@@ -1,0 +1,56 @@
+﻿using RimWorld;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+using Verse;
+using Verse.AI.Group;
+
+namespace RimThreaded
+{
+    class HediffGiver_Heat_Patch
+	{
+		public static bool OnIntervalPassed(HediffGiver_Heat __instance, Pawn pawn, Hediff cause)
+		{
+			float ambientTemperature = pawn.AmbientTemperature;
+			float comfortableTemperatureMax = pawn.GetStatValue(StatDefOf.ComfyTemperatureMax, true);
+			float maxTemp = comfortableTemperatureMax + 10f;
+			Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(__instance.hediff, false);
+			if (ambientTemperature > maxTemp)
+			{
+				float x = ambientTemperature - maxTemp;
+				float sevOffset = Mathf.Max(HediffGiver_Heat.TemperatureOverageAdjustmentCurve.Evaluate(x) * 6.45E-05f, 0.000375f);
+				HealthUtility.AdjustSeverity(pawn, __instance.hediff, sevOffset);
+			}
+			else if (firstHediffOfDef != null && ambientTemperature < comfortableTemperatureMax)
+			{
+				float num = Mathf.Clamp(firstHediffOfDef.Severity * 0.027f, 0.0015f, 0.015f);
+				firstHediffOfDef.Severity -= num;
+			}
+			if (pawn.Dead || !pawn.IsNestedHashIntervalTick(60, 420))			
+				return false;
+			
+			float num4 = comfortableTemperatureMax + 150f;
+			if (ambientTemperature <= num4)
+				return false;
+
+			float x1 = ambientTemperature - num4;
+			int num2 = Mathf.Max(GenMath.RoundRandom(HediffGiver_Heat.TemperatureOverageAdjustmentCurve.Evaluate(x1) * 0.06f), 3);
+			DamageInfo dinfo = new DamageInfo(DamageDefOf.Burn, num2, 0f, -1f, null, null, null, DamageInfo.SourceCategory.ThingOrUnknown, null);
+			dinfo.SetBodyRegion(BodyPartHeight.Undefined, BodyPartDepth.Outside);
+			pawn.TakeDamage(dinfo);
+			if (pawn.Faction == Faction.OfPlayer)
+			{
+				Find.TickManager.slower.SignalForceNormalSpeed();
+				if (MessagesRepeatAvoider.MessageShowAllowed("PawnBeingBurned", 60f))
+				{
+					Messages.Message("MessagePawnBeingBurned".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.ThreatSmall, true);
+				}
+			}
+			pawn.GetLord()?.ReceiveMemo(HediffGiver_Heat.MemoPawnBurnedByAir);
+
+			return false;
+		}
+	}
+}

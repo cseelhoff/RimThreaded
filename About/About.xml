@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ModMetaData>
+	<name>RimThreaded [1.2]</name>
+	<author>Major Hoff</author>
+	<packageId>majorhoff.rimthreaded</packageId>
+	<supportedVersions>
+		<li>1.2</li>
+	</supportedVersions>
+	<description>Enable Rimworld to utilize multiple threads.</description>
+</ModMetaData>
