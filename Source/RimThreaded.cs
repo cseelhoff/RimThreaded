@@ -70,6 +70,7 @@ namespace RimThreaded
 			Type original = null;
 			Type patched = null;
 
+			
 			//ContentFinderTexture2D			
 			original = typeof(ContentFinder<Texture2D>);
 			patched = typeof(ContentFinder_Texture2D);
@@ -84,14 +85,18 @@ namespace RimThreaded
 			original = typeof(TickList);
 			patched = typeof(Ticklist_Patch);
 			Prefix(original, patched, "Tick");
-
+			
 			//Rand
 			original = typeof(Rand);
 			patched = typeof(Rand_Patch);
 			Prefix(original, patched, "set_Seed");
+			Prefix(original, patched, "get_Int");
+			Prefix(original, patched, "get_Value");
 			Prefix(original, patched, "EnsureStateStackEmpty");
 			Prefix(original, patched, "PopState");
+			Prefix(original, patched, "TryRangeInclusiveWhere");
 			Prefix(original, patched, "PushState", new Type[] { });
+			
 
 			//ThingOwner<Thing> - perf improvement - uses slow method invoke / reflection call
 			original = typeof(ThingOwner<Thing>);
@@ -429,7 +434,7 @@ namespace RimThreaded
 			original = typeof(Pawn_MindState);
 			patched = typeof(Pawn_MindState_Patch);
 			Prefix(original, patched, "MindStateTick");
-
+			
 			Log.Message("RimThreaded patching is complete.");
 		}
 
