@@ -50,6 +50,7 @@ namespace RimThreaded
 		public override string SettingsCategory()
 		{
 			return "RimThreaded";
+
 		}
 
 	}
@@ -60,9 +61,9 @@ namespace RimThreaded
 		public static BindingFlags bf = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 		public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
 		//bugs - textures flicker/shift around
-		//bugs - remove is out of sync for listerthings and thinggrid and maybe thingownerthing\
 		//bugs - audio error in method SustainerManagerUpdate - causes strange unity crash
-		//bugs - weapons shots don't seem to impact
+		//bugs - weapons shots don't seem to impact correctly
+		//bugs - remove is out of sync for listerthings and thinggrid and maybe thingownerthing\
 		//perf impr - replace dicts with hashsets (maybe custom hash function too?)
 
 		static RimThreadedHarmony() { 
