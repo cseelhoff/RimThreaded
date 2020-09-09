@@ -5,6 +5,11 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RimThreaded", "RimThreaded.csproj", "{FC5437E9-4CA5-4DEF-BA34-3D809C44EA8E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{837F6211-E9E8-4DBF-B250-A3722C637AD8}"
+	ProjectSection(SolutionItems) = preProject
+		..\About\About.xml = ..\About\About.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

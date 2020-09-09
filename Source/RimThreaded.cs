@@ -60,10 +60,7 @@ namespace RimThreaded
 
 		public static BindingFlags bf = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 		public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
-		//bugs - textures flicker/shift around
-		//bugs - audio error in method SustainerManagerUpdate - causes strange unity crash
-		//bugs - weapons shots don't seem to impact correctly
-		//bugs - remove is out of sync for listerthings and thinggrid and maybe thingownerthing\
+		//bugs - remove is out of sync for listerthings and thinggrid and maybe thingownerthing
 		//perf impr - replace dicts with hashsets (maybe custom hash function too?)
 
 		static RimThreadedHarmony() { 
@@ -418,6 +415,14 @@ namespace RimThreaded
 			original = typeof(Verb);
 			patched = typeof(Verb_Patch);
 			Prefix(original, patched, "CanHitFromCellIgnoringRange");
+
+			//FastPriorityQueue<KeyValuePair<IntVec3, float>>
+			original = typeof(FastPriorityQueue<KeyValuePair<IntVec3, float>>);
+			patched = typeof(FastPriorityQueueKeyValuePairIntVec3Float_Patch);
+			Prefix(original, patched, "Push");
+			Prefix(original, patched, "Pop");
+			Prefix(original, patched, "Clear");
+
 
 			//PERFORMANCE IMPROVEMENTS
 
