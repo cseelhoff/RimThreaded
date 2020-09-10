@@ -10,9 +10,12 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.3
+    Version 1.0.4
 
     CHANGE LOG:
+    Version 1.0.4
+    -Fixed a bug in the randomizer that caused a lot of issues. Bugs fixed: 14, 19, and 20
+
     Version 1.0.3
     -Fixed the dreaded "Thread did not finish..." causing game to completely freeze (threads are now aborted and auto-restarted)
     -Fixed Projectiles not hitting
