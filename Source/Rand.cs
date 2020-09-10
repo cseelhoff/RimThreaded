@@ -98,7 +98,7 @@ namespace RimThreaded
 
         public static bool PushState()
         {            
-            stateStack.Push(seed2 | iterations2 << 32);
+            stateStack.Push((ulong) seed2 | (ulong) iterations2 << 32);
             return false;
         }
 
@@ -106,8 +106,8 @@ namespace RimThreaded
         {
             if (stateStack.TryPop(out ulong result))
             {
-                seed2 = (uint)(result & uint.MaxValue);
-                iterations2 = (uint)(result >> 32 & uint.MaxValue);
+                seed2 = (uint)(result & (ulong) uint.MaxValue);
+                iterations2 = (uint)(result >> 32 & (ulong)uint.MaxValue);
             }
             else
             {
