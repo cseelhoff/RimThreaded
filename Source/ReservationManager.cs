@@ -76,17 +76,20 @@ namespace RimThreaded
 				for (int index = 0; index < reservations(__instance).Count; ++index)
 				{
 					ReservationManager.Reservation reservation = reservations(__instance)[index];
-					if (!(reservation.Target != target) && reservation.Layer == layer && (reservation.Claimant != claimant && RespectsReservationsOf(claimant, reservation.Claimant)))
+					if (null != reservation)
 					{
-						if (reservation.MaxPawns != maxPawns)
-							return false;
-						++num3;
-						if (reservation.StackCount == -1)
-							num4 += num1;
-						else
-							num4 += reservation.StackCount;
-						if (num3 >= maxPawns || num2 + num4 > num1)
-							return false;
+						if (!(reservation.Target != target) && reservation.Layer == layer && (reservation.Claimant != claimant && RespectsReservationsOf(claimant, reservation.Claimant)))
+						{
+							if (reservation.MaxPawns != maxPawns)
+								return false;
+							++num3;
+							if (reservation.StackCount == -1)
+								num4 += num1;
+							else
+								num4 += reservation.StackCount;
+							if (num3 >= maxPawns || num2 + num4 > num1)
+								return false;
+						}
 					}
 				}
 			}

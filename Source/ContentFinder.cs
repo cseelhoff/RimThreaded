@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace RimThreaded
 {    
-    public class ContentFinder_Texture2D
+    public class ContentFinder_Texture2D_Patch
     {
 		public static bool Get(ref Texture2D __result, string itemPath, bool reportFailure = true)
 		{
