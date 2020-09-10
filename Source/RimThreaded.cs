@@ -442,6 +442,11 @@ namespace RimThreaded
 			patched = typeof(Pawn_WorkSettings_Patch);
 			Prefix(original, patched, "CacheWorkGiversInOrder");
 
+			//Sample
+			original = typeof(Sample);
+			patched = typeof(Sample_Patch);
+			Prefix(original, patched, "Update");
+
 
 
 			//PERFORMANCE IMPROVEMENTS
