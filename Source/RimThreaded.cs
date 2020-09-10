@@ -427,6 +427,16 @@ namespace RimThreaded
 			original = typeof(MapPawns);
 			patched = typeof(MapPawns_Patch);
 			Prefix(original, patched, "get_AllPawns");
+			Prefix(original, patched, "LogListedPawns");
+			Prefix(original, patched, "RegisterPawn");
+			Prefix(original, patched, "get_AnyPawnBlockingMapRemoval");
+			Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
+			Prefix(original, patched, "DeRegisterPawn");
+
+			//Region
+			original = typeof(Region);
+			patched = typeof(Region_Patch);
+			Prefix(original, patched, "DangerFor");
 
 
 
