@@ -10,9 +10,12 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.4
+    Version 1.0.5
 
     CHANGE LOG:
+    Version 1.0.5
+    -Fixed bug 26 (related to error with Verse.MapPawns.get_AllPawns)
+
     Version 1.0.4
     -Fixed a bug in the randomizer that caused a lot of issues. Bugs fixed: 14, 19, and 20
 

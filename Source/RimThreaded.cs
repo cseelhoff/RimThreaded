@@ -423,6 +423,12 @@ namespace RimThreaded
 			Prefix(original, patched, "Pop");
 			Prefix(original, patched, "Clear");
 
+			//MapPawns
+			original = typeof(MapPawns);
+			patched = typeof(MapPawns_Patch);
+			Prefix(original, patched, "get_AllPawns");
+
+
 
 			//PERFORMANCE IMPROVEMENTS
 
