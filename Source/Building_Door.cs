@@ -22,6 +22,16 @@ namespace RimThreaded
 			AccessTools.FieldRefAccess<Building_Door, int>("ticksUntilClose");
 		public static PropertyInfo canTryCloseAutomatically = AccessTools.DeclaredProperty(typeof(Building_Door), "CanTryCloseAutomatically");
 
+		public static bool get_DoorPowerOn(Building_Door __instance, ref bool __result)
+		{
+            CompPowerTrader pc = __instance.powerComp;
+            if (pc != null)
+			{
+				return pc.PowerOn;
+			}
+			return false;
+		}
+
 		public static bool get_FreePassage(Building_Door __instance, out bool __result)
 		{
             bool r = false;

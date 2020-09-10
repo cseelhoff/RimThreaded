@@ -1,9 +1,28 @@
 # RimThreaded
 RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-Version 1.0.3
+Version 1.0.7
 
 CHANGE LOG:
+Version 1.0.7
+-Fixed bug 33 (RimWorld.Building_Door.get_DoorPowerOn)
+-Fixed bug 35 (Verse.MapPawns.FreeHunmanlikesSpawnedOfFaction)
+-Fixed bug 36 (RimThreaded.ReservationManager_Patch.CanReserve)
+-Fixed duplicate code section in SubSustainer
+
+Version 1.0.6
+-Fixed Audio issue with sustainers. Thanks Kiame Vivacity! (bug 3)
+-Fixed bug 17 - Verse.Region.DangerFor
+-Fixed bug 29 - RimThreaded.ThingOwnerUtility_Patch.GetAllThingsRecursively
+-Fixed some other bugs with MapPawns possibly related to bug 10
+-Fixed bug in RimThreaded that allows Camera+ to work well now. No more saying this mod is incompatible with everything ;-)
+
+Version 1.0.5
+-Fixed bug 26 (related to error with Verse.MapPawns.get_AllPawns)
+
+Version 1.0.4
+-Fixed a bug in the randomizer that caused a lot of issues. Bugs fixed: 14, 19, and 20
+
 Version 1.0.3
 -Fixed the dreaded "Thread did not finish..." causing game to completely freeze (threads are now aborted and auto-restarted)
 -Fixed Projectiles not hitting
@@ -31,6 +50,9 @@ CREDITS:
 Bug testing:
 Special thank you for helping me test Austin (Stanui)!
 And thank you to others in Rimworld community who have posted their bug findings!
+
+Coding:
+Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!
 
 Logo:
 Thank you ArchieV1 for the logo! (https://github.com/ArchieV1)

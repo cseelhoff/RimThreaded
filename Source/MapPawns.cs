@@ -22,6 +22,47 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<MapPawns, List<Pawn>>("prisonersOfColonySpawned");
         public static AccessTools.FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> pawnsInFactionSpawned =
             AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("pawnsInFactionSpawned");
+        public static AccessTools.FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesSpawnedOfFactionResult =
+            AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("freeHumanlikesSpawnedOfFactionResult");
+
+        public static bool FreeHumanlikesSpawnedOfFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
+        {
+            List<Pawn> pawnList1;
+            lock (freeHumanlikesSpawnedOfFactionResult(__instance))
+            {
+                if (!freeHumanlikesSpawnedOfFactionResult(__instance).TryGetValue(faction, out pawnList1))
+                {
+                    pawnList1 = new List<Pawn>();
+                    lock (freeHumanlikesSpawnedOfFactionResult(__instance))
+                    {
+                        freeHumanlikesSpawnedOfFactionResult(__instance)[faction] = pawnList1;
+                    }
+                }
+            }
+            pawnList1.Clear();
+            List<Pawn> pawnList2 = null;
+            SpawnedPawnsInFaction(__instance, ref pawnList2, faction);
+            for (int index = 0; index < pawnList2.Count; ++index)
+            {
+                if (pawnList2[index].HostFaction == null && pawnList2[index].RaceProps.Humanlike)
+                    pawnList1.Add(pawnList2[index]);
+            }
+            __result = pawnList1;
+            return false;
+        }
+
+        public static bool SpawnedPawnsInFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
+        {
+            EnsureFactionsListsInit(__instance);
+            if (faction != null)
+            {
+                __result = pawnsInFactionSpawned(__instance)[faction];
+                return false;
+            }
+            Log.Error("Called SpawnedPawnsInFaction with null faction.", false);
+            __result = new List<Pawn>();
+            return false;
+        }
 
         public static bool get_AllPawns(MapPawns __instance, ref List<Pawn> __result)
         {

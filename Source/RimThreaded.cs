@@ -67,11 +67,10 @@ namespace RimThreaded
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
-
 			
 			//ContentFinderTexture2D			
 			original = typeof(ContentFinder<Texture2D>);
-			patched = typeof(ContentFinder_Texture2D);
+			patched = typeof(ContentFinder_Texture2D_Patch);
 			Prefix(original, patched, "Get");
 
 			//ContentFinderTexture2D			
@@ -341,6 +340,7 @@ namespace RimThreaded
 			original = typeof(Building_Door);
 			patched = typeof(Building_Door_Patch);
 			Prefix(original, patched, "get_BlockedOpenMomentary");
+			Prefix(original, patched, "get_DoorPowerOn");
 
 			//ThoughtHandler						
 			original = typeof(ThoughtHandler);
@@ -432,6 +432,8 @@ namespace RimThreaded
 			Prefix(original, patched, "get_AnyPawnBlockingMapRemoval");
 			Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
 			Prefix(original, patched, "DeRegisterPawn");
+			Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
+			Prefix(original, patched, "SpawnedPawnsInFaction");
 
 			//Region
 			original = typeof(Region);

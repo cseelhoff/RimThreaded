@@ -10,9 +10,15 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.6
+    Version 1.0.7
 
     CHANGE LOG:
+    Version 1.0.7
+    -Fixed bug 33 (RimWorld.Building_Door.get_DoorPowerOn)
+    -Fixed bug 35 (Verse.MapPawns.FreeHumanlikesSpawnedOfFaction)
+    -Fixed bug 36 (RimThreaded.ReservationManager_Patch.CanReserve)
+    -Fixed duplicate code section in SubSustainer
+
     Version 1.0.6
     -Fixed Audio issue with sustainers. Thanks Kiame Vivacity! (bug 3)
     -Fixed bug 17 - Verse.Region.DangerFor
