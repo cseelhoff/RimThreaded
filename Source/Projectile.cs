@@ -8,6 +8,7 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
+using System.Reflection;
 
 namespace RimThreaded
 {
@@ -28,6 +29,14 @@ namespace RimThreaded
 		public static AccessTools.FieldRef<Projectile, Sustainer> ambientSustainer =
 			AccessTools.FieldRefAccess<Projectile, Sustainer>("ambientSustainer");
 
+		//public static MethodInfo ThrowDebugText =
+			//typeof(Projectile).GetMethod("ThrowDebugText", BindingFlags.NonPublic | BindingFlags.Instance);
+		//public static MethodInfo CanHit =
+			//typeof(Projectile).GetMethod("CanHit", BindingFlags.NonPublic | BindingFlags.Instance);
+		public static MethodInfo Impact =
+			typeof(Projectile).GetMethod("Impact", BindingFlags.NonPublic | BindingFlags.Instance);
+
+		
 		private static void ThrowDebugText(Projectile __instance, string text, IntVec3 c)
 		{
 			if (DebugViewSettings.drawShooting)
@@ -35,6 +44,8 @@ namespace RimThreaded
 				MoteMaker.ThrowText(c.ToVector3Shifted(), __instance.Map, text, -1f);
 			}
 		}
+		
+		
 		private static bool CanHit(Projectile __instance, Thing thing)
 		{
 			if (!thing.Spawned)
@@ -89,6 +100,7 @@ namespace RimThreaded
 			}
 			return thing == __instance.intendedTarget && thing.def.Fillage == FillCategory.Full;
 		}
+
 		public static bool ImpactSomething(Projectile __instance)
 		{
 			if (__instance.def.projectile.flyOverhead)
@@ -99,83 +111,63 @@ namespace RimThreaded
 					if (roofDef.isThickRoof)
 					{
 						ThrowDebugText(__instance, "hit-thick-roof", __instance.Position);
-						__instance.def.projectile.soundHitThickRoof.PlayOneShot(new TargetInfo(__instance.Position, __instance.Map, false));
+						__instance.def.projectile.soundHitThickRoof.PlayOneShot((SoundInfo)new TargetInfo(__instance.Position, __instance.Map, false));
 						__instance.Destroy(DestroyMode.Vanish);
 						return false;
 					}
 					if (__instance.Position.GetEdifice(__instance.Map) == null || __instance.Position.GetEdifice(__instance.Map).def.Fillage != FillCategory.Full)
-					{
-						RoofCollapserImmediate.DropRoofInCells(__instance.Position, __instance.Map, null);
-					}
+						RoofCollapserImmediate.DropRoofInCells(__instance.Position, __instance.Map, (List<Thing>)null);
 				}
 			}
-			if (!__instance.usedTarget.HasThing || !CanHit(__instance, __instance.usedTarget.Thing))
+			if (__instance.usedTarget.HasThing && CanHit(__instance, __instance.usedTarget.Thing))
 			{
-				//Projectile.cellThingsFiltered.Clear();
-				List<Thing> cellThingsFiltered = new List<Thing>();
-
-				List<Thing> thingList = __instance.Position.GetThingList(__instance.Map);
-				for (int i = 0; i < thingList.Count; i++)
+				if (__instance.usedTarget.Thing is Pawn thing && thing.GetPosture() != PawnPosture.Standing && ((double)(origin(__instance) - destination(__instance)).MagnitudeHorizontalSquared() >= 20.25 && !Rand.Chance(0.2f)))
 				{
-					Thing thing = thingList[i];
-					if ((thing.def.category == ThingCategory.Building || thing.def.category == ThingCategory.Pawn || thing.def.category == ThingCategory.Item || thing.def.category == ThingCategory.Plant) && CanHit(__instance, thing))
-					{
+					ThrowDebugText(__instance, "miss-laying", __instance.Position);
+					Impact.Invoke(__instance, new object[] { (Thing)null });
+				}
+				else
+					Impact.Invoke(__instance, new object[] { __instance.usedTarget.Thing });
+			}
+			else
+			{
+				List<Thing> cellThingsFiltered = new List<Thing>();
+				List<Thing> thingList = __instance.Position.GetThingList(__instance.Map);
+				for (int index = 0; index < thingList.Count; ++index)
+				{
+					Thing thing = thingList[index];
+					if ((thing.def.category == ThingCategory.Building || thing.def.category == ThingCategory.Pawn || (thing.def.category == ThingCategory.Item || thing.def.category == ThingCategory.Plant)) && CanHit(__instance, thing))
 						cellThingsFiltered.Add(thing);
-					}
 				}
 				cellThingsFiltered.Shuffle<Thing>();
-				for (int j = 0; j < cellThingsFiltered.Count; j++)
+				for (int index = 0; index < cellThingsFiltered.Count; ++index)
 				{
-					Thing thing2 = cellThingsFiltered[j];
-					Pawn pawn = thing2 as Pawn;
+					Thing thing = cellThingsFiltered[index];
 					float num;
-					if (pawn != null)
+					if (thing is Pawn p)
 					{
-						num = 0.5f * Mathf.Clamp(pawn.BodySize, 0.1f, 2f);
-						if (pawn.GetPosture() != PawnPosture.Standing && (origin(__instance) - destination(__instance)).MagnitudeHorizontalSquared() >= 20.25f)
-						{
+						num = 0.5f * Mathf.Clamp(p.BodySize, 0.1f, 2f);
+						if (p.GetPosture() != PawnPosture.Standing && (double)(origin(__instance) - destination(__instance)).MagnitudeHorizontalSquared() >= 20.25)
 							num *= 0.2f;
-						}
-						if (__instance.Launcher != null && pawn.Faction != null && __instance.Launcher.Faction != null && !pawn.Faction.HostileTo(__instance.Launcher.Faction))
-						{
+						if (launcher(__instance) != null && p.Faction != null && (launcher(__instance).Faction != null && !p.Faction.HostileTo(launcher(__instance).Faction)))
 							num *= VerbUtility.InterceptChanceFactorFromDistance(origin(__instance), __instance.Position);
-						}
 					}
 					else
-					{
-						num = 1.5f * thing2.def.fillPercent;
-					}
+						num = 1.5f * thing.def.fillPercent;
 					if (Rand.Chance(num))
 					{
 						ThrowDebugText(__instance, "hit-" + num.ToStringPercent(), __instance.Position);
-						Impact(__instance, cellThingsFiltered.RandomElement<Thing>());
+						Impact.Invoke(__instance, new object[] { cellThingsFiltered.RandomElement<Thing>() });
 						return false;
-
 					}
 					ThrowDebugText(__instance, "miss-" + num.ToStringPercent(), __instance.Position);
 				}
-				Impact(__instance, null);
-				return false;
-
+				Impact.Invoke(__instance, new object[] { (Thing)null });
 			}
-			Pawn pawn2 = __instance.usedTarget.Thing as Pawn;
-			if (pawn2 != null && pawn2.GetPosture() != PawnPosture.Standing && (origin(__instance) - destination(__instance)).MagnitudeHorizontalSquared() >= 20.25f && !Rand.Chance(0.2f))
-			{
-				ThrowDebugText(__instance, "miss-laying", __instance.Position);
-				Impact(__instance, null);
-				return false;
-
-			}
-			Impact(__instance, __instance.usedTarget.Thing);
 			return false;
 		}
-		private static void Impact(Projectile __instance, Thing hitThing)
-		{
-			GenClamor.DoClamor(__instance, 2.1f, ClamorDefOf.Impact);
-			__instance.Destroy(DestroyMode.Vanish);
-		}
-
-
+		
+		
 		private static bool CheckForFreeIntercept(Projectile __instance, IntVec3 c)
 		{
 			if (destination(__instance).ToIntVec3() == c)
@@ -200,7 +192,7 @@ namespace RimThreaded
 						else
 						{
 							ThrowDebugText(__instance, "int-wall", c);
-							Impact(__instance, thing);
+							Impact.Invoke(__instance, new object[] { thing });
 							return true;
 						}
 					}
@@ -221,7 +213,7 @@ namespace RimThreaded
 						if (Rand.Chance(num3))
 						{
 							ThrowDebugText(__instance, "int-" + num3.ToStringPercent(), c);
-							Impact(__instance, thing);
+							Impact.Invoke(__instance, new object[] { thing });
 							return true;
 						}
 						flag1 = true;
@@ -233,7 +225,8 @@ namespace RimThreaded
 				ThrowDebugText(__instance, "o", c);
 			return false;
 		}
-
+		
+		
 		private static bool CheckForFreeInterceptBetween(Projectile __instance, Vector3 lastExactPos, Vector3 newExactPos)
 		{
 			if (lastExactPos == newExactPos)
@@ -281,6 +274,8 @@ namespace RimThreaded
 
 		public static AccessTools.FieldRef<ThingWithComps, List<ThingComp>> comps =
 			AccessTools.FieldRefAccess<ThingWithComps, List<ThingComp>>("comps");
+		
+		
 		public static bool Tick(Projectile __instance)
 		{
 			if(__instance is ThingWithComps twc)
@@ -329,6 +324,6 @@ namespace RimThreaded
 			}
 			return false;
 		}
-
+		
 	}
 }

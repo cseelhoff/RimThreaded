@@ -7,10 +7,16 @@
 	<supportedVersions>
 		<li>1.2</li>
 	</supportedVersions>
-	<description>
+  <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.2
+    Version 1.0.3
+
+    CHANGE LOG:
+    Version 1.0.3
+    -Fixed the dreaded "Thread did not finish..." causing game to completely freeze (threads are now aborted and auto-restarted)
+    -Fixed Projectiles not hitting
+    -Removed some old unused methods
 
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below.
 
@@ -25,8 +31,9 @@
 
     That being said, since it replaces methods, I *think* towards the top? Someone please correct me if they have had better luck using a different mod order. I am actually only testing this with vanilla+royalty+tickspersecond right now, so I am probably not the best person to ask. I'll update this description as people reply with different experiences.
 
-BUGS:
+    BUGS:
     https://github.com/cseelhoff/RimThreaded/issues
+    Your (likely) log location: C:\Users\username\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\player.log
 
     CREDITS:
 
@@ -36,5 +43,9 @@ BUGS:
 
     Logo:
     Thank you ArchieV1 for the logo! (https://github.com/ArchieV1)
-    Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=36313) and JKimsey (https://pixabay.com/users/jkimsey-253161/)</description>
+    Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=36313) and JKimsey (https://pixabay.com/users/jkimsey-253161/)
+
+    Video Review:
+    Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)
+  </description>
 </ModMetaData>

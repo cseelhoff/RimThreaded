@@ -37,6 +37,9 @@ namespace RimThreaded
         public static Thread monitorThread = null;
         public static TickerType currentTickType;
         public static int currentTickInterval;
+        public static Dictionary<int, Thread> allThreads = new Dictionary<int, Thread>();
+        public static Thread thread2 = null;
+        public static StackTrace trace = null;
         private static int get_TickInterval(TickList __instance)
         {
             switch (currentTickType)
@@ -114,6 +117,7 @@ namespace RimThreaded
             {
                 Thread thread = new Thread(() => ProcessTicks());
                 int tID = thread.ManagedThreadId;
+                allThreads.Add(tID, thread);
                 eventWaitStarts.TryAdd(tID, new AutoResetEvent(false));
                 eventWaitDones.TryAdd(tID, new AutoResetEvent(false));
                 thread.Start();
@@ -125,12 +129,31 @@ namespace RimThreaded
                         while (true)
                         {
                             monitorThreadWaitHandle.WaitOne();
+                            //List<int> ewd = eventWaitDones.Keys.ToList();
                             foreach (int tID2 in eventWaitDones.Keys)
                             {
                                 eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone);
-                                if (!eventWaitDone.WaitOne(5000))
+                                if (!eventWaitDone.WaitOne(1000))
                                 {
-                                    Log.Error("Thread: " + tID2.ToString() + " did not finish within 5000ms. Continuing to tick other things...");
+                                    Log.Error("Thread: " + tID2.ToString() + " did not finish within 1000ms. Restarting thread...");                                    
+                                    Thread thread2 = allThreads[tID2];
+                                    thread2.Abort();
+                                    allThreads.Remove(tID2);
+                                    eventWaitStarts.TryRemove(tID2, out _);
+                                    eventWaitDones.TryRemove(tID2, out _);
+                                    Thread thread3 = new Thread(() => ProcessTicks());
+                                    int tID3 = thread3.ManagedThreadId;
+                                    allThreads.Add(tID3, thread);
+                                    AutoResetEvent eventWaitStart1 = new AutoResetEvent(false);
+                                    eventWaitStarts.TryAdd(tID3, eventWaitStart1);
+                                    AutoResetEvent eventWaitDone1 = new AutoResetEvent(false);
+                                    eventWaitDones.TryAdd(tID3, eventWaitDone1);
+                                    thread3.Start();
+                                    eventWaitStart1.Set();
+                                    //ewd.Add(eventWaitDone1);
+                                    //thread2.Suspend();
+                                    //trace = new System.Diagnostics.StackTrace(thread2, false);
+                                    //Log.Error(trace.ToString());
                                 }
                             }
                             mainThreadWaitHandle.Set();
