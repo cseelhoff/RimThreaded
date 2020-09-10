@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="MapPawns.cs" />
     <Compile Include="FastPriorityQueueKeyValuePairIntVec3Float.cs" />
     <Compile Include="AttackTargetReservationManager.cs" />
     <Compile Include="AttackTargetsCache.cs" />
