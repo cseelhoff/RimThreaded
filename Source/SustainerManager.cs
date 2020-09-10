@@ -1,13 +1,6 @@
-﻿using HarmonyLib;
-using RimWorld;
-using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using UnityEngine;
 using Verse;
 using Verse.Sound;
 
@@ -37,14 +30,9 @@ namespace RimThreaded
         }
         public static bool SustainerExists(SustainerManager __instance, ref bool __result, SoundDef def)
         {
-            Sustainer[] arraySustainers;
-            lock (allSustainersDict)
+            foreach (var kv in allSustainersDict)
             {
-                arraySustainers = allSustainersDict.Values.ToArray();
-            }
-            for (int index = 0; index < arraySustainers.Length; ++index)
-            {
-                if (arraySustainers[index].def == def)
+                if (kv.Value.def == def)
                 {
                     __result = true;
                     return false;
@@ -56,38 +44,23 @@ namespace RimThreaded
 
         public static bool SustainerManagerUpdate(SustainerManager __instance)
         {
-            
-            Sustainer[] arraySustainers;
-            lock (allSustainersDict)
+            foreach (var kv in allSustainersDict)
             {
-                arraySustainers = allSustainersDict.Values.ToArray();
+                kv.Value.SustainerUpdate();
             }
-            //test - uncommenting causes strange unity crash
-            /*
-            for (int index = arraySustainers.Length - 1; index >= 0; --index)
-                arraySustainers[index].SustainerUpdate();
-            */
             __instance.UpdateAllSustainerScopes();
-            
             return false;
         }
 
         public static bool UpdateAllSustainerScopes(SustainerManager __instance)
         {            
             Dictionary<SoundDef, List<Sustainer>> playingPerDef = new Dictionary<SoundDef, List<Sustainer>>();
-            Sustainer[] arraySustainers;
-            lock (allSustainersDict)
+            foreach (var kv in allSustainersDict)
             {
-                arraySustainers = allSustainersDict.Values.ToArray();
-            }
-            for (int index = 0; index < arraySustainers.Length; ++index)
-            {
-                Sustainer allSustainer = arraySustainers[index];
+                Sustainer allSustainer = kv.Value;
                 if (!playingPerDef.ContainsKey(allSustainer.def))
                 {
-                    // List<Sustainer> sustainerList = SimplePool<List<Sustainer>>.Get();
-                    List<Sustainer> sustainerList;
-                    if (!sListStack.TryPop(out sustainerList))
+                    if (!sListStack.TryPop(out List<Sustainer> sustainerList))
                         sustainerList = new List<Sustainer>();
                     sustainerList.Add(allSustainer);
                     playingPerDef.Add(allSustainer.def, sustainerList);
@@ -136,15 +109,10 @@ namespace RimThreaded
         }
         public static bool EndAllInMap(SustainerManager __instance, Map map)
         {
-            Sustainer[] arraySustainers;
-            lock (allSustainersDict)
+            foreach (var kv in allSustainersDict)
             {
-                arraySustainers = allSustainersDict.Values.ToArray();
-            }
-            for (int index = arraySustainers.Length - 1; index >= 0; --index)
-            {
-                if (arraySustainers[index].info.Maker.Map == map)
-                    arraySustainers[index].End();
+                if (kv.Value.info.Maker.Map == map)
+                    kv.Value.End();
             }
             return false;
         }
