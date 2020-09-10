@@ -189,6 +189,9 @@ namespace RimThreaded
 			patched = typeof(GenSpawn_Patch);
 			Prefix(original, patched, "WipeExistingThings");
 			Prefix(original, patched, "CheckMoveItemsAside");
+			Prefix(original, patched, "Spawn", new Type[] {
+				typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4),
+				typeof(WipeMode), typeof(bool) });
 
 			//PawnDestinationReservationManager
 			original = typeof(PawnDestinationReservationManager);
@@ -378,12 +381,6 @@ namespace RimThreaded
 			patched = typeof(Explosion_Patch);
 			Prefix(original, patched, "Tick");
 
-			//GenSpawn
-			original = typeof(GenSpawn);
-			patched = typeof(GenSpawn_Patch);
-			Prefix(original, patched, "Spawn", new Type[] {
-				typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4),
-				typeof(WipeMode), typeof(bool) });
 
 			//AttackTargetReservationManager
 			original = typeof(AttackTargetReservationManager);
@@ -439,6 +436,11 @@ namespace RimThreaded
 			original = typeof(Region);
 			patched = typeof(Region_Patch);
 			Prefix(original, patched, "DangerFor");
+
+			//Pawn_WorkSettings
+			original = typeof(Pawn_WorkSettings);
+			patched = typeof(Pawn_WorkSettings_Patch);
+			Prefix(original, patched, "CacheWorkGiversInOrder");
 
 
 
