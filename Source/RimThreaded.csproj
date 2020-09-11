@@ -14,8 +14,8 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>none</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -68,6 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="Immunity.cs" />
+    <Compile Include="Sustainer.cs" />
+    <Compile Include="Sample.cs" />
     <Compile Include="Pawn_WorkSettings.cs" />
     <Compile Include="Region.cs" />
     <Compile Include="MapPawns.cs" />
