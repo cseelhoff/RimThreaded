@@ -23,6 +23,7 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<TickList, TickerType>("tickType");
 
         public static int maxThreads = Math.Max(RimThreadedMod.Settings.maxThreads, 1);
+        public static int timeoutMS = Math.Max(RimThreadedMod.Settings.timeoutMS, 1);
         public static ConcurrentDictionary<int, object[]> tryMakeAndPlayRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitStarts = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitDones = new ConcurrentDictionary<int, EventWaitHandle>();
@@ -133,9 +134,9 @@ namespace RimThreaded
                             foreach (int tID2 in eventWaitDones.Keys)
                             {
                                 eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone);
-                                if (!eventWaitDone.WaitOne(1000))
+                                if (!eventWaitDone.WaitOne(timeoutMS))
                                 {
-                                    Log.Error("Thread: " + tID2.ToString() + " did not finish within 1000ms. Restarting thread...");                                    
+                                    Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
                                     Thread thread2 = allThreads[tID2];
                                     thread2.Abort();
                                     allThreads.Remove(tID2);

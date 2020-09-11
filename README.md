@@ -1,9 +1,12 @@
 # RimThreaded
 RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-Version 1.0.9
+Version 1.0.10
 
 CHANGE LOG:
+Version 1.0.10
+-Added enhancement 46 (Add a custom timeout setting for threads)
+
 Version 1.0.9
 -Fixed bug 34 (UnityEngine.AudioSource.SetPitch)
 -Fixed missing code in GenSpawn.Spawn
