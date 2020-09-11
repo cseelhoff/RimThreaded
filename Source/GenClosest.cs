@@ -86,6 +86,8 @@ namespace RimThreaded
                 // Predicate<Thing> validator1 = t => map.reachability.CanReach(root, t, peMode, traverseParams) && (validator == null || validator(t));
                 Predicate<Thing> validator1 = t => Reachability_Patch.CanReach2(map.reachability, root, t, peMode, traverseParams) && (validator == null || validator(t));
                 IEnumerable<Thing> things = customGlobalSearchSet ?? map.listerThings.ThingsMatching(thingReq);
+
+                //null check needed - bug #55
                 thing = GenClosest.ClosestThing_Global(root, things, maxDistance, validator1, null);
             }
             __result = thing;

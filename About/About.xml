@@ -10,8 +10,9 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.10
-    -Added enhancement 46 (Add a custom timeout setting for threads)
+    Version 1.0.11
+    -Added enhancement/bug 51 (LVM deep storage mod is not compatible with RimThreaded; items scatter out of containers) Thanks Ataman!
+    -Fixed bug 54 (Verse.Room.OpenRoofCountStopAt)
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.
@@ -34,6 +35,7 @@
 
     Coding:
     Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!
+    Thank you to Ataman for helping me fix the LVM deep storage bug
 
     Logo:
     Thank you ArchieV1 for the logo! (https://github.com/ArchieV1)

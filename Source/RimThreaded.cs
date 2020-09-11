@@ -462,6 +462,11 @@ namespace RimThreaded
 			patched = typeof(ImmunityHandler_Patch);
 			Prefix(original, patched, "ImmunityHandlerTick");
 
+			//Room
+			original = typeof(Room);
+			patched = typeof(Room_Patch);
+			Prefix(original, patched, "OpenRoofCountStopAt");
+
 
 
 			//PERFORMANCE IMPROVEMENTS

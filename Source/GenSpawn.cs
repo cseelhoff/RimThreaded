@@ -41,6 +41,24 @@ namespace RimThreaded
             return false;
         }
         public static bool Spawn(ref Thing __result,
+            Thing newThing,
+            IntVec3 loc,
+            Map map,
+            Rot4 rot,
+            WipeMode wipeMode = WipeMode.Vanish,
+            bool respawningAfterLoad = false)
+        {
+            if (null != newThing)
+            {
+                if (null != newThing.def)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        /*
+            public static bool Spawn(ref Thing __result,
       Thing newThing,
       IntVec3 loc,
       Map map,
@@ -139,7 +157,7 @@ namespace RimThreaded
             __result = newThing;
             return false;
         }
-
+        */
 
         public static bool CheckMoveItemsAside(
           IntVec3 thingPos,
