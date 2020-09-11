@@ -60,8 +60,10 @@ namespace RimThreaded
                 __result = (Thing)null;
                 return false;
             }
+            //added null check
             if (null != newThing)
             {
+                //added null check
                 if (null != newThing.def)
                 {
                     if (newThing.def.randomizeRotationOnSpawn)
@@ -129,6 +131,8 @@ namespace RimThreaded
                                     pawn.pather.TryRecoverFromUnwalkablePosition(false);
                             }
                         }
+                        __result = newThing;
+                        return false;
                     }
                 }
             }

@@ -375,12 +375,11 @@ namespace RimThreaded
 			patched = typeof(GenGrid_Patch);
 			Prefix(original, patched, "InBounds", new Type[] { typeof(IntVec3), typeof(Map) });
 			Prefix(original, patched, "InBounds", new Type[] { typeof(Vector3), typeof(Map) });
-
+			
 			//Explosion
 			original = typeof(Explosion);
 			patched = typeof(Explosion_Patch);
 			Prefix(original, patched, "Tick");
-
 
 			//AttackTargetReservationManager
 			original = typeof(AttackTargetReservationManager);
@@ -446,6 +445,16 @@ namespace RimThreaded
 			original = typeof(Sample);
 			patched = typeof(Sample_Patch);
 			Prefix(original, patched, "Update");
+
+			//Sustainer
+			original = typeof(Sustainer);
+			patched = typeof(Sustainer_Patch);
+			Prefix(original, patched, "Cleanup");
+
+			//ImmunityHandler
+			original = typeof(ImmunityHandler);
+			patched = typeof(ImmunityHandler_Patch);
+			Prefix(original, patched, "ImmunityHandlerTick");
 
 
 

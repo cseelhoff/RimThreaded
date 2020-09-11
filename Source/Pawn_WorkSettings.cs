@@ -12,9 +12,11 @@ namespace RimThreaded
 {
 
     public class Pawn_WorkSettings_Patch
-	{
+    {
         public static AccessTools.FieldRef<Pawn_WorkSettings, List<WorkGiver>> workGiversInOrderNormal =
             AccessTools.FieldRefAccess<Pawn_WorkSettings, List<WorkGiver>>("workGiversInOrderNormal");
+        public static AccessTools.FieldRef<Pawn_WorkSettings, List<WorkGiver>> workGiversInOrderEmerg =
+            AccessTools.FieldRefAccess<Pawn_WorkSettings, List<WorkGiver>>("workGiversInOrderEmerg");
         public static AccessTools.FieldRef<Pawn_WorkSettings, bool> workGiversDirty =
             AccessTools.FieldRefAccess<Pawn_WorkSettings, bool>("workGiversDirty");
 
@@ -30,26 +32,32 @@ namespace RimThreaded
                 int priority = __instance.GetPriority(w);
                 if (priority > 0)
                 {
-                    if (priority < num1 && w.workGiversByPriority.Any<WorkGiverDef>((Predicate<WorkGiverDef>)(wg => !wg.emergency)))
+                    if (priority < num1 && w.workGiversByPriority.Any(wg => !wg.emergency))
                         num1 = priority;
                     wtsByPrio.Add(w);
                 }
             }
-            wtsByPrio.InsertionSort<WorkTypeDef>((Comparison<WorkTypeDef>)((a, b) =>
+            wtsByPrio.InsertionSort((a, b) =>
             {
-                float num2 = (float)(a.naturalPriority + (4 - __instance.GetPriority(a)) * 100000);
+                float num2 = a.naturalPriority + (4 - __instance.GetPriority(a)) * 100000;
                 return ((float)(b.naturalPriority + (4 - __instance.GetPriority(b)) * 100000)).CompareTo(num2);
-            }));
-            //this.workGiversInOrderEmerg.Clear();
-            List<WorkGiver> workGiversInOrderEmerg = new List<WorkGiver>();
+            });
+            lock (workGiversInOrderEmerg(__instance))
+            {
+                workGiversInOrderEmerg(__instance).Clear();
+            }
             for (int index1 = 0; index1 < wtsByPrio.Count; ++index1)
             {
                 WorkTypeDef workTypeDef = wtsByPrio[index1];
                 for (int index2 = 0; index2 < workTypeDef.workGiversByPriority.Count; ++index2)
                 {
                     WorkGiver worker = workTypeDef.workGiversByPriority[index2].Worker;
-                    if (worker.def.emergency && __instance.GetPriority(worker.def.workType) <= num1)
-                        workGiversInOrderEmerg.Add(worker);
+                    if (worker.def.emergency && __instance.GetPriority(worker.def.workType) <= num1) {
+                        lock (workGiversInOrderEmerg(__instance)) 
+                        {
+                            workGiversInOrderEmerg(__instance).Add(worker);
+                        }
+                    }
                 }
             }
             lock (workGiversInOrderNormal(__instance))
