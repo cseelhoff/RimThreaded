@@ -5,7 +5,7 @@ using Verse.Sound;
 
 namespace RimThreaded
 {
-    class SoundStarter_Patch
+	class SoundStarter_Patch
 	{
 		public static bool PlayOneShot(SoundDef soundDef, SoundInfo info)
 		{
@@ -37,11 +37,12 @@ namespace RimThreaded
 			{
 				Ticklist_Patch.PlayOneShot.Enqueue(new Tuple<SoundDef, SoundInfo>(soundDef, info));
 			}
+			// Don't know why but if this is set to false, threads will hang and timeout.
 			return true;
 		}
 
 		public static bool PlayOneShotOnCamera(SoundDef soundDef, Map onlyThisMap)
-        {
+		{
 			if (UnityData.IsInMainThread)
 			{
 				return true;
@@ -57,7 +58,7 @@ namespace RimThreaded
 			}
 
 			Ticklist_Patch.PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
-            return false;
-        }
-    }
+			return false;
+		}
+	}
 }
