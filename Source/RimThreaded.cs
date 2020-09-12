@@ -320,9 +320,12 @@ namespace RimThreaded
 			Prefix(original, patched, "RegisterSustainer");
 			Prefix(original, patched, "DeregisterSustainer");
 			Prefix(original, patched, "SustainerExists");
-			Prefix(original, patched, "SustainerManagerUpdate");
-			Prefix(original, patched, "UpdateAllSustainerScopes");
 			Prefix(original, patched, "EndAllInMap");
+
+			//RecreateMapSustainers
+			original = typeof(AmbientSoundManager);
+			patched = typeof(AmbientSoundManager_Patch);
+			Prefix(original, patched, "RecreateMapSustainers");
 
 			//SubSustainer
 			original = typeof(SubSustainer);
