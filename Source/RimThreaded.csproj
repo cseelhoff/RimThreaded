@@ -67,9 +67,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
     <Compile Include="Room.cs" />
     <Compile Include="Immunity.cs" />
+    <Compile Include="SoundStarter_Patch.cs" />
     <Compile Include="Sustainer.cs" />
     <Compile Include="Sample.cs" />
     <Compile Include="Pawn_WorkSettings.cs" />
