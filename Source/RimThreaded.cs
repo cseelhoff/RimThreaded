@@ -329,6 +329,13 @@ namespace RimThreaded
 			patched = typeof(SubSustainer_Patch);
 			Prefix(original, patched, "StartSample");
 			Prefix(original, patched, "SubSustainerUpdate");
+			
+			//SoundStarter
+			original = typeof(SoundStarter);
+			patched = typeof(SoundStarter_Patch);
+			Prefix(original, patched, "PlayOneShot");
+			Prefix(original, patched, "PlayOneShotOnCamera");
+
 
 			//Pawn_RelationsTracker			
 			original = typeof(Pawn_RelationsTracker);
