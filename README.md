@@ -1,9 +1,12 @@
 # RimThreaded
 RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-Version 1.0.11
+Version 1.0.12
 
 CHANGE LOG:
+Version 1.0.12
+-Fixed tons of sound issues - All credit goes to KV!
+
 Version 1.0.11
 -Added enhancement/bug 51 (LVM deep storage mod is not compatible with RimThreaded; items scatter out of containers)
 -Fixed bug 54 (Verse.Room.OpenRoofCountStopAt)
