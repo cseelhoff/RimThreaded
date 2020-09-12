@@ -31,6 +31,8 @@ namespace RimThreaded
         public static ConcurrentDictionary<int, string> texture2DRequests = new ConcurrentDictionary<int, string>();
         public static ConcurrentDictionary<MaterialRequest, Material> materialResults = new ConcurrentDictionary<MaterialRequest, Material>();
         public static ConcurrentDictionary<int, MaterialRequest> materialRequests = new ConcurrentDictionary<int, MaterialRequest>();
+        public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
+        public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
         public static List<Thing> thingList1;
@@ -108,22 +110,6 @@ namespace RimThreaded
 
             monitorThreadWaitHandle.Set();
             MainThreadWaitLoop();
-
-            // Add any sounds that were produced in this tick
-            while(MainThreadWorkTasks.PlayOneShot.Count > 0)
-            {
-                if (MainThreadWorkTasks.PlayOneShot.TryDequeue(out Tuple<SoundDef, SoundInfo> s))
-                {
-                    s.Item1.PlayOneShot(s.Item2);
-                }
-            }
-            while (MainThreadWorkTasks.PlayOneShotCamera.Count > 0)
-            {
-                if (MainThreadWorkTasks.PlayOneShotCamera.TryDequeue(out Tuple<SoundDef, Map> s))
-                {
-                    s.Item1.PlayOneShotOnCamera(s.Item2);
-                }
-            }
             return false;            
         }
 
@@ -231,6 +217,22 @@ namespace RimThreaded
                     }
                     eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart);
                     eventWaitStart.Set();
+                }
+
+                // Add any sounds that were produced in this tick
+                while (PlayOneShot.Count > 0)
+                {
+                    if (PlayOneShot.TryDequeue(out Tuple<SoundDef, SoundInfo> s))
+                    {
+                        s.Item1.PlayOneShot(s.Item2);
+                    }
+                }
+                while (PlayOneShotCamera.Count > 0)
+                {
+                    if (PlayOneShotCamera.TryDequeue(out Tuple<SoundDef, Map> s))
+                    {
+                        s.Item1.PlayOneShotOnCamera(s.Item2);
+                    }
                 }
             }
         }

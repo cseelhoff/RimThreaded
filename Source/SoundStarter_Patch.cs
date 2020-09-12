@@ -35,7 +35,7 @@ namespace RimThreaded
 			}
 			for (int i = 0; i < soundDef.subSounds.Count; i++)
 			{
-				MainThreadWorkTasks.PlayOneShot.Enqueue(new Tuple<SoundDef, SoundInfo>(soundDef, info));
+				Ticklist_Patch.PlayOneShot.Enqueue(new Tuple<SoundDef, SoundInfo>(soundDef, info));
 			}
 			return true;
 		}
@@ -56,7 +56,7 @@ namespace RimThreaded
 				return false;
 			}
 
-			MainThreadWorkTasks.PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
+			Ticklist_Patch.PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
             return false;
         }
     }
