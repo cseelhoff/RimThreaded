@@ -108,7 +108,22 @@ namespace RimThreaded
 
             monitorThreadWaitHandle.Set();
             MainThreadWaitLoop();
-                
+
+            // Add any sounds that were produced in this tick
+            while(MainThreadWorkTasks.PlayOneShot.Count > 0)
+            {
+                if (MainThreadWorkTasks.PlayOneShot.TryDequeue(out Tuple<SoundDef, SoundInfo> s))
+                {
+                    s.Item1.PlayOneShot(s.Item2);
+                }
+            }
+            while (MainThreadWorkTasks.PlayOneShotCamera.Count > 0)
+            {
+                if (MainThreadWorkTasks.PlayOneShotCamera.TryDequeue(out Tuple<SoundDef, Map> s))
+                {
+                    s.Item1.PlayOneShotOnCamera(s.Item2);
+                }
+            }
             return false;            
         }
 
