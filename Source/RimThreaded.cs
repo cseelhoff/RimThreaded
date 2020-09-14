@@ -517,6 +517,13 @@ namespace RimThreaded
 			patched = typeof(LongEventHandler_Patch);
 			Prefix(original, patched, "ExecuteToExecuteWhenFinished");
 
+			//SituationalThoughtHandler
+			original = typeof(SituationalThoughtHandler);
+			patched = typeof(SituationalThoughtHandler_Patch);
+			Prefix(original, patched, "AppendSocialThoughts");
+			Prefix(original, patched, "Notify_SituationalThoughtsDirty");
+			Prefix(original, patched, "RemoveExpiredThoughtsFromCache");
+
 
 
 
