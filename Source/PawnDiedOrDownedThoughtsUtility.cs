@@ -43,6 +43,33 @@ namespace RimThreaded
 			}
 			return false;
 		}
+		public static bool RemoveDiedThoughts(Pawn pawn)
+		{
+            Pawn[] pawnsAlive = PawnsFinder.AllMapsWorldAndTemporary_Alive.ToArray();
+			//foreach (Pawn pawn2 in PawnsFinder.AllMapsWorldAndTemporary_Alive)
+			for (int a = 0; a < pawnsAlive.Length; a++)
+			{
+				Pawn pawn2 = pawnsAlive[a];
+				if (pawn2.needs != null && pawn2.needs.mood != null && pawn2 != pawn)
+				{
+					MemoryThoughtHandler memories = pawn2.needs.mood.thoughts.memories;
+					memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.KnowColonistDied, pawn);
+					memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.KnowPrisonerDiedInnocent, pawn);
+					memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.PawnWithGoodOpinionDied, pawn);
+					memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.PawnWithBadOpinionDied, pawn);
+					List<PawnRelationDef> allDefsListForReading = DefDatabase<PawnRelationDef>.AllDefsListForReading;
+					for (int i = 0; i < allDefsListForReading.Count; i++)
+					{
+						ThoughtDef genderSpecificDiedThought = allDefsListForReading[i].GetGenderSpecificDiedThought(pawn);
+						if (genderSpecificDiedThought != null)
+						{
+							memories.RemoveMemoriesOfDefWhereOtherPawnIs(genderSpecificDiedThought, pawn);
+						}
+					}
+				}
+			}
+			return false;
+		}
 
 	}
 }

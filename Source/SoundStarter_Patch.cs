@@ -1,5 +1,6 @@
 ﻿using RimWorld.Planet;
 using System;
+using System.Threading;
 using Verse;
 using Verse.Sound;
 
@@ -59,6 +60,53 @@ namespace RimThreaded
 
 			Ticklist_Patch.PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
 			return false;
+		}
+		public static bool TrySpawnSustainer(ref Sustainer __result, SoundDef soundDef, SoundInfo info)
+		{
+			DebugSoundEventsLog.Notify_SoundEvent(soundDef, info);
+			if (soundDef == null)
+			{
+				__result = null;
+				return false;
+			}
+			if (soundDef.isUndefined)
+			{
+				__result = null;
+				return false;
+			}
+			if (!soundDef.sustain)
+			{
+				Log.Error("Tried to spawn a sustainer from non-sustainer sound " + soundDef + ".", false);
+				__result = null;
+				return false;
+			}
+			if (!info.IsOnCamera && info.Maker.Thing != null && info.Maker.Thing.Destroyed)
+			{
+				__result = null;
+				return false;
+			}
+			if (soundDef.sustainStartSound != null)
+			{
+				soundDef.sustainStartSound.PlayOneShot(info);
+			}
+			Sustainer sustainer = null;
+			int tID = Thread.CurrentThread.ManagedThreadId;
+			if (Ticklist_Patch.eventWaitStarts.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+			{
+				Ticklist_Patch.newSustainerRequests.TryAdd(tID, new object[] { soundDef, info });
+				Ticklist_Patch.mainThreadWaitHandle.Set();
+				eventWaitStart.WaitOne();
+
+				Ticklist_Patch.newSustainerResults.TryGetValue(tID, out sustainer);
+				__result = sustainer;
+			} else
+            {
+				__result = new Sustainer(soundDef, info);
+			}
+			//return new Sustainer(soundDef, info);
+			//return sustainer;
+			return false;
+
 		}
 	}
 }

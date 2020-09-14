@@ -126,17 +126,14 @@ namespace RimThreaded
             }
 
             List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
-            try 
+            foreach (Thing t in thingList)
             {
-                foreach (Thing t in thingList)
+                if (t.def.category == cat)
                 {
-                    if (t.def.category == cat)
-                    {
-                        __result = t;
-                        return false;
-                    }
+                    __result = t;
+                    return false;
                 }
-            } catch { }
+            }
             __result = null;
             return false;
         }
@@ -150,18 +147,15 @@ namespace RimThreaded
                 return false;
             }
             List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
-            try
+            foreach (Thing t in thingList)
             {
-                foreach (Thing t in thingList)
+                if (t.def == def)
                 {
-                    if (t.def == def)
-                    {
-                        __result = t;
-                        return false;
-                    }
+                    __result = t;
+                    return false;
                 }
             }
-            catch { }
+            
             __result = null;
             return false;
         }

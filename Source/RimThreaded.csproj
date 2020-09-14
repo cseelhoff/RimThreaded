@@ -71,6 +71,8 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="LongEventHandler.cs" />
+    <Compile Include="Dijkstra.cs" />
     <Compile Include="Room.cs" />
     <Compile Include="Immunity.cs" />
     <Compile Include="SoundStarter_Patch.cs" />

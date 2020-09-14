@@ -281,12 +281,23 @@ namespace RimThreaded
 			patched = typeof(CellFinder_Patch);
 			Prefix(original, patched, "TryFindRandomCellInRegion");
 			Prefix(original, patched, "TryFindRandomReachableCellNear");
+			Prefix(original, patched, "TryFindBestPawnStandCell");
 
 			//ThingOwnerUtility
 			original = typeof(ThingOwnerUtility);
 			patched = typeof(ThingOwnerUtility_Patch);
 			Prefix(original, patched, "AppendThingHoldersFromThings");
 			Prefix(original, patched, "GetAllThingsRecursively", new Type[] { typeof(IThingHolder), typeof(List<Thing>), typeof(bool), typeof(Predicate<IThingHolder>) });
+
+			MethodInfo[] methods = original.GetMethods();
+
+			//MethodInfo originalPawnGetAllThings = original.GetMethod("GetAllThingsRecursively", bf, null, new Type[] { 
+			//	typeof(Map), typeof(ThingRequest), typeof(List<Pawn>), typeof(bool), typeof(Predicate<IThingHolder>), typeof(bool) }, null);
+			MethodInfo originalPawnGetAllThings = methods[17];
+			MethodInfo originalPawnGetAllThingsGeneric = originalPawnGetAllThings.MakeGenericMethod(new Type[] { typeof(Pawn) });
+			MethodInfo patchedPawnGetAllThings = patched.GetMethod("GetAllThingsRecursively_Pawn");
+			HarmonyMethod prefixPawnGetAllThings = new HarmonyMethod(patchedPawnGetAllThings);
+			harmony.Patch(originalPawnGetAllThingsGeneric, prefix: prefixPawnGetAllThings);
 
 			//Pawn_MeleeVerbs
 			original = typeof(Pawn_MeleeVerbs);
@@ -312,6 +323,7 @@ namespace RimThreaded
 			original = typeof(PawnDiedOrDownedThoughtsUtility);
 			patched = typeof(PawnDiedOrDownedThoughtsUtility_Patch);
 			Prefix(original, patched, "RemoveLostThoughts");
+			Prefix(original, patched, "RemoveDiedThoughts");
 
 			//AttackTargetFinder
 			original = typeof(AttackTargetFinder);
@@ -354,6 +366,8 @@ namespace RimThreaded
 			patched = typeof(SoundStarter_Patch);
 			Prefix(original, patched, "PlayOneShot");
 			Prefix(original, patched, "PlayOneShotOnCamera");
+			//Prefix(original, patched, "TrySpawnSustainer");
+			
 
 
 			//Pawn_RelationsTracker			
@@ -370,6 +384,7 @@ namespace RimThreaded
 			original = typeof(Battle);
 			patched = typeof(Battle_Patch);
 			Prefix(original, patched, "ExposeData");
+			Prefix(original, patched, "Absorb");
 
 			//Building_Door			
 			original = typeof(Building_Door);
@@ -427,6 +442,7 @@ namespace RimThreaded
 			original = typeof(GridsUtility);
 			patched = typeof(GridsUtility_Patch);
 			Prefix(original, patched, "GetTerrain");
+			Prefix(original, patched, "GetGas");
 
 			//ReservationManager
 			original = typeof(ReservationManager);
@@ -450,6 +466,8 @@ namespace RimThreaded
 			Prefix(original, patched, "Push");
 			Prefix(original, patched, "Pop");
 			Prefix(original, patched, "Clear");
+			//Prefix(original, patched, "SwapElements");
+			//Prefix(original, patched, "CompareElements");
 
 			//MapPawns
 			original = typeof(MapPawns);
@@ -461,10 +479,11 @@ namespace RimThreaded
 			Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
 			Prefix(original, patched, "DeRegisterPawn");
 			Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
-			Prefix(original, patched, "SpawnedPawnsInFaction");
+			Prefix(original, patched, "SpawnedPawnsInFaction"); 
+			Prefix(original, patched, "get_AllPawnsUnspawned");
 
-			//Region
-			original = typeof(Region);
+			 //Region
+			 original = typeof(Region);
 			patched = typeof(Region_Patch);
 			Prefix(original, patched, "DangerFor");
 
@@ -492,6 +511,12 @@ namespace RimThreaded
 			original = typeof(Room);
 			patched = typeof(Room_Patch);
 			Prefix(original, patched, "OpenRoofCountStopAt");
+
+			//LongEventHandler
+			original = typeof(LongEventHandler);
+			patched = typeof(LongEventHandler_Patch);
+			Prefix(original, patched, "ExecuteToExecuteWhenFinished");
+
 
 
 

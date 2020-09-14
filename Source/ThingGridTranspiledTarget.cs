@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 
 namespace RimThreaded
@@ -109,8 +110,8 @@ namespace RimThreaded
 					{
 						thing = list[i];
 					}
-					catch
-                    {
+					catch (ArgumentOutOfRangeException _)
+					{
 						break;
                     }
 					yield return thing;
@@ -151,17 +152,22 @@ namespace RimThreaded
 			{
 				return null;
 			}
+			Thing thing;
 			List<Thing> list = thingGrid[map.cellIndices.CellToIndex(c)];
-			try
+			for (int i = 0; i < list.Count; i++)
 			{
-				for (int i = 0; i < list.Count; i++)
+				//thing = null;
+				try
+                {
+					thing = list[i];
+                }
+				catch (ArgumentOutOfRangeException _) { break; }
+				//if (null == thing) break;
+				if (list[i].def.category == cat)
 				{
-					if (list[i].def.category == cat)
-					{
-						return list[i];
-					}
-				}
-			} catch { }
+					return list[i];
+				}				
+			} 
 			return null;
 		}
 
@@ -177,16 +183,22 @@ namespace RimThreaded
 			{
 				return null;
 			}
+			Thing thing;
 			List<Thing> list = thingGrid[map.cellIndices.CellToIndex(c)];
-			try { 
-				for (int i = 0; i < list.Count; i++)
+			for (int i = 0; i < list.Count; i++)
+			{
+				//thing = null;
+				try
 				{
-					if (list[i].def == def)
-					{
-						return list[i];
-					}
+					thing = list[i];
 				}
-			} catch { }
+				catch (ArgumentOutOfRangeException _) { break; }
+				//if (null == thing) break;
+				if (list[i].def == def)
+				{
+					return list[i];
+				}
+			}
 			return null;
 		}
 
@@ -197,17 +209,22 @@ namespace RimThreaded
 			{
 				return null;
 			}
-			List<Thing> list = thingGrid[map.cellIndices.CellToIndex(c)];
-			try { 
-				for (int i = 0; i < list.Count; i++)
-				{
-					T val = list[i] as T;
-					if (val != null)
-					{
-						return val;
-					}
-				}
-			} catch { }
+		Thing thing;
+		List<Thing> list = thingGrid[map.cellIndices.CellToIndex(c)];
+			for (int i = 0; i < list.Count; i++)
+			{
+				//thing = null;
+				try
+                {
+					thing = list[i];
+                }
+				catch (ArgumentOutOfRangeException _) { break; }
+				//if (null == thing) break;
+                if (thing is T val)
+                {
+                    return val;
+                }
+            } 
 			return null;
 		}
 	}
