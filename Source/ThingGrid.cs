@@ -10,8 +10,10 @@ namespace RimThreaded
     {
         public static readonly List<Thing> EmptyThingList = new List<Thing>();
         public static AccessTools.FieldRef<ThingGrid, Map> map = AccessTools.FieldRefAccess<ThingGrid, Map>("map");
+        public static AccessTools.FieldRef<ThingGrid, List<Thing>[]> thingGrid = AccessTools.FieldRefAccess<ThingGrid, List<Thing>[]>("thingGrid");
         public static Dictionary<ThingGrid, List<Thing>[]> thingGridDict = new Dictionary<ThingGrid, List<Thing>[]>();
 
+        /*
         public static void Postfix_Constructor(ThingGrid __instance, Map map)
         {
             ThingGrid_Patch.map(__instance) = map;
@@ -21,7 +23,7 @@ namespace RimThreaded
             for (int i = 0; i < cellIndices.NumGridCells; ++i)
                 thingGrid[i] = new List<Thing>(4);
         }
-
+        */
         public static bool RegisterInCell(ThingGrid __instance, Thing t, IntVec3 c)
         {
             Map this_map = map(__instance);
@@ -34,8 +36,8 @@ namespace RimThreaded
             else
             {
                 int index = cellIndices.CellToIndex(c);
-                lock (thingGridDict[__instance][index]) { 
-                    thingGridDict[__instance][index].Add(t);
+                lock (thingGrid(__instance)[index]) {
+                    thingGrid(__instance)[index].Add(t);
                 }
             }
             return false;
@@ -52,7 +54,7 @@ namespace RimThreaded
             else
             {
                 int index = cellIndices.CellToIndex(c);
-                List<Thing>[] thingList = thingGridDict[__instance];
+                List<Thing>[] thingList = thingGrid(__instance);
                 lock (thingList[index])
                 {
                     if (!thingList[index].Contains(t))
@@ -62,6 +64,7 @@ namespace RimThreaded
             }
             return false;
         }
+        /*
 
         public static bool ThingsAt(ThingGrid __instance, ref IEnumerable<Thing> __result, IntVec3 c)
         {
@@ -111,6 +114,7 @@ namespace RimThreaded
             __result = thingGridDict[__instance][index];
             return false;
         }
+        */
         public static bool ThingAt(ThingGrid __instance, ref Thing __result, IntVec3 c, ThingCategory cat)
         {
             Map this_map = map(__instance);
@@ -121,9 +125,9 @@ namespace RimThreaded
                 return false;
             }
 
-            lock (thingGridDict[__instance][cellIndices.CellToIndex(c)])
+            List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
+            try 
             {
-                List<Thing> thingList = thingGridDict[__instance][cellIndices.CellToIndex(c)];
                 foreach (Thing t in thingList)
                 {
                     if (t.def.category == cat)
@@ -132,7 +136,7 @@ namespace RimThreaded
                         return false;
                     }
                 }
-            }
+            } catch { }
             __result = null;
             return false;
         }
@@ -145,9 +149,9 @@ namespace RimThreaded
                 __result = null;
                 return false;
             }
-            lock (thingGridDict[__instance][cellIndices.CellToIndex(c)])
+            List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
+            try
             {
-                List<Thing> thingList = thingGridDict[__instance][cellIndices.CellToIndex(c)];
                 foreach (Thing t in thingList)
                 {
                     if (t.def == def)
@@ -157,10 +161,11 @@ namespace RimThreaded
                     }
                 }
             }
+            catch { }
             __result = null;
             return false;
         }
-
+        /*
         public static bool ThingAt_Apparel(ThingGrid __instance, ref Apparel __result, IntVec3 c)
         {
             Map this_map = map(__instance);
@@ -211,6 +216,7 @@ namespace RimThreaded
             __result = default(Building_Door);
             return false;
         }
+        */
     }
 
 }

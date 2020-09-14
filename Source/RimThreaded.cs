@@ -69,11 +69,11 @@ namespace RimThreaded
 		//bugs - remove is out of sync for listerthings and thinggrid and maybe thingownerthing
 		//perf impr - replace dicts with hashsets (maybe custom hash function too?)
 
-		static RimThreadedHarmony() { 
+		static RimThreadedHarmony() {
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
-			
+
 			//ContentFinderTexture2D			
 			original = typeof(ContentFinder<Texture2D>);
 			patched = typeof(ContentFinder_Texture2D_Patch);
@@ -88,7 +88,7 @@ namespace RimThreaded
 			original = typeof(TickList);
 			patched = typeof(Ticklist_Patch);
 			Prefix(original, patched, "Tick");
-			
+
 			//Rand
 			original = typeof(Rand);
 			patched = typeof(Rand_Patch);
@@ -99,7 +99,7 @@ namespace RimThreaded
 			Prefix(original, patched, "PopState");
 			Prefix(original, patched, "TryRangeInclusiveWhere");
 			Prefix(original, patched, "PushState", new Type[] { });
-			
+
 
 			//ThingOwner<Thing> - perf improvement - uses slow method invoke / reflection call
 			original = typeof(ThingOwner<Thing>);
@@ -148,29 +148,45 @@ namespace RimThreaded
 
 			//ThingGrid
 			original = typeof(ThingGrid);
+
+			//ThingGrid_Transpile
+			patched = typeof(ThingGrid_Transpile);
+			//Transpile(original, patched, "RegisterInCell");
+			//Transpile(original, patched, "DeregisterInCell");
+			//Transpile(original, patched, "ThingsAt");
+			//Transpile(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingCategory) });
+			//Transpile(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingDef) );
+			//MethodInfo originalApparelThingAt = original.GetMethod("ThingAt", bf, null, new Type[] { typeof(IntVec3) }, null);
+			
 			patched = typeof(ThingGrid_Patch);
 
-			ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Map) });
-			MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
-			harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
+			//ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Map) });
+			//MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
+			//harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
 
 			Prefix(original, patched, "RegisterInCell");
 			Prefix(original, patched, "DeregisterInCell");
-			Prefix(original, patched, "ThingsListAt");
-			Prefix(original, patched, "ThingsAt");
-			Prefix(original, patched, "ThingsListAtFast", new Type[] { typeof(int) });
-			Prefix(original, patched, "ThingsListAtFast", new Type[] { typeof(IntVec3) });
+			//Prefix(original, patched, "ThingsListAt");
+			//Prefix(original, patched, "ThingsAt");
+			//Prefix(original, patched, "ThingsListAtFast", new Type[] { typeof(int) });
+			//Prefix(original, patched, "ThingsListAtFast", new Type[] { typeof(IntVec3) });
 			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingCategory) });
 			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingDef) });
+			/*
+			original = typeof(ThingGrid);
+			patched = typeof(ThingGrid_Patch);
+			MethodInfo originalApparelThingAt = original.GetMethod("ThingAt", bf, null, new Type[] { typeof(IntVec3) }, null);
+			MethodInfo originalApparelThingAtGeneric = originalApparelThingAt.MakeGenericMethod(new Type[] { typeof(Apparel) });
+			MethodInfo patchedApparelThingAt = patched.GetMethod("ThingAt_Apparel");
+			HarmonyMethod prefixApparel = new HarmonyMethod(patchedApparelThingAt);
+			harmony.Patch(originalApparelThingAtGeneric, prefix: prefixApparel);
 
-			MethodInfo oMethod = original.GetMethod("ThingAt", bf, null, new Type[] { typeof(IntVec3) }, null);
-			MethodInfo apparelMethod = oMethod.MakeGenericMethod(typeof(Apparel));
-			MethodInfo apMethod = patched.GetMethod("ThingAt_Apparel");
-			harmony.Patch(apparelMethod, prefix: new HarmonyMethod(apMethod));
-			MethodInfo doorMethod = oMethod.MakeGenericMethod(typeof(Building_Door));
-			MethodInfo dpMethod = patched.GetMethod("ThingAt_Building_Door");
-			harmony.Patch(doorMethod, prefix: new HarmonyMethod(dpMethod));
-
+			MethodInfo originalBuilding_DoorThingAt = original.GetMethod("ThingAt", bf, null, new Type[] { typeof(IntVec3) }, null);
+			MethodInfo originalBuilding_DoorThingAtGeneric = originalBuilding_DoorThingAt.MakeGenericMethod(new Type[] {typeof(Building_Door)});
+			MethodInfo patchedBuilding_DoorThingAt = patched.GetMethod("ThingAt_Building_Door");
+			HarmonyMethod prefixBuilding_Door = new HarmonyMethod(patchedBuilding_DoorThingAt);
+			harmony.Patch(originalBuilding_DoorThingAtGeneric, prefix: prefixBuilding_Door);
+			*/
 			//RealtimeMoteList			
 			original = typeof(RealtimeMoteList);
 			patched = typeof(RealtimeMoteList_Patch);
@@ -193,11 +209,11 @@ namespace RimThreaded
 			//GenSpawn
 			original = typeof(GenSpawn);
 			patched = typeof(GenSpawn_Patch);
-			Prefix(original, patched, "WipeExistingThings");
-			Prefix(original, patched, "CheckMoveItemsAside");
-			Prefix(original, patched, "Spawn", new Type[] {
-				typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4),
-				typeof(WipeMode), typeof(bool) });
+			//Prefix(original, patched, "WipeExistingThings");
+			//Prefix(original, patched, "CheckMoveItemsAside");
+			//Prefix(original, patched, "Spawn", new Type[] {
+			//	typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4),
+			//	typeof(WipeMode), typeof(bool) });
 
 			//PawnDestinationReservationManager
 			original = typeof(PawnDestinationReservationManager);
@@ -499,6 +515,8 @@ namespace RimThreaded
 			Log.Message("RimThreaded patching is complete.");
 		}
 
+
+
 		public static void Prefix(Type original, Type patched, String methodName, Type[] orig_type)
 		{
 			MethodInfo oMethod = original.GetMethod(methodName, bf, null, orig_type, null);
@@ -559,6 +577,14 @@ namespace RimThreaded
 			}
 			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
 		}
+
+		public static void Transpile(Type original, Type patched, String methodName)
+        {
+			MethodInfo oMethod = original.GetMethod(methodName, bf);
+			MethodInfo pMethod = patched.GetMethod(methodName);
+			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
+		}
+
 	}
 	
 }

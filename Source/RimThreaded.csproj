@@ -21,6 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -129,6 +131,8 @@
     <Compile Include="SubSustainer.cs" />
     <Compile Include="SustainerManager.cs" />
     <Compile Include="Thing.cs" />
+    <Compile Include="ThingGridTranspile.cs" />
+    <Compile Include="ThingGridTranspiledTarget.cs" />
     <Compile Include="ThingGrid.cs" />
     <Compile Include="ThingOwnerThing.cs" />
     <Compile Include="ThingOwnerUtility.cs" />
