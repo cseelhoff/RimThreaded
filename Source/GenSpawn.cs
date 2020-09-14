@@ -18,7 +18,7 @@ namespace RimThreaded
             foreach (IntVec3 c in GenAdj.CellsOccupiedBy(thingPos, thingRot, thingDef.Size))
             {
                 Thing[] array;
-                List<Thing> list = ThingGrid_Patch.ThingsListAt2(map.thingGrid, c);
+                List<Thing> list = map.thingGrid.ThingsListAt(c); // ThingsListAt(map.thingGrid, c);
                 lock(list)
                 {
                     array = list.ToArray();
@@ -175,7 +175,7 @@ namespace RimThreaded
                 if (intVec3.InBounds(map))
                 {
                     CellIndices cellIndices = map.cellIndices;
-                    List<Thing> list = ThingGrid_Patch.thingGridDict[map.thingGrid][cellIndices.CellToIndex(intVec3)];
+                    List<Thing> list = intVec3.GetThingList(map).ToList<Thing>(); // map.thingGrid [cellIndices.CellToIndex(intVec3)];
                     lock (list)
                     {
                         foreach (Thing thing in list.ToArray())
