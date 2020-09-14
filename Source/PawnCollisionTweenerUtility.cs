@@ -29,30 +29,26 @@ namespace RimThreaded
 			forPawnFound = false;
 			foreach (IntVec3 c in CellRect.SingleCell(at).ExpandedBy(1))
 			{
-				if (c.InBounds(map))
-				{
-					List<Thing> thingList = c.GetThingList(map);
-					for (int index = 0; index < thingList.Count; ++index)
+				foreach (Thing thing in map.thingGrid.ThingsAt(c))
+                {                
+					if (thing is Pawn p && p.GetPosture() == PawnPosture.Standing)
 					{
-						if (thingList[index] is Pawn p && p.GetPosture() == PawnPosture.Standing)
+                        Pawn_PathFollower path = p.pather;
+						if (null != path)
 						{
-                            Pawn_PathFollower path = p.pather;
-							if (null != path)
+							if (c != at)
 							{
-								if (c != at)
-								{
-									if (!path.MovingNow || path.nextCell != path.Destination.Cell || path.Destination.Cell != at)
-										continue;
-								}
-								else if (path.MovingNow)
+								if (!path.MovingNow || path.nextCell != path.Destination.Cell || path.Destination.Cell != at)
 									continue;
 							}
-							if (p == forPawn)
-								forPawnFound = true;
-							++pawnsCount;
-							if (p.thingIDNumber < forPawn.thingIDNumber)
-								++pawnsWithLowerIdCount;
+							else if (path.MovingNow)
+								continue;
 						}
+						if (p == forPawn)
+							forPawnFound = true;
+						++pawnsCount;
+						if (p.thingIDNumber < forPawn.thingIDNumber)
+							++pawnsWithLowerIdCount;
 					}
 				}
 			}

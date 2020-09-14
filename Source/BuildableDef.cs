@@ -20,9 +20,17 @@ namespace RimThreaded
         {
             if (__instance.placeWorkers == null)
                 return null;
-            placeWorkersInstantiatedInt(__instance) = new List<PlaceWorker>();
-            foreach (System.Type placeWorker in __instance.placeWorkers)
-                placeWorkersInstantiatedInt(__instance).Add((PlaceWorker)Activator.CreateInstance(placeWorker));
+            if(placeWorkersInstantiatedInt(__instance) == null)
+                placeWorkersInstantiatedInt(__instance) = new List<PlaceWorker>();
+            lock (placeWorkersInstantiatedInt(__instance))
+            {
+                placeWorkersInstantiatedInt(__instance).Clear(); // = new List<PlaceWorker>();
+                foreach (Type placeWorkerType in __instance.placeWorkers)
+                {
+                    //PlaceWorker placeWorker = (PlaceWorker)Activator.CreateInstance(placeWorkerType);
+                    placeWorkersInstantiatedInt(__instance).Add((PlaceWorker)Activator.CreateInstance(placeWorkerType));
+                }
+            }
             return placeWorkersInstantiatedInt(__instance);
             
         }
@@ -33,17 +41,24 @@ namespace RimThreaded
                 __result = false;
                 return false;
             }
-            PlaceWorker[] arrayPlaceWorkers;
-            lock (get_PlaceWorkers(__instance))
+            PlaceWorker placeWorker;
+            List<PlaceWorker> placeWorkersReturn = get_PlaceWorkers(__instance);
+            for (int index = 0; index < placeWorkersReturn.Count; ++index)
             {
-                arrayPlaceWorkers = get_PlaceWorkers(__instance).ToArray();
-            }
-            for (int index = 0; index < arrayPlaceWorkers.Length; ++index)
-            {
-                if (arrayPlaceWorkers[index].ForceAllowPlaceOver(other))
+                try
                 {
-                    __result = true;
-                    return false;
+                    placeWorker = placeWorkersReturn[index];
+                } catch (ArgumentOutOfRangeException _)
+                {
+                    break;
+                }
+                if (null != placeWorker)
+                {
+                    if (placeWorker.ForceAllowPlaceOver(other))
+                    {
+                        __result = true;
+                        return false;
+                    }
                 }
             }
             __result = false;

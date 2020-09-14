@@ -17,26 +17,18 @@ namespace RimThreaded
         {
             foreach (IntVec3 c in GenAdj.CellsOccupiedBy(thingPos, thingRot, thingDef.Size))
             {
-                Thing[] array;
-                List<Thing> list = map.thingGrid.ThingsListAt(c); // ThingsListAt(map.thingGrid, c);
-                lock(list)
-                {
-                    array = list.ToArray();
-                }
-                foreach (Thing thing in array)
+                foreach (Thing thing in map.thingGrid.ThingsAt(c))
                 {
                     if (null != thing)
                     {
-                        ThingDef d = thing.def;
-                        if (null != d)
+                        ThingDef thingDef2 = thing.def;
+                        if (null != thingDef2)
                         {
-                            if (GenSpawn.SpawningWipes(thingDef, thing.def))
+                            if (GenSpawn.SpawningWipes(thingDef, thingDef2))
                                 thing.Destroy(mode);
                         }
                     }
-                }
-                    
-                
+                }                
             }
             return false;
         }
@@ -172,26 +164,20 @@ namespace RimThreaded
             CellRect occupiedRect = GenAdj.OccupiedRect(thingPos, thingRot, thingDef.Size);
             foreach (IntVec3 intVec3 in occupiedRect)
             {
-                if (intVec3.InBounds(map))
-                {
-                    CellIndices cellIndices = map.cellIndices;
-                    List<Thing> list = intVec3.GetThingList(map).ToList<Thing>(); // map.thingGrid [cellIndices.CellToIndex(intVec3)];
-                    lock (list)
+                //if (intVec3.InBounds(map))
+                //{
+                    //CellIndices cellIndices = map.cellIndices;
+                    //List<Thing> list = intVec3.GetThingList(map).ToList<Thing>(); // map.thingGrid [cellIndices.CellToIndex(intVec3)];
+                    foreach (Thing thing in map.thingGrid.ThingsAt(intVec3))
                     {
-                        foreach (Thing thing in list.ToArray())
+                        if (thing.def.category == ThingCategory.Item)
                         {
-                            //if (!thing.Destroyed)
-                            //{
-                                if (thing.def.category == ThingCategory.Item)
-                                {
-                                    thing.DeSpawn(DestroyMode.Vanish);
-                                    if (!GenPlace.TryPlaceThing(thing, intVec3, map, ThingPlaceMode.Near, null, (x => !occupiedRect.Contains(x)), new Rot4()))
-                                        thing.Destroy(DestroyMode.Vanish);
-                                }
-                            //}
+                            thing.DeSpawn(DestroyMode.Vanish);
+                            if (!GenPlace.TryPlaceThing(thing, intVec3, map, ThingPlaceMode.Near, null, (x => !occupiedRect.Contains(x)), new Rot4()))
+                                thing.Destroy(DestroyMode.Vanish);
                         }
-                    }
-                }
+                    }                    
+                //}
             }
             return false;
         }

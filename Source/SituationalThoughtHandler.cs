@@ -138,7 +138,8 @@ namespace RimThreaded
         {
             if (!this_cachedSocialThoughts.ContainsKey(__instance))
                 this_cachedSocialThoughts.Add(__instance, new Dictionary<Pawn, CachedSocialThoughts>());
-            this_cachedSocialThoughts[__instance].RemoveAll<Pawn, CachedSocialThoughts>((Predicate<KeyValuePair<Pawn, CachedSocialThoughts>>)(x => x.Value.Expired || x.Key.Discarded));
+            Dictionary<Pawn, CachedSocialThoughts> this_cachedSocialThoughtsInstance = this_cachedSocialThoughts[__instance];
+            this_cachedSocialThoughtsInstance.RemoveAll<Pawn, CachedSocialThoughts>((Predicate<KeyValuePair<Pawn, CachedSocialThoughts>>)(x => x.Value.Expired || x.Key.Discarded));
             return false;
         }
 

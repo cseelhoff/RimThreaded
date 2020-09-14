@@ -1,9 +1,15 @@
 # RimThreaded
 RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-Version 1.0.15
-
 CHANGE LOG:  
+Version 1.0.16  
+-Fixed bug with BuildableDef  
+-Fixed bug with GenAdjFast  
+-Fixed bug with GenSpawn  
+-Fixed bug with LordToil_Siege  
+-Fixed bug with PawnCollisionTweenerUtility  
+-Fixed bug with SituationalThoughtHandler  
+
 Version 1.0.15  
 -Fixed bug with SituationalThoughtHandler  
 

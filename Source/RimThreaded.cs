@@ -209,8 +209,8 @@ namespace RimThreaded
 			//GenSpawn
 			original = typeof(GenSpawn);
 			patched = typeof(GenSpawn_Patch);
-			//Prefix(original, patched, "WipeExistingThings");
-			//Prefix(original, patched, "CheckMoveItemsAside");
+			Prefix(original, patched, "WipeExistingThings");
+			Prefix(original, patched, "CheckMoveItemsAside");
 			//Prefix(original, patched, "Spawn", new Type[] {
 			//	typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4),
 			//	typeof(WipeMode), typeof(bool) });
@@ -524,7 +524,18 @@ namespace RimThreaded
 			Prefix(original, patched, "Notify_SituationalThoughtsDirty");
 			Prefix(original, patched, "RemoveExpiredThoughtsFromCache");
 
+			//GenAdjFast
+			original = typeof(GenAdjFast);
+			patched = typeof(GenAdjFast_Patch);
+			Prefix(original, patched, "AdjacentCells8Way", new Type[] { typeof(IntVec3) });
+			Prefix(original, patched, "AdjacentCells8Way", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
+			Prefix(original, patched, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3) });
+			Prefix(original, patched, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
 
+			//LordToil_Siege
+			original = typeof(LordToil_Siege);
+			patched = typeof(LordToil_Siege_Patch);
+			Prefix(original, patched, "UpdateAllDuties");
 
 
 			//PERFORMANCE IMPROVEMENTS
