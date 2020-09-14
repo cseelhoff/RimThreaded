@@ -87,6 +87,43 @@ namespace RimThreaded
 			//tmpHolders.Clear();
 			return false;
 		}
-
+		public static bool GetAllThingsRecursively_Pawn(Map map, 
+			ThingRequest request, List<Pawn> outThings, bool allowUnreal = true, 
+			Predicate<IThingHolder> passCheck = null, bool alsoGetSpawnedThings = true) 
+		{
+			outThings.Clear();
+			if (alsoGetSpawnedThings)
+			{
+				List<Thing> list = map.listerThings.ThingsMatching(request);
+				for (int i = 0; i < list.Count; i++)
+				{
+					Pawn t = list[i] as Pawn;
+					if (t != null)
+					{
+						outThings.Add(t);
+					}
+				}
+			}
+			List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
+			//ThingOwnerUtility.tmpMapChildHolders.Clear();
+			map.GetChildHolders(tmpMapChildHolders);
+			for (int j = 0; j < tmpMapChildHolders.Count; j++)
+			{
+				//ThingOwnerUtility.tmpThings.Clear();
+				List<Thing> tmpThings = new List<Thing>();
+				ThingOwnerUtility.GetAllThingsRecursively(tmpMapChildHolders[j], tmpThings, allowUnreal, passCheck);
+				for (int k = 0; k < tmpThings.Count; k++)
+				{
+					Pawn t2 = tmpThings[k] as Pawn;
+					if (t2 != null && request.Accepts(t2))
+					{
+						outThings.Add(t2);
+					}
+				}
+			}
+			return false;
+			//tmpThings.Clear();
+			//tmpMapChildHolders.Clear();
+		}
 	}
 }

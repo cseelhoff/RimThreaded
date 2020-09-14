@@ -40,10 +40,10 @@ namespace RimThreaded
                         __result = 120f;
                         return false;
                     }
-                    __result = 100f;
+                    __result = 12f;
                     return false;
                 case TimeSpeed.Ultrafast:
-                    __result = Find.Maps.Count == 0 ? 150f : 30f;
+                    __result = Find.Maps.Count == 0 ? 150f : 150f;
                     return false;
                 default:
                     __result = -1f;

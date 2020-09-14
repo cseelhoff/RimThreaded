@@ -26,6 +26,25 @@ namespace RimThreaded
             }
             return false;
         }
-
+        public static bool GetGas(ref Gas __result, IntVec3 c, Map map)
+        {
+            List<Thing> thingList = c.GetThingList(map);
+            Thing thing;
+            for (int i = 0; i < thingList.Count; i++)
+            {
+                try
+                {
+                    thing = thingList[i];
+                }
+                catch (ArgumentOutOfRangeException _) { break; }
+                if (thingList[i].def.category == ThingCategory.Gas)
+                {
+                    __result = (Gas)thingList[i];
+                    return false;
+                }                
+            } 
+            __result = null;
+            return false;
+        }
     }
 }

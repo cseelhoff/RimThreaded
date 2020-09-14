@@ -10,8 +10,8 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.13
-    -Fixed a bug that did not allow colonists wear apparel
+    Version 1.0.14
+    -Fixed a bunch of bugs appearing in combat. Many of which were causing thread timeouts.
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.

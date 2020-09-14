@@ -1,9 +1,12 @@
 # RimThreaded
 RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-Version 1.0.13
+Version 1.0.14
 
 CHANGE LOG:
+Version 1.0.14
+-Fixed a bunch of bugs appearing in combat. Many of which were causing thread timeouts.
+
 Version 1.0.13
 -Fixed a bug that did not allow colonists wear apparel
     

@@ -7,6 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using UnityEngine;
 
 namespace RimThreaded
 {
@@ -27,6 +28,27 @@ namespace RimThreaded
         public static AccessTools.FieldRef<Battle, HashSet<Pawn>> concerns =
             AccessTools.FieldRefAccess<Battle, HashSet<Pawn>>("concerns");
 
+        public static bool Absorb(Battle __instance, Battle battle)
+        {
+            creationTimestamp(__instance) = Mathf.Min(creationTimestamp(__instance), creationTimestamp(battle));
+            entries(__instance).AddRange(entries(battle));
+            concerns(__instance).AddRange(concerns(battle));
+            
+            entries(__instance) = (from e in entries(__instance)
+                            orderby e.Age
+                            select e).ToList<LogEntry>();
+            /*
+            foreach(var e in entries(__instance))
+            {
+
+            }
+            */
+            entries(battle).Clear();
+            concerns(battle).Clear();
+            absorbedBy(battle) = __instance;
+            battleName(__instance) = null;
+            return false;
+        }
 
         public static bool ExposeData(Battle __instance)
         {

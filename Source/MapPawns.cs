@@ -24,6 +24,27 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("pawnsInFactionSpawned");
         public static AccessTools.FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesSpawnedOfFactionResult =
             AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("freeHumanlikesSpawnedOfFactionResult");
+        public static AccessTools.FieldRef<MapPawns, List<Pawn>> allPawnsUnspawnedResult =
+            AccessTools.FieldRefAccess<MapPawns, List<Pawn>>("allPawnsUnspawnedResult");
+
+        public static bool get_AllPawnsUnspawned(MapPawns __instance, ref List<Pawn> __result)
+        {
+            allPawnsUnspawnedResult(__instance).Clear();
+            ThingOwnerUtility.GetAllThingsRecursively<Pawn>(map(__instance), ThingRequest.ForGroup(ThingRequestGroup.Pawn), allPawnsUnspawnedResult(__instance), true, null, false);
+            for (int i = allPawnsUnspawnedResult(__instance).Count - 1; i >= 0; i--)
+            {
+                lock (allPawnsUnspawnedResult(__instance))
+                {
+                    if (allPawnsUnspawnedResult(__instance)[i].Dead)
+                    {
+                        allPawnsUnspawnedResult(__instance).RemoveAt(i);
+                    }
+                }
+            }
+            __result = allPawnsUnspawnedResult(__instance);
+            return false;
+            
+        }
 
         public static bool FreeHumanlikesSpawnedOfFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
         {

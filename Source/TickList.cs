@@ -25,11 +25,13 @@ namespace RimThreaded
         public static int maxThreads = Math.Max(RimThreadedMod.Settings.maxThreads, 1);
         public static int timeoutMS = Math.Max(RimThreadedMod.Settings.timeoutMS, 1);
         public static ConcurrentDictionary<int, object[]> tryMakeAndPlayRequests = new ConcurrentDictionary<int, object[]>();
+        public static ConcurrentDictionary<int, object[]> newSustainerRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitStarts = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitDones = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<string, Texture2D> texture2DResults = new ConcurrentDictionary<string, Texture2D>();
         public static ConcurrentDictionary<int, string> texture2DRequests = new ConcurrentDictionary<int, string>();
         public static ConcurrentDictionary<MaterialRequest, Material> materialResults = new ConcurrentDictionary<MaterialRequest, Material>();
+        public static ConcurrentDictionary<int, Sustainer> newSustainerResults = new ConcurrentDictionary<int, Sustainer>();
         public static ConcurrentDictionary<int, MaterialRequest> materialRequests = new ConcurrentDictionary<int, MaterialRequest>();
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
@@ -218,7 +220,20 @@ namespace RimThreaded
                     eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart);
                     eventWaitStart.Set();
                 }
-
+                if (newSustainerRequests.Count > 0)
+                {
+                    continueWaiting = true;
+                    int key = newSustainerRequests.Keys.First();
+                    if (newSustainerRequests.TryRemove(key, out object[] objects))
+                    {
+                        SoundDef soundDef = (SoundDef)objects[0];
+                        SoundInfo soundInfo = (SoundInfo)objects[1];
+                        Sustainer sustainer = new Sustainer(soundDef, soundInfo);
+                        newSustainerResults[key] = sustainer;
+                    }
+                    eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart);
+                    eventWaitStart.Set();
+                }
                 // Add any sounds that were produced in this tick
                 while (PlayOneShot.Count > 0)
                 {

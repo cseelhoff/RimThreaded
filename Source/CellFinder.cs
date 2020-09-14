@@ -42,7 +42,120 @@ namespace RimThreaded
 			return false;
 		}
 
-        public static bool TryFindRandomReachableCellNear(ref bool __result,
+        private static IEnumerable<IntVec3> GetAdjacentCardinalCellsForBestStandCell(
+          IntVec3 x,
+          float radius,
+          Pawn pawn)
+        {
+            if ((double)(x - pawn.Position).LengthManhattan <= (double)radius)
+            {
+                for (int i = 0; i < 4; ++i)
+                {
+                    IntVec3 c = x + GenAdj.CardinalDirections[i];
+                    if (c.InBounds(pawn.Map) && c.Walkable(pawn.Map) && (!(c.GetEdifice(pawn.Map) is Building_Door edifice) || edifice.CanPhysicallyPass(pawn)))
+                        yield return c;
+                }
+            }
+        }
+        public static bool TryFindBestPawnStandCell(ref bool __result, Pawn forPawn, out IntVec3 cell, bool cellByCell = false)
+		{
+            cell = IntVec3.Invalid;
+            int num1 = -1;
+            float radius = 10f;
+            Dictionary<IntVec3, float> tmpDistances = new Dictionary<IntVec3, float>();
+            Dictionary<IntVec3, IntVec3> tmpParents = new Dictionary<IntVec3, IntVec3>();
+            DijkstraIntVec3 dijkstraIntVec3 = new DijkstraIntVec3();
+            while (true)
+            {
+                tmpDistances.Clear();
+                tmpParents.Clear();
+                dijkstraIntVec3.Run(forPawn.Position, (Func<IntVec3, IEnumerable<IntVec3>>)(x => GetAdjacentCardinalCellsForBestStandCell(x, radius, forPawn)), (Func<IntVec3, IntVec3, float>)((from, to) =>
+                {
+                    float num2 = 1f;
+                    if (from.x != to.x && from.z != to.z)
+                        num2 = 1.414214f;
+                    if (!to.Standable(forPawn.Map))
+                        num2 += 3f;
+                    if (PawnUtility.AnyPawnBlockingPathAt(to, forPawn, false, false, false))
+                    {
+                        if (to.GetThingList(forPawn.Map).Find((Predicate<Thing>)(x => x is Pawn && x.HostileTo((Thing)forPawn))) != null)
+                            num2 += 40f;
+                        else
+                            num2 += 15f;
+                    }
+                    if (to.GetEdifice(forPawn.Map) is Building_Door edifice && !edifice.FreePassage)
+                    {
+                        if (edifice.PawnCanOpen(forPawn))
+                            num2 += 6f;
+                        else
+                            num2 += 50f;
+                    }
+                    return num2;
+                }), tmpDistances, tmpParents);
+                if (tmpDistances.Count != num1)
+                {
+                    float num2 = 0.0f;
+                    foreach (KeyValuePair<IntVec3, float> tmpDistance in tmpDistances)
+                    {
+                        if ((!cell.IsValid || (double)tmpDistance.Value < (double)num2) && (tmpDistance.Key.Walkable(forPawn.Map) && !PawnUtility.AnyPawnBlockingPathAt(tmpDistance.Key, forPawn, false, false, false)))
+                        {
+                            Building_Door door = tmpDistance.Key.GetDoor(forPawn.Map);
+                            if (door == null || door.FreePassage)
+                            {
+                                cell = tmpDistance.Key;
+                                num2 = tmpDistance.Value;
+                            }
+                        }
+                    }
+                    if (!cell.IsValid)
+                    {
+                        if ((double)radius <= (double)forPawn.Map.Size.x || (double)radius <= (double)forPawn.Map.Size.z)
+                        {
+                            radius *= 2f;
+                            num1 = tmpDistances.Count;
+                        }
+                        else
+                            goto label_23;
+                    }
+                    else
+                        goto label_11;
+                }
+                else
+                    break;
+            }
+            __result = false;
+            return false;
+        label_11:
+            if (!cellByCell)
+            {
+                __result = true;
+                return false;
+            }
+            IntVec3 c = cell;
+            int num3 = 0;
+            for (; c.IsValid && c != forPawn.Position; c = tmpParents[c])
+            {
+                ++num3;
+                if (num3 >= 10000)
+                {
+                    Log.Error("Too many iterations.", false);
+                    break;
+                }
+                if (c.Walkable(forPawn.Map))
+                {
+                    Building_Door door = c.GetDoor(forPawn.Map);
+                    if (door == null || door.FreePassage)
+                        cell = c;
+                }
+            }
+            __result = true;
+            return false;
+        label_23:
+            __result = false;
+            return false;
+        }
+
+		public static bool TryFindRandomReachableCellNear(ref bool __result,
           IntVec3 root,
           Map map,
           float radius,
