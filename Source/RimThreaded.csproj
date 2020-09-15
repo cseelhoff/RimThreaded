@@ -71,6 +71,9 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="TooltipGiverList.cs" />
+    <Compile Include="Pawn_RecordsTracker.cs" />
+    <Compile Include="BattleLog.cs" />
     <Compile Include="LordToil_Siege.cs" />
     <Compile Include="GenAdjFast.cs" />
     <Compile Include="Pawn_InteractionsTracker.cs" />

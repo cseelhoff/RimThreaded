@@ -91,7 +91,9 @@ namespace RimThreaded
 			ThingRequest request, List<Pawn> outThings, bool allowUnreal = true, 
 			Predicate<IThingHolder> passCheck = null, bool alsoGetSpawnedThings = true) 
 		{
-			outThings.Clear();
+			lock (outThings) {
+				outThings.Clear();
+			}
 			if (alsoGetSpawnedThings)
 			{
 				List<Thing> list = map.listerThings.ThingsMatching(request);
@@ -100,10 +102,13 @@ namespace RimThreaded
 					Pawn t = list[i] as Pawn;
 					if (t != null)
 					{
-						outThings.Add(t);
+						lock(outThings) {
+							outThings.Add(t);
+						}
 					}
 				}
 			}
+			
 			List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
 			//ThingOwnerUtility.tmpMapChildHolders.Clear();
 			map.GetChildHolders(tmpMapChildHolders);
@@ -117,7 +122,10 @@ namespace RimThreaded
 					Pawn t2 = tmpThings[k] as Pawn;
 					if (t2 != null && request.Accepts(t2))
 					{
-						outThings.Add(t2);
+						lock (outThings)
+						{
+							outThings.Add(t2);
+						}
 					}
 				}
 			}

@@ -2,6 +2,13 @@
 RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
 CHANGE LOG:  
+
+Version 1.0.17  
+-Fixed bug with AttackTargetReservationManager  
+-Fixed bug with BattleLog  
+-Fixed bug with Pawn_RecordsTracker  
+-Fixed bug with ThingOwnerUtility  
+
 Version 1.0.16  
 -Fixed bug with BuildableDef  
 -Fixed bug with GenAdjFast  

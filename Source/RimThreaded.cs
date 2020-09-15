@@ -432,6 +432,7 @@ namespace RimThreaded
 			original = typeof(AttackTargetReservationManager);
 			patched = typeof(AttackTargetReservationManager_Patch);
 			Prefix(original, patched, "FirstReservationFor");
+			Prefix(original, patched, "ReleaseClaimedBy");
 
 			//PawnCollisionTweenerUtility
 			original = typeof(PawnCollisionTweenerUtility);
@@ -536,6 +537,11 @@ namespace RimThreaded
 			original = typeof(LordToil_Siege);
 			patched = typeof(LordToil_Siege_Patch);
 			Prefix(original, patched, "UpdateAllDuties");
+
+			//BattleLog
+			original = typeof(BattleLog);
+			patched = typeof(BattleLog_Patch);
+			Prefix(original, patched, "Add");
 
 
 			//PERFORMANCE IMPROVEMENTS
