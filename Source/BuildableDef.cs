@@ -48,7 +48,7 @@ namespace RimThreaded
                 try
                 {
                     placeWorker = placeWorkersReturn[index];
-                } catch (ArgumentOutOfRangeException _)
+                } catch (IndexOutOfRangeException)
                 {
                     break;
                 }

@@ -13,8 +13,10 @@ namespace RimThreaded
 
     public class PawnsFinder_Patch
     {
-        public static AccessTools.FieldRef<Building_SteamGeyser, IntermittentSteamSprayer> steamSprayer =
-            AccessTools.FieldRefAccess<Building_SteamGeyser, IntermittentSteamSprayer>("steamSprayer");
+
+		public static List<Pawn> allMapsWorldAndTemporary_Alive_Result =
+			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsWorldAndTemporary_Alive_Result");
+
 		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists(ref List<Pawn> __result)
 		{
 			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result = new List<Pawn>();
@@ -31,6 +33,21 @@ namespace RimThreaded
 				}
 			}
 			__result = allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result;
+			return false;
+		}
+		public static bool get_AllMapsWorldAndTemporary_Alive(ref List<Pawn> __result)
+		{
+			allMapsWorldAndTemporary_Alive_Result.Clear();
+			lock (allMapsWorldAndTemporary_Alive_Result)
+			{
+				allMapsWorldAndTemporary_Alive_Result.AddRange(PawnsFinder.AllMaps);
+				if (Find.World != null)
+				{
+					allMapsWorldAndTemporary_Alive_Result.AddRange(Find.WorldPawns.AllPawnsAlive);
+				}
+				allMapsWorldAndTemporary_Alive_Result.AddRange(PawnsFinder.Temporary_Alive);
+			}
+			__result = allMapsWorldAndTemporary_Alive_Result;
 			return false;
 		}
 	}

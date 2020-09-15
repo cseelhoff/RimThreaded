@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Verse;
@@ -64,20 +65,33 @@ namespace RimThreaded
             }
             return false;
         }
-        /*
-
+        
+        private static IEnumerable<Thing> ThingsAtEnumerableThing(ThingGrid __instance, IntVec3 c)
+        {
+            if (c.InBounds(map(__instance)))
+                yield break;
+            List<Thing> list;
+            try
+            {
+                list = thingGrid(__instance)[map(__instance).cellIndices.CellToIndex(c)];
+            } catch (IndexOutOfRangeException) { yield break; }
+            Thing thing;
+            for (int i = 0; i < list.Count; i++)
+            {
+                try
+                {
+                    thing = list[i];
+                }
+                catch (IndexOutOfRangeException) { break; }
+                yield return thing;
+            }
+        }
         public static bool ThingsAt(ThingGrid __instance, ref IEnumerable<Thing> __result, IntVec3 c)
         {
-            Map this_map = map(__instance);
-            CellIndices cellIndices = this_map.cellIndices;
-            __result = null;
-            if (c.InBounds(this_map))
-            {
-                __result = thingGridDict[__instance][cellIndices.CellToIndex(c)];
-                return false;
-            }
+            __result = ThingsAtEnumerableThing(__instance, c);
             return false;
         }
+        /*
         public static List<Thing> ThingsListAt2(ThingGrid __instance, IntVec3 c)
         {
             Map this_map = map(__instance);
