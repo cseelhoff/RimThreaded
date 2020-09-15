@@ -48,10 +48,7 @@ namespace RimThreaded
                 try
                 {
                     placeWorker = placeWorkersReturn[index];
-                } catch (ArgumentOutOfRangeException _)
-                {
-                    break;
-                }
+                } catch (ArgumentOutOfRangeException) { break; }
                 if (null != placeWorker)
                 {
                     if (placeWorker.ForceAllowPlaceOver(other))

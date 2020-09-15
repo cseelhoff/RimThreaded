@@ -1,7 +1,44 @@
 # RimThreaded
 RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
+DESCRIPTION:  
+-THIS MOD IS A WIP AND IS NOT GUARANTEED TO BE COMPATIBLE WITH OTHER MODS-  
+I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.
+
+SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
+
+LOAD ORDER/MOD COMPATIBILITY:  
+https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!  
+
+BUGS:  
+https://github.com/cseelhoff/RimThreaded/issues  
+Your (likely) log location: C:\Users\username\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\player.log  
+
+DISCORD:  
+https://discord.gg/3JJuWK8  
+
+CREDITS:  
+Bug testing:  
+Special thank you for helping me test Austin (Stanui)!  
+And thank you to others in Rimworld community who have posted their bug findings!  
+
+Coding:  
+Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!  
+
+Logo:  
+Thank you ArchieV1 for the logo! (https://github.com/ArchieV1)  
+Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=36313) and JKimsey (https://pixabay.com/users/jkimsey-253161/)  
+
+Video Review:  
+Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
+
 CHANGE LOG:  
+Version 1.0.18  
+-Fixed bug with PawnCapacitiesHandler (infinite stat recursion bug 13)  
+-Fixed bug with PathFinder  
+-Fixed bug with PawnsFinder  
+-Fixed bug with ThingGrid  
+-Fixed bug with WorldPawns  
 
 Version 1.0.17  
 -Fixed bug with AttackTargetReservationManager  
@@ -68,34 +105,3 @@ Version 1.0.3
 -Fixed the dreaded "Thread did not finish..." causing game to completely freeze (threads are now aborted and auto-restarted)  
 -Fixed Projectiles not hitting  
 -Removed some old unused methods  
-
-DESCRIPTION:  
--THIS MOD IS A WIP AND IS NOT GUARANTEED TO BE COMPATIBLE WITH OTHER MODS-  
-I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.
-
-SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
-
-LOAD ORDER/MOD COMPATIBILITY:  
-https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!  
-
-BUGS:  
-https://github.com/cseelhoff/RimThreaded/issues  
-Your (likely) log location: C:\Users\username\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\player.log  
-
-DISCORD:  
-https://discord.gg/3JJuWK8  
-
-CREDITS:  
-Bug testing:  
-Special thank you for helping me test Austin (Stanui)!  
-And thank you to others in Rimworld community who have posted their bug findings!  
-
-Coding:  
-Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!  
-
-Logo:  
-Thank you ArchieV1 for the logo! (https://github.com/ArchieV1)  
-Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=36313) and JKimsey (https://pixabay.com/users/jkimsey-253161/)  
-
-Video Review:  
-Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  

@@ -10,6 +10,7 @@ using UnityEngine;
 using Verse.AI;
 using RimWorld;
 using Verse.Sound;
+using RimWorld.Planet;
 
 namespace RimThreaded
 {
@@ -167,7 +168,7 @@ namespace RimThreaded
 			Prefix(original, patched, "RegisterInCell");
 			Prefix(original, patched, "DeregisterInCell");
 			//Prefix(original, patched, "ThingsListAt");
-			//Prefix(original, patched, "ThingsAt");
+			Prefix(original, patched, "ThingsAt");
 			//Prefix(original, patched, "ThingsListAtFast", new Type[] { typeof(int) });
 			//Prefix(original, patched, "ThingsListAtFast", new Type[] { typeof(IntVec3) });
 			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingCategory) });
@@ -318,6 +319,7 @@ namespace RimThreaded
 			original = typeof(PawnsFinder);
 			patched = typeof(PawnsFinder_Patch);
 			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
+			Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
 
 			//PawnDiedOrDownedThoughtsUtility
 			original = typeof(PawnDiedOrDownedThoughtsUtility);
@@ -360,15 +362,13 @@ namespace RimThreaded
 			patched = typeof(SubSustainer_Patch);
 			Prefix(original, patched, "StartSample");
 			Prefix(original, patched, "SubSustainerUpdate");
-			
+
 			//SoundStarter
 			original = typeof(SoundStarter);
 			patched = typeof(SoundStarter_Patch);
 			Prefix(original, patched, "PlayOneShot");
 			Prefix(original, patched, "PlayOneShotOnCamera");
 			//Prefix(original, patched, "TrySpawnSustainer");
-			
-
 
 			//Pawn_RelationsTracker			
 			original = typeof(Pawn_RelationsTracker);
@@ -422,7 +422,7 @@ namespace RimThreaded
 			patched = typeof(GenGrid_Patch);
 			Prefix(original, patched, "InBounds", new Type[] { typeof(IntVec3), typeof(Map) });
 			Prefix(original, patched, "InBounds", new Type[] { typeof(Vector3), typeof(Map) });
-			
+
 			//Explosion
 			original = typeof(Explosion);
 			patched = typeof(Explosion_Patch);
@@ -483,8 +483,8 @@ namespace RimThreaded
 			Prefix(original, patched, "SpawnedPawnsInFaction"); 
 			Prefix(original, patched, "get_AllPawnsUnspawned");
 
-			 //Region
-			 original = typeof(Region);
+			//Region
+			original = typeof(Region);
 			patched = typeof(Region_Patch);
 			Prefix(original, patched, "DangerFor");
 
@@ -542,6 +542,29 @@ namespace RimThreaded
 			original = typeof(BattleLog);
 			patched = typeof(BattleLog_Patch);
 			Prefix(original, patched, "Add");
+
+			//PawnCapacitiesHandler
+			original = typeof(PawnCapacitiesHandler);
+			patched = typeof(PawnCapacitiesHandler_Patch);
+			Prefix(original, patched, "GetLevel");
+			Prefix(original, patched, "Notify_CapacityLevelsDirty");
+			Prefix(original, patched, "Clear");
+			ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
+			MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
+			harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
+
+			//PathFinder
+			original = typeof(PathFinder);
+			patched = typeof(PathFinder_Patch);
+			Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
+			ConstructorInfo constructorMethod2 = original.GetConstructor(new Type[] { typeof(Map) });
+			MethodInfo cpMethod2 = patched.GetMethod("Postfix_Constructor");
+			harmony.Patch(constructorMethod2, postfix: new HarmonyMethod(cpMethod2));
+
+			//WorldPawns
+			original = typeof(WorldPawns);
+			patched = typeof(WorldPawns_Patch);
+			Prefix(original, patched, "get_AllPawnsAlive");
 
 
 			//PERFORMANCE IMPROVEMENTS

@@ -37,7 +37,8 @@ namespace RimThreaded
 				try
 				{
 					action = toExecuteWhenFinished[i];
-				} catch (ArgumentOutOfRangeException _) { }
+				}
+                catch (ArgumentOutOfRangeException) { break; }
 				if (null == action)
 					break;
 				DeepProfiler.Start(action.Method.DeclaringType.ToString() + " -> " + action.Method.ToString());

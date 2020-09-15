@@ -36,7 +36,7 @@ namespace RimThreaded
                 {
                     thing = thingList[i];
                 }
-                catch (ArgumentOutOfRangeException _) { break; }
+                catch (ArgumentOutOfRangeException) { break; }
                 if (thingList[i].def.category == ThingCategory.Gas)
                 {
                     __result = (Gas)thingList[i];
