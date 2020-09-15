@@ -68,7 +68,7 @@ namespace RimThreaded
         
         private static IEnumerable<Thing> ThingsAtEnumerableThing(ThingGrid __instance, IntVec3 c)
         {
-            if (c.InBounds(map(__instance)))
+            if (!c.InBounds(map(__instance)))
                 yield break;
             List<Thing> list;
             try
@@ -82,7 +82,7 @@ namespace RimThreaded
                 {
                     thing = list[i];
                 }
-                catch (IndexOutOfRangeException) { break; }
+                catch (ArgumentOutOfRangeException) { break; }
                 yield return thing;
             }
         }

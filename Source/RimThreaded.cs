@@ -319,7 +319,7 @@ namespace RimThreaded
 			original = typeof(PawnsFinder);
 			patched = typeof(PawnsFinder_Patch);
 			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
-			//Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
+			Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
 
 			//PawnDiedOrDownedThoughtsUtility
 			original = typeof(PawnDiedOrDownedThoughtsUtility);
@@ -362,15 +362,13 @@ namespace RimThreaded
 			patched = typeof(SubSustainer_Patch);
 			Prefix(original, patched, "StartSample");
 			Prefix(original, patched, "SubSustainerUpdate");
-			
+
 			//SoundStarter
 			original = typeof(SoundStarter);
 			patched = typeof(SoundStarter_Patch);
 			Prefix(original, patched, "PlayOneShot");
 			Prefix(original, patched, "PlayOneShotOnCamera");
 			//Prefix(original, patched, "TrySpawnSustainer");
-			
-
 
 			//Pawn_RelationsTracker			
 			original = typeof(Pawn_RelationsTracker);
@@ -424,7 +422,7 @@ namespace RimThreaded
 			patched = typeof(GenGrid_Patch);
 			Prefix(original, patched, "InBounds", new Type[] { typeof(IntVec3), typeof(Map) });
 			Prefix(original, patched, "InBounds", new Type[] { typeof(Vector3), typeof(Map) });
-			
+
 			//Explosion
 			original = typeof(Explosion);
 			patched = typeof(Explosion_Patch);
@@ -485,8 +483,8 @@ namespace RimThreaded
 			Prefix(original, patched, "SpawnedPawnsInFaction"); 
 			Prefix(original, patched, "get_AllPawnsUnspawned");
 
-			 //Region
-			 original = typeof(Region);
+			//Region
+			original = typeof(Region);
 			patched = typeof(Region_Patch);
 			Prefix(original, patched, "DangerFor");
 

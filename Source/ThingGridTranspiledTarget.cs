@@ -110,7 +110,7 @@ namespace RimThreaded
 					{
 						thing = list[i];
 					}
-					catch (IndexOutOfRangeException) {break;}
+					catch (ArgumentOutOfRangeException) {break;}
 					yield return thing;
 					++i;
 				}
@@ -158,7 +158,7 @@ namespace RimThreaded
                 {
 					thing = list[i];
                 }
-				catch (IndexOutOfRangeException) { break; }
+				catch (ArgumentOutOfRangeException) { break; }
 				//if (null == thing) break;
 				if (list[i].def.category == cat)
 				{
@@ -189,7 +189,7 @@ namespace RimThreaded
 				{
 					thing = list[i];
 				}
-				catch (IndexOutOfRangeException) { break; }
+				catch (ArgumentOutOfRangeException) { break; }
 				//if (null == thing) break;
 				if (list[i].def == def)
 				{
@@ -215,7 +215,7 @@ namespace RimThreaded
                 {
 					thing = list[i];
                 }
-				catch (IndexOutOfRangeException) { break; }
+				catch (ArgumentOutOfRangeException) { break; }
 				//if (null == thing) break;
                 if (thing is T val)
                 {
