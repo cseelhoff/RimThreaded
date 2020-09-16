@@ -70,6 +70,13 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="JobGiver_ConfigurableHostilityResponse.cs" />
+    <Compile Include="Spark.cs" />
+    <Compile Include="Projectile_DoomsdayRocket.cs" />
+    <Compile Include="Bullet.cs" />
+    <Compile Include="WaterSplash.cs" />
+    <Compile Include="Projectile_Explosive.cs" />
+    <Compile Include="LanguageWordInfo.cs" />
     <Compile Include="HediffSet.cs" />
     <Compile Include="SoundSizeAggregator.cs" />
     <Compile Include="GenCollection.cs" />

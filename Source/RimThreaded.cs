@@ -275,7 +275,7 @@ namespace RimThreaded
 			patched = typeof(GenClosest_Patch);
 			Prefix(original, patched, "RegionwiseBFSWorker");
 			Prefix(original, patched, "ClosestThingReachable");
-			//Prefix(original, patched, "ClosestThing_Global");
+			Prefix(original, patched, "ClosestThing_Global");
 
 			//PawnUtility
 			original = typeof(PawnUtility);
@@ -607,6 +607,21 @@ namespace RimThreaded
 			original = typeof(HediffSet);
 			patched = typeof(HediffSet_Patch);
 			Prefix(original, patched, "PartIsMissing");
+
+			//LanguageWordInfo
+			original = typeof(LanguageWordInfo);
+			patched = typeof(LanguageWordInfo_Patch);
+			Prefix(original, patched, "TryResolveGender");
+
+			//JobGiver_ConfigurableHostilityResponse
+			original = typeof(JobGiver_ConfigurableHostilityResponse);
+			patched = typeof(JobGiver_ConfigurableHostilityResponse_Patch);
+			Prefix(original, patched, "TryGetFleeJob");
+
+			//Pawn_InteractionsTracker
+			original = typeof(Pawn_InteractionsTracker);
+			patched = typeof(Pawn_InteractionsTracker_Patch);
+			Prefix(original, patched, "TryInteractRandomly");
 
 
 			//PERFORMANCE IMPROVEMENTS

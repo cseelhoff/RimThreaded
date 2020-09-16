@@ -13,10 +13,40 @@ namespace RimThreaded
 
     public class GenCollection_Patch
 	{
+        
+        public static bool TryRandomElement_Pawn(IEnumerable<Pawn> source, out Pawn result)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
 
+            IList<Pawn> list = source as IList<Pawn>;
+            if (list != null)
+            {
+                if (list.Count == 0)
+                {
+                    result = default(Pawn);
+                    return false;
+                }
+            }
+            else
+            {
+                list = source.ToList();
+                if (!list.Any())
+                {
+                    result = default(Pawn);
+                    return false;
+                }
+            }
+
+            result = list.RandomElement();
+            return true;
+        }
+        
         public static bool RemoveAll_Pawn_SituationalThoughtHandler_Patch(ref int __result, Dictionary<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts> dictionary, Predicate<KeyValuePair<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts>> predicate)
         {
-            List<Pawn> list = new List<Pawn>(); 
+            List<Pawn> list = new List<Pawn>();
             //try
             //{
                 foreach (KeyValuePair<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts> item in dictionary)

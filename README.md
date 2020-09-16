@@ -34,6 +34,14 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.23  
+-Fixed bug in BFSWorker  
+-Fixed bug in JobGiver_ConfigurableHostilityResponse  
+-Fixed bug in LanguageWordInfo  
+-Fixed bug in PathFinder  
+-Fixed bug in Projectiles (Bullet, DoomsdayRocket, Explosive, Spark, WaterSplash)  
+-Fixed bug in RimThreaded  
+
 Version 1.0.22  
 -Fixed bug in GenCollection  
 -Fixed bug in HediffSet  
