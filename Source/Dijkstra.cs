@@ -66,11 +66,12 @@ namespace RimThreaded
                     }
                 }
             }
-            while (queue.Count != 0)
+            while (queue.Count > 0)
             {
                 KeyValuePair<IntVec3, float> node = queue.Pop();
                 {
-                    float distance = distances[node.Key];
+                    IntVec3 nodeKey = node.Key;
+                    float distance = distances[nodeKey];
                     if ((double)node.Value == (double)distance)
                     {
                         IEnumerable<IntVec3> objs = neighborsGetter(node.Key);
@@ -162,7 +163,7 @@ namespace RimThreaded
                 outParents.Add(n, node.Key);
         }
 
-        private class DistanceComparer : IComparer<KeyValuePair<IntVec3, float>>
+        public class DistanceComparer : IComparer<KeyValuePair<IntVec3, float>>
         {
             public int Compare(KeyValuePair<IntVec3, float> a, KeyValuePair<IntVec3, float> b)
             {

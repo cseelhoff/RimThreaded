@@ -164,8 +164,11 @@ namespace RimThreaded
             calcGridDict[__instance][curIndex].costNodeCost = 0;
             calcGridDict[__instance][curIndex].parentIndex = curIndex;
             calcGridDict[__instance][curIndex].status = statusOpenValue;
-            openListDict[__instance].Clear();
-            openListDict[__instance].Push(new CostNode(curIndex, 0));
+            lock (openListDict[__instance])
+            {
+                openListDict[__instance].Clear();
+                openListDict[__instance].Push(new CostNode(curIndex, 0));
+            }
         }
         private static void ResetStatuses(PathFinder __instance)
         {
@@ -339,7 +342,11 @@ namespace RimThreaded
 
                 num5 += openListDict[__instance].Count;
                 num6++;
-                CostNode costNode = openListDict[__instance].Pop();
+                CostNode costNode;
+                lock (openListDict[__instance])
+                {
+                    costNode = openListDict[__instance].Pop();
+                }
                 curIndex = costNode.index;
                 if (costNode.cost != calcGridDict[__instance][curIndex].costNodeCost)
                 {
@@ -620,7 +627,10 @@ namespace RimThreaded
                     calcGridDict[__instance][num14].status = statusOpenValue;
                     calcGridDict[__instance][num14].costNodeCost = num21;
                     num3++;
-                    openListDict[__instance].Push(new CostNode(num14, num21));
+                    lock (openListDict[__instance])
+                    {
+                        openListDict[__instance].Push(new CostNode(num14, num21));
+                    }
                 }
 
                 PfProfilerEndSample();

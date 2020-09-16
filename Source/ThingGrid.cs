@@ -140,11 +140,17 @@ namespace RimThreaded
             }
 
             List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
-            foreach (Thing t in thingList)
+            Thing thing;
+            for (int index = 0; index < thingList.Count; index++)
             {
-                if (t.def.category == cat)
+                try
                 {
-                    __result = t;
+                    thing = thingList[index];
+                }
+                catch (ArgumentOutOfRangeException) { break; }
+                if (thing.def.category == cat)
+                {
+                    __result = thing;
                     return false;
                 }
             }
@@ -161,15 +167,20 @@ namespace RimThreaded
                 return false;
             }
             List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
-            foreach (Thing t in thingList)
+            Thing thing;
+            for (int index = 0; index < thingList.Count; index++)
             {
-                if (t.def == def)
+                try
                 {
-                    __result = t;
+                    thing = thingList[index];
+                }
+                catch (ArgumentOutOfRangeException) { break; }
+                if (thing.def == def)
+                {
+                    __result = thing;
                     return false;
                 }
             }
-            
             __result = null;
             return false;
         }

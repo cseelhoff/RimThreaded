@@ -123,7 +123,13 @@ namespace RimThreaded
 			for (int index = 0; index < reservations(__instance).Count; ++index)
 			{
 				ReservationManager.Reservation reservation = reservations(__instance)[index];
-				if (reservation.Target == target && reservation.Claimant == claimant && (reservation.Job == job && reservation.Layer == layer) && (reservation.StackCount == -1 || reservation.StackCount >= num2)) {
+				//if (reservation.Target == target && reservation.Claimant == claimant && (reservation.Job == job && reservation.Layer == layer) && (reservation.StackCount == -1 || reservation.StackCount >= num2))
+				bool test1 = reservation.Target == target;
+				bool test2 = reservation.Claimant == claimant;
+				bool test3 = reservation.Job == job && reservation.Layer == layer;
+				bool test4 = reservation.StackCount == -1 || reservation.StackCount >= num2;
+				if (test1 && test2 && test3 && test4) 
+				{
 					__result = true;
 					return false;
 				}

@@ -33,6 +33,13 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+
+Version 1.0.19  
+-Fixed bug with PawnPath  
+-Fixed bug with ReservationManager  
+-Fixed bug with ThingGrid  
+-Fixed bug with TickList  
+
 Version 1.0.18  
 -Fixed bug with PawnCapacitiesHandler (infinite stat recursion bug 13)  
 -Fixed bug with PathFinder  

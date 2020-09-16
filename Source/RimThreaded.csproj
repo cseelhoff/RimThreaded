@@ -70,6 +70,8 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="GenCollection.cs" />
+    <Compile Include="PawnPath.cs" />
     <Compile Include="WorldPawns.cs" />
     <Compile Include="PawnCapacitiesHandler.cs" />
     <Compile Include="PathFinder.cs" />
