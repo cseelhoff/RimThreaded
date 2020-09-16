@@ -71,21 +71,25 @@ namespace RimThreaded
                 KeyValuePair<IntVec3, float> node = queue.Pop();
                 {
                     IntVec3 nodeKey = node.Key;
-                    float distance = distances[nodeKey];
-                    if ((double)node.Value == (double)distance)
+                    // NEED TO FIX HACK (contains key)
+                    if (distances.ContainsKey(nodeKey))
                     {
-                        IEnumerable<IntVec3> objs = neighborsGetter(node.Key);
-                        if (objs != null)
+                        float distance = distances[nodeKey];
+                        if ((double)node.Value == (double)distance)
                         {
-                            if (objs is IList<IntVec3> objList2)
+                            IEnumerable<IntVec3> objs = neighborsGetter(node.Key);
+                            if (objs != null)
                             {
-                                for (int index = 0; index < objList2.Count; ++index)
-                                    HandleNeighbor(objList2[index], distance, node, distanceGetter, outParents);
-                            }
-                            else
-                            {
-                                foreach (IntVec3 n in objs)
-                                    HandleNeighbor(n, distance, node, distanceGetter, outParents);
+                                if (objs is IList<IntVec3> objList2)
+                                {
+                                    for (int index = 0; index < objList2.Count; ++index)
+                                        HandleNeighbor(objList2[index], distance, node, distanceGetter, outParents);
+                                }
+                                else
+                                {
+                                    foreach (IntVec3 n in objs)
+                                        HandleNeighbor(n, distance, node, distanceGetter, outParents);
+                                }
                             }
                         }
                     }

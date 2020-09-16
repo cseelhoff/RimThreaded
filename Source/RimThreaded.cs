@@ -112,6 +112,9 @@ namespace RimThreaded
 			original = typeof(Pawn_PathFollower);
 			patched = typeof(Pawn_PathFollower_Patch);
 			Prefix(original, patched, "GenerateNewPath");
+			//Prefix(original, patched, "NextCellDoorToWaitForOrManuallyOpen");
+			//Prefix(original, patched, "SetupMoveIntoNextCell");
+			//Prefix(original, patched, "TryEnterNextPathCell");
 
 			//RegionListersUpdater
 			original = typeof(RegionListersUpdater);
@@ -353,6 +356,7 @@ namespace RimThreaded
 			Prefix(original, patched, "DeregisterSustainer");
 			Prefix(original, patched, "SustainerExists");
 			Prefix(original, patched, "EndAllInMap");
+			Prefix(original, patched, "UpdateAllSustainerScopes");
 
 			//RecreateMapSustainers
 			original = typeof(AmbientSoundManager);
@@ -440,6 +444,7 @@ namespace RimThreaded
 			original = typeof(PawnCollisionTweenerUtility);
 			patched = typeof(PawnCollisionTweenerUtility_Patch);
 			Prefix(original, patched, "GetPawnsStandingAtOrAboutToStandAt");
+			Prefix(original, patched, "CanGoDirectlyToNextCell");
 
 			//GridsUtility			
 			original = typeof(GridsUtility);
@@ -452,6 +457,8 @@ namespace RimThreaded
 			patched = typeof(ReservationManager_Patch);
 			Prefix(original, patched, "ReleaseClaimedBy");
 			Prefix(original, patched, "Reserve");
+			Prefix(original, patched, "Release");
+			Prefix(original, patched, "FirstReservationFor");
 
 			//FloodFiller - inefficient global lock			
 			original = typeof(FloodFiller);

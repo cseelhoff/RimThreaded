@@ -38,6 +38,28 @@ namespace RimThreaded
 			}
 			return false;
 		}
+		public static bool Release(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
+		{
+			if (target.ThingDestroyed)
+				Log.Warning("Releasing destroyed thing " + (object)target + " for " + (object)claimant, false);
+			ReservationManager.Reservation reservation1 = (ReservationManager.Reservation)null;
+			for (int index = 0; index < reservations(__instance).Count; ++index)
+			{
+				ReservationManager.Reservation reservation2 = reservations(__instance)[index];
+				if (reservation2.Target == target && reservation2.Claimant == claimant && reservation2.Job == job)
+				{
+					reservation1 = reservation2;
+					break;
+				}
+			}
+			if (reservation1 == null && !target.ThingDestroyed)
+				Log.Error("Tried to release " + (object)target + " that wasn't reserved by " + (object)claimant + ".", false);
+			else
+				lock (reservations(__instance)) {
+					reservations(__instance).Remove(reservation1);
+				}
+			return false;
+		}
 
 		public static bool CanReserve(ReservationManager __instance,
 		  Pawn claimant,
@@ -100,7 +122,29 @@ namespace RimThreaded
 		{
 			return newClaimant == oldClaimant || newClaimant.Faction != null && oldClaimant.Faction != null && (newClaimant.Faction == oldClaimant.Faction || !newClaimant.Faction.HostileTo(oldClaimant.Faction) || oldClaimant.HostFaction != null && oldClaimant.HostFaction == newClaimant.HostFaction || newClaimant.HostFaction != null && (oldClaimant.HostFaction != null || newClaimant.HostFaction == oldClaimant.Faction));
 		}
-
+		public static bool FirstRespectedReserver(ReservationManager __instance, ref Pawn __result, LocalTargetInfo target, Pawn claimant)
+		{
+			if (!target.IsValid)
+			{
+				__result = null;
+				return false;
+			}
+			for (int i = 0; i < reservations(__instance).Count; i++)
+			{
+				ReservationManager.Reservation reservation = reservations(__instance)[i];
+				if(null == reservation)
+                {
+					continue;
+                }
+				if (reservation.Target == target && RespectsReservationsOf(claimant, reservation.Claimant))
+				{
+					__result = reservation.Claimant;
+					return false;
+				}
+			}
+			__result = null;
+			return false;
+		}
 		public static bool Reserve(ReservationManager __instance, ref bool __result,
 		  Pawn claimant,
 		  Job job,
@@ -123,6 +167,10 @@ namespace RimThreaded
 			for (int index = 0; index < reservations(__instance).Count; ++index)
 			{
 				ReservationManager.Reservation reservation = reservations(__instance)[index];
+				if(null == reservation)
+                {
+					continue;
+                }
 				//if (reservation.Target == target && reservation.Claimant == claimant && (reservation.Job == job && reservation.Layer == layer) && (reservation.StackCount == -1 || reservation.StackCount >= num2))
 				bool test1 = reservation.Target == target;
 				bool test2 = reservation.Claimant == claimant;
@@ -157,7 +205,10 @@ namespace RimThreaded
 				__result = false;
 				return false;
 			}
-			reservations(__instance).Add(new ReservationManager.Reservation(claimant, job, maxPawns, stackCount, target, layer));
+			lock (reservations(__instance))
+			{
+				reservations(__instance).Add(new ReservationManager.Reservation(claimant, job, maxPawns, stackCount, target, layer));
+            }
 			__result = true;
 			return false;
 		}
