@@ -33,13 +33,18 @@ namespace RimThreaded
             ThingOwnerUtility.GetAllThingsRecursively<Pawn>(map(__instance), ThingRequest.ForGroup(ThingRequestGroup.Pawn), allPawnsUnspawnedResult(__instance), true, null, false);
             for (int i = allPawnsUnspawnedResult(__instance).Count - 1; i >= 0; i--)
             {
-                lock (allPawnsUnspawnedResult(__instance))
+                Pawn pawn;
+                try
                 {
-                    if (allPawnsUnspawnedResult(__instance)[i].Dead)
+                    pawn = allPawnsUnspawnedResult(__instance)[i];
+                } catch (ArgumentOutOfRangeException) { break; }                
+                if (pawn.Dead)
+                {
+                    lock (allPawnsUnspawnedResult(__instance))
                     {
                         allPawnsUnspawnedResult(__instance).RemoveAt(i);
                     }
-                }
+                }                
             }
             __result = allPawnsUnspawnedResult(__instance);
             return false;
