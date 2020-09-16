@@ -13,11 +13,13 @@ using System.Reflection;
 namespace RimThreaded
 {
 
-    public class Projectile_Patch
+	public abstract class Projectile_Patch 
 	{
-		
+
 		public static AccessTools.FieldRef<Projectile, Vector3> origin =
 			AccessTools.FieldRefAccess<Projectile, Vector3>("origin");
+		public static AccessTools.FieldRef<Projectile, ThingDef> equipmentDef =
+			AccessTools.FieldRefAccess<Projectile, ThingDef>("equipmentDef");
 		public static AccessTools.FieldRef<Projectile, Vector3> destination =
 			AccessTools.FieldRefAccess<Projectile, Vector3>("destination");
 		public static AccessTools.FieldRef<Projectile, bool> landed =
@@ -28,16 +30,53 @@ namespace RimThreaded
 			AccessTools.FieldRefAccess<Projectile, Thing>("launcher");
 		public static AccessTools.FieldRef<Projectile, Sustainer> ambientSustainer =
 			AccessTools.FieldRefAccess<Projectile, Sustainer>("ambientSustainer");
+		public static AccessTools.FieldRef<Projectile, ThingDef> targetCoverDef =
+			AccessTools.FieldRefAccess<Projectile, ThingDef>("targetCoverDef");
+		 
 
 		//public static MethodInfo ThrowDebugText =
-			//typeof(Projectile).GetMethod("ThrowDebugText", BindingFlags.NonPublic | BindingFlags.Instance);
+		//typeof(Projectile).GetMethod("ThrowDebugText", BindingFlags.NonPublic | BindingFlags.Instance);
 		//public static MethodInfo CanHit =
-			//typeof(Projectile).GetMethod("CanHit", BindingFlags.NonPublic | BindingFlags.Instance);
-		public static MethodInfo Impact =
-			typeof(Projectile).GetMethod("Impact", BindingFlags.NonPublic | BindingFlags.Instance);
+		//typeof(Projectile).GetMethod("CanHit", BindingFlags.NonPublic | BindingFlags.Instance);
+		//public static MethodInfo ImpactReflected =
+		//typeof(Projectile).GetMethod("Impact", BindingFlags.NonPublic | BindingFlags.Instance);
 
+		public static void Impact(Projectile __instance, Thing hitThing)
+        {
+			if(__instance is Bullet bullet)
+            {
+				Bullet_Patch.Impact(bullet, hitThing);
+            }
+			else if (__instance is Projectile_DoomsdayRocket projectile_DoomsdayRocket)
+			{
+				Projectile_DoomsdayRocket_Patch.Impact(projectile_DoomsdayRocket, hitThing);
+			}
+			else if (__instance is Spark spark)
+			{
+				Spark_Patch.Impact(spark, hitThing);
+			}
+			else if (__instance is WaterSplash waterSplash)
+			{
+				WaterSplash_Patch.Impact(waterSplash, hitThing);
+			}
+			else if (__instance is Projectile_Explosive projectile_Explosive)
+			{
+				Projectile_Explosive_Patch.Impact(projectile_Explosive, hitThing);
+			}
+			else
+            {
+				Base_Impact(__instance, hitThing);
+			}
+
+		}
+
+        public static void Base_Impact(Projectile projectile, Thing hitThing)
+        {
+			GenClamor.DoClamor(projectile, 2.1f, ClamorDefOf.Impact);
+			projectile.Destroy();
+		}
 		
-		private static void ThrowDebugText(Projectile __instance, string text, IntVec3 c)
+        private static void ThrowDebugText(Projectile __instance, string text, IntVec3 c)
 		{
 			if (DebugViewSettings.drawShooting)
 			{
@@ -126,10 +165,13 @@ namespace RimThreaded
 				if (__instance.usedTarget.Thing is Pawn thing && thing.GetPosture() != PawnPosture.Standing && ((double)(origin(__instance) - destination(__instance)).MagnitudeHorizontalSquared() >= 20.25 && !Rand.Chance(0.2f)))
 				{
 					ThrowDebugText(__instance, "miss-laying", __instance.Position);
-					Impact.Invoke(__instance, new object[] { (Thing)null });
+					//Impact.Invoke(__instance, new object[] { (Thing)null });
+					Impact(__instance, null);
 				}
 				else
-					Impact.Invoke(__instance, new object[] { __instance.usedTarget.Thing });
+				{
+					Impact(__instance, __instance.usedTarget.Thing);
+				}
 			}
 			else
 			{
@@ -159,12 +201,12 @@ namespace RimThreaded
 					if (Rand.Chance(num))
 					{
 						ThrowDebugText(__instance, "hit-" + num.ToStringPercent(), __instance.Position);
-						Impact.Invoke(__instance, new object[] { cellThingsFiltered.RandomElement<Thing>() });
+						Impact(__instance, cellThingsFiltered.RandomElement<Thing>());
 						return false;
 					}
 					ThrowDebugText(__instance, "miss-" + num.ToStringPercent(), __instance.Position);
 				}
-				Impact.Invoke(__instance, new object[] { (Thing)null });
+				Impact(__instance, null);
 			}
 			return false;
 		}
@@ -194,7 +236,7 @@ namespace RimThreaded
 						else
 						{
 							ThrowDebugText(__instance, "int-wall", c);
-							Impact.Invoke(__instance, new object[] { thing });
+							Impact(__instance, thing);
 							return true;
 						}
 					}
@@ -215,7 +257,7 @@ namespace RimThreaded
 						if (Rand.Chance(num3))
 						{
 							ThrowDebugText(__instance, "int-" + num3.ToStringPercent(), c);
-							Impact.Invoke(__instance, new object[] { thing });
+							Impact(__instance, thing);
 							return true;
 						}
 						flag1 = true;

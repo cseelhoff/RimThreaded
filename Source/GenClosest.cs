@@ -14,12 +14,6 @@ namespace RimThreaded
 
     public class GenClosest_Patch
     {
-        public static AccessTools.FieldRef<Building_SteamGeyser, IntermittentSteamSprayer> steamSprayer =
-            AccessTools.FieldRefAccess<Building_SteamGeyser, IntermittentSteamSprayer>("steamSprayer");
-        public static AccessTools.FieldRef<Building_SteamGeyser, Sustainer> spraySustainer =
-            AccessTools.FieldRefAccess<Building_SteamGeyser, Sustainer>("spraySustainer");
-        public static AccessTools.FieldRef<Building_SteamGeyser, int> spraySustainerStartTick =
-            AccessTools.FieldRefAccess<Building_SteamGeyser, int>("spraySustainerStartTick");
 
         private static bool EarlyOutSearch(
           IntVec3 start,

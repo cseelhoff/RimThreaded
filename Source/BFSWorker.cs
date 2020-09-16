@@ -68,10 +68,16 @@ namespace RimThreaded
                 Region region1 = this.open.Dequeue();
                 if (DebugViewSettings.drawRegionTraversal)
                     region1.Debug_Notify_Traversed();
-                if (regionProcessor != null && regionProcessor(region1))
+                if (regionProcessor != null)
                 {
-                    this.FinalizeSearch();
-                    return;
+                    bool rpflag = false;
+                    try { rpflag = regionProcessor(region1); }
+                    catch (NullReferenceException) { }
+                    if (rpflag)
+                    {
+                        this.FinalizeSearch();
+                        return;
+                    }
                 }
                 if (!region1.IsDoorway)
                     ++this.numRegionsProcessed;
