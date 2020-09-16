@@ -34,6 +34,11 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.20  
+-Fixed bug with AttackTargetReservationManager  
+-Fixed bug with MapPawns  
+-Fixed bug with Pawn_PathFollower  
+
 Version 1.0.19  
 -Fixed bug with PawnPath  
 -Fixed bug with ReservationManager  

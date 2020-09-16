@@ -7,6 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using static Verse.AI.AttackTargetReservationManager;
 
 namespace RimThreaded
 {
@@ -15,6 +16,27 @@ namespace RimThreaded
 	{
         public static AccessTools.FieldRef<AttackTargetReservationManager, List<AttackTargetReservationManager.AttackTargetReservation>> reservations =
             AccessTools.FieldRefAccess<AttackTargetReservationManager, List<AttackTargetReservationManager.AttackTargetReservation>>("reservations");
+
+		public void Reserve(AttackTargetReservationManager __instance, Pawn claimant, Job job, IAttackTarget target)
+		{
+			bool isReservedBy = false;
+			IsReservedBy(__instance, ref isReservedBy, claimant, target);
+			if (target == null)
+			{
+				Log.Warning(claimant + " tried to reserve null attack target.");
+			}
+			else if (!isReservedBy)
+			{
+				AttackTargetReservation attackTargetReservation = new AttackTargetReservation();
+				attackTargetReservation.target = target;
+				attackTargetReservation.claimant = claimant;
+				attackTargetReservation.job = job;
+				lock (reservations(__instance))
+				{
+					reservations(__instance).Add(attackTargetReservation);
+				}
+			}
+		}
 
 		public static bool FirstReservationFor(AttackTargetReservationManager __instance, ref IAttackTarget __result, Pawn claimant)
 		{
@@ -43,12 +65,37 @@ namespace RimThreaded
 				{
 					if (reservations(__instance)[i].claimant == claimant && reservations(__instance)[i].job == job)
 					{
-						reservations(__instance).RemoveAt(i);
+						lock (reservations(__instance))
+						{
+							reservations(__instance).RemoveAt(i);
+						}
 					}
 
 				}
 			}
 			return false;
 		}
+
+		public static bool IsReservedBy(AttackTargetReservationManager __instance, ref bool __result, Pawn claimant, IAttackTarget target)
+		{
+			AttackTargetReservation attackTargetReservation;
+			for (int i = 0; i < reservations(__instance).Count; i++)
+			{
+				try
+				{
+					attackTargetReservation = reservations(__instance)[i];
+				} catch (ArgumentOutOfRangeException) { break; }
+				if (null != attackTargetReservation)
+				{
+					if (attackTargetReservation.target == target && attackTargetReservation.claimant == claimant)
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
 	}
 }
