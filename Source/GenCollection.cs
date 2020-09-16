@@ -14,12 +14,12 @@ namespace RimThreaded
     public class GenCollection_Patch
 	{
 
-        public static bool RemoveAll<TKey, TValue>(ref int __result, Dictionary<TKey, TValue> dictionary, Predicate<KeyValuePair<TKey, TValue>> predicate)
+        public static bool RemoveAll_Pawn_SituationalThoughtHandler_Patch(ref int __result, Dictionary<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts> dictionary, Predicate<KeyValuePair<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts>> predicate)
         {
-            List<TKey> list = new List<TKey>(); 
+            List<Pawn> list = new List<Pawn>(); 
             //try
             //{
-                foreach (KeyValuePair<TKey, TValue> item in dictionary)
+                foreach (KeyValuePair<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts> item in dictionary)
                 {
                     if (predicate(item))
                     {

@@ -231,6 +231,9 @@ namespace RimThreaded
 			Prefix(original, patched, "ReleaseAllObsoleteClaimedBy");
 			Prefix(original, patched, "ReleaseAllClaimedBy");
 			Prefix(original, patched, "ReleaseClaimedBy");
+			Prefix(original, patched, "CanReserve");
+			Prefix(original, patched, "FirstObsoleteReservationFor");
+			
 
 			//DynamicDrawManager - uses conncurrent dictionary - could be improved?
 			original = typeof(DynamicDrawManager);
@@ -374,7 +377,7 @@ namespace RimThreaded
 			patched = typeof(SoundStarter_Patch);
 			Prefix(original, patched, "PlayOneShot");
 			Prefix(original, patched, "PlayOneShotOnCamera");
-			//Prefix(original, patched, "TrySpawnSustainer");
+			Prefix(original, patched, "TrySpawnSustainer");
 
 			//Pawn_RelationsTracker			
 			original = typeof(Pawn_RelationsTracker);
@@ -585,6 +588,25 @@ namespace RimThreaded
 			original = typeof(GenCollection);
 			patched = typeof(GenCollection_Patch);
 			//Prefix(original, patched, "RemoveAll", new Type[], { typeof(Dictionary<TKey, TValue>) , typeof(Predicate< KeyValuePair < TKey, TValue >>) });
+			MethodInfo[] genCollectionMethods = original.GetMethods();
+			//MethodInfo originalRemoveAll = original.GetMethod("RemoveAll");
+			//HACK - because I don't know how to get method the right way
+			MethodInfo originalRemoveAll = genCollectionMethods[29];
+			MethodInfo originalRemoveAllGeneric = originalRemoveAll.MakeGenericMethod(new Type[] { typeof(Pawn), typeof(SituationalThoughtHandler_Patch.CachedSocialThoughts) });
+			MethodInfo patchedRemoveAll = patched.GetMethod("RemoveAll_Pawn_SituationalThoughtHandler_Patch");
+			HarmonyMethod prefixRemoveAll = new HarmonyMethod(patchedRemoveAll);
+			harmony.Patch(originalRemoveAllGeneric, prefix: prefixRemoveAll);
+
+			//SoundSizeAggregator
+			original = typeof(SoundSizeAggregator);
+			patched = typeof(SoundSizeAggregator_Patch);
+			Prefix(original, patched, "RegisterReporter");
+			Prefix(original, patched, "RemoveReporter");
+
+			//HediffSet
+			original = typeof(HediffSet);
+			patched = typeof(HediffSet_Patch);
+			Prefix(original, patched, "PartIsMissing");
 
 
 			//PERFORMANCE IMPROVEMENTS

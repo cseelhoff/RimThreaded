@@ -51,7 +51,10 @@ namespace RimThreaded
             }
             else
             {
-                __instance.rememberedDuties.Clear();
+                lock (__instance.rememberedDuties)
+                {
+                    __instance.rememberedDuties.Clear();
+                }
                 int num1 = Mathf.RoundToInt((float)__instance.lord.ownedPawns.Count * data.desiredBuilderFraction);
                 if (num1 <= 0)
                     num1 = 1;
@@ -64,7 +67,10 @@ namespace RimThreaded
                     Pawn ownedPawn = __instance.lord.ownedPawns[index];
                     if (ownedPawn.mindState.duty.def == DutyDefOf.Build)
                     {
-                        __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Build);
+                        lock (__instance.rememberedDuties)
+                        {
+                            __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Build);
+                        }
                         SetAsBuilder(data, ownedPawn);
                         ++num3;
                     }
@@ -75,7 +81,10 @@ namespace RimThreaded
                     Pawn result;
                     if (__instance.lord.ownedPawns.Where<Pawn>((Func<Pawn, bool>)(pa => !__instance.rememberedDuties.ContainsKey(pa) && CanBeBuilder(pa))).TryRandomElement<Pawn>(out result))
                     {
-                        __instance.rememberedDuties.Add(result, DutyDefOf.Build);
+                        lock (__instance.rememberedDuties)
+                        {
+                            __instance.rememberedDuties.Add(result, DutyDefOf.Build);
+                        }
                         SetAsBuilder(data, result);
                         ++num3;
                     }
@@ -86,7 +95,10 @@ namespace RimThreaded
                     if (!__instance.rememberedDuties.ContainsKey(ownedPawn))
                     {
                         SetAsDefender(data, ownedPawn);
-                        __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Defend);
+                        lock (__instance.rememberedDuties)
+                        {
+                            __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Defend);
+                        }
                     }
                 }
                 if (num3 != 0)

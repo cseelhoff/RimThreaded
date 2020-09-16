@@ -59,8 +59,9 @@ namespace RimThreaded
 		}
 		public static bool PawnBlockingPathAt(ref Pawn __result, IntVec3 c, Pawn forPawn, bool actAsIfHadCollideWithPawnsJob = false, bool collideOnlyWithStandingPawns = false, bool forPathFinder = false)
 		{
-			List<Thing> thingList = c.GetThingList(forPawn.Map);
-			if (thingList.Count == 0)
+			//List<Thing> thingList = c.GetThingList(forPawn.Map);
+			IEnumerable<Thing> thingList = forPawn.Map.thingGrid.ThingsAt(c);
+            if (!thingList.Any())
 			{
 				__result = null;
 				return false;
@@ -84,9 +85,10 @@ namespace RimThreaded
 				}
 				*/
 			}
-			for (int i = 0; i < thingList.Count; i++)
+			//for (int i = 0; i < thingList.Count; i++)
+			foreach(Thing thing in thingList)
 			{
-				Pawn pawn = thingList[i] as Pawn;
+				Pawn pawn = thing as Pawn;
 				if (pawn != null && pawn != forPawn)
 				{
                     Pawn_PathFollower pathFollower = pawn.pather;

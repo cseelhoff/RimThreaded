@@ -190,8 +190,11 @@ namespace RimThreaded
         }
         private static PawnPath FinalizedPath(PathFinder __instance, int finalIndex, bool usedRegionHeuristics)
         {
-            PawnPath emptyPawnPath = map(__instance).pawnPathPool.GetEmptyPawnPath();
+            //HACK - fix pool
+            //PawnPath emptyPawnPath = map(__instance).pawnPathPool.GetEmptyPawnPath();
+            PawnPath emptyPawnPath = new PawnPath();
             int num = finalIndex;
+            //lock()?
             while (true)
             {
                 int parentIndex = calcGridDict[__instance][num].parentIndex;

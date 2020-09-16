@@ -35,6 +35,7 @@ namespace RimThreaded
         public static ConcurrentDictionary<int, MaterialRequest> materialRequests = new ConcurrentDictionary<int, MaterialRequest>();
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
+        public static ConcurrentDictionary<int, bool> isThreadWaiting = new ConcurrentDictionary<int, bool>();
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
         public static List<Thing> thingList1;
@@ -134,30 +135,34 @@ namespace RimThreaded
                         {
                             monitorThreadWaitHandle.WaitOne();
                             //List<int> ewd = eventWaitDones.Keys.ToList();
-                            foreach (int tID2 in eventWaitDones.Keys)
+                            foreach (int tID2 in eventWaitDones.Keys.ToArray())
                             {
-                                eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone);
-                                if (!eventWaitDone.WaitOne(timeoutMS))
+                                if (eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone)) {
+                                    if (!eventWaitDone.WaitOne(timeoutMS))
+                                    {
+                                        Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
+                                        Thread thread2 = allThreads[tID2];
+                                        thread2.Abort();
+                                        allThreads.Remove(tID2);
+                                        eventWaitStarts.TryRemove(tID2, out _);
+                                        eventWaitDones.TryRemove(tID2, out _);
+                                        Thread thread3 = new Thread(() => ProcessTicks());
+                                        int tID3 = thread3.ManagedThreadId;
+                                        allThreads.Add(tID3, thread);
+                                        AutoResetEvent eventWaitStart1 = new AutoResetEvent(false);
+                                        eventWaitStarts.TryAdd(tID3, eventWaitStart1);
+                                        AutoResetEvent eventWaitDone1 = new AutoResetEvent(false);
+                                        eventWaitDones.TryAdd(tID3, eventWaitDone1);
+                                        thread3.Start();
+                                        //eventWaitStart1.Set();
+                                        //ewd.Add(eventWaitDone1);
+                                        //thread2.Suspend();
+                                        //trace = new System.Diagnostics.StackTrace(thread2, false);
+                                        //Log.Error(trace.ToString());
+                                    }
+                                } else
                                 {
-                                    Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
-                                    Thread thread2 = allThreads[tID2];
-                                    thread2.Abort();
-                                    allThreads.Remove(tID2);
-                                    eventWaitStarts.TryRemove(tID2, out _);
-                                    eventWaitDones.TryRemove(tID2, out _);
-                                    Thread thread3 = new Thread(() => ProcessTicks());
-                                    int tID3 = thread3.ManagedThreadId;
-                                    allThreads.Add(tID3, thread);
-                                    AutoResetEvent eventWaitStart1 = new AutoResetEvent(false);
-                                    eventWaitStarts.TryAdd(tID3, eventWaitStart1);
-                                    AutoResetEvent eventWaitDone1 = new AutoResetEvent(false);
-                                    eventWaitDones.TryAdd(tID3, eventWaitDone1);
-                                    thread3.Start();
-                                    eventWaitStart1.Set();
-                                    //ewd.Add(eventWaitDone1);
-                                    //thread2.Suspend();
-                                    //trace = new System.Diagnostics.StackTrace(thread2, false);
-                                    //Log.Error(trace.ToString());
+                                    Log.Error("Thread monitor cannot find thread: " + tID2.ToString());
                                 }
                             }
                             mainThreadWaitHandle.Set();
@@ -175,7 +180,7 @@ namespace RimThreaded
             {
                 mainThreadWaitHandle.WaitOne();
                 continueWaiting = false;
-                if (texture2DRequests.Count > 0)
+                while (texture2DRequests.Count > 0)
                 {
                     continueWaiting = true;
                     int key = texture2DRequests.Keys.First();
@@ -184,11 +189,13 @@ namespace RimThreaded
                         Texture2D content = ContentFinder<Texture2D>.Get(itempath);
                         texture2DResults.TryAdd(itempath, content);
                     }
-                    if(eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
                         eventWaitStart.Set();
+                    else
+                        Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
 
                 }
-                if (materialRequests.Count > 0)
+                while (materialRequests.Count > 0)
                 {
                     continueWaiting = true;
                     int key = materialRequests.Keys.First();
@@ -199,8 +206,10 @@ namespace RimThreaded
                     }
                     if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
                         eventWaitStart.Set();
+                    else
+                        Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
                 }
-                if (tryMakeAndPlayRequests.Count > 0)
+                while (tryMakeAndPlayRequests.Count > 0)
                 {
                     continueWaiting = true;
                     int key = tryMakeAndPlayRequests.Keys.First();
@@ -219,8 +228,10 @@ namespace RimThreaded
                     }
                     if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
                         eventWaitStart.Set();
+                    else
+                        Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
                 }
-                if (newSustainerRequests.Count > 0)
+                while (newSustainerRequests.Count > 0)
                 {
                     continueWaiting = true;
                     int key = newSustainerRequests.Keys.First();
@@ -231,8 +242,12 @@ namespace RimThreaded
                         Sustainer sustainer = new Sustainer(soundDef, soundInfo);
                         newSustainerResults[key] = sustainer;
                     }
-                    eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart);
-                    eventWaitStart.Set();
+                    if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    {
+                        eventWaitStart.Set();
+                    }
+                    else
+                        Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
                 }
                 // Add any sounds that were produced in this tick
                 while (PlayOneShot.Count > 0)
@@ -259,7 +274,10 @@ namespace RimThreaded
             eventWaitDones.TryGetValue(tID, out EventWaitHandle eventWaitDone);
             while (true)
             {
-                eventWaitStart.WaitOne();
+                isThreadWaiting[tID] = true;
+                //eventWaitStart.WaitOne();
+                //HACK - why is thread aborting?
+                eventWaitStart.WaitOne(100);
                 while (thingQueue.TryDequeue(out Thing thing))
                 {
                     if (!thing.Destroyed)
