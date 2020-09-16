@@ -9,6 +9,7 @@ using System.Threading;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using static Verse.PawnDestinationReservationManager;
 
 namespace RimThreaded
 {
@@ -17,21 +18,97 @@ namespace RimThreaded
     {
         private static readonly Material DestinationMat = MaterialPool.MatFrom("UI/Overlays/ReservedDestination");
         private static readonly Material DestinationSelectionMat = MaterialPool.MatFrom("UI/Overlays/ReservedDestinationSelection");
-        public static ConcurrentDictionary<Faction, PawnDestinationReservationManager.PawnDestinationSet> reservedDestinations = new ConcurrentDictionary<Faction, PawnDestinationReservationManager.PawnDestinationSet>();
+        public static ConcurrentDictionary<Faction, PawnDestinationSet> reservedDestinations = new ConcurrentDictionary<Faction, PawnDestinationReservationManager.PawnDestinationSet>();
 
-
-
-        public static bool Notify_FactionRemoved(PawnDestinationReservationManager __instance, Faction faction)
+        public static bool FirstObsoleteReservationFor(PawnDestinationReservationManager __instance, ref IntVec3 __result, Pawn p)
         {
-
-                reservedDestinations.TryRemove(faction, out _);
-            
+            if (p.Faction == null)
+            {
+                __result = IntVec3.Invalid;
+                return false;
+            }
+            PawnDestinationSet pawnDestinationSet = null;
+            GetPawnDestinationSetFor(__instance, ref pawnDestinationSet, p.Faction);
+            List<PawnDestinationReservation> list = pawnDestinationSet.list;
+            PawnDestinationReservation pawnDestinationReservation;
+            for (int i = 0; i < list.Count; i++)
+            {
+                try
+                {
+                    pawnDestinationReservation = list[i];
+                } catch (ArgumentException) { break; }
+                if (pawnDestinationReservation.claimant == p && pawnDestinationReservation.obsolete)
+                {
+                    __result = pawnDestinationReservation.target;
+                    return false;
+                }
+            }
+            __result = IntVec3.Invalid;
             return false;
         }
 
-        public static bool GetPawnDestinationSetFor(PawnDestinationReservationManager __instance, ref PawnDestinationReservationManager.PawnDestinationSet __result, Faction faction)
+        public static bool CanReserve(PawnDestinationReservationManager __instance, ref bool __result, IntVec3 c, Pawn searcher, bool draftedOnly = false)
         {
-            PawnDestinationReservationManager.PawnDestinationSet value = reservedDestinations.GetOrAdd(faction, new PawnDestinationReservationManager.PawnDestinationSet());
+            if (searcher.Faction == null)
+            {
+                __result = true;
+                return false;
+            }
+            if (searcher.Faction == Faction.OfPlayer)
+            {
+                __result = CanReserveInt(__instance, c, searcher.Faction, searcher, draftedOnly);
+                return false;
+            }
+            foreach (Faction faction in Find.FactionManager.AllFactionsListForReading)
+            {
+                if (!faction.HostileTo(searcher.Faction) && !CanReserveInt(__instance, c, faction, searcher, draftedOnly))
+                {
+                    __result = false;
+                    return false;
+                }
+            }
+            __result = true;
+            return false;
+        }
+
+        private static bool CanReserveInt(PawnDestinationReservationManager __instance, IntVec3 c, Faction faction, Pawn ignoreClaimant = null, bool draftedOnly = false)
+        {
+            if (faction == null)
+            {
+                return true;
+            }
+            PawnDestinationSet pawnDestinationSet = null;
+            GetPawnDestinationSetFor(__instance, ref pawnDestinationSet, faction);
+            List<PawnDestinationReservation> list = pawnDestinationSet.list;
+            
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (null != list[i])
+                {
+                    if (null != list[i].claimant)
+                    {
+                        if (list[i].target == c && (
+                            ignoreClaimant == null ||
+                            list[i].claimant != ignoreClaimant) && (!draftedOnly ||
+                            list[i].claimant.Drafted))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        public static bool Notify_FactionRemoved(PawnDestinationReservationManager __instance, Faction faction)
+        {
+            reservedDestinations.TryRemove(faction, out _);            
+            return false;
+        }
+
+        public static bool GetPawnDestinationSetFor(PawnDestinationReservationManager __instance, ref PawnDestinationSet __result, Faction faction)
+        {
+            PawnDestinationSet value = reservedDestinations.GetOrAdd(faction, new PawnDestinationSet());
             __result = value;
             return false;
         }

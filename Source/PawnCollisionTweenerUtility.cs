@@ -59,12 +59,13 @@ namespace RimThreaded
 			IntVec3 nextCell = pawn.pather.nextCell;
 			foreach (IntVec3 c in CellRect.FromLimits(nextCell, pawn.Position).ExpandedBy(1))
 			{
-				if (c.InBounds(pawn.Map))
-				{
-					Thing[] thingList = c.GetThingList(pawn.Map).ToArray<Thing>();
-					for (int i = 0; i < thingList.Length; i++)
+				//if (c.InBounds(pawn.Map))
+				//{
+					//Thing[] thingList = c.GetThingList(pawn.Map).ToArray<Thing>();
+					//for (int i = 0; i < thingList.Length; i++)
+					foreach(Thing thing in pawn.Map.thingGrid.ThingsAt(c))
 					{
-						Pawn pawn2 = thingList[i] as Pawn;
+						Pawn pawn2 = thing as Pawn;
 						if (pawn2 != null && pawn2 != pawn && pawn2.GetPosture() == PawnPosture.Standing)
 						{
                             Pawn_PathFollower pather1 = pawn2.pather;
@@ -89,7 +90,7 @@ namespace RimThreaded
 							}
 						}
 					}
-				}
+				//}
 			}
 			__result = true;
 			return false;

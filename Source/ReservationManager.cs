@@ -19,6 +19,8 @@ namespace RimThreaded
 		public static AccessTools.FieldRef<ReservationManager, Map> map =
 			AccessTools.FieldRefAccess<ReservationManager, Map>("map");
 
+
+
 		public static bool ReleaseClaimedBy(ReservationManager __instance, Pawn claimant, Job job)
 		{
 			lock (reservations(__instance))

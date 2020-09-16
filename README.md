@@ -34,6 +34,18 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.22
+-Fixed bug in GenCollection
+-Fixed bug in HediffSet
+-Fixed bug in LordToil_Siege
+-Fixed bug in PathFinder
+-Fixed bug in PawnCollisionTweenerUtility
+-Fixed bug in PawnDestinationReservationManager
+-Fixed bug in PawnUtility
+-Fixed bug in ReservationManager
+-Fixed bug in TickList (fixed many Threads timing out)
+-Fixed bug in SoundSizeAggregator
+
 Version 1.0.21  
 -Fixed bug with AmbientSoundManager  
 -Fixed bug with Pawn_PathFollower  
