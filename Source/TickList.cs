@@ -184,8 +184,8 @@ namespace RimThreaded
                         Texture2D content = ContentFinder<Texture2D>.Get(itempath);
                         texture2DResults.TryAdd(itempath, content);
                     }
-                    eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart);
-                    eventWaitStart.Set();
+                    if(eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                        eventWaitStart.Set();
 
                 }
                 if (materialRequests.Count > 0)
@@ -197,8 +197,8 @@ namespace RimThreaded
                         Material material = MaterialPool.MatFrom(materialRequest);
                         materialResults.TryAdd(materialRequest, material);
                     }
-                    eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart);
-                    eventWaitStart.Set();
+                    if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                        eventWaitStart.Set();
                 }
                 if (tryMakeAndPlayRequests.Count > 0)
                 {
@@ -217,8 +217,8 @@ namespace RimThreaded
                             SubSustainer_Patch.samples(subSustainer).Add(sampleSustainer);
                         }
                     }
-                    eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart);
-                    eventWaitStart.Set();
+                    if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                        eventWaitStart.Set();
                 }
                 if (newSustainerRequests.Count > 0)
                 {

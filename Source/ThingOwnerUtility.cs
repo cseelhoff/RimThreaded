@@ -22,9 +22,14 @@ namespace RimThreaded
 			}
 			int i = 0;
 			int count = container.Count;
+			Thing thing;
 			while (i < count)
 			{
-				IThingHolder thingHolder = container[i] as IThingHolder;
+				try
+                {
+					thing = container[i];
+				} catch (ArgumentOutOfRangeException) { break; }
+				IThingHolder thingHolder = thing as IThingHolder;
 				if (thingHolder != null)
 				{
 					lock (outThingsHolders)

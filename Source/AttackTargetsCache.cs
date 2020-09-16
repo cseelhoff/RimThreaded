@@ -21,8 +21,106 @@ namespace RimThreaded
 			AccessTools.FieldRefAccess<AttackTargetsCache, HashSet<Pawn>>("factionlessHumanlikes");
 		public static AccessTools.FieldRef<AttackTargetsCache, Map> map =
 			AccessTools.FieldRefAccess<AttackTargetsCache, Map>("map");
+		public static AccessTools.FieldRef<AttackTargetsCache, HashSet<IAttackTarget>> allTargets =
+			AccessTools.FieldRefAccess<AttackTargetsCache, HashSet<IAttackTarget>>("allTargets");
 
 		public static HashSet<IAttackTarget> emptySet = new HashSet<IAttackTarget>();
+
+
+		public static bool DeregisterTarget(AttackTargetsCache __instance, IAttackTarget target)
+		{
+			if (!allTargets(__instance).Contains(target))
+			{
+				Log.Warning("Tried to deregister " + target + " but it's not in " + __instance.GetType());
+				return false;
+			}
+			lock (allTargets(__instance))
+			{
+				allTargets(__instance).Remove(target);
+			}
+			foreach (KeyValuePair<Faction, HashSet<IAttackTarget>> item in targetsHostileToFaction(__instance))
+			{
+				lock (item.Value)
+				{
+					item.Value.Remove(target);
+				}
+			}
+
+			Pawn pawn = target as Pawn;
+			if (pawn != null)
+			{
+				lock (pawnsInAggroMentalState(__instance))
+				{
+					pawnsInAggroMentalState(__instance).Remove(pawn);
+				}
+				lock (factionlessHumanlikes(__instance)) {
+					factionlessHumanlikes(__instance).Remove(pawn);
+				}
+			}
+			return false;
+		}
+
+		public static bool RegisterTarget(AttackTargetsCache __instance, IAttackTarget target)
+		{
+			if (allTargets(__instance).Contains(target))
+			{
+				Log.Warning("Tried to register the same target twice " + target.ToStringSafe() + " in " + __instance.GetType());
+				return false;
+			}
+
+			Thing thing = target.Thing;
+			if (!thing.Spawned)
+			{
+				Log.Warning("Tried to register unspawned thing " + thing.ToStringSafe() + " in " + __instance.GetType());
+				return false;
+			}
+
+			if (thing.Map != map(__instance))
+			{
+				Log.Warning("Tried to register attack target " + thing.ToStringSafe() + " but its Map is not this one.");
+				return false;
+			}
+			lock (allTargets(__instance)) {
+				allTargets(__instance).Add(target);
+			}
+			List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
+			for (int i = 0; i < allFactionsListForReading.Count; i++)
+			{
+				if (thing.HostileTo(allFactionsListForReading[i]))
+				{
+					lock (targetsHostileToFaction(__instance))
+					{
+						if (!targetsHostileToFaction(__instance).ContainsKey(allFactionsListForReading[i]))
+						{
+							targetsHostileToFaction(__instance).Add(allFactionsListForReading[i], new HashSet<IAttackTarget>());
+						}
+						targetsHostileToFaction(__instance)[allFactionsListForReading[i]].Add(target);
+					}
+				}
+			}
+
+			Pawn pawn = target as Pawn;
+			if (pawn != null)
+			{
+				if (pawn.InAggroMentalState)
+				{
+					lock (pawnsInAggroMentalState(__instance)) {
+						pawnsInAggroMentalState(__instance).Add(pawn);
+					}
+				}
+
+				if (pawn.Faction == null && pawn.RaceProps.Humanlike)
+				{
+					lock (factionlessHumanlikes(__instance))
+					{
+						factionlessHumanlikes(__instance).Add(pawn);
+					}
+				}
+			}
+			return false;
+
+		}
+
 
 		public static HashSet<IAttackTarget> TargetsHostileToFaction2(AttackTargetsCache __instance, Faction f)
 		{

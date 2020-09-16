@@ -59,11 +59,13 @@ namespace RimThreaded
 			bool flag = false;
 			foreach (IntVec3 c in thing.OccupiedRect())
 			{
-				List<Thing> thingList = c.GetThingList(__instance.Map);
+                //List<Thing> thingList = c.GetThingList(__instance.Map);
+                IEnumerable<Thing> enumThing = __instance.Map.thingGrid.ThingsAt(c);
 				bool flag2 = false;
-				for (int i = 0; i < thingList.Count; i++)
+				//for (int i = 0; i < thingList.Count; i++)
+				foreach (Thing tlThing in enumThing) 
 				{
-					if (thingList[i] != thing && thingList[i].def.Fillage == FillCategory.Full && thingList[i].def.Altitude >= thing.def.Altitude)
+					if (tlThing != thing && tlThing.def.Fillage == FillCategory.Full && tlThing.def.Altitude >= thing.def.Altitude)
 					{
 						flag2 = true;
 						break;

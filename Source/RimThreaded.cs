@@ -314,6 +314,8 @@ namespace RimThreaded
 			original = typeof(AttackTargetsCache);
 			patched = typeof(AttackTargetsCache_Patch);
 			Prefix(original, patched, "GetPotentialTargetsFor");
+			Prefix(original, patched, "RegisterTarget");
+			Prefix(original, patched, "DeregisterTarget");
 
 			//PawnsFinder
 			original = typeof(PawnsFinder);
@@ -565,6 +567,17 @@ namespace RimThreaded
 			original = typeof(WorldPawns);
 			patched = typeof(WorldPawns_Patch);
 			Prefix(original, patched, "get_AllPawnsAlive");
+
+			//PawnPath
+			original = typeof(PawnPath);
+			patched = typeof(PawnPath_Patch);
+			Prefix(original, patched, "AddNode");
+			Prefix(original, patched, "ReleaseToPool");
+
+			//GenCollection
+			original = typeof(GenCollection);
+			patched = typeof(GenCollection_Patch);
+			//Prefix(original, patched, "RemoveAll", new Type[], { typeof(Dictionary<TKey, TValue>) , typeof(Predicate< KeyValuePair < TKey, TValue >>) });
 
 
 			//PERFORMANCE IMPROVEMENTS
