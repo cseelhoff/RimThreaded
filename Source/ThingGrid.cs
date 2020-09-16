@@ -184,6 +184,30 @@ namespace RimThreaded
             __result = null;
             return false;
         }
+
+        public static Building_Door ThingAt_Building_Door (ThingGrid __instance, IntVec3 c)
+        {
+            if (!c.InBounds(map(__instance)))
+            {
+                return null;
+            }
+
+            List<Thing> thingList = thingGrid(__instance)[map(__instance).cellIndices.CellToIndex(c)];
+            Thing thing;
+            for (int index = 0; index < thingList.Count; index++)
+            {
+                try
+                {
+                    thing = thingList[index];
+                } catch (ArgumentOutOfRangeException) { break; }
+                Building_Door building_Door = thing as Building_Door;
+                if (building_Door != null)
+                {
+                    return building_Door;
+                }
+            }
+            return null;
+        }
         /*
         public static bool ThingAt_Apparel(ThingGrid __instance, ref Apparel __result, IntVec3 c)
         {

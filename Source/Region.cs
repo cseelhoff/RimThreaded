@@ -49,35 +49,39 @@ namespace RimThreaded
                     }
                 }
             }
-            float temperature = __instance.Room.Temperature;
-            FloatRange floatRange;
-            if (Current.ProgramState == ProgramState.Playing)
+            Danger danger = Danger.Unspecified;
+            if (__instance.Room != null)
             {
-                if (cachedSafeTemperatureRangesForFrame != Time.frameCount)
+                float temperature = __instance.Room.Temperature;
+                FloatRange floatRange;
+                if (Current.ProgramState == ProgramState.Playing)
                 {
+                    if (cachedSafeTemperatureRangesForFrame != Time.frameCount)
+                    {
+                        lock (cachedSafeTemperatureRanges)
+                        {
+                            cachedSafeTemperatureRanges.Clear();
+                        }
+                        cachedSafeTemperatureRangesForFrame = Time.frameCount;
+                    }
                     lock (cachedSafeTemperatureRanges)
                     {
-                        cachedSafeTemperatureRanges.Clear();
+                        if (!cachedSafeTemperatureRanges.TryGetValue(p, out floatRange))
+                        {
+                            floatRange = p.SafeTemperatureRange();
+                            cachedSafeTemperatureRanges.Add(p, floatRange);
+                        }
                     }
-                    cachedSafeTemperatureRangesForFrame = Time.frameCount;
                 }
-                lock (cachedSafeTemperatureRanges)
+                else
+                    floatRange = p.SafeTemperatureRange();
+                danger = !floatRange.Includes(temperature) ? (!floatRange.ExpandedBy(80f).Includes(temperature) ? Danger.Deadly : Danger.Some) : Danger.None;
+                if (Current.ProgramState == ProgramState.Playing)
                 {
-                    if (!cachedSafeTemperatureRanges.TryGetValue(p, out floatRange))
+                    lock (cachedDangers(__instance))
                     {
-                        floatRange = p.SafeTemperatureRange();
-                        cachedSafeTemperatureRanges.Add(p, floatRange);
+                        cachedDangers(__instance).Add(new KeyValuePair<Pawn, Danger>(p, danger));
                     }
-                }
-            }
-            else
-                floatRange = p.SafeTemperatureRange();
-            Danger danger = !floatRange.Includes(temperature) ? (!floatRange.ExpandedBy(80f).Includes(temperature) ? Danger.Deadly : Danger.Some) : Danger.None;
-            if (Current.ProgramState == ProgramState.Playing)
-            {
-                lock (cachedDangers(__instance))
-                {
-                    cachedDangers(__instance).Add(new KeyValuePair<Pawn, Danger>(p, danger));
                 }
             }
             __result = danger;

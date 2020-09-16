@@ -34,6 +34,14 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.21  
+-Fixed bug with AmbientSoundManager  
+-Fixed bug with Pawn_PathFollower  
+-Fixed bug with Region  
+-Fixed bug with ReservationManager  
+-Fixed bug with SustainerManager  
+-Fixed bug with ThingGrid (Building_Door)  
+
 Version 1.0.20  
 -Fixed bug with AttackTargetReservationManager  
 -Fixed bug with MapPawns  

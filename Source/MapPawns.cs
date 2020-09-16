@@ -29,7 +29,10 @@ namespace RimThreaded
 
         public static bool get_AllPawnsUnspawned(MapPawns __instance, ref List<Pawn> __result)
         {
-            allPawnsUnspawnedResult(__instance).Clear();
+            lock (allPawnsUnspawnedResult(__instance))
+            {
+                allPawnsUnspawnedResult(__instance).Clear();
+            }
             ThingOwnerUtility.GetAllThingsRecursively<Pawn>(map(__instance), ThingRequest.ForGroup(ThingRequestGroup.Pawn), allPawnsUnspawnedResult(__instance), true, null, false);
             for (int i = allPawnsUnspawnedResult(__instance).Count - 1; i >= 0; i--)
             {

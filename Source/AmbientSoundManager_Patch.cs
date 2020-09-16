@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,11 +18,11 @@ namespace RimThreaded
             {
                 SoundDefOf.Ambient_AltitudeWind.TrySpawnSustainer(SoundInfo.OnCamera(MaintenanceType.None));
             }
-
+            SustainerManager sustainerManager = Find.SoundRoot.sustainerManager;
             List<Sustainer> sustainers = (biomeAmbientSustainersFI.GetValue(null) as List<Sustainer>);
             foreach (Sustainer s in sustainers)
             {
-                if (SustainerManager_Patch.allSustainers.ContainsKey(s) && !s.Ended)
+                if (SustainerManager_Patch.allSustainers(sustainerManager).Contains(s) && !s.Ended)
                 {
                     s.End();
                 }
@@ -33,7 +34,10 @@ namespace RimThreaded
                 for (int j = 0; j < soundsAmbient.Count; j++)
                 {
                     Sustainer item = soundsAmbient[j].TrySpawnSustainer(SoundInfo.OnCamera(MaintenanceType.None));
-                    if (!SustainerManager_Patch.allSustainers.TryAdd(item, item))
+                    try
+                    {
+                        SustainerManager_Patch.allSustainers(sustainerManager).Add(item);
+                    } catch (Exception)
                     {
                         item.End();
                     }
