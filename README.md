@@ -40,7 +40,6 @@ Version 1.0.23
 -Fixed bug in LanguageWordInfo  
 -Fixed bug in PathFinder  
 -Fixed bug in Projectiles (Bullet, DoomsdayRocket, Explosive, Spark, WaterSplash)  
--Fixed bug in RimThreaded  
 
 Version 1.0.22  
 -Fixed bug in GenCollection  
