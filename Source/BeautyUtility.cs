@@ -25,8 +25,14 @@ namespace RimThreaded
             float num1 = 0.0f;
             int num2 = 0;
             BeautyUtility.FillBeautyRelevantCells(root, map);
+            IntVec3 cells;
             for (int index = 0; index < BeautyUtility.beautyRelevantCells.Count; ++index)
             {
+                try
+                {
+                    cells = BeautyUtility.beautyRelevantCells[index];
+                }
+                catch (ArgumentOutOfRangeException) { break; }
                 num1 += BeautyUtility.CellBeauty(BeautyUtility.beautyRelevantCells[index], map, tempCountedThings);
                 ++num2;
             }

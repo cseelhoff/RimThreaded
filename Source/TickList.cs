@@ -52,7 +52,6 @@ namespace RimThreaded
         public static TickerType currentTickType;
         public static int currentTickInterval;
         public static Dictionary<int, Thread> allThreads = new Dictionary<int, Thread>();
-        public static Thread thread2 = null;
         public static StackTrace trace = null;
         private static int get_TickInterval(TickList __instance)
         {
@@ -130,7 +129,7 @@ namespace RimThreaded
         {
             Thread thread = new Thread(() => ProcessTicks());
             int tID = thread.ManagedThreadId;
-            //allThreads.Add(tID, thread);
+            allThreads.Add(tID, thread);
             eventWaitStarts.TryAdd(tID, new AutoResetEvent(false));
             eventWaitDones.TryAdd(tID, new AutoResetEvent(false));
             tryMakeAndPlayWaits.TryAdd(tID, new AutoResetEvent(false));
@@ -142,14 +141,20 @@ namespace RimThreaded
 
         private static void AbortWorkerThread(int managedThreadID)
         {
-            thread2.Abort();
-            //allThreads.Remove(managedThreadID);
-            eventWaitStarts.TryRemove(managedThreadID, out _);
-            eventWaitDones.TryRemove(managedThreadID, out _);
-            tryMakeAndPlayWaits.TryRemove(managedThreadID, out _);
-            newSustainerWaits.TryRemove(managedThreadID, out _);
-            texture2DWaits.TryRemove(managedThreadID, out _);
-            materialWaits.TryRemove(managedThreadID, out _);
+            if (allThreads.TryGetValue(managedThreadID, out Thread thread))
+            {
+                thread.Abort();
+                allThreads.Remove(managedThreadID);
+                eventWaitStarts.TryRemove(managedThreadID, out _);
+                eventWaitDones.TryRemove(managedThreadID, out _);
+                tryMakeAndPlayWaits.TryRemove(managedThreadID, out _);
+                newSustainerWaits.TryRemove(managedThreadID, out _);
+                texture2DWaits.TryRemove(managedThreadID, out _);
+                materialWaits.TryRemove(managedThreadID, out _);
+            } else
+            {
+                Log.Error("Error finding timed out thread: " + managedThreadID.ToString());
+            }
         }
 
         private static void CreateMonitorThread()
@@ -308,8 +313,6 @@ namespace RimThreaded
             while (true)
             {
                 isThreadWaiting[tID] = true;
-                //eventWaitStart.WaitOne();
-                //HACK - why is thread aborting?
                 eventWaitStart.WaitOne();
                 while (thingQueue.TryDequeue(out Thing thing))
                 {

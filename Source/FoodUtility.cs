@@ -53,9 +53,13 @@ namespace RimThreaded
             if (eater.needs != null && eater.needs.mood != null)
             {
                 List<ThoughtDef> thoughtDefList = FoodUtility.ThoughtsFromIngesting(eater, foodSource, foodDef);
+                ThoughtDef thoughtDef;
                 for (int index = 0; index < thoughtDefList.Count; ++index)
                 {
-                    ThoughtDef thoughtDef = thoughtDefList[index];
+                    try
+                    {
+                        thoughtDef = thoughtDefList[index];
+                    } catch (ArgumentOutOfRangeException) { break; }
                     if (null != thoughtDef)
                     {
                         num += FoodOptimalityEffectFromMoodCurve.Evaluate(thoughtDef.stages[0].baseMoodEffect);
