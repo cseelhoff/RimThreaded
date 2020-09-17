@@ -33,6 +33,11 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.25  
+-Fixed bug in Thread abort timeouts  
+-Fixed bug in BeautyUtility  
+-Fixed bug in FoodUtility  
+
 Version 1.0.24  
 -Fixed bug in Thread abort timeouts  
 -Fixed bug in BeautyUtility  
