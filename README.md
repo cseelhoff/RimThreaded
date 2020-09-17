@@ -33,6 +33,8 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.28  
+-Fixed bug in GenRadial (fixes problem with blight)  
 
 Version 1.0.27  
 -Fixed bugs in RegionAndRoomUpdater - bug #112  

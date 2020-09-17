@@ -656,6 +656,11 @@ namespace RimThreaded
 			Prefix(original, patched, "FloodAndSetRoomGroups");
 			Prefix(original, patched, "CombineNewAndReusedRoomsIntoContiguousGroups");
 
+			//GenRadial
+			original = typeof(GenRadial);
+			patched = typeof(GenRadial_Patch);
+			Prefix(original, patched, "ProcessEquidistantCells");
+
 
 			//PERFORMANCE IMPROVEMENTS
 
