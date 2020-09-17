@@ -650,6 +650,12 @@ namespace RimThreaded
 			patched = typeof(WanderUtility_Patch);
 			Prefix(original, patched, "GetColonyWanderRoot");
 
+			//RegionAndRoomUpdater
+			original = typeof(RegionAndRoomUpdater);
+			patched = typeof(RegionAndRoomUpdater_Patch);
+			Prefix(original, patched, "FloodAndSetRoomGroups");
+			Prefix(original, patched, "CombineNewAndReusedRoomsIntoContiguousGroups");
+
 
 			//PERFORMANCE IMPROVEMENTS
 
