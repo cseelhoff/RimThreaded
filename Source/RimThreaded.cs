@@ -645,6 +645,11 @@ namespace RimThreaded
 			patched = typeof(TendUtility_Patch);
 			Prefix(original, patched, "GetOptimalHediffsToTendWithSingleTreatment");
 
+			//WanderUtility
+			original = typeof(WanderUtility);
+			patched = typeof(WanderUtility_Patch);
+			Prefix(original, patched, "GetColonyWanderRoot");
+
 
 			//PERFORMANCE IMPROVEMENTS
 
