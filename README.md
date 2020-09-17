@@ -33,6 +33,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+
+Version 1.0.27  
+-Fixed bugs in RegionAndRoomUpdater - bug #112  
+
 Version 1.0.26  
 -Fixed bug in WanderUtility - GetColonyWanderRoot  
 
