@@ -53,6 +53,19 @@ namespace RimThreaded
             return false;
             
         }
+        public static bool get_SpawnedPawnsWithAnyHediff(MapPawns __instance, ref List<Pawn> __result)
+        {
+            //this.spawnedPawnsWithAnyHediffResult.Clear();
+            List<Pawn> spawnedPawnsWithAnyHediffResult = new List<Pawn>();
+            List<Pawn> allPawnsSpawned = __instance.AllPawnsSpawned;
+            for (int index = 0; index < allPawnsSpawned.Count; ++index)
+            {
+                if (allPawnsSpawned[index].health.hediffSet.hediffs.Count != 0)
+                    spawnedPawnsWithAnyHediffResult.Add(allPawnsSpawned[index]);
+            }
+            __result = spawnedPawnsWithAnyHediffResult;
+            return false;
+        }
 
         public static bool FreeHumanlikesSpawnedOfFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
         {

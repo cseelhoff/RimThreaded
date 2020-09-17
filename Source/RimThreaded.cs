@@ -462,6 +462,7 @@ namespace RimThreaded
 			Prefix(original, patched, "Reserve");
 			Prefix(original, patched, "Release");
 			Prefix(original, patched, "FirstReservationFor");
+			Prefix(original, patched, "CanReserve");
 
 			//FloodFiller - inefficient global lock			
 			original = typeof(FloodFiller);
@@ -492,8 +493,9 @@ namespace RimThreaded
 			Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
 			Prefix(original, patched, "DeRegisterPawn");
 			Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
-			Prefix(original, patched, "SpawnedPawnsInFaction"); 
+			Prefix(original, patched, "SpawnedPawnsInFaction");
 			Prefix(original, patched, "get_AllPawnsUnspawned");
+			Prefix(original, patched, "get_SpawnedPawnsWithAnyHediff");
 
 			//Region
 			original = typeof(Region);
@@ -622,6 +624,26 @@ namespace RimThreaded
 			original = typeof(Pawn_InteractionsTracker);
 			patched = typeof(Pawn_InteractionsTracker_Patch);
 			Prefix(original, patched, "TryInteractRandomly");
+
+			//Toils_Ingest
+			original = typeof(Toils_Ingest);
+			patched = typeof(Toils_Ingest_Patch);
+			Prefix(original, patched, "TryFindAdjacentIngestionPlaceSpot");
+
+			//BeautyUtility
+			original = typeof(BeautyUtility);
+			patched = typeof(BeautyUtility_Patch);
+			Prefix(original, patched, "AverageBeautyPerceptible");
+
+			//FoodUtility
+			original = typeof(FoodUtility);
+			patched = typeof(FoodUtility_Patch);
+			Prefix(original, patched, "FoodOptimality");
+
+			//TendUtility
+			original = typeof(TendUtility);
+			patched = typeof(TendUtility_Patch);
+			Prefix(original, patched, "GetOptimalHediffsToTendWithSingleTreatment");
 
 
 			//PERFORMANCE IMPROVEMENTS

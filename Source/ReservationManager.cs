@@ -63,7 +63,7 @@ namespace RimThreaded
 			return false;
 		}
 
-		public static bool CanReserve(ReservationManager __instance,
+		public static bool CanReserve(ReservationManager __instance, ref bool __result,
 		  Pawn claimant,
 		  LocalTargetInfo target,
 		  int maxPawns = 1,
@@ -74,25 +74,38 @@ namespace RimThreaded
 			if (claimant == null)
 			{
 				Log.Error("CanReserve with null claimant", false);
+				__result = false;
 				return false;
 			}
 			if (!claimant.Spawned || claimant.Map != map(__instance) || (!target.IsValid || target.ThingDestroyed) || target.HasThing && target.Thing.SpawnedOrAnyParentSpawned && target.Thing.MapHeld != map(__instance))
+			{
+				__result = false;
 				return false;
+			}
 			int num1 = target.HasThing ? target.Thing.stackCount : 1;
 			int num2 = stackCount == -1 ? num1 : stackCount;
 			if (num2 > num1)
+			{
+				__result = false;
 				return false;
+			}
 			if (!ignoreOtherReservations)
 			{
 				if (map(__instance).physicalInteractionReservationManager.IsReserved(target) && !map(__instance).physicalInteractionReservationManager.IsReservedBy(claimant, target))
+				{
+					__result = false;
 					return false;
+				}
 				for (int index = 0; index < reservations(__instance).Count; ++index)
 				{
 					ReservationManager.Reservation reservation = reservations(__instance)[index];
 					if (null != reservation)
 					{
 						if (reservation.Target == target && reservation.Layer == layer && reservation.Claimant == claimant && (reservation.StackCount == -1 || reservation.StackCount >= num2))
-							return true;
+						{
+							__result = true;
+							return false;
+						}
 					}
 				}
 				int num3 = 0;
@@ -105,19 +118,26 @@ namespace RimThreaded
 						if (!(reservation.Target != target) && reservation.Layer == layer && (reservation.Claimant != claimant && RespectsReservationsOf(claimant, reservation.Claimant)))
 						{
 							if (reservation.MaxPawns != maxPawns)
+							{
+								__result = false;
 								return false;
+							}
 							++num3;
 							if (reservation.StackCount == -1)
 								num4 += num1;
 							else
 								num4 += reservation.StackCount;
 							if (num3 >= maxPawns || num2 + num4 > num1)
+							{
+								__result = false;
 								return false;
+							}
 						}
 					}
 				}
 			}
-			return true;
+			__result = true;
+			return false;
 		}
 
 		private static bool RespectsReservationsOf(Pawn newClaimant, Pawn oldClaimant)
@@ -189,9 +209,12 @@ namespace RimThreaded
 				__result = false;
 				return false;
 			}
-			if (!CanReserve(__instance, claimant, target, maxPawns, stackCount, layer, false))
+			bool canReserveResult = false;
+			CanReserve(__instance, ref canReserveResult, claimant, target, maxPawns, stackCount, layer, false);
+			if (!canReserveResult)
 			{
-				if (job != null && job.playerForced && CanReserve(__instance, claimant, target, maxPawns, stackCount, layer, true))
+				CanReserve(__instance, ref canReserveResult, claimant, target, maxPawns, stackCount, layer, true);
+				if (job != null && job.playerForced && canReserveResult)
 				{
 					reservations(__instance).Add(new ReservationManager.Reservation(claimant, job, maxPawns, stackCount, target, layer));
 					foreach (ReservationManager.Reservation reservation in reservations(__instance).ToList<ReservationManager.Reservation>())

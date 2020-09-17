@@ -24,20 +24,28 @@ namespace RimThreaded
 
         public static int maxThreads = Math.Max(RimThreadedMod.Settings.maxThreads, 1);
         public static int timeoutMS = Math.Max(RimThreadedMod.Settings.timeoutMS, 1);
-        public static ConcurrentDictionary<int, object[]> tryMakeAndPlayRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, object[]> newSustainerRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitStarts = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitDones = new ConcurrentDictionary<int, EventWaitHandle>();
-        public static ConcurrentDictionary<string, Texture2D> texture2DResults = new ConcurrentDictionary<string, Texture2D>();
-        public static ConcurrentDictionary<int, string> texture2DRequests = new ConcurrentDictionary<int, string>();
-        public static ConcurrentDictionary<MaterialRequest, Material> materialResults = new ConcurrentDictionary<MaterialRequest, Material>();
-        public static ConcurrentDictionary<int, Sustainer> newSustainerResults = new ConcurrentDictionary<int, Sustainer>();
-        public static ConcurrentDictionary<int, MaterialRequest> materialRequests = new ConcurrentDictionary<int, MaterialRequest>();
-        public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
-        public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
-        public static ConcurrentDictionary<int, bool> isThreadWaiting = new ConcurrentDictionary<int, bool>();
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
+
+        public static ConcurrentDictionary<int, object[]> tryMakeAndPlayRequests = new ConcurrentDictionary<int, object[]>();
+        public static ConcurrentDictionary<int, EventWaitHandle> tryMakeAndPlayWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<int, object[]> newSustainerRequests = new ConcurrentDictionary<int, object[]>();
+        public static ConcurrentDictionary<int, Sustainer> newSustainerResults = new ConcurrentDictionary<int, Sustainer>();
+        public static ConcurrentDictionary<int, EventWaitHandle> newSustainerWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<string, Texture2D> texture2DResults = new ConcurrentDictionary<string, Texture2D>();
+        public static ConcurrentDictionary<int, string> texture2DRequests = new ConcurrentDictionary<int, string>();
+        public static ConcurrentDictionary<int, EventWaitHandle> texture2DWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<MaterialRequest, Material> materialResults = new ConcurrentDictionary<MaterialRequest, Material>();
+        public static ConcurrentDictionary<int, MaterialRequest> materialRequests = new ConcurrentDictionary<int, MaterialRequest>();
+        public static ConcurrentDictionary<int, EventWaitHandle> materialWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+
+        public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
+        public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
+
+        public static bool allWorkerThreadsFinished = false;
+        public static ConcurrentDictionary<int, bool> isThreadWaiting = new ConcurrentDictionary<int, bool>();
         public static List<Thing> thingList1;
         public static ConcurrentQueue<Thing> thingQueue = new ConcurrentQueue<Thing>();
         public static Thread monitorThread = null;
@@ -105,150 +113,97 @@ namespace RimThreaded
             thingList1 = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
             thingQueue = new ConcurrentQueue<Thing>(thingList1);
 
-            CreateTickThreads();       
+            CreateWorkerThreads();
+            allWorkerThreadsFinished = false;
+            CreateMonitorThread();
+            monitorThreadWaitHandle.Set();
             foreach (EventWaitHandle eventWaitHandle in eventWaitStarts.Values)
             {
                 eventWaitHandle.Set();
             }
 
-            monitorThreadWaitHandle.Set();
             MainThreadWaitLoop();
             return false;            
         }
 
-        private static void CreateTickThreads()
+        private static void CreateWorkerThread()
+        {
+            Thread thread = new Thread(() => ProcessTicks());
+            int tID = thread.ManagedThreadId;
+            //allThreads.Add(tID, thread);
+            eventWaitStarts.TryAdd(tID, new AutoResetEvent(false));
+            eventWaitDones.TryAdd(tID, new AutoResetEvent(false));
+            tryMakeAndPlayWaits.TryAdd(tID, new AutoResetEvent(false));
+            newSustainerWaits.TryAdd(tID, new AutoResetEvent(false));
+            texture2DWaits.TryAdd(tID, new AutoResetEvent(false));
+            materialWaits.TryAdd(tID, new AutoResetEvent(false));
+            thread.Start();
+        }
+
+        private static void AbortWorkerThread(int managedThreadID)
+        {
+            thread2.Abort();
+            //allThreads.Remove(managedThreadID);
+            eventWaitStarts.TryRemove(managedThreadID, out _);
+            eventWaitDones.TryRemove(managedThreadID, out _);
+            tryMakeAndPlayWaits.TryRemove(managedThreadID, out _);
+            newSustainerWaits.TryRemove(managedThreadID, out _);
+            texture2DWaits.TryRemove(managedThreadID, out _);
+            materialWaits.TryRemove(managedThreadID, out _);
+        }
+
+        private static void CreateMonitorThread()
+        {
+            if (null == monitorThread)
+            {
+                monitorThread = new Thread(() =>
+                {
+                    while (true)
+                    {
+                        monitorThreadWaitHandle.WaitOne();
+                        foreach (int tID2 in eventWaitDones.Keys.ToArray())
+                        {
+                            if (eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone))
+                            {
+                                if (!eventWaitDone.WaitOne(timeoutMS))
+                                {
+                                    Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
+                                    AbortWorkerThread(tID2);
+                                    CreateWorkerThread();
+                                }
+                            }
+                            else
+                            {
+                                Log.Error("Thread monitor cannot find thread: " + tID2.ToString());
+                            }
+                        }
+                        allWorkerThreadsFinished = true;
+                        mainThreadWaitHandle.Set();
+                    }
+                });
+                monitorThread.Start();
+            }
+        }
+
+        private static void CreateWorkerThreads()
         {
             while (eventWaitStarts.Count < maxThreads)
             {
-                Thread thread = new Thread(() => ProcessTicks());
-                int tID = thread.ManagedThreadId;
-                allThreads.Add(tID, thread);
-                eventWaitStarts.TryAdd(tID, new AutoResetEvent(false));
-                eventWaitDones.TryAdd(tID, new AutoResetEvent(false));
-                thread.Start();
-
-                if (null == monitorThread)
-                {
-                    monitorThread = new Thread(() =>
-                    {
-                        while (true)
-                        {
-                            monitorThreadWaitHandle.WaitOne();
-                            //List<int> ewd = eventWaitDones.Keys.ToList();
-                            foreach (int tID2 in eventWaitDones.Keys.ToArray())
-                            {
-                                if (eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone)) {
-                                    if (!eventWaitDone.WaitOne(timeoutMS))
-                                    {
-                                        Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
-                                        Thread thread2 = allThreads[tID2];
-                                        thread2.Abort();
-                                        allThreads.Remove(tID2);
-                                        eventWaitStarts.TryRemove(tID2, out _);
-                                        eventWaitDones.TryRemove(tID2, out _);
-                                        Thread thread3 = new Thread(() => ProcessTicks());
-                                        int tID3 = thread3.ManagedThreadId;
-                                        allThreads.Add(tID3, thread);
-                                        AutoResetEvent eventWaitStart1 = new AutoResetEvent(false);
-                                        eventWaitStarts.TryAdd(tID3, eventWaitStart1);
-                                        AutoResetEvent eventWaitDone1 = new AutoResetEvent(false);
-                                        eventWaitDones.TryAdd(tID3, eventWaitDone1);
-                                        thread3.Start();
-                                        //eventWaitStart1.Set();
-                                        //ewd.Add(eventWaitDone1);
-                                        //thread2.Suspend();
-                                        //trace = new System.Diagnostics.StackTrace(thread2, false);
-                                        //Log.Error(trace.ToString());
-                                    }
-                                } else
-                                {
-                                    Log.Error("Thread monitor cannot find thread: " + tID2.ToString());
-                                }
-                            }
-                            mainThreadWaitHandle.Set();
-                        }
-                    });
-                    monitorThread.Start();
-                }
+                CreateWorkerThread();
             }
         }
 
         private static void MainThreadWaitLoop()
         {
-            bool continueWaiting = true;
-            while (continueWaiting)
+            //bool continueWaiting = true;
+            while (!allWorkerThreadsFinished)
             {
                 mainThreadWaitHandle.WaitOne();
-                continueWaiting = false;
-                while (texture2DRequests.Count > 0)
-                {
-                    continueWaiting = true;
-                    int key = texture2DRequests.Keys.First();
-                    if (texture2DRequests.TryRemove(key, out string itempath))
-                    {
-                        Texture2D content = ContentFinder<Texture2D>.Get(itempath);
-                        texture2DResults.TryAdd(itempath, content);
-                    }
-                    if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                        eventWaitStart.Set();
-                    else
-                        Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-
-                }
-                while (materialRequests.Count > 0)
-                {
-                    continueWaiting = true;
-                    int key = materialRequests.Keys.First();
-                    if (materialRequests.TryRemove(key, out MaterialRequest materialRequest))
-                    {
-                        Material material = MaterialPool.MatFrom(materialRequest);
-                        materialResults.TryAdd(materialRequest, material);
-                    }
-                    if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                        eventWaitStart.Set();
-                    else
-                        Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-                }
-                while (tryMakeAndPlayRequests.Count > 0)
-                {
-                    continueWaiting = true;
-                    int key = tryMakeAndPlayRequests.Keys.First();
-                    if (tryMakeAndPlayRequests.TryRemove(key, out object[] objects))
-                    {
-                        SubSustainer subSustainer = (SubSustainer)objects[0];
-                        AudioClip clip = (AudioClip)objects[1];
-                        float num2 = (float)objects[2];
-                        SampleSustainer sampleSustainer = SampleSustainer.TryMakeAndPlay(subSustainer, clip, num2);
-                        if (sampleSustainer != null)
-                        {
-                            if (subSustainer.subDef.sustainSkipFirstAttack && Time.frameCount == subSustainer.creationFrame)
-                                sampleSustainer.resolvedSkipAttack = true;
-                            SubSustainer_Patch.samples(subSustainer).Add(sampleSustainer);
-                        }
-                    }
-                    if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                        eventWaitStart.Set();
-                    else
-                        Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-                }
-                while (newSustainerRequests.Count > 0)
-                {
-                    continueWaiting = true;
-                    int key = newSustainerRequests.Keys.First();
-                    if (newSustainerRequests.TryRemove(key, out object[] objects))
-                    {
-                        SoundDef soundDef = (SoundDef)objects[0];
-                        SoundInfo soundInfo = (SoundInfo)objects[1];
-                        Sustainer sustainer = new Sustainer(soundDef, soundInfo);
-                        newSustainerResults[key] = sustainer;
-                    }
-                    if (eventWaitStarts.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    {
-                        eventWaitStart.Set();
-                    }
-                    else
-                        Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-                }
+                RespondToTexture2DRequests();
+                RespondToMaterialRequests();
+                RespondToPlayRequests();
+                RespondToSustainerRequests();
+                
                 // Add any sounds that were produced in this tick
                 while (PlayOneShot.Count > 0)
                 {
@@ -267,6 +222,84 @@ namespace RimThreaded
             }
         }
 
+        private static void RespondToSustainerRequests()
+        {
+            while (newSustainerRequests.Count > 0)
+            {
+                int key = newSustainerRequests.Keys.First();
+                if (newSustainerRequests.TryRemove(key, out object[] objects))
+                {
+                    SoundDef soundDef = (SoundDef)objects[0];
+                    SoundInfo soundInfo = (SoundInfo)objects[1];
+                    Sustainer sustainer = new Sustainer(soundDef, soundInfo);
+                    newSustainerResults[key] = sustainer;
+                }
+                if (newSustainerWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToPlayRequests()
+        {
+            while (tryMakeAndPlayRequests.Count > 0)
+            {
+                int key = tryMakeAndPlayRequests.Keys.First();
+                if (tryMakeAndPlayRequests.TryRemove(key, out object[] objects))
+                {
+                    SubSustainer subSustainer = (SubSustainer)objects[0];
+                    AudioClip clip = (AudioClip)objects[1];
+                    float num2 = (float)objects[2];
+                    SampleSustainer sampleSustainer = SampleSustainer.TryMakeAndPlay(subSustainer, clip, num2);
+                    if (sampleSustainer != null)
+                    {
+                        if (subSustainer.subDef.sustainSkipFirstAttack && Time.frameCount == subSustainer.creationFrame)
+                            sampleSustainer.resolvedSkipAttack = true;
+                        SubSustainer_Patch.samples(subSustainer).Add(sampleSustainer);
+                    }
+                }
+                if (tryMakeAndPlayWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToMaterialRequests()
+        {
+            while (materialRequests.Count > 0)
+            {
+                int key = materialRequests.Keys.First();
+                if (materialRequests.TryRemove(key, out MaterialRequest materialRequest))
+                {
+                    Material material = MaterialPool.MatFrom(materialRequest);
+                    materialResults.TryAdd(materialRequest, material);
+                }
+                if (materialWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToTexture2DRequests()
+        {
+            while (texture2DRequests.Count > 0)
+            {
+                int key = texture2DRequests.Keys.First();
+                if (texture2DRequests.TryRemove(key, out string itempath))
+                {
+                    Texture2D content = ContentFinder<Texture2D>.Get(itempath);
+                    texture2DResults.TryAdd(itempath, content);
+                }
+                if (texture2DWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
         public static void ProcessTicks()
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
@@ -277,7 +310,7 @@ namespace RimThreaded
                 isThreadWaiting[tID] = true;
                 //eventWaitStart.WaitOne();
                 //HACK - why is thread aborting?
-                eventWaitStart.WaitOne(100);
+                eventWaitStart.WaitOne();
                 while (thingQueue.TryDequeue(out Thing thing))
                 {
                     if (!thing.Destroyed)
