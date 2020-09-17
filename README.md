@@ -33,6 +33,9 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.26  
+-Fixed bug in WanderUtility - GetColonyWanderRoot  
+
 Version 1.0.25  
 -Fixed bug in Thread abort timeouts  
 -Fixed bug in BeautyUtility  
