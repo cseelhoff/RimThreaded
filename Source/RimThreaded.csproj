@@ -70,6 +70,10 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="TendUtility.cs" />
+    <Compile Include="FoodUtility.cs" />
+    <Compile Include="BeautyUtility.cs" />
+    <Compile Include="Toils_Ingest.cs" />
     <Compile Include="JobGiver_ConfigurableHostilityResponse.cs" />
     <Compile Include="Spark.cs" />
     <Compile Include="Projectile_DoomsdayRocket.cs" />

@@ -15,7 +15,7 @@ namespace RimThreaded
 			//return false;
 			//}
 			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (Ticklist_Patch.eventWaitStarts.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
+			if (Ticklist_Patch.materialWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
 				Ticklist_Patch.materialRequests.TryAdd(tID, req);
 				Ticklist_Patch.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();

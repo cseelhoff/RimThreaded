@@ -229,21 +229,24 @@ namespace RimThreaded
             Func<Thing, float> priorityGetter, ref float bestPrio, ref float closestDistSquared, 
             ref Thing chosen, Predicate<Thing> validator)
         {
-            if (!t.Spawned)
-                return;
-            float horizontalSquared = (float)(center - t.Position).LengthHorizontalSquared;
-            if ((double)horizontalSquared > (double)maxDistanceSquared || priorityGetter == null && (double)horizontalSquared >= (double)closestDistSquared || validator != null && !validator(t))
-                return;
-            float num = 0.0f;
-            if (priorityGetter != null)
+            if (null != t)
             {
-                num = priorityGetter(t);
-                if ((double)num < (double)bestPrio || (double)num == (double)bestPrio && (double)horizontalSquared >= (double)closestDistSquared)
+                if (!t.Spawned)
                     return;
+                float horizontalSquared = (float)(center - t.Position).LengthHorizontalSquared;
+                if ((double)horizontalSquared > (double)maxDistanceSquared || priorityGetter == null && (double)horizontalSquared >= (double)closestDistSquared || validator != null && !validator(t))
+                    return;
+                float num = 0.0f;
+                if (priorityGetter != null)
+                {
+                    num = priorityGetter(t);
+                    if ((double)num < (double)bestPrio || (double)num == (double)bestPrio && (double)horizontalSquared >= (double)closestDistSquared)
+                        return;
+                }
+                chosen = t;
+                closestDistSquared = horizontalSquared;
+                bestPrio = num;
             }
-            chosen = t;
-            closestDistSquared = horizontalSquared;
-            bestPrio = num;
         }
     }
 }
