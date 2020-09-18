@@ -13,7 +13,22 @@ namespace RimThreaded
 
 	public class GenTemperature_Patch
     {
+
+		public static Dictionary<int, float> SeasonalShiftAmplitudeCache = new Dictionary<int, float>();
+
 		public static RoomGroup[] beqRoomGroups = AccessTools.StaticFieldRefAccess<RoomGroup[]>(typeof(GenTemperature), "beqRoomGroups");
+		public static bool SeasonalShiftAmplitudeAt(ref float __result, int tile)
+		{
+			if (SeasonalShiftAmplitudeCache.TryGetValue(tile, out __result))
+			{
+				__result = (double)Find.WorldGrid.LongLatOf(tile).y >= 0.0 ?
+					TemperatureTuning.SeasonalTempVariationCurve.Evaluate(Find.WorldGrid.DistanceFromEquatorNormalized(tile)) :
+					-TemperatureTuning.SeasonalTempVariationCurve.Evaluate(Find.WorldGrid.DistanceFromEquatorNormalized(tile));
+				SeasonalShiftAmplitudeCache[tile] = __result;
+			}
+			return false;
+		}
+
 		public static bool PushHeat(ref bool __result, IntVec3 c, Map map, float energy)
 		{
 			if (map == null)

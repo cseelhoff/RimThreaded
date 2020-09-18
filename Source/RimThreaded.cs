@@ -203,8 +203,9 @@ namespace RimThreaded
 			original = typeof(GenTemperature);
 			patched = typeof(GenTemperature_Patch);
 			Prefix(original, patched, "EqualizeTemperaturesThroughBuilding");
+			Prefix(original, patched, "SeasonalShiftAmplitudeAt");
 			Prefix(original, patched, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
-
+			
 			//RCellFinder			
 			original = typeof(RCellFinder);
 			patched = typeof(RCellFinder_Patch);
@@ -668,6 +669,11 @@ namespace RimThreaded
 			original = typeof(WealthWatcher);
 			patched = typeof(WealthWatcher_Patch);
 			Prefix(original, patched, "ForceRecount");
+
+			//Medicine
+			original = typeof(Medicine);
+			patched = typeof(Medicine_Patch);
+			Prefix(original, patched, "GetMedicineCountToFullyHeal");
 
 
 			//PERFORMANCE IMPROVEMENTS

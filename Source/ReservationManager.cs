@@ -45,9 +45,13 @@ namespace RimThreaded
 			if (target.ThingDestroyed)
 				Log.Warning("Releasing destroyed thing " + (object)target + " for " + (object)claimant, false);
 			ReservationManager.Reservation reservation1 = (ReservationManager.Reservation)null;
+			ReservationManager.Reservation reservation2;
 			for (int index = 0; index < reservations(__instance).Count; ++index)
 			{
-				ReservationManager.Reservation reservation2 = reservations(__instance)[index];
+				try
+				{
+					reservation2 = reservations(__instance)[index];
+				} catch (ArgumentOutOfRangeException) { break; }
 				if (reservation2.Target == target && reservation2.Claimant == claimant && reservation2.Job == job)
 				{
 					reservation1 = reservation2;
@@ -96,12 +100,16 @@ namespace RimThreaded
 					__result = false;
 					return false;
 				}
+				ReservationManager.Reservation reservation1;
 				for (int index = 0; index < reservations(__instance).Count; ++index)
 				{
-					ReservationManager.Reservation reservation = reservations(__instance)[index];
-					if (null != reservation)
+					try
 					{
-						if (reservation.Target == target && reservation.Layer == layer && reservation.Claimant == claimant && (reservation.StackCount == -1 || reservation.StackCount >= num2))
+						reservation1 = reservations(__instance)[index];
+					} catch (ArgumentOutOfRangeException) { break; }
+					if (null != reservation1)
+					{
+						if (reservation1.Target == target && reservation1.Layer == layer && reservation1.Claimant == claimant && (reservation1.StackCount == -1 || reservation1.StackCount >= num2))
 						{
 							__result = true;
 							return false;
@@ -110,23 +118,27 @@ namespace RimThreaded
 				}
 				int num3 = 0;
 				int num4 = 0;
+				ReservationManager.Reservation reservation2;
 				for (int index = 0; index < reservations(__instance).Count; ++index)
 				{
-					ReservationManager.Reservation reservation = reservations(__instance)[index];
-					if (null != reservation)
+					try
 					{
-						if (!(reservation.Target != target) && reservation.Layer == layer && (reservation.Claimant != claimant && RespectsReservationsOf(claimant, reservation.Claimant)))
+						reservation2 = reservations(__instance)[index];
+					} catch (ArgumentOutOfRangeException) { break; }
+					if (null != reservation2)
+					{
+						if (!(reservation2.Target != target) && reservation2.Layer == layer && (reservation2.Claimant != claimant && RespectsReservationsOf(claimant, reservation2.Claimant)))
 						{
-							if (reservation.MaxPawns != maxPawns)
+							if (reservation2.MaxPawns != maxPawns)
 							{
 								__result = false;
 								return false;
 							}
 							++num3;
-							if (reservation.StackCount == -1)
+							if (reservation2.StackCount == -1)
 								num4 += num1;
 							else
-								num4 += reservation.StackCount;
+								num4 += reservation2.StackCount;
 							if (num3 >= maxPawns || num2 + num4 > num1)
 							{
 								__result = false;
@@ -151,9 +163,13 @@ namespace RimThreaded
 				__result = null;
 				return false;
 			}
+			ReservationManager.Reservation reservation;
 			for (int i = 0; i < reservations(__instance).Count; i++)
 			{
-				ReservationManager.Reservation reservation = reservations(__instance)[i];
+				try
+				{
+					reservation = reservations(__instance)[i];
+				} catch (ArgumentOutOfRangeException) { break; }
 				if(null == reservation)
                 {
 					continue;
@@ -186,18 +202,22 @@ namespace RimThreaded
 			}
 			int num1 = target.HasThing ? target.Thing.stackCount : 1;
 			int num2 = stackCount == -1 ? num1 : stackCount;
+			ReservationManager.Reservation reservation1;
 			for (int index = 0; index < reservations(__instance).Count; ++index)
 			{
-				ReservationManager.Reservation reservation = reservations(__instance)[index];
-				if(null == reservation)
+				try
+				{
+					reservation1 = reservations(__instance)[index];
+				} catch (ArgumentOutOfRangeException) { break; }
+				if(null == reservation1)
                 {
 					continue;
                 }
 				//if (reservation.Target == target && reservation.Claimant == claimant && (reservation.Job == job && reservation.Layer == layer) && (reservation.StackCount == -1 || reservation.StackCount >= num2))
-				bool test1 = reservation.Target == target;
-				bool test2 = reservation.Claimant == claimant;
-				bool test3 = reservation.Job == job && reservation.Layer == layer;
-				bool test4 = reservation.StackCount == -1 || reservation.StackCount >= num2;
+				bool test1 = reservation1.Target == target;
+				bool test2 = reservation1.Claimant == claimant;
+				bool test3 = reservation1.Job == job && reservation1.Layer == layer;
+				bool test4 = reservation1.StackCount == -1 || reservation1.StackCount >= num2;
 				if (test1 && test2 && test3 && test4) 
 				{
 					__result = true;
@@ -216,11 +236,20 @@ namespace RimThreaded
 				CanReserve(__instance, ref canReserveResult, claimant, target, maxPawns, stackCount, layer, true);
 				if (job != null && job.playerForced && canReserveResult)
 				{
-					reservations(__instance).Add(new ReservationManager.Reservation(claimant, job, maxPawns, stackCount, target, layer));
-					foreach (ReservationManager.Reservation reservation in reservations(__instance).ToList<ReservationManager.Reservation>())
+					lock (reservations(__instance))
 					{
-						if (reservation.Target == target && reservation.Claimant != claimant && (reservation.Layer == layer && RespectsReservationsOf(claimant, reservation.Claimant)))
-							reservation.Claimant.jobs.EndCurrentOrQueuedJob(reservation.Job, JobCondition.InterruptForced, true);
+						reservations(__instance).Add(new ReservationManager.Reservation(claimant, job, maxPawns, stackCount, target, layer));
+					}
+					//foreach (ReservationManager.Reservation reservation in reservations(__instance).ToList<ReservationManager.Reservation>())
+					ReservationManager.Reservation reservation2;
+					for (int index = 0; index < reservations(__instance).Count; index++)
+					{
+						try
+                        {
+							reservation2 = reservations(__instance)[index];
+						} catch (ArgumentOutOfRangeException) { break; }
+						if (reservation2.Target == target && reservation2.Claimant != claimant && (reservation2.Layer == layer && RespectsReservationsOf(claimant, reservation2.Claimant)))
+							reservation2.Claimant.jobs.EndCurrentOrQueuedJob(reservation2.Job, JobCondition.InterruptForced, true);
 					}
 					__result = true;
 					return false;
@@ -287,10 +316,14 @@ namespace RimThreaded
 				__result = LocalTargetInfo.Invalid;
 				return false;
 			}
-			ReservationManager.Reservation[] reservations2 = reservations(__instance).ToArray();
-			for (int i = 0; i < reservations2.Length; i++)
+			//ReservationManager.Reservation[] reservations2 = reservations(__instance).ToArray();
+			ReservationManager.Reservation r;
+			for (int i = 0; i < reservations(__instance).Count; i++)
 			{
-				ReservationManager.Reservation r = reservations2[i];
+				try
+				{
+					r = reservations(__instance)[i];
+				} catch (ArgumentOutOfRangeException) { break; }
 				if (null != r)
 				{
 					if (r.Claimant == claimant)

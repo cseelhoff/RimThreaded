@@ -33,6 +33,11 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.31  
+-Added performance optimization to GenTemperature - SeasonalShiftAmplitudeAt  
+-Fixed bug in Medicine - GetMedicineCountToFullyHeal  
+-Fixed bugs in ReservationManager  
+
 Version 1.0.30
 -Fixed bug in WealthWatcher - ForceRecount
 -Fixed bug in BeautyUtility - AverageBeautyPerceptible
