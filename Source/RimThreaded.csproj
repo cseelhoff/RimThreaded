@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="Medicine.cs" />
     <Compile Include="WealthWatcher.cs" />
     <Compile Include="GenRadial.cs" />
     <Compile Include="RegionAndRoomUpdater.cs" />
