@@ -664,6 +664,11 @@ namespace RimThreaded
 			patched = typeof(GenRadial_Patch);
 			Prefix(original, patched, "ProcessEquidistantCells");
 
+			//WealthWatcher
+			original = typeof(WealthWatcher);
+			patched = typeof(WealthWatcher_Patch);
+			Prefix(original, patched, "ForceRecount");
+
 
 			//PERFORMANCE IMPROVEMENTS
 

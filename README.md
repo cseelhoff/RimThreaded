@@ -33,6 +33,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.30
+-Fixed bug in WealthWatcher - ForceRecount
+-Fixed bug in BeautyUtility - AverageBeautyPerceptible
+
 Version 1.0.29  
 -Fixed bug in Fire (rain was not extinguishing)  
 -Fixed bug in SituationalThoughtHandler  
