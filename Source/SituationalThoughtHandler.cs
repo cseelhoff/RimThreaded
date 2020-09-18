@@ -21,6 +21,11 @@ namespace RimThreaded
         public static AccessTools.FieldRef<SituationalThoughtHandler, List<Thought_Situational>> cachedThoughts =
             AccessTools.FieldRefAccess<SituationalThoughtHandler, List<Thought_Situational>>("cachedThoughts");
 
+        public static void Postfix_Constructor(SituationalThoughtHandler __instance, Pawn pawn)
+        {
+            this_cachedSocialThoughts[__instance] = new Dictionary<Pawn, CachedSocialThoughts>();
+        }
+
         public class CachedSocialThoughts
         {
             public List<Thought_SituationalSocial> thoughts = new List<Thought_SituationalSocial>();
