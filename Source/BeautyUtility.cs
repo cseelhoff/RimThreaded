@@ -33,7 +33,7 @@ namespace RimThreaded
                     cells = BeautyUtility.beautyRelevantCells[index];
                 }
                 catch (ArgumentOutOfRangeException) { break; }
-                num1 += BeautyUtility.CellBeauty(BeautyUtility.beautyRelevantCells[index], map, tempCountedThings);
+                num1 += BeautyUtility.CellBeauty(cells, map, tempCountedThings);
                 ++num2;
             }
             //BeautyUtility.tempCountedThings.Clear();
