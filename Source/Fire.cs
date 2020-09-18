@@ -20,8 +20,8 @@ namespace RimThreaded
             AccessTools.StaticFieldRefAccess<int>(typeof(Fire), "fireCount");
         public static IntRange SmokeIntervalRange =
             AccessTools.StaticFieldRefAccess<IntRange>(typeof(Fire), "SmokeIntervalRange");
-        public static List<Thing> flammableList =
-            AccessTools.StaticFieldRefAccess<List<Thing>>(typeof(Fire), "flammableList");
+        //public static List<Thing> flammableList =
+            //AccessTools.StaticFieldRefAccess<List<Thing>>(typeof(Fire), "flammableList");
 
         public static AccessTools.FieldRef<Fire, float> flammabilityMax =
             AccessTools.FieldRefAccess<Fire, float>("flammabilityMax");
@@ -186,9 +186,10 @@ namespace RimThreaded
                     if ((double)__instance.Map.weatherManager.RainRate <= 0.00999999977648258 || !VulnerableToRain(__instance) || (double)Rand.Value >= 6.0)
                         return false;
                     //__instance.TakeDamage(new DamageInfo(DamageDefOf.Extinguish, 10f, 0.0f, -1f, (Thing)null, (BodyPartRecord)null, (ThingDef)null, DamageInfo.SourceCategory.ThingOrUnknown, (Thing)null));
-                    DamageInfo daminfo = new DamageInfo(DamageDefOf.Extinguish, 10f, 0.0f, -1f, (Thing)null, (BodyPartRecord)null, (ThingDef)null, DamageInfo.SourceCategory.ThingOrUnknown, (Thing)null);
-                    DamageWorker.DamageResult dresult = new DamageWorker.DamageResult();
-                    Thing_Patch.TakeDamage(__instance, ref dresult, daminfo);
+                    //DamageInfo daminfo = new DamageInfo(DamageDefOf.Extinguish, 10f, 0.0f, -1f, (Thing)null, (BodyPartRecord)null, (ThingDef)null, DamageInfo.SourceCategory.ThingOrUnknown, (Thing)null);
+                    __instance.TakeDamage(new DamageInfo(DamageDefOf.Extinguish, 10f, 0.0f, -1f, (Thing)null, (BodyPartRecord)null, (ThingDef)null, DamageInfo.SourceCategory.ThingOrUnknown, (Thing)null));
+                    //DamageWorker.DamageResult dresult = new DamageWorker.DamageResult();
+                    //Thing_Patch.TakeDamage(__instance, ref dresult, daminfo);
                 }
 
             }

@@ -538,6 +538,9 @@ namespace RimThreaded
 			Prefix(original, patched, "AppendSocialThoughts");
 			Prefix(original, patched, "Notify_SituationalThoughtsDirty");
 			Prefix(original, patched, "RemoveExpiredThoughtsFromCache");
+			ConstructorInfo constructorMethod3 = original.GetConstructor(new Type[] { typeof(Pawn) });
+			MethodInfo cpMethod3 = patched.GetMethod("Postfix_Constructor");
+			harmony.Patch(constructorMethod3, postfix: new HarmonyMethod(cpMethod3));
 
 			//GenAdjFast
 			original = typeof(GenAdjFast);
