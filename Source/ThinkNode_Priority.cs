@@ -16,16 +16,21 @@ namespace RimThreaded
 
         public static bool TryIssueJobPackage(ThinkNode_Priority __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
         {
+	    ThinkNode subNode;
             for (int index = 0; index < __instance.subNodes.Count; ++index )
             {
+		try {
+			subNode = __instance.subNodes[index];
+		} catch (ArgumentOutOfRange) { break; }
                 try
-                {
-                    var subNode = __instance.subNodes[index];
+                {                    
                     if (subNode != null)
                     {
                         ThinkResult thinkResult = subNode.TryIssueJobPackage(pawn, jobParams);
-                        if (thinkResult.IsValid)
+                        if (thinkResult.IsValid) {
                             __result = thinkResult;
+			    return false;
+			}
                     }
                 }
                 catch (Exception ex)
