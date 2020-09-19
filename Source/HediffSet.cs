@@ -17,7 +17,8 @@ namespace RimThreaded
 		{
 			for (int i = 0; i < __instance.hediffs.Count; i++)
 			{
-				if (__instance.hediffs[i].Part == part && __instance.hediffs[i] is Hediff_MissingPart)
+				Hediff hediff = __instance.hediffs[i];
+				if (hediff is Hediff_MissingPart && hediff?.Part == part)
 				{
 					__result = true;
 					return false;

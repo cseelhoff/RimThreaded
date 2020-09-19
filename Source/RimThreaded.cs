@@ -145,6 +145,11 @@ namespace RimThreaded
 				typeof(RegionType)
 			});
 
+			//ThinkNode_Priority
+			original = typeof(ThinkNode_Priority);
+			patched = typeof(ThinkNode_Priority_Patch);
+			Prefix(original, patched, "TryIssueJobPackage");
+
 			//ThinkNode_PrioritySorter
 			original = typeof(ThinkNode_PrioritySorter);
 			patched = typeof(ThinkNode_PrioritySorter_Patch);
