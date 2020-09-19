@@ -17,9 +17,12 @@ namespace RimThreaded
 
             HashSet<RoomGroup> fastProcessedRoomGroups = new HashSet<RoomGroup>();
             List<Room> allRooms = map(__instance).regionGrid.allRooms;
+            RoomGroup group;
             for (int index = 0; index < allRooms.Count; ++index)
             {
-                RoomGroup group = allRooms[index].Group;
+                try {
+                    group = allRooms[index].Group;
+                } catch(ArgumentOutOfRange) { break; }
                 if (!fastProcessedRoomGroups.Contains(group))
                 {
                     group.TempTracker.EqualizeTemperature();
