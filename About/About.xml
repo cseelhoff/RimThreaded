@@ -10,19 +10,18 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.31
-    -Added performance optimization to GenTemperature - SeasonalShiftAmplitudeAt
-    -Fixed bug in Medicine - GetMedicineCountToFullyHeal
-    -Fixed bugs in ReservationManager
+    Version 1.0.32 - All credit goes to bookdude13. Thanks bud!
+    -Fixed bug in ThinkNode_Priority - TryIssueJobPackage
+    -Fixed bug in HediffSet - PartIsMissing
+    -Fixed bug in MapTemperature - MapTemperatureTick
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.
 
     NOTE: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
 
-    LOAD ORDER:
-    After: Core, Royalty, and Harmony
-    Before: Everything else, most likely
+    LOAD ORDER/MOD COMPATIBILITY:
+    https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!
 
     BUGS:
     https://github.com/cseelhoff/RimThreaded/issues
@@ -36,6 +35,7 @@
 
     Coding:
     Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!
+    Thank you bookdude 13 for your many bugfixes!
     Thank you to Ataman for helping me fix the LVM deep storage bug
 
     Logo:
