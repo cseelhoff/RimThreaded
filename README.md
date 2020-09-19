@@ -24,6 +24,8 @@ And thank you to others in Rimworld community who have posted their bug findings
 
 Coding:  
 Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!  
+Thank you bookdude 13 for your many bugfixes!  
+Thank you to Ataman for helping me fix the LVM deep storage bug  
 
 Logo:  
 Thank you ArchieV1 for the logo! (https://github.com/ArchieV1)  
@@ -32,15 +34,20 @@ Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=3
 Video Review:  
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
-CHANGE LOG:  
+CHANGE LOG: 
+Version 1.0.32 - All credit goes to bookdude13. Thanks bud!  
+-Fixed bug in ThinkNode_Priority - TryIssueJobPackage  
+-Fixed bug in HediffSet - PartIsMissing  
+-Fixed bug in MapTemperature - MapTemperatureTick  
+
 Version 1.0.31  
 -Added performance optimization to GenTemperature - SeasonalShiftAmplitudeAt  
 -Fixed bug in Medicine - GetMedicineCountToFullyHeal  
 -Fixed bugs in ReservationManager  
 
 Version 1.0.30
--Fixed bug in WealthWatcher - ForceRecount
--Fixed bug in BeautyUtility - AverageBeautyPerceptible
+-Fixed bug in WealthWatcher - ForceRecount  
+-Fixed bug in BeautyUtility - AverageBeautyPerceptible  
 
 Version 1.0.29  
 -Fixed bug in Fire (rain was not extinguishing)  

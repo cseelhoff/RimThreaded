@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using Verse;
+using System;
 
 namespace RimThreaded
 {
@@ -22,7 +23,7 @@ namespace RimThreaded
             {
                 try {
                     group = allRooms[index].Group;
-                } catch(ArgumentOutOfRange) { break; }
+                } catch(ArgumentOutOfRangeException) { break; }
                 if (!fastProcessedRoomGroups.Contains(group))
                 {
                     group.TempTracker.EqualizeTemperature();

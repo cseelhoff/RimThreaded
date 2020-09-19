@@ -20,7 +20,7 @@ namespace RimThreaded
 			{
 				try {
 					hediff = __instance.hediffs[i];
-				} catch (ArgumentOutOfRange) { break; }
+				} catch (ArgumentOutOfRangeException) { break; }
 				if (hediff is Hediff_MissingPart && hediff?.Part == part)
 				{
 					__result = true;

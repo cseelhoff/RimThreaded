@@ -208,7 +208,6 @@ namespace RimThreaded
 			original = typeof(GenTemperature);
 			patched = typeof(GenTemperature_Patch);
 			Prefix(original, patched, "EqualizeTemperaturesThroughBuilding");
-			Prefix(original, patched, "SeasonalShiftAmplitudeAt");
 			Prefix(original, patched, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
 			
 			//RCellFinder			
@@ -702,6 +701,11 @@ namespace RimThreaded
 			original = typeof(Pawn_MindState);
 			patched = typeof(Pawn_MindState_Patch);
 			Prefix(original, patched, "MindStateTick");
+			
+			//GenTemperature			
+			original = typeof(GenTemperature);
+			patched = typeof(GenTemperature_Patch);
+			Prefix(original, patched, "SeasonalShiftAmplitudeAt");
 			
 			Log.Message("RimThreaded patching is complete.");
 		}

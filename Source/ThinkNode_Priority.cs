@@ -19,9 +19,9 @@ namespace RimThreaded
 	    ThinkNode subNode;
             for (int index = 0; index < __instance.subNodes.Count; ++index )
             {
-		try {
-			subNode = __instance.subNodes[index];
-		} catch (ArgumentOutOfRange) { break; }
+		        try {
+			        subNode = __instance.subNodes[index];
+		        } catch (ArgumentOutOfRangeException) { break; }
                 try
                 {                    
                     if (subNode != null)
@@ -29,8 +29,8 @@ namespace RimThreaded
                         ThinkResult thinkResult = subNode.TryIssueJobPackage(pawn, jobParams);
                         if (thinkResult.IsValid) {
                             __result = thinkResult;
-			    return false;
-			}
+			                return false;
+			            }
                     }
                 }
                 catch (Exception ex)
@@ -38,7 +38,6 @@ namespace RimThreaded
                     Log.Error("Exception in " + (object)__instance.GetType() + " TryIssueJobPackage: " + ex.ToString());
                 }
             }
-
             __result = ThinkResult.NoJob;
             return false;
 		}
