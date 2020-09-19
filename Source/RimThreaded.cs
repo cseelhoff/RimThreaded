@@ -74,7 +74,7 @@ namespace RimThreaded
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
-
+			
 			//ContentFinderTexture2D			
 			original = typeof(ContentFinder<Texture2D>);
 			patched = typeof(ContentFinder_Texture2D_Patch);
@@ -497,6 +497,11 @@ namespace RimThreaded
 			Prefix(original, patched, "SpawnedPawnsInFaction");
 			Prefix(original, patched, "get_AllPawnsUnspawned");
 			Prefix(original, patched, "get_SpawnedPawnsWithAnyHediff");
+
+			//MapTemperatures
+			original = typeof(MapTemperature);
+			patched = typeof(MapTemperature_Patch);
+			Prefix(original, patched, "MapTemperatureTick");
 
 			//Region
 			original = typeof(Region);
