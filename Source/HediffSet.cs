@@ -15,9 +15,13 @@ namespace RimThreaded
 	{
 		public static bool PartIsMissing(HediffSet __instance, ref bool __result, BodyPartRecord part)
 		{
+			Hediff hediff;
 			for (int i = 0; i < __instance.hediffs.Count; i++)
 			{
-				if (__instance.hediffs[i].Part == part && __instance.hediffs[i] is Hediff_MissingPart)
+				try {
+					hediff = __instance.hediffs[i];
+				} catch (ArgumentOutOfRange) { break; }
+				if (hediff is Hediff_MissingPart && hediff?.Part == part)
 				{
 					__result = true;
 					return false;
