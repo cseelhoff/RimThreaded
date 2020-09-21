@@ -35,6 +35,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG: 
+Version 1.0.33  
+-Fixed bug in GenTemperature - SeasonalShiftAmplitudeAt bug #131  
+-Fixed bug in WorkGiver_DoBill  
+
 Version 1.0.32 - All credit goes to bookdude13. Thanks bud!  
 -Fixed bug in ThinkNode_Priority - TryIssueJobPackage  
 -Fixed bug in HediffSet - PartIsMissing  

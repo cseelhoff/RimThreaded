@@ -19,7 +19,7 @@ namespace RimThreaded
 		public static RoomGroup[] beqRoomGroups = AccessTools.StaticFieldRefAccess<RoomGroup[]>(typeof(GenTemperature), "beqRoomGroups");
 		public static bool SeasonalShiftAmplitudeAt(ref float __result, int tile)
 		{
-			if (SeasonalShiftAmplitudeCache.TryGetValue(tile, out __result))
+			if (!SeasonalShiftAmplitudeCache.TryGetValue(tile, out __result))
 			{
 				__result = (double)Find.WorldGrid.LongLatOf(tile).y >= 0.0 ?
 					TemperatureTuning.SeasonalTempVariationCurve.Evaluate(Find.WorldGrid.DistanceFromEquatorNormalized(tile)) :
