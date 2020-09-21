@@ -684,6 +684,11 @@ namespace RimThreaded
 			patched = typeof(Medicine_Patch);
 			Prefix(original, patched, "GetMedicineCountToFullyHeal");
 
+			//WorkGiver_DoBill
+			original = typeof(WorkGiver_DoBill);
+			patched = typeof(WorkGiver_DoBill_Patch);
+			Prefix(original, patched, "TryFindBestBillIngredients");
+
 
 			//PERFORMANCE IMPROVEMENTS
 
