@@ -37,10 +37,13 @@ namespace RimThreaded
                 {
                     pawnDestinationReservation = list[i];
                 } catch (ArgumentException) { break; }
-                if (pawnDestinationReservation.claimant == p && pawnDestinationReservation.obsolete)
+                if (null != pawnDestinationReservation)
                 {
-                    __result = pawnDestinationReservation.target;
-                    return false;
+                    if (pawnDestinationReservation.claimant == p && pawnDestinationReservation.obsolete)
+                    {
+                        __result = pawnDestinationReservation.target;
+                        return false;
+                    }
                 }
             }
             __result = IntVec3.Invalid;

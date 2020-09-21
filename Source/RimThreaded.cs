@@ -698,6 +698,11 @@ namespace RimThreaded
 			patched = typeof(ThingCountUtility_Patch);
 			Prefix(original, patched, "AddToList");
 
+			//WorkGiver_ConstructDeliverResources
+			original = typeof(WorkGiver_ConstructDeliverResources);
+			patched = typeof(WorkGiver_ConstructDeliverResources_Patch);
+			Prefix(original, patched, "ResourceDeliverJobFor");
+
 
 			//PERFORMANCE IMPROVEMENTS
 

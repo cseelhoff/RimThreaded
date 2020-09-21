@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="WorkGiver_ConstructDeliverResources.cs" />
     <Compile Include="ThingCountUtility.cs" />
     <Compile Include="JobGiver_Work.cs" />
     <Compile Include="WorldObjectsHolder.cs" />
