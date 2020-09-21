@@ -10,15 +10,11 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.34
-    -Added multithreading for WorldObjectsHolderTick
-    -Added multithreading for WorldPawnsTick
-    -Fixed bug in DynamicDrawManager
-    -Fixed bug in JobGiver_Work
-    -Fixed bug in ReservationManager
-    -Fixed bug in Room
-    -Fixed bug in ThingCountUtility
-    -Simplified code in Ticklist.Tick
+    Version 1.0.35
+    -Fixed multithreading for WorldObjectsHolderTick
+    -Fixed multithreading for WorldPawnsTick
+    -Fixed bug in PawnDestinationReservationManager
+    -Fixed bug in WorkGiver_ConstructDeliverResources
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.

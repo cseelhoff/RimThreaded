@@ -346,7 +346,7 @@ namespace RimThreaded
                         }
                     }
                 }
-                /*
+                
                 while (tmpPawnsToTick.TryDequeue(out Pawn pawn))
                 {
                     try
@@ -372,7 +372,7 @@ namespace RimThreaded
                 {
                     worldObject.Tick();
                 }
-                */
+                
                 /*
                 while(drawQueue.TryDequeue(out Thing drawThing))
                 {

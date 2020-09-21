@@ -35,6 +35,12 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.35  
+-Fixed multithreading for WorldObjectsHolderTick  
+-Fixed multithreading for WorldPawnsTick  
+-Fixed bug in PawnDestinationReservationManager  
+-Fixed bug in WorkGiver_ConstructDeliverResources  
+
 Version 1.0.34  
 -Added multithreading for WorldObjectsHolderTick  
 -Added multithreading for WorldPawnsTick  
