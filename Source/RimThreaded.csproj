@@ -70,6 +70,10 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="ThingCountUtility.cs" />
+    <Compile Include="JobGiver_Work.cs" />
+    <Compile Include="WorldObjectsHolder.cs" />
+    <Compile Include="Rand_Transpile.cs" />
     <Compile Include="WorkGiver_DoBill.cs" />
     <Compile Include="MapTemperature.cs" />
     <Compile Include="Medicine.cs" />

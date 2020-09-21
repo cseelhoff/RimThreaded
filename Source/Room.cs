@@ -13,34 +13,37 @@ namespace RimThreaded
 			AccessTools.FieldRefAccess<Room, IEnumerator<IntVec3>>("cachedOpenRoofState");
 		public static bool OpenRoofCountStopAt(Room __instance, ref int __result, int threshold)
 		{
-			if (cachedOpenRoofCount(__instance) == -1 && cachedOpenRoofState(__instance) == null)
+            IEnumerator<IntVec3> cachedOpenRoofState2 = __instance.Cells.GetEnumerator();
+			int cachedOpenRoofCount2 = -1;
+
+			if (cachedOpenRoofCount2 == -1 && cachedOpenRoofState2 == null)
 			{
-				cachedOpenRoofCount(__instance) = 0;
-				cachedOpenRoofState(__instance) = __instance.Cells.GetEnumerator();
+				cachedOpenRoofCount2 = 0;
+				cachedOpenRoofState2 = __instance.Cells.GetEnumerator();
 			}
-			if (cachedOpenRoofCount(__instance) < threshold && cachedOpenRoofState(__instance) != null)
+			if (cachedOpenRoofCount2 < threshold && cachedOpenRoofState2 != null)
 			{
 				RoofGrid roofGrid = __instance.Map.roofGrid;
 				if (null != roofGrid)
 				{
-					while (cachedOpenRoofCount(__instance) < threshold && cachedOpenRoofState(__instance).MoveNext())
+					while (cachedOpenRoofCount2 < threshold && cachedOpenRoofState2.MoveNext())
 					{
-                        IntVec3 currentRoofState = cachedOpenRoofState(__instance).Current;
+                        IntVec3 currentRoofState = cachedOpenRoofState2.Current;
 						if (null != currentRoofState)
 						{
 							if (!roofGrid.Roofed(currentRoofState))
 							{
-								cachedOpenRoofCount(__instance)++;
+								cachedOpenRoofCount2++;
 							}
 						}
 					}
-					if (cachedOpenRoofCount(__instance) < threshold)
+					if (cachedOpenRoofCount2 < threshold)
 					{
-						cachedOpenRoofState(__instance) = null;
+						cachedOpenRoofState2 = null;
 					}
 				}
 			}
-			__result = cachedOpenRoofCount(__instance);
+			__result = cachedOpenRoofCount2;
 			return false;
 		}
 

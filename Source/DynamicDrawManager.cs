@@ -12,9 +12,11 @@ namespace RimThreaded
     
     public class Verse_DynamicDrawManager_Patch
     {
-        public static ConcurrentDictionary<DynamicDrawManager, ConcurrentDictionary<Thing, Thing>> drawThings = new ConcurrentDictionary<DynamicDrawManager, ConcurrentDictionary<Thing, Thing>>();
+        //public static ConcurrentDictionary<DynamicDrawManager, ConcurrentDictionary<Thing, Thing>> drawThings = new ConcurrentDictionary<DynamicDrawManager, ConcurrentDictionary<Thing, Thing>>();
         public static AccessTools.FieldRef<DynamicDrawManager, Map> map =
             AccessTools.FieldRefAccess<DynamicDrawManager, Map>("map");
+        public static AccessTools.FieldRef<DynamicDrawManager, HashSet<Thing>> drawThings =
+            AccessTools.FieldRefAccess<DynamicDrawManager, HashSet<Thing>>("drawThings");
         public static AccessTools.FieldRef<DynamicDrawManager, bool> drawingNow =
             AccessTools.FieldRefAccess<DynamicDrawManager, bool>("drawingNow");
 
@@ -24,7 +26,10 @@ namespace RimThreaded
             {
                 if (drawingNow(__instance))
                     Log.Warning("Cannot register drawable " + (object)t + " while drawing is in progress. Things shouldn't be spawned in Draw methods.", false);
-                drawThings.GetOrAdd(__instance, new ConcurrentDictionary<Thing, Thing>()).TryAdd(t, t);
+                lock (drawThings(__instance))
+                {
+                    drawThings(__instance).Add(t);
+                }
             }
             return false;
         }
@@ -35,7 +40,10 @@ namespace RimThreaded
             {
                 if (drawingNow(__instance))
                     Log.Warning("Cannot deregister drawable " + (object)t + " while drawing is in progress. Things shouldn't be despawned in Draw methods.", false);
-                drawThings.GetOrAdd(__instance, new ConcurrentDictionary<Thing, Thing>()).TryRemove(t, out _);
+                lock (drawThings(__instance))
+                {
+                    drawThings(__instance).Remove(t);
+                }
             }
             return false;
         }
@@ -52,10 +60,27 @@ namespace RimThreaded
                 cellRect.ClipInsideMap(map(__instance));
                 cellRect = cellRect.ExpandedBy(1);
                 CellIndices cellIndices = map(__instance).cellIndices;
-                foreach (Thing drawThing in drawThings.GetOrAdd(__instance, new ConcurrentDictionary<Thing, Thing>()).Values)
+                SnowGrid snowGrid = map(__instance).snowGrid;
+
+                /*
+                Ticklist_Patch.fogGrid = map(__instance).fogGrid.fogGrid;
+                Ticklist_Patch.cellRect = Find.CameraDriver.CurrentViewRect;
+                Ticklist_Patch.cellRect.ClipInsideMap(map(__instance));
+                Ticklist_Patch.cellRect = Ticklist_Patch.cellRect.ExpandedBy(1);
+                Ticklist_Patch.cellIndices = map(__instance).cellIndices;
+                Ticklist_Patch.snowGrid = map(__instance).snowGrid;
+                Ticklist_Patch.drawQueue = new ConcurrentQueue<Thing>(drawThings(__instance));
+                Ticklist_Patch.startWorkerThreads();
+                */
+                //Thing drawThing;
+                //Thing[] drawThingsArray;
+
+                //for (int index = 0; index < drawThingsArray.Length; index++)
+                foreach (Thing drawThing in drawThings(__instance))
                 {
+                    //drawThing = drawThingsArray[index];
                     IntVec3 position = drawThing.Position;
-                    if ((cellRect.Contains(position) || drawThing.def.drawOffscreen) && (!fogGrid[cellIndices.CellToIndex(position)] || drawThing.def.seeThroughFog) && ((double)drawThing.def.hideAtSnowDepth >= 1.0 || (double)map(__instance).snowGrid.GetDepth(position) <= (double)drawThing.def.hideAtSnowDepth))
+                    if ((cellRect.Contains(position) || drawThing.def.drawOffscreen) && (!fogGrid[cellIndices.CellToIndex(position)] || drawThing.def.seeThroughFog) && ((double)drawThing.def.hideAtSnowDepth >= 1.0 || (double)snowGrid.GetDepth(position) <= (double)drawThing.def.hideAtSnowDepth))
                     {
                         try
                         {
@@ -67,6 +92,7 @@ namespace RimThreaded
                         }
                     }
                 }
+                
             }
             catch (Exception ex)
             {
@@ -78,7 +104,7 @@ namespace RimThreaded
 
         public static bool LogDynamicDrawThings(DynamicDrawManager __instance)
         {
-            Log.Message(DebugLogsUtility.ThingListToUniqueCountString((IEnumerable<Thing>)drawThings.Values), false);
+            Log.Message(DebugLogsUtility.ThingListToUniqueCountString(drawThings(__instance)), false);
             return false;
         }
 
