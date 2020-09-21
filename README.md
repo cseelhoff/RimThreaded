@@ -34,7 +34,17 @@ Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=3
 Video Review:  
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
-CHANGE LOG: 
+CHANGE LOG:  
+Version 1.0.34  
+-Added multithreading for WorldObjectsHolderTick  
+-Added multithreading for WorldPawnsTick  
+-Fixed bug in DynamicDrawManager  
+-Fixed bug in JobGiver_Work  
+-Fixed bug in ReservationManager  
+-Fixed bug in Room  
+-Fixed bug in ThingCountUtility  
+-Simplified code in Ticklist.Tick  
+
 Version 1.0.33  
 -Fixed bug in GenTemperature - SeasonalShiftAmplitudeAt bug #131  
 -Fixed bug in WorkGiver_DoBill  

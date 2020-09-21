@@ -237,10 +237,9 @@ namespace RimThreaded
 			Prefix(original, patched, "ReleaseAllClaimedBy");
 			Prefix(original, patched, "ReleaseClaimedBy");
 			Prefix(original, patched, "CanReserve");
-			Prefix(original, patched, "FirstObsoleteReservationFor");
-			
+			Prefix(original, patched, "FirstObsoleteReservationFor");			
 
-			//DynamicDrawManager - uses conncurrent dictionary - could be improved?
+			//DynamicDrawManager
 			original = typeof(DynamicDrawManager);
 			patched = typeof(Verse_DynamicDrawManager_Patch);
 			Prefix(original, patched, "RegisterDrawable");
@@ -689,6 +688,16 @@ namespace RimThreaded
 			patched = typeof(WorkGiver_DoBill_Patch);
 			Prefix(original, patched, "TryFindBestBillIngredients");
 
+			//JobGiver_Work
+			original = typeof(JobGiver_Work);
+			patched = typeof(JobGiver_Work_Patch);
+			Prefix(original, patched, "TryIssueJobPackage");
+
+			//ThingCountUtility
+			original = typeof(ThingCountUtility);
+			patched = typeof(ThingCountUtility_Patch);
+			Prefix(original, patched, "AddToList");
+
 
 			//PERFORMANCE IMPROVEMENTS
 
@@ -702,7 +711,7 @@ namespace RimThreaded
 			patched = typeof(HediffGiver_Hypothermia_Patch);
 			Prefix(original, patched, "OnIntervalPassed");
 
-			//Pawn_MindState - hack. replaced (GenLocalDate.DayTick((Thing)__instance.pawn) interactions today with always 0 for speedup
+			//Pawn_MindState - hack for speedup. replaced (GenLocalDate.DayTick((Thing)__instance.pawn) interactions today with always 0
 			original = typeof(Pawn_MindState);
 			patched = typeof(Pawn_MindState_Patch);
 			Prefix(original, patched, "MindStateTick");
@@ -711,7 +720,17 @@ namespace RimThreaded
 			original = typeof(GenTemperature);
 			patched = typeof(GenTemperature_Patch);
 			Prefix(original, patched, "SeasonalShiftAmplitudeAt");
-			
+
+			//WorldObjectsHolder
+			original = typeof(WorldObjectsHolder);
+			patched = typeof(WorldObjectsHolder_Patch);
+			Prefix(original, patched, "WorldObjectsHolderTick");
+
+			//WorldPawns
+			original = typeof(WorldPawns);
+			patched = typeof(WorldPawns_Patch);
+			Prefix(original, patched, "WorldPawnsTick");
+
 			Log.Message("RimThreaded patching is complete.");
 		}
 

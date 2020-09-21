@@ -8,6 +8,8 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using System.Collections.Concurrent;
+using static Verse.AI.ReservationManager;
+using UnityEngine;
 
 namespace RimThreaded
 {
@@ -254,8 +256,12 @@ namespace RimThreaded
 					__result = true;
 					return false;
 				}
+				//HACK - Probably because Reserve is no longer valid after CanReserve time delay with multiple threads.
 				if (errorOnFailed)
-					LogCouldNotReserveError(__instance, claimant, job, target, maxPawns, stackCount, layer);
+				{
+					//LogCouldNotReserveError(__instance, claimant, job, target, maxPawns, stackCount, layer);
+					Log.Warning("ReservationManager.Reserve cannot reserve. This is likely because reservation is no longer valid after CanReserve was called due to time delay with multiple threads.");
+				}
 				__result = false;
 				return false;
 			}
@@ -308,6 +314,77 @@ namespace RimThreaded
 				text = text + " Physical interaction reserver: " + pawn2.ToStringSafe<Pawn>();
 			Log.Error(text, false);
 		}
+		public static bool CanReserveStack(ReservationManager __instance, ref int __result, Pawn claimant, LocalTargetInfo target, int maxPawns = 1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
+		{
+			if (claimant == null)
+			{
+				Log.Error("CanReserve with null claimant");
+				__result = 0;
+				return false;
+			}
+
+			if (!claimant.Spawned || claimant.Map != map(__instance))
+			{
+				__result = 0;
+				return false;
+			}
+
+			if (!target.IsValid || target.ThingDestroyed)
+			{
+				__result = 0;
+				return false;
+			}
+
+			if (target.HasThing && target.Thing.SpawnedOrAnyParentSpawned && target.Thing.MapHeld != map(__instance))
+			{
+				__result = 0;
+				return false;
+			}
+
+			int num = (!target.HasThing) ? 1 : target.Thing.stackCount;
+			int num2 = 0;
+			if (!ignoreOtherReservations)
+			{
+				if (map(__instance).physicalInteractionReservationManager.IsReserved(target) && !map(__instance).physicalInteractionReservationManager.IsReservedBy(claimant, target))
+				{
+					__result = 0;
+					return false;
+				}
+
+				int num3 = 0;
+				Reservation reservation;
+				for (int i = 0; i < reservations(__instance).Count; i++)
+				{
+					try
+					{
+						reservation = reservations(__instance)[i];
+					} catch(ArgumentOutOfRangeException) { break; }
+					if (null != reservation)
+					{
+						if (!(reservation.Target != target) && reservation.Layer == layer && reservation.Claimant != claimant && RespectsReservationsOf(claimant, reservation.Claimant))
+						{
+							if (reservation.MaxPawns != maxPawns)
+							{
+								__result = 0;
+								return false;
+							}
+
+							num3++;
+							num2 = ((reservation.StackCount != -1) ? (num2 + reservation.StackCount) : (num2 + num));
+							if (num3 >= maxPawns || num2 >= num)
+							{
+								__result = 0;
+								return false;
+							}
+						}
+					}
+				}
+			}
+
+			__result = Mathf.Max(num - num2, 0);
+			return false;
+		}
+
 
 		public static bool FirstReservationFor(ReservationManager __instance, ref LocalTargetInfo __result, Pawn claimant)
 		{

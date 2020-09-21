@@ -1,4 +1,6 @@
 ﻿using HarmonyLib;
+using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -43,6 +45,17 @@ namespace RimThreaded
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
+
+        public static ConcurrentQueue<Thing> drawQueue = new ConcurrentQueue<Thing>();
+        public static CellRect cellRect;
+        public static bool[] fogGrid;
+        public static CellIndices cellIndices;
+        public static SnowGrid snowGrid;
+
+        public static ConcurrentQueue<Pawn> tmpPawnsToTick = new ConcurrentQueue<Pawn>();
+
+        public static ConcurrentQueue<WorldObject> tmpWorldObjects = new ConcurrentQueue<WorldObject>();
+        //public static WorldPawns worldPawns;
 
         public static bool allWorkerThreadsFinished = false;
         public static ConcurrentDictionary<int, bool> isThreadWaiting = new ConcurrentDictionary<int, bool>();
@@ -112,18 +125,12 @@ namespace RimThreaded
             thingList1 = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
             thingQueue = new ConcurrentQueue<Thing>(thingList1);
 
-            CreateWorkerThreads();
-            allWorkerThreadsFinished = false;
             CreateMonitorThread();
-            monitorThreadWaitHandle.Set();
-            foreach (EventWaitHandle eventWaitHandle in eventWaitStarts.Values)
-            {
-                eventWaitHandle.Set();
-            }
-
             MainThreadWaitLoop();
+
             return false;            
         }
+
 
         private static void CreateWorkerThread()
         {
@@ -157,15 +164,20 @@ namespace RimThreaded
             }
         }
 
-        private static void CreateMonitorThread()
+        public static void CreateMonitorThread()
         {
             if (null == monitorThread)
             {
+                CreateWorkerThreads();
                 monitorThread = new Thread(() =>
                 {
                     while (true)
                     {
                         monitorThreadWaitHandle.WaitOne();
+                        foreach (EventWaitHandle eventWaitHandle in eventWaitStarts.Values)
+                        {
+                            eventWaitHandle.Set();
+                        }
                         foreach (int tID2 in eventWaitDones.Keys.ToArray())
                         {
                             if (eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone))
@@ -198,9 +210,11 @@ namespace RimThreaded
             }
         }
 
-        private static void MainThreadWaitLoop()
+        public static void MainThreadWaitLoop()
         {
             //bool continueWaiting = true;
+            allWorkerThreadsFinished = false;
+            monitorThreadWaitHandle.Set();
             while (!allWorkerThreadsFinished)
             {
                 mainThreadWaitHandle.WaitOne();
@@ -332,6 +346,50 @@ namespace RimThreaded
                         }
                     }
                 }
+                /*
+                while (tmpPawnsToTick.TryDequeue(out Pawn pawn))
+                {
+                    try
+                    {
+                        pawn.Tick();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 1148571423, false);
+                    }
+                    try
+                    {
+                        if (!pawn.Dead && !pawn.Destroyed && (pawn.IsHashIntervalTick(7500) && !pawn.IsCaravanMember()) && !PawnUtility.IsTravelingInTransportPodWorldObject(pawn))
+                            TendUtility.DoTend(null, pawn, null);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
+                    }
+                }
+
+                while(tmpWorldObjects.TryDequeue(out WorldObject worldObject))
+                {
+                    worldObject.Tick();
+                }
+                */
+                /*
+                while(drawQueue.TryDequeue(out Thing drawThing))
+                {
+                    IntVec3 position = drawThing.Position;
+                    if ((cellRect.Contains(position) || drawThing.def.drawOffscreen) && (!fogGrid[cellIndices.CellToIndex(position)] || drawThing.def.seeThroughFog) && (drawThing.def.hideAtSnowDepth >= 1.0 || snowGrid.GetDepth(position) <= (double)drawThing.def.hideAtSnowDepth))
+                    {
+                        try
+                        {
+                            drawThing.Draw();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Exception drawing " + (object)drawThing + ": " + ex.ToString(), false);
+                        }
+                    }
+                }
+                */
                 eventWaitDone.Set();
             }
         }
