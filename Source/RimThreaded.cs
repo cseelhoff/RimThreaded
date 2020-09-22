@@ -101,20 +101,11 @@ namespace RimThreaded
 			Prefix(original, patched, "TryRangeInclusiveWhere");
 			Prefix(original, patched, "PushState", new Type[] { });
 
-
 			//ThingOwner<Thing> - perf improvement - uses slow method invoke / reflection call
 			original = typeof(ThingOwner<Thing>);
 			patched = typeof(ThingOwnerThing_Patch);
 			Prefix(original, patched, "Remove");
 			Prefix(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
-
-			//Pawn_PathFollower
-			original = typeof(Pawn_PathFollower);
-			patched = typeof(Pawn_PathFollower_Patch);
-			Prefix(original, patched, "GenerateNewPath");
-			//Prefix(original, patched, "NextCellDoorToWaitForOrManuallyOpen");
-			//Prefix(original, patched, "SetupMoveIntoNextCell");
-			//Prefix(original, patched, "TryEnterNextPathCell");
 
 			//RegionListersUpdater
 			original = typeof(RegionListersUpdater);
@@ -583,9 +574,9 @@ namespace RimThreaded
 			original = typeof(PathFinder);
 			patched = typeof(PathFinder_Patch);
 			Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
-			ConstructorInfo constructorMethod2 = original.GetConstructor(new Type[] { typeof(Map) });
-			MethodInfo cpMethod2 = patched.GetMethod("Postfix_Constructor");
-			harmony.Patch(constructorMethod2, postfix: new HarmonyMethod(cpMethod2));
+			//ConstructorInfo constructorMethod2 = original.GetConstructor(new Type[] { typeof(Map) });
+			//MethodInfo cpMethod2 = patched.GetMethod("Postfix_Constructor");
+			//harmony.Patch(constructorMethod2, postfix: new HarmonyMethod(cpMethod2));
 
 			//WorldPawns
 			original = typeof(WorldPawns);
