@@ -155,7 +155,6 @@
     <Compile Include="PawnUtility.cs" />
     <Compile Include="Pawn_MeleeVerbs.cs" />
     <Compile Include="Pawn_MindState.cs" />
-    <Compile Include="Pawn_PathFollower.cs" />
     <Compile Include="Pawn_RelationsTracker.cs" />
     <Compile Include="PhysicalInteractionReservationManager.cs" />
     <Compile Include="Projectile.cs" />

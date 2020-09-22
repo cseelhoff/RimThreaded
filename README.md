@@ -35,6 +35,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.37  
+-Optimized PathFinder  
+-Removed Pawn_PathFollower patch  
+
 Version 1.0.36  
 -Fixed bug in AttackTargetsCache  
 -Fixed bug in GenText  
