@@ -57,69 +57,68 @@ namespace RimThreaded
 			}
 			return num > 3.57f;
 		}
-		public static bool PawnBlockingPathAt(ref Pawn __result, IntVec3 c, Pawn forPawn, bool actAsIfHadCollideWithPawnsJob = false, bool collideOnlyWithStandingPawns = false, bool forPathFinder = false)
-		{
-			//List<Thing> thingList = c.GetThingList(forPawn.Map);
-			IEnumerable<Thing> thingList = forPawn.Map.thingGrid.ThingsAt(c);
+        public static bool PawnBlockingPathAt(ref Pawn __result, IntVec3 c, Pawn forPawn, bool actAsIfHadCollideWithPawnsJob = false, bool collideOnlyWithStandingPawns = false, bool forPathFinder = false)
+        {
+            //List<Thing> thingList = c.GetThingList(forPawn.Map);
+            IEnumerable<Thing> thingList = forPawn.Map.thingGrid.ThingsAt(c);
             if (!thingList.Any())
-			{
-				__result = null;
-				return false;
-			}
-			bool flag = false;
-			if (actAsIfHadCollideWithPawnsJob)
-			{
-				flag = true;
-			}
-			else
-			{
-				Job curJob = forPawn.CurJob;
-				if (curJob != null && (curJob.collideWithPawns || curJob.def.collideWithPawns || forPawn.jobs.curDriver.collideWithPawns))
-				{
-					flag = true;
-				}
-				/*
-				else if (forPawn.Drafted)
-				{
-					bool moving = forPawn.pather.Moving;
-				}
-				*/
-			}
-			//for (int i = 0; i < thingList.Count; i++)
-			foreach(Thing thing in thingList)
-			{
-				Pawn pawn = thing as Pawn;
-				if (pawn != null && pawn != forPawn)
-				{
-                    Pawn_PathFollower pathFollower = pawn.pather;
-                    if (!pawn.Downed && pathFollower != null)
-                    {
-						if (!collideOnlyWithStandingPawns ||
-						(!pathFollower.MovingNow &&
-						(!pathFollower.Moving || !pathFollower.MovedRecently(60))) &&
-						!PawnsCanShareCellBecauseOfBodySize(pawn, forPawn))
-						{
-							if (pawn.HostileTo(forPawn))
-							{
-								__result = pawn;
-								return false;
-							}
+            {
+                __result = null;
+                return false;
+            }
 
-							if (flag && (forPathFinder || !forPawn.Drafted || !pawn.RaceProps.Animal))
-							{
-								Job curJob2 = pawn.CurJob;
-								if (curJob2 != null && (curJob2.collideWithPawns || curJob2.def.collideWithPawns || pawn.jobs.curDriver.collideWithPawns))
-								{
-									__result = pawn;
-									return false;
-								}
-							}
-						}
-					}
-				}
-			}
-			__result = null;
-			return false;
-		}
-	}
+            bool flag = false;
+            if (actAsIfHadCollideWithPawnsJob)
+            {
+                flag = true;
+            }
+            else
+            {
+                Job curJob = forPawn.CurJob;
+                if (curJob != null && (curJob.collideWithPawns || curJob.def.collideWithPawns || forPawn.jobs.curDriver.collideWithPawns))
+                {
+                    flag = true;
+                }
+                else if (forPawn.Drafted)
+                {
+                    _ = forPawn.pather.Moving;
+                }
+            }
+
+            //for (int i = 0; i < thingList.Count; i++)
+            foreach(Thing thing in thingList)
+            {
+                Pawn pawn = thing as Pawn;
+                if (pawn == null || pawn == forPawn || pawn.Downed || (collideOnlyWithStandingPawns && (pawn.pather.MovingNow || (pawn.pather.Moving && pawn.pather.MovedRecently(60)))) || PawnsCanShareCellBecauseOfBodySize(pawn, forPawn))
+                {
+                    continue;
+                }
+
+                if (pawn.HostileTo(forPawn))
+                {
+                    __result = pawn;
+                    return false;
+                }
+
+                if (flag && (forPathFinder || !forPawn.Drafted || !pawn.RaceProps.Animal))
+                {
+                    Job curJob2 = pawn.CurJob;
+                    JobDriver curDriver = pawn.jobs.curDriver;
+                    if (curJob2 != null && curDriver != null)
+                    {
+                        if (curJob2.collideWithPawns || curJob2.def.collideWithPawns || curDriver.collideWithPawns)
+                        {
+                            __result = pawn;
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            __result = null;
+            return false;
+        }
+
+
+    }
 }

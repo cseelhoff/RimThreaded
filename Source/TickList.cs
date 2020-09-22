@@ -309,7 +309,7 @@ namespace RimThreaded
                 int key = texture2DRequests.Keys.First();
                 if (texture2DRequests.TryRemove(key, out string itempath))
                 {
-                    Texture2D content = ContentFinder<Texture2D>.Get(itempath);
+                    Texture2D content = ContentFinder_Texture2D_Patch.GetTexture2D(itempath);
                     texture2DResults.TryAdd(itempath, content);
                 }
                 if (texture2DWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
