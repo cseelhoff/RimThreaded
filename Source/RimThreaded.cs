@@ -284,7 +284,7 @@ namespace RimThreaded
 			//PawnUtility
 			original = typeof(PawnUtility);
 			patched = typeof(PawnUtility_Patch);
-			//Prefix(original, patched, "PawnBlockingPathAt");
+			Prefix(original, patched, "PawnBlockingPathAt");
 			Prefix(original, patched, "EnemiesAreNearby");
 
 			//CellFinder
@@ -702,6 +702,11 @@ namespace RimThreaded
 			original = typeof(WorkGiver_ConstructDeliverResources);
 			patched = typeof(WorkGiver_ConstructDeliverResources_Patch);
 			Prefix(original, patched, "ResourceDeliverJobFor");
+
+			//GenText
+			original = typeof(GenText);
+			patched = typeof(GenText_Patch);
+			Prefix(original, patched, "CapitalizeSentences");
 
 
 			//PERFORMANCE IMPROVEMENTS

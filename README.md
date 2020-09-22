@@ -35,6 +35,11 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.36  
+-Fixed bug in AttackTargetsCache  
+-Fixed bug in GenText  
+-Fixed bug in PawnUtility  
+
 Version 1.0.35  
 -Fixed multithreading for WorldObjectsHolderTick  
 -Fixed multithreading for WorldPawnsTick  

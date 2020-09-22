@@ -143,8 +143,10 @@ namespace RimThreaded
 			Faction faction = thing.Faction;
 			if (faction != null)
 			{
-				foreach (IAttackTarget attackTarget in TargetsHostileToFaction2(__instance, faction))
+                IAttackTarget[] targetsArray = TargetsHostileToFaction2(__instance, faction).ToArray();
+				for (int index = 0; index < targetsArray.Length; index++)
 				{
+					IAttackTarget attackTarget = targetsArray[index];
 					if (thing.HostileTo(attackTarget.Thing))
 					{
 						targets.Add(attackTarget);
