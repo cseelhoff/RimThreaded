@@ -73,6 +73,11 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="BiomeDef.cs" />
+    <Compile Include="WildPlantSpawner.cs" />
+    <Compile Include="FactionManager.cs" />
+    <Compile Include="WindManager.cs" />
+    <Compile Include="SteadyEnvironmentEffects.cs" />
     <Compile Include="GenText.cs" />
     <Compile Include="WorkGiver_ConstructDeliverResources.cs" />
     <Compile Include="ThingCountUtility.cs" />

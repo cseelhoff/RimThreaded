@@ -58,7 +58,10 @@ namespace RimThreaded
             {
                 TrySpawnExplosionThing(__instance, __instance.preExplosionSpawnThingDef, c, __instance.preExplosionSpawnThingCount);
             }
-            __instance.damType.Worker.ExplosionAffectCell(__instance, c, damagedThings(__instance), ignoredThings(__instance), !flag);
+            if (null != __instance.damType)
+            {
+                __instance.damType.Worker.ExplosionAffectCell(__instance, c, damagedThings(__instance), ignoredThings(__instance), !flag);
+            }
             if (!flag && Rand.Chance(__instance.postExplosionSpawnChance) && c.Walkable(__instance.Map))
             {
                 TrySpawnExplosionThing(__instance, __instance.postExplosionSpawnThingDef, c, __instance.postExplosionSpawnThingCount);

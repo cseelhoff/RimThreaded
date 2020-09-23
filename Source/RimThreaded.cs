@@ -704,6 +704,15 @@ namespace RimThreaded
 			patched = typeof(GenText_Patch);
 			Prefix(original, patched, "CapitalizeSentences");
 
+			//BiomeDef
+			original = typeof(BiomeDef);
+			patched = typeof(BiomeDef_Patch);
+			Prefix(original, patched, "CachePlantCommonalitiesIfShould");
+
+			//WildPlantSpawner
+			original = typeof(WildPlantSpawner);
+			patched = typeof(WildPlantSpawner_Patch);
+			Prefix(original, patched, "CheckSpawnWildPlantAt"); 
 
 			//PERFORMANCE IMPROVEMENTS
 
@@ -736,6 +745,26 @@ namespace RimThreaded
 			original = typeof(WorldPawns);
 			patched = typeof(WorldPawns_Patch);
 			Prefix(original, patched, "WorldPawnsTick");
+
+			//SteadyEnvironmentEffects
+			original = typeof(SteadyEnvironmentEffects);
+			patched = typeof(SteadyEnvironmentEffects_Patch);
+			Prefix(original, patched, "SteadyEnvironmentEffectsTick");
+
+			//WindManager
+			original = typeof(WindManager);
+			patched = typeof(WindManager_Patch);
+			Prefix(original, patched, "WindManagerTick");
+
+			//FactionManager
+			original = typeof(FactionManager);
+			patched = typeof(FactionManager_Patch);
+			Prefix(original, patched, "FactionManagerTick");
+
+			//WildPlantSpawner
+			original = typeof(WildPlantSpawner);
+			patched = typeof(WildPlantSpawner_Patch);
+			Prefix(original, patched, "WildPlantSpawnerTickInternal");
 
 			Log.Message("RimThreaded patching is complete.");
 		}
