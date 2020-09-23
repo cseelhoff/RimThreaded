@@ -24,9 +24,9 @@ namespace RimThreaded
         {
             //tmpWorldObjects.Clear();
             //tmpWorldObjects.AddRange(worldObjects(__instance));
-            Ticklist_Patch.tmpWorldObjects = new ConcurrentQueue<WorldObject>(worldObjects(__instance));
-            Ticklist_Patch.CreateMonitorThread();
-            Ticklist_Patch.MainThreadWaitLoop();
+            TickList_Patch.tmpWorldObjects = new ConcurrentQueue<WorldObject>(worldObjects(__instance));
+            TickList_Patch.CreateMonitorThread();
+            TickList_Patch.MainThreadWaitLoop();
             //for (int index = 0; index < tmpWorldObjects.Count; ++index)
                 //tmpWorldObjects[index].Tick();
             return false;

@@ -35,6 +35,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.38  
+-Fixed bug in Mod Settings that did not load properly  
+-Added feature that allows Mod Settings to be applied in game without restart  
+
 Version 1.0.37  
 -Optimized PathFinder  
 -Removed Pawn_PathFollower patch  

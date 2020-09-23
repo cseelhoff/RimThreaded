@@ -9,17 +9,17 @@ namespace RimThreaded
 		public static bool MatFrom(ref Material __result, MaterialRequest req)
 		{
 			Material material;
-			//if (Ticklist_Patch.materialResults.TryGetValue(req, out material))
+			//if (TickList_Patch.materialResults.TryGetValue(req, out material))
 			//{
 			//__result = material;
 			//return false;
 			//}
 			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (Ticklist_Patch.materialWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
-				Ticklist_Patch.materialRequests.TryAdd(tID, req);
-				Ticklist_Patch.mainThreadWaitHandle.Set();
+			if (TickList_Patch.materialWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
+				TickList_Patch.materialRequests.TryAdd(tID, req);
+				TickList_Patch.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
-				Ticklist_Patch.materialResults.TryGetValue(req, out material);
+				TickList_Patch.materialResults.TryGetValue(req, out material);
 				__result = material;
 				return false;
 			}

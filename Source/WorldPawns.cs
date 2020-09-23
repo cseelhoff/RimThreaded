@@ -109,12 +109,12 @@ namespace RimThreaded
 
         public static bool WorldPawnsTick(WorldPawns __instance)
         {
-            //Ticklist_Patch.tmpPawnsToTick.Clear();
-            //Ticklist_Patch.tmpPawnsToTick.AddRange(pawnsAlive(__instance));
-            //Ticklist_Patch.worldPawns = __instance;
-            Ticklist_Patch.tmpPawnsToTick = new ConcurrentQueue<Pawn>(pawnsAlive(__instance));
-            Ticklist_Patch.CreateMonitorThread();
-            Ticklist_Patch.MainThreadWaitLoop();
+            //TickList_Patch.tmpPawnsToTick.Clear();
+            //TickList_Patch.tmpPawnsToTick.AddRange(pawnsAlive(__instance));
+            //TickList_Patch.worldPawns = __instance;
+            TickList_Patch.tmpPawnsToTick = new ConcurrentQueue<Pawn>(pawnsAlive(__instance));
+            TickList_Patch.CreateMonitorThread();
+            TickList_Patch.MainThreadWaitLoop();
             /*
             for (int index = 0; index < WorldPawns.tmpPawnsToTick.Count; ++index)
             {

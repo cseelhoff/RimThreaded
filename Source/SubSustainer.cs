@@ -79,10 +79,10 @@ namespace RimThreaded
 			}
 
 			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (Ticklist_Patch.tryMakeAndPlayWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+			if (TickList_Patch.tryMakeAndPlayWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
 			{
-				Ticklist_Patch.tryMakeAndPlayRequests.TryAdd(tID, new object[] { __instance, ((ResolvedGrain_Clip)resolvedGrain).clip, num2 });
-				Ticklist_Patch.mainThreadWaitHandle.Set();
+				TickList_Patch.tryMakeAndPlayRequests.TryAdd(tID, new object[] { __instance, ((ResolvedGrain_Clip)resolvedGrain).clip, num2 });
+				TickList_Patch.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
 			}			
 			return false;
