@@ -24,11 +24,14 @@ namespace RimThreaded
         {
             //tmpWorldObjects.Clear();
             //tmpWorldObjects.AddRange(worldObjects(__instance));
-            TickList_Patch.tmpWorldObjects = new ConcurrentQueue<WorldObject>(worldObjects(__instance));
+            //TickList_Patch.worldObjectsHolder = __instance;
+            TickList_Patch.worldObjects = worldObjects(__instance);
+            TickList_Patch.worldObjectsTicks = worldObjects(__instance).Count;
             TickList_Patch.CreateMonitorThread();
-            TickList_Patch.MainThreadWaitLoop();
+            TickList_Patch.monitorThreadWaitHandle.Set();
+            //TickList_Patch.MainThreadWaitLoop();
             //for (int index = 0; index < tmpWorldObjects.Count; ++index)
-                //tmpWorldObjects[index].Tick();
+            //tmpWorldObjects[index].Tick();
             return false;
         }
 

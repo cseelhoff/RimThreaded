@@ -27,6 +27,7 @@ namespace RimThreaded
         public static int maxThreads = Math.Max(Int32.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1);
         public static int timeoutMS = Math.Max(Int32.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 1);
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitStarts = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<int, EventWaitHandle> eventWaitStarts2 = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitDones = new ConcurrentDictionary<int, EventWaitHandle>();
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
@@ -56,16 +57,64 @@ namespace RimThreaded
 
         public static ConcurrentQueue<WorldObject> tmpWorldObjects = new ConcurrentQueue<WorldObject>();
         //public static WorldPawns worldPawns;
+        public static MapCellsInRandomOrder steadyEnvironmentEffectsCellsInRandomOrder = null;
+        public static int steadyEnvironmentEffectsTicks = 0;
+        public static int steadyEnvironmentEffectsArea = 0;
+        public static int steadyEnvironmentEffectsCycleIndex = 0;
+        public static SteadyEnvironmentEffects steadyEnvironmentEffectsInstance = null;
 
         public static bool allWorkerThreadsFinished = false;
         public static ConcurrentDictionary<int, bool> isThreadWaiting = new ConcurrentDictionary<int, bool>();
-        public static List<Thing> thingList1;
+        public static List<Thing> thingListNormal;
+        public static int thingListNormalTicks = 0;
+        public static List<Thing> thingListRare;
+        public static int thingListRareTicks = 0;
+        public static List<Thing> thingListLong;
+        public static int thingListLongTicks = 0;
         public static ConcurrentQueue<Thing> thingQueue = new ConcurrentQueue<Thing>();
         public static Thread monitorThread = null;
         public static TickerType currentTickType;
         public static int currentTickInterval;
         public static Dictionary<int, Thread> allThreads = new Dictionary<int, Thread>();
         public static StackTrace trace = null;
+
+        public static WorldObjectsHolder worldObjectsHolder = null;
+        public static int worldObjectsTicks = 0;
+        public static List<WorldObject> worldObjects = null;
+
+        public static WorldPawns worldPawns = null;
+        public static int worldPawnsTicks = 0;
+
+        public static List<Pawn> worldPawnsAlive = null;
+
+        public static int plantMaterialsCount = 0;
+
+        public static float plantSwayHead = 0;
+
+        public static List<Faction> allFactions = null;
+        public static int allFactionsTicks = 0;
+
+        public static int steadyEnvironmentEffectsCycleIndexOffset = 0;
+
+        public static int WildPlantSpawnerTicks = 0;
+        public static int WildPlantSpawnerCycleIndexOffset = 0;
+
+        public static int WildPlantSpawnerArea = 0;
+        public static Map WildPlantSpawnerMap = null;
+
+        public static MapCellsInRandomOrder WildPlantSpawnerCellsInRandomOrder = null;
+        public static float WildPlantSpawnerCurrentPlantDensity = 0f;
+        public static float DesiredPlants = 0f;
+        public static float DesiredPlantsTmp = 0f;
+        public static int DesiredPlants1000 = 0;
+        public static int DesiredPlantsTmp1000 = 0;
+        public static int DesiredPlants2Tmp1000 = 0;
+        public static int FertilityCellsTmp = 0;
+        public static int FertilityCells2Tmp = 0;
+        public static int FertilityCells = 0;
+        public static WildPlantSpawner WildPlantSpawnerInstance = null;
+        public static float WildPlantSpawnerChance = 0f;
+
         private static int get_TickInterval(TickList __instance)
         {
             switch (currentTickType)
@@ -91,13 +140,14 @@ namespace RimThreaded
         {
             currentTickType = tickType(__instance);
             currentTickInterval = get_TickInterval(__instance);
+
             List<Thing> tr = thingsToRegister(__instance);
             for (int index = 0; index < tr.Count; ++index)
             {
                 Thing i = tr[index];
                 List<Thing> b = BucketOf(__instance, i);
                 b.Add(i);
-            }            
+            }
             tr.Clear();
 
             List<Thing> td = thingsToDeregister(__instance);
@@ -122,12 +172,24 @@ namespace RimThreaded
                     }
                 }
             }
-            thingList1 = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
-            thingQueue = new ConcurrentQueue<Thing>(thingList1);
-
             CreateMonitorThread();
+            switch (currentTickType)
+            {
+                case TickerType.Normal:
+                    thingListNormal = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
+                    thingListNormalTicks = thingListNormal.Count;
+                    break;
+                case TickerType.Rare:
+                    thingListRare = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
+                    thingListRareTicks = thingListRare.Count;
+                    break;
+                case TickerType.Long:
+                    thingListLong = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
+                    thingListLongTicks = thingListLong.Count;
+                    break;
+            }
+            //thingQueue = new ConcurrentQueue<Thing>(thingList1);
             MainThreadWaitLoop();
-
             return false;            
         }
 
@@ -138,6 +200,7 @@ namespace RimThreaded
             int tID = thread.ManagedThreadId;
             allThreads.Add(tID, thread);
             eventWaitStarts.TryAdd(tID, new AutoResetEvent(false));
+            eventWaitStarts2.TryAdd(tID, new AutoResetEvent(false));
             eventWaitDones.TryAdd(tID, new AutoResetEvent(false));
             tryMakeAndPlayWaits.TryAdd(tID, new AutoResetEvent(false));
             newSustainerWaits.TryAdd(tID, new AutoResetEvent(false));
@@ -153,6 +216,7 @@ namespace RimThreaded
                 thread.Abort();
                 allThreads.Remove(managedThreadID);
                 eventWaitStarts.TryRemove(managedThreadID, out _);
+                eventWaitStarts2.TryRemove(managedThreadID, out _);
                 eventWaitDones.TryRemove(managedThreadID, out _);
                 tryMakeAndPlayWaits.TryRemove(managedThreadID, out _);
                 newSustainerWaits.TryRemove(managedThreadID, out _);
@@ -196,6 +260,10 @@ namespace RimThreaded
                         }
                         allWorkerThreadsFinished = true;
                         mainThreadWaitHandle.Set();
+                        foreach (EventWaitHandle eventWaitHandle2 in eventWaitStarts2.Values)
+                        {
+                            eventWaitHandle2.Set();
+                        }
                     }
                 });
                 monitorThread.Start();
@@ -323,53 +391,164 @@ namespace RimThreaded
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
             eventWaitStarts.TryGetValue(tID, out EventWaitHandle eventWaitStart);
+            eventWaitStarts2.TryGetValue(tID, out EventWaitHandle eventWaitStart2);
             eventWaitDones.TryGetValue(tID, out EventWaitHandle eventWaitDone);
             while (true)
             {
-                ProcessTicksWait(eventWaitStart);                
-                while (thingQueue.TryDequeue(out Thing thing))
+                ProcessTicksWait(eventWaitStart);
+
+                while (thingListNormalTicks > 0)
                 {
-                    if (!thing.Destroyed)
+                    int index = Interlocked.Decrement(ref thingListNormalTicks);
+                    if (index >= 0)
                     {
-                        switch (currentTickType)
+                        Thing thing = thingListNormal[index];
+                        if (!thing.Destroyed)
                         {
-                            case TickerType.Normal:
-                                thing.Tick();
-                                break;
-                            case TickerType.Rare:
-                                thing.TickRare();
-                                break;
-                            case TickerType.Long:
-                                thing.TickLong();
-                                break;
+                            thing.Tick();
                         }
                     }
                 }
-                
-                while (tmpPawnsToTick.TryDequeue(out Pawn pawn))
+                while (thingListRareTicks > 0)
                 {
-                    try
+                    int index = Interlocked.Decrement(ref thingListRareTicks);
+                    if (index >= 0)
                     {
-                        pawn.Tick();
+                        Thing thing = thingListRare[index];
+                        if (!thing.Destroyed)
+                        {
+                            thing.TickRare();
+                        }
                     }
-                    catch (Exception ex)
+                }
+                while (thingListLongTicks > 0)
+                {
+                    int index = Interlocked.Decrement(ref thingListLongTicks);
+                    if (index >= 0)
                     {
-                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 1148571423, false);
-                    }
-                    try
-                    {
-                        if (!pawn.Dead && !pawn.Destroyed && (pawn.IsHashIntervalTick(7500) && !pawn.IsCaravanMember()) && !PawnUtility.IsTravelingInTransportPodWorldObject(pawn))
-                            TendUtility.DoTend(null, pawn, null);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
+                        Thing thing = thingListLong[index];
+                        if (!thing.Destroyed)
+                        {
+                            thing.TickLong();
+                        }
                     }
                 }
 
-                while(tmpWorldObjects.TryDequeue(out WorldObject worldObject))
+                while (worldPawnsTicks > 0)
                 {
-                    worldObject.Tick();
+                    int index = Interlocked.Decrement(ref worldPawnsTicks);
+                    if (index >= 0)
+                    {
+                        Pawn pawn = worldPawnsAlive[index];
+                        try
+                        {
+                            pawn.Tick();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 1148571423, false);
+                        }
+                        try
+                        {
+                            if (!pawn.Dead && !pawn.Destroyed && (pawn.IsHashIntervalTick(7500) && !pawn.IsCaravanMember()) && !PawnUtility.IsTravelingInTransportPodWorldObject(pawn))
+                                TendUtility.DoTend(null, pawn, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
+                        }
+                    }
+                }
+
+                while(worldObjectsTicks > 0)
+                {
+                    int index = Interlocked.Decrement(ref worldObjectsTicks);
+                    if (index >= 0)
+                    {
+                        worldObjects[index].Tick();
+                    }
+                }
+                
+                while(steadyEnvironmentEffectsTicks > 0)
+                {
+                    int index = Interlocked.Decrement(ref steadyEnvironmentEffectsTicks);
+                    if (index >= 0)
+                    {
+                        int cycleIndex = (steadyEnvironmentEffectsCycleIndexOffset - index) % steadyEnvironmentEffectsArea;
+                        IntVec3 c = steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
+                        SteadyEnvironmentEffects_Patch.DoCellSteadyEffects(steadyEnvironmentEffectsInstance, c);
+                        //Interlocked.Increment(ref SteadyEnvironmentEffects_Patch.cycleIndex(steadyEnvironmentEffectsInstance));
+                    }
+                }
+
+                while (plantMaterialsCount > 0)
+                {
+                    int index = Interlocked.Decrement(ref plantMaterialsCount);
+                    if (index >= 0)
+                    {
+                        WindManager_Patch.plantMaterials[index].SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
+                    }
+                }
+
+                while (allFactionsTicks > 0)
+                {
+                    int index = Interlocked.Decrement(ref allFactionsTicks);
+                    if (index >= 0)
+                    {
+                        allFactions[index].FactionTick();
+                    }
+                }
+
+                while (WildPlantSpawnerTicks > 0)
+                {
+                    int index = Interlocked.Decrement(ref WildPlantSpawnerTicks);
+                    if (index >= 0)
+                    {
+                        int cycleIndex = (WildPlantSpawnerCycleIndexOffset - index) % WildPlantSpawnerArea;
+                        IntVec3 intVec = WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
+
+                        if ((WildPlantSpawnerCycleIndexOffset - index) > WildPlantSpawnerArea)
+                        {
+                            Interlocked.Add(ref DesiredPlants2Tmp1000,
+                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(WildPlantSpawnerMap, intVec, intVec, WildPlantSpawnerCurrentPlantDensity));
+                            if (intVec.GetTerrain(WildPlantSpawnerMap).fertility > 0f)
+                            {
+                                Interlocked.Increment(ref FertilityCells2Tmp);
+                            }
+
+                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(WildPlantSpawnerMap, intVec) ? 130f : WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
+                            if (Rand.Chance(WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && WildPlantSpawner_Patch.CanRegrowAt2(WildPlantSpawnerMap, intVec))
+                            {
+                                WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlantsTmp1000 / 1000.0f);
+                            }
+                        } else
+                        {
+                            Interlocked.Add(ref DesiredPlantsTmp1000,
+                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(WildPlantSpawnerMap, intVec, intVec, WildPlantSpawnerCurrentPlantDensity));
+                            if (intVec.GetTerrain(WildPlantSpawnerMap).fertility > 0f)
+                            {
+                                Interlocked.Increment(ref FertilityCellsTmp);
+                            }
+
+                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(WildPlantSpawnerMap, intVec) ? 130f : WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
+                            if (Rand.Chance(WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && WildPlantSpawner_Patch.CanRegrowAt2(WildPlantSpawnerMap, intVec))
+                            {
+                                WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlants);
+                            }
+                        }
+
+                    }
+                    if ((WildPlantSpawnerCycleIndexOffset - index) > WildPlantSpawnerArea)
+                    {
+                        WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlants(WildPlantSpawnerInstance) = DesiredPlantsTmp1000 / 1000.0f;
+                        WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(WildPlantSpawnerInstance) = DesiredPlants2Tmp1000 / 1000.0f;
+                        WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(WildPlantSpawnerInstance) = FertilityCellsTmp;
+                        WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCellsTmp(WildPlantSpawnerInstance) = FertilityCells2Tmp;
+                    } else
+                    {
+                        WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(WildPlantSpawnerInstance) = DesiredPlantsTmp1000 / 1000.0f;
+                        WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(WildPlantSpawnerInstance) = FertilityCellsTmp;
+                    }
                 }
                 
                 /*
@@ -390,10 +569,16 @@ namespace RimThreaded
                 }
                 */
                 eventWaitDone.Set();
+                ProcessTicksWait2(eventWaitStart2);
+
             }
         }
 
         private static void ProcessTicksWait(EventWaitHandle eventWaitStart)
+        {
+            eventWaitStart.WaitOne();
+        }
+        private static void ProcessTicksWait2(EventWaitHandle eventWaitStart)
         {
             eventWaitStart.WaitOne();
         }

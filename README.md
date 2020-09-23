@@ -35,6 +35,16 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.39  
+-Added multithreading to FactionManager  
+-Added multithreading to SteadyEnvironmentEffects  
+-Added multithreading to WildPlantSpawner  
+-Added multithreading to WindManager  
+-Fixed bug in WorldPawns  
+-Fixed bug in WorldObjectsHolder  
+-Fixed bug in BiomeDef  
+-Fixed bug in Explosion AffectCell  
+
 Version 1.0.38  
 -Fixed bug in Mod Settings that did not load properly  
 -Added feature that allows Mod Settings to be applied in game without restart  
