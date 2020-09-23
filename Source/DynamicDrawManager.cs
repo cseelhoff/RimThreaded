@@ -63,14 +63,14 @@ namespace RimThreaded
                 SnowGrid snowGrid = map(__instance).snowGrid;
 
                 /*
-                Ticklist_Patch.fogGrid = map(__instance).fogGrid.fogGrid;
-                Ticklist_Patch.cellRect = Find.CameraDriver.CurrentViewRect;
-                Ticklist_Patch.cellRect.ClipInsideMap(map(__instance));
-                Ticklist_Patch.cellRect = Ticklist_Patch.cellRect.ExpandedBy(1);
-                Ticklist_Patch.cellIndices = map(__instance).cellIndices;
-                Ticklist_Patch.snowGrid = map(__instance).snowGrid;
-                Ticklist_Patch.drawQueue = new ConcurrentQueue<Thing>(drawThings(__instance));
-                Ticklist_Patch.startWorkerThreads();
+                TickList_Patch.fogGrid = map(__instance).fogGrid.fogGrid;
+                TickList_Patch.cellRect = Find.CameraDriver.CurrentViewRect;
+                TickList_Patch.cellRect.ClipInsideMap(map(__instance));
+                TickList_Patch.cellRect = TickList_Patch.cellRect.ExpandedBy(1);
+                TickList_Patch.cellIndices = map(__instance).cellIndices;
+                TickList_Patch.snowGrid = map(__instance).snowGrid;
+                TickList_Patch.drawQueue = new ConcurrentQueue<Thing>(drawThings(__instance));
+                TickList_Patch.startWorkerThreads();
                 */
                 //Thing drawThing;
                 //Thing[] drawThingsArray;

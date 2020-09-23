@@ -50,8 +50,13 @@ namespace RimThreaded
 		public override void DoSettingsWindowContents(Rect inRect)
 		{
 			Settings.DoWindowContents(inRect);
-			Ticklist_Patch.maxThreads = Math.Max(Settings.maxThreads, 1);
-			Ticklist_Patch.timeoutMS = Settings.timeoutMS;
+			TickList_Patch.maxThreads = Math.Max(Settings.maxThreads, 1);
+			TickList_Patch.timeoutMS = Math.Max(Settings.timeoutMS, 1);
+			foreach (int tID2 in TickList_Patch.eventWaitDones.Keys.ToArray())
+			{
+				TickList_Patch.AbortWorkerThread(tID2);
+			}
+			TickList_Patch.CreateWorkerThreads();
 		}
 
 		public override string SettingsCategory()
@@ -87,7 +92,7 @@ namespace RimThreaded
 
 			//TickList			
 			original = typeof(TickList);
-			patched = typeof(Ticklist_Patch);
+			patched = typeof(TickList_Patch);
 			Prefix(original, patched, "Tick");
 
 			//Rand

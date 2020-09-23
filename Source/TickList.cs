@@ -13,7 +13,7 @@ using Verse.Sound;
 
 namespace RimThreaded
 {
-    public class Ticklist_Patch
+    public class TickList_Patch
     {
         public static AccessTools.FieldRef<TickList, List<List<Thing>>> thingLists =
             AccessTools.FieldRefAccess<TickList, List<List<Thing>>>("thingLists");
@@ -24,8 +24,8 @@ namespace RimThreaded
         public static AccessTools.FieldRef<TickList, TickerType> tickType =
             AccessTools.FieldRefAccess<TickList, TickerType>("tickType");
 
-        public static int maxThreads = Math.Max(RimThreadedMod.Settings.maxThreads, 1);
-        public static int timeoutMS = Math.Max(RimThreadedMod.Settings.timeoutMS, 1);
+        public static int maxThreads = Math.Max(Int32.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1);
+        public static int timeoutMS = Math.Max(Int32.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 1);
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitStarts = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitDones = new ConcurrentDictionary<int, EventWaitHandle>();
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
@@ -146,7 +146,7 @@ namespace RimThreaded
             thread.Start();
         }
 
-        private static void AbortWorkerThread(int managedThreadID)
+        public static void AbortWorkerThread(int managedThreadID)
         {
             if (allThreads.TryGetValue(managedThreadID, out Thread thread))
             {
@@ -202,7 +202,7 @@ namespace RimThreaded
             }
         }
 
-        private static void CreateWorkerThreads()
+        public static void CreateWorkerThreads()
         {
             while (eventWaitStarts.Count < maxThreads)
             {
@@ -326,8 +326,7 @@ namespace RimThreaded
             eventWaitDones.TryGetValue(tID, out EventWaitHandle eventWaitDone);
             while (true)
             {
-                isThreadWaiting[tID] = true;
-                eventWaitStart.WaitOne();
+                ProcessTicksWait(eventWaitStart);                
                 while (thingQueue.TryDequeue(out Thing thing))
                 {
                     if (!thing.Destroyed)
@@ -392,6 +391,11 @@ namespace RimThreaded
                 */
                 eventWaitDone.Set();
             }
+        }
+
+        private static void ProcessTicksWait(EventWaitHandle eventWaitStart)
+        {
+            eventWaitStart.WaitOne();
         }
     }
 }
