@@ -15,6 +15,9 @@ namespace RimThreaded
     {
 
 		public static Dictionary<int, float> SeasonalShiftAmplitudeCache = new Dictionary<int, float>();
+		public static Dictionary<int, float> tileTemperature = new Dictionary<int, float>();
+		public static Dictionary<int, float> absTickOffset = new Dictionary<int, float>();
+		public static Dictionary<int, Dictionary<int, float>> tileAbsTickTemperature = new Dictionary<int, Dictionary<int, float>>();
 
 		public static RoomGroup[] beqRoomGroups = AccessTools.StaticFieldRefAccess<RoomGroup[]>(typeof(GenTemperature), "beqRoomGroups");
 		public static bool SeasonalShiftAmplitudeAt(ref float __result, int tile)
@@ -28,6 +31,32 @@ namespace RimThreaded
 			}
 			return false;
 		}
+		public static bool GetTemperatureFromSeasonAtTile(ref float __result, int absTick, int tile)
+		{
+			if (absTick == 0)
+			{
+				absTick = 1;
+			}
+			
+			if (!tileAbsTickTemperature.TryGetValue(tile, out Dictionary<int, float> absTickTemperature))
+			{
+				absTickTemperature = new Dictionary<int, float>();
+				tileAbsTickTemperature[tile] = absTickTemperature;
+			}
+			if (!absTickTemperature.TryGetValue(absTick, out float temperature))
+			{
+				if (!tileTemperature.TryGetValue(tile, out float temperatureFromTile))
+				{
+					temperatureFromTile = Find.WorldGrid[tile].temperature;
+					tileTemperature[tile] = temperatureFromTile;
+				}
+				temperature = temperatureFromTile + GenTemperature.OffsetFromSeasonCycle(absTick, tile);
+				absTickTemperature[absTick] = temperature;
+			}
+			__result = temperature;
+			return false;
+		}
+
 
 		public static bool PushHeat(ref bool __result, IntVec3 c, Map map, float energy)
 		{

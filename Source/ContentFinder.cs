@@ -12,17 +12,17 @@ namespace RimThreaded
 		public static bool Get(ref Texture2D __result, string itemPath, bool reportFailure = true)
 		{
 			Texture2D texture2d;
-			//if (TickList_Patch.texture2DResults.TryGetValue(itemPath, out texture2d))
+			//if (RimThreaded.texture2DResults.TryGetValue(itemPath, out texture2d))
 			//{
 			//__result = texture2d;
 			//return false;
 			//}
 			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (TickList_Patch.texture2DWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
-				TickList_Patch.texture2DRequests.TryAdd(tID, itemPath);
-				TickList_Patch.mainThreadWaitHandle.Set();
+			if (RimThreaded.texture2DWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
+				RimThreaded.texture2DRequests.TryAdd(tID, itemPath);
+				RimThreaded.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
-				TickList_Patch.texture2DResults.TryGetValue(itemPath, out texture2d);
+				RimThreaded.texture2DResults.TryGetValue(itemPath, out texture2d);
 				__result = texture2d;
 				return false;
 			}

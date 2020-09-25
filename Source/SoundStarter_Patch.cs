@@ -36,7 +36,7 @@ namespace RimThreaded
 			}
 			for (int i = 0; i < soundDef.subSounds.Count; i++)
 			{
-				TickList_Patch.PlayOneShot.Enqueue(new Tuple<SoundDef, SoundInfo>(soundDef, info));
+				RimThreaded.PlayOneShot.Enqueue(new Tuple<SoundDef, SoundInfo>(soundDef, info));
 			}
 			// Don't know why but if this is set to false, threads will hang and timeout.
 			return true;
@@ -58,7 +58,7 @@ namespace RimThreaded
 				return false;
 			}
 
-			TickList_Patch.PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
+			RimThreaded.PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
 			return false;
 		}
 		public static bool TrySpawnSustainer(ref Sustainer __result, SoundDef soundDef, SoundInfo info)
@@ -91,13 +91,13 @@ namespace RimThreaded
 			}
 			Sustainer sustainer = null;
 			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (TickList_Patch.newSustainerWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+			if (RimThreaded.newSustainerWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
 			{
-				TickList_Patch.newSustainerRequests.TryAdd(tID, new object[] { soundDef, info });
-				TickList_Patch.mainThreadWaitHandle.Set();
+				RimThreaded.newSustainerRequests.TryAdd(tID, new object[] { soundDef, info });
+				RimThreaded.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
 
-				TickList_Patch.newSustainerResults.TryGetValue(tID, out sustainer);
+				RimThreaded.newSustainerResults.TryGetValue(tID, out sustainer);
 				__result = sustainer;
 			} else
             {

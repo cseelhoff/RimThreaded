@@ -41,19 +41,17 @@ namespace RimThreaded
             outdoorMeltAmount(__instance) = MeltAmountAt2(map2.mapTemperature.OutdoorTemp);
             snowRate(__instance) = map2.weatherManager.SnowRate;
             rainRate(__instance) = map2.weatherManager.RainRate;
-            TickList_Patch.steadyEnvironmentEffectsCellsInRandomOrder = map2.cellsInRandomOrder;
+            RimThreaded.steadyEnvironmentEffectsCellsInRandomOrder = map2.cellsInRandomOrder;
             deteriorationRate(__instance) = Mathf.Lerp(1f, 5f, rainRate(__instance));
             //int num = Mathf.CeilToInt((float)map2.Area * 0.0006f);
             //int area = map2.Area;
-            TickList_Patch.steadyEnvironmentEffectsArea = map2.Area;
-            TickList_Patch.steadyEnvironmentEffectsInstance = __instance;
+            RimThreaded.steadyEnvironmentEffectsArea = map2.Area;
+            RimThreaded.steadyEnvironmentEffectsInstance = __instance;
             int ticks = Mathf.CeilToInt((float)map2.Area * 0.0006f);
-            TickList_Patch.steadyEnvironmentEffectsCycleIndexOffset = ticks + cycleIndex(__instance);
-            TickList_Patch.steadyEnvironmentEffectsTicks = ticks;
-            TickList_Patch.CreateMonitorThread();
-            TickList_Patch.monitorThreadWaitHandle.Set();
+            RimThreaded.steadyEnvironmentEffectsCycleIndexOffset = ticks + cycleIndex(__instance);
+            RimThreaded.steadyEnvironmentEffectsTicks = ticks;
             cycleIndex(__instance) = (cycleIndex(__instance) + ticks) % map2.Area;
-            //TickList_Patch.MainThreadWaitLoop();
+            //RimThreaded.MainThreadWaitLoop();
             /*
             for (int i = 0; i < num; i++)
             {

@@ -35,6 +35,9 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.40  
+-Reworked tons of multithreading code (seriously... too many to list here)  
+
 Version 1.0.39  
 -Added multithreading to FactionManager  
 -Added multithreading to SteadyEnvironmentEffects  

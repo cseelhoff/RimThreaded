@@ -63,20 +63,20 @@ namespace RimThreaded
                 SnowGrid snowGrid = map(__instance).snowGrid;
 
                 /*
-                TickList_Patch.fogGrid = map(__instance).fogGrid.fogGrid;
-                TickList_Patch.cellRect = Find.CameraDriver.CurrentViewRect;
-                TickList_Patch.cellRect.ClipInsideMap(map(__instance));
-                TickList_Patch.cellRect = TickList_Patch.cellRect.ExpandedBy(1);
-                TickList_Patch.cellIndices = map(__instance).cellIndices;
-                TickList_Patch.snowGrid = map(__instance).snowGrid;
-                TickList_Patch.drawQueue = new ConcurrentQueue<Thing>(drawThings(__instance));
-                TickList_Patch.startWorkerThreads();
+                RimThreaded.fogGrid = map(__instance).fogGrid.fogGrid;
+                RimThreaded.cellRect = Find.CameraDriver.CurrentViewRect;
+                RimThreaded.cellRect.ClipInsideMap(map(__instance));
+                RimThreaded.cellRect = RimThreaded.cellRect.ExpandedBy(1);
+                RimThreaded.cellIndices = map(__instance).cellIndices;
+                RimThreaded.snowGrid = map(__instance).snowGrid;
+                RimThreaded.drawQueue = new ConcurrentQueue<Thing>(drawThings(__instance));
+                RimThreaded.startWorkerThreads();
                 */
                 //Thing drawThing;
                 //Thing[] drawThingsArray;
 
                 //for (int index = 0; index < drawThingsArray.Length; index++)
-                foreach (Thing drawThing in drawThings(__instance))
+                foreach (Thing drawThing in drawThings(__instance).ToList())
                 {
                     //drawThing = drawThingsArray[index];
                     IntVec3 position = drawThing.Position;

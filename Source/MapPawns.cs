@@ -24,34 +24,29 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("pawnsInFactionSpawned");
         public static AccessTools.FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesSpawnedOfFactionResult =
             AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("freeHumanlikesSpawnedOfFactionResult");
-        public static AccessTools.FieldRef<MapPawns, List<Pawn>> allPawnsUnspawnedResult =
-            AccessTools.FieldRefAccess<MapPawns, List<Pawn>>("allPawnsUnspawnedResult");
 
         public static bool get_AllPawnsUnspawned(MapPawns __instance, ref List<Pawn> __result)
         {
-            lock (allPawnsUnspawnedResult(__instance))
+            List<Pawn> outThings = new List<Pawn>();
+            List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
+            map(__instance).GetChildHolders(tmpMapChildHolders);
+            List<Thing> tmpThings = new List<Thing>();
+            for (int j = 0; j < tmpMapChildHolders.Count; j++)
             {
-                allPawnsUnspawnedResult(__instance).Clear();
-            }
-            ThingOwnerUtility.GetAllThingsRecursively<Pawn>(map(__instance), ThingRequest.ForGroup(ThingRequestGroup.Pawn), allPawnsUnspawnedResult(__instance), true, null, false);
-            for (int i = allPawnsUnspawnedResult(__instance).Count - 1; i >= 0; i--)
-            {
-                Pawn pawn;
-                try
+                tmpThings.Clear();                
+                ThingOwnerUtility.GetAllThingsRecursively(tmpMapChildHolders[j], tmpThings, true, null);
+                for (int k = 0; k < tmpThings.Count; k++)
                 {
-                    pawn = allPawnsUnspawnedResult(__instance)[i];
-                } catch (ArgumentOutOfRangeException) { break; }                
-                if (pawn.Dead)
-                {
-                    lock (allPawnsUnspawnedResult(__instance))
+                    Pawn t2 = tmpThings[k] as Pawn;
+                    if (t2 != null && ThingRequest.ForGroup(ThingRequestGroup.Pawn).Accepts(t2) && !t2.Dead)
                     {
-                        allPawnsUnspawnedResult(__instance).RemoveAt(i);
+                        outThings.Add(t2);
                     }
-                }                
+                }
             }
-            __result = allPawnsUnspawnedResult(__instance);
+            __result = outThings;
             return false;
-            
+
         }
         public static bool get_SpawnedPawnsWithAnyHediff(MapPawns __instance, ref List<Pawn> __result)
         {

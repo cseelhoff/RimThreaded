@@ -70,10 +70,8 @@ namespace RimThreaded
 
             if (Find.CurrentMap == map(__instance))
             {
-                TickList_Patch.plantSwayHead = plantSwayHead(__instance);
-                TickList_Patch.plantMaterialsCount = plantMaterials.Count;
-                TickList_Patch.CreateMonitorThread();
-                TickList_Patch.monitorThreadWaitHandle.Set();
+                RimThreaded.plantSwayHead = plantSwayHead(__instance);
+                RimThreaded.plantMaterialsCount = plantMaterials.Count;
             }
             return false;
         }

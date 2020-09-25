@@ -34,10 +34,8 @@ namespace RimThreaded
         {
             SettlementProximityGoodwillUtility.CheckSettlementProximityGoodwillChange();
 
-            TickList_Patch.allFactions = allFactions(__instance);
-            TickList_Patch.allFactionsTicks = allFactions(__instance).Count;
-            TickList_Patch.CreateMonitorThread();
-            TickList_Patch.monitorThreadWaitHandle.Set();
+            RimThreaded.allFactions = allFactions(__instance);
+            RimThreaded.allFactionsTicks = allFactions(__instance).Count;
 
             for (int num = toRemove(__instance).Count - 1; num >= 0; num--)
             {
