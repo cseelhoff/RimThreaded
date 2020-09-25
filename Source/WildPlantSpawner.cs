@@ -49,46 +49,20 @@ namespace RimThreaded
             int num2 = Mathf.CeilToInt(10000f);
             float chance = calculatedWholeMapNumDesiredPlants(__instance) / (float)calculatedWholeMapNumNonZeroFertilityCells(__instance);
             map2.cellsInRandomOrder.Get(0); //Create List If Should
-            TickList_Patch.WildPlantSpawnerCycleIndexOffset = num + cycleIndex(__instance);
-            TickList_Patch.WildPlantSpawnerArea = area;
-            TickList_Patch.WildPlantSpawnerCellsInRandomOrder = map2.cellsInRandomOrder;
-            TickList_Patch.WildPlantSpawnerMap = map2;
-            TickList_Patch.WildPlantSpawnerCurrentPlantDensity = currentPlantDensity;
-            TickList_Patch.DesiredPlants = calculatedWholeMapNumDesiredPlants(__instance);
-            TickList_Patch.DesiredPlantsTmp1000 = 1000 * (int)calculatedWholeMapNumDesiredPlantsTmp(__instance);
-            TickList_Patch.FertilityCellsTmp = calculatedWholeMapNumNonZeroFertilityCellsTmp(__instance);
-            TickList_Patch.DesiredPlants2Tmp1000 = 0;
-            TickList_Patch.FertilityCells2Tmp = 0;
-            TickList_Patch.WildPlantSpawnerInstance = __instance;
-            TickList_Patch.WildPlantSpawnerChance = chance;
-
-            TickList_Patch.WildPlantSpawnerTicks = num;
-            TickList_Patch.CreateMonitorThread();
-            TickList_Patch.monitorThreadWaitHandle.Set();
-
-            if (cycleIndex(__instance) >= area)
-            {
-                calculatedWholeMapNumDesiredPlants(__instance) = calculatedWholeMapNumDesiredPlantsTmp(__instance);
-                calculatedWholeMapNumDesiredPlantsTmp(__instance) = 0f;
-                calculatedWholeMapNumNonZeroFertilityCells(__instance) = calculatedWholeMapNumNonZeroFertilityCellsTmp(__instance);
-                calculatedWholeMapNumNonZeroFertilityCellsTmp(__instance) = 0;
-                cycleIndex(__instance) = 0;
-            }
-
-            IntVec3 intVec = map2.cellsInRandomOrder.Get(cycleIndex(__instance));
-            calculatedWholeMapNumDesiredPlantsTmp(__instance) += __instance.GetDesiredPlantsCountAt(intVec, intVec, currentPlantDensity);
-            if (intVec.GetTerrain(map2).fertility > 0f)
-            {
-                calculatedWholeMapNumNonZeroFertilityCellsTmp(__instance)++;
-            }
-
-            float mtb = GoodRoofForCavePlant2(map2, intVec) ? 130f : map2.Biome.wildPlantRegrowDays;
-            if (Rand.Chance(chance) && Rand.MTBEventOccurs(mtb, 60000f, num2) && CanRegrowAt2(map2, intVec))
-            {
-                __instance.CheckSpawnWildPlantAt(intVec, currentPlantDensity, calculatedWholeMapNumDesiredPlants(__instance));
-            }
-
-            cycleIndex(__instance)++;
+            RimThreaded.WildPlantSpawnerCycleIndexOffset = num + cycleIndex(__instance);
+            RimThreaded.WildPlantSpawnerArea = area;
+            RimThreaded.WildPlantSpawnerCellsInRandomOrder = map2.cellsInRandomOrder;
+            RimThreaded.WildPlantSpawnerMap = map2;
+            RimThreaded.WildPlantSpawnerCurrentPlantDensity = currentPlantDensity;
+            RimThreaded.DesiredPlants = calculatedWholeMapNumDesiredPlants(__instance);
+            RimThreaded.DesiredPlantsTmp1000 = 1000 * (int)calculatedWholeMapNumDesiredPlantsTmp(__instance);
+            RimThreaded.FertilityCellsTmp = calculatedWholeMapNumNonZeroFertilityCellsTmp(__instance);
+            RimThreaded.DesiredPlants2Tmp1000 = 0;
+            RimThreaded.FertilityCells2Tmp = 0;
+            RimThreaded.WildPlantSpawnerInstance = __instance;
+            RimThreaded.WildPlantSpawnerChance = chance;
+            RimThreaded.WildPlantSpawnerTicks = num;
+            cycleIndex(__instance) = (cycleIndex(__instance) + num) % area;
             return false;
         }
         public static bool GoodRoofForCavePlant2(Map map2, IntVec3 c)
@@ -385,10 +359,14 @@ namespace RimThreaded
             List<ThingDef> allWildPlants = map(__instance).Biome.AllWildPlants;
             for (int i = 0; i < allWildPlants.Count; i++)
             {
-                if (allWildPlants[i].plant.wildOrder < plantDef.plant.wildOrder)
+                ThingDef wildPlant = allWildPlants[i];
+                if (null != wildPlant)
                 {
-                    num += GetCommonalityPctOfPlant2(__instance, allWildPlants[i]);
-                    tmpPlantDefsLowerOrder.Add(allWildPlants[i]);
+                    if (wildPlant.plant.wildOrder < plantDef.plant.wildOrder)
+                    {
+                        num += GetCommonalityPctOfPlant2(__instance, wildPlant);
+                        tmpPlantDefsLowerOrder.Add(wildPlant);
+                    }
                 }
             }
 

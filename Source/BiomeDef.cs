@@ -7,6 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using UnityEngine;
 
 namespace RimThreaded
 {
@@ -19,7 +20,37 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<BiomeDef, List<BiomePlantRecord>>("wildPlants");
         public static AccessTools.FieldRef<BiomeDef, float> cachedPlantCommonalitiesSum =
             AccessTools.FieldRefAccess<BiomeDef, float>("cachedPlantCommonalitiesSum");
+        public static AccessTools.FieldRef<BiomeDef, float?> cachedLowestWildPlantOrder =
+            AccessTools.FieldRefAccess<BiomeDef, float?>("cachedLowestWildPlantOrder");
 
+        public static bool get_LowestWildAndCavePlantOrder(BiomeDef __instance, ref float __result)
+        {
+            if (!cachedLowestWildPlantOrder(__instance).HasValue)
+            {
+                cachedLowestWildPlantOrder(__instance) = 2.14748365E+09f;
+                List<ThingDef> allWildPlants = __instance.AllWildPlants;
+                for (int i = 0; i < allWildPlants.Count; i++)
+                {
+                    ThingDef wildPlant = allWildPlants[i];
+                    if (null != wildPlant)
+                    {
+                        cachedLowestWildPlantOrder(__instance) = Mathf.Min(cachedLowestWildPlantOrder(__instance).Value, wildPlant.plant.wildOrder);
+                    }
+                }
+
+                List<ThingDef> allDefsListForReading = DefDatabase<ThingDef>.AllDefsListForReading;
+                for (int j = 0; j < allDefsListForReading.Count; j++)
+                {
+                    if (allDefsListForReading[j].category == ThingCategory.Plant && allDefsListForReading[j].plant.cavePlant)
+                    {
+                        cachedLowestWildPlantOrder(__instance) = Mathf.Min(cachedLowestWildPlantOrder(__instance).Value, allDefsListForReading[j].plant.wildOrder);
+                    }
+                }
+            }
+
+            __result = cachedLowestWildPlantOrder(__instance).Value;
+            return false;
+        }
 
         public static bool CachePlantCommonalitiesIfShould(BiomeDef __instance)
         {
