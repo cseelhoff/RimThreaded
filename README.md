@@ -35,6 +35,9 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.41  
+-Optimized code in ThinkNode_PrioritySorter.TryIssueJobPackage  
+
 Version 1.0.40  
 -Reworked tons of multithreading code (seriously... too many to list here)  
 

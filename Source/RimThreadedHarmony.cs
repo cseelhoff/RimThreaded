@@ -673,6 +673,11 @@ namespace RimThreaded
 			patched = typeof(PawnRelationUtility_Patch);
 			Prefix(original, patched, "GetMostImportantColonyRelative");
 
+			//GrammarResolverSimple
+			original = typeof(GrammarResolverSimple);
+			patched = typeof(GrammarResolverSimple_Patch);
+			//Prefix(original, patched, "Formatted");
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
