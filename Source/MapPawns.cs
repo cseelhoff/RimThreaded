@@ -16,6 +16,8 @@ namespace RimThreaded
     {
         public static AccessTools.FieldRef<MapPawns, List<Pawn>> pawnsSpawned =
             AccessTools.FieldRefAccess<MapPawns, List<Pawn>>("pawnsSpawned");
+        public static AccessTools.FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> pawnsInFactionResult =
+            AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("pawnsInFactionResult");
         public static AccessTools.FieldRef<MapPawns, Map> map =
             AccessTools.FieldRefAccess<MapPawns, Map>("map");
         public static AccessTools.FieldRef<MapPawns, List<Pawn>> prisonersOfColonySpawned =
@@ -85,6 +87,40 @@ namespace RimThreaded
                     pawnList1.Add(pawnList2[index]);
             }
             __result = pawnList1;
+            return false;
+        }
+        public static bool PawnsInFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
+        {
+            if (faction == null)
+            {
+                Log.Error("Called PawnsInFaction with null faction.");
+                __result = new List<Pawn>();
+                return false;
+            }
+
+            //if (!pawnsInFactionResult.TryGetValue(faction, out List<Pawn> value))
+            //{
+            //pawnsInFactionResult.Add(faction, value);                
+            //}
+
+            //value.Clear();
+            List<Pawn> value = new List<Pawn>();
+            List<Pawn> allPawns = __instance.AllPawns;
+            Pawn pawn;
+            for (int i = 0; i < allPawns.Count; i++)
+            {
+                try
+                {
+                    pawn = allPawns[i];
+                }
+                catch (ArgumentOutOfRangeException) { break; }
+                if (pawn.Faction == faction)
+                {
+                    value.Add(pawn);
+                }
+            }
+
+            __result = value;
             return false;
         }
 

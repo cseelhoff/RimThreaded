@@ -444,6 +444,7 @@ namespace RimThreaded
 			Prefix(original, patched, "SpawnedPawnsInFaction");
 			Prefix(original, patched, "get_AllPawnsUnspawned");
 			Prefix(original, patched, "get_SpawnedPawnsWithAnyHediff");
+			Prefix(original, patched, "PawnsInFaction");
 
 			//MapTemperatures
 			original = typeof(MapTemperature);
@@ -672,6 +673,11 @@ namespace RimThreaded
 			original = typeof(PawnRelationUtility);
 			patched = typeof(PawnRelationUtility_Patch);
 			Prefix(original, patched, "GetMostImportantColonyRelative");
+
+			//GrammarResolverSimple
+			//original = typeof(GrammarResolverSimple);
+			//patched = typeof(GrammarResolverSimple_Patch);
+			//Prefix(original, patched, "Formatted");
 
 			//PERFORMANCE IMPROVEMENTS
 

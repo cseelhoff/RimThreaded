@@ -13,21 +13,9 @@ namespace RimThreaded
     
     public class ThinkNode_PrioritySorter_Patch
     {
-        public static Dictionary<int, List<ThinkNode>> workingNodesDict = new Dictionary<int, List<ThinkNode>>();
-
         public static bool TryIssueJobPackage(ThinkNode_PrioritySorter __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            List<ThinkNode> workingNodes;
-            lock (workingNodesDict)
-            {
-                if (!workingNodesDict.TryGetValue(tID, out workingNodes))
-                {
-                    workingNodes = new List<ThinkNode>();
-                    workingNodesDict.Add(tID, workingNodes);
-                }
-            }
-            workingNodes.Clear();
+            List<ThinkNode> workingNodes = new List<ThinkNode>();
             int count = __instance.subNodes.Count;
             for (int index = 0; index < count; ++index)
                 workingNodes.Insert(Rand.Range(0, workingNodes.Count - 1), __instance.subNodes[index]);
