@@ -108,25 +108,46 @@ namespace RimThreaded
         public static int WorldComponentTicks = 0;
         public static List<WorldComponent> WorldComponents = null;
 
+        public static int currentPrepsDone = -1;
+        public static readonly int totalPrepsCount = 11;
+        public static List<EventWaitHandle> prepEventWaitStarts = new List<EventWaitHandle>();
+        public static EventWaitHandle ProcessTicksManualWait = new ManualResetEvent(false);
+        public static EventWaitHandle WaitingForAllThreadsToComplete = new ManualResetEvent(false);
+        public static int workingOnMapPreTick = -1;
+        public static int workingOnTickListNormal = -1;
+        public static int workingOnTickListRare = -1;
+        public static int workingOnTickListLong = -1;
+        public static int workingOnDateNotifierTick = -1;
+        public static int workingOnWorldTick = -1;
+        public static int workingOnMapPostTick = -1;
+        public static int workingOnHistoryTick = -1;
+        public static int workingOnMiscellaneous = -1;
+        public static TickManager currentInstance;
+        public static int listsFullyProcessed = 0;
+
         static RimThreaded()
         {
             CreateWorkerThreads();
             monitorThread = new Thread(() => MonitorThreads());
             monitorThread.Start();
+            for(int index = 0; index < totalPrepsCount; index++)
+            {
+                prepEventWaitStarts.Add(new ManualResetEvent(false));
+            }
         }
 
         public static void RestartAllWorkerThreads()
         {
-            foreach (int tID2 in RimThreaded.eventWaitDones.Keys.ToArray())
+            foreach (int tID2 in eventWaitDones.Keys.ToArray())
             {
-                RimThreaded.AbortWorkerThread(tID2);
+                AbortWorkerThread(tID2);
             }
             CreateWorkerThreads();
         }
 
         private static void CreateWorkerThreads()
         {
-            while (eventWaitStarts.Count < maxThreads)
+            while (allThreads.Count < maxThreads)
             {
                 CreateWorkerThread();
             }
@@ -153,61 +174,322 @@ namespace RimThreaded
             eventWaitDones.TryGetValue(tID, out EventWaitHandle eventWaitDone);
             while (true)
             {
-                ProcessTicksWait(eventWaitStart);
-                while (!SingleTickComplete)
+                eventWaitStart.WaitOne();
+                PrepareWorkLists();
+                for(int loopsCompleted = listsFullyProcessed; loopsCompleted < totalPrepsCount; loopsCompleted++)
                 {
+                    prepEventWaitStarts[loopsCompleted].WaitOne();
                     ExecuteTicks();
                 }
-                ExecuteTicks();
+                CompletePostWorkLists();
                 eventWaitDone.Set();
-                //ProcessTicksWait2(eventWaitStart2);
-
+                //WaitingForAllThreadsToComplete.WaitOne();
             }
+        }
+
+        private static void CompletePostWorkLists()
+        {
+            if (Interlocked.Increment(ref workingOnDateNotifierTick) == 0)
+            {
+                try
+                {
+                    Find.DateNotifier.DateNotifierTick();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+            }
+            if (Interlocked.Increment(ref workingOnHistoryTick) == 0)
+            {
+                try
+                {
+                    Find.History.HistoryTick();
+                }
+                catch (Exception ex10)
+                {
+                    Log.Error(ex10.ToString());
+                }
+            }
+            if (Interlocked.Increment(ref workingOnMiscellaneous) == 0)
+            {
+                try
+                {
+                    Find.Scenario.TickScenario();
+                }
+                catch (Exception ex2)
+                {
+                    Log.Error(ex2.ToString());
+                }
+
+                try
+                {
+                    Find.StoryWatcher.StoryWatcherTick();
+                }
+                catch (Exception ex4)
+                {
+                    Log.Error(ex4.ToString());
+                }
+
+                try
+                {
+                    Find.GameEnder.GameEndTick();
+                }
+                catch (Exception ex5)
+                {
+                    Log.Error(ex5.ToString());
+                }
+
+                try
+                {
+                    Find.Storyteller.StorytellerTick();
+                }
+                catch (Exception ex6)
+                {
+                    Log.Error(ex6.ToString());
+                }
+
+                try
+                {
+                    Find.TaleManager.TaleManagerTick();
+                }
+                catch (Exception ex7)
+                {
+                    Log.Error(ex7.ToString());
+                }
+
+                try
+                {
+                    Find.QuestManager.QuestManagerTick();
+                }
+                catch (Exception ex8)
+                {
+                    Log.Error(ex8.ToString());
+                }
+
+                try
+                {
+                    Find.World.WorldPostTick();
+                }
+                catch (Exception ex9)
+                {
+                    Log.Error(ex9.ToString());
+                }
+
+                try
+                {
+                    Find.Scenario.TickScenario();
+                }
+                catch (Exception ex2)
+                {
+                    Log.Error(ex2.ToString());
+                }
+
+                try
+                {
+                    Find.StoryWatcher.StoryWatcherTick();
+                }
+                catch (Exception ex4)
+                {
+                    Log.Error(ex4.ToString());
+                }
+
+                try
+                {
+                    Find.GameEnder.GameEndTick();
+                }
+                catch (Exception ex5)
+                {
+                    Log.Error(ex5.ToString());
+                }
+
+                try
+                {
+                    Find.Storyteller.StorytellerTick();
+                }
+                catch (Exception ex6)
+                {
+                    Log.Error(ex6.ToString());
+                }
+
+                try
+                {
+                    Find.TaleManager.TaleManagerTick();
+                }
+                catch (Exception ex7)
+                {
+                    Log.Error(ex7.ToString());
+                }
+
+                try
+                {
+                    Find.QuestManager.QuestManagerTick();
+                }
+                catch (Exception ex8)
+                {
+                    Log.Error(ex8.ToString());
+                }
+
+                try
+                {
+                    Find.World.WorldPostTick();
+                }
+                catch (Exception ex9)
+                {
+                    Log.Error(ex9.ToString());
+                }
+
+
+                GameComponentUtility.GameComponentTick();
+                try
+                {
+                    Find.LetterStack.LetterStackTick();
+                }
+                catch (Exception ex11)
+                {
+                    Log.Error(ex11.ToString());
+                }
+
+                try
+                {
+                    Find.Autosaver.AutosaverTick();
+                }
+                catch (Exception ex12)
+                {
+                    Log.Error(ex12.ToString());
+                }
+
+                try
+                {
+                    FilthMonitor2.FilthMonitorTick();
+                }
+                catch (Exception ex13)
+                {
+                    Log.Error(ex13.ToString());
+                }
+            }
+        }
+
+        private static void PrepareWorkLists()
+        {
+            if (Interlocked.Increment(ref workingOnMapPreTick) == 0)
+            {
+                List<Map> maps = Find.Maps;
+                for (int i = 0; i < maps.Count; i++)
+                {
+                    maps[i].MapPreTick();
+                }
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WindManager
+            }
+
+            if (Interlocked.Increment(ref workingOnTickListNormal) == 0)
+            {
+                TickManager_Patch.tickListNormal(currentInstance).Tick();
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickNormal
+            }
+            if (Interlocked.Increment(ref workingOnTickListRare) == 0)
+            {
+                TickManager_Patch.tickListRare(currentInstance).Tick();
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickRare
+            }
+            if (Interlocked.Increment(ref workingOnTickListLong) == 0)
+            {
+                TickManager_Patch.tickListLong(currentInstance).Tick();
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickLong
+            }
+            if (Interlocked.Increment(ref workingOnWorldTick) == 0)
+            {
+                try
+                {
+                    World world = Find.World;
+                    world.worldPawns.WorldPawnsTick();
+                    world.factionManager.FactionManagerTick();
+                    world.worldObjects.WorldObjectsHolderTick();
+                    world.debugDrawer.WorldDebugDrawerTick();
+                    world.pathGrid.WorldPathGridTick();
+                    WorldComponentUtility.WorldComponentTick(world);
+                }
+                catch (Exception ex3)
+                {
+                    Log.Error(ex3.ToString());
+                }
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WorldPawns
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //Factions
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WorldObjects
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WorldComponents
+            }
+            if (Interlocked.Increment(ref workingOnMapPostTick) == 0)
+            {
+                List<Map> maps = Find.Maps;
+                for (int j = 0; j < maps.Count; j++)
+                {
+                    maps[j].MapPostTick();
+                }
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WildPlantSpawner
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //SteadyEnvironment
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //PassingShipManagerTick
+            }
+
         }
 
         private static void ExecuteTicks()
         {
-            while (thingListNormalTicks > 0)
+
+            if (thingListNormalTicks > 0)
             {
                 int index = Interlocked.Decrement(ref thingListNormalTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     Thing thing = thingListNormal[index];
                     if (!thing.Destroyed)
                     {
                         thing.Tick();
                     }
+                    index = Interlocked.Decrement(ref thingListNormalTicks);
+                }
+                if(index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-            while (thingListRareTicks > 0)
+            else if (thingListRareTicks > 0)
             {
                 int index = Interlocked.Decrement(ref thingListRareTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     Thing thing = thingListRare[index];
                     if (!thing.Destroyed)
                     {
                         thing.TickRare();
                     }
+                    index = Interlocked.Decrement(ref thingListRareTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-            while (thingListLongTicks > 0)
+            else if (thingListLongTicks > 0)
             {
                 int index = Interlocked.Decrement(ref thingListLongTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     Thing thing = thingListLong[index];
                     if (!thing.Destroyed)
                     {
                         thing.TickLong();
                     }
+                    index = Interlocked.Decrement(ref thingListLongTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-
-            while (worldPawnsTicks > 0)
+            else if (worldPawnsTicks > 0)
             {
                 int index = Interlocked.Decrement(ref worldPawnsTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     Pawn pawn = worldPawnsAlive[index];
                     try
@@ -227,52 +509,77 @@ namespace RimThreaded
                     {
                         Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
                     }
+                    index = Interlocked.Decrement(ref worldPawnsTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
 
-            while (worldObjectsTicks > 0)
+            else if (worldObjectsTicks > 0)
             {
                 int index = Interlocked.Decrement(ref worldObjectsTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     worldObjects[index].Tick();
+                    index = Interlocked.Decrement(ref worldObjectsTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
 
-            while (steadyEnvironmentEffectsTicks > 0)
+            else if (steadyEnvironmentEffectsTicks > 0)
             {
                 int index = Interlocked.Decrement(ref steadyEnvironmentEffectsTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     int cycleIndex = (steadyEnvironmentEffectsCycleIndexOffset - index) % steadyEnvironmentEffectsArea;
                     IntVec3 c = steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
                     SteadyEnvironmentEffects_Patch.DoCellSteadyEffects(steadyEnvironmentEffectsInstance, c);
                     //Interlocked.Increment(ref SteadyEnvironmentEffects_Patch.cycleIndex(steadyEnvironmentEffectsInstance));
+                    index = Interlocked.Decrement(ref steadyEnvironmentEffectsTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
 
-            while (plantMaterialsCount > 0)
+            else if (plantMaterialsCount > 0)
             {
                 int index = Interlocked.Decrement(ref plantMaterialsCount);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     WindManager_Patch.plantMaterials[index].SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
+                    index = Interlocked.Decrement(ref steadyEnvironmentEffectsTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
 
-            while (allFactionsTicks > 0)
+            else if (allFactionsTicks > 0)
             {
                 int index = Interlocked.Decrement(ref allFactionsTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     allFactions[index].FactionTick();
+                    index = Interlocked.Decrement(ref allFactionsTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
 
-            while (WildPlantSpawnerTicks > 0)
+            else if (WildPlantSpawnerTicks > 0)
             {
                 int index = Interlocked.Decrement(ref WildPlantSpawnerTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     int cycleIndex = (WildPlantSpawnerCycleIndexOffset - index) % WildPlantSpawnerArea;
                     IntVec3 intVec = WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
@@ -307,7 +614,7 @@ namespace RimThreaded
                             WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlants);
                         }
                     }
-
+                    index = Interlocked.Decrement(ref WildPlantSpawnerTicks);
                 }
                 if ((WildPlantSpawnerCycleIndexOffset - index) > WildPlantSpawnerArea)
                 {
@@ -321,11 +628,15 @@ namespace RimThreaded
                     WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(WildPlantSpawnerInstance) = DesiredPlantsTmp1000 / 1000.0f;
                     WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(WildPlantSpawnerInstance) = FertilityCellsTmp;
                 }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
             }
-            while (TradeShipTicks > 0)
+            else if (TradeShipTicks > 0)
             {
                 int index = Interlocked.Decrement(ref TradeShipTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     Pawn pawn = TradeShipThings[index] as Pawn;
                     if (pawn != null)
@@ -339,12 +650,17 @@ namespace RimThreaded
                             }
                         }
                     }
+                    index = Interlocked.Decrement(ref TradeShipTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-            while (WorldComponentTicks > 0)
+            else if (WorldComponentTicks > 0)
             {
                 int index = Interlocked.Decrement(ref WorldComponentTicks);
-                if (index >= 0)
+                while (index >= 0)
                 {
                     //try
                     //{
@@ -358,8 +674,14 @@ namespace RimThreaded
                     //{
                     //    Log.Error(ex.ToString());
                     //}
+                    index = Interlocked.Decrement(ref WorldComponentTicks);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
+
             /*
             while(drawQueue.TryDequeue(out Thing drawThing))
             {
@@ -377,6 +699,7 @@ namespace RimThreaded
                 }
             }
             */
+
         }
 
         private static void MonitorThreads()
@@ -384,11 +707,22 @@ namespace RimThreaded
             while (true)
             {
                 monitorThreadWaitHandle.WaitOne();
-                foreach (EventWaitHandle eventWaitHandle in eventWaitStarts.Values)
+                workingOnMapPreTick = -1;
+                workingOnTickListNormal = -1;
+                workingOnTickListRare = -1;
+                workingOnTickListLong = -1;
+                workingOnDateNotifierTick = -1;
+                workingOnWorldTick = -1;
+                workingOnMapPostTick = -1;
+                workingOnHistoryTick = -1;
+                currentPrepsDone = -1;
+                workingOnMiscellaneous = -1;
+                listsFullyProcessed = 0;
+                foreach (EventWaitHandle eventWaitStart in eventWaitStarts.Values)
                 {
-                    eventWaitHandle.Set();
+                    eventWaitStart.Set();
                 }
-                foreach (int tID2 in eventWaitDones.Keys.ToArray())
+                foreach (int tID2 in eventWaitDones.Keys.ToList())
                 {
                     if (eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone))
                     {
@@ -537,10 +871,7 @@ namespace RimThreaded
             }
         }
 
-        private static void ProcessTicksWait(EventWaitHandle eventWaitStart)
-        {
-            eventWaitStart.WaitOne();
-        }
+
     }
 }
 
