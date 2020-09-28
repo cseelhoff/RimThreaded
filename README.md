@@ -35,9 +35,13 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.43  
+-Transpiled ThingOwnerThing.TryAdd  
+-Transpiled ThingOwnerThing.Remove  
+
 Version 1.0.42  
 -Fixed bug in MapPawns.PawnsInFaction  
--Multithreaded a few micellaneous functions remaining from DoSingleTick  
+-Multithreaded a few miscellaneous functions remaining from DoSingleTick  
 -Fixed many "Thread timeout" bugs  
 
 Version 1.0.41  

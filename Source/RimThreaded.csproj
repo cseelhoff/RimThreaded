@@ -76,6 +76,7 @@
     <Compile Include="GrammarResolverSimple.cs" />
     <Compile Include="PawnRelationUtility.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="ThingOwnerThing_Transpile.cs" />
     <Compile Include="TileTemperaturesComp.cs" />
     <Compile Include="RimThreadedHarmony.cs" />
     <Compile Include="RimThreadedMod.cs" />
@@ -193,7 +194,6 @@
     <Compile Include="ThingGridTranspile.cs" />
     <Compile Include="ThingGridTranspiledTarget.cs" />
     <Compile Include="ThingGrid.cs" />
-    <Compile Include="ThingOwnerThing.cs" />
     <Compile Include="ThingOwnerUtility.cs" />
     <Compile Include="ThinkNode_PrioritySorter.cs" />
     <Compile Include="ThoughtHandler.cs" />
