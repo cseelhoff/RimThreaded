@@ -19,11 +19,12 @@ namespace RimThreaded
 	public class RimThreadedHarmony {
 
 		public static BindingFlags bf = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-		public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
+        public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
 		//bugs - remove is out of sync for listerthings and thinggrid and maybe thingownerthing
 		//perf impr - replace dicts with hashsets (maybe custom hash function too?)
 
 		static RimThreadedHarmony() {
+			Harmony.DEBUG = true;
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
@@ -54,11 +55,15 @@ namespace RimThreaded
 			Prefix(original, patched, "TryRangeInclusiveWhere");
 			Prefix(original, patched, "PushState", new Type[] { });
 
-			//ThingOwner<Thing> - perf improvement - uses slow method invoke / reflection call
+			//ThingOwner<Thing>
 			original = typeof(ThingOwner<Thing>);
-			patched = typeof(ThingOwnerThing_Patch);
-			Prefix(original, patched, "Remove");
-			Prefix(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
+			patched = typeof(ThingOwnerThing_Transpile);
+			Transpile(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
+			Transpile(original, patched, "Remove");
+
+			//patched = typeof(ThingOwnerThing_Patch);
+			//Prefix(original, patched, "Remove");
+			//Prefix(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
 
 			//RegionListersUpdater
 			original = typeof(RegionListersUpdater);
@@ -839,7 +844,38 @@ namespace RimThreaded
 			MethodInfo pMethod = patched.GetMethod(methodName);
 			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 		}
+		public static void Transpile(Type original, Type patched, String methodName, Type[] orig_type)
+		{
+			MethodInfo oMethod = original.GetMethod(methodName, bf, null, orig_type, null);
+			Type[] patch_type = new Type[orig_type.Length];
+			Array.Copy(orig_type, patch_type, orig_type.Length);
 
+			if (!oMethod.ReturnType.Name.Equals("Void"))
+			{
+				Type[] temp_type = patch_type;
+				patch_type = new Type[temp_type.Length + 1];
+				patch_type[0] = oMethod.ReturnType.MakeByRefType();
+				Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
+			}
+			if (!oMethod.IsStatic)
+			{
+				Type[] temp_type = patch_type;
+				patch_type = new Type[temp_type.Length + 1];
+				patch_type[0] = original;
+				Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
+			}
+
+			MethodInfo pMethod = patched.GetMethod(methodName);
+			if (null == oMethod)
+			{
+				Log.Message(original.ToString() + "." + methodName + "(" + string.Join(",", orig_type.Select(x => x.ToString()).ToArray()) + ") not found");
+			}
+			if (null == pMethod)
+			{
+				Log.Message(patched.ToString() + "." + methodName + "(" + string.Join(",", patch_type.Select(x => x.ToString()).ToArray()) + ") not found");
+			}
+			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
+		}
 	}
 	
 }

@@ -362,3 +362,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Assemblies/0Harmony.dll
 /Assemblies/0Harmony.xml
+/Assemblies/UnityEngine.AssetBundleModule.dll
