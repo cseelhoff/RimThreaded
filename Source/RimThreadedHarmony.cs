@@ -61,10 +61,6 @@ namespace RimThreaded
 			Transpile(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
 			Transpile(original, patched, "Remove");
 
-			//patched = typeof(ThingOwnerThing_Patch);
-			//Prefix(original, patched, "Remove");
-			//Prefix(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
-
 			//RegionListersUpdater
 			original = typeof(RegionListersUpdater);
 			patched = typeof(RegionListersUpdater_Patch);
@@ -109,42 +105,14 @@ namespace RimThreaded
 
 			//ThingGrid_Transpile
 			patched = typeof(ThingGrid_Transpile);
-			//Transpile(original, patched, "RegisterInCell");
-			//Transpile(original, patched, "DeregisterInCell");
-			//Transpile(original, patched, "ThingsAt");
-			//Transpile(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingCategory) });
-			//Transpile(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingDef) );
-			//MethodInfo originalApparelThingAt = original.GetMethod("ThingAt", bf, null, new Type[] { typeof(IntVec3) }, null);
-			
 			patched = typeof(ThingGrid_Patch);
-
-			//ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Map) });
-			//MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
-			//harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
 
 			Prefix(original, patched, "RegisterInCell");
 			Prefix(original, patched, "DeregisterInCell");
-			//Prefix(original, patched, "ThingsListAt");
 			Prefix(original, patched, "ThingsAt");
-			//Prefix(original, patched, "ThingsListAtFast", new Type[] { typeof(int) });
-			//Prefix(original, patched, "ThingsListAtFast", new Type[] { typeof(IntVec3) });
 			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingCategory) });
 			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingDef) });
-			/*
-			original = typeof(ThingGrid);
-			patched = typeof(ThingGrid_Patch);
-			MethodInfo originalApparelThingAt = original.GetMethod("ThingAt", bf, null, new Type[] { typeof(IntVec3) }, null);
-			MethodInfo originalApparelThingAtGeneric = originalApparelThingAt.MakeGenericMethod(new Type[] { typeof(Apparel) });
-			MethodInfo patchedApparelThingAt = patched.GetMethod("ThingAt_Apparel");
-			HarmonyMethod prefixApparel = new HarmonyMethod(patchedApparelThingAt);
-			harmony.Patch(originalApparelThingAtGeneric, prefix: prefixApparel);
 
-			MethodInfo originalBuilding_DoorThingAt = original.GetMethod("ThingAt", bf, null, new Type[] { typeof(IntVec3) }, null);
-			MethodInfo originalBuilding_DoorThingAtGeneric = originalBuilding_DoorThingAt.MakeGenericMethod(new Type[] {typeof(Building_Door)});
-			MethodInfo patchedBuilding_DoorThingAt = patched.GetMethod("ThingAt_Building_Door");
-			HarmonyMethod prefixBuilding_Door = new HarmonyMethod(patchedBuilding_DoorThingAt);
-			harmony.Patch(originalBuilding_DoorThingAtGeneric, prefix: prefixBuilding_Door);
-			*/
 			//RealtimeMoteList			
 			original = typeof(RealtimeMoteList);
 			patched = typeof(RealtimeMoteList_Patch);
@@ -169,9 +137,6 @@ namespace RimThreaded
 			patched = typeof(GenSpawn_Patch);
 			Prefix(original, patched, "WipeExistingThings");
 			Prefix(original, patched, "CheckMoveItemsAside");
-			//Prefix(original, patched, "Spawn", new Type[] {
-			//	typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4),
-			//	typeof(WipeMode), typeof(bool) });
 
 			//PawnDestinationReservationManager
 			original = typeof(PawnDestinationReservationManager);
@@ -215,8 +180,8 @@ namespace RimThreaded
 
 			//JobDriver_Wait
 			original = typeof(JobDriver_Wait);
-			patched = typeof(JobDriver_Wait_Patch);
-			Prefix(original, patched, "CheckForAutoAttack");
+			patched = typeof(JobDriver_Wait_Transpile);
+			Transpile(original, patched, "CheckForAutoAttack");
 
 			//SelfDefenseUtility
 			original = typeof(SelfDefenseUtility);
