@@ -59,10 +59,10 @@ namespace RimThreaded
 			original = typeof(ThingOwner<Thing>);
 			patched = typeof(ThingOwnerThing_Transpile);
 			Transpile(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
-			//Transpile(original, patched, "Remove");
+			Transpile(original, patched, "Remove");
 			patched = typeof(ThingOwnerThing_Patch);
 			//Prefix(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
-			Prefix(original, patched, "Remove");
+			//Prefix(original, patched, "Remove");
 
 			//RegionListersUpdater
 			original = typeof(RegionListersUpdater);
@@ -258,9 +258,13 @@ namespace RimThreaded
 
 			//AttackTargetFinder
 			original = typeof(AttackTargetFinder);
-			patched = typeof(AttackTargetFinder_Patch);
-			Prefix(original, patched, "BestAttackTarget");
-			Prefix(original, patched, "CanSee");
+			patched = typeof(AttackTargetFinder_Transpile);
+			Transpile(original, patched, "BestAttackTarget");
+			Transpile(original, patched, "CanSee");
+
+			//patched = typeof(AttackTargetFinder_Patch);
+			//Prefix(original, patched, "BestAttackTarget");
+			//Prefix(original, patched, "CanSee");
 
 			//ShootLeanUtility
 			original = typeof(ShootLeanUtility);
