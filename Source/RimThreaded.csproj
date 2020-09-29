@@ -77,6 +77,9 @@
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="Fire_Transpile.cs" />
+    <Compile Include="SustainerAggregatorUtility.cs" />
+    <Compile Include="Fire_Target.cs" />
     <Compile Include="JobDriver_Wait_Target.cs" />
     <Compile Include="GrammarResolverSimple.cs" />
     <Compile Include="PawnRelationUtility.cs" />
