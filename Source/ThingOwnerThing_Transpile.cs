@@ -227,6 +227,7 @@ namespace RimThreaded
             LocalBuilder thingList = iLGenerator.DeclareLocal(typeof(List<Thing>));
             LocalBuilder returnValue = iLGenerator.DeclareLocal(typeof(bool));
             List<CodeInstruction> instructionsList = instructions.ToList();
+            Label returnLabel = iLGenerator.DefineLabel();
             int i = 0;
             while (i < instructionsList.Count)
             {
@@ -268,8 +269,7 @@ namespace RimThreaded
                     Label itemFound = iLGenerator.DefineLabel();
                     yield return new CodeInstruction(OpCodes.Bne_Un_S, itemFound);
                     yield return new CodeInstruction(OpCodes.Ldc_I4_0);
-                    yield return new CodeInstruction(OpCodes.Stloc, returnValue.LocalIndex);
-                    Label returnLabel = iLGenerator.DefineLabel();
+                    yield return new CodeInstruction(OpCodes.Stloc, returnValue.LocalIndex);                    
                     yield return new CodeInstruction(OpCodes.Leave_S, returnLabel);
                     instructionsList[i + 6].labels.Add(itemFound);
                     yield return instructionsList[i + 6];
@@ -300,6 +300,10 @@ namespace RimThreaded
                 }
                 i++;
             }
+            CodeInstruction returnCode = new CodeInstruction(OpCodes.Ldloc, returnValue.LocalIndex);
+            returnCode.labels.Add(returnLabel);
+            yield return returnCode;
+            yield return new CodeInstruction(OpCodes.Ret);
         }
     }
 }
