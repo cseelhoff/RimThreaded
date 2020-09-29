@@ -35,6 +35,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.46  
+-Transpiled Fire.DoComplexCalcs  
+-Fixed bug in SustainerAggregatorUtility.AggregateOrSpawnSustainerFor  
+
 Version 1.0.45  
 -Transpiled AttackTargetFinder.AutoAttack  
 -Transpiled AttackTargetFinder.CanSee  

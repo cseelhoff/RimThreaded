@@ -341,9 +341,11 @@ namespace RimThreaded
 
 			//Fire			
 			original = typeof(Fire);
-			patched = typeof(Fire_Patch);
-			Prefix(original, patched, "DoComplexCalcs");
-			Prefix(original, patched, "Tick");
+			patched = typeof(Fire_Transpile);
+			Transpile(original, patched, "DoComplexCalcs");
+			//patched = typeof(Fire_Patch);
+			//Prefix(original, patched, "DoComplexCalcs");
+			//Prefix(original, patched, "Tick");
 
 			//Projectile			
 			original = typeof(Projectile);
@@ -650,6 +652,11 @@ namespace RimThreaded
 			original = typeof(PawnRelationUtility);
 			patched = typeof(PawnRelationUtility_Patch);
 			Prefix(original, patched, "GetMostImportantColonyRelative");
+
+			//SustainerAggregatorUtility
+			original = typeof(SustainerAggregatorUtility);
+			patched = typeof(SustainerAggregatorUtility_Patch);
+			Prefix(original, patched, "AggregateOrSpawnSustainerFor");
 
 			//GrammarResolverSimple
 			//original = typeof(GrammarResolverSimple);
