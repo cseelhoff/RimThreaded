@@ -35,6 +35,11 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.44  
+-Fixed bug in ThingOwnerThing.Remove  
+-Fixed bug in JobDriver_Wait.AutoAttack  
+-Transpiled JobDriver_Wait.AutoAttack  
+
 Version 1.0.43  
 -Transpiled ThingOwnerThing.TryAdd  
 -Transpiled ThingOwnerThing.Remove  
