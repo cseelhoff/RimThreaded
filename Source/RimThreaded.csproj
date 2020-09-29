@@ -78,6 +78,8 @@
     <Compile Include="PawnRelationUtility.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="JobDriver_Wait_Transpile.cs" />
+    <Compile Include="ThingOwnerThing_Target.cs" />
+    <Compile Include="ThingOwnerThing.cs" />
     <Compile Include="ThingOwnerThing_Transpile.cs" />
     <Compile Include="TileTemperaturesComp.cs" />
     <Compile Include="RimThreadedHarmony.cs" />

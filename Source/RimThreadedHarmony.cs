@@ -59,7 +59,10 @@ namespace RimThreaded
 			original = typeof(ThingOwner<Thing>);
 			patched = typeof(ThingOwnerThing_Transpile);
 			Transpile(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
-			Transpile(original, patched, "Remove");
+			//Transpile(original, patched, "Remove");
+			patched = typeof(ThingOwnerThing_Patch);
+			//Prefix(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
+			Prefix(original, patched, "Remove");
 
 			//RegionListersUpdater
 			original = typeof(RegionListersUpdater);

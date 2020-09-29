@@ -224,6 +224,8 @@ namespace RimThreaded
 		     * 
             */
             LocalBuilder __lockWasTaken = iLGenerator.DeclareLocal(typeof(bool));
+            LocalBuilder thingList = iLGenerator.DeclareLocal(typeof(List<Thing>));
+            LocalBuilder returnValue = iLGenerator.DeclareLocal(typeof(bool));
             List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
             while (i < instructionsList.Count)
@@ -241,16 +243,18 @@ namespace RimThreaded
                     instructionsList[i + 9].opcode == OpCodes.Callvirt && instructionsList[i + 9].operand.ToString().Equals("Void RemoveAt(Int32)")
                     )
                 {
-                    CodeInstruction startCode = new CodeInstruction(OpCodes.Ldc_I4_0);
+                    CodeInstruction startCode = new CodeInstruction(OpCodes.Ldarg_0);
                     List<Label> startLabels = instructionsList[i].labels;
                     instructionsList[i].labels = startCode.labels;
                     startCode.labels = startLabels;
                     yield return startCode;
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(ThingOwner<Thing>), "innerList"));
+                    yield return new CodeInstruction(OpCodes.Stloc, thingList.LocalIndex);
+                    yield return new CodeInstruction(OpCodes.Ldc_I4_0);
                     yield return new CodeInstruction(OpCodes.Stloc, __lockWasTaken.LocalIndex);
-                    CodeInstruction tryStartLdarg_0 = new CodeInstruction(OpCodes.Ldarg_0); //TODO: Maybe replace with reference to Local Variable Index of innerList
+                    CodeInstruction tryStartLdarg_0 = new CodeInstruction(OpCodes.Ldloc, thingList.LocalIndex); //TODO: Maybe replace with reference to Local Variable Index of innerList
                     tryStartLdarg_0.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
                     yield return tryStartLdarg_0;
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(ThingOwner<Thing>), "innerList"));
                     yield return new CodeInstruction(OpCodes.Ldloca_S, __lockWasTaken.LocalIndex);
                     yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter", new Type[] { typeof(object), typeof(bool).MakeByRefType() }));
                     yield return instructionsList[i];
@@ -261,23 +265,26 @@ namespace RimThreaded
                     yield return instructionsList[i + 5];
                     yield return new CodeInstruction(OpCodes.Ldloc_0);//TODO: Maybe replace with reference to Local Variable Index of num
                     yield return new CodeInstruction(OpCodes.Ldc_I4_M1);
-                    Label itemNotFound = iLGenerator.DefineLabel();
-                    yield return new CodeInstruction(OpCodes.Bne_Un_S, itemNotFound);
+                    Label itemFound = iLGenerator.DefineLabel();
+                    yield return new CodeInstruction(OpCodes.Bne_Un_S, itemFound);
+                    yield return new CodeInstruction(OpCodes.Ldc_I4_0);
+                    yield return new CodeInstruction(OpCodes.Stloc, returnValue.LocalIndex);
+                    Label returnLabel = iLGenerator.DefineLabel();
+                    yield return new CodeInstruction(OpCodes.Leave_S, returnLabel);
+                    instructionsList[i + 6].labels.Add(itemFound);
                     yield return instructionsList[i + 6];
                     yield return instructionsList[i + 7];
                     yield return instructionsList[i + 8];
                     yield return instructionsList[i + 9];
                     Label handlerEnd = iLGenerator.DefineLabel();
                     CodeInstruction leaveForHandlerEnd = new CodeInstruction(OpCodes.Leave_S, handlerEnd);
-                    leaveForHandlerEnd.labels.Add(itemNotFound);
                     yield return leaveForHandlerEnd;
                     CodeInstruction tryEndHandlerStartLdloc = new CodeInstruction(OpCodes.Ldloc, __lockWasTaken.LocalIndex);
                     tryEndHandlerStartLdloc.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFinallyBlock));
                     yield return tryEndHandlerStartLdloc;
                     Label endFinally = iLGenerator.DefineLabel();
                     yield return new CodeInstruction(OpCodes.Brfalse_S, endFinally);
-                    yield return new CodeInstruction(OpCodes.Ldarg_0); //TODO: Maybe replace with reference to Local Variable Index of innerList
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(ThingOwner<Thing>), "innerList"));
+                    yield return new CodeInstruction(OpCodes.Ldloc, thingList.LocalIndex);
                     yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Exit", new Type[] { typeof(object) }));
                     CodeInstruction endFinallyInstruction = new CodeInstruction(OpCodes.Endfinally);
                     endFinallyInstruction.labels.Add(endFinally);
