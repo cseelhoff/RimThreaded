@@ -77,7 +77,12 @@
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="DllExporter.cs" />
+    <Compile Include="StoryState.cs" />
+    <Compile Include="PathFinder_Transpile.cs" />
     <Compile Include="Fire_Transpile.cs" />
+    <Compile Include="PathFinder_Original.cs" />
+    <Compile Include="PathFinder_Target.cs" />
     <Compile Include="SustainerAggregatorUtility.cs" />
     <Compile Include="Fire_Target.cs" />
     <Compile Include="JobDriver_Wait_Target.cs" />

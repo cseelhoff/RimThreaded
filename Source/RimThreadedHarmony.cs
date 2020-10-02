@@ -505,6 +505,9 @@ namespace RimThreaded
 
 			//PathFinder
 			original = typeof(PathFinder);
+			patched = typeof(PathFinder_Transpile);
+			//Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
+
 			patched = typeof(PathFinder_Patch);
 			Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
 			//ConstructorInfo constructorMethod2 = original.GetConstructor(new Type[] { typeof(Map) });
