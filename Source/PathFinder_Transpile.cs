@@ -1060,7 +1060,7 @@ namespace RimThreaded
 					// fastPriorityQueue.Clear();
 					//IL_0502: ldloc.3
 					//IL_0503: callvirt instance void class ['Assembly-CSharp'] Verse.FastPriorityQueue`1<valuetype Verse.AI.PathFinder_Target/CostNode>::Clear()
-					yield return new CodeInstruction(OpCodes.Ldloca_S, openList.LocalIndex);
+					yield return new CodeInstruction(OpCodes.Ldloc_S, openList.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(fastPriorityQueueCostNodeType, "Clear"));
 
 					// openList.Push(new CostNode(curIndex, 0));
