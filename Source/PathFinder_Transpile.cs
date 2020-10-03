@@ -562,20 +562,22 @@ namespace RimThreaded
 			
 			while (i < instructionsList.Count)
 			{
-			// CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
-			//IL_0358: ldarg.0
-			//IL_0359: ldarg.3
-			//IL_035a: ldarg.s peMode
-			//IL_035c: ldloc.s 9
-			//IL_035e: call instance void Verse.AI.PathFinder::CalculateAndAddDisallowedCorners(valuetype Verse.TraverseParms, valuetype Verse.AI.PathEndMode, valuetype Verse.CellRect)
-			// InitStatusesAndPushStartNode(ref curIndex, start);
-			//IL_0363: ldarg.0
-			//IL_0364: ldloca.s 3
-			//IL_0366: ldarg.1
-			//IL_0367: call instance void Verse.AI.PathFinder::InitStatusesAndPushStartNode(int32 &, valuetype Verse.IntVec3)
+				// CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
+				//IL_0358: ldarg.0
+				//IL_0359: ldarg.3
+				//IL_035a: ldarg.s peMode
+				//IL_035c: ldloc.s 9
+				//IL_035e: call instance void Verse.AI.PathFinder::CalculateAndAddDisallowedCorners(valuetype Verse.TraverseParms, valuetype Verse.AI.PathEndMode, valuetype Verse.CellRect)
+				// InitStatusesAndPushStartNode(ref curIndex, start);
+				//IL_0363: ldarg.0
+				//IL_0364: ldloca.s 3
+				//IL_0366: ldarg.1
+				//IL_0367: call instance void Verse.AI.PathFinder::InitStatusesAndPushStartNode(int32 &, valuetype Verse.IntVec3)
 				if (
-					i+8 < instructionsList.Count && instructionsList[i+8].opcode == OpCodes.Call && instructionsList[i+8].operand.ToString().Equals("Void InitStatusesAndPushStartNode(Int32 ByRef, Verse.IntVec3)")
-                    )
+					i + 4 < instructionsList.Count && instructionsList[i + 4].opcode == OpCodes.Call &&
+					(MethodInfo)instructionsList[i + 4].operand == (AccessTools.Method(typeof(PathFinder), "CalculateAndAddDisallowedCorners"))
+					//instructionsList[i + 4].operand.ToString().Equals("Void CalculateAndAddDisallowedCorners(Verse.TraverseParms, Verse.AI.PathEndMode, Verse.CellRect)")
+					)
 				{
 					// if (peMode == PathEndMode.Touch)
 					// sequence point: (line 255, col 13) to (line 255, col 45) in C:\Steam\steamapps\common\RimWorld\Mods\RimThreaded\Source\PathFinder_Target.cs
@@ -587,12 +589,7 @@ namespace RimThreaded
 
 					instructionsList[i].opcode = OpCodes.Ldarg_S;
 					instructionsList[i].operand = 4;
-					//instructionsList[i].opcode = OpCodes.Nop;
-					//instructionsList[i].operand = null;
-					//instructionsList[i].labels.Add(IL_0477);
 					yield return instructionsList[i];
-
-					
 					yield return new CodeInstruction(OpCodes.Ldc_I4_2);
 					yield return new CodeInstruction(OpCodes.Bne_Un, IL_0477);
 
@@ -605,7 +602,7 @@ namespace RimThreaded
 					yield return new CodeInstruction(OpCodes.Ldloc_S, 9);
 					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(CellRect), "minX"));
 					yield return new CodeInstruction(OpCodes.Stloc_S, minX.LocalIndex);
-					
+
 					// int minZ = end.minZ;
 					// sequence point: (line 258, col 17) to (line 258, col 42) in C:\Steam\steamapps\common\RimWorld\Mods\RimThreaded\Source\PathFinder_Target.cs
 					//IL_0380: ldloc.s 11
@@ -632,8 +629,8 @@ namespace RimThreaded
 					yield return new CodeInstruction(OpCodes.Ldloc_S, 9);
 					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(CellRect), "maxZ"));
 					yield return new CodeInstruction(OpCodes.Stloc_S, maxZ.LocalIndex);
-					
-					
+
+
 					// if (!IsCornerTouchAllowed(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
 					// sequence point: (line 261, col 17) to (line 261, col 95) in C:\Steam\steamapps\common\RimWorld\Mods\RimThreaded\Source\PathFinder_Target.cs
 					//IL_039b: ldarg.0
@@ -874,20 +871,23 @@ namespace RimThreaded
 					yield return new CodeInstruction(OpCodes.Ldloc_S, minZ.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(CellIndices), "CellToIndex", new Type[] { typeof(int), typeof(int) }));
 					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(List<Int32>), "Add"));
-					
+					instructionsList[i + 5].labels.Add(IL_0477);
+					i += 4;
+				} else if (					
+					i + 3 < instructionsList.Count && instructionsList[i + 3].opcode == OpCodes.Call && instructionsList[i + 3].operand.ToString().Equals("Void InitStatusesAndPushStartNode(Int32 ByRef, Verse.IntVec3)")
+					) { 
 					// num = (ushort)(num + 2);
 					//IL_033e: ldloc.1   (statusOpenValue2.LocalIndex)
 					//IL_033f: ldc.i4.2
 					//IL_0340: add
 					//IL_0341: conv.u2
 					//IL_0342: stloc.1   (statusOpenValue2.LocalIndex)	
-					instructionsList[i+5].opcode = OpCodes.Ldloc;
-					instructionsList[i+5].operand = statusOpenValue2.LocalIndex;
+					instructionsList[i].opcode = OpCodes.Ldloc;
+					instructionsList[i].operand = statusOpenValue2.LocalIndex;
 					//instructionsList[i + 5].opcode = OpCodes.Nop;
 					//instructionsList[i + 5].operand = null;
-					instructionsList[i + 5].labels.Add(IL_0477);
-					yield return instructionsList[i+5];
-					
+					//instructionsList[i].labels.Add(IL_0477);
+					yield return instructionsList[i];					
 					yield return new CodeInstruction(OpCodes.Ldc_I4_2);
 					yield return new CodeInstruction(OpCodes.Add);
 					yield return new CodeInstruction(OpCodes.Conv_U2);
@@ -908,11 +908,11 @@ namespace RimThreaded
 					// if (num2 >= 65435)
 					//IL_0348: ldloc.2   (statusClosedValue2.LocalIndex)
 					//IL_0349: ldc.i4 65435
-					//IL_034e: blt.s IL_0374		(goto IL_0374)
+					//IL_034e: blt.s IL_04ad		(goto IL_04ad)
 					yield return new CodeInstruction(OpCodes.Ldloc, statusClosedValue2.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldc_I4, 65435);
-					Label IL_0374 = iLGenerator.DefineLabel();
-					yield return new CodeInstruction(OpCodes.Blt_S, IL_0374);
+					Label IL_04AD = iLGenerator.DefineLabel();
+					yield return new CodeInstruction(OpCodes.Blt_S, IL_04AD);
 										
 					// for (int i = 0; i < array.Length; i++)
 					//IL_0350: ldc.i4.0
@@ -922,8 +922,9 @@ namespace RimThreaded
 					//IL_0353: br.s IL_0369		(goto IL_0369)
 					yield return new CodeInstruction(OpCodes.Ldc_I4_0);
 					yield return new CodeInstruction(OpCodes.Stloc_S, loopIndex.LocalIndex);
-					Label IL_0369 = iLGenerator.DefineLabel();
-					yield return new CodeInstruction(OpCodes.Br_S, IL_0369);					
+
+					Label IL_04A2 = iLGenerator.DefineLabel();
+					yield return new CodeInstruction(OpCodes.Br_S, IL_04A2);					
 
 					// loop start (head: IL_0369)
 						//IL_0355: ldloc.0   (calcGrid2.LocalIndex) (add label IL_0355)
@@ -932,10 +933,10 @@ namespace RimThreaded
 						//IL_035d: ldc.i4.0		
 						// {
 						//IL_035e: stfld uint16 Verse.AI.PathFinder_Target/PathFinderNodeFast::status
-					CodeInstruction ldloc_0_IL_0355 = new CodeInstruction(OpCodes.Ldloc, calcGrid2.LocalIndex);
-					Label IL_0355 = iLGenerator.DefineLabel();
-					ldloc_0_IL_0355.labels.Add(IL_0355);
-					yield return ldloc_0_IL_0355;
+					CodeInstruction ldloc_0_IL_048E = new CodeInstruction(OpCodes.Ldloc, calcGrid2.LocalIndex);
+					Label IL_048E = iLGenerator.DefineLabel();
+					ldloc_0_IL_048E.labels.Add(IL_048E);
+					yield return ldloc_0_IL_048E;
 					yield return new CodeInstruction(OpCodes.Ldloc_S, loopIndex.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldelema, nodeFastType);
 					yield return new CodeInstruction(OpCodes.Ldc_I4_0);
@@ -957,13 +958,13 @@ namespace RimThreaded
 					//IL_036c: ldlen
 					//IL_036d: conv.i4
 					//IL_036e: blt.s IL_0355   (goto IL_0355)
-					CodeInstruction ldloc_S_IL_0369 = new CodeInstruction(OpCodes.Ldloc_S, loopIndex.LocalIndex);
-					ldloc_S_IL_0369.labels.Add(IL_0369);
-					yield return ldloc_S_IL_0369;
+					CodeInstruction ldloc_S_IL_04A2 = new CodeInstruction(OpCodes.Ldloc_S, loopIndex.LocalIndex);
+					ldloc_S_IL_04A2.labels.Add(IL_04A2);
+					yield return ldloc_S_IL_04A2;
 					yield return new CodeInstruction(OpCodes.Ldloc_S, calcGrid2.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldlen);
 					yield return new CodeInstruction(OpCodes.Conv_I4);
-					yield return new CodeInstruction(OpCodes.Blt_S, IL_0355);
+					yield return new CodeInstruction(OpCodes.Blt_S, IL_048E);
 
 					//CodeInstruction ci = new CodeInstruction(OpCodes.Nop);
 					//ci.labels.Add(IL_0374);
@@ -987,9 +988,9 @@ namespace RimThreaded
 					//IL_037a: ldarg.1
 					//IL_037b: callvirt instance int32 ['Assembly-CSharp']Verse.CellIndices::CellToIndex(valuetype ['Assembly-CSharp']Verse.IntVec3)
 					//IL_0380: stloc 3
-					CodeInstruction ldarg_0_IL_0374 = new CodeInstruction(OpCodes.Ldarg_0);
-					ldarg_0_IL_0374.labels.Add(IL_0374);
-					yield return ldarg_0_IL_0374;
+					CodeInstruction ldarg_0_IL_04AD = new CodeInstruction(OpCodes.Ldarg_0);
+					ldarg_0_IL_04AD.labels.Add(IL_04AD);
+					yield return ldarg_0_IL_04AD;
 					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PathFinder), "cellIndices"));
 					yield return new CodeInstruction(OpCodes.Ldarg_1);
 					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(CellIndices), "CellToIndex", new Type[] { typeof(IntVec3) }));
@@ -1054,30 +1055,29 @@ namespace RimThreaded
 					yield return new CodeInstruction(OpCodes.Ldelema, nodeFastType);
 					yield return new CodeInstruction(OpCodes.Ldloc_S, statusOpenValue2.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(nodeFastType, "status"));
-					
+
 					// openList.Clear();
-					//IL_03c9: ldarg.0
-					//IL_03ca: ldfld class ['Assembly-CSharp']Verse.FastPriorityQueue`1<valuetype Verse.AI.PathFinder_Target/CostNode> Verse.AI.PathFinder_Target::openList
-					//IL_03cf: callvirt instance void class ['Assembly-CSharp']Verse.FastPriorityQueue`1<valuetype Verse.AI.PathFinder_Target/CostNode>::Clear()
-					yield return new CodeInstruction(OpCodes.Ldarg_0);
-					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PathFinder), "openList"));
+					// fastPriorityQueue.Clear();
+					//IL_0502: ldloc.3
+					//IL_0503: callvirt instance void class ['Assembly-CSharp'] Verse.FastPriorityQueue`1<valuetype Verse.AI.PathFinder_Target/CostNode>::Clear()
+					yield return new CodeInstruction(OpCodes.Ldloca_S, openList.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(fastPriorityQueueCostNodeType, "Clear"));
 
 					// openList.Push(new CostNode(curIndex, 0));
-					//IL_03d4: ldarg.0
-					//IL_03d5: ldfld class ['Assembly-CSharp']Verse.FastPriorityQueue`1<valuetype Verse.AI.PathFinder_Target/CostNode> Verse.AI.PathFinder_Target::openList
-					//IL_03da: ldloc 3
-					//IL_03dc: ldc.i4.0
-					//IL_03dd: newobj instance void Verse.AI.PathFinder_Target/CostNode::.ctor(int32, int32)
-					//IL_03e2: callvirt instance void class ['Assembly-CSharp']Verse.FastPriorityQueue`1<valuetype Verse.AI.PathFinder_Target/CostNode>::Push(!0)					 
-					yield return new CodeInstruction(OpCodes.Ldarg_0);
-					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PathFinder), "openList"));
+					// fastPriorityQueue.Push(new CostNode(num3, 0));
+					//IL_0508: ldloc.3
+					//IL_0509: ldloc.s 9
+					//IL_050b: ldc.i4.0
+					//IL_050c: newobj instance void Verse.AI.PathFinder_Target / CostNode::.ctor(int32, int32)
+					//IL_0511: callvirt instance void class ['Assembly-CSharp'] Verse.FastPriorityQueue`1<valuetype Verse.AI.PathFinder_Target/CostNode>::Push(!0)
+					yield return new CodeInstruction(OpCodes.Ldloc_S, openList.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldloc_3); //curIndex
 					yield return new CodeInstruction(OpCodes.Ldc_I4_0);
 					yield return new CodeInstruction(OpCodes.Newobj, costNodeType.GetConstructor(new Type[] { typeof(Int32), typeof(Int32) }));
-					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(fastPriorityQueueCostNodeType, "Push"));					
-					
-					i += 8;
+					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(fastPriorityQueueCostNodeType, "Push"));
+					//yield return new CodeInstruction(OpCodes.Ldloc_S, openList.LocalIndex);
+
+					i += 3;
 					
 				}
 				//call instance class ['Assembly-CSharp']Verse.AI.PawnPath Verse.AI.PathFinder_Original::FinalizedPath(int32, bool)
@@ -1096,6 +1096,7 @@ namespace RimThreaded
 					instructionsList[i].operand = AccessTools.Constructor(typeof(PawnPath));
 					yield return instructionsList[i];
 					yield return new CodeInstruction(OpCodes.Stloc_S, emptyPawnPath.LocalIndex);
+
 					yield return new CodeInstruction(OpCodes.Ldloc_3); //curIndex
 					yield return new CodeInstruction(OpCodes.Stloc_S, num1.LocalIndex);
 
@@ -1106,10 +1107,10 @@ namespace RimThreaded
 					//IL_054e: ldelema Verse.AI.PathFinder_Target/PathFinderNodeFast
 					//IL_0553: ldfld int32 Verse.AI.PathFinder_Target/PathFinderNodeFast::parentIndex
 					//IL_0558: stloc.s 41   (parentIndex.LocalIndex)
-					CodeInstruction ldloc_0_IL_054b = new CodeInstruction(OpCodes.Ldloc, calcGrid2.LocalIndex);
-					Label IL_054b = iLGenerator.DefineLabel();
-					ldloc_0_IL_054b.labels.Add(IL_054b);
-					yield return ldloc_0_IL_054b;
+					CodeInstruction ldloc_0_IL_0667 = new CodeInstruction(OpCodes.Ldloc, calcGrid2.LocalIndex);
+					Label IL_0667 = iLGenerator.DefineLabel();
+					ldloc_0_IL_0667.labels.Add(IL_0667);
+					yield return ldloc_0_IL_0667;
 					yield return new CodeInstruction(OpCodes.Ldloc_S, num1.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldelema, nodeFastType);
 					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(nodeFastType, "parentIndex"));
@@ -1137,8 +1138,8 @@ namespace RimThreaded
 					//IL_0577: beq.s IL_057f   (goto IL_057f)
 					yield return new CodeInstruction(OpCodes.Ldloc_S, num1.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldloc_S, parentIndex.LocalIndex);
-					Label IL_057f = iLGenerator.DefineLabel();
-					yield return new CodeInstruction(OpCodes.Beq_S, IL_057f);
+					Label IL_069b = iLGenerator.DefineLabel();
+					yield return new CodeInstruction(OpCodes.Beq_S, IL_069b);
 
 					// num13 = parentIndex;
 					//IL_0579: ldloc.s 41   (parentIndex.LocalIndex)
@@ -1148,7 +1149,8 @@ namespace RimThreaded
 					// end loop
 					yield return new CodeInstruction(OpCodes.Ldloc_S, parentIndex.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Stloc_S, num1.LocalIndex);
-					yield return new CodeInstruction(OpCodes.Br_S, IL_054b);
+
+					yield return new CodeInstruction(OpCodes.Br_S, IL_0667);
 
 					// emptyPawnPath.SetupFound(array[curIndex].knownCost, flag8);
 					//IL_057f: ldloc.s 39   (emptyPawnPath.LocalIndex) (add label IL_057f)
@@ -1159,10 +1161,10 @@ namespace RimThreaded
 					//IL_058e: conv.r4
 					//IL_058f: ldloc.s 20   (flag8)
 					//IL_0591: callvirt instance void ['Assembly-CSharp']Verse.AI.PawnPath::SetupFound(float32, bool)
-					CodeInstruction ldloc_s_IL_057f = new CodeInstruction(OpCodes.Ldloc_S, emptyPawnPath.LocalIndex);
-					ldloc_s_IL_057f.labels.Add(IL_057f);
-					yield return ldloc_s_IL_057f;
-					yield return new CodeInstruction(OpCodes.Ldloc, calcGrid2.LocalIndex);
+					CodeInstruction ldloc_s_IL_069b = new CodeInstruction(OpCodes.Ldloc_S, emptyPawnPath.LocalIndex);
+					ldloc_s_IL_069b.labels.Add(IL_069b);
+					yield return ldloc_s_IL_069b;
+					yield return new CodeInstruction(OpCodes.Ldloc_S, calcGrid2.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldloc_3);
 					yield return new CodeInstruction(OpCodes.Ldelema, nodeFastType);
 					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(nodeFastType, "knownCost"));
