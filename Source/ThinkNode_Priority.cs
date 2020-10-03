@@ -27,6 +27,8 @@ namespace RimThreaded
                     if (subNode != null)
                     {
                         ThinkResult thinkResult = subNode.TryIssueJobPackage(pawn, jobParams);
+                        if (null == thinkResult)
+                            break;
                         if (thinkResult.IsValid) {
                             __result = thinkResult;
 			                return false;

@@ -24,7 +24,7 @@ namespace RimThreaded
 		//perf impr - replace dicts with hashsets (maybe custom hash function too?)
 
 		static RimThreadedHarmony() {
-			Harmony.DEBUG = true;
+			//Harmony.DEBUG = true;
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
@@ -505,11 +505,8 @@ namespace RimThreaded
 
 			//PathFinder
 			original = typeof(PathFinder);
-			patched = typeof(PathFinder_Patch);
-			Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
-			//ConstructorInfo constructorMethod2 = original.GetConstructor(new Type[] { typeof(Map) });
-			//MethodInfo cpMethod2 = patched.GetMethod("Postfix_Constructor");
-			//harmony.Patch(constructorMethod2, postfix: new HarmonyMethod(cpMethod2));
+			patched = typeof(PathFinder_Transpile);
+			Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
 
 			//WorldPawns
 			original = typeof(WorldPawns);
@@ -657,6 +654,11 @@ namespace RimThreaded
 			original = typeof(SustainerAggregatorUtility);
 			patched = typeof(SustainerAggregatorUtility_Patch);
 			Prefix(original, patched, "AggregateOrSpawnSustainerFor");
+
+			//StoryState
+			original = typeof(StoryState);
+			patched = typeof(StoryState_Patch);
+			Prefix(original, patched, "RecordPopulationIncrease");
 
 			//GrammarResolverSimple
 			//original = typeof(GrammarResolverSimple);
