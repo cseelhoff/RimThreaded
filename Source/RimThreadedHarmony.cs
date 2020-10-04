@@ -661,9 +661,10 @@ namespace RimThreaded
 			Prefix(original, patched, "RecordPopulationIncrease");
 
 			//GrammarResolverSimple
-			//original = typeof(GrammarResolverSimple);
-			//patched = typeof(GrammarResolverSimple_Patch);
-			//Prefix(original, patched, "Formatted");
+			original = typeof(GrammarResolverSimple);
+			patched = typeof(GrammarResolverSimple_Transpile);
+			Transpile(original, patched, "Formatted");
+			
 
 			//PERFORMANCE IMPROVEMENTS
 
