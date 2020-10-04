@@ -20,6 +20,8 @@ namespace RimThreaded
 		public string maxThreadsBuffer = "8";
 		public int timeoutMS = 1000;
 		public string timeoutMSBuffer = "1000";
+		public string modsText = "";
+		public Vector2 scrollPos = new Vector2(0, 0);
 		public override void ExposeData()
 		{
 			base.ExposeData();
@@ -35,6 +37,7 @@ namespace RimThreaded
 			Widgets.IntEntry(listing_Standard.GetRect(40f), ref maxThreads, ref maxThreadsBuffer);
 			Widgets.Label(listing_Standard.GetRect(30f), "Timeout (in miliseconds) waiting for threads (default: 1000):");
 			Widgets.IntEntry(listing_Standard.GetRect(40f), ref timeoutMS, ref timeoutMSBuffer, 10);
+			Widgets.TextAreaScrollable(listing_Standard.GetRect(400f), modsText, ref scrollPos);
 			listing_Standard.End();
 		}
 	}	

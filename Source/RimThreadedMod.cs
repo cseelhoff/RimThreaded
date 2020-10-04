@@ -23,6 +23,52 @@ namespace RimThreaded
 		}
 		public override void DoSettingsWindowContents(Rect inRect)
 		{
+			if (Settings.modsText.Length == 0)
+			{
+				Settings.modsText = "Potential RimThreaded mod conflicts :\n";
+
+				IEnumerable<MethodBase> originalMethods = Harmony.GetAllPatchedMethods();
+				foreach (MethodBase originalMethod in originalMethods)
+				{
+					Patches patches = Harmony.GetPatchInfo(originalMethod);
+					if (patches is null) { }
+					else
+					{
+						bool isRimThreadedPrefixed = false;
+						foreach (Patch patch in patches.Prefixes)
+						{
+							if (patch.owner.Equals("majorhoff.rimthreaded") && (patches.Prefixes.Count > 1 || patches.Postfixes.Count > 0 || patches.Transpilers.Count > 0))
+							{
+								isRimThreadedPrefixed = true;
+								Settings.modsText += ("\n---Patch method: " + patch.PatchMethod + "---\n");
+								Settings.modsText += ("RimThreaded priority: " + patch.priority + "\n");
+								break;
+							}
+						}
+						if (isRimThreadedPrefixed)
+						{
+							foreach (Patch patch in patches.Prefixes)
+							{
+								if (!patch.owner.Equals("majorhoff.rimthreaded"))
+								{
+									Settings.modsText += ("owner: " + patch.owner + "\n");
+									Settings.modsText += ("priority: " + patch.priority + "\n");
+								}
+							}
+							foreach (Patch patch in patches.Postfixes)
+							{
+								Settings.modsText += ("owner: " + patch.owner + "\n");
+								Settings.modsText += ("priority: " + patch.priority + "\n");
+							}
+							foreach (Patch patch in patches.Transpilers)
+							{
+								Settings.modsText += ("owner: " + patch.owner + "\n");
+								Settings.modsText += ("priority: " + patch.priority + "\n");
+							}
+						}
+					}
+				}
+			}			
 			Settings.DoWindowContents(inRect);
 			if (Settings.maxThreads != RimThreaded.maxThreads)
 			{
