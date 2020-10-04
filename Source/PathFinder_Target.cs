@@ -53,9 +53,9 @@ namespace Verse.AI
 
         private static PathFinderNodeFast[] calcGrid;
 
-        private static ushort statusOpenValue = 1;
+        //private static ushort statusOpenValue = 1;
 
-        private static ushort statusClosedValue = 2;
+        //private static ushort statusClosedValue = 2;
 
         //private RegionCostCalculatorWrapper regionCostCalculator;
 
@@ -839,8 +839,8 @@ namespace Verse.AI
                 calcGrid[i].status = 0;
             }
 
-            statusOpenValue = 1;
-            statusClosedValue = 2;
+            //statusOpenValue = 1;
+            //statusClosedValue = 2;
         }
         
         [Conditional("PFPROFILE")]

@@ -24,7 +24,7 @@ namespace RimThreaded
 		//perf impr - replace dicts with hashsets (maybe custom hash function too?)
 
 		static RimThreadedHarmony() {
-			//Harmony.DEBUG = true;
+			Harmony.DEBUG = true;
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
@@ -591,8 +591,8 @@ namespace RimThreaded
 
 			//GenRadial
 			original = typeof(GenRadial);
-			patched = typeof(GenRadial_Patch);
-			Prefix(original, patched, "ProcessEquidistantCells");
+			patched = typeof(GenRadial_Transpile);
+			Transpile(original, patched, "ProcessEquidistantCells");
 
 			//WealthWatcher
 			original = typeof(WealthWatcher);

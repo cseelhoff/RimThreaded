@@ -35,6 +35,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.48  
+-Transpiled GenRadial.ProcessEquidistantCells  
+-Added feature to list mods possibly conflicting with RimThreaded in Mod Settings  
+
 Version 1.0.47  
 -Transpiled PathFinder.FindPath!  
 -Fixed bug in StoryState.RecordPopulationIncrease  
