@@ -154,14 +154,14 @@ namespace RimThreaded
 			Prefix(original, patched, "ReleaseAllClaimedBy");
 			Prefix(original, patched, "ReleaseClaimedBy");
 			Prefix(original, patched, "CanReserve");
-			Prefix(original, patched, "FirstObsoleteReservationFor");			
+			Prefix(original, patched, "FirstObsoleteReservationFor");
 
 			//DynamicDrawManager
 			original = typeof(DynamicDrawManager);
 			patched = typeof(Verse_DynamicDrawManager_Patch);
 			Prefix(original, patched, "RegisterDrawable");
 			Prefix(original, patched, "DeRegisterDrawable");
-			Prefix(original, patched, "DrawDynamicThings");
+			//Prefix(original, patched, "DrawDynamicThings");
 			Prefix(original, patched, "LogDynamicDrawThings");
 
 			//Reachability - needs code rewrite - not efficient
@@ -390,6 +390,7 @@ namespace RimThreaded
 			Prefix(original, patched, "Release");
 			Prefix(original, patched, "FirstReservationFor");
 			Prefix(original, patched, "CanReserve");
+			Prefix(original, patched, "IsReservedByAnyoneOf");
 
 			//FloodFiller - inefficient global lock			
 			original = typeof(FloodFiller);
@@ -612,7 +613,7 @@ namespace RimThreaded
 			//JobGiver_Work
 			original = typeof(JobGiver_Work);
 			patched = typeof(JobGiver_Work_Patch);
-			Prefix(original, patched, "TryIssueJobPackage");
+			//Prefix(original, patched, "TryIssueJobPackage");
 
 			//ThingCountUtility
 			original = typeof(ThingCountUtility);
@@ -665,7 +666,12 @@ namespace RimThreaded
 			original = typeof(GrammarResolverSimple);
 			patched = typeof(GrammarResolverSimple_Transpile);
 			Transpile(original, patched, "Formatted");
-			
+
+			//MapGenerator
+			original = typeof(MapGenerator);
+			patched = typeof(MapGenerator_Patch);
+			Prefix(original, patched, "GenerateMap");
+
 
 			//PERFORMANCE IMPROVEMENTS
 

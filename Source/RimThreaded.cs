@@ -45,6 +45,10 @@ namespace RimThreaded
         public static ConcurrentDictionary<MaterialRequest, Material> materialResults = new ConcurrentDictionary<MaterialRequest, Material>();
         public static ConcurrentDictionary<int, MaterialRequest> materialRequests = new ConcurrentDictionary<int, MaterialRequest>();
         public static ConcurrentDictionary<int, EventWaitHandle> materialWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<int, Map> generateMapResults = new ConcurrentDictionary<int, Map>();
+        public static ConcurrentDictionary<int, object[]> generateMapRequests = new ConcurrentDictionary<int, object[]>();
+        public static ConcurrentDictionary<int, EventWaitHandle> generateMapWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
 
@@ -164,6 +168,7 @@ namespace RimThreaded
             newSustainerWaits.TryAdd(tID, new AutoResetEvent(false));
             texture2DWaits.TryAdd(tID, new AutoResetEvent(false));
             materialWaits.TryAdd(tID, new AutoResetEvent(false));
+            generateMapWaits.TryAdd(tID, new AutoResetEvent(false));
             thread.Start();
         }
 
@@ -755,6 +760,7 @@ namespace RimThreaded
                 newSustainerWaits.TryRemove(managedThreadID, out _);
                 texture2DWaits.TryRemove(managedThreadID, out _);
                 materialWaits.TryRemove(managedThreadID, out _);
+                generateMapWaits.TryRemove(managedThreadID, out _);
             }
             else
             {
@@ -774,6 +780,7 @@ namespace RimThreaded
                 RespondToMaterialRequests();
                 RespondToPlayRequests();
                 RespondToSustainerRequests();
+                RespondToGenerateMapRequests();
 
                 // Add any sounds that were produced in this tick
                 while (PlayOneShot.Count > 0)
@@ -865,6 +872,23 @@ namespace RimThreaded
                     texture2DResults.TryAdd(itempath, content);
                 }
                 if (texture2DWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToGenerateMapRequests()
+        {
+            while (generateMapRequests.Count > 0)
+            {
+                int key = generateMapRequests.Keys.First();
+                if (generateMapRequests.TryRemove(key, out object[] requestParams))
+                {
+                    Map mapResult = MapGenerator.GenerateMap((IntVec3)requestParams[0], (MapParent)requestParams[1], (MapGeneratorDef)requestParams[2], (IEnumerable<GenStepWithParams>)requestParams[3], (Action<Map>)requestParams[4]);
+                    generateMapResults.TryAdd(key, mapResult);
+                }
+                if (generateMapWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
