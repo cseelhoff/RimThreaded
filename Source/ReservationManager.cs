@@ -21,7 +21,28 @@ namespace RimThreaded
 		public static AccessTools.FieldRef<ReservationManager, Map> map =
 			AccessTools.FieldRefAccess<ReservationManager, Map>("map");
 
-
+		public static bool IsReservedByAnyoneOf(ReservationManager __instance, ref bool __result, LocalTargetInfo target, Faction faction)
+		{
+			if (!target.IsValid)
+			{
+				__result = false;
+				return false;
+			}
+			for (int i = 0; i < reservations(__instance).Count; i++)
+			{
+                Reservation reservation = reservations(__instance)[i];
+				if (reservation != null)
+				{
+					if (reservation.Target == target && reservation.Claimant.Faction == faction)
+					{
+						__result = true;
+						return false;
+					}
+				}
+			}
+			__result = false;
+			return false;
+		}
 
 		public static bool ReleaseClaimedBy(ReservationManager __instance, Pawn claimant, Job job)
 		{

@@ -35,6 +35,11 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.50  
+-Forced MapGenerator.GenerateMap to run on main thread only (hopefully helps z-level compatibility)  
+-Fixed bug with ReservationManager.IsReservedByAnyoneOf  
+-Removed a few messy hacks that I never should have used  
+
 Version 1.0.49  
 -Transpiled GrammarResolverSimple.Formatted  
 -Transpiled WorkGiver_ConstructDeliverResources.ResourceDeliverJobFor  
