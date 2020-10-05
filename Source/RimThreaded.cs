@@ -48,6 +48,7 @@ namespace RimThreaded
         public static ConcurrentDictionary<int, Map> generateMapResults = new ConcurrentDictionary<int, Map>();
         public static ConcurrentDictionary<int, object[]> generateMapRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, EventWaitHandle> generateMapWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
@@ -733,10 +734,17 @@ namespace RimThreaded
                     {
                         if (!eventWaitDone.WaitOne(timeoutMS))
                         {
-                            Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
-                            AbortWorkerThread(tID2);
-                            CreateWorkerThread();
-                        }
+                            if (!timeoutExemptThreads.Contains(tID2))
+                            {
+                                Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
+                                AbortWorkerThread(tID2);
+                                CreateWorkerThread();
+                            } else
+                            {
+                                eventWaitDone.WaitOne();
+                                timeoutExemptThreads.Remove(tID2);
+                            }
+                        }                            
                     }
                     else
                     {
@@ -885,6 +893,7 @@ namespace RimThreaded
                 int key = generateMapRequests.Keys.First();
                 if (generateMapRequests.TryRemove(key, out object[] requestParams))
                 {
+                    timeoutExemptThreads.Add(key);
                     Map mapResult = MapGenerator.GenerateMap((IntVec3)requestParams[0], (MapParent)requestParams[1], (MapGeneratorDef)requestParams[2], (IEnumerable<GenStepWithParams>)requestParams[3], (Action<Map>)requestParams[4]);
                     generateMapResults.TryAdd(key, mapResult);
                 }

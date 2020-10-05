@@ -23,7 +23,7 @@ namespace RimThreaded
         public static bool CacheWorkGiversInOrder(Pawn_WorkSettings __instance)
         {
             //Pawn_WorkSettings.wtsByPrio.Clear();
-            List<WorkTypeDef> wtsByPrio = new List<WorkTypeDef>();
+            List<WorkTypeDef> wtsByPrio = new List<WorkTypeDef>(); //CHANGE
             List<WorkTypeDef> defsListForReading = DefDatabase<WorkTypeDef>.AllDefsListForReading;
             int num1 = 999;
             for (int index = 0; index < defsListForReading.Count; ++index)
@@ -42,7 +42,7 @@ namespace RimThreaded
                 float num2 = a.naturalPriority + (4 - __instance.GetPriority(a)) * 100000;
                 return ((float)(b.naturalPriority + (4 - __instance.GetPriority(b)) * 100000)).CompareTo(num2);
             });
-            lock (workGiversInOrderEmerg(__instance))
+            lock (workGiversInOrderEmerg(__instance)) //CHANGE
             {
                 workGiversInOrderEmerg(__instance).Clear();
             }
@@ -53,14 +53,14 @@ namespace RimThreaded
                 {
                     WorkGiver worker = workTypeDef.workGiversByPriority[index2].Worker;
                     if (worker.def.emergency && __instance.GetPriority(worker.def.workType) <= num1) {
-                        lock (workGiversInOrderEmerg(__instance)) 
+                        lock (workGiversInOrderEmerg(__instance)) //CHANGE
                         {
                             workGiversInOrderEmerg(__instance).Add(worker);
                         }
                     }
                 }
             }
-            lock (workGiversInOrderNormal(__instance))
+            lock (workGiversInOrderNormal(__instance)) //CHANGE
             {
                 workGiversInOrderNormal(__instance).Clear();
             }
@@ -72,7 +72,7 @@ namespace RimThreaded
                     WorkGiver worker = workTypeDef.workGiversByPriority[index2].Worker;
                     if (!worker.def.emergency || __instance.GetPriority(worker.def.workType) > num1)
                     {
-                        lock (workGiversInOrderNormal(__instance))
+                        lock (workGiversInOrderNormal(__instance)) //CHANGE
                         {
                             workGiversInOrderNormal(__instance).Add(worker);
                         }

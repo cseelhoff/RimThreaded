@@ -23,7 +23,22 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<TickList, List<Thing>>("thingsToDeregister");
         public static AccessTools.FieldRef<TickList, TickerType> tickType =
             AccessTools.FieldRefAccess<TickList, TickerType>("tickType");
-
+        public static bool DeregisterThing(TickList __instance, Thing t)
+        {
+            lock (thingsToDeregister(__instance))
+            {
+                thingsToDeregister(__instance).Add(t);
+            }
+            return false;
+        }
+        public static bool RegisterThing(TickList __instance, Thing t)
+        {
+            lock (thingsToRegister(__instance))
+            {
+                thingsToRegister(__instance).Add(t);
+            }
+            return false;
+        }
         private static int get_TickInterval2(TickList __instance)
         {
             switch (tickType(__instance))
@@ -50,23 +65,36 @@ namespace RimThreaded
             TickerType currentTickType = tickType(__instance);
             int currentTickInterval = get_TickInterval2(__instance);
 
+            Thing i;
             List<Thing> tr = thingsToRegister(__instance);
             for (int index = 0; index < tr.Count; ++index)
             {
-                Thing i = tr[index];
+                try
+                {
+                    i = tr[index];
+                } catch (ArgumentOutOfRangeException) { break; }
                 List<Thing> b = BucketOf2(__instance, i, currentTickInterval);
                 b.Add(i);
             }
-            tr.Clear();
+            lock (tr)
+            {
+                tr.Clear();
+            }
 
             List<Thing> td = thingsToDeregister(__instance);
             for (int index = 0; index < td.Count; ++index)
             {
-                Thing i = td[index];
+                try
+                {
+                    i = td[index];
+                } catch (ArgumentOutOfRangeException) { break; }
                 List<Thing> b = BucketOf2(__instance, i, currentTickInterval);
                 b.Remove(i);
             }
-            td.Clear();
+            lock (td)
+            {
+                td.Clear();
+            }
 
             if (DebugSettings.fastEcology)
             {
