@@ -201,6 +201,7 @@ namespace RimThreaded
                 __result = InstallJob(pawn, blueprint_Install);
                 return false;
             }
+            List<Thing> resourcesAvailable = new List<Thing>();
 
             bool flag = false;
             ThingDefCountClass thingDefCountClass = null;
@@ -219,8 +220,28 @@ namespace RimThreaded
                 Thing foundRes = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForDef(need.thingDef), PathEndMode.ClosestTouch, TraverseParms.For(pawn), 9999f, (Thing r) => ResourceValidator(pawn, need, r));
                 if (foundRes != null)
                 {
-                    List<Thing> resourcesAvailable = new List<Thing>();
-                    FindAvailableNearbyResources2(foundRes, pawn, out int resTotalAvailable, resourcesAvailable);
+                    resourcesAvailable.Clear();
+                    //FindAvailableNearbyResources2(foundRes, pawn, out int resTotalAvailable, resourcesAvailable);
+                    int resTotalAvailable;
+                    int num0 = Mathf.Min(foundRes.def.stackLimit, pawn.carryTracker.MaxStackSpaceEver(foundRes.def));
+                    resTotalAvailable = 0;
+                    resourcesAvailable.Add(foundRes);
+                    resTotalAvailable += foundRes.stackCount;
+                    if (resTotalAvailable < num0)
+                    {
+                        foreach (Thing item in GenRadial.RadialDistinctThingsAround(foundRes.Position, foundRes.Map, 5f, useCenter: false))
+                        {
+                            if (resTotalAvailable >= num0)
+                            {
+                                break;
+                            }
+                            if (item.def == foundRes.def && GenAI.CanUseItemForWork(pawn, item))
+                            {
+                                resourcesAvailable.Add(item);
+                                resTotalAvailable += item.stackCount;
+                            }
+                        }
+                    }
                     int neededTotal;
                     Job jobToMakeNeederAvailable;
                     HashSet<Thing> hashSet = FindNearbyNeeders(pawn, need, c, resTotalAvailable, canRemoveExistingFloorUnderNearbyNeeders, out neededTotal, out jobToMakeNeederAvailable);

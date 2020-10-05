@@ -107,7 +107,7 @@ namespace RimThreaded
 			original = typeof(ThingGrid);
 
 			//ThingGrid_Transpile
-			patched = typeof(ThingGrid_Transpile);
+			//patched = typeof(ThingGrid_Transpile);
 			patched = typeof(ThingGrid_Patch);
 
 			Prefix(original, patched, "RegisterInCell");
@@ -621,8 +621,9 @@ namespace RimThreaded
 
 			//WorkGiver_ConstructDeliverResources
 			original = typeof(WorkGiver_ConstructDeliverResources);
-			patched = typeof(WorkGiver_ConstructDeliverResources_Patch);
-			Prefix(original, patched, "ResourceDeliverJobFor");
+			//patched = typeof(WorkGiver_ConstructDeliverResources_Patch);
+			patched = typeof(WorkGiver_ConstructDeliverResources_Transpile);
+			Transpile(original, patched, "ResourceDeliverJobFor");
 
 			//GenText
 			original = typeof(GenText);
@@ -661,9 +662,10 @@ namespace RimThreaded
 			Prefix(original, patched, "RecordPopulationIncrease");
 
 			//GrammarResolverSimple
-			//original = typeof(GrammarResolverSimple);
-			//patched = typeof(GrammarResolverSimple_Patch);
-			//Prefix(original, patched, "Formatted");
+			original = typeof(GrammarResolverSimple);
+			patched = typeof(GrammarResolverSimple_Transpile);
+			Transpile(original, patched, "Formatted");
+			
 
 			//PERFORMANCE IMPROVEMENTS
 
