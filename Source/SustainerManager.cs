@@ -18,6 +18,24 @@ namespace RimThreaded
             AccessTools.FieldRefAccess< SustainerManager, List<Sustainer>>("allSustainers");
         //public static ConcurrentDictionary<Sustainer, Sustainer> allSustainers = new ConcurrentDictionary<Sustainer, Sustainer>();
 
+        public static bool SustainerManagerUpdate(SustainerManager __instance)
+        {
+            Sustainer sNum;
+            for (int num = allSustainers(__instance).Count - 1; num >= 0; num--)
+            {
+                try
+                {
+                    sNum = allSustainers(__instance)[num];
+                } catch(ArgumentOutOfRangeException) { break; }
+                if (null != sNum) { 
+                    sNum.SustainerUpdate();
+                }
+            }
+
+            __instance.UpdateAllSustainerScopes();
+            return false;
+        }
+
         public static bool get_AllSustainers(SustainerManager __instance, ref List<Sustainer> __result)
         {
             __result = allSustainers(__instance);
@@ -66,7 +84,7 @@ namespace RimThreaded
         }
 
         private readonly static FieldInfo playingPerDefFI = typeof(SustainerManager).GetField("playingPerDef", BindingFlags.Static | BindingFlags.NonPublic);
-        public static void SustainerManagerUpdate(SustainerManager __instance)
+        public static void SustainerManagerUpdate2(SustainerManager __instance)
         {
             // SustainerManagerUpdate is executed prior to Ticks so this will only ever be run on a single thread.
             Dictionary<SoundDef, List<Sustainer>> d = playingPerDefFI.GetValue(__instance) as Dictionary<SoundDef, List<Sustainer>>;
@@ -111,15 +129,11 @@ namespace RimThreaded
                 {
                     List<Sustainer> list = new List<Sustainer>();
                     list.Add(sust);
-                    lock (playingPerDef) {
-                        playingPerDef.Add(sust.def, list);
-                    }
+                    playingPerDef.Add(sust.def, list);
                 }
                 else
                 {
-                    lock (playingPerDef[sust.def]) {
-                        playingPerDef[sust.def].Add(sust);
-                    }
+                    playingPerDef[sust.def].Add(sust);
                 }
             }
 

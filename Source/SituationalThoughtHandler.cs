@@ -55,11 +55,15 @@ namespace RimThreaded
             CheckRecalculateSocialThoughts(__instance, otherPawn);
             if (!this_cachedSocialThoughts.ContainsKey(__instance))
                 this_cachedSocialThoughts.Add(__instance, new Dictionary<Pawn, CachedSocialThoughts>());
-            CachedSocialThoughts cachedSocialThought = this_cachedSocialThoughts[__instance][otherPawn];
-            cachedSocialThought.lastQueryTick = Find.TickManager.TicksGame;
-            List<Thought_SituationalSocial> activeThoughts = cachedSocialThought.activeThoughts;
-            for (int index = 0; index < activeThoughts.Count; ++index)
-                outThoughts.Add((ISocialThought)activeThoughts[index]);
+            try
+            {
+                CachedSocialThoughts cachedSocialThought = this_cachedSocialThoughts[__instance][otherPawn];
+                cachedSocialThought.lastQueryTick = Find.TickManager.TicksGame;
+                List<Thought_SituationalSocial> activeThoughts = cachedSocialThought.activeThoughts;
+                for (int index = 0; index < activeThoughts.Count; ++index)
+                    outThoughts.Add((ISocialThought)activeThoughts[index]);
+            }
+            catch (KeyNotFoundException) { }
             return false;
         }
         private static void CheckRecalculateSocialThoughts(SituationalThoughtHandler __instance, Pawn otherPawn)
