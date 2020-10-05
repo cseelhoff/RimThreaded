@@ -43,6 +43,8 @@ namespace RimThreaded
 			original = typeof(TickList);
 			patched = typeof(TickList_Patch);
 			Prefix(original, patched, "Tick");
+			Prefix(original, patched, "RegisterThing");
+			Prefix(original, patched, "DeregisterThing");
 
 			//Rand
 			original = typeof(Rand);

@@ -40,8 +40,8 @@ namespace RimThreaded
 							if (patch.owner.Equals("majorhoff.rimthreaded") && (patches.Prefixes.Count > 1 || patches.Postfixes.Count > 0 || patches.Transpilers.Count > 0))
 							{
 								isRimThreadedPrefixed = true;
-								Settings.modsText += ("\n---Patch method: " + patch.PatchMethod + "---\n");
-								Settings.modsText += ("RimThreaded priority: " + patch.priority + "\n");
+								Settings.modsText += "\n---Patch method: " + patch.PatchMethod + "---\n";
+								Settings.modsText += "RimThreaded priority: " + patch.priority + "\n";
 								break;
 							}
 						}
@@ -51,19 +51,19 @@ namespace RimThreaded
 							{
 								if (!patch.owner.Equals("majorhoff.rimthreaded"))
 								{
-									Settings.modsText += ("owner: " + patch.owner + "\n");
-									Settings.modsText += ("priority: " + patch.priority + "\n");
+									Settings.modsText += "owner: " + patch.owner + " - ";
+									Settings.modsText += "priority: " + patch.priority + "\n";
 								}
 							}
 							foreach (Patch patch in patches.Postfixes)
 							{
-								Settings.modsText += ("owner: " + patch.owner + "\n");
-								Settings.modsText += ("priority: " + patch.priority + "\n");
+								Settings.modsText += "owner: " + patch.owner + " - ";
+								Settings.modsText += "priority: " + patch.priority + "\n";
 							}
 							foreach (Patch patch in patches.Transpilers)
 							{
-								Settings.modsText += ("owner: " + patch.owner + "\n");
-								Settings.modsText += ("priority: " + patch.priority + "\n");
+								Settings.modsText += "owner: " + patch.owner + " - ";
+								Settings.modsText += "priority: " + patch.priority + "\n";
 							}
 						}
 					}
