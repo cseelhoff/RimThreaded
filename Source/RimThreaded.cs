@@ -48,6 +48,9 @@ namespace RimThreaded
         public static ConcurrentDictionary<int, Map> generateMapResults = new ConcurrentDictionary<int, Map>();
         public static ConcurrentDictionary<int, object[]> generateMapRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, EventWaitHandle> generateMapWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<int, AudioSource> newAudioSourceResults = new ConcurrentDictionary<int, AudioSource>();
+        public static ConcurrentDictionary<int, GameObject> newAudioSourceRequests = new ConcurrentDictionary<int, GameObject>();
+        public static ConcurrentDictionary<int, EventWaitHandle> newAudioSourceWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
@@ -170,6 +173,7 @@ namespace RimThreaded
             texture2DWaits.TryAdd(tID, new AutoResetEvent(false));
             materialWaits.TryAdd(tID, new AutoResetEvent(false));
             generateMapWaits.TryAdd(tID, new AutoResetEvent(false));
+            newAudioSourceWaits.TryAdd(tID, new AutoResetEvent(false));
             thread.Start();
         }
 
@@ -739,12 +743,16 @@ namespace RimThreaded
                                 Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
                                 AbortWorkerThread(tID2);
                                 CreateWorkerThread();
-                            } else
+                            }
+                            else
                             {
                                 eventWaitDone.WaitOne();
-                                timeoutExemptThreads.Remove(tID2);
                             }
-                        }                            
+                        }
+                        if (timeoutExemptThreads.Contains(tID2))
+                        {
+                            timeoutExemptThreads.Remove(tID2);
+                        }
                     }
                     else
                     {
@@ -769,6 +777,7 @@ namespace RimThreaded
                 texture2DWaits.TryRemove(managedThreadID, out _);
                 materialWaits.TryRemove(managedThreadID, out _);
                 generateMapWaits.TryRemove(managedThreadID, out _);
+                newAudioSourceWaits.TryRemove(managedThreadID, out _);
             }
             else
             {
@@ -789,6 +798,7 @@ namespace RimThreaded
                 RespondToPlayRequests();
                 RespondToSustainerRequests();
                 RespondToGenerateMapRequests();
+                RespondToNewAudioSourceRequests();
 
                 // Add any sounds that were produced in this tick
                 while (PlayOneShot.Count > 0)
@@ -898,6 +908,22 @@ namespace RimThreaded
                     generateMapResults.TryAdd(key, mapResult);
                 }
                 if (generateMapWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+        private static void RespondToNewAudioSourceRequests()
+        {
+            while (newAudioSourceRequests.Count > 0)
+            {
+                int key = newAudioSourceRequests.Keys.First();
+                if (newAudioSourceRequests.TryRemove(key, out GameObject go))
+                {
+                    AudioSource audioSourceResult = AudioSourceMaker.NewAudioSourceOn(go);
+                    newAudioSourceResults.TryAdd(key, audioSourceResult);
+                }
+                if (newAudioSourceWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");

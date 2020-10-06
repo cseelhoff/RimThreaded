@@ -35,6 +35,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.52  
+-Fixed many sound issues!  
+-Fixed bug in SituationalThoughtHandler.AppendSocialThoughts  
+
 Version 1.0.51  
 -Fixed bug in TickList.Register  
 -Fixed bug in TickList.Deregister  

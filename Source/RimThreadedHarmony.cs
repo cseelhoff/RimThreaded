@@ -278,34 +278,41 @@ namespace RimThreaded
 			patched = typeof(BuildableDef_Patch);
 			Prefix(original, patched, "ForceAllowPlaceOver");
 
+			
 			//SustainerManager			
 			original = typeof(SustainerManager);
 			patched = typeof(SustainerManager_Patch);
-			Prefix(original, patched, "get_AllSustainers");
+			//Prefix(original, patched, "get_AllSustainers");
 			Prefix(original, patched, "RegisterSustainer");
 			Prefix(original, patched, "DeregisterSustainer");
 			Prefix(original, patched, "SustainerExists");
 			Prefix(original, patched, "EndAllInMap");
+			Prefix(original, patched, "SustainerManagerUpdate");
 			Prefix(original, patched, "UpdateAllSustainerScopes");
+
+			//AudioSourceMaker			
+			original = typeof(AudioSourceMaker);
+			patched = typeof(AudioSourceMaker_Patch);
+			Prefix(original, patched, "NewAudioSourceOn");
 
 			//RecreateMapSustainers
 			original = typeof(AmbientSoundManager);
 			patched = typeof(AmbientSoundManager_Patch);
-			Prefix(original, patched, "RecreateMapSustainers");
+			//Prefix(original, patched, "RecreateMapSustainers");
 
 			//SubSustainer
 			original = typeof(SubSustainer);
 			patched = typeof(SubSustainer_Patch);
-			Prefix(original, patched, "StartSample");
-			Prefix(original, patched, "SubSustainerUpdate");
+			//Prefix(original, patched, "StartSample");
+			//Prefix(original, patched, "SubSustainerUpdate");
 
 			//SoundStarter
 			original = typeof(SoundStarter);
 			patched = typeof(SoundStarter_Patch);
-			Prefix(original, patched, "PlayOneShot");
-			Prefix(original, patched, "PlayOneShotOnCamera");
-			Prefix(original, patched, "TrySpawnSustainer");
-
+			//Prefix(original, patched, "PlayOneShot");
+			//Prefix(original, patched, "PlayOneShotOnCamera");
+			//Prefix(original, patched, "TrySpawnSustainer");
+			
 			//Pawn_RelationsTracker			
 			original = typeof(Pawn_RelationsTracker);
 			patched = typeof(Pawn_RelationsTracker_Patch);
