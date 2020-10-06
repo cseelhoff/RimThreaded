@@ -78,6 +78,7 @@
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
     <Compile Include="AudioSourceMaker.cs" />
+    <Compile Include="Graphics.cs" />
     <Compile Include="LightningBoltMeshMaker.cs" />
     <Compile Include="MeditationFocusTypeAvailabilityCache.cs" />
     <Compile Include="JobQueue.cs" />

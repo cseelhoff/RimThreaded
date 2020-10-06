@@ -798,7 +798,12 @@ namespace RimThreaded
 			patched = typeof(RenderTexture_Patch);
 			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
 
-			
+			//Graphics (Giddy-Up)
+			original = typeof(Graphics);
+			patched = typeof(Graphics_Patch);
+			Prefix(original, patched, "Blit", new Type[] { typeof(Texture), typeof(RenderTexture) });
+
+
 
 			Log.Message("RimThreaded patching is complete.");
 		}

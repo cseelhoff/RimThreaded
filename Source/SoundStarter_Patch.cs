@@ -91,7 +91,7 @@ namespace RimThreaded
 			}
 			Sustainer sustainer = null;
 			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (RimThreaded.newSustainerWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
 			{
 				RimThreaded.newSustainerRequests.TryAdd(tID, new object[] { soundDef, info });
 				RimThreaded.mainThreadWaitHandle.Set();

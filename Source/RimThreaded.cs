@@ -34,30 +34,24 @@ namespace RimThreaded
         public static bool SingleTickComplete = true;
 
         //MainThreadRequests
+        public static ConcurrentDictionary<int, EventWaitHandle> mainRequestWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, object[]> tryMakeAndPlayRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, SampleSustainer> tryMakeAndPlayResults = new ConcurrentDictionary<int, SampleSustainer>();
-        public static ConcurrentDictionary<int, EventWaitHandle> tryMakeAndPlayWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, object[]> newSustainerRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, Sustainer> newSustainerResults = new ConcurrentDictionary<int, Sustainer>();
-        public static ConcurrentDictionary<int, EventWaitHandle> newSustainerWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<string, Texture2D> texture2DResults = new ConcurrentDictionary<string, Texture2D>();
         public static ConcurrentDictionary<int, string> texture2DRequests = new ConcurrentDictionary<int, string>();
-        public static ConcurrentDictionary<int, EventWaitHandle> texture2DWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<MaterialRequest, Material> materialResults = new ConcurrentDictionary<MaterialRequest, Material>();
         public static ConcurrentDictionary<int, MaterialRequest> materialRequests = new ConcurrentDictionary<int, MaterialRequest>();
-        public static ConcurrentDictionary<int, EventWaitHandle> materialWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, Map> generateMapResults = new ConcurrentDictionary<int, Map>();
         public static ConcurrentDictionary<int, object[]> generateMapRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, EventWaitHandle> generateMapWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, AudioSource> newAudioSourceResults = new ConcurrentDictionary<int, AudioSource>();
         public static ConcurrentDictionary<int, GameObject> newAudioSourceRequests = new ConcurrentDictionary<int, GameObject>();
-        public static ConcurrentDictionary<int, EventWaitHandle> newAudioSourceWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, RenderTexture> renderTextureResults = new ConcurrentDictionary<int, RenderTexture>();
         public static ConcurrentDictionary<int, object[]> renderTextureRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, EventWaitHandle> renderTextureWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<int, object[]> blitRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, Mesh> newBoltMeshResults = new ConcurrentDictionary<int, Mesh>();
         public static ConcurrentQueue<int> newBoltMeshRequests = new ConcurrentQueue<int>();
-        public static ConcurrentDictionary<int, EventWaitHandle> newBoltMeshWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
@@ -175,14 +169,7 @@ namespace RimThreaded
             allThreads.Add(tID, thread);
             eventWaitStarts.TryAdd(tID, new AutoResetEvent(false));
             eventWaitDones.TryAdd(tID, new AutoResetEvent(false));
-            tryMakeAndPlayWaits.TryAdd(tID, new AutoResetEvent(false));
-            newSustainerWaits.TryAdd(tID, new AutoResetEvent(false));
-            texture2DWaits.TryAdd(tID, new AutoResetEvent(false));
-            materialWaits.TryAdd(tID, new AutoResetEvent(false));
-            generateMapWaits.TryAdd(tID, new AutoResetEvent(false));
-            newAudioSourceWaits.TryAdd(tID, new AutoResetEvent(false));
-            renderTextureWaits.TryAdd(tID, new AutoResetEvent(false));
-            newBoltMeshWaits.TryAdd(tID, new AutoResetEvent(false));
+            mainRequestWaits.TryAdd(tID, new AutoResetEvent(false));
             thread.Start();
         }
 
@@ -777,14 +764,7 @@ namespace RimThreaded
                 allThreads.Remove(managedThreadID);
                 eventWaitStarts.TryRemove(managedThreadID, out _);
                 eventWaitDones.TryRemove(managedThreadID, out _);
-                tryMakeAndPlayWaits.TryRemove(managedThreadID, out _);
-                newSustainerWaits.TryRemove(managedThreadID, out _);
-                texture2DWaits.TryRemove(managedThreadID, out _);
-                materialWaits.TryRemove(managedThreadID, out _);
-                generateMapWaits.TryRemove(managedThreadID, out _);
-                newAudioSourceWaits.TryRemove(managedThreadID, out _);
-                renderTextureWaits.TryRemove(managedThreadID, out _);
-                newBoltMeshWaits.TryRemove(managedThreadID, out _);
+                mainRequestWaits.TryRemove(managedThreadID, out _);
             }
             else
             {
@@ -841,7 +821,7 @@ namespace RimThreaded
                     Sustainer sustainer = new Sustainer(soundDef, soundInfo);
                     newSustainerResults[key] = sustainer;
                 }
-                if (newSustainerWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
@@ -867,7 +847,7 @@ namespace RimThreaded
                         //SubSustainer_Patch.samples(subSustainer).Add(sampleSustainer);
                     //}
                 }
-                if (tryMakeAndPlayWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
@@ -884,7 +864,7 @@ namespace RimThreaded
                     Material material = MaterialPool.MatFrom(materialRequest);
                     materialResults.TryAdd(materialRequest, material);
                 }
-                if (materialWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
@@ -901,7 +881,7 @@ namespace RimThreaded
                     Texture2D content = ContentFinder_Texture2D_Patch.GetTexture2D(itempath);
                     texture2DResults.TryAdd(itempath, content);
                 }
-                if (texture2DWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
@@ -919,7 +899,7 @@ namespace RimThreaded
                     Map mapResult = MapGenerator.GenerateMap((IntVec3)requestParams[0], (MapParent)requestParams[1], (MapGeneratorDef)requestParams[2], (IEnumerable<GenStepWithParams>)requestParams[3], (Action<Map>)requestParams[4]);
                     generateMapResults.TryAdd(key, mapResult);
                 }
-                if (generateMapWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
@@ -937,7 +917,7 @@ namespace RimThreaded
                     AudioSource audioSourceResult = AudioSourceMaker.NewAudioSourceOn(go);
                     newAudioSourceResults.TryAdd(key, audioSourceResult);
                 }
-                if (newAudioSourceWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
@@ -955,7 +935,7 @@ namespace RimThreaded
                     RenderTexture renderTextureResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4]);
                     renderTextureResults.TryAdd(key, renderTextureResult);
                 }
-                if (renderTextureWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
@@ -971,7 +951,23 @@ namespace RimThreaded
                     Mesh newBoltMeshResult = LightningBoltMeshMaker.NewBoltMesh();
                     newBoltMeshResults.TryAdd(key, newBoltMeshResult);
                 }
-                if (newBoltMeshWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToblitRequests()
+        {
+            while (blitRequests.Count > 0)
+            {
+                int key = blitRequests.Keys.First();
+                if (blitRequests.TryRemove(key, out object[] parameters))
+                {
+                    Graphics.Blit((Texture)parameters[0], (RenderTexture)parameters[1]);
+                }
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");

@@ -18,7 +18,7 @@ namespace RimThreaded
         public static bool NewBoltMesh(ref Mesh __result)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.newBoltMeshWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
                 RimThreaded.newBoltMeshRequests.Enqueue(tID);
                 RimThreaded.mainThreadWaitHandle.Set();

@@ -18,7 +18,7 @@ namespace RimThreaded
         public static bool GetTemporary(ref RenderTexture __result, int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.renderTextureWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
                 RimThreaded.renderTextureRequests.TryAdd(tID, new object[] { width, height, depthBuffer, format, readWrite });
                 RimThreaded.mainThreadWaitHandle.Set();

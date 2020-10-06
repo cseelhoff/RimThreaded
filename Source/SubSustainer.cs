@@ -79,7 +79,7 @@ namespace RimThreaded
 			}
 
 			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (RimThreaded.tryMakeAndPlayWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
 			{
 				RimThreaded.tryMakeAndPlayRequests.TryAdd(tID, new object[] { __instance, ((ResolvedGrain_Clip)resolvedGrain).clip, num2 });
 				RimThreaded.mainThreadWaitHandle.Set();

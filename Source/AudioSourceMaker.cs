@@ -18,7 +18,7 @@ namespace RimThreaded
         public static bool NewAudioSourceOn(ref AudioSource __result, GameObject go)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.newAudioSourceWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
                 RimThreaded.newAudioSourceRequests.TryAdd(tID, go);
                 RimThreaded.mainThreadWaitHandle.Set();

@@ -7,31 +7,26 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
-using System.Threading;
 using UnityEngine;
+using System.Threading;
 
 namespace RimThreaded
 {
 
-    public class SampleSustainer_Patch
+    public class Graphics_Patch
 	{
-
-        public static bool TryMakeAndPlay(ref SampleSustainer __result, SubSustainer subSus, AudioClip clip, float scheduledEndTime)
+        public static bool Blit(Texture source, RenderTexture dest)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.tryMakeAndPlayRequests.TryAdd(tID, new object[] { subSus, clip, scheduledEndTime });
+                RimThreaded.blitRequests.TryAdd(tID, new object[] { source, dest });
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
-                RimThreaded.tryMakeAndPlayResults.TryGetValue(tID, out SampleSustainer sustainer_result);
-                __result = sustainer_result;
                 return false;
             }
             return true;
         }
-
-
 
     }
 }

@@ -20,7 +20,7 @@ namespace RimThreaded
         public static bool GenerateMap(ref Map __result, IntVec3 mapSize, MapParent parent, MapGeneratorDef mapGenerator, IEnumerable<GenStepWithParams> extraGenStepDefs = null, Action<Map> extraInitBeforeContentGen = null)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.generateMapWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
                 RimThreaded.generateMapRequests.TryAdd(tID, new object[] { mapSize, parent, mapGenerator, extraGenStepDefs, extraInitBeforeContentGen });
                 RimThreaded.mainThreadWaitHandle.Set();
