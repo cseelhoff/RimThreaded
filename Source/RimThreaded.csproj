@@ -78,6 +78,7 @@
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
     <Compile Include="AudioSourceMaker.cs" />
+    <Compile Include="JobQueue.cs" />
     <Compile Include="RenderTexture.cs" />
     <Compile Include="MapGenerator.cs" />
     <Compile Include="DllExporter.cs" />

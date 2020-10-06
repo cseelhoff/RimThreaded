@@ -35,6 +35,12 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.55  
+-Fixed more sounds issues  
+-Fixed bug in JobQueue.AnyCanBeginNow  
+-Fixed bug in MapTemperature.MapTemperatureTick  
+
+
 Version 1.0.54  
 -Added mod compatibility for mods (like Giddy-Up) that call RenderTexture.GetTemporary from worker threads  
 -Fixed bug in SampleSustainer.TryMakeAndPlay  

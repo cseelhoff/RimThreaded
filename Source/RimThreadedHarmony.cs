@@ -314,8 +314,8 @@ namespace RimThreaded
 			//SoundStarter
 			original = typeof(SoundStarter);
 			patched = typeof(SoundStarter_Patch);
-			//Prefix(original, patched, "PlayOneShot");
-			//Prefix(original, patched, "PlayOneShotOnCamera");
+			Prefix(original, patched, "PlayOneShot");
+			Prefix(original, patched, "PlayOneShotOnCamera");
 			//Prefix(original, patched, "TrySpawnSustainer");
 			
 			//Pawn_RelationsTracker			
@@ -681,10 +681,10 @@ namespace RimThreaded
 			patched = typeof(GrammarResolverSimple_Transpile);
 			Transpile(original, patched, "Formatted");
 
-			//MapGenerator
-			original = typeof(MapGenerator);
-			patched = typeof(MapGenerator_Patch);
-			Prefix(original, patched, "GenerateMap");
+			//JobQueue
+			original = typeof(JobQueue);
+			patched = typeof(JobQueue_Patch);
+			Prefix(original, patched, "AnyCanBeginNow");
 
 
 			//PERFORMANCE IMPROVEMENTS
@@ -777,11 +777,17 @@ namespace RimThreaded
 
 			//MOD COMPATIBILITY
 
-			//RenderTexture
+			//MapGenerator (Z-levels)
+			original = typeof(MapGenerator);
+			patched = typeof(MapGenerator_Patch);
+			Prefix(original, patched, "GenerateMap");
+
+			//RenderTexture (Giddy-Up)
 			original = typeof(RenderTexture);
 			patched = typeof(RenderTexture_Patch);
 			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
 
+			
 
 			Log.Message("RimThreaded patching is complete.");
 		}

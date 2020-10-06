@@ -804,6 +804,7 @@ namespace RimThreaded
                 RespondToRenderTextureRequests();
 
                 // Add any sounds that were produced in this tick
+                
                 while (PlayOneShot.Count > 0)
                 {
                     if (PlayOneShot.TryDequeue(out Tuple<SoundDef, SoundInfo> s))
@@ -818,6 +819,7 @@ namespace RimThreaded
                         s.Item1.PlayOneShotOnCamera(s.Item2);
                     }
                 }
+                
             }
         }
 
