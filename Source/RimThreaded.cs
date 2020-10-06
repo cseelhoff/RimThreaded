@@ -55,6 +55,9 @@ namespace RimThreaded
         public static ConcurrentDictionary<int, RenderTexture> renderTextureResults = new ConcurrentDictionary<int, RenderTexture>();
         public static ConcurrentDictionary<int, object[]> renderTextureRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, EventWaitHandle> renderTextureWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<int, Mesh> newBoltMeshResults = new ConcurrentDictionary<int, Mesh>();
+        public static ConcurrentQueue<int> newBoltMeshRequests = new ConcurrentQueue<int>();
+        public static ConcurrentDictionary<int, EventWaitHandle> newBoltMeshWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
@@ -179,6 +182,7 @@ namespace RimThreaded
             generateMapWaits.TryAdd(tID, new AutoResetEvent(false));
             newAudioSourceWaits.TryAdd(tID, new AutoResetEvent(false));
             renderTextureWaits.TryAdd(tID, new AutoResetEvent(false));
+            newBoltMeshWaits.TryAdd(tID, new AutoResetEvent(false));
             thread.Start();
         }
 
@@ -780,6 +784,7 @@ namespace RimThreaded
                 generateMapWaits.TryRemove(managedThreadID, out _);
                 newAudioSourceWaits.TryRemove(managedThreadID, out _);
                 renderTextureWaits.TryRemove(managedThreadID, out _);
+                newBoltMeshWaits.TryRemove(managedThreadID, out _);
             }
             else
             {
@@ -802,9 +807,10 @@ namespace RimThreaded
                 RespondToGenerateMapRequests();
                 RespondToNewAudioSourceRequests();
                 RespondToRenderTextureRequests();
+                RespondToNewBoltMeshRequests();
 
                 // Add any sounds that were produced in this tick
-                
+
                 while (PlayOneShot.Count > 0)
                 {
                     if (PlayOneShot.TryDequeue(out Tuple<SoundDef, SoundInfo> s))
@@ -950,6 +956,22 @@ namespace RimThreaded
                     renderTextureResults.TryAdd(key, renderTextureResult);
                 }
                 if (renderTextureWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToNewBoltMeshRequests()
+        {
+            while (newBoltMeshRequests.Count > 0)
+            {
+                if (newBoltMeshRequests.TryDequeue(out int key))
+                {
+                    Mesh newBoltMeshResult = LightningBoltMeshMaker.NewBoltMesh();
+                    newBoltMeshResults.TryAdd(key, newBoltMeshResult);
+                }
+                if (newBoltMeshWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
