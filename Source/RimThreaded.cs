@@ -52,6 +52,9 @@ namespace RimThreaded
         public static ConcurrentDictionary<int, AudioSource> newAudioSourceResults = new ConcurrentDictionary<int, AudioSource>();
         public static ConcurrentDictionary<int, GameObject> newAudioSourceRequests = new ConcurrentDictionary<int, GameObject>();
         public static ConcurrentDictionary<int, EventWaitHandle> newAudioSourceWaits = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static ConcurrentDictionary<int, RenderTexture> renderTextureResults = new ConcurrentDictionary<int, RenderTexture>();
+        public static ConcurrentDictionary<int, object[]> renderTextureRequests = new ConcurrentDictionary<int, object[]>();
+        public static ConcurrentDictionary<int, EventWaitHandle> renderTextureWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
@@ -175,6 +178,7 @@ namespace RimThreaded
             materialWaits.TryAdd(tID, new AutoResetEvent(false));
             generateMapWaits.TryAdd(tID, new AutoResetEvent(false));
             newAudioSourceWaits.TryAdd(tID, new AutoResetEvent(false));
+            renderTextureWaits.TryAdd(tID, new AutoResetEvent(false));
             thread.Start();
         }
 
@@ -775,6 +779,7 @@ namespace RimThreaded
                 materialWaits.TryRemove(managedThreadID, out _);
                 generateMapWaits.TryRemove(managedThreadID, out _);
                 newAudioSourceWaits.TryRemove(managedThreadID, out _);
+                renderTextureWaits.TryRemove(managedThreadID, out _);
             }
             else
             {
@@ -796,6 +801,7 @@ namespace RimThreaded
                 RespondToSustainerRequests();
                 RespondToGenerateMapRequests();
                 RespondToNewAudioSourceRequests();
+                RespondToRenderTextureRequests();
 
                 // Add any sounds that were produced in this tick
                 while (PlayOneShot.Count > 0)
@@ -924,6 +930,24 @@ namespace RimThreaded
                     newAudioSourceResults.TryAdd(key, audioSourceResult);
                 }
                 if (newAudioSourceWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToRenderTextureRequests()
+        {
+            while (renderTextureRequests.Count > 0)
+            {
+                int key = renderTextureRequests.Keys.First();
+                if (renderTextureRequests.TryRemove(key, out object[] parameters))
+                {
+                    timeoutExemptThreads.Add(key);
+                    RenderTexture renderTextureResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4]);
+                    renderTextureResults.TryAdd(key, renderTextureResult);
+                }
+                if (renderTextureWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");

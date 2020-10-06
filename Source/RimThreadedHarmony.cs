@@ -295,6 +295,11 @@ namespace RimThreaded
 			patched = typeof(AudioSourceMaker_Patch);
 			Prefix(original, patched, "NewAudioSourceOn");
 
+			//SampleSustainer			
+			original = typeof(SampleSustainer);
+			patched = typeof(SampleSustainer_Patch);
+			Prefix(original, patched, "TryMakeAndPlay");
+
 			//RecreateMapSustainers
 			original = typeof(AmbientSoundManager);
 			patched = typeof(AmbientSoundManager_Patch);
@@ -768,6 +773,14 @@ namespace RimThreaded
 			original = typeof(Map);
 			patched = typeof(Map_Patch);
 			Prefix(original, patched, "MapUpdate");
+
+
+			//MOD COMPATIBILITY
+
+			//RenderTexture
+			original = typeof(RenderTexture);
+			patched = typeof(RenderTexture_Patch);
+			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
 
 
 			Log.Message("RimThreaded patching is complete.");
