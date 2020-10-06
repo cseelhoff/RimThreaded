@@ -304,6 +304,7 @@ namespace RimThreaded
 			original = typeof(AmbientSoundManager);
 			patched = typeof(AmbientSoundManager_Patch);
 			//Prefix(original, patched, "RecreateMapSustainers");
+			Prefix(original, patched, "EnsureWorldAmbientSoundCreated");
 
 			//SubSustainer
 			original = typeof(SubSustainer);
@@ -686,6 +687,16 @@ namespace RimThreaded
 			patched = typeof(JobQueue_Patch);
 			Prefix(original, patched, "AnyCanBeginNow");
 
+			//MeditationFocusTypeAvailabilityCache
+			original = typeof(MeditationFocusTypeAvailabilityCache);
+			patched = typeof(MeditationFocusTypeAvailabilityCache_Patch);
+			Prefix(original, patched, "PawnCanUse");
+			Prefix(original, patched, "ClearFor");
+
+			//LightningBoltMeshMaker
+			original = typeof(LightningBoltMeshMaker);
+			patched = typeof(LightningBoltMeshMaker_Patch);
+			Prefix(original, patched, "NewBoltMesh");
 
 			//PERFORMANCE IMPROVEMENTS
 

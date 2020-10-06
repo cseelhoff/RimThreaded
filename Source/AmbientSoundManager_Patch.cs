@@ -45,5 +45,27 @@ namespace RimThreaded
             }
             return false;
         }
+        public static bool EnsureWorldAmbientSoundCreated()
+        {
+            SoundDef aSpace = null;
+            SoundRoot soundRoot = Find.SoundRoot;
+            if (null != soundRoot)
+            {
+                SustainerManager sManager = soundRoot.sustainerManager;
+                if (null != sManager)
+                {
+                    aSpace = SoundDefOf.Ambient_Space;
+                    if (null != aSpace)
+                    {
+                        if (sManager.SustainerExists(aSpace))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            aSpace.TrySpawnSustainer(SoundInfo.OnCamera());
+            return false;
+        }
     }
 }
