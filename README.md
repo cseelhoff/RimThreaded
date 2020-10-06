@@ -35,6 +35,10 @@ Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
 CHANGE LOG:  
+Version 1.0.53  
+-Fixed bug in SampleSustainer.TryMakeAndPlay  
+-Fixed bug in MapTemperature.MapTemperatureTick  
+
 Version 1.0.52  
 -Fixed many sound issues!  
 -Fixed bug in SituationalThoughtHandler.AppendSocialThoughts  

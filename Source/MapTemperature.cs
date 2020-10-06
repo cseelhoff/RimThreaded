@@ -26,8 +26,11 @@ namespace RimThreaded
                 } catch(ArgumentOutOfRangeException) { break; }
                 if (!fastProcessedRoomGroups.Contains(group))
                 {
-                    group.TempTracker.EqualizeTemperature();
-                    fastProcessedRoomGroups.Add(group);
+                    if (null != group.TempTracker)
+                    {
+                        group.TempTracker.EqualizeTemperature();
+                        fastProcessedRoomGroups.Add(group);
+                    }
                 }
             }
 

@@ -35,6 +35,7 @@ namespace RimThreaded
 
         //MainThreadRequests
         public static ConcurrentDictionary<int, object[]> tryMakeAndPlayRequests = new ConcurrentDictionary<int, object[]>();
+        public static ConcurrentDictionary<int, SampleSustainer> tryMakeAndPlayResults = new ConcurrentDictionary<int, SampleSustainer>();
         public static ConcurrentDictionary<int, EventWaitHandle> tryMakeAndPlayWaits = new ConcurrentDictionary<int, EventWaitHandle>();
         public static ConcurrentDictionary<int, object[]> newSustainerRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, Sustainer> newSustainerResults = new ConcurrentDictionary<int, Sustainer>();
@@ -743,16 +744,12 @@ namespace RimThreaded
                                 Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
                                 AbortWorkerThread(tID2);
                                 CreateWorkerThread();
-                            }
-                            else
+                            } else
                             {
                                 eventWaitDone.WaitOne();
+                                timeoutExemptThreads.Remove(tID2);
                             }
-                        }
-                        if (timeoutExemptThreads.Contains(tID2))
-                        {
-                            timeoutExemptThreads.Remove(tID2);
-                        }
+                        }                            
                     }
                     else
                     {
@@ -848,12 +845,13 @@ namespace RimThreaded
                     AudioClip clip = (AudioClip)objects[1];
                     float num2 = (float)objects[2];
                     SampleSustainer sampleSustainer = SampleSustainer.TryMakeAndPlay(subSustainer, clip, num2);
-                    if (sampleSustainer != null)
-                    {
-                        if (subSustainer.subDef.sustainSkipFirstAttack && Time.frameCount == subSustainer.creationFrame)
-                            sampleSustainer.resolvedSkipAttack = true;
-                        SubSustainer_Patch.samples(subSustainer).Add(sampleSustainer);
-                    }
+                    tryMakeAndPlayResults.TryAdd(key, sampleSustainer);
+                    //if (sampleSustainer != null)
+                    //{
+                        //if (subSustainer.subDef.sustainSkipFirstAttack && Time.frameCount == subSustainer.creationFrame)
+                            //sampleSustainer.resolvedSkipAttack = true;
+                        //SubSustainer_Patch.samples(subSustainer).Add(sampleSustainer);
+                    //}
                 }
                 if (tryMakeAndPlayWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
@@ -913,6 +911,7 @@ namespace RimThreaded
                     Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
             }
         }
+
         private static void RespondToNewAudioSourceRequests()
         {
             while (newAudioSourceRequests.Count > 0)
@@ -920,6 +919,7 @@ namespace RimThreaded
                 int key = newAudioSourceRequests.Keys.First();
                 if (newAudioSourceRequests.TryRemove(key, out GameObject go))
                 {
+                    timeoutExemptThreads.Add(key);
                     AudioSource audioSourceResult = AudioSourceMaker.NewAudioSourceOn(go);
                     newAudioSourceResults.TryAdd(key, audioSourceResult);
                 }

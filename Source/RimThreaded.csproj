@@ -82,6 +82,7 @@
     <Compile Include="DllExporter.cs" />
     <Compile Include="GrammarResolverSimple_Transpile.cs" />
     <Compile Include="GenRadial_Transpile.cs" />
+    <Compile Include="SampleSustainer.cs" />
     <Compile Include="WorkGiver_ConstructDeliverResources_Transpile.cs" />
     <Compile Include="StoryState.cs" />
     <Compile Include="PathFinder_Transpile.cs" />
