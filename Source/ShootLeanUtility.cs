@@ -63,7 +63,10 @@ namespace RimThreaded
 		}
 		public static bool LeanShootingSourcesFromTo(IntVec3 shooterLoc, IntVec3 targetPos, Map map, List<IntVec3> listToFill)
 		{
-			listToFill.Clear();
+			lock (listToFill)
+			{
+				listToFill.Clear();
+			}
 			float angleFlat = (targetPos - shooterLoc).AngleFlat;
 			bool flag = angleFlat > 270f || angleFlat < 90f;
 			bool flag2 = angleFlat > 90f && angleFlat < 270f;
@@ -76,25 +79,40 @@ namespace RimThreaded
 			}
 			if (!workingBlockedArray[1] && ((workingBlockedArray[0] && !workingBlockedArray[5] && flag) || (workingBlockedArray[2] && !workingBlockedArray[4] && flag2)))
 			{
-				listToFill.Add(shooterLoc + new IntVec3(1, 0, 0));
+				lock (listToFill)
+				{
+					listToFill.Add(shooterLoc + new IntVec3(1, 0, 0));
+				}
 			}
 			if (!workingBlockedArray[3] && ((workingBlockedArray[0] && !workingBlockedArray[6] && flag) || (workingBlockedArray[2] && !workingBlockedArray[7] && flag2)))
 			{
-				listToFill.Add(shooterLoc + new IntVec3(-1, 0, 0));
+				lock (listToFill)
+				{
+					listToFill.Add(shooterLoc + new IntVec3(-1, 0, 0));
+				}
 			}
 			if (!workingBlockedArray[2] && ((workingBlockedArray[3] && !workingBlockedArray[7] && flag3) || (workingBlockedArray[1] && !workingBlockedArray[4] && flag4)))
 			{
-				listToFill.Add(shooterLoc + new IntVec3(0, 0, -1));
+				lock (listToFill)
+				{
+					listToFill.Add(shooterLoc + new IntVec3(0, 0, -1));
+				}
 			}
 			if (!workingBlockedArray[0] && ((workingBlockedArray[3] && !workingBlockedArray[6] && flag3) || (workingBlockedArray[1] && !workingBlockedArray[5] && flag4)))
 			{
-				listToFill.Add(shooterLoc + new IntVec3(0, 0, 1));
+				lock (listToFill)
+				{
+					listToFill.Add(shooterLoc + new IntVec3(0, 0, 1));
+				}
 			}
 			for (int j = 0; j < 4; j++)
 			{
 				if (!workingBlockedArray[j] && (j != 0 || flag) && (j != 1 || flag4) && (j != 2 || flag2) && (j != 3 || flag3) && (shooterLoc + GenAdj.AdjacentCells[j]).GetCover(map) != null)
 				{
-					listToFill.Add(shooterLoc + GenAdj.AdjacentCells[j]);
+					lock (listToFill)
+					{
+						listToFill.Add(shooterLoc + GenAdj.AdjacentCells[j]);
+					}
 				}
 			}
 			ReturnWorkingBlockedArray(workingBlockedArray);
