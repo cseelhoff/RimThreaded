@@ -37,7 +37,7 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 CHANGE LOG:  
   
 Version 1.0.57  
--Fixed bugs in ShootLeanUtility 
+-Fixed bugs in ShootLeanUtility  
 -Added mod compatibility for mods (like Giddy-Up) that call Graphics.Blit from worker threads  
   
 Version 1.0.56  
