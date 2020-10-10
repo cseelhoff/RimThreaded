@@ -10,14 +10,9 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.59
-    -Fixed bug in ThingGrid.ThingAt(Building_Door)
-    -Fixed bug in FloatMenuMakerMap.AddHumanlikeOrders
-    -Fixed bug in AttackTargetReservationManager.IsReservedBy
-    -Fixed bug in AttackTargetReservationManager.CanReserve
-    -Fixed bug in ReservationManager.FirstRespectedReserver
-    -Fixed bug in Verb.TryFindShootLineFromTo
-    -Fixed bug in PathGrid.CalculatedCostAt
+    Version 1.0.60
+    -Transpiled FloatMenuMakerMap.AddHumanlikeOrders
+    -Added Harmony Priority for WorkGiver_ConstructDeliverResources.ResourceDeliverJobFor (compatibility with CodeOptimist.JobsOfOpportunity)
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.

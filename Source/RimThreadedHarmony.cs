@@ -129,8 +129,10 @@ namespace RimThreaded
 
 			//FloatMenuMakerMap
 			original = typeof(FloatMenuMakerMap);
-			patched = typeof(FloatMenuMakerMap_Patch);
-			Prefix(original, patched, "AddHumanlikeOrders");
+			//patched = typeof(FloatMenuMakerMap_Patch);
+			//Prefix(original, patched, "AddHumanlikeOrders");
+			patched = typeof(FloatMenuMakerMap_Transpile);
+			Transpile(original, patched, "AddHumanlikeOrders");
 
 			//RealtimeMoteList			
 			original = typeof(RealtimeMoteList);
@@ -660,7 +662,7 @@ namespace RimThreaded
 			original = typeof(WorkGiver_ConstructDeliverResources);
 			//patched = typeof(WorkGiver_ConstructDeliverResources_Patch);
 			patched = typeof(WorkGiver_ConstructDeliverResources_Transpile);
-			Transpile(original, patched, "ResourceDeliverJobFor");
+			Transpile(original, patched, "ResourceDeliverJobFor", new string[] { "CodeOptimist.JobsOfOpportunity" });
 
 			//GenText
 			original = typeof(GenText);
@@ -941,7 +943,17 @@ namespace RimThreaded
 			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 		}
 
+		public static void Transpile(Type original, Type patched, String methodName, string[] harmonyAfter)
+		{
+			MethodInfo oMethod = original.GetMethod(methodName, bf);
+			MethodInfo pMethod = patched.GetMethod(methodName);
+            HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod)
+            {
+                after = harmonyAfter
+            };
+            harmony.Patch(oMethod, transpiler: transpilerMethod);
+		}
 	}
-	
+
 }
 
