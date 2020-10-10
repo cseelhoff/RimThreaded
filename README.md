@@ -36,6 +36,20 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
   
+Version 1.0.59  
+-Fixed bug in ThingGrid.ThingAt(Building_Door)  
+-Fixed bug in FloatMenuMakerMap.AddHumanlikeOrders  
+-Fixed bug in AttackTargetReservationManager.IsReservedBy  
+-Fixed bug in AttackTargetReservationManager.CanReserve  
+-Fixed bug in ReservationManager.FirstRespectedReserver  
+-Fixed bug in Verb.TryFindShootLineFromTo  
+-Fixed bug in PathGrid.CalculatedCostAt  
+
+Version 1.0.58   
+-Fixed bugs in AttackTargetFinder.GetRandomShootingTargetByScore  
+-Fixed bug in SubSustainer  
+-Disabled vanilla game feature that forces game to switch to Normal speed during some events  
+  
 Version 1.0.57  
 -Fixed bugs in ShootLeanUtility  
 -Added mod compatibility for mods (like Giddy-Up) that call Graphics.Blit from worker threads  

@@ -27,16 +27,31 @@ namespace RimThreaded
 
 		public static bool SubSustainerUpdate(SubSustainer __instance)
 		{
-			for (int index = samples(__instance).Count - 1; index >= 0; --index)
+			SampleSustainer sample;
+			for (int num = samples(__instance).Count - 1; num >= 0; num--)
 			{
-				if ((double)Time.realtimeSinceStartup > (double)samples(__instance)[index].scheduledEndTime)
-					EndSample2(__instance, samples(__instance)[index]);
+                sample = samples(__instance)[num];
+				if (sample != null)
+				{
+					if (Time.realtimeSinceStartup > samples(__instance)[num].scheduledEndTime)
+					{
+						EndSample2(__instance, sample);
+					}
+				}
 			}
-			if ((double)Time.realtimeSinceStartup > (double)nextSampleStartTime(__instance))
-				StartSample(__instance);
-			for (int index = 0; index < samples(__instance).Count; ++index)
+
+			if (Time.realtimeSinceStartup > nextSampleStartTime(__instance))
 			{
-				samples(__instance)[index].Update();
+				StartSample(__instance);
+			}
+
+			for (int i = 0; i < samples(__instance).Count; i++)
+			{
+				sample = samples(__instance)[i];
+				if (sample != null)
+				{
+					sample.Update();
+				}
 			}
 			return false;
 		}

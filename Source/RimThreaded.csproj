@@ -78,6 +78,10 @@
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
     <Compile Include="AudioSourceMaker.cs" />
+    <Compile Include="GrammarResolver.cs" />
+    <Compile Include="PathGrid.cs" />
+    <Compile Include="FloatMenuMakerMap.cs" />
+    <Compile Include="TimeControls.cs" />
     <Compile Include="Graphics.cs" />
     <Compile Include="LightningBoltMeshMaker.cs" />
     <Compile Include="MeditationFocusTypeAvailabilityCache.cs" />

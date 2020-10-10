@@ -57,11 +57,11 @@ namespace RimThreaded
 
         public static bool get_TickRateMultiplier(TickManager __instance, ref float __result)
         {
-            if (__instance.slower.ForcedNormalSpeed)
-            {
-                __result = curTimeSpeed(__instance) == TimeSpeed.Paused ? 0.0f : 1f;
-                return false;
-            }
+            //if (__instance.slower.ForcedNormalSpeed)
+            //{
+                //__result = curTimeSpeed(__instance) == TimeSpeed.Paused ? 0.0f : 1f;
+                //return false;
+            //}
             switch (curTimeSpeed(__instance))
             {
                 case TimeSpeed.Paused:

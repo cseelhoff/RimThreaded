@@ -110,13 +110,27 @@ namespace RimThreaded
 
 			//ThingGrid_Transpile
 			//patched = typeof(ThingGrid_Transpile);
-			patched = typeof(ThingGrid_Patch);
+			//TranspileGeneric(original, patched, "ThingAt", new Type[] { typeof(IntVec3) });
 
+			patched = typeof(ThingGrid_Patch);
 			Prefix(original, patched, "RegisterInCell");
 			Prefix(original, patched, "DeregisterInCell");
 			Prefix(original, patched, "ThingsAt");
 			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingCategory) });
 			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingDef) });
+
+			Type original2 = typeof(ThingGrid);
+			Type patched2 = typeof(ThingGrid_Patch);
+			MethodInfo originalBuilding_DoorThingAt = original2.GetMethod("ThingAt", bf, null, new Type[] { typeof(IntVec3) }, null);
+			MethodInfo originalBuilding_DoorThingAtGeneric = originalBuilding_DoorThingAt.MakeGenericMethod(typeof(Building_Door));
+			MethodInfo patchedBuilding_DoorThingAt = patched2.GetMethod("ThingAt_Building_Door");
+			HarmonyMethod prefixBuilding_Door = new HarmonyMethod(patchedBuilding_DoorThingAt);
+			harmony.Patch(originalBuilding_DoorThingAtGeneric, prefix: prefixBuilding_Door);
+
+			//FloatMenuMakerMap
+			original = typeof(FloatMenuMakerMap);
+			patched = typeof(FloatMenuMakerMap_Patch);
+			Prefix(original, patched, "AddHumanlikeOrders");
 
 			//RealtimeMoteList			
 			original = typeof(RealtimeMoteList);
@@ -264,7 +278,8 @@ namespace RimThreaded
 			Transpile(original, patched, "BestAttackTarget");
 			Transpile(original, patched, "CanSee");
 
-			//patched = typeof(AttackTargetFinder_Patch);
+			patched = typeof(AttackTargetFinder_Patch);
+			Prefix(original, patched, "GetRandomShootingTargetByScore");
 			//Prefix(original, patched, "BestAttackTarget");
 			//Prefix(original, patched, "CanSee");
 
@@ -310,7 +325,7 @@ namespace RimThreaded
 			original = typeof(SubSustainer);
 			patched = typeof(SubSustainer_Patch);
 			//Prefix(original, patched, "StartSample");
-			//Prefix(original, patched, "SubSustainerUpdate");
+			Prefix(original, patched, "SubSustainerUpdate");
 
 			//SoundStarter
 			original = typeof(SoundStarter);
@@ -384,6 +399,10 @@ namespace RimThreaded
 			patched = typeof(AttackTargetReservationManager_Patch);
 			Prefix(original, patched, "FirstReservationFor");
 			Prefix(original, patched, "ReleaseClaimedBy");
+			Prefix(original, patched, "IsReservedBy");
+			Prefix(original, patched, "CanReserve");
+			//Prefix(original, patched, "ReleaseAllClaimedBy");
+
 
 			//PawnCollisionTweenerUtility
 			original = typeof(PawnCollisionTweenerUtility);
@@ -406,6 +425,7 @@ namespace RimThreaded
 			Prefix(original, patched, "FirstReservationFor");
 			Prefix(original, patched, "CanReserve");
 			Prefix(original, patched, "IsReservedByAnyoneOf");
+			Prefix(original, patched, "FirstRespectedReserver");
 
 			//FloodFiller - inefficient global lock			
 			original = typeof(FloodFiller);
@@ -416,6 +436,7 @@ namespace RimThreaded
 			original = typeof(Verb);
 			patched = typeof(Verb_Patch);
 			Prefix(original, patched, "CanHitFromCellIgnoringRange");
+			Prefix(original, patched, "TryFindShootLineFromTo");
 
 			//FastPriorityQueue<KeyValuePair<IntVec3, float>>
 			original = typeof(FastPriorityQueue<KeyValuePair<IntVec3, float>>);
@@ -698,6 +719,16 @@ namespace RimThreaded
 			patched = typeof(LightningBoltMeshMaker_Patch);
 			Prefix(original, patched, "NewBoltMesh");
 
+			//Unforce Normal Speed			
+			//original = typeof(TimeControls);
+			//patched = typeof(TimeControls_Patch);
+			//Prefix(original, patched, "DoTimeControlsGUI");
+
+			//PathGrid
+			original = typeof(PathGrid);
+			patched = typeof(PathGrid_Patch);
+			Prefix(original, patched, "CalculatedCostAt");
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
@@ -909,6 +940,7 @@ namespace RimThreaded
 			}
 			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 		}
+
 	}
 	
 }

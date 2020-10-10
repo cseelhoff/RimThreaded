@@ -224,44 +224,47 @@ namespace RimThreaded
 			for (int index = 0; index < thingList.Count; ++index)
 			{
 				Thing thing = thingList[index];
-				if (CanHit(__instance, thing))
+				if (thing != null)
 				{
-					bool flag2 = false;
-					if (thing.def.Fillage == FillCategory.Full)
+					if (CanHit(__instance, thing))
 					{
-						if (thing is Building_Door buildingDoor && buildingDoor.Open)
+						bool flag2 = false;
+						if (thing.def.Fillage == FillCategory.Full)
 						{
-							flag2 = true;
+							if (thing is Building_Door buildingDoor && buildingDoor.Open)
+							{
+								flag2 = true;
+							}
+							else
+							{
+								ThrowDebugText(__instance, "int-wall", c);
+								Impact(__instance, thing);
+								return true;
+							}
 						}
-						else
+						float num2 = 0.0f;
+						if (thing is Pawn p)
 						{
-							ThrowDebugText(__instance, "int-wall", c);
-							Impact(__instance, thing);
-							return true;
+							num2 = 0.4f * Mathf.Clamp(p.BodySize, 0.1f, 2f);
+							if (p.GetPosture() != PawnPosture.Standing)
+								num2 *= 0.1f;
+							if (launcher(__instance) != null && p.Faction != null && (launcher(__instance).Faction != null && !p.Faction.HostileTo(launcher(__instance).Faction)))
+								num2 *= Find.Storyteller.difficultyValues.friendlyFireChanceFactor;
 						}
-					}
-					float num2 = 0.0f;
-					if (thing is Pawn p)
-					{
-						num2 = 0.4f * Mathf.Clamp(p.BodySize, 0.1f, 2f);
-						if (p.GetPosture() != PawnPosture.Standing)
-							num2 *= 0.1f;
-						if (launcher(__instance) != null && p.Faction != null && (launcher(__instance).Faction != null && !p.Faction.HostileTo(launcher(__instance).Faction)))
-							num2 *= Find.Storyteller.difficultyValues.friendlyFireChanceFactor;
-					}
-					else if ((double)thing.def.fillPercent > 0.200000002980232)
-						num2 = !flag2 ? (!new IntVec3(destination(__instance)).AdjacentTo8Way(c) ? thing.def.fillPercent * 0.15f : thing.def.fillPercent * 1f) : 0.05f;
-					float num3 = num2 * num1;
-					if ((double)num3 > 9.99999974737875E-06)
-					{
-						if (Rand.Chance(num3))
+						else if ((double)thing.def.fillPercent > 0.200000002980232)
+							num2 = !flag2 ? (!new IntVec3(destination(__instance)).AdjacentTo8Way(c) ? thing.def.fillPercent * 0.15f : thing.def.fillPercent * 1f) : 0.05f;
+						float num3 = num2 * num1;
+						if ((double)num3 > 9.99999974737875E-06)
 						{
-							ThrowDebugText(__instance, "int-" + num3.ToStringPercent(), c);
-							Impact(__instance, thing);
-							return true;
+							if (Rand.Chance(num3))
+							{
+								ThrowDebugText(__instance, "int-" + num3.ToStringPercent(), c);
+								Impact(__instance, thing);
+								return true;
+							}
+							flag1 = true;
+							ThrowDebugText(__instance, num3.ToStringPercent(), c);
 						}
-						flag1 = true;
-						ThrowDebugText(__instance, num3.ToStringPercent(), c);
 					}
 				}
 			}

@@ -75,13 +75,16 @@ namespace RimThreaded
             else
             {
                 Job curJob = forPawn.CurJob;
-                if (curJob != null && (curJob.collideWithPawns || curJob.def.collideWithPawns || forPawn.jobs.curDriver.collideWithPawns))
+                if (curJob != null)
                 {
-                    flag = true;
-                }
-                else if (forPawn.Drafted)
-                {
-                    _ = forPawn.pather.Moving;
+                    if (curJob.collideWithPawns || (curJob.def != null && curJob.def.collideWithPawns) || (forPawn.jobs != null && forPawn.jobs.curDriver != null && forPawn.jobs.curDriver.collideWithPawns))
+                    {
+                        flag = true;
+                    }
+                    else if (forPawn.Drafted)
+                    {
+                        _ = forPawn.pather.Moving;
+                    }
                 }
             }
 

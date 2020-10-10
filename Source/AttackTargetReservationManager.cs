@@ -14,8 +14,75 @@ namespace RimThreaded
 
     public class AttackTargetReservationManager_Patch
 	{
-        public static AccessTools.FieldRef<AttackTargetReservationManager, List<AttackTargetReservationManager.AttackTargetReservation>> reservations =
-            AccessTools.FieldRefAccess<AttackTargetReservationManager, List<AttackTargetReservationManager.AttackTargetReservation>>("reservations");
+		public static AccessTools.FieldRef<AttackTargetReservationManager, List<AttackTargetReservation>> reservations =
+			AccessTools.FieldRefAccess<AttackTargetReservationManager, List<AttackTargetReservation>>("reservations");
+		public static AccessTools.FieldRef<AttackTargetReservationManager, Map> map =
+			AccessTools.FieldRefAccess<AttackTargetReservationManager, Map>("map");
+		public static bool ReleaseAllClaimedBy(AttackTargetReservationManager __instance, Pawn claimant)
+		{
+			for (int num = reservations(__instance).Count - 1; num >= 0; num--)
+			{
+				lock (reservations(__instance))
+				{
+					AttackTargetReservation reservation = reservations(__instance)[num];
+					if (reservation != null)
+					{
+						if (reservation.claimant == claimant)
+						{
+							reservations(__instance).RemoveAt(num);
+						}
+					}
+				}
+			}
+			return false;
+		}
+		private static int GetReservationsCount2(AttackTargetReservationManager __instance, IAttackTarget target, Faction faction)
+		{
+			int num = 0;
+			for (int i = 0; i < reservations(__instance).Count; i++)
+			{
+				AttackTargetReservation attackTargetReservation = reservations(__instance)[i];
+				if (attackTargetReservation != null)
+				{
+					if (attackTargetReservation.target == target && attackTargetReservation.claimant != null && attackTargetReservation.claimant.Faction == faction)
+					{
+						num++;
+					}
+                }				
+			}
+
+			return num;
+		}
+		private static int GetMaxPreferredReservationsCount2(AttackTargetReservationManager __instance, IAttackTarget target)
+		{
+			int num = 0;
+			CellRect cellRect = target.Thing.OccupiedRect();
+			foreach (IntVec3 item in cellRect.ExpandedBy(1))
+			{
+				if (!cellRect.Contains(item) && item.InBounds(map(__instance)) && item.Standable(map(__instance)))
+				{
+					num++;
+				}
+			}
+
+			return num;
+		}
+
+
+		public static bool CanReserve(AttackTargetReservationManager __instance, ref bool __result, Pawn claimant, IAttackTarget target)
+		{
+			if (__instance.IsReservedBy(claimant, target))
+			{
+				__result = true;
+				return false;
+			}
+
+			int reservationsCount = GetReservationsCount2(__instance, target, claimant.Faction);
+			int maxPreferredReservationsCount = GetMaxPreferredReservationsCount2(__instance, target);
+			__result = reservationsCount < maxPreferredReservationsCount;
+			return false;
+		}
+
 
 		public void Reserve(AttackTargetReservationManager __instance, Pawn claimant, Job job, IAttackTarget target)
 		{
