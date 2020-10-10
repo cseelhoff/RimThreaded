@@ -101,10 +101,13 @@ namespace RimThreaded
 		     * 
             */
             LocalBuilder tempDestList = iLGenerator.DeclareLocal(typeof(List<IntVec3>));
+            LocalBuilder tempSourceList = iLGenerator.DeclareLocal(typeof(List<IntVec3>));
             List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
             yield return new CodeInstruction(OpCodes.Newobj, AccessTools.Constructor(typeof(List<IntVec3>)));
             yield return new CodeInstruction(OpCodes.Stloc, tempDestList.LocalIndex);
+            yield return new CodeInstruction(OpCodes.Newobj, AccessTools.Constructor(typeof(List<IntVec3>)));
+            yield return new CodeInstruction(OpCodes.Stloc, tempSourceList.LocalIndex);
             while (i < instructionsList.Count)
             {
                 if (
@@ -114,8 +117,15 @@ namespace RimThreaded
                     instructionsList[i].opcode = OpCodes.Ldloc;
                     instructionsList[i].operand = tempDestList.LocalIndex;
                     yield return instructionsList[i];
-                }
-                else
+                } else if (
+                    instructionsList[i].opcode == OpCodes.Ldsfld && instructionsList[i].operand.ToString().Equals("System.Collections.Generic.List`1[Verse.IntVec3] tempSourceList")
+                    )
+                    {
+                        instructionsList[i].opcode = OpCodes.Ldloc;
+                        instructionsList[i].operand = tempSourceList.LocalIndex;
+                        yield return instructionsList[i];
+                    }
+                    else
                 {
                     yield return instructionsList[i];
                 }

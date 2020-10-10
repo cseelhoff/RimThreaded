@@ -216,13 +216,13 @@ namespace RimThreaded
 		}
 
 
-		private static IAttackTarget GetRandomShootingTargetByScore(
+		public static bool GetRandomShootingTargetByScore(ref IAttackTarget __result,
 		  List<IAttackTarget> targets,
 		  IAttackTargetSearcher searcher,
 		  Verb verb)
 		{
-			Pair<IAttackTarget, float> result;
-			return GetAvailableShootingTargetsByScore(targets, searcher, verb).TryRandomElementByWeight<Pair<IAttackTarget, float>>((Func<Pair<IAttackTarget, float>, float>)(x => x.Second), out result) ? result.First : (IAttackTarget)null;
+            __result = GetAvailableShootingTargetsByScore(targets, searcher, verb).TryRandomElementByWeight(x => x.Second, out Pair<IAttackTarget, float> result) ? result.First : null;
+            return false;
 		}
 		private static bool CanShootAtFromCurrentPosition(
 		  IAttackTarget target,
@@ -423,11 +423,11 @@ namespace RimThreaded
 						break;
 					}
 				}
-				IAttackTarget result;
+				IAttackTarget result = null;
 				if (flag)
 				{
 					tmpTargets.RemoveAll((IAttackTarget x) => !x.Thing.Position.InHorDistOf(searcherThing.Position, maxDist) || !innerValidator(x));
-					result = GetRandomShootingTargetByScore(tmpTargets, searcher, verb);
+					_ = GetRandomShootingTargetByScore(ref result, tmpTargets, searcher, verb);
 				}
 				else
 				{

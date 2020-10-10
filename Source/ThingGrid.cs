@@ -185,11 +185,12 @@ namespace RimThreaded
             return false;
         }
 
-        public static Building_Door ThingAt_Building_Door (ThingGrid __instance, IntVec3 c)
+        public static bool ThingAt_Building_Door (ThingGrid __instance, ref Building_Door __result, IntVec3 c)
         {
             if (!c.InBounds(map(__instance)))
             {
-                return null;
+                __result = null;
+                return false;
             }
 
             List<Thing> thingList = thingGrid(__instance)[map(__instance).cellIndices.CellToIndex(c)];
@@ -203,10 +204,12 @@ namespace RimThreaded
                 Building_Door building_Door = thing as Building_Door;
                 if (building_Door != null)
                 {
-                    return building_Door;
+                    __result = building_Door;
+                    return false;
                 }
             }
-            return null;
+            __result = null;
+            return false;
         }
         /*
         public static bool ThingAt_Apparel(ThingGrid __instance, ref Apparel __result, IntVec3 c)
