@@ -77,6 +77,7 @@
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="FloatMenuMakerMap_Transpile.cs" />
     <Compile Include="AudioSourceMaker.cs" />
     <Compile Include="GrammarResolver.cs" />
     <Compile Include="PathGrid.cs" />

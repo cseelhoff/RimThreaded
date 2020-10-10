@@ -36,6 +36,10 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
   
+Version 1.0.60  
+-Transpiled FloatMenuMakerMap.AddHumanlikeOrders  
+-Added Harmony Priority for WorkGiver_ConstructDeliverResources.ResourceDeliverJobFor (compatibility with CodeOptimist.JobsOfOpportunity) 
+
 Version 1.0.59  
 -Fixed bug in ThingGrid.ThingAt(Building_Door)  
 -Fixed bug in FloatMenuMakerMap.AddHumanlikeOrders  
