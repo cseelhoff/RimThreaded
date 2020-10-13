@@ -13,7 +13,120 @@ namespace RimThreaded
 
     public class CellFinder_Patch
     {
-		public static bool TryFindRandomCellInRegion(ref bool __result, Region reg, Predicate<IntVec3> validator, out IntVec3 result)
+        public static bool TryFindRandomCellNear(ref bool __result, IntVec3 root, Map map, int squareRadius, Predicate<IntVec3> validator, out IntVec3 result, int maxTries = -1)
+        {
+            int num = root.x - squareRadius;
+            int num2 = root.x + squareRadius;
+            int num3 = root.z - squareRadius;
+            int num4 = root.z + squareRadius;
+            int num5 = (num2 - num + 1) * (num4 - num3 + 1);
+            if (num < 0)
+            {
+                num = 0;
+            }
+
+            if (num3 < 0)
+            {
+                num3 = 0;
+            }
+
+            if (num2 > map.Size.x)
+            {
+                num2 = map.Size.x;
+            }
+
+            if (num4 > map.Size.z)
+            {
+                num4 = map.Size.z;
+            }
+
+            int num6;
+            bool flag;
+            if (maxTries < 0 || maxTries >= num5)
+            {
+                num6 = 20;
+                flag = false;
+            }
+            else
+            {
+                num6 = maxTries;
+                flag = true;
+            }
+
+            for (int i = 0; i < num6; i++)
+            {
+                IntVec3 intVec = new IntVec3(Rand.RangeInclusive(num, num2), 0, Rand.RangeInclusive(num3, num4));
+                if (validator == null || validator(intVec))
+                {
+                    if (DebugViewSettings.drawDestSearch)
+                    {
+                        map.debugDrawer.FlashCell(intVec, 0.5f, "found");
+                    }
+
+                    result = intVec;
+                    __result = true;
+                    return false;
+                }
+
+                if (DebugViewSettings.drawDestSearch)
+                {
+                    map.debugDrawer.FlashCell(intVec, 0f, "inv");
+                }
+            }
+
+            if (flag)
+            {
+                result = root;
+                __result = false;
+                return false;
+            }
+
+            //workingListX.Clear();
+            List<int> workingListX = new List<int>();
+            //workingListZ.Clear();
+            List<int> workingListZ = new List<int>();
+            for (int j = num; j <= num2; j++)
+            {
+                workingListX.Add(j);
+            }
+
+            for (int k = num3; k <= num4; k++)
+            {
+                workingListZ.Add(k);
+            }
+
+            workingListX.Shuffle();
+            workingListZ.Shuffle();
+            for (int l = 0; l < workingListX.Count; l++)
+            {
+                for (int m = 0; m < workingListZ.Count; m++)
+                {
+                    IntVec3 intVec = new IntVec3(workingListX[l], 0, workingListZ[m]);
+                    if (validator(intVec))
+                    {
+                        if (DebugViewSettings.drawDestSearch)
+                        {
+                            map.debugDrawer.FlashCell(intVec, 0.6f, "found2");
+                        }
+
+                        result = intVec;
+                        __result = true;
+                        return false;
+                    }
+
+                    if (DebugViewSettings.drawDestSearch)
+                    {
+                        map.debugDrawer.FlashCell(intVec, 0.25f, "inv2");
+                    }
+                }
+            }
+
+            result = root;
+            __result = false;
+            return false;
+        }
+
+        public static bool TryFindRandomCellInRegion(ref bool __result, Region reg, Predicate<IntVec3> validator, out IntVec3 result)
 		{
 			for (int i = 0; i < 10; i++)
 			{

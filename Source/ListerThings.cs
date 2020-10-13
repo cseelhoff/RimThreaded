@@ -21,7 +21,10 @@ namespace RimThreaded
 			if (!listsByDef(__instance).TryGetValue(t.def, out thingList1))
 			{
 				thingList1 = new List<Thing>();
-				listsByDef(__instance).Add(t.def, thingList1);
+				lock (listsByDef(__instance))
+				{
+					listsByDef(__instance).Add(t.def, thingList1);
+				}
 			}
 			lock (thingList1)
 			{
