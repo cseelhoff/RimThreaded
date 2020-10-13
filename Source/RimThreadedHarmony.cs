@@ -436,9 +436,12 @@ namespace RimThreaded
 
 			//Verb
 			original = typeof(Verb);
-			patched = typeof(Verb_Patch);
-			Prefix(original, patched, "CanHitFromCellIgnoringRange");
-			Prefix(original, patched, "TryFindShootLineFromTo");
+			//patched = typeof(Verb_Patch);
+			//Prefix(original, patched, "CanHitFromCellIgnoringRange");
+			//Prefix(original, patched, "TryFindShootLineFromTo");
+			patched = typeof(Verb_Transpile);
+			Transpile(original, patched, "TryFindShootLineFromTo");
+			Transpile(original, patched, "CanHitFromCellIgnoringRange");
 
 			//FastPriorityQueue<KeyValuePair<IntVec3, float>>
 			original = typeof(FastPriorityQueue<KeyValuePair<IntVec3, float>>);
