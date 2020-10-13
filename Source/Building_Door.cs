@@ -14,6 +14,8 @@ namespace RimThreaded
 
     public class Building_Door_Patch
     {
+		public static AccessTools.FieldRef<CompPowerTrader, bool> powerOnInt =
+			AccessTools.FieldRefAccess<CompPowerTrader, bool>("powerOnInt");
 		public static AccessTools.FieldRef<Building_Door, bool> openInt =
 			AccessTools.FieldRefAccess<Building_Door, bool>("openInt");
 		public static AccessTools.FieldRef<Building_Door, bool> holdOpenInt =
@@ -24,11 +26,14 @@ namespace RimThreaded
 
 		public static bool get_DoorPowerOn(Building_Door __instance, ref bool __result)
 		{
-            CompPowerTrader pc = __instance.powerComp;
-            if (pc != null)
+			CompPowerTrader pc = __instance.powerComp;
+			bool poweron = false;
+			try
 			{
-				return pc.PowerOn;
+				poweron = pc.PowerOn;
 			}
+			catch (NullReferenceException) { }
+			__result = poweron;
 			return false;
 		}
 

@@ -39,7 +39,8 @@ namespace RimThreaded
                         IntVec3 c = IntVec3.Invalid;
                         for (int index = 0; index < 5; ++index)
                         {
-                            IntVec3 randomCell = regions.RandomElementByWeight<Region>((Func<Region, float>)(reg => (float)reg.CellCount)).RandomCell;
+                            _ = regions.TryRandomElementByWeight<Region>((Func<Region, float>)(reg => (float)reg.CellCount), out Region randomRegion);
+                            IntVec3 randomCell = randomRegion.RandomCell;
                             if ((double)randomCell.DistanceToSquared(root) <= (double)radius * (double)radius)
                             {
                                 c = randomCell;

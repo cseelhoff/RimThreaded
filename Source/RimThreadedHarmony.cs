@@ -228,7 +228,8 @@ namespace RimThreaded
 			Prefix(original, patched, "TryFindRandomCellInRegion");
 			Prefix(original, patched, "TryFindRandomReachableCellNear");
 			Prefix(original, patched, "TryFindBestPawnStandCell");
-
+			Prefix(original, patched, "TryFindRandomCellNear");
+			
 			//ThingOwnerUtility
 			original = typeof(ThingOwnerUtility);
 			patched = typeof(ThingOwnerUtility_Patch);
@@ -820,6 +821,11 @@ namespace RimThreaded
 			original = typeof(Map);
 			patched = typeof(Map_Patch);
 			Prefix(original, patched, "MapUpdate");
+
+			//ThinkNode_SubtreesByTag			
+			original = typeof(ThinkNode_SubtreesByTag);
+			patched = typeof(ThinkNode_SubtreesByTag_Patch);
+			Prefix(original, patched, "TryIssueJobPackage");
 
 
 			//MOD COMPATIBILITY

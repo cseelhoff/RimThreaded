@@ -23,7 +23,7 @@ namespace RimThreaded
         public static bool CacheWorkGiversInOrder(Pawn_WorkSettings __instance)
         {
             //Pawn_WorkSettings.wtsByPrio.Clear();
-            List<WorkTypeDef> wtsByPrio = new List<WorkTypeDef>(); //CHANGE
+            List<WorkTypeDef> wtsByPrio = new List<WorkTypeDef>(); //ADD
             List<WorkTypeDef> defsListForReading = DefDatabase<WorkTypeDef>.AllDefsListForReading;
             int num1 = 999;
             for (int index = 0; index < defsListForReading.Count; ++index)
@@ -34,9 +34,9 @@ namespace RimThreaded
                 {
                     if (priority < num1 && w.workGiversByPriority.Any(wg => !wg.emergency))
                         num1 = priority;
-                    wtsByPrio.Add(w);
+                    wtsByPrio.Add(w); //CHANGE
                 }
-            }
+            } //CHANGE
             wtsByPrio.InsertionSort((a, b) =>
             {
                 float num2 = a.naturalPriority + (4 - __instance.GetPriority(a)) * 100000;
@@ -46,9 +46,9 @@ namespace RimThreaded
             {
                 workGiversInOrderEmerg(__instance).Clear();
             }
-            for (int index1 = 0; index1 < wtsByPrio.Count; ++index1)
+            for (int index1 = 0; index1 < wtsByPrio.Count; ++index1) //CHANGE
             {
-                WorkTypeDef workTypeDef = wtsByPrio[index1];
+                WorkTypeDef workTypeDef = wtsByPrio[index1]; //CHANGE
                 for (int index2 = 0; index2 < workTypeDef.workGiversByPriority.Count; ++index2)
                 {
                     WorkGiver worker = workTypeDef.workGiversByPriority[index2].Worker;
@@ -64,9 +64,9 @@ namespace RimThreaded
             {
                 workGiversInOrderNormal(__instance).Clear();
             }
-            for (int index1 = 0; index1 < wtsByPrio.Count; ++index1)
+            for (int index1 = 0; index1 < wtsByPrio.Count; ++index1) //CHANGE
             {
-                WorkTypeDef workTypeDef = wtsByPrio[index1];
+                WorkTypeDef workTypeDef = wtsByPrio[index1]; //CHANGE
                 for (int index2 = 0; index2 < workTypeDef.workGiversByPriority.Count; ++index2)
                 {
                     WorkGiver worker = workTypeDef.workGiversByPriority[index2].Worker;
