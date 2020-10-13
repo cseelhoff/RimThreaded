@@ -86,11 +86,12 @@ namespace RimThreaded
                     __result = true;
                     return false;
                 }
-                List<IntVec3> tempLeanShootSources = new List<IntVec3>();
-                ShootLeanUtility.LeanShootingSourcesFromTo(root, cellRect.ClosestCellTo(root), __instance.caster.Map, tempLeanShootSources);
-                for (int i = 0; i < tempLeanShootSources.Count; i++)
+                List<IntVec3> tempLeanShootSources = new List<IntVec3>(); //ADDED
+                ShootLeanUtility.LeanShootingSourcesFromTo(
+                    root, cellRect.ClosestCellTo(root), __instance.caster.Map, tempLeanShootSources); //CHANGED tempLeanShootSources
+                for (int i = 0; i < tempLeanShootSources.Count; i++) //CHANGED tempLeanShootSources
                 {
-                    IntVec3 intVec = tempLeanShootSources[i];
+                    IntVec3 intVec = tempLeanShootSources[i]; //CHANGED tempLeanShootSources
                     if (CanHitFromCellIgnoringRange2(__instance, intVec, targ, out goodDest))
                     {
                         resultingLine = new ShootLine(intVec, goodDest);

@@ -36,6 +36,10 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
   
+Version 1.0.61  
+-Transpiled Verb.TryFindShootLineFromTo (for compatibility with CombatExtended)  
+-Transpiled Verb.CanHitFromCellIgnoringRange  
+
 Version 1.0.60  
 -Transpiled FloatMenuMakerMap.AddHumanlikeOrders  
 -Added Harmony Priority for WorkGiver_ConstructDeliverResources.ResourceDeliverJobFor (compatibility with CodeOptimist.JobsOfOpportunity) 
