@@ -180,7 +180,7 @@ namespace RimThreaded
             foreach (KeyValuePair<SoundDef, List<Sustainer>> item2 in playingPerDef)
             {
                 item2.Value.Clear();
-                SimplePool<List<Sustainer>>.Return(item2.Value);
+                //SimplePool<List<Sustainer>>.Return(item2.Value);
             }
 
             //playingPerDef.Clear();
