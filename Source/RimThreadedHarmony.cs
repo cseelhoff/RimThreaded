@@ -827,6 +827,11 @@ namespace RimThreaded
 			patched = typeof(ThinkNode_SubtreesByTag_Patch);
 			Prefix(original, patched, "TryIssueJobPackage");
 
+			//ThinkNode_SubtreesByTag			
+			original = typeof(ResourceCounter);
+			patched = typeof(ResourceCounter_Patch);
+			Prefix(original, patched, "get_TotalHumanEdibleNutrition");
+
 
 			//MOD COMPATIBILITY
 

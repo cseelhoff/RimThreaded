@@ -788,6 +788,7 @@ namespace RimThreaded
                 RespondToNewAudioSourceRequests();
                 RespondToRenderTextureRequests();
                 RespondToNewBoltMeshRequests();
+                RespondToBlitRequests();
 
                 // Add any sounds that were produced in this tick
 
@@ -913,7 +914,7 @@ namespace RimThreaded
                 int key = newAudioSourceRequests.Keys.First();
                 if (newAudioSourceRequests.TryRemove(key, out GameObject go))
                 {
-                    timeoutExemptThreads.Add(key);
+                    //timeoutExemptThreads.Add(key);
                     AudioSource audioSourceResult = AudioSourceMaker.NewAudioSourceOn(go);
                     newAudioSourceResults.TryAdd(key, audioSourceResult);
                 }
@@ -931,7 +932,7 @@ namespace RimThreaded
                 int key = renderTextureRequests.Keys.First();
                 if (renderTextureRequests.TryRemove(key, out object[] parameters))
                 {
-                    timeoutExemptThreads.Add(key);
+                    //timeoutExemptThreads.Add(key);
                     RenderTexture renderTextureResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4]);
                     renderTextureResults.TryAdd(key, renderTextureResult);
                 }
@@ -958,7 +959,7 @@ namespace RimThreaded
             }
         }
 
-        private static void RespondToblitRequests()
+        private static void RespondToBlitRequests()
         {
             while (blitRequests.Count > 0)
             {

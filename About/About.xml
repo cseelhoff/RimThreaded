@@ -10,12 +10,12 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.62
-    -Fixed bug in CellFinder.TryFindRandomCellNear
-    -Fixed bug in ThinkNode_SubtreesByTag.TryIssueJobPackage
-    -Fixed bug in Building_Door.get_DoorPowerOn
-    -Fixed bug in ListerThings_Patch.Add
-    -Fixed bug in RCellFinder.RandomWanderDestFor
+    Version 1.0.63
+    -Fixed bug in Graphics.blit (caused crashes with giddy-up)
+    -Fixed bug in Dijkstra.Run(int)
+    -Fixed bug in ResourceCounter.get_TotalHumanEdibleNutrition
+    -Fixed bug in SustainerManager.UpdateAllSustainerScopes
+    -Removed 2 methods that qualify for timeoutExemptThreads
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.

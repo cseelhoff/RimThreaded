@@ -36,6 +36,13 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
   
+Version 1.0.63  
+-Fixed bug in Graphics.blit (caused crashes with giddy-up)  
+-Fixed bug in Dijkstra.Run(int)  
+-Fixed bug in ResourceCounter.get_TotalHumanEdibleNutrition  
+-Fixed bug in SustainerManager.UpdateAllSustainerScopes  
+-Removed 2 methods that qualify for timeoutExemptThreads  
+
 Version 1.0.62
 -Fixed bug in CellFinder.TryFindRandomCellNear
 -Fixed bug in ThinkNode_SubtreesByTag.TryIssueJobPackage
