@@ -49,6 +49,11 @@ namespace RimThreaded
         public static ConcurrentDictionary<int, GameObject> newAudioSourceRequests = new ConcurrentDictionary<int, GameObject>();
         public static ConcurrentDictionary<int, RenderTexture> renderTextureResults = new ConcurrentDictionary<int, RenderTexture>();
         public static ConcurrentDictionary<int, object[]> renderTextureRequests = new ConcurrentDictionary<int, object[]>();
+        public static ConcurrentDictionary<int, RenderTexture> renderTextureSetActiveRequests = new ConcurrentDictionary<int, RenderTexture>();
+        public static ConcurrentDictionary<int, RenderTexture> renderTextureGetActiveRequests = new ConcurrentDictionary<int, RenderTexture>();
+        public static ConcurrentDictionary<int, RenderTexture> renderTextureGetActiveResults = new ConcurrentDictionary<int, RenderTexture>();
+        public static ConcurrentDictionary<int, object[]> texture2dRequests = new ConcurrentDictionary<int, object[]>();
+        public static ConcurrentDictionary<int, Texture2D> texture2dResults = new ConcurrentDictionary<int, Texture2D>();
         public static ConcurrentDictionary<int, object[]> blitRequests = new ConcurrentDictionary<int, object[]>();
         public static ConcurrentDictionary<int, Mesh> newBoltMeshResults = new ConcurrentDictionary<int, Mesh>();
         public static ConcurrentQueue<int> newBoltMeshRequests = new ConcurrentQueue<int>();
@@ -789,6 +794,8 @@ namespace RimThreaded
                 RespondToRenderTextureRequests();
                 RespondToNewBoltMeshRequests();
                 RespondToBlitRequests();
+                RespondToGetActiveTextureRequests();
+                RespondToSetActiveTextureRequests();
 
                 // Add any sounds that were produced in this tick
 
@@ -934,6 +941,41 @@ namespace RimThreaded
                 {
                     //timeoutExemptThreads.Add(key);
                     RenderTexture renderTextureResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4]);
+                    renderTextureResults.TryAdd(key, renderTextureResult);
+                }
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToSetActiveTextureRequests()
+        {
+            while (renderTextureSetActiveRequests.Count > 0)
+            {
+                int key = renderTextureSetActiveRequests.Keys.First();
+                if (renderTextureSetActiveRequests.TryRemove(key, out RenderTexture renderTexture))
+                {
+                    //timeoutExemptThreads.Add(key);
+                    RenderTexture.active = renderTexture;
+                }
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToGetActiveTextureRequests()
+        {
+            while (renderTextureGetActiveRequests.Count > 0)
+            {
+                int key = renderTextureGetActiveRequests.Keys.First();
+                if (renderTextureGetActiveRequests.TryRemove(key, out RenderTexture renderTexture))
+                {
+                    //timeoutExemptThreads.Add(key);
+                    RenderTexture renderTextureResult = RenderTexture.active;
                     renderTextureResults.TryAdd(key, renderTextureResult);
                 }
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))

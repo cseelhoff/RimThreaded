@@ -64,7 +64,8 @@ namespace RimThreaded
             while (i < instructionsList.Count)
             {
                 if (
-                    i+6 < instructionsList.Count && instructionsList[i + 6].opcode == OpCodes.Callvirt && instructionsList[i + 6].operand.ToString().Equals("Verse.ThingGrid::ThingAt<class RimWorld.Apparel>(valuetype Verse.IntVec3)")
+                    i+6 < instructionsList.Count && instructionsList[i + 6].opcode == OpCodes.Callvirt &&
+                    instructionsList[i + 6].operand.ToString().Equals("RimWorld.Apparel ThingAt[Apparel](Verse.IntVec3)")
                     )
                 {
                     yield return instructionsList[i + 1];
