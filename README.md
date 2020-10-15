@@ -36,6 +36,11 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
   
+Version 1.0.64  
+-Fixed bug in FloatMenuMakerMap.AddHumanlikeOrders (colonists can force wear clothes again)  
+-Fixed bug in RenderTexture.set_active (getting closer to giddy-up compatibility)  
+-Fixed bug in RenderTexture.get_active (getting closer to giddy-up compatibility)  
+  
 Version 1.0.63  
 -Fixed bug in Graphics.blit (caused crashes with giddy-up)  
 -Fixed bug in Dijkstra.Run(int)  
@@ -43,12 +48,12 @@ Version 1.0.63
 -Fixed bug in SustainerManager.UpdateAllSustainerScopes  
 -Removed 2 methods that qualify for timeoutExemptThreads  
 
-Version 1.0.62
--Fixed bug in CellFinder.TryFindRandomCellNear
--Fixed bug in ThinkNode_SubtreesByTag.TryIssueJobPackage
--Fixed bug in Building_Door.get_DoorPowerOn
--Fixed bug in ListerThings_Patch.Add
--Fixed bug in RCellFinder.RandomWanderDestFor
+Version 1.0.62  
+-Fixed bug in CellFinder.TryFindRandomCellNear  
+-Fixed bug in ThinkNode_SubtreesByTag.TryIssueJobPackage  
+-Fixed bug in Building_Door.get_DoorPowerOn  
+-Fixed bug in ListerThings_Patch.Add  
+-Fixed bug in RCellFinder.RandomWanderDestFor  
 
 Version 1.0.61  
 -Transpiled Verb.TryFindShootLineFromTo (for compatibility with CombatExtended)  
