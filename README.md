@@ -36,6 +36,13 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
   
+Version 1.0.68  
+-Fixed bug in Room.get_PsychologicallyOutdoors
+-Fixed bug in SteadyEnvironmentEffects.DoCellSteadyEffects  
+
+Version 1.0.67  
+-Fixed bug in Region.DangerFor (null room group)  
+     
 Version 1.0.66  
 -Fixed bug in Region.DangerFor (again... source of another Room.get_Temperature bug)  
 -Fixed bug in PawnsFinder.get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists  

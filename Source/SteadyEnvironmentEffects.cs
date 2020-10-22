@@ -88,7 +88,12 @@ namespace RimThreaded
             Map map2 = map(__instance);
             Room room = c.GetRoom(map2, RegionType.Set_All);
             bool roofed = map2.roofGrid.Roofed(c);
-            bool roomUsesOutdoorTemperature = room != null && room.Group != null && room.UsesOutdoorTemperature;
+            RoomGroup roomGroup = null;
+            if (room != null)
+            {
+                roomGroup = room.Group;
+            }
+            bool roomUsesOutdoorTemperature = room != null && roomGroup != null && room.UsesOutdoorTemperature;
             if ((room == null) | roomUsesOutdoorTemperature)
             {
                 if ((double)outdoorMeltAmount(__instance) > 0.0)
@@ -114,9 +119,9 @@ namespace RimThreaded
                     else
                         TryDoDeteriorate(__instance, t, roofed, roomUsesOutdoorTemperature, protectedByEdifice, terrain);
                 }
-                if (!roomUsesOutdoorTemperature)
+                if (!roomUsesOutdoorTemperature && roomGroup != null)
                 {
-                    float temperature = room.Temperature;
+                    float temperature = roomGroup.Temperature;
                     if ((double)temperature > 0.0)
                     {
                         float num1 = MeltAmountAt(temperature);
