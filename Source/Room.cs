@@ -62,6 +62,23 @@ namespace RimThreaded
 			__result = temperature;
 			return false;
 		}
+		public static bool get_PsychologicallyOutdoors(Room __instance, ref bool __result)
+		{
+			if (__instance.OpenRoofCountStopAt(300) >= 300)
+			{
+				__result = true;
+				return false;
+			}
+
+			RoomGroup roomGroup = __instance.Group;
+			if (roomGroup !=null && roomGroup.AnyRoomTouchesMapEdge && (float)__instance.OpenRoofCount / (float)__instance.CellCount >= 0.5f)
+			{
+				__result = true;
+				return false;
+			}
+			__result = false;
+			return false;
+		}
 
 	}
 }

@@ -504,6 +504,7 @@ namespace RimThreaded
 			original = typeof(Room);
 			patched = typeof(Room_Patch);
 			Prefix(original, patched, "OpenRoofCountStopAt");
+			Prefix(original, patched, "get_PsychologicallyOutdoors");
 
 			//LongEventHandler
 			original = typeof(LongEventHandler);
