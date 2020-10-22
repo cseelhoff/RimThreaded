@@ -52,7 +52,11 @@ namespace RimThreaded
             }
             Danger danger = Danger.Unspecified;
             Room room = __instance.Room;
-            RoomGroup group = room.Group;
+            RoomGroup group = null;
+            if (room != null)
+            {
+                group = room.Group;
+            }
             if (room != null && group != null)
             {
                 float temperature = group.Temperature;
