@@ -17,6 +17,31 @@ namespace RimThreaded
 		public static List<Pawn> allMapsWorldAndTemporary_Alive_Result =
 			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsWorldAndTemporary_Alive_Result");
 
+		public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result =
+			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result");
+
+
+		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists(ref List<Pawn> __result)
+		{
+			lock (allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result)
+			{
+				allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result.Clear();
+			}
+			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive;
+			for (int i = 0; i < allMapsCaravansAndTravelingTransportPods_Alive.Count; i++)
+			{
+				if (allMapsCaravansAndTravelingTransportPods_Alive[i].IsFreeColonist)
+				{
+					lock (allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result)
+					{
+						allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result.Add(allMapsCaravansAndTravelingTransportPods_Alive[i]);
+					}
+				}
+			}
+
+			__result = allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result;
+			return false;
+		}
 		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists(ref List<Pawn> __result)
 		{
 			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result = new List<Pawn>();

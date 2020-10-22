@@ -10,12 +10,10 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.65
-    -Added feature in settings to suppress 'Could not load UnityEngine.Texture2D' error
-    -Fixed bug in JobDriver.TryActuallyStartNextToil
-    -Fixed bug in PawnUtility.ForceWait
-    -Fixed bug in Region.DangerFor (source of Room.get_Temperature bug)
-    -Fixed bug in ThinkNode_QueuedJob.TryIssueJobPackage
+    Version 1.0.66
+    -Fixed bug in Region.DangerFor (again... source of another Room.get_Temperature bug)
+    -Fixed bug in PawnsFinder.get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists
+    -Fixed bug in SteadyEnvironmentEffects.DoCellSteadyEffects
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.
