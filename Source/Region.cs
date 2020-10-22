@@ -50,9 +50,10 @@ namespace RimThreaded
                 }
             }
             Danger danger = Danger.Unspecified;
-            if (__instance.Room != null)
+            Room room = __instance.Room;
+            if (room != null)
             {
-                float temperature = __instance.Room.Temperature;
+                float temperature = room.Temperature;
                 FloatRange floatRange;
                 if (Current.ProgramState == ProgramState.Playing)
                 {

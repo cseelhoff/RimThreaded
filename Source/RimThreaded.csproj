@@ -77,8 +77,10 @@
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="JobDriver.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="ResourceCounter.cs" />
+    <Compile Include="ThinkNode_QueuedJob.cs" />
     <Compile Include="ThinkNode_SubtreesByTag.cs" />
     <Compile Include="Verb_Transpile.cs" />
     <Compile Include="FloatMenuMakerMap_Transpile.cs" />

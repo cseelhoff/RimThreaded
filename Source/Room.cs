@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -46,7 +47,21 @@ namespace RimThreaded
 			__result = cachedOpenRoofCount2;
 			return false;
 		}
-
+		public static bool get_Temperature(Room __instance, ref float __result)
+		{
+			float temperature = 0f;
+			try
+			{
+				RoomGroup group = __instance.Group;
+				temperature = group.Temperature;
+			}
+			catch(NullReferenceException)
+			{
+				__result = 0f;
+			}
+			__result = temperature;
+			return false;
+		}
 
 	}
 }
