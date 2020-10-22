@@ -72,7 +72,7 @@ namespace RimThreaded
             }            
             if (reportFailure)
             {
-                if (RimThreaded.supressTexture2dError)
+                if (RimThreaded.suppressTexture2dError)
                 {
                     Log.Warning("Could not load " + typeof(Texture2D) + " at " + itemPath + " in any active mod or in base resources.");
                 }

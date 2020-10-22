@@ -82,6 +82,11 @@ namespace RimThreaded
                 IEnumerable<Thing> things = customGlobalSearchSet ?? map.listerThings.ThingsMatching(thingReq);
 
                 //null check needed - bug #55
+                //if(RimThreaded.stopwatch.ElapsedMilliseconds > 200)
+                //{
+                //    long eMilliseconds = RimThreaded.stopwatch.ElapsedMilliseconds;
+                //    Log.ErrorOnce(thingReq.ToString(), thingReq.ToString().GetHashCode());
+                //}
                 thing = GenClosest.ClosestThing_Global(root, things, maxDistance, validator1, null);
             }
             __result = thing;

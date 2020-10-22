@@ -13,6 +13,7 @@ using Verse.Sound;
 using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Diagnostics;
 
 namespace RimThreaded
 {
@@ -22,7 +23,7 @@ namespace RimThreaded
 
         public static int maxThreads = Math.Max(Int32.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1);
         public static int timeoutMS = Math.Max(Int32.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 1);
-        public static bool supressTexture2dError = RimThreadedMod.Settings.supressTexture2dError;
+        public static bool suppressTexture2dError = RimThreadedMod.Settings.suppressTexture2dError;
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
         public static ConcurrentDictionary<int, EventWaitHandle> eventWaitStarts = new ConcurrentDictionary<int, EventWaitHandle>();
@@ -62,6 +63,8 @@ namespace RimThreaded
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
+
+        public static Stopwatch stopwatch = new Stopwatch();
 
         //ThingListTicks
         public static List<Thing> thingListNormal;
@@ -734,6 +737,7 @@ namespace RimThreaded
                 {
                     eventWaitStart.Set();
                 }
+                stopwatch.Restart();
                 foreach (int tID2 in eventWaitDones.Keys.ToList())
                 {
                     if (eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone))

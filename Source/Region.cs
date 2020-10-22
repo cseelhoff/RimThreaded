@@ -8,6 +8,7 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
+using System.Text.RegularExpressions;
 
 namespace RimThreaded
 {
@@ -51,9 +52,10 @@ namespace RimThreaded
             }
             Danger danger = Danger.Unspecified;
             Room room = __instance.Room;
-            if (room != null)
+            RoomGroup group = room.Group;
+            if (room != null && group != null)
             {
-                float temperature = room.Temperature;
+                float temperature = group.Temperature;
                 FloatRange floatRange;
                 if (Current.ProgramState == ProgramState.Playing)
                 {

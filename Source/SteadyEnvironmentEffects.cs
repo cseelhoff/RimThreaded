@@ -88,8 +88,8 @@ namespace RimThreaded
             Map map2 = map(__instance);
             Room room = c.GetRoom(map2, RegionType.Set_All);
             bool roofed = map2.roofGrid.Roofed(c);
-            bool roomUsesOutdoorTemperature = room != null && room.UsesOutdoorTemperature;
-            if (room == null | roomUsesOutdoorTemperature)
+            bool roomUsesOutdoorTemperature = room != null && room.Group != null && room.UsesOutdoorTemperature;
+            if ((room == null) | roomUsesOutdoorTemperature)
             {
                 if ((double)outdoorMeltAmount(__instance) > 0.0)
                     map2.snowGrid.AddDepth(c, -outdoorMeltAmount(__instance));

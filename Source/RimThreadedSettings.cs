@@ -21,14 +21,14 @@ namespace RimThreaded
 		public int timeoutMS = 1000;
 		public string timeoutMSBuffer = "1000";
 		public string modsText = "";
-		public bool supressTexture2dError = true;
+		public bool suppressTexture2dError = true;
 		public Vector2 scrollPos = new Vector2(0, 0);
 		public override void ExposeData()
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref maxThreadsBuffer, "maxThreadsBuffer", "8");
 			Scribe_Values.Look(ref timeoutMSBuffer, "timeoutMSBuffer", "1000");
-			Scribe_Values.Look(ref supressTexture2dError, "supressTexture2dError", true);
+			Scribe_Values.Look(ref suppressTexture2dError, "suppressTexture2dError", true);
 		}
 
 		public void DoWindowContents(Rect inRect)
@@ -39,8 +39,7 @@ namespace RimThreaded
 			Widgets.IntEntry(listing_Standard.GetRect(40f), ref maxThreads, ref maxThreadsBuffer);
 			Widgets.Label(listing_Standard.GetRect(30f), "Timeout (in miliseconds) waiting for threads (default: 1000):");
 			Widgets.IntEntry(listing_Standard.GetRect(40f), ref timeoutMS, ref timeoutMSBuffer, 10);
-			//Widgets.Label(listing_Standard.GetRect(30f), "Supress 'Could not load UnityEngine.Texture2D' error:");
-			Widgets.CheckboxLabeled(listing_Standard.GetRect(40f), "Supress 'Could not load UnityEngine.Texture2D' error:", ref supressTexture2dError);
+			Widgets.CheckboxLabeled(listing_Standard.GetRect(40f), "Suppress 'Could not load UnityEngine.Texture2D' error:", ref suppressTexture2dError);
 			Widgets.TextAreaScrollable(listing_Standard.GetRect(400f), modsText, ref scrollPos);
 			listing_Standard.End();
 		}

@@ -267,6 +267,7 @@ namespace RimThreaded
 			//PawnsFinder
 			original = typeof(PawnsFinder);
 			patched = typeof(PawnsFinder_Patch);
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
 			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
 			Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
 

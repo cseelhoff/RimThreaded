@@ -36,12 +36,17 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
   
+Version 1.0.66  
+-Fixed bug in Region.DangerFor (again... source of another Room.get_Temperature bug)  
+-Fixed bug in PawnsFinder.get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists  
+-Fixed bug in SteadyEnvironmentEffects.DoCellSteadyEffects  
+   
 Version 1.0.65  
 -Added feature in settings to suppress 'Could not load UnityEngine.Texture2D' error  
--Fixed bug in JobDriver.TryActuallyStartNextToil
--Fixed bug in PawnUtility.ForceWait
--Fixed bug in Region.DangerFor (source of Room.get_Temperature bug)
--Fixed bug in ThinkNode_QueuedJob.TryIssueJobPackage
+-Fixed bug in JobDriver.TryActuallyStartNextToil  
+-Fixed bug in PawnUtility.ForceWait  
+-Fixed bug in Region.DangerFor (source of Room.get_Temperature bug)  
+-Fixed bug in ThinkNode_QueuedJob.TryIssueJobPackage  
   
 Version 1.0.64  
 -Fixed bug in FloatMenuMakerMap.AddHumanlikeOrders (colonists can force wear clothes again)  
