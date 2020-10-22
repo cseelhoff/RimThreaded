@@ -221,6 +221,7 @@ namespace RimThreaded
 			patched = typeof(PawnUtility_Patch);
 			Prefix(original, patched, "PawnBlockingPathAt");
 			Prefix(original, patched, "EnemiesAreNearby");
+			Prefix(original, patched, "ForceWait");
 
 			//CellFinder
 			original = typeof(CellFinder);
@@ -831,6 +832,16 @@ namespace RimThreaded
 			original = typeof(ResourceCounter);
 			patched = typeof(ResourceCounter_Patch);
 			Prefix(original, patched, "get_TotalHumanEdibleNutrition");
+
+			//ThinkNode_QueuedJob			
+			original = typeof(ThinkNode_QueuedJob);
+			patched = typeof(ThinkNode_QueuedJob_Patch);
+			Prefix(original, patched, "TryIssueJobPackage");
+
+			//JobDriver			
+			original = typeof(JobDriver);
+			patched = typeof(JobDriver_Patch);
+			Prefix(original, patched, "TryActuallyStartNextToil");
 
 
 			//MOD COMPATIBILITY

@@ -122,6 +122,22 @@ namespace RimThreaded
             return false;
         }
 
+        public static bool ForceWait(Pawn pawn, int ticks, Thing faceTarget = null, bool maintainPosture = false)
+        {
+            if (ticks <= 0)
+            {
+                Log.ErrorOnce("Forcing a wait for zero ticks", 47045639);
+            }
+
+            Job job = JobMaker.MakeJob(maintainPosture ? JobDefOf.Wait_MaintainPosture : JobDefOf.Wait, faceTarget);
+            job.expiryInterval = ticks;
+            Pawn_JobTracker jobs = pawn.jobs;
+            if (jobs != null && job != null)
+            {
+                jobs.StartJob(job, JobCondition.InterruptForced, null, resumeCurJobAfterwards: true);
+            }
+            return false;
+        }
 
     }
 }
