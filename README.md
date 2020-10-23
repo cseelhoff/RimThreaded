@@ -36,6 +36,14 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
   
+Version 1.0.69  
+-Fixed bug in GridsUtility.IsInPrisonCell
+-Fixed bug in MapPawns.FreeHumanlikesSpawnedOfFaction  
+-Fixed bug in Reachability.CheckRegionBasedReachability  
+-Fixed bug in MapPawns.TryRebuildDirtyRegionsAndRooms  
+-Fixed bug in TemperatureCache.TryCacheRegionTempInfo  
+-Fixed bug in WanderUtility.GetColonyWanderRoot  
+  
 Version 1.0.68  
 -Fixed bug in Room.get_PsychologicallyOutdoors
 -Fixed bug in SteadyEnvironmentEffects.DoCellSteadyEffects  

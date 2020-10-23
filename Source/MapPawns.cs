@@ -78,7 +78,10 @@ namespace RimThreaded
                     }
                 }
             }
-            pawnList1.Clear();
+            lock (pawnList1)
+            {
+                pawnList1.Clear();
+            }
             List<Pawn> pawnList2 = null;
             SpawnedPawnsInFaction(__instance, ref pawnList2, faction);
             for (int index = 0; index < pawnList2.Count; ++index)

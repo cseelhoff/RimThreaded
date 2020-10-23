@@ -324,7 +324,15 @@ namespace RimThreaded
                             if (this_destRegions.Contains(region2))
                             {
                                 for (int index3 = 0; index3 < this_startingRegions.Count; ++index3)
-                                    this_cache.AddCachedResult(this_startingRegions[index3].Room, region2.Room, traverseParams, true);
+                                {
+                                    Region regionA = this_startingRegions[index3];
+                                    Room roomA = null;
+                                    if(regionA != null)
+                                    {
+                                        roomA = regionA.Room;
+                                        this_cache.AddCachedResult(roomA, region2.Room, traverseParams, true);
+                                    }                                    
+                                }
                                 return true;
                             }
                             QueueNewOpenRegion(region2,
@@ -448,6 +456,7 @@ namespace RimThreaded
             if (pathGrid.WalkableFast(start))
             {
                 Region validRegionAt = regionGrid.GetValidRegionAt(start);
+                //if(validRegionAt != null)
                 QueueNewOpenRegion(validRegionAt, this_reachedIndex, this_openQueue, ref this_numRegionsOpened, regionsReached);
                 this_startingRegions.Add(validRegionAt);
             }
