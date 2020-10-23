@@ -420,6 +420,7 @@ namespace RimThreaded
 			patched = typeof(GridsUtility_Patch);
 			Prefix(original, patched, "GetTerrain");
 			Prefix(original, patched, "GetGas");
+			Prefix(original, patched, "IsInPrisonCell");
 
 			//ReservationManager
 			original = typeof(ReservationManager);
@@ -634,6 +635,7 @@ namespace RimThreaded
 			patched = typeof(RegionAndRoomUpdater_Patch);
 			Prefix(original, patched, "FloodAndSetRoomGroups");
 			Prefix(original, patched, "CombineNewAndReusedRoomsIntoContiguousGroups");
+			Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
 
 			//GenRadial
 			original = typeof(GenRadial);
@@ -844,6 +846,11 @@ namespace RimThreaded
 			original = typeof(JobDriver);
 			patched = typeof(JobDriver_Patch);
 			Prefix(original, patched, "TryActuallyStartNextToil");
+
+			//TemperatureCache			
+			original = typeof(TemperatureCache);
+			patched = typeof(TemperatureCache_Patch);
+			Prefix(original, patched, "TryCacheRegionTempInfo");
 
 
 			//MOD COMPATIBILITY

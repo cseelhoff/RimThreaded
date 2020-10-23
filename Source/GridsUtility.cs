@@ -13,7 +13,19 @@ namespace RimThreaded
 
     public class GridsUtility_Patch
     {
-
+        public static bool IsInPrisonCell(ref bool __result, IntVec3 c, Map map)
+        {
+            Room roomOrAdjacent = c.GetRoomOrAdjacent(map);
+            if (roomOrAdjacent != null)
+            {
+                __result = roomOrAdjacent.isPrisonCell;
+                return false;
+            }
+            //TODO fix check for null room earlier
+            //Log.Error("Checking prison cell status of " + c + " which is not in or adjacent to a room.");
+            __result = false;
+            return false;
+        }
         public static bool GetTerrain(ref TerrainDef __result, IntVec3 c, Map map)
         {
             __result = null;

@@ -77,6 +77,7 @@
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="AutoUndrafter.cs" />
     <Compile Include="JobDriver.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="ResourceCounter.cs" />
@@ -182,7 +183,7 @@
     <Compile Include="FastPriorityQueueKeyValuePairIntVec3Float.cs" />
     <Compile Include="AttackTargetReservationManager.cs" />
     <Compile Include="AttackTargetsCache.cs" />
-    <Compile Include="AutoUndrafter.cs" />
+    <Compile Include="TemperatureCache.cs" />
     <Compile Include="Battle.cs" />
     <Compile Include="BFSWorker.cs" />
     <Compile Include="BuildableDef.cs" />

@@ -63,7 +63,11 @@ namespace RimThreaded
                 ++num;
             }
             Pawn result;
-            __result = pawn.Map.mapPawns.FreeColonistsSpawned.Where<Pawn>((Func<Pawn, bool>)(c => !c.Position.IsForbidden(pawn) && pawn.CanReach((LocalTargetInfo)c.Position, PathEndMode.Touch, Danger.None, false, TraverseMode.ByPawn))).TryRandomElement<Pawn>(out result) ? result.Position : pawn.Position;
+            Map map = pawn.Map;
+            MapPawns mapPawns = map.mapPawns;
+            List<Pawn> freeColonistsSpawned = mapPawns.FreeColonistsSpawned;
+
+            __result = freeColonistsSpawned.Where(c => !c.Position.IsForbidden(pawn) && pawn.CanReach(c.Position, PathEndMode.Touch, Danger.None, false, TraverseMode.ByPawn)).TryRandomElement(out result) ? result.Position : pawn.Position;
 			return false;
 		}
 
