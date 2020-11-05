@@ -901,7 +901,7 @@ namespace RimThreaded
                     materialRequests.Remove(key);
                 }
                 Material material = MaterialPool.MatFrom(materialRequest);
-                materialResults.Add(materialRequest, material);
+                materialResults[materialRequest] = material;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
