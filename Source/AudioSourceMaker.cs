@@ -20,7 +20,9 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.newAudioSourceRequests.TryAdd(tID, go);
+                lock (RimThreaded.newAudioSourceRequests) {
+                    RimThreaded.newAudioSourceRequests[tID] = go;
+                }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 RimThreaded.newAudioSourceResults.TryGetValue(tID, out AudioSource newAudioSource_result);

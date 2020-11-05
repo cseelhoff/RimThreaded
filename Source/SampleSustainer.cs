@@ -21,10 +21,16 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.tryMakeAndPlayRequests.TryAdd(tID, new object[] { subSus, clip, scheduledEndTime });
+                lock (RimThreaded.tryMakeAndPlayRequests)
+                {
+                    RimThreaded.tryMakeAndPlayRequests[tID] = new object[] { subSus, clip, scheduledEndTime };
+                }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
-                RimThreaded.tryMakeAndPlayResults.TryGetValue(tID, out SampleSustainer sustainer_result);
+                if(!RimThreaded.tryMakeAndPlayResults.TryGetValue(tID, out SampleSustainer sustainer_result))
+                {
+                    Log.Error("Error retriving tryMakeAndPlayResults");
+                }
                 __result = sustainer_result;
                 return false;
             }

@@ -20,7 +20,10 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.texture2dRequests.TryAdd(tID, new object[] { width, height });
+                lock (RimThreaded.texture2dRequests)
+                {
+                    RimThreaded.texture2dRequests[tID] = new object[] { width, height };
+                }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 RimThreaded.texture2dResults.TryGetValue(tID, out Texture2D texture2dResult);

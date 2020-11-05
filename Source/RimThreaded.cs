@@ -26,8 +26,8 @@ namespace RimThreaded
         public static bool suppressTexture2dError = RimThreadedMod.Settings.suppressTexture2dError;
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
-        public static ConcurrentDictionary<int, EventWaitHandle> eventWaitStarts = new ConcurrentDictionary<int, EventWaitHandle>();
-        public static ConcurrentDictionary<int, EventWaitHandle> eventWaitDones = new ConcurrentDictionary<int, EventWaitHandle>();
+        public static Dictionary<int, EventWaitHandle> eventWaitStarts = new Dictionary<int, EventWaitHandle>();
+        public static Dictionary<int, EventWaitHandle> eventWaitDones = new Dictionary<int, EventWaitHandle>();
 
         //public static ConcurrentQueue<Thing> drawQueue = new ConcurrentQueue<Thing>();
         private static Dictionary<int, Thread> allThreads = new Dictionary<int, Thread>();
@@ -36,28 +36,28 @@ namespace RimThreaded
         public static bool SingleTickComplete = true;
 
         //MainThreadRequests
-        public static ConcurrentDictionary<int, EventWaitHandle> mainRequestWaits = new ConcurrentDictionary<int, EventWaitHandle>();
-        public static ConcurrentDictionary<int, object[]> tryMakeAndPlayRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, SampleSustainer> tryMakeAndPlayResults = new ConcurrentDictionary<int, SampleSustainer>();
-        public static ConcurrentDictionary<int, object[]> newSustainerRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, Sustainer> newSustainerResults = new ConcurrentDictionary<int, Sustainer>();
-        public static ConcurrentDictionary<string, Texture2D> texture2DResults = new ConcurrentDictionary<string, Texture2D>();
-        public static ConcurrentDictionary<int, string> texture2DRequests = new ConcurrentDictionary<int, string>();
-        public static ConcurrentDictionary<MaterialRequest, Material> materialResults = new ConcurrentDictionary<MaterialRequest, Material>();
-        public static ConcurrentDictionary<int, MaterialRequest> materialRequests = new ConcurrentDictionary<int, MaterialRequest>();
-        public static ConcurrentDictionary<int, Map> generateMapResults = new ConcurrentDictionary<int, Map>();
-        public static ConcurrentDictionary<int, object[]> generateMapRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, AudioSource> newAudioSourceResults = new ConcurrentDictionary<int, AudioSource>();
-        public static ConcurrentDictionary<int, GameObject> newAudioSourceRequests = new ConcurrentDictionary<int, GameObject>();
-        public static ConcurrentDictionary<int, RenderTexture> renderTextureResults = new ConcurrentDictionary<int, RenderTexture>();
-        public static ConcurrentDictionary<int, object[]> renderTextureRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, RenderTexture> renderTextureSetActiveRequests = new ConcurrentDictionary<int, RenderTexture>();
-        public static ConcurrentDictionary<int, RenderTexture> renderTextureGetActiveRequests = new ConcurrentDictionary<int, RenderTexture>();
-        public static ConcurrentDictionary<int, RenderTexture> renderTextureGetActiveResults = new ConcurrentDictionary<int, RenderTexture>();
-        public static ConcurrentDictionary<int, object[]> texture2dRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, Texture2D> texture2dResults = new ConcurrentDictionary<int, Texture2D>();
-        public static ConcurrentDictionary<int, object[]> blitRequests = new ConcurrentDictionary<int, object[]>();
-        public static ConcurrentDictionary<int, Mesh> newBoltMeshResults = new ConcurrentDictionary<int, Mesh>();
+        public static Dictionary<int, EventWaitHandle> mainRequestWaits = new Dictionary<int, EventWaitHandle>();
+        public static Dictionary<int, object[]> tryMakeAndPlayRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, SampleSustainer> tryMakeAndPlayResults = new Dictionary<int, SampleSustainer>();
+        public static Dictionary<int, object[]> newSustainerRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, Sustainer> newSustainerResults = new Dictionary<int, Sustainer>();
+        public static Dictionary<string, Texture2D> texture2DResults = new Dictionary<string, Texture2D>();
+        public static Dictionary<int, string> texture2DRequests = new Dictionary<int, string>();
+        public static Dictionary<MaterialRequest, Material> materialResults = new Dictionary<MaterialRequest, Material>();
+        public static Dictionary<int, MaterialRequest> materialRequests = new Dictionary<int, MaterialRequest>();
+        public static Dictionary<int, Map> generateMapResults = new Dictionary<int, Map>();
+        public static Dictionary<int, object[]> generateMapRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, AudioSource> newAudioSourceResults = new Dictionary<int, AudioSource>();
+        public static Dictionary<int, GameObject> newAudioSourceRequests = new Dictionary<int, GameObject>();
+        public static Dictionary<int, RenderTexture> renderTextureResults = new Dictionary<int, RenderTexture>();
+        public static Dictionary<int, object[]> renderTextureRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, RenderTexture> renderTextureSetActiveRequests = new Dictionary<int, RenderTexture>();
+        public static Dictionary<int, RenderTexture> renderTextureGetActiveRequests = new Dictionary<int, RenderTexture>();
+        public static Dictionary<int, RenderTexture> renderTextureGetActiveResults = new Dictionary<int, RenderTexture>();
+        public static Dictionary<int, object[]> texture2dRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, Texture2D> texture2dResults = new Dictionary<int, Texture2D>();
+        public static Dictionary<int, object[]> blitRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, Mesh> newBoltMeshResults = new Dictionary<int, Mesh>();
         public static ConcurrentQueue<int> newBoltMeshRequests = new ConcurrentQueue<int>();
         public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
 
@@ -176,9 +176,18 @@ namespace RimThreaded
             Thread thread = new Thread(() => ProcessTicks());
             int tID = thread.ManagedThreadId;
             allThreads.Add(tID, thread);
-            eventWaitStarts.TryAdd(tID, new AutoResetEvent(false));
-            eventWaitDones.TryAdd(tID, new AutoResetEvent(false));
-            mainRequestWaits.TryAdd(tID, new AutoResetEvent(false));
+            lock (eventWaitStarts)
+            {
+                eventWaitStarts[tID] = new AutoResetEvent(false);
+            }
+            lock (eventWaitDones)
+            {
+                eventWaitDones[tID] = new AutoResetEvent(false);
+            }
+            lock(mainRequestWaits)
+            {
+                mainRequestWaits[tID] = new AutoResetEvent(false);
+            }            
             thread.Start();
         }
 
@@ -772,9 +781,18 @@ namespace RimThreaded
             {
                 thread.Abort();
                 allThreads.Remove(managedThreadID);
-                eventWaitStarts.TryRemove(managedThreadID, out _);
-                eventWaitDones.TryRemove(managedThreadID, out _);
-                mainRequestWaits.TryRemove(managedThreadID, out _);
+                lock (eventWaitStarts)
+                {
+                    eventWaitStarts.Remove(managedThreadID);
+                }
+                lock (eventWaitDones)
+                {
+                    eventWaitDones.Remove(managedThreadID);
+                }
+                lock (mainRequestWaits)
+                {
+                    mainRequestWaits.Remove(managedThreadID);
+                }
             }
             else
             {
@@ -826,14 +844,19 @@ namespace RimThreaded
         {
             while (newSustainerRequests.Count > 0)
             {
-                int key = newSustainerRequests.Keys.First();
-                if (newSustainerRequests.TryRemove(key, out object[] objects))
+                object[] objects;
+                int key;
+                lock (newSustainerRequests)
                 {
-                    SoundDef soundDef = (SoundDef)objects[0];
-                    SoundInfo soundInfo = (SoundInfo)objects[1];
-                    Sustainer sustainer = new Sustainer(soundDef, soundInfo);
-                    newSustainerResults[key] = sustainer;
+                    key = newSustainerRequests.Keys.First();
+                    objects = newSustainerRequests[key];
+                    newSustainerRequests.Remove(key);
                 }
+                SoundDef soundDef = (SoundDef)objects[0];
+                SoundInfo soundInfo = (SoundInfo)objects[1];
+                Sustainer sustainer = new Sustainer(soundDef, soundInfo);
+                newSustainerResults[key] = sustainer;
+                
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -845,21 +868,19 @@ namespace RimThreaded
         {
             while (tryMakeAndPlayRequests.Count > 0)
             {
-                int key = tryMakeAndPlayRequests.Keys.First();
-                if (tryMakeAndPlayRequests.TryRemove(key, out object[] objects))
+                object[] objects;
+                int key;
+                lock (tryMakeAndPlayRequests)
                 {
-                    SubSustainer subSustainer = (SubSustainer)objects[0];
-                    AudioClip clip = (AudioClip)objects[1];
-                    float num2 = (float)objects[2];
-                    SampleSustainer sampleSustainer = SampleSustainer.TryMakeAndPlay(subSustainer, clip, num2);
-                    tryMakeAndPlayResults.TryAdd(key, sampleSustainer);
-                    //if (sampleSustainer != null)
-                    //{
-                        //if (subSustainer.subDef.sustainSkipFirstAttack && Time.frameCount == subSustainer.creationFrame)
-                            //sampleSustainer.resolvedSkipAttack = true;
-                        //SubSustainer_Patch.samples(subSustainer).Add(sampleSustainer);
-                    //}
+                    key = tryMakeAndPlayRequests.Keys.First();
+                    objects = tryMakeAndPlayRequests[key];
+                    tryMakeAndPlayRequests.Remove(key);
                 }
+                SubSustainer subSustainer = (SubSustainer)objects[0];
+                AudioClip clip = (AudioClip)objects[1];
+                float num2 = (float)objects[2];
+                SampleSustainer sampleSustainer = SampleSustainer.TryMakeAndPlay(subSustainer, clip, num2);
+                tryMakeAndPlayResults[key] = sampleSustainer;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -871,12 +892,16 @@ namespace RimThreaded
         {
             while (materialRequests.Count > 0)
             {
-                int key = materialRequests.Keys.First();
-                if (materialRequests.TryRemove(key, out MaterialRequest materialRequest))
+                MaterialRequest materialRequest;
+                int key;
+                lock (materialRequests)
                 {
-                    Material material = MaterialPool.MatFrom(materialRequest);
-                    materialResults.TryAdd(materialRequest, material);
+                    key = materialRequests.Keys.First();
+                    materialRequest = materialRequests[key];
+                    materialRequests.Remove(key);
                 }
+                Material material = MaterialPool.MatFrom(materialRequest);
+                materialResults.Add(materialRequest, material);
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -888,12 +913,16 @@ namespace RimThreaded
         {
             while (texture2DRequests.Count > 0)
             {
-                int key = texture2DRequests.Keys.First();
-                if (texture2DRequests.TryRemove(key, out string itempath))
+                string itempath;
+                int key;
+                lock (texture2DRequests)
                 {
-                    Texture2D content = ContentFinder_Texture2D_Patch.GetTexture2D(itempath);
-                    texture2DResults.TryAdd(itempath, content);
+                    key = texture2DRequests.Keys.First();
+                    itempath = texture2DRequests[key];
+                    texture2DRequests.Remove(key);
                 }
+                Texture2D content = ContentFinder_Texture2D_Patch.GetTexture2D(itempath);
+                texture2DResults[itempath] = content;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -905,13 +934,19 @@ namespace RimThreaded
         {
             while (generateMapRequests.Count > 0)
             {
-                int key = generateMapRequests.Keys.First();
-                if (generateMapRequests.TryRemove(key, out object[] requestParams))
+                object[] requestParams;
+                int key;
+                lock (generateMapRequests)
                 {
-                    timeoutExemptThreads.Add(key);
-                    Map mapResult = MapGenerator.GenerateMap((IntVec3)requestParams[0], (MapParent)requestParams[1], (MapGeneratorDef)requestParams[2], (IEnumerable<GenStepWithParams>)requestParams[3], (Action<Map>)requestParams[4]);
-                    generateMapResults.TryAdd(key, mapResult);
+                    key = generateMapRequests.Keys.First();
+                    requestParams = generateMapRequests[key];
+                    generateMapRequests.Remove(key);
                 }
+
+                timeoutExemptThreads.Add(key);
+                Map mapResult = MapGenerator.GenerateMap((IntVec3)requestParams[0], (MapParent)requestParams[1], (MapGeneratorDef)requestParams[2], (IEnumerable<GenStepWithParams>)requestParams[3], (Action<Map>)requestParams[4]);
+                generateMapResults[key] = mapResult;
+
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -923,13 +958,17 @@ namespace RimThreaded
         {
             while (newAudioSourceRequests.Count > 0)
             {
-                int key = newAudioSourceRequests.Keys.First();
-                if (newAudioSourceRequests.TryRemove(key, out GameObject go))
+                GameObject go;
+                int key;
+                lock (newAudioSourceRequests)
                 {
-                    //timeoutExemptThreads.Add(key);
-                    AudioSource audioSourceResult = AudioSourceMaker.NewAudioSourceOn(go);
-                    newAudioSourceResults.TryAdd(key, audioSourceResult);
+                    key = newAudioSourceRequests.Keys.First();
+                    go = newAudioSourceRequests[key];
+                    newAudioSourceRequests.Remove(key);
                 }
+                //timeoutExemptThreads.Add(key);
+                AudioSource audioSourceResult = AudioSourceMaker.NewAudioSourceOn(go);
+                newAudioSourceResults[key] = audioSourceResult;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -941,13 +980,17 @@ namespace RimThreaded
         {
             while (renderTextureRequests.Count > 0)
             {
-                int key = renderTextureRequests.Keys.First();
-                if (renderTextureRequests.TryRemove(key, out object[] parameters))
+                object[] parameters;
+                int key;
+                lock (renderTextureRequests)
                 {
-                    //timeoutExemptThreads.Add(key);
-                    RenderTexture renderTextureResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4]);
-                    renderTextureResults.TryAdd(key, renderTextureResult);
+                    key = renderTextureRequests.Keys.First();
+                    parameters = renderTextureRequests[key];
+                    renderTextureRequests.Remove(key);
                 }
+                //timeoutExemptThreads.Add(key);
+                RenderTexture renderTextureResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4]);
+                renderTextureResults[key] = renderTextureResult;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -959,12 +1002,16 @@ namespace RimThreaded
         {
             while (renderTextureSetActiveRequests.Count > 0)
             {
-                int key = renderTextureSetActiveRequests.Keys.First();
-                if (renderTextureSetActiveRequests.TryRemove(key, out RenderTexture renderTexture))
+                RenderTexture renderTexture;
+                int key;
+                lock (renderTextureSetActiveRequests)
                 {
-                    //timeoutExemptThreads.Add(key);
-                    RenderTexture.active = renderTexture;
+                    key = renderTextureSetActiveRequests.Keys.First();
+                    renderTexture = renderTextureSetActiveRequests[key];
+                    renderTextureSetActiveRequests.Remove(key);
                 }
+                //timeoutExemptThreads.Add(key);
+                RenderTexture.active = renderTexture;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -976,13 +1023,18 @@ namespace RimThreaded
         {
             while (renderTextureGetActiveRequests.Count > 0)
             {
-                int key = renderTextureGetActiveRequests.Keys.First();
-                if (renderTextureGetActiveRequests.TryRemove(key, out RenderTexture renderTexture))
+                RenderTexture renderTexture;
+                int key;
+                lock (renderTextureGetActiveRequests)
                 {
-                    //timeoutExemptThreads.Add(key);
-                    RenderTexture renderTextureResult = RenderTexture.active;
-                    renderTextureResults.TryAdd(key, renderTextureResult);
+                    key = renderTextureGetActiveRequests.Keys.First();
+                    renderTexture = renderTextureGetActiveRequests[key];
+                    renderTextureGetActiveRequests.Remove(key);
                 }
+                //timeoutExemptThreads.Add(key);
+                RenderTexture renderTextureResult = RenderTexture.active;
+                renderTextureResults[key] = renderTextureResult;
+                
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else
@@ -997,7 +1049,7 @@ namespace RimThreaded
                 if (newBoltMeshRequests.TryDequeue(out int key))
                 {
                     Mesh newBoltMeshResult = LightningBoltMeshMaker.NewBoltMesh();
-                    newBoltMeshResults.TryAdd(key, newBoltMeshResult);
+                    newBoltMeshResults[key] = newBoltMeshResult;
                 }
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
@@ -1010,11 +1062,15 @@ namespace RimThreaded
         {
             while (blitRequests.Count > 0)
             {
-                int key = blitRequests.Keys.First();
-                if (blitRequests.TryRemove(key, out object[] parameters))
+                object[] parameters;
+                int key;
+                lock (blitRequests)
                 {
-                    Graphics.Blit((Texture)parameters[0], (RenderTexture)parameters[1]);
+                    key = blitRequests.Keys.First();
+                    parameters = blitRequests[key];
+                    blitRequests.Remove(key);
                 }
+                Graphics.Blit((Texture)parameters[0], (RenderTexture)parameters[1]);
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else

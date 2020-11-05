@@ -89,16 +89,22 @@ namespace RimThreaded
 			{
 				soundDef.sustainStartSound.PlayOneShot(info);
 			}
-			Sustainer sustainer = null;
-			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
 			{
-				RimThreaded.newSustainerRequests.TryAdd(tID, new object[] { soundDef, info });
+				lock (RimThreaded.newSustainerRequests)
+				{
+					RimThreaded.newSustainerRequests[tID] = new object[] { soundDef, info };
+				}
 				RimThreaded.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
 
-				RimThreaded.newSustainerResults.TryGetValue(tID, out sustainer);
-				__result = sustainer;
+                if (!RimThreaded.newSustainerResults.TryGetValue(tID, out Sustainer sustainer))
+                {
+                    Log.Error("Error retriving newSustainerResults");
+                }
+                __result = sustainer;
 			} else
             {
 				__result = new Sustainer(soundDef, info);

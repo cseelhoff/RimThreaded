@@ -14,48 +14,23 @@ namespace RimThreaded
         public static Comparison<Sustainer> SortSustainersByCameraDistanceCached =
             AccessTools.StaticFieldRefAccess<Comparison<Sustainer>>(typeof(SustainerManager), "SortSustainersByCameraDistanceCached");
 
-        public static AccessTools.FieldRef<SustainerManager, List<Sustainer>> allSustainers =
-            AccessTools.FieldRefAccess< SustainerManager, List<Sustainer>>("allSustainers");
+        //public static AccessTools.FieldRef<SustainerManager, List<Sustainer>> allSustainers =
+        //AccessTools.FieldRefAccess< SustainerManager, List<Sustainer>>("allSustainers");
         //public static ConcurrentDictionary<Sustainer, Sustainer> allSustainers = new ConcurrentDictionary<Sustainer, Sustainer>();
-
-        public static bool SustainerManagerUpdate(SustainerManager __instance)
-        {
-            Sustainer sNum;
-            for (int num = allSustainers(__instance).Count - 1; num >= 0; num--)
-            {
-                try
-                {
-                    sNum = allSustainers(__instance)[num];
-                } catch(ArgumentOutOfRangeException) { break; }
-                if (null != sNum) { 
-                    sNum.SustainerUpdate();
-                }
-            }
-
-            __instance.UpdateAllSustainerScopes();
-            return false;
-        }
-
-        public static bool get_AllSustainers(SustainerManager __instance, ref List<Sustainer> __result)
-        {
-            __result = allSustainers(__instance);
-            return false;
-        }
 
         public static bool RegisterSustainer(SustainerManager __instance, Sustainer newSustainer)
         {
-            lock (allSustainers(__instance))
+            lock (__instance.AllSustainers)
             {
-                allSustainers(__instance).Add(newSustainer);
+                __instance.AllSustainers.Add(newSustainer);
             }
             return false;
         }
-
         public static bool DeregisterSustainer(SustainerManager __instance, Sustainer oldSustainer)
         {
-            lock (allSustainers(__instance))
+            lock (__instance.AllSustainers)
             {
-                allSustainers(__instance).Remove(oldSustainer);
+                __instance.AllSustainers.Remove(oldSustainer);
             }
             return false;
         }
@@ -63,13 +38,14 @@ namespace RimThreaded
         {
             //foreach (Sustainer sust in allSustainers(__instance))
             Sustainer sust;
-            for(int index = 0; index < allSustainers(__instance).Count; index++)
+            for (int index = 0; index < __instance.AllSustainers.Count; index++)
             {
                 try
                 {
-                    sust = allSustainers(__instance)[index];
-                } catch (ArgumentOutOfRangeException) { break; }
-                if(null == sust)
+                    sust = __instance.AllSustainers[index];
+                }
+                catch (ArgumentOutOfRangeException) { break; }
+                if (null == sust)
                 {
                     continue;
                 }
@@ -82,43 +58,34 @@ namespace RimThreaded
             __result = false;
             return false;
         }
-
-        private readonly static FieldInfo playingPerDefFI = typeof(SustainerManager).GetField("playingPerDef", BindingFlags.Static | BindingFlags.NonPublic);
-        public static void SustainerManagerUpdate2(SustainerManager __instance)
+        public static bool SustainerManagerUpdate(SustainerManager __instance)
         {
-            // SustainerManagerUpdate is executed prior to Ticks so this will only ever be run on a single thread.
-            Dictionary<SoundDef, List<Sustainer>> d = playingPerDefFI.GetValue(__instance) as Dictionary<SoundDef, List<Sustainer>>;
-            d.Clear();
-            Sustainer sust;
-            for (int index = 0; index < allSustainers(__instance).Count; index++)
+            Sustainer sNum;
+            for (int num = __instance.AllSustainers.Count - 1; num >= 0; num--)
             {
                 try
                 {
-                    sust = allSustainers(__instance)[index];
+                    sNum = __instance.AllSustainers[num];
+                } catch(ArgumentOutOfRangeException) { break; }
+                if (null != sNum) { 
+                    sNum.SustainerUpdate();
                 }
-                catch (ArgumentOutOfRangeException) { break; }
-                if (null == sust)
-                {
-                    continue;
-                }
-                if (!d.TryGetValue(sust.def, out List<Sustainer> l))
-                {
-                    l = new List<Sustainer>();
-                    d[sust.def] = l;
-                }
-                l.Add(sust);
             }
+
+            __instance.UpdateAllSustainerScopes();
+            return false;
         }
+
         public static bool UpdateAllSustainerScopes(SustainerManager __instance)
         {
             //playingPerDef.Clear();
             Dictionary<SoundDef, List<Sustainer>> playingPerDef = new Dictionary<SoundDef, List<Sustainer>>();
             Sustainer sust;
-            for (int index = 0; index < allSustainers(__instance).Count; index++)
+            for (int index = 0; index < __instance.AllSustainers.Count; index++)
             {
                 try
                 {
-                    sust = allSustainers(__instance)[index];
+                    sust = __instance.AllSustainers[index];
                 }
                 catch (ArgumentOutOfRangeException) { break; }
                 if (null == sust)
@@ -190,11 +157,11 @@ namespace RimThreaded
         public static bool EndAllInMap(SustainerManager __instance, Map map)
         {
             Sustainer sust;
-            for (int index = 0; index < allSustainers(__instance).Count; index++)
+            for (int index = 0; index < __instance.AllSustainers.Count; index++)
             {
                 try
                 {
-                    sust = allSustainers(__instance)[index];
+                    sust = __instance.AllSustainers[index];
                 }
                 catch (ArgumentOutOfRangeException) { break; }
                 if (null == sust)

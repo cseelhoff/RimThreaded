@@ -16,7 +16,10 @@ namespace RimThreaded
 			//}
 			int tID = Thread.CurrentThread.ManagedThreadId;
 			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
-				RimThreaded.materialRequests.TryAdd(tID, req);
+				lock (RimThreaded.materialRequests)
+				{
+					RimThreaded.materialRequests[tID] = req;
+				}
 				RimThreaded.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
 				RimThreaded.materialResults.TryGetValue(req, out material);
