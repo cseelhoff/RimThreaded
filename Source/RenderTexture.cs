@@ -20,7 +20,10 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.renderTextureRequests.TryAdd(tID, new object[] { width, height, depthBuffer, format, readWrite });
+                lock (RimThreaded.renderTextureRequests)
+                {
+                    RimThreaded.renderTextureRequests[tID] = new object[] { width, height, depthBuffer, format, readWrite };
+                }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 RimThreaded.renderTextureResults.TryGetValue(tID, out RenderTexture renderTexture_result);
@@ -34,7 +37,10 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.renderTextureGetActiveRequests.TryAdd(tID, __instance);
+                lock (RimThreaded.renderTextureGetActiveRequests)
+                {
+                    RimThreaded.renderTextureGetActiveRequests[tID] = __instance;
+                }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 RimThreaded.renderTextureGetActiveResults.TryGetValue(tID, out RenderTexture renderTexture_result);
@@ -49,7 +55,10 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.renderTextureSetActiveRequests.TryAdd(tID, value);
+                lock (RimThreaded.renderTextureSetActiveRequests)
+                {
+                    RimThreaded.renderTextureSetActiveRequests[tID] = value;
+                }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 //RimThreaded.renderTextureSetActiveResults.TryGetValue(tID, out RenderTexture renderTexture_result);

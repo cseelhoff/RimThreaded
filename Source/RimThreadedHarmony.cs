@@ -305,10 +305,10 @@ namespace RimThreaded
 			//Prefix(original, patched, "get_AllSustainers");
 			Prefix(original, patched, "RegisterSustainer");
 			Prefix(original, patched, "DeregisterSustainer");
-			Prefix(original, patched, "SustainerExists");
-			Prefix(original, patched, "EndAllInMap");
 			Prefix(original, patched, "SustainerManagerUpdate");
 			Prefix(original, patched, "UpdateAllSustainerScopes");
+			Prefix(original, patched, "SustainerExists");
+			Prefix(original, patched, "EndAllInMap");
 
 			//AudioSourceMaker			
 			original = typeof(AudioSourceMaker);

@@ -20,29 +20,36 @@ namespace RimThreaded
             }
             SustainerManager sustainerManager = Find.SoundRoot.sustainerManager;
             List<Sustainer> sustainers = (biomeAmbientSustainersFI.GetValue(null) as List<Sustainer>);
-            foreach (Sustainer s in sustainers)
-            {
-                if (SustainerManager_Patch.allSustainers(sustainerManager).Contains(s) && !s.Ended)
+            //lock (sustainerManager.AllSustainers)
+            //{
+                foreach (Sustainer s in sustainers)
                 {
-                    s.End();
-                }
-            }
-            sustainers.Clear();
-            if (Find.CurrentMap != null)
-            {
-                List<SoundDef> soundsAmbient = Find.CurrentMap.Biome.soundsAmbient;
-                for (int j = 0; j < soundsAmbient.Count; j++)
-                {
-                    Sustainer item = soundsAmbient[j].TrySpawnSustainer(SoundInfo.OnCamera(MaintenanceType.None));
-                    try
+                    if (sustainerManager.AllSustainers.Contains(s) && !s.Ended)
                     {
-                        SustainerManager_Patch.allSustainers(sustainerManager).Add(item);
-                    } catch (Exception)
-                    {
-                        item.End();
+                        s.End();
                     }
                 }
-            }
+                sustainers.Clear();
+                if (Find.CurrentMap != null)
+                {
+                    List<SoundDef> soundsAmbient = Find.CurrentMap.Biome.soundsAmbient;
+                    for (int j = 0; j < soundsAmbient.Count; j++)
+                    {
+                        Sustainer item = soundsAmbient[j].TrySpawnSustainer(SoundInfo.OnCamera(MaintenanceType.None));
+                        try
+                        {
+                            lock (sustainerManager.AllSustainers)
+                            {
+                                sustainerManager.AllSustainers.Add(item);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            item.End();
+                        }
+                    }
+                }
+            //}
             return false;
         }
         public static bool EnsureWorldAmbientSoundCreated()

@@ -27,30 +27,33 @@ namespace RimThreaded
 
 		public static bool SubSustainerUpdate(SubSustainer __instance)
 		{
-			SampleSustainer sample;
-			for (int num = samples(__instance).Count - 1; num >= 0; num--)
+			lock (__instance)
 			{
-                sample = samples(__instance)[num];
-				if (sample != null)
+				SampleSustainer sample;
+				for (int num = samples(__instance).Count - 1; num >= 0; num--)
 				{
-					if (Time.realtimeSinceStartup > samples(__instance)[num].scheduledEndTime)
+					sample = samples(__instance)[num];
+					if (sample != null)
 					{
-						EndSample2(__instance, sample);
+						if (Time.realtimeSinceStartup > samples(__instance)[num].scheduledEndTime)
+						{
+							EndSample2(__instance, sample);
+						}
 					}
 				}
-			}
 
-			if (Time.realtimeSinceStartup > nextSampleStartTime(__instance))
-			{
-				StartSample(__instance);
-			}
-
-			for (int i = 0; i < samples(__instance).Count; i++)
-			{
-				sample = samples(__instance)[i];
-				if (sample != null)
+				if (Time.realtimeSinceStartup > nextSampleStartTime(__instance))
 				{
-					sample.Update();
+					StartSample(__instance);
+				}
+
+				for (int i = 0; i < samples(__instance).Count; i++)
+				{
+					sample = samples(__instance)[i];
+					if (sample != null)
+					{
+						sample.Update();
+					}
 				}
 			}
 			return false;
@@ -93,13 +96,24 @@ namespace RimThreaded
 				return false;
 			}
 
+			SampleSustainer sampleSustainer = SampleSustainer.TryMakeAndPlay(__instance, ((ResolvedGrain_Clip)resolvedGrain).clip, num2);
+			if (sampleSustainer != null)
+			{
+				if (__instance.subDef.sustainSkipFirstAttack && Time.frameCount == __instance.creationFrame)
+				{
+					sampleSustainer.resolvedSkipAttack = true;
+				}
+				samples(__instance).Add(sampleSustainer);
+			}
+			/*
 			int tID = Thread.CurrentThread.ManagedThreadId;
 			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
 			{
 				RimThreaded.tryMakeAndPlayRequests.TryAdd(tID, new object[] { __instance, ((ResolvedGrain_Clip)resolvedGrain).clip, num2 });
 				RimThreaded.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
-			}			
+			}
+			*/
 			return false;
 		}
 

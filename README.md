@@ -34,7 +34,12 @@ Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=3
 Video Review:  
 Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
 
-CHANGE LOG:    
+CHANGE LOG:  
+
+Version 1.0.71  
+-Fixed bug with looping sounds  
+-Replaced many ConcurrentDictionaries with more efficient Dictionaries using locks  
+
 Version 1.0.70  
 -Fixed bug in Room.OpenRoofCountStopAt (fixed issue with rooms showing "Unroofed -1")  
 

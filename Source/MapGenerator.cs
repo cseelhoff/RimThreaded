@@ -22,7 +22,10 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.generateMapRequests.TryAdd(tID, new object[] { mapSize, parent, mapGenerator, extraGenStepDefs, extraInitBeforeContentGen });
+                lock (RimThreaded.generateMapRequests)
+                {
+                    RimThreaded.generateMapRequests[tID] = new object[] { mapSize, parent, mapGenerator, extraGenStepDefs, extraInitBeforeContentGen };
+                }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 RimThreaded.generateMapResults.TryGetValue(tID, out Map map_result);

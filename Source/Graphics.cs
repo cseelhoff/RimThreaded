@@ -20,7 +20,10 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                RimThreaded.blitRequests.TryAdd(tID, new object[] { source, dest });
+                lock (RimThreaded.blitRequests)
+                {
+                    RimThreaded.blitRequests[tID] = new object[] { source, dest };
+                }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 return false;
