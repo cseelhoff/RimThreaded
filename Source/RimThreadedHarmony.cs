@@ -744,6 +744,11 @@ namespace RimThreaded
 			patched = typeof(PathGrid_Patch);
 			Prefix(original, patched, "CalculatedCostAt");
 
+			//GlobalControlsUtility
+			original = typeof(GlobalControlsUtility);
+			patched = typeof(GlobalControlsUtility_Patch);
+			Postfix(original, patched, "DoTimespeedControls");
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
