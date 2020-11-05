@@ -28,7 +28,7 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<TickManager, TickList>("tickListRare");
         public static AccessTools.FieldRef<TickManager, TickList> tickListLong =
             AccessTools.FieldRefAccess<TickManager, TickList>("tickListLong");
-        
+
         public static bool DoSingleTick(TickManager __instance)
         {
             RimThreaded.currentInstance = __instance;
@@ -68,21 +68,16 @@ namespace RimThreaded
                     __result = 0.0f;
                     return false;
                 case TimeSpeed.Normal:
-                    __result = 1f;
+                    __result = RimThreaded.timeSpeedNormal;
                     return false;
                 case TimeSpeed.Fast:
-                    __result = 3f;
+                    __result = RimThreaded.timeSpeedFast;
                     return false;
                 case TimeSpeed.Superfast:
-                    if (Find.Maps.Count == 0)
-                    {
-                        __result = 120f;
-                        return false;
-                    }
-                    __result = 12f;
+                    __result = Find.Maps.Count == 0 ? RimThreaded.timeSpeedSuperfast : RimThreaded.timeSpeedSuperfast;
                     return false;
                 case TimeSpeed.Ultrafast:
-                    __result = Find.Maps.Count == 0 ? 150f : 150f;
+                    __result = Find.Maps.Count == 0 ? RimThreaded.timeSpeedUltrafast : RimThreaded.timeSpeedUltrafast;
                     return false;
                 default:
                     __result = -1f;

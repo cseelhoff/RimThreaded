@@ -36,6 +36,10 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.72  
+-Added feature to modify TimeSpeed multipliers in mod settings  
+-Added feature to display ticks per second  
+
 Version 1.0.71  
 -Fixed bug with looping sounds  
 -Replaced many ConcurrentDictionaries with more efficient Dictionaries using locks  

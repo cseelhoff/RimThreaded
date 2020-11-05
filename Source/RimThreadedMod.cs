@@ -76,6 +76,11 @@ namespace RimThreaded
 				RimThreaded.RestartAllWorkerThreads();
 			}
 			RimThreaded.timeoutMS = Math.Max(Settings.timeoutMS, 1);
+			RimThreaded.timeSpeedNormal = Settings.timeSpeedNormal;
+			RimThreaded.timeSpeedFast = Settings.timeSpeedFast;
+			RimThreaded.timeSpeedSuperfast = Settings.timeSpeedSuperfast;
+			RimThreaded.timeSpeedUltrafast = Settings.timeSpeedUltrafast;
+
 		}
 
 		public override string SettingsCategory()
