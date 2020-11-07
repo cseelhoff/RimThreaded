@@ -36,6 +36,9 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.74  
+-Fixed bug in ThingOwnerUtility.GetAllThingsRecursively(Thing) that caused item wealth to be 0  
+
 Version 1.0.73  
 -Fixed bug in PathFinder.FindPath that prevented pawns from reaching diagonal grids  
 
