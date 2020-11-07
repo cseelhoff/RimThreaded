@@ -17,22 +17,30 @@ namespace RimThreaded
     {
         public static bool AlwaysRedrawShadows =
             AccessTools.StaticFieldRefAccess<bool>(typeof(Map), "AlwaysRedrawShadows");
-        public static Thread SkyManagerThread = null;
-        public static AutoResetEvent SkyManagerStartEvent;
-        public static AutoResetEvent SkyManagerDoneEvent;
-        public static Map currentInstance = null;
+        public static Dictionary<Map, AutoResetEvent> skyManagerStartEvents = new Dictionary<Map, AutoResetEvent>();
+        public static void SkyManagerUpdate2(Map __instance)
+        {
+            if (!skyManagerStartEvents.TryGetValue(__instance, out AutoResetEvent skyManagerStartEvent))
+            {
+                skyManagerStartEvent = new AutoResetEvent(false);
+                skyManagerStartEvents.Add(__instance, skyManagerStartEvent);
+                new Thread(() =>
+                {
+                    AutoResetEvent skyManagerStartEvent2 = skyManagerStartEvents[__instance];
+                    SkyManager skyManager = __instance.skyManager;
+                    while (true)
+                    {
+                        skyManagerStartEvent2.WaitOne();
+                        skyManager.SkyManagerUpdate();
+                    }
+                }).Start();
+            }
+            skyManagerStartEvent.Set();
+        }
         public static bool MapUpdate(Map __instance)
         {
-            currentInstance = __instance;
             bool worldRenderedNow = WorldRendererUtility.WorldRenderedNow;
-            if (null == SkyManagerThread)
-            {
-                SkyManagerThread = new Thread(() => SkyManagerTicks());
-                SkyManagerStartEvent = new AutoResetEvent(false);
-                SkyManagerDoneEvent = new AutoResetEvent(false);
-                SkyManagerThread.Start();
-            }
-            SkyManagerStartEvent.Set();
+            SkyManagerUpdate2(__instance);
             __instance.powerNetManager.UpdatePowerNetsAndConnections_First();
             __instance.regionGrid.UpdateClean();
             __instance.regionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms();
@@ -73,16 +81,6 @@ namespace RimThreaded
             MapComponentUtility.MapComponentUpdate(__instance);
             return false;
         }
-        private static void SkyManagerTicks()
-        {
-            while (true)
-            {
-                SkyManagerStartEvent.WaitOne();
-                currentInstance.skyManager.SkyManagerUpdate();
-                SkyManagerDoneEvent.Set();
-            }
-        }
-
 
     }
 }

@@ -20,6 +20,21 @@ namespace RimThreaded
         public static AccessTools.FieldRef<Pawn_WorkSettings, bool> workGiversDirty =
             AccessTools.FieldRefAccess<Pawn_WorkSettings, bool>("workGiversDirty");
 
+        public static void WorkGiverListAdd(List<WorkGiver> workGiverList, WorkGiver worker)
+        {
+            lock (workGiverList)
+            {
+                workGiverList.Add(worker);
+            }
+        }
+        public static void WorkGiverListClear(List<WorkGiver> workGiverList)
+        {
+            lock (workGiverList)
+            {
+                workGiverList.Clear();
+            }
+        }
+
         public static bool CacheWorkGiversInOrder(Pawn_WorkSettings __instance)
         {
             //Pawn_WorkSettings.wtsByPrio.Clear();
@@ -34,48 +49,37 @@ namespace RimThreaded
                 {
                     if (priority < num1 && w.workGiversByPriority.Any(wg => !wg.emergency))
                         num1 = priority;
-                    wtsByPrio.Add(w); //CHANGE
+                    wtsByPrio.Add(w); //FIND REPLACE
                 }
-            } //CHANGE
+            }
+            //FIND REPLACE
             wtsByPrio.InsertionSort((a, b) =>
             {
                 float num2 = a.naturalPriority + (4 - __instance.GetPriority(a)) * 100000;
                 return ((float)(b.naturalPriority + (4 - __instance.GetPriority(b)) * 100000)).CompareTo(num2);
             });
-            lock (workGiversInOrderEmerg(__instance)) //CHANGE
+            WorkGiverListClear(workGiversInOrderEmerg(__instance));
+            for (int index1 = 0; index1 < wtsByPrio.Count; ++index1) //FIND REPLACE
             {
-                workGiversInOrderEmerg(__instance).Clear();
-            }
-            for (int index1 = 0; index1 < wtsByPrio.Count; ++index1) //CHANGE
-            {
-                WorkTypeDef workTypeDef = wtsByPrio[index1]; //CHANGE
+                WorkTypeDef workTypeDef = wtsByPrio[index1]; ////FIND REPLACE
                 for (int index2 = 0; index2 < workTypeDef.workGiversByPriority.Count; ++index2)
                 {
                     WorkGiver worker = workTypeDef.workGiversByPriority[index2].Worker;
                     if (worker.def.emergency && __instance.GetPriority(worker.def.workType) <= num1) {
-                        lock (workGiversInOrderEmerg(__instance)) //CHANGE
-                        {
-                            workGiversInOrderEmerg(__instance).Add(worker);
-                        }
+                        WorkGiverListAdd(workGiversInOrderEmerg(__instance), worker);
                     }
                 }
             }
-            lock (workGiversInOrderNormal(__instance)) //CHANGE
+            WorkGiverListClear(workGiversInOrderNormal(__instance));
+            for (int index1 = 0; index1 < wtsByPrio.Count; ++index1) //FIND REPLACE
             {
-                workGiversInOrderNormal(__instance).Clear();
-            }
-            for (int index1 = 0; index1 < wtsByPrio.Count; ++index1) //CHANGE
-            {
-                WorkTypeDef workTypeDef = wtsByPrio[index1]; //CHANGE
+                WorkTypeDef workTypeDef = wtsByPrio[index1]; //FIND REPLACE
                 for (int index2 = 0; index2 < workTypeDef.workGiversByPriority.Count; ++index2)
                 {
                     WorkGiver worker = workTypeDef.workGiversByPriority[index2].Worker;
                     if (!worker.def.emergency || __instance.GetPriority(worker.def.workType) > num1)
                     {
-                        lock (workGiversInOrderNormal(__instance)) //CHANGE
-                        {
-                            workGiversInOrderNormal(__instance).Add(worker);
-                        }
+                        WorkGiverListAdd(workGiversInOrderNormal(__instance), worker);
                     }
                 }
             }
