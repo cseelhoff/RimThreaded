@@ -77,9 +77,12 @@
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="InfestationCellFinder.cs" />
     <Compile Include="GlobalControlsUtility.cs" />
     <Compile Include="AutoUndrafter.cs" />
     <Compile Include="JobDriver.cs" />
+    <Compile Include="Pawn_WorkSettings_Transpile.cs" />
+    <Compile Include="Map_Transpile.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="ResourceCounter.cs" />
     <Compile Include="ThinkNode_QueuedJob.cs" />

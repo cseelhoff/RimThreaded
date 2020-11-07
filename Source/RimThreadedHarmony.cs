@@ -489,8 +489,10 @@ namespace RimThreaded
 
 			//Pawn_WorkSettings
 			original = typeof(Pawn_WorkSettings);
-			patched = typeof(Pawn_WorkSettings_Patch);
-			Prefix(original, patched, "CacheWorkGiversInOrder");
+			//patched = typeof(Pawn_WorkSettings_Patch);
+			//Prefix(original, patched, "CacheWorkGiversInOrder");
+			patched = typeof(Pawn_WorkSettings_Transpile);
+			Transpile(original, patched, "CacheWorkGiversInOrder");
 
 			//Sample
 			original = typeof(Sample);
@@ -757,7 +759,12 @@ namespace RimThreaded
 			original = typeof(GlobalControlsUtility);
 			patched = typeof(GlobalControlsUtility_Patch);
 			Postfix(original, patched, "DoTimespeedControls");
-			
+
+			//InfestationCellFinder
+			original = typeof(InfestationCellFinder);
+			patched = typeof(InfestationCellFinder_Patch);
+			Prefix(original, patched, "CalculateDistanceToColonyBuildingGrid");
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
@@ -842,8 +849,10 @@ namespace RimThreaded
 
 			//Map			
 			original = typeof(Map);
-			patched = typeof(Map_Patch);
-			Prefix(original, patched, "MapUpdate");
+			//patched = typeof(Map_Patch);
+			//Prefix(original, patched, "MapUpdate");
+			patched = typeof(Map_Transpile);
+			Transpile(original, patched, "MapUpdate");
 
 			//ThinkNode_SubtreesByTag			
 			original = typeof(ThinkNode_SubtreesByTag);
