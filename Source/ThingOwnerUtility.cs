@@ -138,5 +138,43 @@ namespace RimThreaded
 			//tmpThings.Clear();
 			//tmpMapChildHolders.Clear();
 		}
+
+		public static bool GetAllThingsRecursively_Thing(Map map, ThingRequest request, List<Thing> outThings, bool allowUnreal = true, Predicate<IThingHolder> passCheck = null, bool alsoGetSpawnedThings = true)
+		{
+			outThings.Clear();
+			if (alsoGetSpawnedThings)
+			{
+				List<Thing> list = map.listerThings.ThingsMatching(request);
+				for (int i = 0; i < list.Count; i++)
+				{
+					Thing val = list[i] as Thing;
+					if (val != null)
+					{
+						outThings.Add(val);
+					}
+				}
+			}
+			List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
+			//tmpMapChildHolders.Clear();
+			map.GetChildHolders(tmpMapChildHolders);
+			List<Thing> tmpThings = new List<Thing>();
+			for (int j = 0; j < tmpMapChildHolders.Count; j++)
+			{
+				tmpThings.Clear();
+				GetAllThingsRecursively(tmpMapChildHolders[j], tmpThings, allowUnreal, passCheck);
+				for (int k = 0; k < tmpThings.Count; k++)
+				{
+                    if (tmpThings[k] is Thing val2 && request.Accepts(val2))
+                    {
+                        outThings.Add(val2);
+                    }
+                }
+			}
+			//tmpThings.Clear();
+			//tmpMapChildHolders.Clear();
+			return false;
+		}
+
+
 	}
 }

@@ -247,6 +247,12 @@ namespace RimThreaded
 			HarmonyMethod prefixPawnGetAllThings = new HarmonyMethod(patchedPawnGetAllThings);
 			harmony.Patch(originalPawnGetAllThingsGeneric, prefix: prefixPawnGetAllThings);
 
+			MethodInfo originalThingGetAllThings = methods[17];
+			MethodInfo originalThingGetAllThingsGeneric = originalThingGetAllThings.MakeGenericMethod(new Type[] { typeof(Thing) });
+			MethodInfo patchedThingGetAllThings = patched.GetMethod("GetAllThingsRecursively_Thing");
+			HarmonyMethod prefixThingGetAllThings = new HarmonyMethod(patchedThingGetAllThings);
+			harmony.Patch(originalThingGetAllThingsGeneric, prefix: prefixThingGetAllThings);
+
 			//Pawn_MeleeVerbs
 			original = typeof(Pawn_MeleeVerbs);
 			patched = typeof(Pawn_MeleeVerbs_Patch);

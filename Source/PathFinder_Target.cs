@@ -185,7 +185,7 @@ namespace Verse.AI
 
         public PawnPath FindPath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)
         {
-            
+            openList = null;
             PathFinderNodeFast[] calcGrid2 = new PathFinderNodeFast[mapSizeX * mapSizeZ];
             ushort statusOpenValue2 = 1;
             ushort statusClosedValue2 = 2;
