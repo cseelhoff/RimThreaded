@@ -553,11 +553,14 @@ namespace RimThreaded
 			ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
 			MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
 			harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
-
+			
 			//PathFinder
 			original = typeof(PathFinder);
 			patched = typeof(PathFinder_Transpile);
 			Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
+			//patched = typeof(PathFinder_Patch);
+			//Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
+
 
 			//WorldPawns
 			original = typeof(WorldPawns);
@@ -640,7 +643,7 @@ namespace RimThreaded
 			Prefix(original, patched, "FloodAndSetRoomGroups");
 			Prefix(original, patched, "CombineNewAndReusedRoomsIntoContiguousGroups");
 			Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
-
+			
 			//GenRadial
 			original = typeof(GenRadial);
 			patched = typeof(GenRadial_Transpile);
@@ -748,7 +751,7 @@ namespace RimThreaded
 			original = typeof(GlobalControlsUtility);
 			patched = typeof(GlobalControlsUtility_Patch);
 			Postfix(original, patched, "DoTimespeedControls");
-
+			
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
@@ -794,7 +797,7 @@ namespace RimThreaded
 			//FactionManager
 			original = typeof(FactionManager);
 			patched = typeof(FactionManager_Patch);
-			Prefix(original, patched, "FactionManagerTick");
+			Prefix(original, patched, "FactionManagerTick");			
 
 			//WildPlantSpawner
 			original = typeof(WildPlantSpawner);
@@ -805,7 +808,7 @@ namespace RimThreaded
 			original = typeof(SeasonUtility);
 			patched = typeof(SeasonUtility_Patch);
 			Prefix(original, patched, "GetReportedSeason");
-
+			
 			//TradeShip
 			original = typeof(TradeShip);
 			patched = typeof(TradeShip_Patch);
@@ -850,7 +853,7 @@ namespace RimThreaded
 			original = typeof(ThinkNode_QueuedJob);
 			patched = typeof(ThinkNode_QueuedJob_Patch);
 			Prefix(original, patched, "TryIssueJobPackage");
-
+			
 			//JobDriver			
 			original = typeof(JobDriver);
 			patched = typeof(JobDriver_Patch);
@@ -880,6 +883,7 @@ namespace RimThreaded
 			original = typeof(Graphics);
 			patched = typeof(Graphics_Patch);
 			Prefix(original, patched, "Blit", new Type[] { typeof(Texture), typeof(RenderTexture) });
+			
 
 
 
