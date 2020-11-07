@@ -13,6 +13,7 @@ namespace Verse.AI
 {
     public class PathFinder_Target
     {
+        private FastPriorityQueue<CostNode> openList;
         internal struct CostNode
         {
             public int index;
@@ -157,6 +158,30 @@ namespace Verse.AI
 
             return FindPath(start, dest, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, canBash), peMode);
         }
+        private static void InitStatusesAndPushStartNode2(ref int curIndex, IntVec3 start, CellIndices cellIndices, PathFinderNodeFast[] pathFinderNodeFast, FastPriorityQueue<CostNode> fastPriorityQueue, ref ushort local_statusOpenValue, ref ushort local_statusClosedValue)
+        {
+            local_statusOpenValue += 2;
+            local_statusClosedValue += 2;
+            if (local_statusClosedValue >= 65435)
+            {
+                int num = pathFinderNodeFast.Length;
+                for (int i = 0; i < num; i++)
+                {
+                    pathFinderNodeFast[i].status = 0;
+                }
+
+                local_statusOpenValue = 1;
+                local_statusClosedValue = 2;
+            }
+            curIndex = cellIndices.CellToIndex(start);
+            pathFinderNodeFast[curIndex].knownCost = 0;
+            pathFinderNodeFast[curIndex].heuristicCost = 0;
+            pathFinderNodeFast[curIndex].costNodeCost = 0;
+            pathFinderNodeFast[curIndex].parentIndex = curIndex;
+            pathFinderNodeFast[curIndex].status = local_statusOpenValue;
+            fastPriorityQueue.Clear();
+            fastPriorityQueue.Push(new CostNode(curIndex, 0));
+        }
 
         public PawnPath FindPath(IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)
         {
@@ -165,7 +190,7 @@ namespace Verse.AI
             ushort statusOpenValue2 = 1;
             ushort statusClosedValue2 = 2;
 
-            FastPriorityQueue<CostNode> openList = new FastPriorityQueue<CostNode>(new CostNodeComparer()); //CHANGE
+            //FastPriorityQueue<CostNode> openList = new FastPriorityQueue<CostNode>(new CostNodeComparer()); //CHANGE
             RegionCostCalculatorWrapper regionCostCalculator = new RegionCostCalculatorWrapper(map); //CHANGE
             List<int> disallowedCornerIndices = new List<int>(4); //CHANGE
 
@@ -247,6 +272,11 @@ namespace Verse.AI
                 num8 = 13;
                 num9 = 18;
             }
+            PathFinderNodeFast[] local_calcGrid = new PathFinderNodeFast[mapSizeX * mapSizeZ]; //CHANGE
+            ushort local_statusOpenValue = 1;
+            ushort local_statusClosedValue = 2;
+
+            InitStatusesAndPushStartNode2(ref curIndex, start, cellIndices, local_calcGrid, openList, ref local_statusOpenValue, ref local_statusClosedValue);
 
             //CalculateAndAddDisallowedCorners(traverseParms, peMode, cellRect);
             //InitStatusesAndPushStartNode(ref curIndex, start);

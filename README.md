@@ -36,6 +36,9 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.73  
+-Fixed bug in PathFinder.FindPath that prevented pawns from reaching diagonal grids  
+
 Version 1.0.72  
 -Added feature to modify TimeSpeed multipliers in mod settings  
 -Added feature to display ticks per second  
