@@ -11,6 +11,7 @@ using Verse.AI;
 using RimWorld;
 using Verse.Sound;
 using RimWorld.Planet;
+using System.IO;
 
 namespace RimThreaded
 {
@@ -51,24 +52,31 @@ namespace RimThreaded
 							{
 								if (!patch.owner.Equals("majorhoff.rimthreaded"))
 								{
+									//Settings.modsText += "method: " + patch.PatchMethod + " - ";
 									Settings.modsText += "owner: " + patch.owner + " - ";
 									Settings.modsText += "priority: " + patch.priority + "\n";
 								}
 							}
 							foreach (Patch patch in patches.Postfixes)
 							{
+								//Settings.modsText += "method: " + patch.PatchMethod + " - ";
 								Settings.modsText += "owner: " + patch.owner + " - ";
 								Settings.modsText += "priority: " + patch.priority + "\n";
 							}
 							foreach (Patch patch in patches.Transpilers)
 							{
+								//Settings.modsText += "method: " + patch.PatchMethod + " - ";
 								Settings.modsText += "owner: " + patch.owner + " - ";
 								Settings.modsText += "priority: " + patch.priority + "\n";
 							}
 						}
 					}
 				}
-			}			
+				//string path = "hmodText.txt";
+				//StreamWriter writer = new StreamWriter(path, true);
+				//writer.WriteLine(Settings.modsText);
+				//writer.Close();
+			}
 			Settings.DoWindowContents(inRect);
 			if (Settings.maxThreads != RimThreaded.maxThreads)
 			{

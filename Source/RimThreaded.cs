@@ -59,6 +59,8 @@ namespace RimThreaded
         public static Dictionary<int, GameObject> newAudioSourceRequests = new Dictionary<int, GameObject>();
         public static Dictionary<int, RenderTexture> renderTextureResults = new Dictionary<int, RenderTexture>();
         public static Dictionary<int, object[]> renderTextureRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, RenderTexture> renderTextureAAResults = new Dictionary<int, RenderTexture>();
+        public static Dictionary<int, object[]> renderTextureAARequests = new Dictionary<int, object[]>();
         public static Dictionary<int, RenderTexture> renderTextureSetActiveRequests = new Dictionary<int, RenderTexture>();
         public static Dictionary<int, RenderTexture> renderTextureGetActiveRequests = new Dictionary<int, RenderTexture>();
         public static Dictionary<int, RenderTexture> renderTextureGetActiveResults = new Dictionary<int, RenderTexture>();
@@ -823,6 +825,7 @@ namespace RimThreaded
                 RespondToGenerateMapRequests();
                 RespondToNewAudioSourceRequests();
                 RespondToRenderTextureRequests();
+                RespondToRenderTextureAARequests();
                 RespondToNewBoltMeshRequests();
                 RespondToBlitRequests();
                 RespondToGetActiveTextureRequests();
@@ -999,6 +1002,28 @@ namespace RimThreaded
                 //timeoutExemptThreads.Add(key);
                 RenderTexture renderTextureResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4]);
                 renderTextureResults[key] = renderTextureResult;
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToRenderTextureAARequests()
+        {
+            while (renderTextureAARequests.Count > 0)
+            {
+                object[] parameters;
+                int key;
+                lock (renderTextureAARequests)
+                {
+                    key = renderTextureAARequests.Keys.First();
+                    parameters = renderTextureAARequests[key];
+                    renderTextureAARequests.Remove(key);
+                }
+                //timeoutExemptThreads.Add(key);
+                RenderTexture renderTextureAAResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4], (int)parameters[5]);
+                renderTextureAAResults[key] = renderTextureAAResult;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else

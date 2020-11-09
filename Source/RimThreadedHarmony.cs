@@ -486,6 +486,7 @@ namespace RimThreaded
 			original = typeof(Region);
 			patched = typeof(Region_Patch);
 			Prefix(original, patched, "DangerFor");
+			Prefix(original, patched, "get_AnyCell");
 
 			//Pawn_WorkSettings
 			original = typeof(Pawn_WorkSettings);
@@ -604,6 +605,7 @@ namespace RimThreaded
 			original = typeof(HediffSet);
 			patched = typeof(HediffSet_Patch);
 			Prefix(original, patched, "PartIsMissing");
+			Prefix(original, patched, "HasDirectlyAddedPartFor");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -765,6 +767,21 @@ namespace RimThreaded
 			patched = typeof(InfestationCellFinder_Patch);
 			Prefix(original, patched, "CalculateDistanceToColonyBuildingGrid");
 
+			//RegionCostCalculator
+			original = typeof(RegionCostCalculator);
+			patched = typeof(RegionCostCalculator_Patch);
+			Prefix(original, patched, "GetPreciseRegionLinkDistances");
+
+			//EditWindow_Log
+			//original = typeof(EditWindow_Log);
+			//patched = typeof(EditWindow_Log_Patch);
+			//Prefix(original, patched, "DoMessagesListing");
+
+			//WorldGrid
+			original = typeof(WorldGrid);
+			patched = typeof(WorldGrid_Patch);
+			Prefix(original, patched, "IsNeighbor");
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
@@ -891,6 +908,9 @@ namespace RimThreaded
 			original = typeof(RenderTexture);
 			patched = typeof(RenderTexture_Patch);
 			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
+
+			//GetTemporary (CE)
+			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite), typeof(int) });
 			Prefix(original, patched, "get_active");
 			Prefix(original, patched, "set_active");
 
