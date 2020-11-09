@@ -36,6 +36,20 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.76
+-Fixed bug in HediffSet.HasDirectlyAddedPartFor  
+-Fixed bug in Region.get_AnyCell  
+-Fixed bug in RegionAndRoomUpdater.SetAllClean2  
+-Fixed bug in RegionCostCalculator.GetPreciseRegionLinkDistances  
+-Fixed bug in RenderTexture.GetTemporary  
+-Fixed bug in ResourceCounter.get_TotalHumanEdibleNutrition  
+-Fixed bug in WorldGrid.IsNeighbor  
+
+Version 1.0.75
+-Fixed bug in InfestationCellFinder.CalculateDistanceToColonyBuildingGrid  
+-Transpiled Map.MapUpdate  
+-Transpiled Pawn_WorkSettings.CacheWorkGiversInOrder  
+
 Version 1.0.74  
 -Fixed bug in ThingOwnerUtility.GetAllThingsRecursively(Thing) that caused item wealth to be 0  
 

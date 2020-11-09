@@ -10,8 +10,14 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.74
-    -Fixed bug in ThingOwnerUtility.GetAllThingsRecursively(Thing) that caused item wealth to be 0  
+    Version 1.0.76
+    -Fixed bug in HediffSet.HasDirectlyAddedPartFor
+    -Fixed bug in Region.get_AnyCell
+    -Fixed bug in RegionAndRoomUpdater.SetAllClean2
+    -Fixed bug in RegionCostCalculator.GetPreciseRegionLinkDistances
+    -Fixed bug in RenderTexture.GetTemporary
+    -Fixed bug in ResourceCounter.get_TotalHumanEdibleNutrition
+    -Fixed bug in WorldGrid.IsNeighbor
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.

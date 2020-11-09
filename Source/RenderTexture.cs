@@ -14,7 +14,7 @@ namespace RimThreaded
 {
 
     public class RenderTexture_Patch
-	{
+    {
         public static bool GetTemporary(ref RenderTexture __result, int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
@@ -27,6 +27,23 @@ namespace RimThreaded
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 RimThreaded.renderTextureResults.TryGetValue(tID, out RenderTexture renderTexture_result);
+                __result = renderTexture_result;
+                return false;
+            }
+            return true;
+        }
+        public static bool GetTemporary(ref RenderTexture __result, int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing)
+        {
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            {
+                lock (RimThreaded.renderTextureAARequests)
+                {
+                    RimThreaded.renderTextureAARequests[tID] = new object[] { width, height, depthBuffer, format, readWrite };
+                }
+                RimThreaded.mainThreadWaitHandle.Set();
+                eventWaitStart.WaitOne();
+                RimThreaded.renderTextureAAResults.TryGetValue(tID, out RenderTexture renderTexture_result);
                 __result = renderTexture_result;
                 return false;
             }

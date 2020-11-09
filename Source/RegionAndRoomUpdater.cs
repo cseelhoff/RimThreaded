@@ -23,7 +23,14 @@ namespace RimThreaded
             List<IntVec3> dirtyCells = __instance.DirtyCells;
             for (int i = 0; i < dirtyCells.Count; i++)
             {
-                maprd(__instance).temperatureCache.ResetCachedCellInfo(dirtyCells[i]);
+                IntVec3 dirtyCell;
+                try
+                {
+                    dirtyCell = dirtyCells[i];
+                }
+                catch(ArgumentOutOfRangeException) { break;  }
+                    
+                maprd(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
             }
 
             dirtyCells.Clear();

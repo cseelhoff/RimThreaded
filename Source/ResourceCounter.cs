@@ -18,7 +18,11 @@ namespace RimThreaded
 		public static bool get_TotalHumanEdibleNutrition(ResourceCounter __instance, ref float __result)
 		{
             float num = 0f;
-            ThingDef[] tdArray = countedAmounts(__instance).Keys.ToArray();
+            ThingDef[] tdArray;
+            lock (countedAmounts(__instance))
+            {
+                tdArray = countedAmounts(__instance).Keys.ToArray();
+            }
             for (int i = 0; i < tdArray.Length; i++)
             {
                 ThingDef td = tdArray[i];

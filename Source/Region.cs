@@ -23,7 +23,25 @@ namespace RimThreaded
             AccessTools.StaticFieldRefAccess<Dictionary<Pawn, FloatRange>>(typeof(Region), "cachedSafeTemperatureRanges");
         public static int cachedSafeTemperatureRangesForFrame =
             AccessTools.StaticFieldRefAccess<int>(typeof(Region), "cachedSafeTemperatureRangesForFrame");
+        public static bool get_AnyCell(Region __instance, ref IntVec3 __result)
+        {
+            Map map = Find.Maps[__instance.mapIndex];
+            CellIndices cellIndices = map.cellIndices;
+            Region[] directGrid = map.regionGrid.DirectGrid;
+            foreach (IntVec3 item in __instance.extentsClose)
+            {
+                if (directGrid[cellIndices.CellToIndex(item)] == __instance)
+                {
+                    __result = item;
+                    return false;
+                }
+            }
 
+            Log.Warning("Couldn't find any cell in region " + __instance.ToString());
+            __result = __instance.extentsClose.RandomCell;
+            return false;
+
+        }
         public static bool DangerFor(Region __instance, ref Danger __result, Pawn p)
 		{
             if (Current.ProgramState == ProgramState.Playing)
