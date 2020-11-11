@@ -36,6 +36,14 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.77
+-Improved performance of GenClosest.ClosestThingReachable
+-Fixed bug in ResourceCounter.ResetDefs
+-Fixed bug in ResourceCounter.ResetResourceCounts
+-Fixed bug in ResourceCounter.GetCount
+-Fixed bug in ResourceCounter.GetCountIn
+-Fixed bug in ResourceCounter.UpdateResourceCounts
+
 Version 1.0.76
 -Fixed bug in HediffSet.HasDirectlyAddedPartFor  
 -Fixed bug in Region.get_AnyCell  
