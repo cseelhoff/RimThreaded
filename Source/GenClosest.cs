@@ -8,6 +8,7 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using System.Collections;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -78,7 +79,8 @@ namespace RimThreaded
                 if (traversableRegionTypes != RegionType.Set_Passable)
                     Log.ErrorOnce("ClosestThingReachable had to do a global search, but traversableRegionTypes is not set to passable only. It's not supported, because Reachability is based on passable regions only.", 14384767, false);
                 // Predicate<Thing> validator1 = t => map.reachability.CanReach(root, t, peMode, traverseParams) && (validator == null || validator(t));
-                Predicate<Thing> validator1 = t => Reachability_Patch.CanReach2(map.reachability, root, t, peMode, traverseParams) && (validator == null || validator(t));
+                //Predicate<Thing> validator1 = t => Reachability_Patch.CanReach2(map.reachability, root, t, peMode, traverseParams) && (validator == null || validator(t));
+                Predicate<Thing> validator1 = t => (validator == null || validator(t) && Reachability_Patch.CanReach2(map.reachability, root, t, peMode, traverseParams));
                 IEnumerable<Thing> things = customGlobalSearchSet ?? map.listerThings.ThingsMatching(thingReq);
 
                 //null check needed - bug #55
@@ -202,28 +204,47 @@ namespace RimThreaded
             float maxDistanceSquared = maxDistance * maxDistance;
             if (searchSet is IList<Thing> thingList)
             {
-                for (int index = 0; index < thingList.Count; ++index)
-                    Process2(thingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                DateTime now = DateTime.Now;
+                //if (thingList.Count > 100 && now.Subtract(RimThreaded.lastClosestThingGlobal).TotalMilliseconds < 1000)
+                //{
+                    //Log.Error("ClosestThing_Global was called within the last 1000ms");
+                //}
+                //else
+                //{
+                    RimThreaded.lastClosestThingGlobal = now;
+                    for (int index = 0; index < thingList.Count; ++index)
+                    {
+                        Process2(thingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                    }
+                //}
             }
             else if (searchSet is IList<Pawn> pawnList)
             {
                 for (int index = 0; index < pawnList.Count; ++index)
+                {
                     Process2((Thing)pawnList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                }
             }
             else if (searchSet is IList<Building> buildingList)
             {
                 for (int index = 0; index < buildingList.Count; ++index)
+                {
                     Process2((Thing)buildingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                }
             }
             else if (searchSet is IList<IAttackTarget> attackTargetList)
             {
                 for (int index = 0; index < attackTargetList.Count; ++index)
+                {
                     Process2((Thing)attackTargetList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                }
             }
             else
             {
                 foreach (Thing search in searchSet)
+                {
                     Process2(search, center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                }
             }
             __result = chosen;
             return false;

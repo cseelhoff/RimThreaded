@@ -782,6 +782,16 @@ namespace RimThreaded
 			patched = typeof(WorldGrid_Patch);
 			Prefix(original, patched, "IsNeighbor");
 
+			//ResourceCounter
+			original = typeof(ResourceCounter);
+			patched = typeof(ResourceCounter_Patch);
+			Prefix(original, patched, "get_TotalHumanEdibleNutrition");
+			Prefix(original, patched, "ResetDefs");
+			Prefix(original, patched, "ResetResourceCounts");
+			Prefix(original, patched, "GetCount");
+			Prefix(original, patched, "GetCountIn", new Type[] { typeof(ThingRequestGroup) });
+			Prefix(original, patched, "UpdateResourceCounts");
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
