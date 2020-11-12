@@ -36,13 +36,24 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.78
+-Added extra error logs to Pawn.Tick (hopefully this will give more useful logs with thread timeout errors)  
+-Transpiled BuildableDef.ForceAllowPlaceOver  
+-Transpiled Building_Door.get_BlockedOpenMomentary  
+-Transpiled AttackTargetReservationManager.IsReservedBy  
+-Transpiled GridsUtility.GetGas  
+-Transpiled ReservationManager.CanReserve  
+-Transpiled HediffSet.PartIsMissing  
+-Transpiled HediffSet.HasDirectlyAddedPartFor  
+-Transpiled FoodUtility.FoodOptimality  
+
 Version 1.0.77
--Improved performance of GenClosest.ClosestThingReachable
--Fixed bug in ResourceCounter.ResetDefs
--Fixed bug in ResourceCounter.ResetResourceCounts
--Fixed bug in ResourceCounter.GetCount
--Fixed bug in ResourceCounter.GetCountIn
--Fixed bug in ResourceCounter.UpdateResourceCounts
+-Improved performance of GenClosest.ClosestThingReachable  
+-Fixed bug in ResourceCounter.ResetDefs  
+-Fixed bug in ResourceCounter.ResetResourceCounts  
+-Fixed bug in ResourceCounter.GetCount  
+-Fixed bug in ResourceCounter.GetCountIn  
+-Fixed bug in ResourceCounter.UpdateResourceCounts  
 
 Version 1.0.76
 -Fixed bug in HediffSet.HasDirectlyAddedPartFor  

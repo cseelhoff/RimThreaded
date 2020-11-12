@@ -14,6 +14,7 @@ using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Diagnostics;
+using System.Reflection.Emit;
 
 namespace RimThreaded
 {
@@ -47,6 +48,96 @@ namespace RimThreaded
         //MainThreadRequests
         public static Dictionary<int, EventWaitHandle> mainRequestWaits = new Dictionary<int, EventWaitHandle>();
         public static Dictionary<int, object[]> tryMakeAndPlayRequests = new Dictionary<int, object[]>();
+
+        public static bool IsCodeInstructionsMatching(List<CodeInstruction> searchInstructions, List<CodeInstruction> instructionsList, int instructionIndex)
+        {
+            bool instructionsMatch = false;
+            if (instructionIndex + searchInstructions.Count < instructionsList.Count)
+            {
+                instructionsMatch = true;
+                for (int searchIndex = 0; searchIndex < searchInstructions.Count; searchIndex++)
+                {
+                    CodeInstruction searchInstruction = searchInstructions[searchIndex];
+                    CodeInstruction originalInstruction = instructionsList[instructionIndex + searchIndex];
+                    object searchOperand = searchInstruction.operand;
+                    object orginalOperand = originalInstruction.operand;
+                    if (searchInstruction.opcode != originalInstruction.opcode)
+                    {
+                        instructionsMatch = false;
+                        break;
+                    }
+                    else
+                    {
+                        if (orginalOperand != null &&
+                            searchOperand != null &&
+                            orginalOperand != searchOperand)
+                        {
+                            if (orginalOperand.GetType() != typeof(LocalBuilder))
+                            {
+                                instructionsMatch = false;
+                                break;
+                            }
+                            else
+                            {
+                                if (((LocalBuilder)orginalOperand).LocalIndex != (int)searchOperand)
+                                {
+                                    instructionsMatch = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return instructionsMatch;
+        }
+        public static Label GetBreakDestination(List<CodeInstruction> instructionsList, int currentInstructionIndex, ILGenerator iLGenerator)
+        {
+            Label breakDestination = iLGenerator.DefineLabel();
+            HashSet<Label> labels = new HashSet<Label>();
+            for (int i = 0; i <= currentInstructionIndex; i++)
+            {
+                foreach (Label label in instructionsList[i].labels)
+                {
+                    labels.Add(label);
+                }
+            }
+            for (int i = currentInstructionIndex + 1; i < instructionsList.Count; i++)
+            {
+                if (instructionsList[i].operand is Label label)
+                {
+                    if (labels.Contains(label))
+                    {
+                        instructionsList[i+1].labels.Add(breakDestination);
+                        break;
+                    }
+                }
+            }
+            return breakDestination;
+        }
+
+        public static List<CodeInstruction> UpdateTryCatchCodeInstructions(
+            List<CodeInstruction> instructionsList, Label breakDestination, Label handlerEnd, ref int currentInstructionIndex, int lastInstructionIndex)
+        {
+            List<CodeInstruction> finalCodeInstructions = new List<CodeInstruction>();
+            instructionsList[currentInstructionIndex].blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
+            while (currentInstructionIndex < lastInstructionIndex)
+            {
+                finalCodeInstructions.Add(instructionsList[currentInstructionIndex]);
+                currentInstructionIndex++;
+            }
+            finalCodeInstructions.Add(new CodeInstruction(OpCodes.Leave_S, handlerEnd)); //a
+            CodeInstruction pop = new CodeInstruction(OpCodes.Pop);
+            pop.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginCatchBlock, typeof(ArgumentOutOfRangeException)));
+            finalCodeInstructions.Add(pop);
+            CodeInstruction leaveLoopEnd = new CodeInstruction(OpCodes.Leave, breakDestination);
+            leaveLoopEnd.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
+            finalCodeInstructions.Add(leaveLoopEnd);
+            instructionsList[currentInstructionIndex].labels.Add(handlerEnd);
+            finalCodeInstructions.Add(instructionsList[currentInstructionIndex]);
+            return finalCodeInstructions;
+        }
+
         public static Dictionary<int, SampleSustainer> tryMakeAndPlayResults = new Dictionary<int, SampleSustainer>();
         public static Dictionary<int, object[]> newSustainerRequests = new Dictionary<int, object[]>();
         public static Dictionary<int, Sustainer> newSustainerResults = new Dictionary<int, Sustainer>();
@@ -469,7 +560,6 @@ namespace RimThreaded
 
         private static void ExecuteTicks()
         {
-
             if (thingListNormalTicks > 0)
             {
                 int index = Interlocked.Decrement(ref thingListNormalTicks);
@@ -478,7 +568,22 @@ namespace RimThreaded
                     Thing thing = thingListNormal[index];
                     if (!thing.Destroyed)
                     {
-                        thing.Tick();
+                        try
+                        {
+                            thing.Tick();
+                        }
+                        catch (Exception ex)
+                        {
+                            string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
+                            if (Prefs.DevMode)
+                            {
+                                Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
+                            }
+                            else
+                            {
+                                Log.ErrorOnce("Exception ticking " + thing.ToStringSafe() + text + ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
+                            }
+                        }
                     }
                     index = Interlocked.Decrement(ref thingListNormalTicks);
                 }
@@ -495,7 +600,22 @@ namespace RimThreaded
                     Thing thing = thingListRare[index];
                     if (!thing.Destroyed)
                     {
-                        thing.TickRare();
+                        try
+                        {
+                            thing.TickRare();
+                        }
+                        catch (Exception ex)
+                        {
+                            string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
+                            if (Prefs.DevMode)
+                            {
+                                Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
+                            }
+                            else
+                            {
+                                Log.ErrorOnce("Exception ticking " + thing.ToStringSafe() + text + ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
+                            }
+                        }
                     }
                     index = Interlocked.Decrement(ref thingListRareTicks);
                 }
@@ -512,7 +632,22 @@ namespace RimThreaded
                     Thing thing = thingListLong[index];
                     if (!thing.Destroyed)
                     {
-                        thing.TickLong();
+                        try
+                        {
+                            thing.TickLong();
+                        }
+                        catch (Exception ex)
+                        {
+                            string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
+                            if (Prefs.DevMode)
+                            {
+                                Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
+                            }
+                            else
+                            {
+                                Log.ErrorOnce("Exception ticking " + thing.ToStringSafe() + text + ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
+                            }
+                        }
                     }
                     index = Interlocked.Decrement(ref thingListLongTicks);
                 }
@@ -533,7 +668,7 @@ namespace RimThreaded
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 1148571423, false);
+                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 1148571423, false);
                     }
                     try
                     {
@@ -542,7 +677,7 @@ namespace RimThreaded
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
+                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
                     }
                     index = Interlocked.Decrement(ref worldPawnsTicks);
                 }

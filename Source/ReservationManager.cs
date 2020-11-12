@@ -66,9 +66,11 @@ namespace RimThreaded
 		public static bool Release(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
 		{
 			if (target.ThingDestroyed)
-				Log.Warning("Releasing destroyed thing " + (object)target + " for " + (object)claimant, false);
-			ReservationManager.Reservation reservation1 = (ReservationManager.Reservation)null;
-			ReservationManager.Reservation reservation2;
+			{
+				Log.Warning("Releasing destroyed thing " + target + " for " + claimant);
+			}
+            Reservation reservation1 = null;
+            Reservation reservation2;
 			for (int index = 0; index < reservations(__instance).Count; ++index)
 			{
 				try
@@ -82,99 +84,14 @@ namespace RimThreaded
 				}
 			}
 			if (reservation1 == null && !target.ThingDestroyed)
-				Log.Error("Tried to release " + (object)target + " that wasn't reserved by " + (object)claimant + ".", false);
+				Log.Error("Tried to release " + target + " that wasn't reserved by " + claimant + ".", false);
 			else
 				lock (reservations(__instance)) {
 					reservations(__instance).Remove(reservation1);
 				}
 			return false;
 		}
-
-		public static bool CanReserve(ReservationManager __instance, ref bool __result,
-		  Pawn claimant,
-		  LocalTargetInfo target,
-		  int maxPawns = 1,
-		  int stackCount = -1,
-		  ReservationLayerDef layer = null,
-		  bool ignoreOtherReservations = false)
-		{
-			if (claimant == null)
-			{
-				Log.Error("CanReserve with null claimant", false);
-				__result = false;
-				return false;
-			}
-			if (!claimant.Spawned || claimant.Map != map(__instance) || (!target.IsValid || target.ThingDestroyed) || target.HasThing && target.Thing.SpawnedOrAnyParentSpawned && target.Thing.MapHeld != map(__instance))
-			{
-				__result = false;
-				return false;
-			}
-			int num1 = target.HasThing ? target.Thing.stackCount : 1;
-			int num2 = stackCount == -1 ? num1 : stackCount;
-			if (num2 > num1)
-			{
-				__result = false;
-				return false;
-			}
-			if (!ignoreOtherReservations)
-			{
-				if (map(__instance).physicalInteractionReservationManager.IsReserved(target) && !map(__instance).physicalInteractionReservationManager.IsReservedBy(claimant, target))
-				{
-					__result = false;
-					return false;
-				}
-				ReservationManager.Reservation reservation1;
-				for (int index = 0; index < reservations(__instance).Count; ++index)
-				{
-					try
-					{
-						reservation1 = reservations(__instance)[index];
-					} catch (ArgumentOutOfRangeException) { break; }
-					if (null != reservation1)
-					{
-						if (reservation1.Target == target && reservation1.Layer == layer && reservation1.Claimant == claimant && (reservation1.StackCount == -1 || reservation1.StackCount >= num2))
-						{
-							__result = true;
-							return false;
-						}
-					}
-				}
-				int num3 = 0;
-				int num4 = 0;
-				ReservationManager.Reservation reservation2;
-				for (int index = 0; index < reservations(__instance).Count; ++index)
-				{
-					try
-					{
-						reservation2 = reservations(__instance)[index];
-					} catch (ArgumentOutOfRangeException) { break; }
-					if (null != reservation2)
-					{
-						if (!(reservation2.Target != target) && reservation2.Layer == layer && (reservation2.Claimant != claimant && RespectsReservationsOf(claimant, reservation2.Claimant)))
-						{
-							if (reservation2.MaxPawns != maxPawns)
-							{
-								__result = false;
-								return false;
-							}
-							++num3;
-							if (reservation2.StackCount == -1)
-								num4 += num1;
-							else
-								num4 += reservation2.StackCount;
-							if (num3 >= maxPawns || num2 + num4 > num1)
-							{
-								__result = false;
-								return false;
-							}
-						}
-					}
-				}
-			}
-			__result = true;
-			return false;
-		}
-
+		
 		private static bool RespectsReservationsOf(Pawn newClaimant, Pawn oldClaimant)
 		{
 			return newClaimant == oldClaimant || newClaimant.Faction != null && oldClaimant.Faction != null && (newClaimant.Faction == oldClaimant.Faction || !newClaimant.Faction.HostileTo(oldClaimant.Faction) || oldClaimant.HostFaction != null && oldClaimant.HostFaction == newClaimant.HostFaction || newClaimant.HostFaction != null && (oldClaimant.HostFaction != null || newClaimant.HostFaction == oldClaimant.Faction));
@@ -186,7 +103,7 @@ namespace RimThreaded
 				__result = null;
 				return false;
 			}
-			ReservationManager.Reservation reservation;
+			Reservation reservation;
 			for (int i = 0; i < reservations(__instance).Count; i++)
 			{
 				try
@@ -252,12 +169,12 @@ namespace RimThreaded
 				__result = false;
 				return false;
 			}
-			bool canReserveResult = false;
-			CanReserve(__instance, ref canReserveResult, claimant, target, maxPawns, stackCount, layer, false);
+			bool canReserveResult = __instance.CanReserve(claimant, target, maxPawns, stackCount, layer);
 			if (!canReserveResult)
 			{
-				CanReserve(__instance, ref canReserveResult, claimant, target, maxPawns, stackCount, layer, true);
-				if (job != null && job.playerForced && canReserveResult)
+				bool canReserveResult2 =
+					__instance.CanReserve(claimant, target, maxPawns, stackCount, layer, true);
+				if (job != null && job.playerForced && canReserveResult2)
 				{
 					lock (reservations(__instance))
 					{

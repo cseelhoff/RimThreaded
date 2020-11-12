@@ -44,28 +44,7 @@ namespace RimThreaded
 			__result = openInt(__instance) && (holdOpenInt(__instance) || !r);
 			return false;
 		}
-		public static bool get_BlockedOpenMomentary(Building_Door __instance, out bool __result)
-		{
-			Thing baseThing = __instance as Thing;
-			Thing[] thingArray;
-			List<Thing> thingList = baseThing.Position.GetThingList(baseThing.Map);
-			lock(thingList)
-            {
-                thingArray = thingList.ToArray();
-            }
-			for (int i = 0; i < thingArray.Length; i++)
-			{
-				Thing thing = thingArray[i];
-				if (thing.def.category == ThingCategory.Item || thing.def.category == ThingCategory.Pawn)
-				{
-					__result = true;
-					return false;
-				}
-			}
-			__result = false;
-			return false;
 
-		}
 		public static bool get_WillCloseSoon(Building_Door __instance, ref bool __result)
 		{
 			if (!__instance.Spawned)

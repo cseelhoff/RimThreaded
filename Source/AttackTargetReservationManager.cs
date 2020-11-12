@@ -86,8 +86,7 @@ namespace RimThreaded
 
 		public void Reserve(AttackTargetReservationManager __instance, Pawn claimant, Job job, IAttackTarget target)
 		{
-			bool isReservedBy = false;
-			IsReservedBy(__instance, ref isReservedBy, claimant, target);
+			bool isReservedBy = __instance.IsReservedBy(claimant, target);
 			if (target == null)
 			{
 				Log.Warning(claimant + " tried to reserve null attack target.");
@@ -140,27 +139,6 @@ namespace RimThreaded
 
 				}
 			}
-			return false;
-		}
-
-		public static bool IsReservedBy(AttackTargetReservationManager __instance, ref bool __result, Pawn claimant, IAttackTarget target)
-		{
-			AttackTargetReservation attackTargetReservation;
-			for (int i = 0; i < reservations(__instance).Count; i++)
-			{
-				try
-				{
-					attackTargetReservation = reservations(__instance)[i];
-				} catch (ArgumentOutOfRangeException) { break; }
-				if (null != attackTargetReservation)
-				{
-					if (attackTargetReservation.target == target && attackTargetReservation.claimant == claimant)
-					{
-						return true;
-					}
-				}
-			}
-
 			return false;
 		}
 
