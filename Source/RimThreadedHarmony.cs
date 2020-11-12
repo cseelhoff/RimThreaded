@@ -301,8 +301,8 @@ namespace RimThreaded
 
 			//BuildableDef
 			original = typeof(BuildableDef);
-			patched = typeof(BuildableDef_Patch);
-			Prefix(original, patched, "ForceAllowPlaceOver");
+			patched = typeof(BuildableDef_Transpile);
+			Transpile(original, patched, "ForceAllowPlaceOver");
 
 			
 			//SustainerManager			
@@ -364,8 +364,9 @@ namespace RimThreaded
 			//Building_Door			
 			original = typeof(Building_Door);
 			patched = typeof(Building_Door_Patch);
-			Prefix(original, patched, "get_BlockedOpenMomentary");
 			Prefix(original, patched, "get_DoorPowerOn");
+			patched = typeof(Building_Door_Transpile);
+			Transpile(original, patched, "get_BlockedOpenMomentary");
 
 			//ThoughtHandler						
 			original = typeof(ThoughtHandler);
@@ -410,9 +411,11 @@ namespace RimThreaded
 			patched = typeof(AttackTargetReservationManager_Patch);
 			Prefix(original, patched, "FirstReservationFor");
 			Prefix(original, patched, "ReleaseClaimedBy");
-			Prefix(original, patched, "IsReservedBy");
+			//Prefix(original, patched, "IsReservedBy");
 			Prefix(original, patched, "CanReserve");
 			//Prefix(original, patched, "ReleaseAllClaimedBy");
+			patched = typeof(AttackTargetReservationManager_Transpile);
+			Transpile(original, patched, "IsReservedBy");
 
 
 			//PawnCollisionTweenerUtility
@@ -425,8 +428,9 @@ namespace RimThreaded
 			original = typeof(GridsUtility);
 			patched = typeof(GridsUtility_Patch);
 			Prefix(original, patched, "GetTerrain");
-			Prefix(original, patched, "GetGas");
 			Prefix(original, patched, "IsInPrisonCell");
+			patched = typeof(GridsUtility_Transpile);
+			Transpile(original, patched, "GetGas");
 
 			//ReservationManager
 			original = typeof(ReservationManager);
@@ -435,9 +439,10 @@ namespace RimThreaded
 			Prefix(original, patched, "Reserve");
 			Prefix(original, patched, "Release");
 			Prefix(original, patched, "FirstReservationFor");
-			Prefix(original, patched, "CanReserve");
 			Prefix(original, patched, "IsReservedByAnyoneOf");
 			Prefix(original, patched, "FirstRespectedReserver");
+			patched = typeof(ReservationManager_Transpile);
+			Transpile(original, patched, "CanReserve");
 
 			//FloodFiller - inefficient global lock			
 			original = typeof(FloodFiller);
@@ -603,9 +608,9 @@ namespace RimThreaded
 
 			//HediffSet
 			original = typeof(HediffSet);
-			patched = typeof(HediffSet_Patch);
-			Prefix(original, patched, "PartIsMissing");
-			Prefix(original, patched, "HasDirectlyAddedPartFor");
+			patched = typeof(HediffSet_Transpile);
+			Transpile(original, patched, "PartIsMissing");
+			Transpile(original, patched, "HasDirectlyAddedPartFor");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -634,8 +639,8 @@ namespace RimThreaded
 
 			//FoodUtility
 			original = typeof(FoodUtility);
-			patched = typeof(FoodUtility_Patch);
-			Prefix(original, patched, "FoodOptimality");
+			patched = typeof(FoodUtility_Transpile);
+			Transpile(original, patched, "FoodOptimality");
 
 			//TendUtility
 			original = typeof(TendUtility);

@@ -14,7 +14,7 @@ namespace RimThreaded
 
     public class EditWindow_Log_Patch
     {
-
+        /*
         public static FieldRef<EditWindow_Log, float> listingViewHeight =
             FieldRefAccess<EditWindow_Log, float>("listingViewHeight");
         public static FieldRef<EditWindow_Log, bool> borderDragging =
@@ -231,6 +231,6 @@ namespace RimThreaded
             return false;
         }
 
-
+        */
     }
 }
