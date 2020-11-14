@@ -664,10 +664,11 @@ namespace RimThreaded
 			//ImmunityHandler
 			original = typeof(ImmunityHandler);
 			patched = typeof(ImmunityHandler_Patch);
-			Prefix(original, patched, "ImmunityHandlerTick");
+			Prefix(original, patched, "ImmunityHandlerTick"); 
+			Prefix(original, patched, "NeededImmunitiesNow");
 
-			//Room
-			original = typeof(Room);
+			 //Room
+			 original = typeof(Room);
 			patched = typeof(Room_Patch);
 			Prefix(original, patched, "OpenRoofCountStopAt");
 			Prefix(original, patched, "get_PsychologicallyOutdoors");
@@ -940,14 +941,14 @@ namespace RimThreaded
 			Prefix(original, patched, "IsNeighbor");
 
 			//ResourceCounter
-			original = typeof(ResourceCounter);
-			patched = typeof(ResourceCounter_Patch);
-			Prefix(original, patched, "get_TotalHumanEdibleNutrition");
-			Prefix(original, patched, "ResetDefs");
-			Prefix(original, patched, "ResetResourceCounts");
-			Prefix(original, patched, "GetCount");
-			Prefix(original, patched, "GetCountIn", new Type[] { typeof(ThingRequestGroup) });
-			Prefix(original, patched, "UpdateResourceCounts");
+			original = typeof(GUIStyle);
+			patched = typeof(GUIStyle_Patch);
+			Prefix(original, patched, "CalcHeight");
+
+			//WorldGrid
+			original = typeof(WorldGrid);
+			patched = typeof(WorldGrid_Patch);
+			Prefix(original, patched, "IsNeighbor");
 
 			//PERFORMANCE IMPROVEMENTS
 
@@ -1070,7 +1071,6 @@ namespace RimThreaded
 			original = typeof(RenderTexture);
 			patched = typeof(RenderTexture_Patch);
 			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
-			Prefix(original, patched, "set_active");
 
 			//GetTemporary (CE)
 			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite), typeof(int) });

@@ -79,6 +79,7 @@
     <Compile Include="AttackTargetFinder.cs" />
     <Compile Include="ExtendedDataStorage_Transpile.cs" />
     <Compile Include="JobDriver_Mounted_Transpile.cs" />
+    <Compile Include="GUIStyle.cs" />
     <Compile Include="TextureUtility_Transpile.cs" />
     <Compile Include="ReservationManager_Transpile.cs" />
     <Compile Include="HediffSet_Transpile.cs" />

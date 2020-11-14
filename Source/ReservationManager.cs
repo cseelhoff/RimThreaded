@@ -46,21 +46,37 @@ namespace RimThreaded
 
 		public static bool ReleaseClaimedBy(ReservationManager __instance, Pawn claimant, Job job)
 		{
-			lock (reservations(__instance))
+			List<Reservation> reservationList = reservations(__instance);
+			//ReservationManager.Reservation[] reservations2 = reservations(__instance).ToArray();
+				
+			for (int i = reservationList.Count - 1; i >= 0; i--)
 			{
-				ReservationManager.Reservation[] reservations2 = reservations(__instance).ToArray();
-				for (int i = reservations2.Length - 1; i >= 0; i--)
+				Reservation r;
+				try
 				{
-					ReservationManager.Reservation r = reservations2[i];
-					if (null != r)
+					r = reservationList[i];
+				} catch(ArgumentOutOfRangeException)
+                {
+					break;
+                }
+				if (null != r)
+				{
+					if (r.Claimant == claimant && r.Job == job)
 					{
-						if (r.Claimant == claimant && r.Job == job)
+						lock (reservationList)
 						{
-							reservations(__instance).RemoveAt(i);
+							if (i < reservationList.Count && r == reservationList[i])
+							{
+								reservationList.RemoveAt(i);
+							} else
+                            {
+								Log.Warning("Reservation " + r.ToString() + " was not at expected list index when attempting to remove.");
+							}
 						}
 					}
 				}
 			}
+			
 			return false;
 		}
 		public static bool Release(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)

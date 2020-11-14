@@ -16,6 +16,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Reflection.Emit;
 using UnityEngine.Experimental.Rendering;
+using static Verse.ImmunityHandler;
 
 namespace RimThreaded
 {
@@ -48,6 +49,7 @@ namespace RimThreaded
         public static bool SingleTickComplete = true;
 
         //MainThreadRequests
+        
         public static Dictionary<int, EventWaitHandle> mainRequestWaits = new Dictionary<int, EventWaitHandle>();
         public static Dictionary<int, object[]> tryMakeAndPlayRequests = new Dictionary<int, object[]>();
 
@@ -72,6 +74,8 @@ namespace RimThreaded
         public static Dictionary<int, RenderTexture> renderTextureGetActiveResults = new Dictionary<int, RenderTexture>();
         public static Dictionary<int, object[]> texture2dRequests = new Dictionary<int, object[]>();
         public static Dictionary<int, Texture2D> texture2dResults = new Dictionary<int, Texture2D>();
+        public static Dictionary<int, object[]> calcHeightRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, float> calcHeightResults = new Dictionary<int, float>();
         public static Dictionary<int, Texture2D> getReadableTextureRequests = new Dictionary<int, Texture2D>();
         public static Dictionary<int, Texture2D> getReadableTextureResults = new Dictionary<int, Texture2D>();
         public static Dictionary<int, object[]> blitRequests = new Dictionary<int, object[]>();
@@ -209,10 +213,18 @@ namespace RimThreaded
             {
                 eventWaitDones[tID] = new AutoResetEvent(false);
             }
-            lock(mainRequestWaits)
+            lock (mainRequestWaits)
             {
                 mainRequestWaits[tID] = new AutoResetEvent(false);
-            }            
+            }
+            lock (ImmunityHandler_Patch.immunityInfoLists)
+            {
+                ImmunityHandler_Patch.immunityInfoLists[tID] = new List<ImmunityInfo>();
+            }
+            lock (RegionListersUpdater_Patch.tmpRegionsLists)
+            {
+                RegionListersUpdater_Patch.tmpRegionsLists[tID] = new List<Region>();
+            }
             thread.Start();
         }
 
@@ -798,6 +810,14 @@ namespace RimThreaded
                 {
                     mainRequestWaits.Remove(managedThreadID);
                 }
+                lock (ImmunityHandler_Patch.immunityInfoLists)
+                {
+                    ImmunityHandler_Patch.immunityInfoLists.Remove(managedThreadID);
+                }
+                lock (RegionListersUpdater_Patch.tmpRegionsLists)
+                {
+                    RegionListersUpdater_Patch.tmpRegionsLists.Remove(managedThreadID);
+                }
             }
             else
             {
@@ -831,6 +851,7 @@ namespace RimThreaded
                 RespondToReleaseTemporaryRequests();
                 RespondToSetActiveRequests();
                 RespondToGetReadableTextureRequests();
+                RespondToCalcHeightRequests();
 
                 // Add any sounds that were produced in this tick
 
@@ -935,6 +956,26 @@ namespace RimThreaded
                 }
                 Texture2D content = ContentFinder_Texture2D_Patch.GetTexture2D(itempath);
                 texture2DResults[itempath] = content;
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+        private static void RespondToCalcHeightRequests()
+        {
+            while (calcHeightRequests.Count > 0)
+            {
+                object[] parameters;
+                int key;
+                lock (calcHeightRequests)
+                {
+                    key = calcHeightRequests.Keys.First();
+                    parameters = calcHeightRequests[key];
+                    calcHeightRequests.Remove(key);
+                }
+                float calcHeightResult = ((GUIStyle)parameters[0]).CalcHeight((GUIContent)parameters[1], (float)parameters[2]);
+                calcHeightResults[key] = calcHeightResult;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else

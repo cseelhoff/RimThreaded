@@ -14,15 +14,19 @@ namespace RimThreaded
     {
         public static bool ContainsStaticFire(ref bool __result, IntVec3 c, Map map)
         {
-            Thing[] arrayThingList;
             List<Thing> thingList = map.thingGrid.ThingsListAt(c);
-            lock (thingList)
+
+            for (int index = 0; index < thingList.Count; ++index)
             {
-                arrayThingList = thingList.ToArray();
-            }
-            for (int index = 0; index < arrayThingList.Length; ++index)
-            {
-                if (arrayThingList[index] is Fire fire && fire.parent == null)
+                Thing thing;
+                try
+                {
+                    thing = thingList[index];
+                } catch(ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+                if (thing is Fire fire && fire.parent == null)
                 {
                     __result = true;
                     return false;

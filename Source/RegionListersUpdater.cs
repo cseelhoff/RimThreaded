@@ -1,27 +1,53 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using Verse;
 
 namespace RimThreaded
 {
     public class RegionListersUpdater_Patch
     {
+
+		public static Dictionary<int, List<Region>> tmpRegionsLists = new Dictionary<int, List<Region>>();
+
 		public static bool DeregisterInRegions(Thing thing, Map map)
 		{
 			if (!ListerThings.EverListable(thing.def, ListerThingsUse.Region))
 			{
 				return false;
 			}
-			List<Region> tmpRegions = new List<Region>();
+			//List<Region> tmpRegions = new List<Region>();
+			List<Region> tmpRegions = tmpRegionsLists[Thread.CurrentThread.ManagedThreadId];
+			tmpRegions.Clear();
 			RegionListersUpdater.GetTouchableRegions(thing, map, tmpRegions, true);
 			for (int i = 0; i < tmpRegions.Count; i++)
 			{
-				ListerThings listerThings = tmpRegions[i].ListerThings;
-				lock (listerThings)
+				//ListerThings listerThings = tmpRegions[i].ListerThings;
+				List<Thing> allThings = tmpRegions[i].ListerThings.AllThings;
+				for (int j = allThings.Count - 1; j >= 0; j--)
 				{
-					if (listerThings.Contains(thing))
+					Thing thing2;
+					try
 					{
-						listerThings.Remove(thing);
+						thing2 = allThings[j];
 					}
+					catch(ArgumentOutOfRangeException)
+					{
+						break;
+					}
+					if (thing == thing2)
+					{
+						lock (allThings)
+						{
+							if (j < allThings.Count && allThings[j] == thing)
+							{
+								allThings.RemoveAt(j);
+							} else
+                            {
+								Log.Warning("Thing " + thing.ToString() + " was not at expected list index when attempting to remove.");
+                            }
+						}
+					}				
 				}
 			}
 			return false;
