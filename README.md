@@ -36,6 +36,10 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.80  
+-Fixed bug causing incidents to trigger twice  
+-Fixed bug in GiddyUpCore.Jobs.JobDriver_Mounted.waitForRider  
+
 Version 1.0.79  
 -Added feature to assist in automating method transpiling  
 -Added method RenderTexture.ReleaseTemporaryThreadSafe  
