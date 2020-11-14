@@ -10,16 +10,9 @@
   <description>
     RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.0.79
-    -Added feature to assist in automating method transpiling
-    -Added method RenderTexture.ReleaseTemporaryThreadSafe
-    -Fixed bug in GiddyUpCore.Utilities.TextureUtility.getReadableTexture
-    -Fixed bug in GiddyUpCore.Utilities.TextureUtility.setDrawOffset
-    -Fixed bug in GiddyUpCore.Storage.ExtendedDataStorage.DeleteExtendedDataFor
-    -Fixed bug in Texture2D.Internal_Create
-    -Fixed bug in Texture2D.ReadPixels
-    -Fixed bug in Texture2D.Apply
-    -Fixed bug in HediffSet.AddDirect
+    Version 1.0.80
+    -Fixed bug causing incidents to trigger twice
+    -Fixed bug in GiddyUpCore.Jobs.JobDriver_Mounted.waitForRider
 
     DESCRIPTION:
     This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.
