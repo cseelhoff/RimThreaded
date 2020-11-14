@@ -36,6 +36,17 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.79  
+-Added feature to assist in automating method transpiling  
+-Added method RenderTexture.ReleaseTemporaryThreadSafe  
+-Fixed bug in GiddyUpCore.Utilities.TextureUtility.getReadableTexture  
+-Fixed bug in GiddyUpCore.Utilities.TextureUtility.setDrawOffset  
+-Fixed bug in GiddyUpCore.Storage.ExtendedDataStorage.DeleteExtendedDataFor  
+-Fixed bug in Texture2D.Internal_Create  
+-Fixed bug in Texture2D.ReadPixels  
+-Fixed bug in Texture2D.Apply  
+-Fixed bug in HediffSet.AddDirect  
+
 Version 1.0.78
 -Added extra error logs to Pawn.Tick (hopefully this will give more useful logs with thread timeout errors)  
 -Transpiled BuildableDef.ForceAllowPlaceOver  

@@ -11,6 +11,9 @@ using Verse.AI;
 using RimWorld;
 using Verse.Sound;
 using RimWorld.Planet;
+using System.Security.Policy;
+using System.Reflection.Emit;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -20,8 +23,155 @@ namespace RimThreaded
 
 		public static BindingFlags bf = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
-		//bugs - remove is out of sync for listerthings and thinggrid and maybe thingownerthing
-		//perf impr - replace dicts with hashsets (maybe custom hash function too?)
+		public static Type giddyUpCoreUtilitiesTextureUtility;
+		public static Type giddyUpCoreStorageExtendedDataStorage;
+		public static Type giddyUpCoreStorageExtendedPawnData;
+		public static Type giddyUpCoreJobsJobDriver_Mounted;
+
+		public static List<CodeInstruction> GetLockCodeInstructions(
+			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
+			int searchInstructionsCount, List<CodeInstruction> loadLockObjectInstructions,
+			LocalBuilder lockObject, LocalBuilder lockTaken)
+		{
+			List<CodeInstruction> finalCodeInstructions = new List<CodeInstruction>();
+			CodeInstruction codeInstruction;
+			for (int i = 0; i < loadLockObjectInstructions.Count - 1; i++)
+			{
+				finalCodeInstructions.Add(loadLockObjectInstructions[i]);
+			}
+			codeInstruction = loadLockObjectInstructions[loadLockObjectInstructions.Count - 1];
+			codeInstruction.labels = instructionsList[currentInstructionIndex].labels;
+			instructionsList[currentInstructionIndex].labels = new List<Label>();
+			finalCodeInstructions.Add(codeInstruction);
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Stloc, lockObject.LocalIndex));
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Ldc_I4_0));
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Stloc, lockTaken.LocalIndex));
+			codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex);
+			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
+			finalCodeInstructions.Add(codeInstruction);
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Ldloca_S, lockTaken.LocalIndex));
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter", 
+				new Type[] { typeof(object), typeof(bool).MakeByRefType() })));
+			for (int i = 0; i < searchInstructionsCount; i++)
+			{
+				finalCodeInstructions.Add(instructionsList[currentInstructionIndex]);
+				currentInstructionIndex++;
+			}
+			Label endHandlerDestination = iLGenerator.DefineLabel();
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Leave_S, endHandlerDestination));
+			codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockTaken.LocalIndex);
+			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFinallyBlock));
+			finalCodeInstructions.Add(codeInstruction);
+			Label endFinallyDestination = iLGenerator.DefineLabel();
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Brfalse_S, endFinallyDestination));
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex));
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Exit")));
+			codeInstruction = new CodeInstruction(OpCodes.Endfinally);
+			codeInstruction.labels.Add(endFinallyDestination);
+			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
+			finalCodeInstructions.Add(codeInstruction);
+			instructionsList[currentInstructionIndex].labels.Add(endHandlerDestination);
+			return finalCodeInstructions;
+		}
+		public static List<CodeInstruction> GetLockCodeInstructions(
+			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
+			int searchInstructionsCount, List<CodeInstruction> loadLockObjectInstructions, Type lockObjectType)
+		{
+			LocalBuilder lockObject = iLGenerator.DeclareLocal(lockObjectType);
+			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+			return GetLockCodeInstructions(iLGenerator, instructionsList, currentInstructionIndex,
+				searchInstructionsCount, loadLockObjectInstructions, lockObject, lockTaken);
+		}
+
+		public static bool IsCodeInstructionsMatching(List<CodeInstruction> searchInstructions, List<CodeInstruction> instructionsList, int instructionIndex)
+		{
+			bool instructionsMatch = false;
+			if (instructionIndex + searchInstructions.Count < instructionsList.Count)
+			{
+				instructionsMatch = true;
+				for (int searchIndex = 0; searchIndex < searchInstructions.Count; searchIndex++)
+				{
+					CodeInstruction searchInstruction = searchInstructions[searchIndex];
+					CodeInstruction originalInstruction = instructionsList[instructionIndex + searchIndex];
+					object searchOperand = searchInstruction.operand;
+					object orginalOperand = originalInstruction.operand;
+					if (searchInstruction.opcode != originalInstruction.opcode)
+					{
+						instructionsMatch = false;
+						break;
+					}
+					else
+					{
+						if (orginalOperand != null &&
+							searchOperand != null &&
+							orginalOperand != searchOperand)
+						{
+							if (orginalOperand.GetType() != typeof(LocalBuilder))
+							{
+								instructionsMatch = false;
+								break;
+							}
+							else
+							{
+								if (((LocalBuilder)orginalOperand).LocalIndex != (int)searchOperand)
+								{
+									instructionsMatch = false;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			return instructionsMatch;
+		}
+		public static Label GetBreakDestination(List<CodeInstruction> instructionsList, int currentInstructionIndex, ILGenerator iLGenerator)
+		{
+			Label breakDestination = iLGenerator.DefineLabel();
+			HashSet<Label> labels = new HashSet<Label>();
+			for (int i = 0; i <= currentInstructionIndex; i++)
+			{
+				foreach (Label label in instructionsList[i].labels)
+				{
+					labels.Add(label);
+				}
+			}
+			for (int i = currentInstructionIndex + 1; i < instructionsList.Count; i++)
+			{
+				if (instructionsList[i].operand is Label label)
+				{
+					if (labels.Contains(label))
+					{
+						instructionsList[i + 1].labels.Add(breakDestination);
+						break;
+					}
+				}
+			}
+			return breakDestination;
+		}
+		public static List<CodeInstruction> UpdateTryCatchCodeInstructions(ILGenerator iLGenerator, 
+			List<CodeInstruction> instructionsList, int currentInstructionIndex, int searchInstructionsCount)
+		{
+			Label breakDestination = GetBreakDestination(instructionsList, currentInstructionIndex, iLGenerator);
+			List<CodeInstruction> finalCodeInstructions = new List<CodeInstruction>();
+			instructionsList[currentInstructionIndex].blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
+			for (int i = 0; i < searchInstructionsCount; i++)
+			{
+				finalCodeInstructions.Add(instructionsList[currentInstructionIndex]);
+				currentInstructionIndex++;
+			}
+			Label handlerEnd = iLGenerator.DefineLabel();
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Leave_S, handlerEnd));
+			CodeInstruction pop = new CodeInstruction(OpCodes.Pop);
+			pop.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginCatchBlock, typeof(ArgumentOutOfRangeException)));
+			finalCodeInstructions.Add(pop);
+			CodeInstruction leaveLoopEnd = new CodeInstruction(OpCodes.Leave, breakDestination);
+			leaveLoopEnd.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
+			finalCodeInstructions.Add(leaveLoopEnd);
+			instructionsList[currentInstructionIndex].labels.Add(handlerEnd);
+			//finalCodeInstructions.Add(instructionsList[currentInstructionIndex]);
+			return finalCodeInstructions;
+		}
 
 		static RimThreadedHarmony() {
 			Harmony.DEBUG = true;
@@ -611,6 +761,7 @@ namespace RimThreaded
 			patched = typeof(HediffSet_Transpile);
 			Transpile(original, patched, "PartIsMissing");
 			Transpile(original, patched, "HasDirectlyAddedPartFor");
+			Transpile(original, patched, "AddDirect");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -891,11 +1042,6 @@ namespace RimThreaded
 			patched = typeof(ThinkNode_SubtreesByTag_Patch);
 			Prefix(original, patched, "TryIssueJobPackage");
 
-			//ThinkNode_SubtreesByTag			
-			original = typeof(ResourceCounter);
-			patched = typeof(ResourceCounter_Patch);
-			Prefix(original, patched, "get_TotalHumanEdibleNutrition");
-
 			//ThinkNode_QueuedJob			
 			original = typeof(ThinkNode_QueuedJob);
 			patched = typeof(ThinkNode_QueuedJob_Patch);
@@ -923,18 +1069,78 @@ namespace RimThreaded
 			original = typeof(RenderTexture);
 			patched = typeof(RenderTexture_Patch);
 			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
+			Prefix(original, patched, "set_active");
 
 			//GetTemporary (CE)
 			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite), typeof(int) });
 			Prefix(original, patched, "get_active");
 			Prefix(original, patched, "set_active");
-
+			
 			//Graphics (Giddy-Up)
 			original = typeof(Graphics);
 			patched = typeof(Graphics_Patch);
 			Prefix(original, patched, "Blit", new Type[] { typeof(Texture), typeof(RenderTexture) });
-			
 
+			//Graphics (Giddy-Up)
+			original = typeof(Texture2D);
+			patched = typeof(Texture2D_Patch);
+			Prefix(original, patched, "Internal_Create");
+			Prefix(original, patched, "ReadPixels", new Type[] { typeof(Rect), typeof(int), typeof(int), typeof(bool) });
+			Prefix(original, patched, "Apply", new Type[] { typeof(bool), typeof(bool) });
+
+			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+			foreach (Assembly assembly in assemblies)
+			{
+				if (assembly.FullName.StartsWith("GiddyUpCore"))
+				{
+					foreach (Type originalType in assembly.GetTypes())
+					{
+						if (originalType.FullName.Equals("GiddyUpCore.Storage.ExtendedPawnData"))
+							giddyUpCoreStorageExtendedPawnData = originalType;
+					}
+					foreach (Type originalType in assembly.GetTypes())
+					{
+						if (originalType.FullName.Equals("GiddyUpCore.Utilities.TextureUtility"))
+						{
+							giddyUpCoreUtilitiesTextureUtility = originalType;
+                            string methodName = "setDrawOffset";
+							Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
+							patched = typeof(TextureUtility_Transpile);
+							Transpile(originalType, patched, methodName);
+						}
+						else if (originalType.FullName.Equals("GiddyUpCore.Storage.ExtendedDataStorage"))
+						{
+							giddyUpCoreStorageExtendedDataStorage = originalType;
+                            string methodName = "DeleteExtendedDataFor";
+							Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
+							patched = typeof(ExtendedDataStorage_Transpile);
+							Transpile(originalType, patched, methodName);
+						}
+						else if (originalType.FullName.Equals("GiddyUpCore.Jobs.JobDriver_Mounted"))
+						{
+							giddyUpCoreJobsJobDriver_Mounted = originalType;
+							string methodName = "<waitForRider>b__8_0";
+							foreach (MethodInfo methodInfo in ((TypeInfo)originalType).DeclaredMethods) {
+								if (methodInfo.Name.Equals(methodName))
+								{
+									Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
+									patched = typeof(JobDriver_Mounted_Transpile);
+									MethodInfo pMethod = patched.GetMethod("WaitForRider");
+									harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod));
+								}
+							}
+							
+						}
+					}
+				}
+			}
+
+
+
+			
+			//ConstructorInfo constructorMethod4 = original.GetConstructor(new Type[] { typeof(int), typeof(int) });
+			//MethodInfo cpMethod4 = patched.GetMethod("Texture2DWidthHeight");
+			//harmony.Patch(constructorMethod4, prefix: new HarmonyMethod(cpMethod4));
 
 
 			Log.Message("RimThreaded patching is complete.");
@@ -1004,11 +1210,12 @@ namespace RimThreaded
 		}
 
 		public static void Transpile(Type original, Type patched, String methodName)
-        {
+		{
 			MethodInfo oMethod = original.GetMethod(methodName, bf);
 			MethodInfo pMethod = patched.GetMethod(methodName);
 			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 		}
+
 		public static void Transpile(Type original, Type patched, String methodName, Type[] orig_type)
 		{
 			MethodInfo oMethod = original.GetMethod(methodName, bf, null, orig_type, null);

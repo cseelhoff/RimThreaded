@@ -39,7 +39,7 @@ namespace RimThreaded
             {
                 lock (RimThreaded.renderTextureAARequests)
                 {
-                    RimThreaded.renderTextureAARequests[tID] = new object[] { width, height, depthBuffer, format, readWrite };
+                    RimThreaded.renderTextureAARequests[tID] = new object[] { width, height, depthBuffer, format, readWrite, antiAliasing };
                 }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
@@ -48,6 +48,32 @@ namespace RimThreaded
                 return false;
             }
             return true;
+        }
+        public static void ReleaseTemporaryThreadSafe(RenderTexture temp)
+        {
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            {
+                lock (RimThreaded.releaseTemporaryRequests)
+                {
+                    RimThreaded.releaseTemporaryRequests[tID] = temp;
+                }
+                RimThreaded.mainThreadWaitHandle.Set();
+                eventWaitStart.WaitOne();
+            }
+        }
+        public static void set_Active(RenderTexture value)
+        {
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            {
+                lock (RimThreaded.setActiveTextureRequests)
+                {
+                    RimThreaded.setActiveTextureRequests[tID] = value;
+                }
+                RimThreaded.mainThreadWaitHandle.Set();
+                eventWaitStart.WaitOne();
+            }
         }
         public static bool get_active(RenderTexture __instance, ref RenderTexture __result)
         {

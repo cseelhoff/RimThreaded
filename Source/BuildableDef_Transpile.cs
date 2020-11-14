@@ -26,22 +26,21 @@ namespace RimThreaded
             bool matchFound = false;
             while (currentInstructionIndex < instructionsList.Count)
             {
-                if(RimThreaded.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
+                if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
                 {
                     matchFound = true;
-                    Label breakDestination = RimThreaded.GetBreakDestination(instructionsList, currentInstructionIndex, iLGenerator);
-                    List<CodeInstruction> tryCatchInstructions = RimThreaded.UpdateTryCatchCodeInstructions(
-                        instructionsList, breakDestination, iLGenerator.DefineLabel(), ref currentInstructionIndex, currentInstructionIndex + searchInstructions.Count);
-                    foreach (CodeInstruction codeInstruction in tryCatchInstructions)
+                    foreach (CodeInstruction codeInstruction in RimThreadedHarmony.UpdateTryCatchCodeInstructions(
+                        iLGenerator, instructionsList, currentInstructionIndex, searchInstructions.Count))
                     {
                         yield return codeInstruction;
                     }
+                    currentInstructionIndex += searchInstructions.Count;
                 }
                 else
                 {
                     yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
                 }
-                currentInstructionIndex++;
             }
             if(!matchFound)
             {

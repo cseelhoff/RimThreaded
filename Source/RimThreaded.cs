@@ -15,6 +15,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Diagnostics;
 using System.Reflection.Emit;
+using UnityEngine.Experimental.Rendering;
 
 namespace RimThreaded
 {
@@ -23,8 +24,8 @@ namespace RimThreaded
     {
         public static DateTime lastClosestThingGlobal = DateTime.Now;
 
-        public static int maxThreads = Math.Max(Int32.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1);
-        public static int timeoutMS = Math.Max(Int32.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 1);
+        public static int maxThreads = Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1);
+        public static int timeoutMS = Math.Max(int.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 1);
         public static bool suppressTexture2dError = RimThreadedMod.Settings.suppressTexture2dError;
         public static float timeSpeedNormal = float.Parse(RimThreadedMod.Settings.timeSpeedNormalBuffer);
         public static float timeSpeedFast = float.Parse(RimThreadedMod.Settings.timeSpeedFastBuffer);
@@ -37,6 +38,7 @@ namespace RimThreaded
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
         public static Dictionary<int, EventWaitHandle> eventWaitStarts = new Dictionary<int, EventWaitHandle>();
+
         public static Dictionary<int, EventWaitHandle> eventWaitDones = new Dictionary<int, EventWaitHandle>();
 
         //public static ConcurrentQueue<Thing> drawQueue = new ConcurrentQueue<Thing>();
@@ -49,94 +51,6 @@ namespace RimThreaded
         public static Dictionary<int, EventWaitHandle> mainRequestWaits = new Dictionary<int, EventWaitHandle>();
         public static Dictionary<int, object[]> tryMakeAndPlayRequests = new Dictionary<int, object[]>();
 
-        public static bool IsCodeInstructionsMatching(List<CodeInstruction> searchInstructions, List<CodeInstruction> instructionsList, int instructionIndex)
-        {
-            bool instructionsMatch = false;
-            if (instructionIndex + searchInstructions.Count < instructionsList.Count)
-            {
-                instructionsMatch = true;
-                for (int searchIndex = 0; searchIndex < searchInstructions.Count; searchIndex++)
-                {
-                    CodeInstruction searchInstruction = searchInstructions[searchIndex];
-                    CodeInstruction originalInstruction = instructionsList[instructionIndex + searchIndex];
-                    object searchOperand = searchInstruction.operand;
-                    object orginalOperand = originalInstruction.operand;
-                    if (searchInstruction.opcode != originalInstruction.opcode)
-                    {
-                        instructionsMatch = false;
-                        break;
-                    }
-                    else
-                    {
-                        if (orginalOperand != null &&
-                            searchOperand != null &&
-                            orginalOperand != searchOperand)
-                        {
-                            if (orginalOperand.GetType() != typeof(LocalBuilder))
-                            {
-                                instructionsMatch = false;
-                                break;
-                            }
-                            else
-                            {
-                                if (((LocalBuilder)orginalOperand).LocalIndex != (int)searchOperand)
-                                {
-                                    instructionsMatch = false;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return instructionsMatch;
-        }
-        public static Label GetBreakDestination(List<CodeInstruction> instructionsList, int currentInstructionIndex, ILGenerator iLGenerator)
-        {
-            Label breakDestination = iLGenerator.DefineLabel();
-            HashSet<Label> labels = new HashSet<Label>();
-            for (int i = 0; i <= currentInstructionIndex; i++)
-            {
-                foreach (Label label in instructionsList[i].labels)
-                {
-                    labels.Add(label);
-                }
-            }
-            for (int i = currentInstructionIndex + 1; i < instructionsList.Count; i++)
-            {
-                if (instructionsList[i].operand is Label label)
-                {
-                    if (labels.Contains(label))
-                    {
-                        instructionsList[i+1].labels.Add(breakDestination);
-                        break;
-                    }
-                }
-            }
-            return breakDestination;
-        }
-
-        public static List<CodeInstruction> UpdateTryCatchCodeInstructions(
-            List<CodeInstruction> instructionsList, Label breakDestination, Label handlerEnd, ref int currentInstructionIndex, int lastInstructionIndex)
-        {
-            List<CodeInstruction> finalCodeInstructions = new List<CodeInstruction>();
-            instructionsList[currentInstructionIndex].blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
-            while (currentInstructionIndex < lastInstructionIndex)
-            {
-                finalCodeInstructions.Add(instructionsList[currentInstructionIndex]);
-                currentInstructionIndex++;
-            }
-            finalCodeInstructions.Add(new CodeInstruction(OpCodes.Leave_S, handlerEnd)); //a
-            CodeInstruction pop = new CodeInstruction(OpCodes.Pop);
-            pop.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginCatchBlock, typeof(ArgumentOutOfRangeException)));
-            finalCodeInstructions.Add(pop);
-            CodeInstruction leaveLoopEnd = new CodeInstruction(OpCodes.Leave, breakDestination);
-            leaveLoopEnd.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
-            finalCodeInstructions.Add(leaveLoopEnd);
-            instructionsList[currentInstructionIndex].labels.Add(handlerEnd);
-            finalCodeInstructions.Add(instructionsList[currentInstructionIndex]);
-            return finalCodeInstructions;
-        }
 
         public static Dictionary<int, SampleSustainer> tryMakeAndPlayResults = new Dictionary<int, SampleSustainer>();
         public static Dictionary<int, object[]> newSustainerRequests = new Dictionary<int, object[]>();
@@ -158,9 +72,18 @@ namespace RimThreaded
         public static Dictionary<int, RenderTexture> renderTextureGetActiveResults = new Dictionary<int, RenderTexture>();
         public static Dictionary<int, object[]> texture2dRequests = new Dictionary<int, object[]>();
         public static Dictionary<int, Texture2D> texture2dResults = new Dictionary<int, Texture2D>();
+        public static Dictionary<int, Texture2D> getReadableTextureRequests = new Dictionary<int, Texture2D>();
+        public static Dictionary<int, Texture2D> getReadableTextureResults = new Dictionary<int, Texture2D>();
         public static Dictionary<int, object[]> blitRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, object[]> internal_CreateRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, object[]> readPixelRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, object[]> applyTextureRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, RenderTexture> releaseTemporaryRequests = new Dictionary<int, RenderTexture>();
+        public static Dictionary<int, RenderTexture> setActiveTextureRequests = new Dictionary<int, RenderTexture>();
+
         public static Dictionary<int, Mesh> newBoltMeshResults = new Dictionary<int, Mesh>();
         public static ConcurrentQueue<int> newBoltMeshRequests = new ConcurrentQueue<int>();
+
         public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
@@ -966,6 +889,12 @@ namespace RimThreaded
                 RespondToBlitRequests();
                 RespondToGetActiveTextureRequests();
                 RespondToSetActiveTextureRequests();
+                RespondToInternal_CreateRequests();
+                RespondToReadPixelRequests();
+                RespondToApplyTextureRequests();
+                RespondToReleaseTemporaryRequests();
+                RespondToSetActiveRequests();
+                RespondToGetReadableTextureRequests();
 
                 // Add any sounds that were produced in this tick
 
@@ -1145,6 +1074,36 @@ namespace RimThreaded
             }
         }
 
+        private static void RespondToGetReadableTextureRequests()
+        {
+            while (getReadableTextureRequests.Count > 0)
+            {
+                Texture2D texture;
+                int key;
+                lock (getReadableTextureRequests)
+                {
+                    key = getReadableTextureRequests.Keys.First();
+                    texture = getReadableTextureRequests[key];
+                    getReadableTextureRequests.Remove(key);
+                }
+                RenderTexture temporary = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+                Graphics.Blit(texture, temporary);
+                RenderTexture active = RenderTexture.active;
+                RenderTexture.active = temporary;
+                Texture2D texture2D = new Texture2D(texture.width, texture.height);
+                texture2D.ReadPixels(new Rect(0f, 0f, temporary.width, temporary.height), 0, 0);
+                texture2D.Apply();
+                RenderTexture.active = active;
+                RenderTexture_Patch.ReleaseTemporaryThreadSafe(temporary);
+
+                getReadableTextureResults[key] = texture2D;
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
         private static void RespondToRenderTextureAARequests()
         {
             while (renderTextureAARequests.Count > 0)
@@ -1247,7 +1206,112 @@ namespace RimThreaded
             }
         }
 
+        public static MethodInfo Internal_Create =
+            typeof(Texture2D).GetMethod("Internal_Create", BindingFlags.NonPublic | BindingFlags.Static);
+
+        private static void RespondToInternal_CreateRequests()
+        {
+            while (internal_CreateRequests.Count > 0)
+            {
+                object[] parameters;
+                int key;
+                lock (internal_CreateRequests)
+                {
+                    key = internal_CreateRequests.Keys.First();
+                    parameters = internal_CreateRequests[key];
+                    internal_CreateRequests.Remove(key);
+                }
+                Internal_Create.Invoke(null, parameters);
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToReadPixelRequests()
+        {
+            while (readPixelRequests.Count > 0)
+            {
+                object[] parameters;
+                int key;
+                lock (readPixelRequests)
+                {
+                    key = readPixelRequests.Keys.First();
+                    parameters = readPixelRequests[key];
+                    readPixelRequests.Remove(key);
+                }
+                ((Texture2D)parameters[0]).ReadPixels((Rect)parameters[1], (int)parameters[2], (int)parameters[3], (bool)parameters[4]);
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToApplyTextureRequests()
+        {
+            while (applyTextureRequests.Count > 0)
+            {
+                object[] parameters;
+                int key;
+                lock (applyTextureRequests)
+                {
+                    key = applyTextureRequests.Keys.First();
+                    parameters = applyTextureRequests[key];
+                    applyTextureRequests.Remove(key);
+                }
+                ((Texture2D)parameters[0]).Apply((bool)parameters[1], (bool)parameters[2]);
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToReleaseTemporaryRequests()
+        {
+            while (releaseTemporaryRequests.Count > 0)
+            {
+                RenderTexture renderTexture;
+                int key;
+                lock (releaseTemporaryRequests)
+                {
+                    key = releaseTemporaryRequests.Keys.First();
+                    renderTexture = releaseTemporaryRequests[key];
+                    releaseTemporaryRequests.Remove(key);
+                }
+                RenderTexture.ReleaseTemporary(renderTexture);
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToSetActiveRequests()
+        {
+            while (setActiveTextureRequests.Count > 0)
+            {
+                RenderTexture renderTexture;
+                int key;
+                lock (setActiveTextureRequests)
+                {
+                    key = setActiveTextureRequests.Keys.First();
+                    renderTexture = setActiveTextureRequests[key];
+                    setActiveTextureRequests.Remove(key);
+                }
+                RenderTexture.active = renderTexture;
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
 
     }
+
 }
+
 
