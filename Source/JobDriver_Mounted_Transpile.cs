@@ -12,21 +12,17 @@ namespace RimThreaded
     {
         public static IEnumerable<CodeInstruction> WaitForRider(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            List<CodeInstruction> searchInstructions = new List<CodeInstruction>
-            {
-                new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Call, AccessTools.Method(RimThreadedHarmony.giddyUpCoreJobsJobDriver_Mounted, "get_Rider")),
-                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Pawn), "get_CurJob")),
-                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Job), "def")),
-                new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(JobDefOf), "Mount")),
-                new CodeInstruction(OpCodes.Beq_S)
-            }; 
             List<CodeInstruction> searchInstructions2 = new List<CodeInstruction>
             {
                 new CodeInstruction(OpCodes.Ldarg_0),
                 new CodeInstruction(OpCodes.Call, AccessTools.Method(RimThreadedHarmony.giddyUpCoreJobsJobDriver_Mounted, "get_Rider")),
                 new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Pawn), "get_CurJob")),
             };
+            List<CodeInstruction> searchInstructions = searchInstructions2.ListFullCopy();
+            searchInstructions.Add(new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Job), "def")));
+            searchInstructions.Add(new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(RimThreadedHarmony.giddyUpCoreJobsGUC_JobDefOf, "Mount")));
+            searchInstructions.Add(new CodeInstruction(OpCodes.Beq_S));
+
             List<CodeInstruction> instructionsList = instructions.ToList();
             int currentInstructionIndex = 0;
             bool matchFound = false;
@@ -59,7 +55,7 @@ namespace RimThreaded
                     yield return new CodeInstruction(OpCodes.Ldloc, curJob.LocalIndex);
                     for (int i = 0; i < 3; i++)
                     {
-                        yield return instructionsList[currentInstructionIndex];
+                        //yield return instructionsList[currentInstructionIndex];
                         currentInstructionIndex++;
                     }
                 }

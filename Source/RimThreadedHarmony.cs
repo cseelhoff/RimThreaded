@@ -27,7 +27,8 @@ namespace RimThreaded
 		public static Type giddyUpCoreStorageExtendedDataStorage;
 		public static Type giddyUpCoreStorageExtendedPawnData;
 		public static Type giddyUpCoreJobsJobDriver_Mounted;
-
+		public static Type giddyUpCoreJobsGUC_JobDefOf;
+		
 		public static List<CodeInstruction> GetLockCodeInstructions(
 			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
 			int searchInstructionsCount, List<CodeInstruction> loadLockObjectInstructions,
@@ -1097,7 +1098,10 @@ namespace RimThreaded
 					{
 						if (originalType.FullName.Equals("GiddyUpCore.Storage.ExtendedPawnData"))
 							giddyUpCoreStorageExtendedPawnData = originalType;
+						else if (originalType.FullName.Equals("GiddyUpCore.Jobs.GUC_JobDefOf"))
+							giddyUpCoreJobsGUC_JobDefOf = originalType;
 					}
+					
 					foreach (Type originalType in assembly.GetTypes())
 					{
 						if (originalType.FullName.Equals("GiddyUpCore.Utilities.TextureUtility"))
