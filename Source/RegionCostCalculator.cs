@@ -27,12 +27,11 @@ namespace RimThreaded
 
         public static bool GetPreciseRegionLinkDistances(RegionCostCalculator __instance, Region region, CellRect destination, List<Pair<RegionLink, int>> outDistances)
         {
-            outDistances.Clear();
-            //tmpCellIndices.Clear();
-            List<int> tmpCellIndices = new List<int>();
+            outDistances.Clear();            
+            List<int> tmpCellIndices = new List<int>();// Replaces tmpCellIndices.Clear();
             if (destination.Width == 1 && destination.Height == 1)
             {
-                tmpCellIndices.Add(map(__instance).cellIndices.CellToIndex(destination.CenterCell));
+                tmpCellIndices.Add(map(__instance).cellIndices.CellToIndex(destination.CenterCell));// Replaces tmpCellIndices
             }
             else
             {
@@ -40,31 +39,33 @@ namespace RimThreaded
                 {
                     if (item.InBounds(map(__instance)))
                     {
-                        tmpCellIndices.Add(map(__instance).cellIndices.CellToIndex(item));
+                        tmpCellIndices.Add(map(__instance).cellIndices.CellToIndex(item));// Replaces tmpCellIndices
                     }
                 }
             }
-            Dictionary<int, float> tmpDistances = new Dictionary<int, float>();
-            Dijkstra<int>.Run(tmpCellIndices, (int x) => PreciseRegionLinkDistancesNeighborsGetter2(__instance, x, region), preciseRegionLinkDistancesDistanceGetter(__instance), tmpDistances);
+            Dictionary<int, float> tmpDistances = new Dictionary<int, float>(); //Replaces tmpDistances
+            Dijkstra<int>.Run(tmpCellIndices, (int x) => PreciseRegionLinkDistancesNeighborsGetter2(__instance, x, region), 
+                preciseRegionLinkDistancesDistanceGetter(__instance), tmpDistances); // Replaces tmpCellIndices
 
             for (int i = 0; i < region.links.Count; i++)
             {
-                RegionLink regionLink = region.links[i];
+                RegionLink regionLink = region.links[i]; //Needs catch ArgumentOutOfRange - or fix region links
                 if (regionLink.GetOtherRegion(region).Allows(traverseParms(__instance), isDestination: false))
                 {
-                    if (!tmpDistances.TryGetValue(map(__instance).cellIndices.CellToIndex(linkTargetCells(__instance)[regionLink]), out float value))
+                    if (!tmpDistances.TryGetValue(map(__instance).cellIndices.CellToIndex(
+                        linkTargetCells(__instance)[regionLink]), out float value))//Replaces tmpDistances
                     {
                         Log.ErrorOnce("Dijkstra couldn't reach one of the cells even though they are in the same region. There is most likely something wrong with the neighbor nodes getter.", 1938471531);
                         value = 100f;
                     }
-
                     outDistances.Add(new Pair<RegionLink, int>(regionLink, (int)value));
                 }
             }
 
             return false;
         }
-        private static IEnumerable<int> PreciseRegionLinkDistancesNeighborsGetter2(RegionCostCalculator __instance, int node, Region region)
+        private static IEnumerable<int> PreciseRegionLinkDistancesNeighborsGetter2(RegionCostCalculator __instance, 
+            int node, Region region) //Not needed if GetPreciseRegionLinkDistances is transpiled
         {
             if (regionGrid(__instance)[node] == null || regionGrid(__instance)[node] != region)
             {
@@ -76,8 +77,8 @@ namespace RimThreaded
 
         private static List<int> PathableNeighborIndices2(RegionCostCalculator __instance, int index)
         {
-            List<int> tmpPathableNeighborIndices = new List<int>();
-            tmpPathableNeighborIndices.Clear();
+            List<int> tmpPathableNeighborIndices = new List<int>(); //Replaces tmpPathableNeighborIndices.Clear();
+            //tmpPathableNeighborIndices.Clear();
             PathGrid pathGrid = map(__instance).pathGrid;
             int x = map(__instance).Size.x;
             bool num = index % x > 0;
@@ -86,22 +87,22 @@ namespace RimThreaded
             bool flag3 = index / x < map(__instance).Size.z - 1;
             if (flag2 && pathGrid.WalkableFast(index - x))
             {
-                tmpPathableNeighborIndices.Add(index - x);
+                tmpPathableNeighborIndices.Add(index - x);//Replaces tmpPathableNeighborIndices
             }
 
             if (flag && pathGrid.WalkableFast(index + 1))
             {
-                tmpPathableNeighborIndices.Add(index + 1);
+                tmpPathableNeighborIndices.Add(index + 1);//Replaces tmpPathableNeighborIndices
             }
 
             if (num && pathGrid.WalkableFast(index - 1))
             {
-                tmpPathableNeighborIndices.Add(index - 1);
+                tmpPathableNeighborIndices.Add(index - 1);//Replaces tmpPathableNeighborIndices
             }
 
             if (flag3 && pathGrid.WalkableFast(index + x))
             {
-                tmpPathableNeighborIndices.Add(index + x);
+                tmpPathableNeighborIndices.Add(index + x);//Replaces tmpPathableNeighborIndices
             }
 
             bool flag4 = !num || PathFinder.BlocksDiagonalMovement(index - 1, map(__instance));
@@ -110,12 +111,12 @@ namespace RimThreaded
             {
                 if (!flag5 && pathGrid.WalkableFast(index - x + 1))
                 {
-                    tmpPathableNeighborIndices.Add(index - x + 1);
+                    tmpPathableNeighborIndices.Add(index - x + 1);//Replaces tmpPathableNeighborIndices
                 }
 
                 if (!flag4 && pathGrid.WalkableFast(index - x - 1))
                 {
-                    tmpPathableNeighborIndices.Add(index - x - 1);
+                    tmpPathableNeighborIndices.Add(index - x - 1);//Replaces tmpPathableNeighborIndices
                 }
             }
 
@@ -123,16 +124,16 @@ namespace RimThreaded
             {
                 if (!flag5 && pathGrid.WalkableFast(index + x + 1))
                 {
-                    tmpPathableNeighborIndices.Add(index + x + 1);
+                    tmpPathableNeighborIndices.Add(index + x + 1);//Replaces tmpPathableNeighborIndices
                 }
 
                 if (!flag4 && pathGrid.WalkableFast(index + x - 1))
                 {
-                    tmpPathableNeighborIndices.Add(index + x - 1);
+                    tmpPathableNeighborIndices.Add(index + x - 1);//Replaces tmpPathableNeighborIndices
                 }
             }
 
-            return tmpPathableNeighborIndices;
+            return tmpPathableNeighborIndices;//Replaces tmpPathableNeighborIndices
         }
 
     }

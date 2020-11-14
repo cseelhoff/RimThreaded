@@ -36,6 +36,14 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.81  
+-Fixed bug in FireUtility.ContainsStaticFire  
+-Fixed bug in GUIStyle.CalcHeight  
+-Fixed bug in ImmunityHandler.NeededImmunitiesNow  
+-Fixed bug in ImmunityHandler.ImmunityHandlerTick  
+-Fixed bug in RegionListersUpdater.DeregisterInRegions  
+-Fixed bug in ReservationManager.ReleaseClaimedBy  
+
 Version 1.0.80  
 -Fixed bug causing incidents to trigger twice  
 -Fixed bug in GiddyUpCore.Jobs.JobDriver_Mounted.waitForRider  

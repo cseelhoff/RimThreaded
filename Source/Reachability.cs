@@ -23,6 +23,14 @@ namespace RimThreaded
           PathEndMode peMode,
           TraverseParms traverseParams)
         {
+            /*
+            if (working)
+            {
+                Log.ErrorOnce("Called CanReach() while working. This should never happen. Suppressing further errors.", 7312233);
+                return false;
+            }
+            */
+
             Map this_map = map(__instance);
             if (traverseParams.pawn != null)
             {
@@ -69,21 +77,22 @@ namespace RimThreaded
                 }
             }
             dest = (LocalTargetInfo)GenPath.ResolvePathMode(traverseParams.pawn, dest.ToTargetInfo(this_map), ref peMode);
-
+            //working = true;
             try
             {
-                uint this_reachedIndex;
-                lock (reachedIndexLock)
+                uint this_reachedIndex; //Replaced reachedIndex
+                lock (reachedIndexLock) //Added
                 {
-                    this_reachedIndex = offsetReachedIndex;
-                    offsetReachedIndex += 100000;
+                    this_reachedIndex = offsetReachedIndex; //Added
+                    offsetReachedIndex += 100000; //Added
                 }
-                HashSet<Region> regionsReached = new HashSet<Region>();
-                List<Region> this_destRegions = new List<Region>();
-                PathGrid pathGrid = this_map.pathGrid;
-                RegionGrid regionGrid = this_map.regionGrid;
-                ++this_reachedIndex;
+                HashSet<Region> regionsReached = new HashSet<Region>(); //Added
+                PathGrid pathGrid = this_map.pathGrid; //Replaced pathGrid
+                RegionGrid regionGrid = this_map.regionGrid; //Replaced regionGrid
+                ++this_reachedIndex; //Replaced reachedIndex
+
                 //this_destRegions.Clear();
+                List<Region> this_destRegions = new List<Region>(); //Replaced destRegions
                 switch (peMode)
                 {
                     case PathEndMode.OnCell:
@@ -105,11 +114,11 @@ namespace RimThreaded
                     return false;
                 }
                 this_destRegions.RemoveDuplicates<Region>();
-                Queue<Region> this_openQueue = new Queue<Region>();
                 //this_openQueue.Clear();
-                int this_numRegionsOpened = 0;
+                Queue<Region> this_openQueue = new Queue<Region>(); //Replaced openQueue
+                int this_numRegionsOpened = 0; //Replaced numRegionsOpened
                 List<Region> this_startingRegions = new List<Region>();
-                DetermineStartRegions(__instance, start, this_startingRegions, pathGrid, regionGrid, this_reachedIndex, this_openQueue, ref this_numRegionsOpened, regionsReached);
+                DetermineStartRegions2(__instance, start, this_startingRegions, pathGrid, regionGrid, this_reachedIndex, this_openQueue, ref this_numRegionsOpened, regionsReached);
                 if (this_openQueue.Count == 0 && traverseParams.mode != TraverseMode.PassAllDestroyableThings && traverseParams.mode != TraverseMode.PassAllDestroyableThingsNotWater)
                 {
                     //this.FinalizeCheck();
@@ -120,7 +129,7 @@ namespace RimThreaded
                 if (this_startingRegions.Any<Region>() && this_destRegions.Any<Region>() && CanUseCache(traverseParams.mode))
                 {
 
-                    switch (GetCachedResult(traverseParams, this_startingRegions, this_destRegions, this_cache))
+                    switch (GetCachedResult2(traverseParams, this_startingRegions, this_destRegions, this_cache))
                     {
                         case BoolUnknown.True:
                             //this.FinalizeCheck();
@@ -246,7 +255,7 @@ namespace RimThreaded
                 //this_openQueue.Clear();
                 int this_numRegionsOpened = 0;
                 List<Region> this_startingRegions = new List<Region>();
-                DetermineStartRegions(__instance, start, this_startingRegions, pathGrid, regionGrid, this_reachedIndex, this_openQueue, ref this_numRegionsOpened, regionsReached);
+                DetermineStartRegions2(__instance, start, this_startingRegions, pathGrid, regionGrid, this_reachedIndex, this_openQueue, ref this_numRegionsOpened, regionsReached);
                 if (this_openQueue.Count == 0 && traverseParams.mode != TraverseMode.PassAllDestroyableThings && traverseParams.mode != TraverseMode.PassAllDestroyableThingsNotWater)
                 {
                     //this.FinalizeCheck();
@@ -257,7 +266,7 @@ namespace RimThreaded
                 if (this_startingRegions.Any<Region>() && this_destRegions.Any<Region>() && CanUseCache(traverseParams.mode))
                 {
 
-                    switch (GetCachedResult(traverseParams, this_startingRegions, this_destRegions, this_cache))
+                    switch (GetCachedResult2(traverseParams, this_startingRegions, this_destRegions, this_cache))
                     {
                         case BoolUnknown.True:
                             //this.FinalizeCheck();
@@ -415,7 +424,7 @@ namespace RimThreaded
             return false;
         }
 
-        private static BoolUnknown GetCachedResult(TraverseParms traverseParams, List<Region> this_startingRegions, List<Region> this_destRegions, ReachabilityCache this_cache)
+        private static BoolUnknown GetCachedResult2(TraverseParms traverseParams, List<Region> this_startingRegions, List<Region> this_destRegions, ReachabilityCache this_cache)
         {
             bool flag = false;
             for (int index1 = 0; index1 < this_startingRegions.Count; ++index1)
@@ -449,10 +458,10 @@ namespace RimThreaded
             return mode != TraverseMode.PassAllDestroyableThingsNotWater && mode != TraverseMode.NoPassClosedDoorsOrWater;
         }
 
-        private static void DetermineStartRegions(Reachability __instance, IntVec3 start, List<Region> this_startingRegions, PathGrid pathGrid, 
+        private static void DetermineStartRegions2(Reachability __instance, IntVec3 start, List<Region> this_startingRegions, PathGrid pathGrid, 
             RegionGrid regionGrid, uint this_reachedIndex, Queue<Region> this_openQueue, ref int this_numRegionsOpened, HashSet<Region> regionsReached)
         {
-            this_startingRegions.Clear();
+            //this_startingRegions.Clear();
             if (pathGrid.WalkableFast(start))
             {
                 Region validRegionAt = regionGrid.GetValidRegionAt(start);
