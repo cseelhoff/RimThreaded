@@ -34,22 +34,21 @@ namespace RimThreaded
             bool matchFound = false;
             while (currentInstructionIndex < instructionsList.Count)
             {
-                if (RimThreaded.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
+                if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
                 {
                     matchFound = true;
-                    Label breakDestination = RimThreaded.GetBreakDestination(instructionsList, currentInstructionIndex, iLGenerator);
-                    List<CodeInstruction> tryCatchInstructions = RimThreaded.UpdateTryCatchCodeInstructions(
-                        instructionsList, breakDestination, iLGenerator.DefineLabel(), ref currentInstructionIndex, currentInstructionIndex + searchInstructions.Count);
-                    foreach (CodeInstruction codeInstruction in tryCatchInstructions)
+                    foreach (CodeInstruction codeInstruction in RimThreadedHarmony.UpdateTryCatchCodeInstructions(
+                        iLGenerator, instructionsList, currentInstructionIndex, searchInstructions.Count))
                     {
                         yield return codeInstruction;
                     }
+                    currentInstructionIndex += searchInstructions.Count;
                 }
                 else
                 {
                     yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
                 }
-                currentInstructionIndex++;
             }
             if (!matchFound)
             {
@@ -81,22 +80,61 @@ namespace RimThreaded
             bool matchFound = false;
             while (currentInstructionIndex < instructionsList.Count)
             {
-                if (RimThreaded.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
+                if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
                 {
                     matchFound = true;
-                    Label breakDestination = RimThreaded.GetBreakDestination(instructionsList, currentInstructionIndex, iLGenerator);
-                    List<CodeInstruction> tryCatchInstructions = RimThreaded.UpdateTryCatchCodeInstructions(
-                        instructionsList, breakDestination, iLGenerator.DefineLabel(), ref currentInstructionIndex, currentInstructionIndex + searchInstructions.Count);
-                    foreach (CodeInstruction codeInstruction in tryCatchInstructions)
+                    foreach (CodeInstruction codeInstruction in RimThreadedHarmony.UpdateTryCatchCodeInstructions(
+                        iLGenerator, instructionsList, currentInstructionIndex, searchInstructions.Count))
                     {
                         yield return codeInstruction;
                     }
+                    currentInstructionIndex += searchInstructions.Count;
                 }
                 else
                 {
                     yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
                 }
-                currentInstructionIndex++;
+            }
+            if (!matchFound)
+            {
+                Log.Error("IL code instructions not found");
+            }
+        }
+        public static IEnumerable<CodeInstruction> AddDirect(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            List<CodeInstruction> searchInstructions = new List<CodeInstruction>
+            {
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(HediffSet), "hediffs")),
+                new CodeInstruction(OpCodes.Ldloc_2),
+                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(List<Hediff>), "get_Item")),
+                new CodeInstruction(OpCodes.Ldarg_1),
+                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Hediff), "TryMergeWith")),
+                new CodeInstruction(OpCodes.Brfalse_S)
+            };
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            int currentInstructionIndex = 0;
+            bool matchFound = false;
+            while (currentInstructionIndex < instructionsList.Count)
+            {
+                if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
+                {
+                    matchFound = true;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        CodeInstruction codeInstruction = instructionsList[currentInstructionIndex + i];
+                        yield return new CodeInstruction(codeInstruction.opcode, codeInstruction.operand);
+                    }
+                    yield return new CodeInstruction(OpCodes.Brfalse_S, instructionsList[currentInstructionIndex + 6].operand);
+                    yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
+                }
+                else
+                {
+                    yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
+                }
             }
             if (!matchFound)
             {
