@@ -722,10 +722,10 @@ namespace RimThreaded
 			
 			//PathFinder
 			original = typeof(PathFinder);
-			patched = typeof(PathFinder_Transpile);
-			Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
-			//patched = typeof(PathFinder_Patch);
-			//Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
+			//patched = typeof(PathFinder_Transpile);
+			//Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
+			patched = typeof(PathFinder_Patch);
+			Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
 
 
 			//WorldPawns
@@ -935,11 +935,6 @@ namespace RimThreaded
 			//patched = typeof(EditWindow_Log_Patch);
 			//Prefix(original, patched, "DoMessagesListing");
 
-			//WorldGrid
-			original = typeof(WorldGrid);
-			patched = typeof(WorldGrid_Patch);
-			Prefix(original, patched, "IsNeighbor");
-
 			//ResourceCounter
 			original = typeof(GUIStyle);
 			patched = typeof(GUIStyle_Patch);
@@ -1059,6 +1054,11 @@ namespace RimThreaded
 			patched = typeof(TemperatureCache_Patch);
 			Prefix(original, patched, "TryCacheRegionTempInfo");
 
+			//JobGiver_AnimalFlee			
+			original = typeof(JobGiver_AnimalFlee);
+			patched = typeof(JobGiver_AnimalFlee_Patch);
+			Prefix(original, patched, "FleeLargeFireJob");
+
 
 			//MOD COMPATIBILITY
 
@@ -1139,18 +1139,8 @@ namespace RimThreaded
 				}
 			}
 
-
-
-			
-			//ConstructorInfo constructorMethod4 = original.GetConstructor(new Type[] { typeof(int), typeof(int) });
-			//MethodInfo cpMethod4 = patched.GetMethod("Texture2DWidthHeight");
-			//harmony.Patch(constructorMethod4, prefix: new HarmonyMethod(cpMethod4));
-
-
 			Log.Message("RimThreaded patching is complete.");
 		}
-
-
 
 		public static void Prefix(Type original, Type patched, String methodName, Type[] orig_type)
 		{

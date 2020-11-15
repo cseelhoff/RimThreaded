@@ -12,7 +12,7 @@ namespace RimThreaded
 
     public static class Rand_Patch
     {
-        private static ConcurrentStack<ulong> stateStack = new ConcurrentStack<ulong>();
+        private static readonly Stack<ulong> stateStack2 = new Stack<ulong>();
         //public static PropertyInfo stateCompressed = AccessTools.DeclaredProperty(typeof(Rand), "StateCompressed");
         //public static uint seed = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "seed");
         //public static uint iterations = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
@@ -78,7 +78,7 @@ namespace RimThreaded
 
         public static bool set_Seed(uint value)
         {
-            if (stateStack.Count == 0)
+            if (stateStack2.Count == 0)
                 Log.ErrorOnce("Modifying the initial rand seed. Call PushState() first. The initial rand seed should always be based on the startup time and set only once.", 825343540, false);
             seed2 = value;
             iterations2 = 0U;
@@ -88,31 +88,34 @@ namespace RimThreaded
 
         public static bool EnsureStateStackEmpty()
         {
-            if (stateStack.Count <= 0)
+            if (stateStack2.Count <= 0)
                 return false;
             Log.Warning("Random state stack is not empty. There were more calls to PushState than PopState. Fixing.", false);
-            while (stateStack.Any())
+            while (stateStack2.Any())
                 PopState();
             return false;
         }
 
         public static bool PushState()
-        {            
-            stateStack.Push((ulong) seed2 | (ulong) iterations2 << 32);
+        {
+            ulong value = (ulong)seed2 | (ulong)iterations2 << 32;
+            lock (stateStack2)
+            {
+                stateStack2.Push(value);
+            }
             return false;
         }
 
         public static bool PopState()
         {
-            if (stateStack.TryPop(out ulong result))
+            ulong result2;
+            lock (stateStack2)
             {
-                seed2 = (uint)(result & (ulong) uint.MaxValue);
-                iterations2 = (uint)(result >> 32 & (ulong)uint.MaxValue);
+                result2 = stateStack2.Pop();
             }
-            else
-            {
-                Log.Error("Rand.PopState stateStack.TryPop failed");
-            }
+            seed2 = (uint)(result2 & (ulong) uint.MaxValue);
+            iterations2 = (uint)(result2 >> 32 & (ulong)uint.MaxValue);            
+
             return false;
         }
 

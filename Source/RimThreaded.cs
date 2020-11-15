@@ -225,6 +225,18 @@ namespace RimThreaded
             {
                 RegionListersUpdater_Patch.tmpRegionsLists[tID] = new List<Region>();
             }
+            lock (RegionListersUpdater_Patch.tmpRegionsLists)
+            {
+                RegionListersUpdater_Patch.tmpRegionsLists[tID] = new List<Region>();
+            }
+            lock (PathFinder_Patch.calcGrids)
+            {
+                PathFinder_Patch.calcGrids[tID] = new Dictionary<PathFinder, PathFinder_Patch.PathFinderNodeFast[]>();
+            }
+            lock (PathFinder_Patch.openLists)
+            {
+                PathFinder_Patch.openLists[tID] = new FastPriorityQueue<PathFinder_Patch.CostNode2>();
+            }
             thread.Start();
         }
 
@@ -817,6 +829,14 @@ namespace RimThreaded
                 lock (RegionListersUpdater_Patch.tmpRegionsLists)
                 {
                     RegionListersUpdater_Patch.tmpRegionsLists.Remove(managedThreadID);
+                }
+                lock (PathFinder_Patch.calcGrids)
+                {
+                    PathFinder_Patch.calcGrids.Remove(managedThreadID);
+                }
+                lock (PathFinder_Patch.openLists)
+                {
+                    PathFinder_Patch.openLists.Remove(managedThreadID);
                 }
             }
             else

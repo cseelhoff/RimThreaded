@@ -17,6 +17,11 @@ namespace RimThreaded
 
     public class PathFinder_Patch
     {
+        public static Dictionary<int, Dictionary<PathFinder, PathFinderNodeFast[]>> calcGrids = 
+            new Dictionary<int, Dictionary<PathFinder, PathFinderNodeFast[]>>();
+        public static Dictionary<int, FastPriorityQueue<CostNode2>> openLists = 
+            new Dictionary<int, FastPriorityQueue<CostNode2>>();
+
         public static AccessTools.FieldRef<PathFinder, Map> mapField =
             AccessTools.FieldRefAccess<PathFinder, Map>("map");
         public static AccessTools.FieldRef<PathFinder, int> mapSizeXField =
@@ -292,15 +297,22 @@ namespace RimThreaded
         */
         public static bool FindPath(PathFinder __instance, ref PawnPath __result, IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)
         {
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            //Dictionary<PathFinder, PathFinderNodeFast[]> calcGrids1 = calcGrids[tID];
+            //if (!calcGrids1.TryGetValue(__instance, out PathFinderNodeFast[] local_calcGrid))
+            //{
+                //local_calcGrid = new PathFinderNodeFast[mapSizeXField(__instance) * mapSizeZField(__instance)];
+                //calcGrids1.Add(__instance, local_calcGrid);
+            //}
             PathFinderNodeFast[] local_calcGrid = new PathFinderNodeFast[mapSizeXField(__instance) * mapSizeZField(__instance)]; //CHANGE
-            ushort local_statusOpenValue = 1;
-            ushort local_statusClosedValue = 2;
 
             //only local because CostNode is an internal struct
             FastPriorityQueue<CostNode2> local_openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
+            //FastPriorityQueue<CostNode2> local_openList = openLists[tID];
             //FastPriorityQueue<object> local_openList = openListField(__instance);
 
-
+            ushort local_statusOpenValue = 1;
+            ushort local_statusClosedValue = 2;
 
             if (DebugSettings.pathThroughWalls)
             {
@@ -473,7 +485,8 @@ namespace RimThreaded
 
                     int num15 = 0;
                     bool flag10 = false;
-                    if (!flag2 && new IntVec3(num12, 0, num13).GetTerrain(mapField(__instance)).HasTag("Water"))
+                    //if (!flag2 && new IntVec3(num12, 0, num13).GetTerrain(mapField(__instance)).HasTag("Water"))                        
+                    if (!flag2 && mapField(__instance).terrainGrid.topGrid[num13 * mapSizeXField(__instance) + num12].HasTag("Water"))
                     {
                         continue;
                     }
