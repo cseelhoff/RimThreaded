@@ -7,12 +7,14 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using System.Threading;
 
 namespace RimThreaded
 {
 
     public class ThingOwnerUtility_Patch
     {
+		public static Dictionary<int, List<IThingHolder>> tmpHoldersDict = new Dictionary<int, List<IThingHolder>>();
 
 		public static bool AppendThingHoldersFromThings(List<IThingHolder> outThingsHolders, IList<Thing> container)
 		{
@@ -78,6 +80,7 @@ namespace RimThreaded
 						outThings.AddRange(directlyHeldThings);
 					}
 				}
+				//List<IThingHolder> tmpHolders = tmpHoldersDict[Thread.CurrentThread.ManagedThreadId];
 				List<IThingHolder> tmpHolders = new List<IThingHolder>();
 				thingHolder.GetChildHolders(tmpHolders);
 				for (int i = 0; i < tmpHolders.Count; i++)
