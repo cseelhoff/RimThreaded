@@ -17,10 +17,14 @@ namespace RimThreaded
 
     public class PathFinder_Patch
     {
-        public static Dictionary<int, Dictionary<PathFinder, PathFinderNodeFast[]>> calcGrids = 
-            new Dictionary<int, Dictionary<PathFinder, PathFinderNodeFast[]>>();
-        public static Dictionary<int, FastPriorityQueue<CostNode2>> openLists = 
+        public static Dictionary<int, PathFinderNodeFast[]> calcGrids = 
+            new Dictionary<int, PathFinderNodeFast[]>();
+        public static Dictionary<int, FastPriorityQueue<CostNode2>> openLists =
             new Dictionary<int, FastPriorityQueue<CostNode2>>();
+        public static Dictionary<int, ushort> openValues =
+            new Dictionary<int, ushort>();
+        public static Dictionary<int, ushort> closedValues =
+            new Dictionary<int, ushort>();
 
         public static AccessTools.FieldRef<PathFinder, Map> mapField =
             AccessTools.FieldRefAccess<PathFinder, Map>("map");
@@ -298,21 +302,10 @@ namespace RimThreaded
         public static bool FindPath(PathFinder __instance, ref PawnPath __result, IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
-            //Dictionary<PathFinder, PathFinderNodeFast[]> calcGrids1 = calcGrids[tID];
-            //if (!calcGrids1.TryGetValue(__instance, out PathFinderNodeFast[] local_calcGrid))
-            //{
-                //local_calcGrid = new PathFinderNodeFast[mapSizeXField(__instance) * mapSizeZField(__instance)];
-                //calcGrids1.Add(__instance, local_calcGrid);
-            //}
-            PathFinderNodeFast[] local_calcGrid = new PathFinderNodeFast[mapSizeXField(__instance) * mapSizeZField(__instance)]; //CHANGE
-
-            //only local because CostNode is an internal struct
-            FastPriorityQueue<CostNode2> local_openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
-            //FastPriorityQueue<CostNode2> local_openList = openLists[tID];
-            //FastPriorityQueue<object> local_openList = openListField(__instance);
-
-            ushort local_statusOpenValue = 1;
-            ushort local_statusClosedValue = 2;
+            PathFinderNodeFast[] local_calcGrid = getCalcGrid(tID, __instance);
+            FastPriorityQueue<CostNode2> local_openList = getOpenList(tID);
+            ushort local_statusOpenValue = getOpenValue(tID);
+            ushort local_statusClosedValue = getClosedValue(tID);
 
             if (DebugSettings.pathThroughWalls)
             {
@@ -726,9 +719,49 @@ namespace RimThreaded
             DebugDrawRichData();
             PfProfilerEndSample();
             PfProfilerEndSample();
+            openValues[tID] = local_statusOpenValue;
+            closedValues[tID] = local_statusClosedValue;
             __result = PawnPath.NotFound;
             return false;
         }
 
+        public static ushort getClosedValue(int tID)
+        {
+            if (!closedValues.TryGetValue(tID, out ushort local_statusClosedValue))
+            {
+                local_statusClosedValue = 2;
+            }
+            return local_statusClosedValue;
+        }
+
+        public static ushort getOpenValue(int tID)
+        {
+            if (!openValues.TryGetValue(tID, out ushort local_statusOpenValue))
+            {
+                local_statusOpenValue = 1;
+            }
+            return local_statusOpenValue;
+        }
+
+        public static FastPriorityQueue<CostNode2> getOpenList(int tID)
+        {
+            if (!openLists.TryGetValue(tID, out FastPriorityQueue<CostNode2> local_openList))
+            {
+                local_openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
+                openLists[tID] = local_openList;
+            }
+            return local_openList;
+        }
+
+        public static PathFinderNodeFast[] getCalcGrid(int tID, PathFinder __instance)
+        {
+            int size = mapSizeXField(__instance) * mapSizeZField(__instance);
+            if (!calcGrids.TryGetValue(tID, out PathFinderNodeFast[] local_calcGrid) || local_calcGrid.Length < size)
+            {
+                local_calcGrid = new PathFinderNodeFast[size];
+                calcGrids[tID] = local_calcGrid;
+            }
+            return local_calcGrid;
+        }
     }
 }

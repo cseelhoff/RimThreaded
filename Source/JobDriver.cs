@@ -157,13 +157,24 @@ namespace Verse.AI
             }
 
             Toil curToil = get_CurToil2(__instance);
-            if (get_CurToil2(__instance).preInitActions != null)
+            Toil gct = get_CurToil2(__instance);
+            if (gct != null && gct.preInitActions != null)
             {
-                for (int i = 0; i < get_CurToil2(__instance).preInitActions.Count; i++)
+                List<Action> preInitActions = gct.preInitActions;
+                for (int i = 0; i < preInitActions.Count; i++)
                 {
                     try
                     {
-                        get_CurToil2(__instance).preInitActions[i]();
+                        gct = get_CurToil2(__instance);
+                        if (gct != null)
+                        {
+                            preInitActions = gct.preInitActions;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        preInitActions[i]();
                     }
                     catch (Exception exception)
                     {
@@ -172,6 +183,15 @@ namespace Verse.AI
                     }
 
                     if (get_CurToil2(__instance) != curToil)
+                    {
+                        break;
+                    }
+                    gct = get_CurToil2(__instance);
+                    if (gct != null)
+                    {
+                        preInitActions = gct.preInitActions;
+                    }
+                    else
                     {
                         break;
                     }

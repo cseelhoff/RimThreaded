@@ -225,17 +225,21 @@ namespace RimThreaded
             {
                 RegionListersUpdater_Patch.tmpRegionsLists[tID] = new List<Region>();
             }
-            lock (RegionListersUpdater_Patch.tmpRegionsLists)
-            {
-                RegionListersUpdater_Patch.tmpRegionsLists[tID] = new List<Region>();
-            }
             lock (PathFinder_Patch.calcGrids)
             {
-                PathFinder_Patch.calcGrids[tID] = new Dictionary<PathFinder, PathFinder_Patch.PathFinderNodeFast[]>();
+                PathFinder_Patch.calcGrids[tID] = new PathFinder_Patch.PathFinderNodeFast[0];
             }
             lock (PathFinder_Patch.openLists)
             {
-                PathFinder_Patch.openLists[tID] = new FastPriorityQueue<PathFinder_Patch.CostNode2>();
+                PathFinder_Patch.openLists[tID] = new FastPriorityQueue<PathFinder_Patch.CostNode2>(new PathFinder_Patch.CostNodeComparer2());
+            }
+            lock (PathFinder_Patch.openValues)
+            {
+                PathFinder_Patch.openValues[tID] = 1;
+            }
+            lock (PathFinder_Patch.closedValues)
+            {
+                PathFinder_Patch.closedValues[tID] = 2;
             }
             thread.Start();
         }
@@ -837,6 +841,14 @@ namespace RimThreaded
                 lock (PathFinder_Patch.openLists)
                 {
                     PathFinder_Patch.openLists.Remove(managedThreadID);
+                }
+                lock (PathFinder_Patch.openValues)
+                {
+                    PathFinder_Patch.openValues.Remove(managedThreadID);
+                }
+                lock (PathFinder_Patch.closedValues)
+                {
+                    PathFinder_Patch.closedValues.Remove(managedThreadID);
                 }
             }
             else
