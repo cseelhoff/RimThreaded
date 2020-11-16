@@ -19,18 +19,20 @@ namespace RimThreaded
 			bool foundEnemy = false;
 			RegionTraverser.BreadthFirstTraverse(pawn.Position, pawn.Map, (RegionEntryPredicate)((from, to) => to.Allows(tp, false)), (RegionProcessor)(r =>
 			{
-				Thing[] array;
 				List<Thing> thingList = r.ListerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
-				lock (thingList)
+                for (int index = 0; index < thingList.Count; ++index)
 				{
-					array = thingList.ToArray();
-				}
-                for (int index = 0; index < array.Length; ++index)
-				{
-					Thing t = array[index];
+                    Thing t;
+                    try
+                    {
+                        t = thingList[index];
+                    } catch(ArgumentOutOfRangeException)
+                    {
+                        break;
+                    }
 					if (null != t)
 					{
-						if (t.HostileTo((Thing)pawn))
+						if (t.HostileTo(pawn))
 						{
 							foundEnemy = true;
 							return true;
