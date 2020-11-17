@@ -1118,6 +1118,12 @@ namespace RimThreaded
 							Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
 							patched = typeof(ExtendedDataStorage_Transpile);
 							Transpile(originalType, patched, methodName);
+
+							giddyUpCoreStorageExtendedDataStorage = originalType;
+							methodName = "GetExtendedDataFor";
+							Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
+							patched = typeof(ExtendedDataStorage_Transpile);
+							Transpile(originalType, patched, methodName);
 						}
 						else if (originalType.FullName.Equals("GiddyUpCore.Jobs.JobDriver_Mounted"))
 						{
