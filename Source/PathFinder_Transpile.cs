@@ -31,7 +31,7 @@ namespace RimThreaded
 			Type fastPriorityQueueCostNodeType1 = typeof(FastPriorityQueue<>).MakeGenericType(costNodeType);
 			Type fastPriorityQueueCostNodeType2 = typeof(FastPriorityQueue<>).MakeGenericType(costNodeType2);
 			LocalBuilder local_openList = iLGenerator.DeclareLocal(fastPriorityQueueCostNodeType2);
-			LocalBuilder tID = iLGenerator.DeclareLocal(typeof(int));
+			//LocalBuilder tID = iLGenerator.DeclareLocal(typeof(int));
 			//LocalBuilder size = iLGenerator.DeclareLocal(typeof(int));
 
 			List<CodeInstruction> instructionsList = instructions.ToList();
@@ -41,16 +41,16 @@ namespace RimThreaded
 			//IL_0000: call class [mscorlib]System.Threading.Thread[mscorlib] System.Threading.Thread::get_CurrentThread()
 			//IL_0005: callvirt instance int32[mscorlib] System.Threading.Thread::get_ManagedThreadId()
 			//IL_000a: stloc.0
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Thread), "get_CurrentThread"));
-			yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Thread), "get_ManagedThreadId"));
-			yield return new CodeInstruction(OpCodes.Stloc, tID.LocalIndex);
+			//yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Thread), "get_CurrentThread"));
+			//yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Thread), "get_ManagedThreadId"));
+			//yield return new CodeInstruction(OpCodes.Stloc, tID.LocalIndex);
 
 			// PathFinderNodeFast[] calcGrid = getCalcGrid(managedThreadId, __instance);
 			//IL_000b: ldloc.0
 			//IL_000c: ldarg.0
 			//IL_000d: call valuetype RimThreaded.PathFinder_Patch / PathFinderNodeFast[] RimThreaded.PathFinder_Patch::getCalcGrid(int32, class ['Assembly-CSharp'] Verse.AI.PathFinder)
 			//IL_0012: stloc.1
-			yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
+			//yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
 			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getCalcGrid"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_calcGrid.LocalIndex);
@@ -59,7 +59,7 @@ namespace RimThreaded
 			//IL_0013: ldloc.0
 			//IL_0014: call class ['Assembly-CSharp'] Verse.FastPriorityQueue`1<valuetype RimThreaded.PathFinder_Patch/CostNode2> RimThreaded.PathFinder_Patch::getOpenList(int32)
 			//IL_0019: stloc.2
-			yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
+			//yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
 			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getOpenList"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_openList.LocalIndex);
 
@@ -67,7 +67,7 @@ namespace RimThreaded
 			//IL_001a: ldloc.0
 			//IL_001b: call uint16 RimThreaded.PathFinder_Patch::getOpenValue(int32)
 			//IL_0020: stloc.3
-			yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
+			//yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
 			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getOpenValue"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_statusOpenValue.LocalIndex);
 
@@ -75,7 +75,7 @@ namespace RimThreaded
 			//IL_0021: ldloc.0
 			//IL_0022: call uint16 RimThreaded.PathFinder_Patch::getClosedValue(int32)
 			//IL_0027: stloc.s 4
-			yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
+			//yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
 			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getClosedValue"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_statusClosedValue.LocalIndex);
 
@@ -406,6 +406,15 @@ namespace RimThreaded
 				}
 				else if (
 					instructionsList[i].opcode == OpCodes.Newobj &&
+					(ConstructorInfo)instructionsList[i].operand == costNodeType.GetConstructor(new Type[] { typeof(int), typeof(int) })
+				)
+				{
+					instructionsList[i].operand = costNodeType2.GetConstructor(new Type[] { typeof(int), typeof(int) });
+					yield return instructionsList[i];
+					i++;
+				}
+				else if (
+					instructionsList[i].opcode == OpCodes.Newobj &&
 					(ConstructorInfo)instructionsList[i].operand == fastPriorityQueueCostNodeType1.GetConstructor(new Type[] { icomparerCostNodeType1 })
 				)
 				{
@@ -413,6 +422,7 @@ namespace RimThreaded
 					yield return instructionsList[i];
 					i++;
 				}
+				/*
 				else if (i == instructionsList.Count - 1)
                 {
 					// openValues[managedThreadId] = value3;
@@ -437,7 +447,7 @@ namespace RimThreaded
 					yield return instructionsList[i];
 					i++;
 				}
-
+				*/
 				else
 				{
                     yield return instructionsList[i];
