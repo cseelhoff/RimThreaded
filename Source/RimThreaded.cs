@@ -241,6 +241,10 @@ namespace RimThreaded
             {
                 PathFinder_Patch.closedValues[tID] = 2;
             }
+            lock (ThingOwnerUtility_Patch.tmpHoldersDict)
+            {
+                ThingOwnerUtility_Patch.tmpHoldersDict[tID] = new List<IThingHolder>();
+            }
             thread.Start();
         }
 
@@ -849,6 +853,10 @@ namespace RimThreaded
                 lock (PathFinder_Patch.closedValues)
                 {
                     PathFinder_Patch.closedValues.Remove(managedThreadID);
+                }
+                lock(ThingOwnerUtility_Patch.tmpHoldersDict)
+                {
+                    ThingOwnerUtility_Patch.tmpHoldersDict.Remove(managedThreadID);
                 }
             }
             else
