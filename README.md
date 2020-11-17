@@ -36,6 +36,10 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.0.83  
+-Fixed bug in PathFinder.FindPath  
+-Fixed bug in GiddyUpCore.Storage.ExtendedDataStorage.GetExtendedDataFor  
+
 Version 1.0.82  
 -Major performance improvement in PathFinder.FindPath  
 -Fixed bug in RegionListersUpdater.RegisterInRegions  
