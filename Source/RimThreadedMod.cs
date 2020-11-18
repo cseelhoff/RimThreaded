@@ -41,7 +41,7 @@ namespace RimThreaded
 							if (patch.owner.Equals("majorhoff.rimthreaded") && (patches.Prefixes.Count > 1 || patches.Postfixes.Count > 0 || patches.Transpilers.Count > 0))
 							{
 								isRimThreadedPrefixed = true;
-								Settings.modsText += "\n---Patch method: " + patch.PatchMethod + "---\n";
+								Settings.modsText += "\n---Patch method: " + patch.PatchMethod.DeclaringType.FullName + " " + patch.PatchMethod + "-- -\n";
 								Settings.modsText += "RimThreaded priority: " + patch.priority + "\n";
 								break;
 							}

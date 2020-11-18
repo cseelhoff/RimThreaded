@@ -661,14 +661,16 @@ namespace RimThreaded
 			Prefix(original, patched, "ImmunityHandlerTick"); 
 			Prefix(original, patched, "NeededImmunitiesNow");
 
-			 //Room
-			 original = typeof(Room);
+			//Room
+			original = typeof(Room);
 			patched = typeof(Room_Patch);
 			Prefix(original, patched, "OpenRoofCountStopAt");
 			Prefix(original, patched, "get_PsychologicallyOutdoors");
-			Prefix(original, patched, "RemoveRegion");
+			//Prefix(original, patched, "RemoveRegion");
 			Prefix(original, patched, "Notify_RoofChanged");
 			Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
+			patched = typeof(Room_Transpile);
+			Transpile(original, patched, "RemoveRegion");
 
 
 			//LongEventHandler
@@ -701,8 +703,10 @@ namespace RimThreaded
 
 			//BattleLog
 			original = typeof(BattleLog);
-			patched = typeof(BattleLog_Patch);
-			Prefix(original, patched, "Add");
+			//patched = typeof(BattleLog_Patch);
+			//Prefix(original, patched, "Add");
+			patched = typeof(BattleLog_Transpile);
+			Transpile(original, patched, "Add");
 
 			//PawnCapacitiesHandler
 			original = typeof(PawnCapacitiesHandler);
@@ -771,8 +775,10 @@ namespace RimThreaded
 
 			//Pawn_InteractionsTracker
 			original = typeof(Pawn_InteractionsTracker);
-			patched = typeof(Pawn_InteractionsTracker_Patch);
-			Prefix(original, patched, "TryInteractRandomly");
+			//patched = typeof(Pawn_InteractionsTracker_Patch);
+			//Prefix(original, patched, "TryInteractRandomly");
+			patched = typeof(Pawn_InteractionsTracker_Transpile);
+			Transpile(original, patched, "TryInteractRandomly");
 
 			//Toils_Ingest
 			original = typeof(Toils_Ingest);

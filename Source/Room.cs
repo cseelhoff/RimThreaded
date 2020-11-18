@@ -39,7 +39,7 @@ namespace RimThreaded
 		}
 		public static bool RemoveRegion(Room __instance, Region r)
 		{
-			lock (__instance)
+			lock (__instance) //ADDED
 			{
 				if (!__instance.Regions.Contains(r))
 				{

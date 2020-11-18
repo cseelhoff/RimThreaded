@@ -7,6 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -15,6 +16,17 @@ namespace RimThreaded
 	{
 		public static AccessTools.FieldRef<Pawn_InteractionsTracker, Pawn> pawn =
 			AccessTools.FieldRefAccess<Pawn_InteractionsTracker, Pawn>("pawn");
+		public static Dictionary<int, List<Pawn>> workingLists = new Dictionary<int, List<Pawn>>();
+		public static List<Pawn> getWorkingList()
+		{
+			int tID = Thread.CurrentThread.ManagedThreadId;
+			if (!workingLists.TryGetValue(tID, out List<Pawn> workingList))
+			{
+				workingList = new List<Pawn>();
+				workingLists[tID] = workingList;
+			}
+			return workingList;
+		}
 		public static bool TryInteractRandomly(Pawn_InteractionsTracker __instance, ref bool __result)
 		{
 			if (__instance.InteractedTooRecentlyToInteract())
@@ -29,13 +41,13 @@ namespace RimThreaded
 			}
 			List<Pawn> collection = pawn(__instance).Map.mapPawns.SpawnedPawnsInFaction(pawn(__instance).Faction);
 			//Pawn_InteractionsTracker.workingList.Clear();
-			List<Pawn> workingList = new List<Pawn>();
-			workingList.AddRange(collection);
-			workingList.Shuffle<Pawn>();
+			List<Pawn> workingList = getWorkingList(); //ADDED
+			workingList.AddRange(collection); //REPLACED workingList with local
+			workingList.Shuffle<Pawn>();//REPLACED workingList with local
 			List<InteractionDef> allDefsListForReading = DefDatabase<InteractionDef>.AllDefsListForReading;
-			for (int i = 0; i < workingList.Count; i++)
+			for (int i = 0; i < workingList.Count; i++)//REPLACED workingList with local
 			{
-				Pawn p = workingList[i];
+				Pawn p = workingList[i];//REPLACED workingList with local
 				InteractionDef intDef;
 				if (p != pawn(__instance) && __instance.CanInteractNowWith(p, null) && InteractionUtility.CanReceiveRandomInteraction(p) && !pawn(__instance).HostileTo(p) && allDefsListForReading.TryRandomElementByWeight(delegate (InteractionDef x)
 				{
@@ -48,7 +60,7 @@ namespace RimThreaded
 				{
 					if (__instance.TryInteractWith(p, intDef))
 					{
-						workingList.Clear();
+						workingList.Clear();//REPLACED workingList with local
 						__result = true;
 						return false;
 					}

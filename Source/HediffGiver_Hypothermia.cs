@@ -14,33 +14,41 @@ namespace RimThreaded
 		public static bool OnIntervalPassed(HediffGiver_Hypothermia __instance, Pawn pawn, Hediff cause)
 		{
 			float ambientTemperature = pawn.AmbientTemperature;
-			float comfortableTemperatureMin = pawn.GetStatValue(StatDefOf.ComfyTemperatureMin, true);
-			float minTemp = comfortableTemperatureMin - 10f;
+			//FloatRange floatRange = pawn.ComfortableTemperatureRange(); //REMOVED
+			//FloatRange floatRange2 = pawn.SafeTemperatureRange(); //REMOVED
+			float comfortableTemperatureMin = pawn.GetStatValue(StatDefOf.ComfyTemperatureMin, true); //ADDED
+			float minTemp = comfortableTemperatureMin - 10f; //ADDED
 			HediffSet hediffSet = pawn.health.hediffSet;
 			HediffDef hediffDef = pawn.RaceProps.FleshType == FleshTypeDefOf.Insectoid ? __instance.hediffInsectoid : __instance.hediff;
 			Hediff firstHediffOfDef = hediffSet.GetFirstHediffOfDef(hediffDef, false);
-			if (ambientTemperature < minTemp)
+			//if (ambientTemperature < floatRange2.min) //REMOVED
+			if (ambientTemperature < minTemp) //ADDED
 			{
-				float sevOffset = Mathf.Max(Mathf.Abs(ambientTemperature - minTemp) * 6.45E-05f, 0.00075f);
-				HealthUtility.AdjustSeverity(pawn, hediffDef, sevOffset);
+				//float a = Mathf.Abs(ambientTemperature - floatRange2.min) * 6.45E-05f; //REMOVED
+				float a = Mathf.Abs(ambientTemperature - minTemp) * 6.45E-05f; //ADDED
+				a = Mathf.Max(a, 0.00075f);
+				HealthUtility.AdjustSeverity(pawn, hediffDef, a);
 				if (pawn.Dead)
 					return false;
 			}
 			if (firstHediffOfDef == null)
 				return false;
-			if (ambientTemperature > comfortableTemperatureMin)
+			//if (ambientTemperature > floatRange.min) //REMOVED
+			if (ambientTemperature > comfortableTemperatureMin) //ADDED
 			{
-				float num = Mathf.Clamp(firstHediffOfDef.Severity * 0.027f, 0.0015f, 0.015f);
-				firstHediffOfDef.Severity -= num;
+				float value = firstHediffOfDef.Severity * 0.027f;
+				value = Mathf.Clamp(value, 0.0015f, 0.015f);
+				firstHediffOfDef.Severity -= value;
 			}
-			else
+			else if (pawn.RaceProps.FleshType != FleshTypeDefOf.Insectoid && ambientTemperature < 0f && firstHediffOfDef.Severity > 0.37f)
 			{
-				BodyPartRecord result;
-				if (pawn.RaceProps.FleshType == FleshTypeDefOf.Insectoid || (double)ambientTemperature >= 0.0 || ((double)firstHediffOfDef.Severity <= 0.370000004768372 || (double)Rand.Value >= (double)(0.025f * firstHediffOfDef.Severity)) || !pawn.RaceProps.body.AllPartsVulnerableToFrostbite.Where<BodyPartRecord>((Func<BodyPartRecord, bool>)(x => !hediffSet.PartIsMissing(x))).TryRandomElementByWeight<BodyPartRecord>((Func<BodyPartRecord, float>)(x => x.def.frostbiteVulnerability), out result))
-					return false;
-				int num = Mathf.CeilToInt(result.def.hitPoints * 0.5f);
-				DamageInfo dinfo = new DamageInfo(DamageDefOf.Frostbite, (float)num, 0.0f, -1f, (Verse.Thing)null, result, (ThingDef)null, DamageInfo.SourceCategory.ThingOrUnknown, (Verse.Thing)null);
-				pawn.TakeDamage(dinfo);
+				float num = 0.025f * firstHediffOfDef.Severity;
+				if (Rand.Value < num && pawn.RaceProps.body.AllPartsVulnerableToFrostbite.Where((BodyPartRecord x) => !hediffSet.PartIsMissing(x)).TryRandomElementByWeight((BodyPartRecord x) => x.def.frostbiteVulnerability, out BodyPartRecord result))
+				{
+					int num2 = Mathf.CeilToInt(result.def.hitPoints * 0.5f);
+					DamageInfo dinfo = new DamageInfo(DamageDefOf.Frostbite, num2, 0f, -1f, null, result);
+					pawn.TakeDamage(dinfo);
+				}
 			}
 			return false;
 		}

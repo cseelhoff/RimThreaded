@@ -174,7 +174,10 @@ namespace RimThreaded
 
         static RimThreaded()
         {
+            int tID = Thread.CurrentThread.ManagedThreadId;
             CreateWorkerThreads();
+            ImmunityHandler_Patch.immunityInfoLists[tID] = new List<ImmunityInfo>();
+
             monitorThread = new Thread(() => MonitorThreads());
             monitorThread.Start();
             for(int index = 0; index < totalPrepsCount; index++)
