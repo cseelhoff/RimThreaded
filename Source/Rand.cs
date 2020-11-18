@@ -111,6 +111,10 @@ namespace RimThreaded
             ulong result2;
             lock (stateStack2)
             {
+                if (stateStack2.Count == 0)
+                {
+                    PushState();
+                }
                 result2 = stateStack2.Pop();
             }
             seed2 = (uint)(result2 & (ulong) uint.MaxValue);
