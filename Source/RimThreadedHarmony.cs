@@ -200,10 +200,10 @@ namespace RimThreaded
 			//Rand
 			original = typeof(Rand);
 			patched = typeof(Rand_Patch);
-			Prefix(original, patched, "set_Seed");
-			Prefix(original, patched, "get_Int");
-			Prefix(original, patched, "get_Value");
-			Prefix(original, patched, "EnsureStateStackEmpty");
+			//Prefix(original, patched, "set_Seed");
+			//Prefix(original, patched, "get_Int");
+			//Prefix(original, patched, "get_Value");
+			//Prefix(original, patched, "EnsureStateStackEmpty");
 			Prefix(original, patched, "PopState");
 			Prefix(original, patched, "TryRangeInclusiveWhere");
 			Prefix(original, patched, "PushState", new Type[] { });

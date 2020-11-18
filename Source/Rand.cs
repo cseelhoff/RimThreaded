@@ -6,19 +6,17 @@ using System.Reflection;
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public static class Rand_Patch
     {
-        private static readonly Stack<ulong> stateStack2 = new Stack<ulong>();
-        //public static PropertyInfo stateCompressed = AccessTools.DeclaredProperty(typeof(Rand), "StateCompressed");
-        //public static uint seed = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "seed");
-        //public static uint iterations = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
-        //I could not get the StaticFieldRefAccess field to work properly. This is an ugly hack I'm doing by rewriting methods.
-        public static uint iterations2 = 0;
-        public static uint seed2 = (uint)DateTime.Now.GetHashCode();
+
+        public static uint seed = StaticFieldRefAccess<uint>(typeof(Rand), "seed");
+        public static uint iterations = StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
+        public static Stack<ulong> stateStack = StaticFieldRefAccess<Stack<ulong>>(typeof(Rand), "stateStack");
 
 
         public static bool TryRangeInclusiveWhere(ref bool __result,
@@ -65,43 +63,12 @@ namespace RimThreaded
             return false;
         }
 
-        public static bool get_Int(ref int __result)
-        {
-             __result = MurmurHash.GetInt(seed2, iterations2++);
-            return false;
-        }
-        public static bool get_Value(ref float __result)
-        {
-            __result = (float)(((double)MurmurHash.GetInt(seed2, iterations2++) - int.MinValue) / uint.MaxValue);
-            return false;
-        }
-
-        public static bool set_Seed(uint value)
-        {
-            if (stateStack2.Count == 0)
-                Log.ErrorOnce("Modifying the initial rand seed. Call PushState() first. The initial rand seed should always be based on the startup time and set only once.", 825343540, false);
-            seed2 = value;
-            iterations2 = 0U;
-            return false;
-        }
-
-
-        public static bool EnsureStateStackEmpty()
-        {
-            if (stateStack2.Count <= 0)
-                return false;
-            Log.Warning("Random state stack is not empty. There were more calls to PushState than PopState. Fixing.", false);
-            while (stateStack2.Any())
-                PopState();
-            return false;
-        }
-
         public static bool PushState()
         {
-            ulong value = (ulong)seed2 | (ulong)iterations2 << 32;
-            lock (stateStack2)
+            ulong value = (ulong)seed | (ulong)iterations << 32;
+            lock (stateStack)
             {
-                stateStack2.Push(value);
+                stateStack.Push(value);
             }
             return false;
         }
@@ -109,12 +76,12 @@ namespace RimThreaded
         public static bool PopState()
         {
             ulong result2;
-            lock (stateStack2)
+            lock (stateStack)
             {
-                result2 = stateStack2.Pop();
+                result2 = stateStack.Pop();
             }
-            seed2 = (uint)(result2 & (ulong) uint.MaxValue);
-            iterations2 = (uint)(result2 >> 32 & (ulong)uint.MaxValue);            
+            seed = (uint)(result2 & (ulong) uint.MaxValue);
+            iterations = (uint)(result2 >> 32 & (ulong)uint.MaxValue);            
 
             return false;
         }
