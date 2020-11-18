@@ -36,6 +36,12 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.1.0  
+-Fixed bug in WorldComponent Ticks  
+-Fixed bug in TradeShip Ticks  
+-Fixed bug in WildPlantSpawner Ticks  
+-Fixed bug in Faction Ticks  
+
 Version 1.0.83  
 -Fixed bug in PathFinder.FindPath  
 -Fixed bug in GiddyUpCore.Storage.ExtendedDataStorage.GetExtendedDataFor  

@@ -615,7 +615,7 @@ namespace RimThreaded
                 while (index >= 0)
                 {
                     WindManager_Patch.plantMaterials[index].SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
-                    index = Interlocked.Decrement(ref steadyEnvironmentEffectsTicks);
+                    index = Interlocked.Decrement(ref plantMaterialsCount);
                 }
                 if (index == -1)
                 {
@@ -728,7 +728,10 @@ namespace RimThreaded
                     WorldComponent wc = WorldComponents[index];
                     if (null != wc)
                     {
-                        wc.WorldComponentTick();
+                        lock (wc)
+                        {
+                            wc.WorldComponentTick();
+                        }
                     }
                     //}
                     //catch (Exception ex)

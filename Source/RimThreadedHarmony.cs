@@ -292,13 +292,7 @@ namespace RimThreaded
 			Prefix(original, patched, "MoteSpawned");
 			Prefix(original, patched, "MoteDespawned");
 			Prefix(original, patched, "MoteListUpdate");
-
-			//GenTemperature			
-			original = typeof(GenTemperature);
-			patched = typeof(GenTemperature_Patch);
-			Prefix(original, patched, "EqualizeTemperaturesThroughBuilding");
-			Prefix(original, patched, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
-			
+						
 			//RCellFinder			
 			original = typeof(RCellFinder);
 			patched = typeof(RCellFinder_Patch);
@@ -866,8 +860,8 @@ namespace RimThreaded
 
 			//TileTemperaturesComp
 			original = typeof(TileTemperaturesComp);
-			patched = typeof(TileTemperaturesComp_Patch);
-			Prefix(original, patched, "WorldComponentTick");
+			patched = typeof(TileTemperaturesComp_Transpile);
+			Transpile(original, patched, "WorldComponentTick");
 
 			//PawnRelationUtility
 			original = typeof(PawnRelationUtility);
@@ -962,11 +956,6 @@ namespace RimThreaded
 			patched = typeof(Pawn_MindState_Patch);
 			Prefix(original, patched, "MindStateTick");
 			
-			//GenTemperature			
-			original = typeof(GenTemperature);
-			patched = typeof(GenTemperature_Patch);
-			Prefix(original, patched, "SeasonalShiftAmplitudeAt");
-
 			//WorldObjectsHolder
 			original = typeof(WorldObjectsHolder);
 			patched = typeof(WorldObjectsHolder_Patch);
@@ -1016,6 +1005,9 @@ namespace RimThreaded
 			original = typeof(GenTemperature);
 			patched = typeof(GenTemperature_Patch);
 			Prefix(original, patched, "GetTemperatureFromSeasonAtTile");
+			Prefix(original, patched, "SeasonalShiftAmplitudeAt");
+			Prefix(original, patched, "EqualizeTemperaturesThroughBuilding");
+			Prefix(original, patched, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
 
 			//WorldComponentUtility			
 			original = typeof(WorldComponentUtility);
