@@ -77,6 +77,9 @@
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="Pawn_InteractionsTracker_Transpile.cs" />
+    <Compile Include="Room_Transpile.cs" />
+    <Compile Include="BattleLog_Transpile.cs" />
     <Compile Include="TileTemperaturesComp_Transpile.cs" />
     <Compile Include="JobGiver_AnimalFlee.cs" />
     <Compile Include="ExtendedDataStorage_Transpile.cs" />
