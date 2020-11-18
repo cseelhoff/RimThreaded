@@ -201,9 +201,9 @@ namespace RimThreaded
 			original = typeof(Rand);
 			patched = typeof(Rand_Patch);
 			//Prefix(original, patched, "set_Seed");
-			//Prefix(original, patched, "get_Int");
 			//Prefix(original, patched, "get_Value");
 			//Prefix(original, patched, "EnsureStateStackEmpty");
+			Prefix(original, patched, "get_Int"); //I have no idea why this is needed. But it fixes a bunch of rocks spawning.
 			Prefix(original, patched, "PopState");
 			Prefix(original, patched, "TryRangeInclusiveWhere");
 			Prefix(original, patched, "PushState", new Type[] { });
