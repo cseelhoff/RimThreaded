@@ -36,11 +36,14 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.1.2  
+-Fixed several bugs in Rand (fixed incompatibility with Map Reroll)
+
 Version 1.1.1  
 -Transpiled BattleLog.Add  
 -Transpiled Pawn_InteractionsTracker.TryInteractRandomly  
 -Transpiled RemoveRegion.RemoveRegion  
--Fixed bug in ImmunityHandler.NeededImmunitiesNow
+-Fixed bug in ImmunityHandler.NeededImmunitiesNow  
 
 Version 1.1.0  
 -Fixed bug in WorldComponent Ticks  
