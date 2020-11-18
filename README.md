@@ -36,8 +36,12 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.1.3  
+-Fixed bugs in GrammarResolverSimple.Formatted  
+-Fixed bugs in Rand  
+
 Version 1.1.2  
--Fixed several bugs in Rand (fixed incompatibility with Map Reroll)
+-Fixed several bugs in Rand (fixed incompatibility with Map Reroll)  
 
 Version 1.1.1  
 -Transpiled BattleLog.Add  

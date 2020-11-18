@@ -13,11 +13,30 @@ namespace RimThreaded
 
     public static class Rand_Patch
     {
+        //private static readonly Stack<ulong> stateStack2 = new Stack<ulong>();
+        //public static PropertyInfo stateCompressed = AccessTools.DeclaredProperty(typeof(Rand), "StateCompressed");
+        //public static uint seed = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "seed");
+        //public static uint iterations = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
+        //I could not get the StaticFieldRefAccess field to work properly. This is an ugly hack I'm doing by rewriting methods.
+        //public static uint iterations2 = 0;
+        //public static uint seed2 = (uint)DateTime.Now.GetHashCode();
 
         public static uint seed = StaticFieldRefAccess<uint>(typeof(Rand), "seed");
         public static uint iterations = StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
         public static Stack<ulong> stateStack = StaticFieldRefAccess<Stack<ulong>>(typeof(Rand), "stateStack");
 
+        public static ulong StateCompressed
+        {
+            get
+            {
+                return seed | ((ulong)iterations << 32);
+            }
+            set
+            {
+                seed = (uint)(value & uint.MaxValue);
+                iterations = (uint)((value >> 32) & uint.MaxValue);
+            }
+        }
 
         public static bool TryRangeInclusiveWhere(ref bool __result,
           int from,
@@ -63,26 +82,27 @@ namespace RimThreaded
             return false;
         }
 
+        public static bool get_Int(ref int __result)
+        {
+            __result = MurmurHash.GetInt(seed, iterations++);
+            return false;
+        }
+
         public static bool PushState()
         {
-            ulong value = (ulong)seed | (ulong)iterations << 32;
             lock (stateStack)
             {
-                stateStack.Push(value);
+                stateStack.Push(StateCompressed);
             }
             return false;
         }
 
         public static bool PopState()
         {
-            ulong result2;
             lock (stateStack)
             {
-                result2 = stateStack.Pop();
+                StateCompressed = stateStack.Pop();
             }
-            seed = (uint)(result2 & (ulong) uint.MaxValue);
-            iterations = (uint)(result2 >> 32 & (ulong)uint.MaxValue);            
-
             return false;
         }
 
