@@ -672,11 +672,11 @@ namespace RimThreaded
 			patched = typeof(Room_Patch);
 			Prefix(original, patched, "OpenRoofCountStopAt");
 			Prefix(original, patched, "get_PsychologicallyOutdoors");
-			//Prefix(original, patched, "RemoveRegion");
+			Prefix(original, patched, "RemoveRegion");
 			Prefix(original, patched, "Notify_RoofChanged");
 			Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
 			patched = typeof(Room_Transpile);
-			Transpile(original, patched, "RemoveRegion");
+			//Transpile(original, patched, "RemoveRegion");
 
 
 			//LongEventHandler
