@@ -75,7 +75,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
-    <Compile Include="AttackTargetFinder_Target.cs" />
     <Compile Include="AttackTargetFinder.cs" />
     <Compile Include="ListerThings_Transpile.cs" />
     <Compile Include="CompUtility_Transpile.cs" />
@@ -130,15 +129,11 @@
     <Compile Include="StoryState.cs" />
     <Compile Include="PathFinder_Transpile.cs" />
     <Compile Include="Fire_Transpile.cs" />
-    <Compile Include="PathFinder_Original.cs" />
-    <Compile Include="PathFinder_Target.cs" />
     <Compile Include="SustainerAggregatorUtility.cs" />
-    <Compile Include="Fire_Target.cs" />
     <Compile Include="GrammarResolverSimple.cs" />
     <Compile Include="PawnRelationUtility.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="JobDriver_Wait_Transpile.cs" />
-    <Compile Include="ThingOwnerThing_Target.cs" />
     <Compile Include="ThingOwnerThing.cs" />
     <Compile Include="AttackTargetFinder_Transpile.cs" />
     <Compile Include="ThingOwnerThing_Transpile.cs" />
@@ -253,7 +248,6 @@
     <Compile Include="SustainerManager.cs" />
     <Compile Include="Thing.cs" />
     <Compile Include="ThingGridTranspile.cs" />
-    <Compile Include="ThingGridTranspiledTarget.cs" />
     <Compile Include="ThingGrid.cs" />
     <Compile Include="ThingOwnerUtility.cs" />
     <Compile Include="ThinkNode_PrioritySorter.cs" />

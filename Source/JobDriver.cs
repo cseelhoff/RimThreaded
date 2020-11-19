@@ -6,9 +6,11 @@
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using Verse;
+using Verse.AI;
 using static HarmonyLib.AccessTools;
 
-namespace Verse.AI
+namespace RimThreaded
 {
     public class JobDriver_Patch
     {

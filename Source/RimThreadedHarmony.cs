@@ -174,7 +174,7 @@ namespace RimThreaded
 		}
 
 		static RimThreadedHarmony() {
-			Harmony.DEBUG = true;
+			Harmony.DEBUG = false;
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
@@ -198,14 +198,18 @@ namespace RimThreaded
 
 			//Rand
 			original = typeof(Rand);
-			patched = typeof(Rand_Patch);
+			//patched = typeof(Rand_Patch);
 			//Prefix(original, patched, "set_Seed");
 			//Prefix(original, patched, "get_Value");
 			//Prefix(original, patched, "EnsureStateStackEmpty");
 			//Prefix(original, patched, "get_Int");
 			//Prefix(original, patched, "PopState");
 			//Prefix(original, patched, "TryRangeInclusiveWhere");
-			//Prefix(original, patched, "PushState", new Type[] { });
+			//Prefix(original, patched, "PushState", Type.EmptyTypes);
+			patched = typeof(Rand_Transpile);
+			Transpile(original, patched, "PushState", Type.EmptyTypes);
+			Transpile(original, patched, "PopState");
+			Transpile(original, patched, "TryRangeInclusiveWhere");
 
 			//ThingOwner<Thing>
 			original = typeof(ThingOwner<Thing>);

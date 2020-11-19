@@ -36,6 +36,11 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.1.5  
+-Transpiled Rand.PopState  
+-Transpiled Rand.PushState  
+-Transpiled Rand.TryRangeInclusiveWhere  
+
 Version 1.1.4  
 -Transpiled CompUtility.CompGuest  
 -Transpiled CompUtility.OnPawnRemoved  
