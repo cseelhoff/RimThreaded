@@ -7,6 +7,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using static HarmonyLib.AccessTools;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -24,6 +25,17 @@ namespace RimThreaded
         public static uint iterations = StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
         public static Stack<ulong> stateStack = StaticFieldRefAccess<Stack<ulong>>(typeof(Rand), "stateStack");
 
+        public static Dictionary<int, List<int>> tmpRanges = new Dictionary<int, List<int>>();
+        public static List<int> getTmpRange()
+        {
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (!tmpRanges.TryGetValue(tID, out List<int> tmpRange))
+            {
+                tmpRange = new List<int>();
+                tmpRanges[tID] = tmpRange;
+            }
+            return tmpRange;
+        }
         public static ulong StateCompressed
         {
             get
@@ -62,7 +74,7 @@ namespace RimThreaded
                 }
             }
             //Rand.tmpRange.Clear();
-            List<int> tmpRange = new List<int>();
+            List<int> tmpRange = getTmpRange();
             for (int index = from; index <= to; ++index)
                 tmpRange.Add(index);
             tmpRange.Shuffle<int>();
