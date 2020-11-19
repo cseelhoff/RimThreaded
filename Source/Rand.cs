@@ -17,7 +17,6 @@ namespace RimThreaded
         //public static PropertyInfo stateCompressed = AccessTools.DeclaredProperty(typeof(Rand), "StateCompressed");
         //public static uint seed = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "seed");
         //public static uint iterations = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
-        //I could not get the StaticFieldRefAccess field to work properly. This is an ugly hack I'm doing by rewriting methods.
         //public static uint iterations2 = 0;
         //public static uint seed2 = (uint)DateTime.Now.GetHashCode();
 

@@ -36,6 +36,13 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.1.4  
+-Transpiled CompUtility.CompGuest  
+-Transpiled CompUtility.OnPawnRemoved  
+-Transpiled HediffGiver_Hypothermia.OnIntervalPassed  
+-Transpiled ListerThings.Add  
+-Transpiled ListerThings.Remove  
+
 Version 1.1.3  
 -Fixed bugs in GrammarResolverSimple.Formatted  
 -Fixed bugs in Rand  

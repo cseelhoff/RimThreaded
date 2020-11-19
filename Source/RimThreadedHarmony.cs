@@ -28,26 +28,25 @@ namespace RimThreaded
 		public static Type giddyUpCoreStorageExtendedPawnData;
 		public static Type giddyUpCoreJobsJobDriver_Mounted;
 		public static Type giddyUpCoreJobsGUC_JobDefOf;
-		
+		public static Type hospitalityCompUtility;
+		public static Type hospitalityCompGuest;
+
 		public static List<CodeInstruction> GetLockCodeInstructions(
 			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
 			int searchInstructionsCount, List<CodeInstruction> loadLockObjectInstructions,
 			LocalBuilder lockObject, LocalBuilder lockTaken)
 		{
 			List<CodeInstruction> finalCodeInstructions = new List<CodeInstruction>();
-			CodeInstruction codeInstruction;
-			for (int i = 0; i < loadLockObjectInstructions.Count - 1; i++)
+			loadLockObjectInstructions[0].labels = instructionsList[currentInstructionIndex].labels;
+			for (int i = 0; i < loadLockObjectInstructions.Count; i++)
 			{
 				finalCodeInstructions.Add(loadLockObjectInstructions[i]);
 			}
-			codeInstruction = loadLockObjectInstructions[loadLockObjectInstructions.Count - 1];
-			codeInstruction.labels = instructionsList[currentInstructionIndex].labels;
 			instructionsList[currentInstructionIndex].labels = new List<Label>();
-			finalCodeInstructions.Add(codeInstruction);
 			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Stloc, lockObject.LocalIndex));
 			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Ldc_I4_0));
 			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Stloc, lockTaken.LocalIndex));
-			codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex);
+			CodeInstruction codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex);
 			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
 			finalCodeInstructions.Add(codeInstruction);
 			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Ldloca_S, lockTaken.LocalIndex));
@@ -203,10 +202,10 @@ namespace RimThreaded
 			//Prefix(original, patched, "set_Seed");
 			//Prefix(original, patched, "get_Value");
 			//Prefix(original, patched, "EnsureStateStackEmpty");
-			Prefix(original, patched, "get_Int"); //I have no idea why this is needed. But it fixes a bunch of rocks spawning.
-			Prefix(original, patched, "PopState");
-			Prefix(original, patched, "TryRangeInclusiveWhere");
-			Prefix(original, patched, "PushState", new Type[] { });
+			//Prefix(original, patched, "get_Int");
+			//Prefix(original, patched, "PopState");
+			//Prefix(original, patched, "TryRangeInclusiveWhere");
+			//Prefix(original, patched, "PushState", new Type[] { });
 
 			//ThingOwner<Thing>
 			original = typeof(ThingOwner<Thing>);
@@ -225,9 +224,12 @@ namespace RimThreaded
 
 			//ListerThings
 			original = typeof(ListerThings);
-			patched = typeof(ListerThings_Patch);
-			Prefix(original, patched, "Remove");
-			Prefix(original, patched, "Add");
+			//patched = typeof(ListerThings_Patch);
+			//Prefix(original, patched, "Remove");
+			//Prefix(original, patched, "Add");
+			patched = typeof(ListerThings_Transpile);
+			Transpile(original, patched, "Remove");
+			Transpile(original, patched, "Add");
 
 			//JobMaker
 			original = typeof(JobMaker);
@@ -954,8 +956,10 @@ namespace RimThreaded
 
 			//HediffGiver_Hypothermia
 			original = typeof(HediffGiver_Hypothermia);
-			patched = typeof(HediffGiver_Hypothermia_Patch);
-			Prefix(original, patched, "OnIntervalPassed");
+			//patched = typeof(HediffGiver_Hypothermia_Patch);
+			//Prefix(original, patched, "OnIntervalPassed");
+			patched = typeof(HediffGiver_Hypothermia_Transpile);
+			Transpile(original, patched, "OnIntervalPassed");
 
 			//Pawn_MindState - hack for speedup. replaced (GenLocalDate.DayTick((Thing)__instance.pawn) interactions today with always 0
 			original = typeof(Pawn_MindState);
@@ -1086,60 +1090,58 @@ namespace RimThreaded
 			Prefix(original, patched, "ReadPixels", new Type[] { typeof(Rect), typeof(int), typeof(int), typeof(bool) });
 			Prefix(original, patched, "Apply", new Type[] { typeof(bool), typeof(bool) });
 
-			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-			foreach (Assembly assembly in assemblies)
-			{
-				if (assembly.FullName.StartsWith("GiddyUpCore"))
-				{
-					foreach (Type originalType in assembly.GetTypes())
-					{
-						if (originalType.FullName.Equals("GiddyUpCore.Storage.ExtendedPawnData"))
-							giddyUpCoreStorageExtendedPawnData = originalType;
-						else if (originalType.FullName.Equals("GiddyUpCore.Jobs.GUC_JobDefOf"))
-							giddyUpCoreJobsGUC_JobDefOf = originalType;
-					}
-					
-					foreach (Type originalType in assembly.GetTypes())
-					{
-						if (originalType.FullName.Equals("GiddyUpCore.Utilities.TextureUtility"))
-						{
-							giddyUpCoreUtilitiesTextureUtility = originalType;
-                            string methodName = "setDrawOffset";
-							Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
-							patched = typeof(TextureUtility_Transpile);
-							Transpile(originalType, patched, methodName);
-						}
-						else if (originalType.FullName.Equals("GiddyUpCore.Storage.ExtendedDataStorage"))
-						{
-							giddyUpCoreStorageExtendedDataStorage = originalType;
-                            string methodName = "DeleteExtendedDataFor";
-							Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
-							patched = typeof(ExtendedDataStorage_Transpile);
-							Transpile(originalType, patched, methodName);
+			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
+			giddyUpCoreJobsGUC_JobDefOf = AccessTools.TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
+			giddyUpCoreUtilitiesTextureUtility = AccessTools.TypeByName("GiddyUpCore.Utilities.TextureUtility");
+			giddyUpCoreStorageExtendedDataStorage = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedDataStorage");
+			giddyUpCoreJobsJobDriver_Mounted = AccessTools.TypeByName("GiddyUpCore.Jobs.JobDriver_Mounted");
+			hospitalityCompUtility = AccessTools.TypeByName("Hospitality.CompUtility");
+			hospitalityCompGuest = AccessTools.TypeByName("Hospitality.CompGuest");
 
-							giddyUpCoreStorageExtendedDataStorage = originalType;
-							methodName = "GetExtendedDataFor";
-							Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
-							patched = typeof(ExtendedDataStorage_Transpile);
-							Transpile(originalType, patched, methodName);
-						}
-						else if (originalType.FullName.Equals("GiddyUpCore.Jobs.JobDriver_Mounted"))
-						{
-							giddyUpCoreJobsJobDriver_Mounted = originalType;
-							string methodName = "<waitForRider>b__8_0";
-							foreach (MethodInfo methodInfo in ((TypeInfo)originalType).DeclaredMethods) {
-								if (methodInfo.Name.Equals(methodName))
-								{
-									Log.Message("RimThreaded is patching " + originalType.FullName + " " + methodName);
-									patched = typeof(JobDriver_Mounted_Transpile);
-									MethodInfo pMethod = patched.GetMethod("WaitForRider");
-									harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod));
-								}
-							}
-							
-						}
+			if (giddyUpCoreUtilitiesTextureUtility != null)
+			{
+				string methodName = "setDrawOffset";
+				Log.Message("RimThreaded is patching " + giddyUpCoreUtilitiesTextureUtility.FullName + " " + methodName);
+				patched = typeof(TextureUtility_Transpile);
+				Transpile(giddyUpCoreUtilitiesTextureUtility, patched, methodName);
+			}
+
+			if(giddyUpCoreStorageExtendedDataStorage != null)
+            {
+				string methodName = "DeleteExtendedDataFor";
+				Log.Message("RimThreaded is patching " + giddyUpCoreStorageExtendedDataStorage.FullName + " " + methodName);
+				patched = typeof(ExtendedDataStorage_Transpile);
+				Transpile(giddyUpCoreStorageExtendedDataStorage, patched, methodName);
+
+				methodName = "GetExtendedDataFor";
+				Log.Message("RimThreaded is patching " + giddyUpCoreStorageExtendedDataStorage.FullName + " " + methodName);
+				Transpile(giddyUpCoreStorageExtendedDataStorage, patched, methodName);
+			}
+
+			if(giddyUpCoreJobsJobDriver_Mounted != null)
+            {
+				string methodName = "<waitForRider>b__8_0";
+				foreach (MethodInfo methodInfo in ((TypeInfo)giddyUpCoreJobsJobDriver_Mounted).DeclaredMethods)
+				{
+					if (methodInfo.Name.Equals(methodName))
+					{
+						Log.Message("RimThreaded is patching " + giddyUpCoreJobsJobDriver_Mounted.FullName + " " + methodName);
+						patched = typeof(JobDriver_Mounted_Transpile);
+						MethodInfo pMethod = patched.GetMethod("WaitForRider");
+						harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod));
 					}
 				}
+			}
+
+			if (hospitalityCompUtility != null)
+			{
+				string methodName = "CompGuest";
+				Log.Message("RimThreaded is patching " + hospitalityCompUtility.FullName + " " + methodName);
+				patched = typeof(CompUtility_Transpile);
+				Transpile(hospitalityCompUtility, patched, methodName);
+				methodName = "OnPawnRemoved";
+				Log.Message("RimThreaded is patching " + hospitalityCompUtility.FullName + " " + methodName);
+				Transpile(hospitalityCompUtility, patched, methodName);
 			}
 
 			Log.Message("RimThreaded patching is complete.");
