@@ -36,6 +36,9 @@ Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/wat
 
 CHANGE LOG:  
 
+Version 1.1.6  
+-Fixed bug in Room.RemoveRegion (game frozen when building)
+
 Version 1.1.5  
 -Transpiled Rand.PopState  
 -Transpiled Rand.PushState  
