@@ -1,6 +1,6 @@
 ---
 name: Reproducible Non-Vanilla Bug Report (Medium Priority)
-about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs that can be reproduced fairly consistantly
+about: Submit a bug report that occurs in RimWorld running mods and that can be reproduced fairly consistantly
 title: ''
 labels: bug, reproducible
 assignees: ''
