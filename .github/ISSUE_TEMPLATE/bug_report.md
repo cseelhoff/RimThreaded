@@ -19,11 +19,11 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
+**PlayerLog**
+Link to contents of Player.log or Error.log (Please use something like gist or pastebin. DO NOT PASTE HERE)
+
 **ModList**
 Paste contents of ModList used when bug occurred.
-
-**PlayerLog**
-Paste contents of Player.log or Error.log
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
