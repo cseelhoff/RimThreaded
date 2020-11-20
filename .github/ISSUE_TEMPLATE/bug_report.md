@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: bug, reproducible
+labels: bug, reproducible, vanilla
 assignees: ''
 
 ---
@@ -11,7 +11,7 @@ assignees: ''
 IMPORTANT: Please first search existing bugs to ensure you are not creating a duplicate bug report.  
 
 **To Reproduce**
-IMPORTANT: Uncheck the "vanilla" label on the right if bug is not reproducible when running RimWorld, DLCs, Harmony, and RimThreaded only  
+IMPORTANT: Uncheck the "vanilla" label on the right if bug is not reproducible when running only RimWorld, DLCs, Harmony, and RimThreaded
 
 Steps to reproduce the behavior:
 1. Go to '...'
