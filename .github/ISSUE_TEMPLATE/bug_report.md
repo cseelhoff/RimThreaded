@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Submit a bug report
 title: ''
 labels: bug, reproducible, vanilla
 assignees: ''
@@ -19,10 +19,10 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
-**PlayerLog**
+**Error Log**
 Link to contents of Player.log or Error.log (Please use something like gist or pastebin. DO NOT PASTE HERE)
 
-**ModList**
+**Mod List**
 Paste contents of ModList used when bug occurred.
 
 **Screenshots**
