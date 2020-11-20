@@ -1,6 +1,6 @@
 ---
-name: Bug report
-about: Submit a bug report
+name: Reproducible Vanilla Bug Report (High Priority)
+about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs that can be reproduced fairly consistantly
 title: ''
 labels: bug, reproducible, vanilla
 assignees: ''
@@ -11,8 +11,6 @@ assignees: ''
 IMPORTANT: Please first search existing bugs to ensure you are not creating a duplicate bug report.  
 
 **To Reproduce**
-IMPORTANT: Uncheck the "vanilla" label on the right if bug is not reproducible when running only RimWorld, DLCs, Harmony, and RimThreaded
-
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
