@@ -8,10 +8,11 @@ assignees: ''
 ---
 
 **Describe the bug**
-A short description of what the bug is.
+A short description of what the bug.
 
 **To Reproduce**
-Uncheck the "vanilla" label on the right if bug is not reproducible when running RimWorld, DLCs, Harmony, and RimThreaded only
+NOTE: Uncheck the "vanilla" label on the right if bug is not reproducible when running RimWorld, DLCs, Harmony, and RimThreaded only  
+
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
