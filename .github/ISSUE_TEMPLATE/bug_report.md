@@ -11,14 +11,12 @@ assignees: ''
 A short description of what the bug is.
 
 **To Reproduce**
+Uncheck the "vanilla" label on the right if bug is not reproducible when running RimWorld, DLCs, Harmony, and RimThreaded only
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
-
-**ReproducibleWithVanilla**
-Is this bug reproducible when running only RimWorld, DLCs, Harmony, and RimThreaded?
 
 **ModList**
 Paste contents of ModList used when bug occurred.
