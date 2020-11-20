@@ -20,8 +20,5 @@ Steps to reproduce the behavior:
 **Error Log**
 Link to contents of Player.log or Error.log (Please use something like gist or pastebin. DO NOT PASTE HERE)
 
-**Mod List**
-Paste contents of ModList used when bug occurred.
-
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
