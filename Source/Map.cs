@@ -39,6 +39,7 @@ namespace RimThreaded
         }
         public static bool MapUpdate(Map __instance)
         {
+            
             bool worldRenderedNow = WorldRendererUtility.WorldRenderedNow;
             SkyManagerUpdate2(__instance);
             __instance.powerNetManager.UpdatePowerNetsAndConnections_First();
@@ -67,7 +68,7 @@ namespace RimThreaded
                 __instance.overlayDrawer.DrawAllOverlays();
                 __instance.temporaryThingDrawer.Draw();
             }
-
+            
             try
             {
                 __instance.areaManager.AreaManagerUpdate();
@@ -79,6 +80,7 @@ namespace RimThreaded
 
             __instance.weatherManager.WeatherManagerUpdate();
             MapComponentUtility.MapComponentUpdate(__instance);
+            
             return false;
         }
 

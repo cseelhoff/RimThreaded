@@ -53,10 +53,12 @@ namespace RimThreaded
         public static Dictionary<int, EventWaitHandle> mainRequestWaits = new Dictionary<int, EventWaitHandle>();
         public static Dictionary<int, object[]> tryMakeAndPlayRequests = new Dictionary<int, object[]>();
 
-
+        public static Queue<int> buildDatabase = new Queue<int>();
         public static Dictionary<int, SampleSustainer> tryMakeAndPlayResults = new Dictionary<int, SampleSustainer>();
         public static Dictionary<int, object[]> newSustainerRequests = new Dictionary<int, object[]>();
         public static Dictionary<int, Sustainer> newSustainerResults = new Dictionary<int, Sustainer>();
+        public static Dictionary<int, object[]> planeMeshRequests = new Dictionary<int, object[]>();
+        public static Dictionary<int, Mesh> planeMeshResults = new Dictionary<int, Mesh>();
         public static Dictionary<string, Texture2D> texture2DResults = new Dictionary<string, Texture2D>();
         public static Dictionary<int, string> texture2DRequests = new Dictionary<int, string>();
         public static Dictionary<int, Mesh> meshRequests = new Dictionary<int, Mesh>();
@@ -446,8 +448,48 @@ namespace RimThreaded
                 List<Map> maps = Find.Maps;
                 for (int j = 0; j < maps.Count; j++)
                 {
+                    /*
+                    bool worldRenderedNow = WorldRendererUtility.WorldRenderedNow;
+                    Map_Patch.SkyManagerUpdate2(maps[j]);
+                    maps[j].powerNetManager.UpdatePowerNetsAndConnections_First();
+                    maps[j].regionGrid.UpdateClean();
+                    maps[j].regionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms();
+                    maps[j].glowGrid.GlowGridUpdate_First();
+                    maps[j].lordManager.LordManagerUpdate();
+                    if (!worldRenderedNow && Find.CurrentMap == maps[j])
+                    {
+                        if (Map_Patch.AlwaysRedrawShadows)
+                        {
+                            maps[j].mapDrawer.WholeMapChanged(MapMeshFlag.Things);
+                        }
+
+                        PlantFallColors.SetFallShaderGlobals(maps[j]);
+                        maps[j].waterInfo.SetTextures();
+                        maps[j].avoidGrid.DebugDrawOnMap();
+                        maps[j].mapDrawer.MapMeshDrawerUpdate_First();
+                        maps[j].powerNetGrid.DrawDebugPowerNetGrid();
+                        DoorsDebugDrawer.DrawDebug();
+                        maps[j].mapDrawer.DrawMapMesh();
+                        maps[j].dynamicDrawManager.DrawDynamicThings();
+                        maps[j].gameConditionManager.GameConditionManagerDraw(maps[j]);
+                        MapEdgeClipDrawer.DrawClippers(maps[j]);
+                        maps[j].designationManager.DrawDesignations();
+                        maps[j].overlayDrawer.DrawAllOverlays();
+                        maps[j].temporaryThingDrawer.Draw();
+                    }
+                    try
+                    {
+                        maps[j].areaManager.AreaManagerUpdate();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+
+                    maps[j].weatherManager.WeatherManagerUpdate();
+                    MapComponentUtility.MapComponentUpdate(maps[j]);
+                    */
                     maps[j].MapPostTick();
-                    //maps[j].mapDrawer.MapMeshDrawerUpdate_First();
                 }
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WildPlantSpawner
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //SteadyEnvironment
@@ -590,7 +632,13 @@ namespace RimThreaded
                 int index = Interlocked.Decrement(ref worldObjectsTicks);
                 while (index >= 0)
                 {
-                    worldObjects[index].Tick();
+                    try
+                    {
+                        worldObjects[index].Tick();
+                    } catch (Exception ex)
+                    {
+                            Log.Error("Exception ticking " + worldObjects[index].ToStringSafe() + ": " + ex);
+                    }
                     index = Interlocked.Decrement(ref worldObjectsTicks);
                 }
                 if (index == -1)
@@ -606,7 +654,13 @@ namespace RimThreaded
                 {
                     int cycleIndex = (steadyEnvironmentEffectsCycleIndexOffset - index) % steadyEnvironmentEffectsArea;
                     IntVec3 c = steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
-                    SteadyEnvironmentEffects_Patch.DoCellSteadyEffects(steadyEnvironmentEffectsInstance, c);
+                    try
+                    {
+                        SteadyEnvironmentEffects_Patch.DoCellSteadyEffects(steadyEnvironmentEffectsInstance, c);
+                    } catch (Exception ex)
+                    {
+                            Log.Error("Exception ticking steadyEnvironmentEffectsCells " + index.ToStringSafe() + ": " + ex);
+                    }                    
                     //Interlocked.Increment(ref SteadyEnvironmentEffects_Patch.cycleIndex(steadyEnvironmentEffectsInstance));
                     index = Interlocked.Decrement(ref steadyEnvironmentEffectsTicks);
                 }
@@ -621,7 +675,13 @@ namespace RimThreaded
                 int index = Interlocked.Decrement(ref plantMaterialsCount);
                 while (index >= 0)
                 {
-                    WindManager_Patch.plantMaterials[index].SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
+                    try
+                    {
+                        WindManager_Patch.plantMaterials[index].SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
+                    } catch (Exception ex)
+                    {
+                            Log.Error("Exception ticking " + WindManager_Patch.plantMaterials[index].ToStringSafe() + ": " + ex);
+                    }
                     index = Interlocked.Decrement(ref plantMaterialsCount);
                 }
                 if (index == -1)
@@ -635,7 +695,13 @@ namespace RimThreaded
                 int index = Interlocked.Decrement(ref allFactionsTicks);
                 while (index >= 0)
                 {
-                    allFactions[index].FactionTick();
+                    try
+                    {
+                        allFactions[index].FactionTick();
+                    } catch (Exception ex)
+                    {
+                            Log.Error("Exception ticking " + allFactions[index].ToStringSafe() + ": " + ex);
+                    }
                     index = Interlocked.Decrement(ref allFactionsTicks);
                 }
                 if (index == -1)
@@ -650,37 +716,43 @@ namespace RimThreaded
                 while (index >= 0)
                 {
                     int cycleIndex = (WildPlantSpawnerCycleIndexOffset - index) % WildPlantSpawnerArea;
-                    IntVec3 intVec = WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
+                    try { 
+                        IntVec3 intVec = WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
 
-                    if ((WildPlantSpawnerCycleIndexOffset - index) > WildPlantSpawnerArea)
-                    {
-                        Interlocked.Add(ref DesiredPlants2Tmp1000,
-                            1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(WildPlantSpawnerMap, intVec, intVec, WildPlantSpawnerCurrentPlantDensity));
-                        if (intVec.GetTerrain(WildPlantSpawnerMap).fertility > 0f)
+                        if ((WildPlantSpawnerCycleIndexOffset - index) > WildPlantSpawnerArea)
                         {
-                            Interlocked.Increment(ref FertilityCells2Tmp);
+                            Interlocked.Add(ref DesiredPlants2Tmp1000,
+                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(WildPlantSpawnerMap, intVec, intVec, WildPlantSpawnerCurrentPlantDensity));
+                            if (intVec.GetTerrain(WildPlantSpawnerMap).fertility > 0f)
+                            {
+                                Interlocked.Increment(ref FertilityCells2Tmp);
+                            }
+
+                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(WildPlantSpawnerMap, intVec) ? 130f : WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
+                            if (Rand.Chance(WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && WildPlantSpawner_Patch.CanRegrowAt2(WildPlantSpawnerMap, intVec))
+                            {
+                                WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlantsTmp1000 / 1000.0f);
+                            }
                         }
-
-                        float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(WildPlantSpawnerMap, intVec) ? 130f : WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                        if (Rand.Chance(WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && WildPlantSpawner_Patch.CanRegrowAt2(WildPlantSpawnerMap, intVec))
+                        else
                         {
-                            WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlantsTmp1000 / 1000.0f);
+                            Interlocked.Add(ref DesiredPlantsTmp1000,
+                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(WildPlantSpawnerMap, intVec, intVec, WildPlantSpawnerCurrentPlantDensity));
+                            if (intVec.GetTerrain(WildPlantSpawnerMap).fertility > 0f)
+                            {
+                                Interlocked.Increment(ref FertilityCellsTmp);
+                            }
+
+                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(WildPlantSpawnerMap, intVec) ? 130f : WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
+                            if (Rand.Chance(WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && WildPlantSpawner_Patch.CanRegrowAt2(WildPlantSpawnerMap, intVec))
+                            {
+                                WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlants);
+                            }
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Interlocked.Add(ref DesiredPlantsTmp1000,
-                            1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(WildPlantSpawnerMap, intVec, intVec, WildPlantSpawnerCurrentPlantDensity));
-                        if (intVec.GetTerrain(WildPlantSpawnerMap).fertility > 0f)
-                        {
-                            Interlocked.Increment(ref FertilityCellsTmp);
-                        }
-
-                        float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(WildPlantSpawnerMap, intVec) ? 130f : WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                        if (Rand.Chance(WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && WildPlantSpawner_Patch.CanRegrowAt2(WildPlantSpawnerMap, intVec))
-                        {
-                            WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlants);
-                        }
+                        Log.Error("Exception ticking WildPlantSpawner: " + ex);
                     }
                     index = Interlocked.Decrement(ref WildPlantSpawnerTicks);
                 }
@@ -709,7 +781,14 @@ namespace RimThreaded
                     Pawn pawn = TradeShipThings[index] as Pawn;
                     if (pawn != null)
                     {
-                        pawn.Tick();
+                        try
+                        {
+                            pawn.Tick();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Exception ticking Pawn: " + pawn.ToStringSafe() + " " + ex);
+                        }
                         if (pawn.Dead)
                         {
                             lock (TradeShipThings)
@@ -737,7 +816,13 @@ namespace RimThreaded
                     {
                         lock (wc)
                         {
-                            wc.WorldComponentTick();
+                            try
+                            {
+                                wc.WorldComponentTick();
+                            } catch(Exception ex)
+                            {
+                                Log.Error("Exception ticking World Component: " + wc.ToStringSafe() + ex);
+                            }
                         }
                     }
                     //}
@@ -904,8 +989,9 @@ namespace RimThreaded
                 RespondToGetReadableTextureRequests();
                 RespondToCalcHeightRequests();
                 //RespondToMeshRequests();
-                //RespondToSubMeshRequests();
-
+                RespondToSubMeshRequests();
+                RespondToBuildDatabaseRequests();
+                RespondToNewPlaneMeshRequests();
                 // Add any sounds that were produced in this tick
 
                 while (PlayOneShot.Count > 0)
@@ -1375,6 +1461,44 @@ namespace RimThreaded
                 //SectionLayer_Patch.GetSubMesh((SectionLayer)parameters[0], layerSubMesh, (Material)parameters[1]);
                 LayerSubMesh layerSubMesh = ((SectionLayer)parameters[0]).GetSubMesh((Material)parameters[1]);
                 layerSubMeshResults[key] = layerSubMesh;
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToBuildDatabaseRequests()
+        {
+            while (buildDatabase.Count > 0)
+            {
+                int key;
+                lock (buildDatabase)
+                {
+                    key = buildDatabase.Dequeue();
+                }
+                GraphicDatabaseHeadRecords_Patch.BuildDatabaseIfNecessary();
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToNewPlaneMeshRequests()
+        {
+            while (planeMeshRequests.Count > 0)
+            {
+                object[] parameters;
+                int key;
+                lock (planeMeshRequests)
+                {
+                    key = planeMeshRequests.Keys.First();
+                    parameters = planeMeshRequests[key];
+                    planeMeshRequests.Remove(key);
+                }
+                Mesh planeMesh = MeshMakerPlanes.NewPlaneMesh((Vector2)parameters[0], (bool)parameters[1], (bool)parameters[2], (bool)parameters[3]);
+                planeMeshResults[key] = planeMesh;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else

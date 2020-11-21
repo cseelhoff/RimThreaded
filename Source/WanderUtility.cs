@@ -68,9 +68,17 @@ namespace RimThreaded
             List<Pawn> freeColonistsSpawned = mapPawns.FreeColonistsSpawned;
 
             List<Pawn> pawnList = new List<Pawn>(freeColonistsSpawned.Count);
-            foreach(Pawn p in freeColonistsSpawned)
+            for (int i = 0; i < freeColonistsSpawned.Count; i++)
             {
-                if(!p.Position.IsForbidden(pawn))
+                Pawn p;
+                try
+                {
+                    p = freeColonistsSpawned[i];
+                } catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+                if (!p.Position.IsForbidden(pawn))
                 {
                     bool canReach = pawn.CanReach(
                         p.Position,

@@ -1124,9 +1124,17 @@ namespace RimThreaded
 			//MethodInfo cpMethod4 = patched.GetMethod("MeshSafe");
 			//harmony.Patch(constructorMethod4, prefix: new HarmonyMethod(cpMethod4));
 
-			//original = typeof(SectionLayer);
-			//patched = typeof(SectionLayer_Patch);
-			//Prefix(original, patched, "GetSubMesh");
+			original = typeof(SectionLayer);
+			patched = typeof(SectionLayer_Patch);
+			Prefix(original, patched, "GetSubMesh");
+
+			original = typeof(GraphicDatabaseHeadRecords);
+			patched = typeof(GraphicDatabaseHeadRecords_Patch);
+			Prefix(original, patched, "BuildDatabaseIfNecessary");
+
+			original = typeof(MeshMakerPlanes);
+			patched = typeof(MeshMakerPlanes_Patch);
+			Prefix(original, patched, "NewPlaneMesh", new Type[] { typeof(Vector2), typeof(bool) , typeof(bool) , typeof(bool) });
 
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
 			giddyUpCoreJobsGUC_JobDefOf = AccessTools.TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");

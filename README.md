@@ -35,11 +35,15 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
-Version 1.1.9
+Version 1.1.10  
+-Fixed bug in WanderUtility.GetColonyWanderRoot  
+-Fixed bug in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms  
+
+Version 1.1.9  
 -Performance improvement in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms  
 -Fixed bug in WorldFloodFiller.FloodFill  
 
-Version 1.1.8
+Version 1.1.8  
 -Fixed bug in ImmunityHandler.NeededImmunitiesNow  
 -Fixed bug in JobDriver.TryActuallyStartNextToil  
 -Fixed bug in JobQueue.EnqueueFirst  

@@ -144,7 +144,7 @@ namespace RimThreaded
             //if (working(__instance) || !__instance.Enabled)
             if (Interlocked.Increment(ref workingInt) > 1 || !__instance.Enabled)
             {
-                //Interlocked.Decrement(ref workingInt);
+                Interlocked.Decrement(ref workingInt);
                 return false;
             }
             //working(__instance) = true;
@@ -156,7 +156,7 @@ namespace RimThreaded
             if (!map(__instance).regionDirtyer.AnyDirty)
             {
                 //working(__instance) = false;
-                //Interlocked.Decrement(ref workingInt);
+                Interlocked.Decrement(ref workingInt);
                 return false;
             }
 
@@ -178,7 +178,7 @@ namespace RimThreaded
             //SetAllClean.Invoke(map(__instance).regionDirtyer, new object[] { });
             initialized(__instance) = true;
             //working(__instance) = false;
-            //Interlocked.Decrement(ref workingInt);
+            Interlocked.Decrement(ref workingInt);
             //}
             if (DebugSettings.detectRegionListersBugs)
             {

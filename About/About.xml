@@ -10,9 +10,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.9
-    -Performance improvement in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms
-    -Fixed bug in WorldFloodFiller.FloodFill
+    Version 1.1.10
+    -Fixed bug in WanderUtility.GetColonyWanderRoot
+    -Fixed bug in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
