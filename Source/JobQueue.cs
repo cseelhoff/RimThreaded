@@ -32,6 +32,81 @@ namespace RimThreaded
             __result = false;
             return false;
         }
+        public static bool EnqueueFirst(JobQueue __instance, Job j, JobTag? tag = null)
+        {
+            lock (jobs(__instance))
+            {
+                jobs(__instance).Insert(0, new QueuedJob(j, tag));
+            }
+            return false;
+        }
+
+        public static bool EnqueueLast(JobQueue __instance, Job j, JobTag? tag = null)
+        {
+            lock (jobs(__instance))
+            {
+                jobs(__instance).Add(new QueuedJob(j, tag));
+            }
+            return false;
+        }
+
+        public static bool Contains(JobQueue __instance, ref bool __result, Job j)
+        {
+            for (int i = 0; i < jobs(__instance).Count; i++)
+            {
+                QueuedJob jobi;
+                try
+                {
+                    jobi = jobs(__instance)[i];
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+                if (jobi.job == j)
+                {
+                    __result = true;
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool Extract(JobQueue __instance, ref QueuedJob __result, Job j)
+        {
+            lock (jobs(__instance))
+            {
+                int num = jobs(__instance).FindIndex((QueuedJob qj) => qj.job == j);
+                if (num >= 0)
+                {
+                    QueuedJob result = jobs(__instance)[num];
+                    jobs(__instance).RemoveAt(num);
+                    __result = result;
+                    return false;
+                }
+            }
+            __result = null;
+            return false;
+        }
+
+        public static bool Dequeue(JobQueue __instance, ref QueuedJob __result)
+        {
+            QueuedJob result;
+            lock (jobs(__instance))
+            {
+                if (jobs(__instance).NullOrEmpty())
+                {
+                    __result = null;
+                    return false;
+                }
+
+                result = jobs(__instance)[0];
+                jobs(__instance).RemoveAt(0);
+            }
+            __result = result;
+            return false;
+        }
 
 
     }

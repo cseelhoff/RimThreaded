@@ -133,10 +133,13 @@ namespace RimThreaded
 
             Job job = JobMaker.MakeJob(maintainPosture ? JobDefOf.Wait_MaintainPosture : JobDefOf.Wait, faceTarget);
             job.expiryInterval = ticks;
-            Pawn_JobTracker jobs = pawn.jobs;
-            if (jobs != null && job != null)
+            if (pawn != null)
             {
-                jobs.StartJob(job, JobCondition.InterruptForced, null, resumeCurJobAfterwards: true);
+                Pawn_JobTracker jobs = pawn.jobs;
+                if (jobs != null && job != null && jobs.curDriver != null && jobs.curDriver.pawn != null && jobs.curDriver.pawn.CurJob != null && jobs.curDriver.pawn.CurJob.def != null)
+                {
+                    jobs.StartJob(job, JobCondition.InterruptForced, null, resumeCurJobAfterwards: true);
+                }
             }
             return false;
         }

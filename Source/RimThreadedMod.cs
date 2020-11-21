@@ -38,6 +38,7 @@ namespace RimThreaded
 						bool isRimThreadedPrefixed = false;
 						foreach (Patch patch in patches.Prefixes)
 						{
+							
 							if (patch.owner.Equals("majorhoff.rimthreaded") && (patches.Prefixes.Count > 1 || patches.Postfixes.Count > 0 || patches.Transpilers.Count > 0))
 							{
 								isRimThreadedPrefixed = true;

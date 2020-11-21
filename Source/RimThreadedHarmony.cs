@@ -30,6 +30,7 @@ namespace RimThreaded
 		public static Type giddyUpCoreJobsGUC_JobDefOf;
 		public static Type hospitalityCompUtility;
 		public static Type hospitalityCompGuest;
+		public static Type giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob;
 
 		public static List<CodeInstruction> GetLockCodeInstructions(
 			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
@@ -324,6 +325,7 @@ namespace RimThreaded
 			Prefix(original, patched, "ReleaseClaimedBy");
 			Prefix(original, patched, "CanReserve");
 			Prefix(original, patched, "FirstObsoleteReservationFor");
+
 
 			//DynamicDrawManager
 			original = typeof(DynamicDrawManager);
@@ -899,6 +901,11 @@ namespace RimThreaded
 			original = typeof(JobQueue);
 			patched = typeof(JobQueue_Patch);
 			Prefix(original, patched, "AnyCanBeginNow");
+			Prefix(original, patched, "EnqueueFirst");
+			Prefix(original, patched, "EnqueueLast");
+			Prefix(original, patched, "Contains");
+			Prefix(original, patched, "Extract");
+			Prefix(original, patched, "Dequeue");
 
 			//MeditationFocusTypeAvailabilityCache
 			original = typeof(MeditationFocusTypeAvailabilityCache);
@@ -950,6 +957,18 @@ namespace RimThreaded
 			original = typeof(WorldGrid);
 			patched = typeof(WorldGrid_Patch);
 			Prefix(original, patched, "IsNeighbor");
+
+			//ReservationUtility
+			original = typeof(ReservationUtility);
+			patched = typeof(ReservationUtility_Patch);
+			Prefix(original, patched, "CanReserve");
+
+			//WorldFloodFiller
+			original = typeof(WorldFloodFiller);
+			patched = typeof(WorldFloodFiller_Patch);
+			Prefix(original, patched, "FloodFill", new Type[] { typeof(int), typeof(Predicate<int>) , typeof(Func<int, int, bool>) , typeof(int) , typeof(IEnumerable<int>) });
+
+
 
 			//PERFORMANCE IMPROVEMENTS
 
@@ -1065,6 +1084,11 @@ namespace RimThreaded
 			patched = typeof(JobGiver_AnimalFlee_Patch);
 			Prefix(original, patched, "FleeLargeFireJob");
 
+			//PlayLog			
+			original = typeof(PlayLog);
+			patched = typeof(PlayLog_Patch);
+			Prefix(original, patched, "RemoveEntry");
+
 			//MOD COMPATIBILITY
 
 			//MapGenerator (Z-levels)
@@ -1094,11 +1118,22 @@ namespace RimThreaded
 			Prefix(original, patched, "ReadPixels", new Type[] { typeof(Rect), typeof(int), typeof(int), typeof(bool) });
 			Prefix(original, patched, "Apply", new Type[] { typeof(bool), typeof(bool) });
 
+			//original = typeof(Mesh);
+			//patched = typeof(Mesh_Patch);
+			//ConstructorInfo constructorMethod4 = original.GetConstructor(Type.EmptyTypes);
+			//MethodInfo cpMethod4 = patched.GetMethod("MeshSafe");
+			//harmony.Patch(constructorMethod4, prefix: new HarmonyMethod(cpMethod4));
+
+			//original = typeof(SectionLayer);
+			//patched = typeof(SectionLayer_Patch);
+			//Prefix(original, patched, "GetSubMesh");
+
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
 			giddyUpCoreJobsGUC_JobDefOf = AccessTools.TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
 			giddyUpCoreUtilitiesTextureUtility = AccessTools.TypeByName("GiddyUpCore.Utilities.TextureUtility");
 			giddyUpCoreStorageExtendedDataStorage = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedDataStorage");
 			giddyUpCoreJobsJobDriver_Mounted = AccessTools.TypeByName("GiddyUpCore.Jobs.JobDriver_Mounted");
+			giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob = AccessTools.TypeByName("GiddyUpCore.Harmony.Pawn_JobTracker_DetermineNextJob");
 			hospitalityCompUtility = AccessTools.TypeByName("Hospitality.CompUtility");
 			hospitalityCompGuest = AccessTools.TypeByName("Hospitality.CompGuest");
 
@@ -1110,8 +1145,8 @@ namespace RimThreaded
 				Transpile(giddyUpCoreUtilitiesTextureUtility, patched, methodName);
 			}
 
-			if(giddyUpCoreStorageExtendedDataStorage != null)
-            {
+			if (giddyUpCoreStorageExtendedDataStorage != null)
+			{
 				string methodName = "DeleteExtendedDataFor";
 				Log.Message("RimThreaded is patching " + giddyUpCoreStorageExtendedDataStorage.FullName + " " + methodName);
 				patched = typeof(ExtendedDataStorage_Transpile);
@@ -1122,7 +1157,15 @@ namespace RimThreaded
 				Transpile(giddyUpCoreStorageExtendedDataStorage, patched, methodName);
 			}
 
-			if(giddyUpCoreJobsJobDriver_Mounted != null)
+			if (giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob != null)
+			{
+				string methodName = "Postfix";
+				Log.Message("RimThreaded is patching " + giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob.FullName + " " + methodName);
+				patched = typeof(Pawn_JobTracker_DetermineNextJob_Transpile);
+				Transpile(giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob, patched, methodName);
+			}
+
+			if (giddyUpCoreJobsJobDriver_Mounted != null)
             {
 				string methodName = "<waitForRider>b__8_0";
 				foreach (MethodInfo methodInfo in ((TypeInfo)giddyUpCoreJobsJobDriver_Mounted).DeclaredMethods)

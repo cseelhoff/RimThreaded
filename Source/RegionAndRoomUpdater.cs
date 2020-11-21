@@ -66,6 +66,7 @@ namespace RimThreaded
 
 
         public static object workingLock = new object();
+        public static int workingInt = 0;
         private static bool ShouldBeInTheSameRoomGroup(Room a, Room b)
         {
             RegionType regionType1 = a.RegionType;
@@ -140,40 +141,44 @@ namespace RimThreaded
 
             //lock (workingLock)
             //{
-                if (working(__instance) || !__instance.Enabled)
-                {
-                    return false;
-                }
-                working(__instance) = true;
-                if (!initialized(__instance))
-                {
-                    __instance.RebuildAllRegionsAndRooms();
-                }
+            //if (working(__instance) || !__instance.Enabled)
+            if (Interlocked.Increment(ref workingInt) > 1 || !__instance.Enabled)
+            {
+                //Interlocked.Decrement(ref workingInt);
+                return false;
+            }
+            //working(__instance) = true;
+            if (!initialized(__instance))
+            {
+                __instance.RebuildAllRegionsAndRooms();
+            }
 
-                if (!map(__instance).regionDirtyer.AnyDirty)
-                {
-                    working(__instance) = false;
-                    return false;
-                }
+            if (!map(__instance).regionDirtyer.AnyDirty)
+            {
+                //working(__instance) = false;
+                //Interlocked.Decrement(ref workingInt);
+                return false;
+            }
 
-                try
-                {
-                    RegenerateNewRegionsFromDirtyCells2(__instance);
-                    //RegenerateNewRegionsFromDirtyCells.Invoke(__instance, new object[] { });
-                    CreateOrUpdateRooms2(__instance);
-                    //CreateOrUpdateRooms.Invoke(__instance, new object[] { });
-                }
-                catch (Exception arg)
-                {
-                    Log.Error("Exception while rebuilding dirty regions: " + arg);
-                }
-
-                newRegions(__instance).Clear();
-                SetAllClean2(map(__instance).regionDirtyer);
-                //SetAllClean.Invoke(map(__instance).regionDirtyer, new object[] { });
-                initialized(__instance) = true;
-                working(__instance) = false;
-
+            try
+            {
+                RegenerateNewRegionsFromDirtyCells2(__instance);
+                //RegenerateNewRegionsFromDirtyCells.Invoke(__instance, new object[] { });
+                CreateOrUpdateRooms2(__instance);
+                //CreateOrUpdateRooms.Invoke(__instance, new object[] { });
+            }
+            catch (Exception arg)
+            {
+                Log.Error("Exception while rebuilding dirty regions: " + arg);
+            }
+            
+            newRegions(__instance).Clear();
+            
+            SetAllClean2(map(__instance).regionDirtyer);
+            //SetAllClean.Invoke(map(__instance).regionDirtyer, new object[] { });
+            initialized(__instance) = true;
+            //working(__instance) = false;
+            //Interlocked.Decrement(ref workingInt);
             //}
             if (DebugSettings.detectRegionListersBugs)
             {
@@ -188,12 +193,19 @@ namespace RimThreaded
 
 
         private static void RegenerateNewRegionsFromDirtyCells2(RegionAndRoomUpdater __instance)
-        {
+        {            
             newRegions(__instance).Clear();
             List<IntVec3> dirtyCells = map(__instance).regionDirtyer.DirtyCells;
             for (int i = 0; i < dirtyCells.Count; i++)
             {
-                IntVec3 intVec = dirtyCells[i];
+                IntVec3 intVec;
+                try
+                {
+                    intVec = dirtyCells[i];
+                } catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
                 if (intVec.GetRegion(map(__instance), RegionType.Set_All) == null)
                 {
                     Region region = map(__instance).regionMaker.TryGenerateRegionFrom(intVec);
@@ -202,7 +214,7 @@ namespace RimThreaded
                         newRegions(__instance).Add(region);
                     }
                 }
-            }
+            }            
         }
 
         private static int CombineNewAndReusedRoomsIntoContiguousGroups2(RegionAndRoomUpdater __instance)

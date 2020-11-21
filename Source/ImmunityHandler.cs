@@ -20,9 +20,20 @@ namespace RimThreaded
         public static AccessTools.FieldRef<ImmunityHandler, List<ImmunityRecord>> immunityList =
             AccessTools.FieldRefAccess<ImmunityHandler, List<ImmunityRecord>>("immunityList");
 
+        public static List<ImmunityInfo> getTmpNeededImmunitiesNow()
+        {
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (!immunityInfoLists.TryGetValue(tID, out List<ImmunityInfo> tmpNeededImmunitiesNow))
+            {
+                tmpNeededImmunitiesNow = new List<ImmunityInfo>();
+                immunityInfoLists[tID] = tmpNeededImmunitiesNow;
+            }
+            return tmpNeededImmunitiesNow;
+        }
+
         public static bool NeededImmunitiesNow(ImmunityHandler __instance, ref List<ImmunityInfo> __result)
         {
-            List<ImmunityInfo> tmpNeededImmunitiesNow = immunityInfoLists[Thread.CurrentThread.ManagedThreadId]; //Added
+            List<ImmunityInfo> tmpNeededImmunitiesNow = getTmpNeededImmunitiesNow(); //Added
             tmpNeededImmunitiesNow.Clear(); //Changed to tmpNeededImmunitiesNow
             List<Hediff> hediffs = __instance.pawn.health.hediffSet.hediffs;
             for (int i = 0; i < hediffs.Count; i++)
