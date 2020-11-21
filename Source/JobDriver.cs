@@ -39,7 +39,7 @@ namespace RimThreaded
 
             if (curToilIndex(__instance) >= toils(__instance).Count)
             {
-                Log.Error(__instance.pawn + " with job " + __instance.pawn.CurJob + " tried to get CurToil with curToilIndex=" + curToilIndex(__instance) + " but only has " + toils(__instance).Count + " toils.");
+                Log.Warning(__instance.pawn + " with job " + __instance.pawn.CurJob + " tried to get CurToil with curToilIndex=" + curToilIndex(__instance) + " but only has " + toils(__instance).Count + " toils.");
                 return null;
             }
 
@@ -151,14 +151,18 @@ namespace RimThreaded
 
 
             __instance.debugTicksSpentThisToil = 0;
-            __instance.ticksLeftThisToil = get_CurToil2(__instance).defaultDuration;
-            curToilCompleteMode(__instance) = get_CurToil2(__instance).defaultCompleteMode;
+            Toil curToil = get_CurToil2(__instance);
+            if (curToil != null)
+            {
+                __instance.ticksLeftThisToil = curToil.defaultDuration;
+                curToilCompleteMode(__instance) = curToil.defaultCompleteMode;
+            }
             if (CheckCurrentToilEndOrFail2(__instance))
             {
                 return false;
             }
 
-            Toil curToil = get_CurToil2(__instance);
+            curToil = get_CurToil2(__instance);
             Toil gct = get_CurToil2(__instance);
             if (gct != null && gct.preInitActions != null)
             {
@@ -200,24 +204,28 @@ namespace RimThreaded
                 }
             }
 
-            if (get_CurToil2(__instance) == curToil)
+            Toil gct2 = get_CurToil2(__instance);
+            if (gct2 == curToil)
             {
-                if (get_CurToil2(__instance).initAction != null)
+                if (gct2 != null)
                 {
-                    try
+                    if (gct2.initAction != null)
                     {
-                        get_CurToil2(__instance).initAction();
+                        try
+                        {
+                            gct2.initAction();
+                        }
+                        catch (Exception exception2)
+                        {
+                            JobUtility.TryStartErrorRecoverJob(__instance.pawn, "JobDriver threw exception in initAction for pawn " + __instance.pawn.ToStringSafe(), exception2, __instance);
+                            return false;
+                        }
                     }
-                    catch (Exception exception2)
-                    {
-                        JobUtility.TryStartErrorRecoverJob(__instance.pawn, "JobDriver threw exception in initAction for pawn " + __instance.pawn.ToStringSafe(), exception2, __instance);
-                        return false;
-                    }
-                }
 
-                if (!__instance.ended && curToilCompleteMode(__instance) == ToilCompleteMode.Instant && get_CurToil2(__instance) == curToil)
-                {
-                    __instance.ReadyForNextToil();
+                    if (!__instance.ended && curToilCompleteMode(__instance) == ToilCompleteMode.Instant && get_CurToil2(__instance) == curToil)
+                    {
+                        __instance.ReadyForNextToil();
+                    }
                 }
             }
             return false;

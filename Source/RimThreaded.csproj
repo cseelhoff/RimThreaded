@@ -76,6 +76,13 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="WorldFloodFiller.cs" />
+    <Compile Include="ReservationUtility.cs" />
+    <Compile Include="PlayLog.cs" />
+    <Compile Include="SectionLayer.cs" />
+    <Compile Include="Mesh.cs" />
+    <Compile Include="Mesh_Transpile.cs" />
+    <Compile Include="Pawn_JobTracker_DetermineNextJob_Transpile.cs" />
     <Compile Include="ListerThings_Transpile.cs" />
     <Compile Include="CompUtility_Transpile.cs" />
     <Compile Include="Pawn_InteractionsTracker_Transpile.cs" />
@@ -191,7 +198,7 @@
     <Compile Include="LongEventHandler.cs" />
     <Compile Include="Dijkstra.cs" />
     <Compile Include="Room.cs" />
-    <Compile Include="Immunity.cs" />
+    <Compile Include="ImmunityHandler.cs" />
     <Compile Include="SoundStarter_Patch.cs" />
     <Compile Include="Sustainer.cs" />
     <Compile Include="Sample.cs" />

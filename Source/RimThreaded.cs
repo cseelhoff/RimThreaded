@@ -59,8 +59,11 @@ namespace RimThreaded
         public static Dictionary<int, Sustainer> newSustainerResults = new Dictionary<int, Sustainer>();
         public static Dictionary<string, Texture2D> texture2DResults = new Dictionary<string, Texture2D>();
         public static Dictionary<int, string> texture2DRequests = new Dictionary<int, string>();
+        public static Dictionary<int, Mesh> meshRequests = new Dictionary<int, Mesh>();
         public static Dictionary<MaterialRequest, Material> materialResults = new Dictionary<MaterialRequest, Material>();
         public static Dictionary<int, MaterialRequest> materialRequests = new Dictionary<int, MaterialRequest>();
+        public static Dictionary<int, LayerSubMesh> layerSubMeshResults = new Dictionary<int, LayerSubMesh>();
+        public static Dictionary<int, object[]> layerSubMeshRequests = new Dictionary<int, object[]>();
         public static Dictionary<int, Map> generateMapResults = new Dictionary<int, Map>();
         public static Dictionary<int, object[]> generateMapRequests = new Dictionary<int, object[]>();
         public static Dictionary<int, AudioSource> newAudioSourceResults = new Dictionary<int, AudioSource>();
@@ -444,6 +447,7 @@ namespace RimThreaded
                 for (int j = 0; j < maps.Count; j++)
                 {
                     maps[j].MapPostTick();
+                    //maps[j].mapDrawer.MapMeshDrawerUpdate_First();
                 }
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WildPlantSpawner
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //SteadyEnvironment
@@ -874,6 +878,7 @@ namespace RimThreaded
         public static void MainThreadWaitLoop()
         {
             //bool continueWaiting = true;
+            RegionAndRoomUpdater_Patch.workingInt = 0;
             allWorkerThreadsFinished = false;
             monitorThreadWaitHandle.Set();
             while (!allWorkerThreadsFinished)
@@ -898,6 +903,8 @@ namespace RimThreaded
                 RespondToSetActiveRequests();
                 RespondToGetReadableTextureRequests();
                 RespondToCalcHeightRequests();
+                //RespondToMeshRequests();
+                //RespondToSubMeshRequests();
 
                 // Add any sounds that were produced in this tick
 
@@ -1325,6 +1332,49 @@ namespace RimThreaded
                     setActiveTextureRequests.Remove(key);
                 }
                 RenderTexture.active = renderTexture;
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToMeshRequests()
+        {
+            while (meshRequests.Count > 0)
+            {
+                Mesh mesh;
+                int key;
+                lock (meshRequests)
+                {
+                    key = meshRequests.Keys.First();
+                    mesh = meshRequests[key];
+                    meshRequests.Remove(key);
+                }
+                Mesh_Patch.MeshSafe(mesh);
+                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
+                    eventWaitStart.Set();
+                else
+                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
+            }
+        }
+
+        private static void RespondToSubMeshRequests()
+        {
+            while (layerSubMeshRequests.Count > 0)
+            {
+                object[] parameters;
+                int key;
+                lock (layerSubMeshRequests)
+                {
+                    key = layerSubMeshRequests.Keys.First();
+                    parameters = layerSubMeshRequests[key];
+                    layerSubMeshRequests.Remove(key);
+                }
+                //LayerSubMesh layerSubMesh = null;
+                //SectionLayer_Patch.GetSubMesh((SectionLayer)parameters[0], layerSubMesh, (Material)parameters[1]);
+                LayerSubMesh layerSubMesh = ((SectionLayer)parameters[0]).GetSubMesh((Material)parameters[1]);
+                layerSubMeshResults[key] = layerSubMesh;
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else

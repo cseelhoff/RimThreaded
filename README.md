@@ -1,21 +1,16 @@
 # RimThreaded
-RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
+RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-DESCRIPTION:  
--THIS MOD IS A WIP AND IS NOT GUARANTEED TO BE COMPATIBLE WITH OTHER MODS-  
-I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.
+JOIN OUR COMMUNITY ON DISCORD:  
+https://discord.gg/3JJuWK8
 
-SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
+SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
 
 LOAD ORDER/MOD COMPATIBILITY:  
-https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!  
+https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!
 
-BUGS:  
-https://github.com/cseelhoff/RimThreaded/issues  
-Your (likely) log location: C:\Users\username\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\player.log  
-
-DISCORD:  
-https://discord.gg/3JJuWK8  
+SUBMIT BUGS:  
+https://github.com/cseelhoff/RimThreaded/issues/new/choose
 
 CREDITS:  
 Bug testing:  
@@ -28,13 +23,42 @@ Thank you bookdude 13 for your many bugfixes!
 Thank you to Ataman for helping me fix the LVM deep storage bug  
 
 Logo:  
-Thank you ArchieV1 for the logo! (https://github.com/ArchieV1)  
-Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=36313) and JKimsey (https://pixabay.com/users/jkimsey-253161/)  
+Thank you ArchieV1 for the logo! https://github.com/ArchieV1  
+Logo help from: Marnador https://ludeon.com/forums/index.php?action=profile;u=36313 and JKimsey https://pixabay.com/users/jkimsey-253161/
 
-Video Review:  
-Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)  
+Video Review:
+Thank you BaRKy for reviewing my mod! I am honored! https://www.youtube.com/watch?v=EWudgTJksMU
+
+DONATE:
+Some subscribers insisted that I set up a donation page. For those looking, here it is:  
+https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
+
+Version 1.1.9
+-Performance improvement in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms  
+-Fixed bug in WorldFloodFiller.FloodFill  
+
+Version 1.1.8
+-Fixed bug in ImmunityHandler.NeededImmunitiesNow  
+-Fixed bug in JobDriver.TryActuallyStartNextToil  
+-Fixed bug in JobQueue.EnqueueFirst  
+-Fixed bug in JobQueue.EnqueueLast  
+-Fixed bug in JobQueue.Contains  
+-Fixed bug in JobQueue.Extract  
+-Fixed bug in JobQueue.Dequeue  
+-Fixed bug in PawnsFinder.get_AllMapsCaravansAndTravelingTransportPods_Alive  
+-Fixed bug in PawnsFinder.get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists  
+-Fixed bug in PawnsFinder.get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists  
+-Fixed bug in PawnsFinder.get_AllMapsWorldAndTemporary_Alive  
+-Fixed bug in PawnUtility.ForceWait  
+-Fixed bug in PlayLog.RemoveEntry  
+-Fixed bug in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms  
+-Fixed bug in ReservationUtilitiy.CanReserve  
+-Fixed bug in WanderUtility.GetColonyWanderRoot  
+
+Version 1.1.7  
+-Transpiled Pawn_JobTracker_DetermineNextJob_Transpile.Postfix (GiddyUpCore compatibility)
 
 Version 1.1.6  
 -Fixed bug in Room.RemoveRegion (game frozen when building)

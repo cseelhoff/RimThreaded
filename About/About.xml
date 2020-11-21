@@ -8,25 +8,27 @@
 		<li>1.2</li>
 	</supportedVersions>
   <description>
-    RimThreaded enables Rimworld to utilize multiple threads and thus greatly increases the speed of the game.
+    RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.6
-    -Fixed bug in Room.RemoveRegion (game frozen when building)
+    Version 1.1.9
+    -Performance improvement in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms
+    -Fixed bug in WorldFloodFiller.FloodFill
 
-    DESCRIPTION:
-    This project is still a work in progress and will likely not play well with other mods. I am uploading this hoping to get feedback and identify some bugs as I continue development. If you would like to contribute, I have provided a github link below. Submissions of bug reports with error logs are the most helpful to progress this project! Also submitting lists of known working and incompatible mods helps too.
+    JOIN OUR COMMUNITY ON DISCORD:
+    https://discord.gg/3JJuWK8
 
-    NOTE: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
+    SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
 
-    LOAD ORDER/MOD COMPATIBILITY:
+    LOAD ORDER:
+    Put RimThreaded last in load order.
+
+    MOD COMPATIBILITY:
     https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!
 
-    BUGS:
-    https://github.com/cseelhoff/RimThreaded/issues
-    Your (likely) log location: C:\Users\username\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\player.log
+    SUBMIT BUGS:
+    https://github.com/cseelhoff/RimThreaded/issues/new/choose
 
     CREDITS:
-
     Bug testing:
     Special thank you for helping me test Austin (Stanui)!
     And thank you to others in Rimworld community who have posted their bug findings!
@@ -37,11 +39,14 @@
     Thank you to Ataman for helping me fix the LVM deep storage bug
 
     Logo:
-    Thank you ArchieV1 for the logo! (https://github.com/ArchieV1)
-    Logo help from: Marnador (https://ludeon.com/forums/index.php?action=profile;u=36313) and JKimsey (https://pixabay.com/users/jkimsey-253161/)
+    Thank you ArchieV1 for the logo! https://github.com/ArchieV1
+    Logo help from: Marnador https://ludeon.com/forums/index.php?action=profile;u=36313 and JKimsey https://pixabay.com/users/jkimsey-253161/
 
     Video Review:
-    Thank you BaRKy for reviewing my mod! I am honored! (https://www.youtube.com/watch?v=EWudgTJksMU)
+    Thank you BaRKy for reviewing my mod! I am honored! https://www.youtube.com/watch?v=EWudgTJksMU
+
+    DONATE:
+    Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded
   </description>
   <modDependencies>
     <li>
