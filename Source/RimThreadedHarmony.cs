@@ -1054,7 +1054,7 @@ namespace RimThreaded
 
 			//Map			
 			original = typeof(Map);
-			//patched = typeof(Map_Patch);
+			patched = typeof(Map_Patch);
 			//Prefix(original, patched, "MapUpdate");
 			patched = typeof(Map_Transpile);
 			Transpile(original, patched, "MapUpdate");
@@ -1089,6 +1089,16 @@ namespace RimThreaded
 			patched = typeof(PlayLog_Patch);
 			Prefix(original, patched, "RemoveEntry");
 
+			//ResourceCounter			
+			original = typeof(ResourceCounter);
+			patched = typeof(ResourceCounter_Patch);
+			Prefix(original, patched, "get_TotalHumanEdibleNutrition");
+			Prefix(original, patched, "ResetDefs");
+			Prefix(original, patched, "ResetResourceCounts");
+			Prefix(original, patched, "GetCount");
+			Prefix(original, patched, "GetCountIn", new Type[] { typeof(ThingRequestGroup) });
+			Prefix(original, patched, "UpdateResourceCounts");
+
 			//MOD COMPATIBILITY
 
 			//MapGenerator (Z-levels)
@@ -1099,12 +1109,13 @@ namespace RimThreaded
 			//RenderTexture (Giddy-Up)
 			original = typeof(RenderTexture);
 			patched = typeof(RenderTexture_Patch);
-			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
-
+			//Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
+			Prefix(original, patched, "GetTemporaryImpl");
+			
 			//GetTemporary (CE)
-			Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite), typeof(int) });
-			Prefix(original, patched, "get_active");
-			Prefix(original, patched, "set_active");
+			//Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite), typeof(int) });
+			//Prefix(original, patched, "get_active");
+			//Prefix(original, patched, "set_active");
 			
 			//Graphics (Giddy-Up)
 			original = typeof(Graphics);
@@ -1134,7 +1145,12 @@ namespace RimThreaded
 
 			original = typeof(MeshMakerPlanes);
 			patched = typeof(MeshMakerPlanes_Patch);
-			Prefix(original, patched, "NewPlaneMesh", new Type[] { typeof(Vector2), typeof(bool) , typeof(bool) , typeof(bool) });
+			Prefix(original, patched, "NewPlaneMesh", new Type[] { typeof(Vector2), typeof(bool), typeof(bool), typeof(bool) });
+
+			original = typeof(MeshMakerShadows);
+			patched = typeof(MeshMakerShadows_Patch);
+			Prefix(original, patched, "NewShadowMesh", new Type[] { typeof(float), typeof(float), typeof(float) });
+
 
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
 			giddyUpCoreJobsGUC_JobDefOf = AccessTools.TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");

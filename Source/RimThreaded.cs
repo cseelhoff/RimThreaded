@@ -27,6 +27,7 @@ namespace RimThreaded
 
         public static int maxThreads = Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1);
         public static int timeoutMS = Math.Max(int.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 1);
+        public static int timeoutMS2 = 300000; //five minute timeout for timeout exempt threads
         public static bool suppressTexture2dError = RimThreadedMod.Settings.suppressTexture2dError;
         public static float timeSpeedNormal = float.Parse(RimThreadedMod.Settings.timeSpeedNormalBuffer);
         public static float timeSpeedFast = float.Parse(RimThreadedMod.Settings.timeSpeedFastBuffer);
@@ -53,6 +54,12 @@ namespace RimThreaded
         public static Dictionary<int, EventWaitHandle> mainRequestWaits = new Dictionary<int, EventWaitHandle>();
         public static Dictionary<int, object[]> tryMakeAndPlayRequests = new Dictionary<int, object[]>();
 
+        public static Dictionary<int, object[]> safeFunctionRequests =
+            new Dictionary<int, object[]>();
+        public static Dictionary<int, object> safeFunctionResults =
+            new Dictionary<int, object>();
+
+
         public static Queue<int> buildDatabase = new Queue<int>();
         public static Dictionary<int, SampleSustainer> tryMakeAndPlayResults = new Dictionary<int, SampleSustainer>();
         public static Dictionary<int, object[]> newSustainerRequests = new Dictionary<int, object[]>();
@@ -62,6 +69,7 @@ namespace RimThreaded
         public static Dictionary<string, Texture2D> texture2DResults = new Dictionary<string, Texture2D>();
         public static Dictionary<int, string> texture2DRequests = new Dictionary<int, string>();
         public static Dictionary<int, Mesh> meshRequests = new Dictionary<int, Mesh>();
+        public static Dictionary<int, Mesh> meshResults = new Dictionary<int, Mesh>();
         public static Dictionary<MaterialRequest, Material> materialResults = new Dictionary<MaterialRequest, Material>();
         public static Dictionary<int, MaterialRequest> materialRequests = new Dictionary<int, MaterialRequest>();
         public static Dictionary<int, LayerSubMesh> layerSubMeshResults = new Dictionary<int, LayerSubMesh>();
@@ -93,7 +101,8 @@ namespace RimThreaded
         public static Dictionary<int, Mesh> newBoltMeshResults = new Dictionary<int, Mesh>();
         public static ConcurrentQueue<int> newBoltMeshRequests = new ConcurrentQueue<int>();
 
-        public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
+        //public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
+        public static Dictionary<int, int> timeoutExemptThreads2 = new Dictionary<int, int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
@@ -449,13 +458,14 @@ namespace RimThreaded
                 for (int j = 0; j < maps.Count; j++)
                 {
                     /*
-                    bool worldRenderedNow = WorldRendererUtility.WorldRenderedNow;
                     Map_Patch.SkyManagerUpdate2(maps[j]);
                     maps[j].powerNetManager.UpdatePowerNetsAndConnections_First();
                     maps[j].regionGrid.UpdateClean();
                     maps[j].regionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms();
                     maps[j].glowGrid.GlowGridUpdate_First();
                     maps[j].lordManager.LordManagerUpdate();
+                    
+                    bool worldRenderedNow = WorldRendererUtility.WorldRenderedNow;
                     if (!worldRenderedNow && Find.CurrentMap == maps[j])
                     {
                         if (Map_Patch.AlwaysRedrawShadows)
@@ -465,18 +475,19 @@ namespace RimThreaded
 
                         PlantFallColors.SetFallShaderGlobals(maps[j]);
                         maps[j].waterInfo.SetTextures();
-                        maps[j].avoidGrid.DebugDrawOnMap();
-                        maps[j].mapDrawer.MapMeshDrawerUpdate_First();
+                        maps[j].avoidGrid.DebugDrawOnMap();                        
+                        maps[j].mapDrawer.MapMeshDrawerUpdate_First();//
                         maps[j].powerNetGrid.DrawDebugPowerNetGrid();
                         DoorsDebugDrawer.DrawDebug();
-                        maps[j].mapDrawer.DrawMapMesh();
-                        maps[j].dynamicDrawManager.DrawDynamicThings();
-                        maps[j].gameConditionManager.GameConditionManagerDraw(maps[j]);
+                        maps[j].mapDrawer.DrawMapMesh();//
+                        maps[j].dynamicDrawManager.DrawDynamicThings(); //
+                        maps[j].gameConditionManager.GameConditionManagerDraw(maps[j]);                        
                         MapEdgeClipDrawer.DrawClippers(maps[j]);
                         maps[j].designationManager.DrawDesignations();
                         maps[j].overlayDrawer.DrawAllOverlays();
                         maps[j].temporaryThingDrawer.Draw();
                     }
+                    
                     try
                     {
                         maps[j].areaManager.AreaManagerUpdate();
@@ -885,15 +896,31 @@ namespace RimThreaded
                     {
                         if (!eventWaitDone.WaitOne(timeoutMS))
                         {
-                            if (!timeoutExemptThreads.Contains(tID2))
+                            bool timoutExempt;
+                            lock (timeoutExemptThreads2)
+                            {
+                                timoutExempt = timeoutExemptThreads2.ContainsKey(tID2);
+                            }
+                                if (!timoutExempt)
                             {
                                 Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
                                 AbortWorkerThread(tID2);
                                 CreateWorkerThread();
                             } else
                             {
-                                eventWaitDone.WaitOne();
-                                timeoutExemptThreads.Remove(tID2);
+                                int timeoutOverride;
+                                lock (timeoutExemptThreads2)
+                                {
+                                    timeoutOverride = timeoutExemptThreads2[tID2];
+                                }
+                                eventWaitDone.WaitOne(timeoutOverride);
+                                lock (timeoutExemptThreads2)
+                                {
+                                    if (timeoutExemptThreads2.ContainsKey(tID2))
+                                    {
+                                        timeoutExemptThreads2.Remove(tID2);
+                                    }
+                                }
                             }
                         }                            
                     }
@@ -962,37 +989,13 @@ namespace RimThreaded
 
         public static void MainThreadWaitLoop()
         {
-            //bool continueWaiting = true;
             RegionAndRoomUpdater_Patch.workingInt = 0;
             allWorkerThreadsFinished = false;
             monitorThreadWaitHandle.Set();
             while (!allWorkerThreadsFinished)
             {
                 mainThreadWaitHandle.WaitOne();
-                RespondToTexture2DRequests();
-                RespondToMaterialRequests();
-                RespondToPlayRequests();
-                RespondToSustainerRequests();
-                RespondToGenerateMapRequests();
-                RespondToNewAudioSourceRequests();
-                RespondToRenderTextureRequests();
-                RespondToRenderTextureAARequests();
-                RespondToNewBoltMeshRequests();
-                RespondToBlitRequests();
-                RespondToGetActiveTextureRequests();
-                RespondToSetActiveTextureRequests();
-                RespondToInternal_CreateRequests();
-                RespondToReadPixelRequests();
-                RespondToApplyTextureRequests();
-                RespondToReleaseTemporaryRequests();
-                RespondToSetActiveRequests();
-                RespondToGetReadableTextureRequests();
-                RespondToCalcHeightRequests();
-                //RespondToMeshRequests();
-                RespondToSubMeshRequests();
-                RespondToBuildDatabaseRequests();
-                RespondToNewPlaneMeshRequests();
-                // Add any sounds that were produced in this tick
+                RespondToSafeFunctionRequests();
 
                 while (PlayOneShot.Count > 0)
                 {
@@ -1012,493 +1015,32 @@ namespace RimThreaded
             }
         }
 
-        private static void RespondToSustainerRequests()
+
+        private static void RespondToSafeFunctionRequests()
         {
-            while (newSustainerRequests.Count > 0)
+            while (safeFunctionRequests.Count > 0)
             {
-                object[] objects;
+                object[] functionAndParameters;
                 int key;
-                lock (newSustainerRequests)
+                lock (safeFunctionRequests)
                 {
-                    key = newSustainerRequests.Keys.First();
-                    objects = newSustainerRequests[key];
-                    newSustainerRequests.Remove(key);
+                    key = safeFunctionRequests.Keys.First();
+                    functionAndParameters = safeFunctionRequests[key];
+                    safeFunctionRequests.Remove(key);
                 }
-                SoundDef soundDef = (SoundDef)objects[0];
-                SoundInfo soundInfo = (SoundInfo)objects[1];
-                Sustainer sustainer = new Sustainer(soundDef, soundInfo);
-                newSustainerResults[key] = sustainer;
-                
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
+                object result;
+                object[] parameters = (object[])functionAndParameters[1];
 
-        private static void RespondToPlayRequests()
-        {
-            while (tryMakeAndPlayRequests.Count > 0)
-            {
-                object[] objects;
-                int key;
-                lock (tryMakeAndPlayRequests)
+                if (functionAndParameters[0] is Func<object[], object> safeFunction) {
+                    result = safeFunction(parameters);
+                    safeFunctionResults[key] = result;
+                } else if (functionAndParameters[0] is Action<object[]> safeAction)
                 {
-                    key = tryMakeAndPlayRequests.Keys.First();
-                    objects = tryMakeAndPlayRequests[key];
-                    tryMakeAndPlayRequests.Remove(key);
-                }
-                SubSustainer subSustainer = (SubSustainer)objects[0];
-                AudioClip clip = (AudioClip)objects[1];
-                float num2 = (float)objects[2];
-                SampleSustainer sampleSustainer = SampleSustainer.TryMakeAndPlay(subSustainer, clip, num2);
-                tryMakeAndPlayResults[key] = sampleSustainer;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToMaterialRequests()
-        {
-            while (materialRequests.Count > 0)
-            {
-                MaterialRequest materialRequest;
-                int key;
-                lock (materialRequests)
+                    safeAction(parameters);
+                } else
                 {
-                    key = materialRequests.Keys.First();
-                    materialRequest = materialRequests[key];
-                    materialRequests.Remove(key);
-                }
-                Material material = MaterialPool.MatFrom(materialRequest);
-                materialResults[materialRequest] = material;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToTexture2DRequests()
-        {
-            while (texture2DRequests.Count > 0)
-            {
-                string itempath;
-                int key;
-                lock (texture2DRequests)
-                {
-                    key = texture2DRequests.Keys.First();
-                    itempath = texture2DRequests[key];
-                    texture2DRequests.Remove(key);
-                }
-                Texture2D content = ContentFinder_Texture2D_Patch.GetTexture2D(itempath);
-                texture2DResults[itempath] = content;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-        private static void RespondToCalcHeightRequests()
-        {
-            while (calcHeightRequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (calcHeightRequests)
-                {
-                    key = calcHeightRequests.Keys.First();
-                    parameters = calcHeightRequests[key];
-                    calcHeightRequests.Remove(key);
-                }
-                float calcHeightResult = ((GUIStyle)parameters[0]).CalcHeight((GUIContent)parameters[1], (float)parameters[2]);
-                calcHeightResults[key] = calcHeightResult;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToGenerateMapRequests()
-        {
-            while (generateMapRequests.Count > 0)
-            {
-                object[] requestParams;
-                int key;
-                lock (generateMapRequests)
-                {
-                    key = generateMapRequests.Keys.First();
-                    requestParams = generateMapRequests[key];
-                    generateMapRequests.Remove(key);
-                }
-
-                timeoutExemptThreads.Add(key);
-                Map mapResult = MapGenerator.GenerateMap((IntVec3)requestParams[0], (MapParent)requestParams[1], (MapGeneratorDef)requestParams[2], (IEnumerable<GenStepWithParams>)requestParams[3], (Action<Map>)requestParams[4]);
-                generateMapResults[key] = mapResult;
-
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToNewAudioSourceRequests()
-        {
-            while (newAudioSourceRequests.Count > 0)
-            {
-                GameObject go;
-                int key;
-                lock (newAudioSourceRequests)
-                {
-                    key = newAudioSourceRequests.Keys.First();
-                    go = newAudioSourceRequests[key];
-                    newAudioSourceRequests.Remove(key);
-                }
-                //timeoutExemptThreads.Add(key);
-                AudioSource audioSourceResult = AudioSourceMaker.NewAudioSourceOn(go);
-                newAudioSourceResults[key] = audioSourceResult;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToRenderTextureRequests()
-        {
-            while (renderTextureRequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (renderTextureRequests)
-                {
-                    key = renderTextureRequests.Keys.First();
-                    parameters = renderTextureRequests[key];
-                    renderTextureRequests.Remove(key);
-                }
-                //timeoutExemptThreads.Add(key);
-                RenderTexture renderTextureResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4]);
-                renderTextureResults[key] = renderTextureResult;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToGetReadableTextureRequests()
-        {
-            while (getReadableTextureRequests.Count > 0)
-            {
-                Texture2D texture;
-                int key;
-                lock (getReadableTextureRequests)
-                {
-                    key = getReadableTextureRequests.Keys.First();
-                    texture = getReadableTextureRequests[key];
-                    getReadableTextureRequests.Remove(key);
-                }
-                RenderTexture temporary = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
-                Graphics.Blit(texture, temporary);
-                RenderTexture active = RenderTexture.active;
-                RenderTexture.active = temporary;
-                Texture2D texture2D = new Texture2D(texture.width, texture.height);
-                texture2D.ReadPixels(new Rect(0f, 0f, temporary.width, temporary.height), 0, 0);
-                texture2D.Apply();
-                RenderTexture.active = active;
-                RenderTexture_Patch.ReleaseTemporaryThreadSafe(temporary);
-
-                getReadableTextureResults[key] = texture2D;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToRenderTextureAARequests()
-        {
-            while (renderTextureAARequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (renderTextureAARequests)
-                {
-                    key = renderTextureAARequests.Keys.First();
-                    parameters = renderTextureAARequests[key];
-                    renderTextureAARequests.Remove(key);
-                }
-                //timeoutExemptThreads.Add(key);
-                RenderTexture renderTextureAAResult = RenderTexture.GetTemporary((int)parameters[0], (int)parameters[1], (int)parameters[2], (RenderTextureFormat)parameters[3], (RenderTextureReadWrite)parameters[4], (int)parameters[5]);
-                renderTextureAAResults[key] = renderTextureAAResult;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToSetActiveTextureRequests()
-        {
-            while (renderTextureSetActiveRequests.Count > 0)
-            {
-                RenderTexture renderTexture;
-                int key;
-                lock (renderTextureSetActiveRequests)
-                {
-                    key = renderTextureSetActiveRequests.Keys.First();
-                    renderTexture = renderTextureSetActiveRequests[key];
-                    renderTextureSetActiveRequests.Remove(key);
-                }
-                //timeoutExemptThreads.Add(key);
-                RenderTexture.active = renderTexture;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToGetActiveTextureRequests()
-        {
-            while (renderTextureGetActiveRequests.Count > 0)
-            {
-                RenderTexture renderTexture;
-                int key;
-                lock (renderTextureGetActiveRequests)
-                {
-                    key = renderTextureGetActiveRequests.Keys.First();
-                    renderTexture = renderTextureGetActiveRequests[key];
-                    renderTextureGetActiveRequests.Remove(key);
-                }
-                //timeoutExemptThreads.Add(key);
-                RenderTexture renderTextureResult = RenderTexture.active;
-                renderTextureResults[key] = renderTextureResult;
-                
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToNewBoltMeshRequests()
-        {
-            while (newBoltMeshRequests.Count > 0)
-            {
-                if (newBoltMeshRequests.TryDequeue(out int key))
-                {
-                    Mesh newBoltMeshResult = LightningBoltMeshMaker.NewBoltMesh();
-                    newBoltMeshResults[key] = newBoltMeshResult;
-                }
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToBlitRequests()
-        {
-            while (blitRequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (blitRequests)
-                {
-                    key = blitRequests.Keys.First();
-                    parameters = blitRequests[key];
-                    blitRequests.Remove(key);
-                }
-                Graphics.Blit((Texture)parameters[0], (RenderTexture)parameters[1]);
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        public static MethodInfo Internal_Create =
-            typeof(Texture2D).GetMethod("Internal_Create", BindingFlags.NonPublic | BindingFlags.Static);
-
-        private static void RespondToInternal_CreateRequests()
-        {
-            while (internal_CreateRequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (internal_CreateRequests)
-                {
-                    key = internal_CreateRequests.Keys.First();
-                    parameters = internal_CreateRequests[key];
-                    internal_CreateRequests.Remove(key);
-                }
-                Internal_Create.Invoke(null, parameters);
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToReadPixelRequests()
-        {
-            while (readPixelRequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (readPixelRequests)
-                {
-                    key = readPixelRequests.Keys.First();
-                    parameters = readPixelRequests[key];
-                    readPixelRequests.Remove(key);
-                }
-                ((Texture2D)parameters[0]).ReadPixels((Rect)parameters[1], (int)parameters[2], (int)parameters[3], (bool)parameters[4]);
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToApplyTextureRequests()
-        {
-            while (applyTextureRequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (applyTextureRequests)
-                {
-                    key = applyTextureRequests.Keys.First();
-                    parameters = applyTextureRequests[key];
-                    applyTextureRequests.Remove(key);
-                }
-                ((Texture2D)parameters[0]).Apply((bool)parameters[1], (bool)parameters[2]);
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToReleaseTemporaryRequests()
-        {
-            while (releaseTemporaryRequests.Count > 0)
-            {
-                RenderTexture renderTexture;
-                int key;
-                lock (releaseTemporaryRequests)
-                {
-                    key = releaseTemporaryRequests.Keys.First();
-                    renderTexture = releaseTemporaryRequests[key];
-                    releaseTemporaryRequests.Remove(key);
-                }
-                RenderTexture.ReleaseTemporary(renderTexture);
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToSetActiveRequests()
-        {
-            while (setActiveTextureRequests.Count > 0)
-            {
-                RenderTexture renderTexture;
-                int key;
-                lock (setActiveTextureRequests)
-                {
-                    key = setActiveTextureRequests.Keys.First();
-                    renderTexture = setActiveTextureRequests[key];
-                    setActiveTextureRequests.Remove(key);
-                }
-                RenderTexture.active = renderTexture;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToMeshRequests()
-        {
-            while (meshRequests.Count > 0)
-            {
-                Mesh mesh;
-                int key;
-                lock (meshRequests)
-                {
-                    key = meshRequests.Keys.First();
-                    mesh = meshRequests[key];
-                    meshRequests.Remove(key);
-                }
-                Mesh_Patch.MeshSafe(mesh);
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToSubMeshRequests()
-        {
-            while (layerSubMeshRequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (layerSubMeshRequests)
-                {
-                    key = layerSubMeshRequests.Keys.First();
-                    parameters = layerSubMeshRequests[key];
-                    layerSubMeshRequests.Remove(key);
-                }
-                //LayerSubMesh layerSubMesh = null;
-                //SectionLayer_Patch.GetSubMesh((SectionLayer)parameters[0], layerSubMesh, (Material)parameters[1]);
-                LayerSubMesh layerSubMesh = ((SectionLayer)parameters[0]).GetSubMesh((Material)parameters[1]);
-                layerSubMeshResults[key] = layerSubMesh;
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToBuildDatabaseRequests()
-        {
-            while (buildDatabase.Count > 0)
-            {
-                int key;
-                lock (buildDatabase)
-                {
-                    key = buildDatabase.Dequeue();
-                }
-                GraphicDatabaseHeadRecords_Patch.BuildDatabaseIfNecessary();
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
-            }
-        }
-
-        private static void RespondToNewPlaneMeshRequests()
-        {
-            while (planeMeshRequests.Count > 0)
-            {
-                object[] parameters;
-                int key;
-                lock (planeMeshRequests)
-                {
-                    key = planeMeshRequests.Keys.First();
-                    parameters = planeMeshRequests[key];
-                    planeMeshRequests.Remove(key);
-                }
-                Mesh planeMesh = MeshMakerPlanes.NewPlaneMesh((Vector2)parameters[0], (bool)parameters[1], (bool)parameters[2], (bool)parameters[3]);
-                planeMeshResults[key] = planeMesh;
+                    Log.Error("First perameter of thread-safe function request was not an action or function");
+                }            
                 if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
                     eventWaitStart.Set();
                 else

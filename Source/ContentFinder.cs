@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -9,84 +10,28 @@ namespace RimThreaded
 {    
     public class ContentFinder_Texture2D_Patch
     {
-		public static bool Get(ref Texture2D __result, string itemPath, bool reportFailure = true)
-		{
-			Texture2D texture2d;
-			//if (RimThreaded.texture2DResults.TryGetValue(itemPath, out texture2d))
-			//{
-			//__result = texture2d;
-			//return false;
-			//}
-			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
-                lock (RimThreaded.texture2DRequests)
-                {
-                    RimThreaded.texture2DRequests[tID] = itemPath;
-                }
-				RimThreaded.mainThreadWaitHandle.Set();
-				eventWaitStart.WaitOne();
-				RimThreaded.texture2DResults.TryGetValue(itemPath, out texture2d);
-				__result = texture2d;
-				return false;
-			}
-			return true;
-		}
-        public static Texture2D GetTexture2D(string itemPath, bool reportFailure = true)
+        static readonly Func<object[], object> safeFunction = p =>
+         ContentFinder<Texture2D>.Get((string)p[0], (bool)p[1]);
+
+        public static bool Get(ref Texture2D __result, string itemPath, bool reportFailure = true)
         {
-			if (!UnityData.IsInMainThread)
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                Log.Error("Tried to get a resource \"" + itemPath + "\" from a different thread. All resources must be loaded in the main thread.");
-                return null;
-            }
-
-            Texture2D val = null;
-            List<ModContentPack> runningModsListForReading = LoadedModManager.RunningModsListForReading;
-            for (int num = runningModsListForReading.Count - 1; num >= 0; num--)
-            {
-                ModContentHolder<Texture2D> texture2DContentHolder = runningModsListForReading[num].GetContentHolder<Texture2D>();
-                val = texture2DContentHolder.Get(itemPath);
-                if (val != null)
+                object[] functionAndParameters = new object[] { safeFunction, new object[] { itemPath, reportFailure } };
+                lock (RimThreaded.safeFunctionRequests)
                 {
-                    return val;
+                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
                 }
+                RimThreaded.mainThreadWaitHandle.Set();
+                eventWaitStart.WaitOne();
+                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
+                __result = (Texture2D)safeFunctionResult;
+                return false;
             }
-            val = Resources.Load<Texture2D>(GenFilePaths.ContentPath<Texture2D>() + itemPath);
-            if (val != null)
-            {
-                return val;
-            }
-            for (int num2 = runningModsListForReading.Count - 1; num2 >= 0; num2--)
-            {
-                for (int i = 0; i < runningModsListForReading[num2].assetBundles.loadedAssetBundles.Count; i++)
-                {
-                    AssetBundle val2 = runningModsListForReading[num2].assetBundles.loadedAssetBundles[i];
-                    string path = Path.Combine("Assets", "Data");
-                    path = Path.Combine(path, runningModsListForReading[num2].FolderName);
-                    string str = Path.Combine(Path.Combine(path, GenFilePaths.ContentPath<Texture2D>()), itemPath);
-                    for (int j = 0; j < ModAssetBundlesHandler.TextureExtensions.Length; j++)
-                    {
-                        val = val2.LoadAsset<Texture2D>(str + ModAssetBundlesHandler.TextureExtensions[j]);
-                        if (val != null)
-                        {
-                            return val;
-                        }
-                    }
-                }
-            }            
-            if (reportFailure)
-            {
-                if (RimThreaded.suppressTexture2dError)
-                {
-                    Log.Warning("Could not load " + typeof(Texture2D) + " at " + itemPath + " in any active mod or in base resources.");
-                }
-                else
-                {
-                    Log.Error("Could not load " + typeof(Texture2D) + " at " + itemPath + " in any active mod or in base resources.");
-                }
-            }
-
-            return val;
+            return true;
         }
+        
 
 	}
 

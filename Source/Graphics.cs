@@ -1,12 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
-using Verse;
-using Verse.AI;
-using Verse.Sound;
+﻿using System;
 using UnityEngine;
 using System.Threading;
 
@@ -15,14 +7,18 @@ namespace RimThreaded
 
     public class Graphics_Patch
 	{
+        static readonly Action<object[]> safeFunction = p =>
+            Graphics.Blit((Texture)p[0], (RenderTexture)p[1]);
+
         public static bool Blit(Texture source, RenderTexture dest)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                lock (RimThreaded.blitRequests)
+                object[] functionAndParameters = new object[] { safeFunction, new object[] { source, dest } };
+                lock (RimThreaded.safeFunctionRequests)
                 {
-                    RimThreaded.blitRequests[tID] = new object[] { source, dest };
+                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
                 }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();

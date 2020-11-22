@@ -72,22 +72,26 @@ namespace RimThreaded
                 if (!freeHumanlikesSpawnedOfFactionResult(__instance).TryGetValue(faction, out pawnList1))
                 {
                     pawnList1 = new List<Pawn>();
-                    lock (freeHumanlikesSpawnedOfFactionResult(__instance))
-                    {
-                        freeHumanlikesSpawnedOfFactionResult(__instance)[faction] = pawnList1;
-                    }
+                    freeHumanlikesSpawnedOfFactionResult(__instance)[faction] = pawnList1;
                 }
             }
             lock (pawnList1)
             {
                 pawnList1.Clear();
-            }
-            List<Pawn> pawnList2 = null;
-            SpawnedPawnsInFaction(__instance, ref pawnList2, faction);
-            for (int index = 0; index < pawnList2.Count; ++index)
-            {
-                if (pawnList2[index].HostFaction == null && pawnList2[index].RaceProps.Humanlike)
-                    pawnList1.Add(pawnList2[index]);
+                List<Pawn> list = __instance.SpawnedPawnsInFaction(faction);
+                for (int i = 0; i < list.Count; i++)
+                {
+                    Pawn pawn;
+                    try
+                    {
+                        pawn = list[i];
+                    }
+                    catch (ArgumentOutOfRangeException) { break; }
+                    if (pawn.HostFaction == null && pawn.RaceProps.Humanlike)
+                    {
+                        pawnList1.Add(pawn);
+                    }
+                }
             }
             __result = pawnList1;
             return false;
@@ -130,13 +134,13 @@ namespace RimThreaded
         public static bool SpawnedPawnsInFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
         {
             EnsureFactionsListsInit(__instance);
-            if (faction != null)
+            if (faction == null)
             {
-                __result = pawnsInFactionSpawned(__instance)[faction];
-                return false;
-            }
-            Log.Error("Called SpawnedPawnsInFaction with null faction.", false);
-            __result = new List<Pawn>();
+                Log.Error("Called SpawnedPawnsInFaction with null faction.");
+                __result = new List<Pawn>();
+                return false;            }
+
+            __result = pawnsInFactionSpawned(__instance)[faction];
             return false;
         }
 

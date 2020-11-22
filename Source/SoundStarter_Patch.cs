@@ -61,58 +61,29 @@ namespace RimThreaded
 			RimThreaded.PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
 			return false;
 		}
+
+
+		static readonly Func<object[], object> safeFunction = p =>
+			SoundStarter.TrySpawnSustainer((SoundDef)p[0], (SoundInfo)p[1]);
+
 		public static bool TrySpawnSustainer(ref Sustainer __result, SoundDef soundDef, SoundInfo info)
 		{
-			DebugSoundEventsLog.Notify_SoundEvent(soundDef, info);
-			if (soundDef == null)
+			int tID = Thread.CurrentThread.ManagedThreadId;
+			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
 			{
-				__result = null;
-				return false;
-			}
-			if (soundDef.isUndefined)
-			{
-				__result = null;
-				return false;
-			}
-			if (!soundDef.sustain)
-			{
-				Log.Error("Tried to spawn a sustainer from non-sustainer sound " + soundDef + ".", false);
-				__result = null;
-				return false;
-			}
-			if (!info.IsOnCamera && info.Maker.Thing != null && info.Maker.Thing.Destroyed)
-			{
-				__result = null;
-				return false;
-			}
-			if (soundDef.sustainStartSound != null)
-			{
-				soundDef.sustainStartSound.PlayOneShot(info);
-			}
-
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
-			{
-				lock (RimThreaded.newSustainerRequests)
+				object[] functionAndParameters = new object[] { safeFunction, new object[] { soundDef, info } };
+				lock (RimThreaded.safeFunctionRequests)
 				{
-					RimThreaded.newSustainerRequests[tID] = new object[] { soundDef, info };
+					RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
 				}
 				RimThreaded.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
-
-                if (!RimThreaded.newSustainerResults.TryGetValue(tID, out Sustainer sustainer))
-                {
-                    Log.Error("Error retriving newSustainerResults");
-                }
-                __result = sustainer;
-			} else
-            {
-				__result = new Sustainer(soundDef, info);
+				RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
+				__result = (Sustainer)safeFunctionResult;
+				return false;
 			}
-			//return new Sustainer(soundDef, info);
-			//return sustainer;
-			return false;
-
+			return true;
 		}
+
 	}
 }

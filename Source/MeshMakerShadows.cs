@@ -1,29 +1,24 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
-using Verse;
-using Verse.AI;
-using Verse.Sound;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Threading;
+using UnityEngine.Experimental.Rendering;
+using System;
+using System.Reflection;
+using Verse;
 
 namespace RimThreaded
 {
 
-    public class AudioSourceMaker_Patch
-	{
+    public class MeshMakerShadows_Patch
+    {
         static readonly Func<object[], object> safeFunction = p =>
-            AudioSourceMaker.NewAudioSourceOn((GameObject)p[0]);
+            MeshMakerShadows.NewShadowMesh((float)p[0], (float)p[1], (float)p[2]);
 
-        public static bool NewAudioSourceOn(ref AudioSource __result, GameObject go)
+        public static bool NewShadowMesh(ref Mesh __result, float baseWidth, float baseHeight, float tallness)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                object[] functionAndParameters = new object[] { safeFunction, new object[] { go } };
+                object[] functionAndParameters = new object[] { safeFunction, new object[] { baseWidth, baseHeight, tallness } };
                 lock (RimThreaded.safeFunctionRequests)
                 {
                     RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
@@ -31,11 +26,10 @@ namespace RimThreaded
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
                 RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                __result = (AudioSource)safeFunctionResult;
+                __result = (Mesh)safeFunctionResult;
                 return false;
             }
-            return true;
+            return true;        
         }
-
     }
 }

@@ -12,20 +12,19 @@ namespace RimThreaded
     {
         public static IEnumerable<CodeInstruction> RemoveRegion(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            Type lockObjectType = typeof(Room);
+            Type lockObjectType = typeof(object);
 
             List<CodeInstruction> instructionsList = instructions.ToList();
             int currentInstructionIndex = 0;
-			CodeInstruction codeInstruction;
 
 			LocalBuilder lockObject = iLGenerator.DeclareLocal(lockObjectType);
 			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
 
-			yield return new CodeInstruction(OpCodes.Ldarg_0);
+			yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(Room_Patch), "roomLock"));
 			yield return new CodeInstruction(OpCodes.Stloc, lockObject.LocalIndex);
 			yield return new CodeInstruction(OpCodes.Ldc_I4_0);
 			yield return new CodeInstruction(OpCodes.Stloc, lockTaken.LocalIndex);
-			codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex);
+			CodeInstruction codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex);
 			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
 			yield return codeInstruction;
 			yield return new CodeInstruction(OpCodes.Ldloca_S, lockTaken.LocalIndex);
@@ -39,17 +38,17 @@ namespace RimThreaded
 			}
 			Label endHandlerDestination = iLGenerator.DefineLabel();
 			yield return (new CodeInstruction(OpCodes.Leave_S, endHandlerDestination));
-			codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockTaken.LocalIndex);
-			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFinallyBlock));
-			yield return (codeInstruction);
+			CodeInstruction codeInstruction2 = new CodeInstruction(OpCodes.Ldloc, lockTaken.LocalIndex);
+			codeInstruction2.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFinallyBlock));
+			yield return (codeInstruction2);
 			Label endFinallyDestination = iLGenerator.DefineLabel();
 			yield return (new CodeInstruction(OpCodes.Brfalse_S, endFinallyDestination));
 			yield return (new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex));
 			yield return (new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Exit")));
-			codeInstruction = new CodeInstruction(OpCodes.Endfinally);
-			codeInstruction.labels.Add(endFinallyDestination);
-			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
-			yield return (codeInstruction);
+			CodeInstruction codeInstruction3 = new CodeInstruction(OpCodes.Endfinally);
+			codeInstruction3.labels.Add(endFinallyDestination);
+			codeInstruction3.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
+			yield return (codeInstruction3);
 			instructionsList[currentInstructionIndex].labels.Add(endHandlerDestination);
 			yield return (instructionsList[currentInstructionIndex]);
 

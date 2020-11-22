@@ -15,8 +15,9 @@ namespace RimThreaded
 
     public class Mesh_Patch
     {
-		public static bool MeshSafe(Mesh __instance)
+		public static bool MeshSafe(ref Mesh __instance)
 		{
+            
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
@@ -26,8 +27,11 @@ namespace RimThreaded
                 }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
+                RimThreaded.meshResults.TryGetValue(tID, out Mesh mesh);
+                __instance = mesh;
                 return false;
             }
+            
             return true;
         }
 

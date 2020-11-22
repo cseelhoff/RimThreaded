@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using UnityEngine;
 using Verse;
 
@@ -6,29 +7,27 @@ namespace RimThreaded
 {    
     public class MaterialPool_Patch
     {
+		static readonly Func<object[], object> safeFunction = p =>
+			MaterialPool.MatFrom((MaterialRequest)p[0]);
+
 		public static bool MatFrom(ref Material __result, MaterialRequest req)
 		{
-			Material material;
-			//if (RimThreaded.materialResults.TryGetValue(req, out material))
-			//{
-			//__result = material;
-			//return false;
-			//}
 			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart)) {
-				lock (RimThreaded.materialRequests)
+			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+			{
+				object[] functionAndParameters = new object[] { safeFunction, new object[] { req } };
+				lock (RimThreaded.safeFunctionRequests)
 				{
-					RimThreaded.materialRequests[tID] = req;
+					RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
 				}
 				RimThreaded.mainThreadWaitHandle.Set();
 				eventWaitStart.WaitOne();
-				RimThreaded.materialResults.TryGetValue(req, out material);
-				__result = material;
+				RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
+				__result = (Material)safeFunctionResult;
 				return false;
 			}
 			return true;
 		}
-
 	}
 
 }

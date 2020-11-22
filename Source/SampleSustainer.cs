@@ -16,27 +16,27 @@ namespace RimThreaded
     public class SampleSustainer_Patch
 	{
 
+        static readonly Func<object[], object> safeFunction = p =>
+            SampleSustainer.TryMakeAndPlay((SubSustainer)p[0], (AudioClip)p[1], (float)p[2]);
+
         public static bool TryMakeAndPlay(ref SampleSustainer __result, SubSustainer subSus, AudioClip clip, float scheduledEndTime)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                lock (RimThreaded.tryMakeAndPlayRequests)
+                object[] functionAndParameters = new object[] { safeFunction, new object[] { subSus, clip, scheduledEndTime } };
+                lock (RimThreaded.safeFunctionRequests)
                 {
-                    RimThreaded.tryMakeAndPlayRequests[tID] = new object[] { subSus, clip, scheduledEndTime };
+                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
                 }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
-                if(!RimThreaded.tryMakeAndPlayResults.TryGetValue(tID, out SampleSustainer sustainer_result))
-                {
-                    Log.Error("Error retriving tryMakeAndPlayResults");
-                }
-                __result = sustainer_result;
+                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
+                __result = (SampleSustainer)safeFunctionResult;
                 return false;
             }
             return true;
         }
-
 
 
     }
