@@ -17,31 +17,23 @@ namespace RimThreaded
 
         public static List<ThingDef> resources = StaticFieldRefAccess<List<ThingDef>>(typeof(ResourceCounter), "resources");
 
-        public static AccessTools.FieldRef<ResourceCounter, Map> map =
-            AccessTools.FieldRefAccess<ResourceCounter, Map>("map");
+        public static FieldRef<ResourceCounter, Map> map =
+            FieldRefAccess<ResourceCounter, Map>("map");
+        public static FieldRef<ResourceCounter, Dictionary<ThingDef, int>> countedAmounts =
+            FieldRefAccess<ResourceCounter, Dictionary<ThingDef, int>>("countedAmounts");
         public static bool get_TotalHumanEdibleNutrition(ResourceCounter __instance, ref float __result)
 		{
             float num = 0f;
-            ThingDef[] tdArray;
-            lock (__instance.AllCountedAmounts)
+            lock (countedAmounts(__instance))
             {
-                tdArray = __instance.AllCountedAmounts.Keys.ToArray();
-            }
-            for (int i = 0; i < tdArray.Length; i++)
-            {
-                ThingDef td = tdArray[i];
-                int value = 0;
-                if (td.IsNutritionGivingIngestible && td.ingestible.HumanEdible)
+                foreach (KeyValuePair<ThingDef, int> countedAmount in countedAmounts(__instance))
                 {
-                    try
+                    if (countedAmount.Key.IsNutritionGivingIngestible && countedAmount.Key.ingestible.HumanEdible)
                     {
-                        value = __instance.AllCountedAmounts[td];
+                        num += countedAmount.Key.GetStatValueAbstract(StatDefOf.Nutrition) * (float)countedAmount.Value;
                     }
-                    catch { continue; }
-                    num += td.GetStatValueAbstract(StatDefOf.Nutrition) * (float)value;
                 }
             }
-
             __result = num;
             return false;
         }
@@ -126,7 +118,7 @@ namespace RimThreaded
                 foreach (Thing heldThing in allGroupsListForReading[i].HeldThings)
                 {
                     Thing innerIfMinified = heldThing.GetInnerIfMinified();
-                    if (innerIfMinified.def.CountAsResource && ShouldCount2(innerIfMinified))
+                    if (innerIfMinified.def.CountAsResource && (!innerIfMinified.IsNotFresh()))
                     {
                         lock (__instance.AllCountedAmounts)
                         {
@@ -136,15 +128,6 @@ namespace RimThreaded
                 }
             }
             return false;
-        }
-        private static bool ShouldCount2(Thing t)
-        {
-            if (t.IsNotFresh())
-            {
-                return false;
-            }
-
-            return true;
         }
 
     }

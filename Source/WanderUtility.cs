@@ -78,17 +78,24 @@ namespace RimThreaded
                 {
                     break;
                 }
-                if (!p.Position.IsForbidden(pawn))
+                if (p != null)
                 {
-                    bool canReach = pawn.CanReach(
-                        p.Position,
-                        PathEndMode.Touch,
-                        Danger.None,
-                        false,
-                        TraverseMode.ByPawn);
-                    if(canReach)
+                    IntVec3 position = p.Position;
+                    if (position != null)
                     {
-                        pawnList.Add(p);
+                        if (!p.Position.IsForbidden(pawn))
+                        {
+                            bool canReach = pawn.CanReach(
+                                p.Position,
+                                PathEndMode.Touch,
+                                Danger.None,
+                                false,
+                                TraverseMode.ByPawn);
+                            if (canReach)
+                            {
+                                pawnList.Add(p);
+                            }
+                        }
                     }
                 }
             }

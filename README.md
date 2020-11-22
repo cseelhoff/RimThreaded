@@ -35,6 +35,20 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.11  
+-Optimized code for calling thread-safe functions from main thread  
+-Added feature for configurable thread timeout for long running methods  
+-Fixed bug in ResourceCounter.get_TotalHumanEdibleNutrition  
+-Fixed bug in ResourceCounter.ResetDefs  
+-Fixed bug in ResourceCounter.ResetResourceCounts  
+-Fixed bug in ResourceCounter.GetCount  
+-Fixed bug in ResourceCounter.GetCountIn  
+-Fixed bug in ResourceCounter.UpdateResourceCounts  
+-Fixed bug in WanderUtility.GetColonyWanderRoot  
+-Fixed bug in RCellFinder.RandomWanderDestFor  
+-Fixed bug in Room.RemoveRegion  
+-Fixed bug in MapPawns.FreeHumanlikesSpawnedOfFaction  
+
 Version 1.1.10  
 -Fixed bug in WanderUtility.GetColonyWanderRoot  
 -Fixed bug in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms  

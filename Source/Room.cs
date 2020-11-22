@@ -20,6 +20,7 @@ namespace RimThreaded
 		public static AccessTools.FieldRef<Room, IEnumerator<IntVec3>> cachedOpenRoofState =
 			AccessTools.FieldRefAccess<Room, IEnumerator<IntVec3>>("cachedOpenRoofState");
 
+		public static object roomLock = new object();
 		public static bool get_CellCount(Room __instance, ref int __result)
 		{
 			lock(__instance)
@@ -39,7 +40,7 @@ namespace RimThreaded
 		}
 		public static bool RemoveRegion(Room __instance, Region r)
 		{
-			lock (__instance) //ADDED
+			lock (__instance.Regions) //ADDED
 			{
 				if (!__instance.Regions.Contains(r))
 				{
@@ -59,7 +60,10 @@ namespace RimThreaded
 					cachedOpenRoofCount(__instance) = -1;
 					cachedOpenRoofState(__instance) = null;
 					statsAndRoleDirty(__instance) = true;
-					__instance.Map.regionGrid.allRooms.Remove(__instance);
+					lock (__instance.Map.regionGrid.allRooms) //ADDED
+					{
+						__instance.Map.regionGrid.allRooms.Remove(__instance);
+					}
 				}
 			}
 			return false;

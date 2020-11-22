@@ -15,19 +15,22 @@ namespace RimThreaded
 
     public class SectionLayer_Patch
     {
-		public static bool GetSubMesh(SectionLayer __instance, ref LayerSubMesh __result, Material material)
-		{
+
+        public static bool GetSubMesh(SectionLayer __instance, ref LayerSubMesh __result, Material material)
+        {
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                lock (RimThreaded.layerSubMeshRequests)
+                Func<object[], object> safeFunction = p => __instance.GetSubMesh((Material)p[0]);
+                object[] functionAndParameters = new object[] { safeFunction, new object[] { material } };
+                lock (RimThreaded.safeFunctionRequests)
                 {
-                    RimThreaded.layerSubMeshRequests[tID] = new object[] { __instance, material };
+                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
                 }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
-                RimThreaded.layerSubMeshResults.TryGetValue(tID, out LayerSubMesh layerSubMesh);
-                __result = layerSubMesh;
+                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
+                __result = (LayerSubMesh)safeFunctionResult;
                 return false;
             }
             return true;

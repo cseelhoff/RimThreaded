@@ -77,6 +77,7 @@
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
     <Compile Include="GraphicDatabaseHeadRecords.cs" />
+    <Compile Include="MeshMakerShadows.cs" />
     <Compile Include="MeshMakerPlanes.cs" />
     <Compile Include="WorldFloodFiller.cs" />
     <Compile Include="ReservationUtility.cs" />

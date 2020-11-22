@@ -9,59 +9,62 @@ using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
 using System.Threading;
+using System.Reflection;
+using UnityEngine.Experimental.Rendering;
 
 namespace RimThreaded
 {
 
     public class RenderTexture_Patch
     {
-        public static bool GetTemporary(ref RenderTexture __result, int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite)
+        public static MethodInfo reflectionMethod = typeof(RenderTexture).GetMethod("GetTemporaryImpl", new Type[] { typeof(int), typeof(int), typeof(int), typeof(GraphicsFormat), typeof(int) , typeof(RenderTextureMemoryless), typeof(VRTextureUsage), typeof(bool)  });
+
+        static Func<int, int, int, GraphicsFormat, int, RenderTextureMemoryless, VRTextureUsage, bool, RenderTexture> getTemporaryImpl = 
+            (Func<int, int, int, GraphicsFormat, int, RenderTextureMemoryless, VRTextureUsage, bool, RenderTexture>)Delegate.CreateDelegate
+            (typeof(Func<int, int, int, GraphicsFormat, int, RenderTextureMemoryless, VRTextureUsage, bool, RenderTexture>), reflectionMethod);
+
+        static Func<object[], object> safeFunction = p =>
+            getTemporaryImpl((int)p[0], (int)p[1], (int)p[2], (GraphicsFormat)p[3], (int)p[4], (RenderTextureMemoryless)p[5], (VRTextureUsage)p[6], (bool)p[7]);
+
+        public static bool GetTemporaryImpl(ref RenderTexture __result, int width, int height, int depthBuffer, GraphicsFormat format, int antiAliasing = 1, RenderTextureMemoryless memorylessMode = RenderTextureMemoryless.None, VRTextureUsage vrUsage = VRTextureUsage.None, bool useDynamicScale = false)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                lock (RimThreaded.renderTextureRequests)
+                object[] functionAndParameters = new object[] { safeFunction, new object[] { width, height, depthBuffer, format, antiAliasing, memorylessMode, vrUsage, useDynamicScale } };
+                lock (RimThreaded.safeFunctionRequests)
                 {
-                    RimThreaded.renderTextureRequests[tID] = new object[] { width, height, depthBuffer, format, readWrite };
+                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
                 }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
-                RimThreaded.renderTextureResults.TryGetValue(tID, out RenderTexture renderTexture_result);
-                __result = renderTexture_result;
+                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
+                __result = (RenderTexture)safeFunctionResult;
                 return false;
             }
             return true;
         }
-        public static bool GetTemporary(ref RenderTexture __result, int width, int height, int depthBuffer, RenderTextureFormat format, RenderTextureReadWrite readWrite, int antiAliasing)
+
+        static readonly Action<object[]> safeFunction2 = p =>
+            RenderTexture.ReleaseTemporary((RenderTexture)p[0]);
+
+        public static bool ReleaseTemporary(RenderTexture temp)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                lock (RimThreaded.renderTextureAARequests)
+                object[] functionAndParameters = new object[] { safeFunction2, new object[] { temp } };
+                lock (RimThreaded.safeFunctionRequests)
                 {
-                    RimThreaded.renderTextureAARequests[tID] = new object[] { width, height, depthBuffer, format, readWrite, antiAliasing };
+                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
                 }
                 RimThreaded.mainThreadWaitHandle.Set();
                 eventWaitStart.WaitOne();
-                RimThreaded.renderTextureAAResults.TryGetValue(tID, out RenderTexture renderTexture_result);
-                __result = renderTexture_result;
                 return false;
             }
             return true;
         }
-        public static void ReleaseTemporaryThreadSafe(RenderTexture temp)
-        {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
-            {
-                lock (RimThreaded.releaseTemporaryRequests)
-                {
-                    RimThreaded.releaseTemporaryRequests[tID] = temp;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-            }
-        }
+        /*
         public static void set_Active(RenderTexture value)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
@@ -110,7 +113,7 @@ namespace RimThreaded
             }
             return true;
         }
-
+        */
 
     }
 }
