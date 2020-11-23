@@ -18,6 +18,16 @@ namespace RimThreaded
 			AccessTools.FieldRefAccess<AttackTargetReservationManager, List<AttackTargetReservation>>("reservations");
 		public static AccessTools.FieldRef<AttackTargetReservationManager, Map> map =
 			AccessTools.FieldRefAccess<AttackTargetReservationManager, Map>("map");
+
+		public static bool ReleaseAllForTarget(AttackTargetReservationManager __instance, IAttackTarget target)
+		{
+			lock (reservations(__instance))
+			{
+				reservations(__instance).RemoveAll((AttackTargetReservation x) => x.target == target);
+			}
+			return false;
+		}
+
 		public static bool ReleaseAllClaimedBy(AttackTargetReservationManager __instance, Pawn claimant)
 		{
 			for (int num = reservations(__instance).Count - 1; num >= 0; num--)
@@ -141,6 +151,24 @@ namespace RimThreaded
 			}
 			return false;
 		}
-
+		public static bool IsReservedBy(AttackTargetReservationManager __instance, ref bool __result, Pawn claimant, IAttackTarget target)
+		{
+			AttackTargetReservation attackTargetReservation;
+			for (int i = 0; i < reservations(__instance).Count; i++)
+			{
+				try
+				{
+					attackTargetReservation = reservations(__instance)[i];
+				}
+				catch (ArgumentOutOfRangeException) { break; }
+				if (attackTargetReservation != null && attackTargetReservation.target == target && attackTargetReservation.claimant == claimant)
+				{
+					__result = true;
+					return false;
+				}
+			}
+			__result = false;
+			return false;
+		}
 	}
 }
