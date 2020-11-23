@@ -76,6 +76,8 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="BuildableDef.cs" />
+    <Compile Include="RimWorld_Pawn_GuestTracker_SetGuestStatus.cs" />
     <Compile Include="JobGiver_FindItemByRadius_Transpile.cs" />
     <Compile Include="GraphicDatabaseHeadRecords.cs" />
     <Compile Include="MeshMakerShadows.cs" />

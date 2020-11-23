@@ -69,7 +69,10 @@ namespace RimThreaded
                     {
                         lock (__instance.rememberedDuties)
                         {
-                            __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Build);
+                            if (__instance.rememberedDuties.ContainsKey(ownedPawn))
+                            {
+                                __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Build);
+                            }
                         }
                         SetAsBuilder(data, ownedPawn);
                         ++num3;
