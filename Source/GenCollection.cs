@@ -49,27 +49,32 @@ namespace RimThreaded
             List<Pawn> list = new List<Pawn>();
             //try
             //{
+            lock (dictionary)
+            {
                 foreach (KeyValuePair<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts> item in dictionary)
                 {
                     if (predicate(item))
                     {
                         //if (list == null)
                         //{
-                            //list = SimplePool<List<TKey>>.Get();
-                            //list = new List<TKey>();
+                        //list = SimplePool<List<TKey>>.Get();
+                        //list = new List<TKey>();
                         //}
 
                         list.Add(item.Key);
                     }
                 }
-
+            }
                 //if (list != null)
                 if (list.Count > 0)
                 {
                     int i = 0;
                     for (int count = list.Count; i < count; i++)
                     {
+                    lock (dictionary)
+                    {
                         dictionary.Remove(list[i]);
+                    }
                     }
 
                     __result = list.Count;

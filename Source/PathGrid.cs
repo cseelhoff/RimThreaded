@@ -30,7 +30,12 @@ namespace RimThreaded
             List<Thing> list = map(__instance).thingGrid.ThingsListAt(c);
             for (int i = 0; i < list.Count; i++)
             {
-                if (IsPathCostIgnoreRepeater(list[i].def))
+                Thing thing;
+                try
+                {
+                    thing = list[i];
+                } catch (ArgumentOutOfRangeException) { break; }
+                if (thing!=null && IsPathCostIgnoreRepeater(thing.def))
                 {
                     return true;
                 }

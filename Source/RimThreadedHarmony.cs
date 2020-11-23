@@ -35,6 +35,7 @@ namespace RimThreaded
 		public static Type awesomeInventoryErrorMessage;
 		public static Type jobGiver_AwesomeInventory_TakeArm;
 		public static Type awesomeInventoryJobsJobGiver_FindItemByRadiusSub;
+		public static Type pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus;
 
 		public static List<CodeInstruction> GetLockCodeInstructions(
 			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
@@ -460,8 +461,10 @@ namespace RimThreaded
 			original = typeof(BuildableDef);
 			patched = typeof(BuildableDef_Transpile);
 			Transpile(original, patched, "ForceAllowPlaceOver");
+			patched = typeof(BuildableDef_Patch);
+			Prefix(original, patched, "get_PlaceWorkers");
 
-			
+
 			//SustainerManager			
 			original = typeof(SustainerManager);
 			patched = typeof(SustainerManager_Patch);
@@ -923,9 +926,9 @@ namespace RimThreaded
 			Prefix(original, patched, "NewBoltMesh");
 
 			//Unforce Normal Speed			
-			//original = typeof(TimeControls);
-			//patched = typeof(TimeControls_Patch);
-			//Prefix(original, patched, "DoTimeControlsGUI");
+			original = typeof(TimeControls);
+			patched = typeof(TimeControls_Patch);
+			Prefix(original, patched, "DoTimeControlsGUI");
 
 			//PathGrid
 			original = typeof(PathGrid);
@@ -1168,6 +1171,9 @@ namespace RimThreaded
 			awesomeInventoryErrorMessage = AccessTools.TypeByName("AwesomeInventory.ErrorMessage");
 			jobGiver_AwesomeInventory_TakeArm = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_AwesomeInventory_TakeArm");
 			awesomeInventoryJobsJobGiver_FindItemByRadiusSub = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius+<>c__DisplayClass17_0");
+			pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus = AccessTools.TypeByName("PawnRules.Patch.RimWorld_Pawn_GuestTracker_SetGuestStatus");
+
+
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{
 				string methodName = "setDrawOffset";
@@ -1231,7 +1237,7 @@ namespace RimThreaded
 			}
 			*/
 
-			
+
 			if (awesomeInventoryJobsJobGiver_FindItemByRadius != null)
 			{
 				string methodName = "Reset";
@@ -1242,6 +1248,14 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + awesomeInventoryJobsJobGiver_FindItemByRadius.FullName + " " + methodName);
 				Transpile(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
 				//Prefix(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
+			}
+
+			if (pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus != null)
+			{
+				string methodName = "Prefix";
+				Log.Message("RimThreaded is patching " + pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus.FullName + " " + methodName);
+				patched = typeof(RimWorld_Pawn_GuestTracker_SetGuestStatus_Transpile);
+				Transpile(pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus, patched, methodName);
 			}
 
 

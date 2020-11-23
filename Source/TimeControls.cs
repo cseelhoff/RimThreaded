@@ -164,6 +164,9 @@ namespace RimThreaded
         public static AccessTools.FieldRef<TimeSlower, int> forceNormalSpeedUntil = AccessTools.FieldRefAccess<TimeSlower, int>("forceNormalSpeedUntil");
         public static TimeSpeed[] CachedTimeSpeedValues = AccessTools.StaticFieldRefAccess<TimeSpeed[]>(typeof(TimeControls), "CachedTimeSpeedValues");
 
+        public static bool lastTickForcedSlow = false;
+        public static bool overrideForcedSlow = false;
+
         private static void PlaySoundOf(TimeSpeed speed)
         {
             SoundDef soundDef = null;
@@ -262,7 +265,11 @@ namespace RimThreaded
                 if (KeyBindingDefOf.TimeSpeed_Fast.KeyDownEvent)
                 {
                     Find.TickManager.CurTimeSpeed = TimeSpeed.Fast;
-                    forceNormalSpeedUntil(Find.TickManager.slower) = 0;
+                    if (lastTickForcedSlow)
+                    {
+                        overrideForcedSlow = true;
+                    }
+                    //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
                     PlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
@@ -271,7 +278,24 @@ namespace RimThreaded
                 if (KeyBindingDefOf.TimeSpeed_Superfast.KeyDownEvent)
                 {
                     Find.TickManager.CurTimeSpeed = TimeSpeed.Superfast;
-                    forceNormalSpeedUntil(Find.TickManager.slower) = 0;
+                    if (lastTickForcedSlow)
+                    {
+                        overrideForcedSlow = true;
+                    }
+                    //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
+                    PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
+                    Event.current.Use();
+                }
+
+                if (KeyBindingDefOf.TimeSpeed_Ultrafast.KeyDownEvent)
+                {
+                    Find.TickManager.CurTimeSpeed = TimeSpeed.Ultrafast;
+                    if(lastTickForcedSlow)
+                    {
+                        overrideForcedSlow = true;
+                    }
+                    //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
                     PlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
@@ -280,14 +304,6 @@ namespace RimThreaded
 
             if (Prefs.DevMode)
             {
-                if (KeyBindingDefOf.TimeSpeed_Ultrafast.KeyDownEvent)
-                {
-                    Find.TickManager.CurTimeSpeed = TimeSpeed.Ultrafast;
-                    forceNormalSpeedUntil(Find.TickManager.slower) = 0;
-                    PlaySoundOf(Find.TickManager.CurTimeSpeed);
-                    Event.current.Use();
-                }
-
                 if (KeyBindingDefOf.Dev_TickOnce.KeyDownEvent && tickManager.CurTimeSpeed == TimeSpeed.Paused)
                 {
                     tickManager.DoSingleTick();

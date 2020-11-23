@@ -29,6 +29,7 @@ namespace RimThreaded
         public static AccessTools.FieldRef<TickManager, TickList> tickListLong =
             AccessTools.FieldRefAccess<TickManager, TickList>("tickListLong");
 
+
         public static bool DoSingleTick(TickManager __instance)
         {
             RimThreaded.currentInstance = __instance;
@@ -57,11 +58,21 @@ namespace RimThreaded
 
         public static bool get_TickRateMultiplier(TickManager __instance, ref float __result)
         {
-            //if (__instance.slower.ForcedNormalSpeed)
-            //{
-                //__result = curTimeSpeed(__instance) == TimeSpeed.Paused ? 0.0f : 1f;
-                //return false;
-            //}
+            if (__instance.slower.ForcedNormalSpeed)
+            {
+                TimeControls_Patch.lastTickForcedSlow = true;
+                if (!TimeControls_Patch.overrideForcedSlow)
+                {
+                    __result = curTimeSpeed(__instance) == TimeSpeed.Paused ? 0.0f : 1f;
+                    return false;
+                }
+            }
+            else
+            {
+                TimeControls_Patch.lastTickForcedSlow = false;
+                TimeControls_Patch.overrideForcedSlow = false;
+            }
+            
             switch (curTimeSpeed(__instance))
             {
                 case TimeSpeed.Paused:
