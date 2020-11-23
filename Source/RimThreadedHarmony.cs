@@ -31,6 +31,10 @@ namespace RimThreaded
 		public static Type hospitalityCompUtility;
 		public static Type hospitalityCompGuest;
 		public static Type giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob;
+		public static Type awesomeInventoryJobsJobGiver_FindItemByRadius;
+		public static Type awesomeInventoryErrorMessage;
+		public static Type jobGiver_AwesomeInventory_TakeArm;
+		public static Type awesomeInventoryJobsJobGiver_FindItemByRadiusSub;
 
 		public static List<CodeInstruction> GetLockCodeInstructions(
 			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
@@ -175,7 +179,7 @@ namespace RimThreaded
 		}
 
 		static RimThreadedHarmony() {
-			Harmony.DEBUG = false;
+			Harmony.DEBUG = true;
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
@@ -1160,7 +1164,10 @@ namespace RimThreaded
 			giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob = AccessTools.TypeByName("GiddyUpCore.Harmony.Pawn_JobTracker_DetermineNextJob");
 			hospitalityCompUtility = AccessTools.TypeByName("Hospitality.CompUtility");
 			hospitalityCompGuest = AccessTools.TypeByName("Hospitality.CompGuest");
-
+			awesomeInventoryJobsJobGiver_FindItemByRadius = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius");
+			awesomeInventoryErrorMessage = AccessTools.TypeByName("AwesomeInventory.ErrorMessage");
+			jobGiver_AwesomeInventory_TakeArm = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_AwesomeInventory_TakeArm");
+			awesomeInventoryJobsJobGiver_FindItemByRadiusSub = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius+<>c__DisplayClass17_0");
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{
 				string methodName = "setDrawOffset";
@@ -1214,6 +1221,30 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + hospitalityCompUtility.FullName + " " + methodName);
 				Transpile(hospitalityCompUtility, patched, methodName);
 			}
+			/*
+			if (jobGiver_AwesomeInventory_TakeArm != null)
+			{
+				string methodName = "TryGiveJob";
+				Log.Message("RimThreaded is patching " + jobGiver_AwesomeInventory_TakeArm.FullName + " " + methodName);
+				patched = typeof(JobGiver_AwesomeInventory_TakeArm_Transpile);
+				Transpile(jobGiver_AwesomeInventory_TakeArm, patched, methodName);
+			}
+			*/
+
+			
+			if (awesomeInventoryJobsJobGiver_FindItemByRadius != null)
+			{
+				string methodName = "Reset";
+				Log.Message("RimThreaded is patching " + awesomeInventoryJobsJobGiver_FindItemByRadius.FullName + " " + methodName);
+				patched = typeof(JobGiver_FindItemByRadius_Transpile);
+				Transpile(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
+				methodName = "FindItem";
+				Log.Message("RimThreaded is patching " + awesomeInventoryJobsJobGiver_FindItemByRadius.FullName + " " + methodName);
+				Transpile(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
+				//Prefix(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
+			}
+
+
 
 			Log.Message("RimThreaded patching is complete.");
 		}

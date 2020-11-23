@@ -9,6 +9,7 @@ using Verse.AI;
 using Verse.Sound;
 using RimWorld.Planet;
 using System.Threading;
+using System.Diagnostics;
 
 namespace RimThreaded
 {
@@ -37,41 +38,45 @@ namespace RimThreaded
             }
             skyManagerStartEvent.Set();
         }
+
+
         public static bool MapUpdate(Map __instance)
         {
-            /*
+            
+            
             SkyManagerUpdate2(__instance);
             __instance.powerNetManager.UpdatePowerNetsAndConnections_First();
             __instance.regionGrid.UpdateClean();
             __instance.regionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms();
             __instance.glowGrid.GlowGridUpdate_First();
             __instance.lordManager.LordManagerUpdate();
-            */
+            
             bool worldRenderedNow = WorldRendererUtility.WorldRenderedNow;
             if (!worldRenderedNow && Find.CurrentMap == __instance)
             {
-                /*
+
                 if (AlwaysRedrawShadows)
                 {
-                    __instance.mapDrawer.WholeMapChanged(MapMeshFlag.Things);
+                __instance.mapDrawer.WholeMapChanged(MapMeshFlag.Things);
                 }
                 PlantFallColors.SetFallShaderGlobals(__instance);
                 __instance.waterInfo.SetTextures();
                 __instance.avoidGrid.DebugDrawOnMap();
-                */
-                //__instance.mapDrawer.MapMeshDrawerUpdate_First();                
-                //__instance.powerNetGrid.DrawDebugPowerNetGrid();
-                //DoorsDebugDrawer.DrawDebug();
-                //__instance.mapDrawer.DrawMapMesh();
-                //__instance.dynamicDrawManager.DrawDynamicThings();
-                //__instance.gameConditionManager.GameConditionManagerDraw(__instance);
-                //MapEdgeClipDrawer.DrawClippers(__instance);
-                //__instance.designationManager.DrawDesignations();
-                //__instance.overlayDrawer.DrawAllOverlays();
-                //__instance.temporaryThingDrawer.Draw();
+
+                __instance.mapDrawer.MapMeshDrawerUpdate_First();
+                __instance.powerNetGrid.DrawDebugPowerNetGrid();
+                DoorsDebugDrawer.DrawDebug();
+                __instance.mapDrawer.DrawMapMesh();
+                __instance.dynamicDrawManager.DrawDynamicThings();
+
+                __instance.gameConditionManager.GameConditionManagerDraw(__instance);
+                MapEdgeClipDrawer.DrawClippers(__instance);
+                __instance.designationManager.DrawDesignations();
+                __instance.overlayDrawer.DrawAllOverlays();
+                __instance.temporaryThingDrawer.Draw();
                 
             }
-            /*
+            
             try
             {
                 __instance.areaManager.AreaManagerUpdate();
@@ -83,7 +88,7 @@ namespace RimThreaded
 
             __instance.weatherManager.WeatherManagerUpdate();
             MapComponentUtility.MapComponentUpdate(__instance);
-            */
+            
             return false;
         }
 

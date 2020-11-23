@@ -456,50 +456,7 @@ namespace RimThreaded
             {
                 List<Map> maps = Find.Maps;
                 for (int j = 0; j < maps.Count; j++)
-                {
-                    /*
-                    Map_Patch.SkyManagerUpdate2(maps[j]);
-                    maps[j].powerNetManager.UpdatePowerNetsAndConnections_First();
-                    maps[j].regionGrid.UpdateClean();
-                    maps[j].regionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms();
-                    maps[j].glowGrid.GlowGridUpdate_First();
-                    maps[j].lordManager.LordManagerUpdate();
-                    
-                    bool worldRenderedNow = WorldRendererUtility.WorldRenderedNow;
-                    if (!worldRenderedNow && Find.CurrentMap == maps[j])
-                    {
-                        if (Map_Patch.AlwaysRedrawShadows)
-                        {
-                            maps[j].mapDrawer.WholeMapChanged(MapMeshFlag.Things);
-                        }
-
-                        PlantFallColors.SetFallShaderGlobals(maps[j]);
-                        maps[j].waterInfo.SetTextures();
-                        maps[j].avoidGrid.DebugDrawOnMap();                        
-                        maps[j].mapDrawer.MapMeshDrawerUpdate_First();//
-                        maps[j].powerNetGrid.DrawDebugPowerNetGrid();
-                        DoorsDebugDrawer.DrawDebug();
-                        maps[j].mapDrawer.DrawMapMesh();//
-                        maps[j].dynamicDrawManager.DrawDynamicThings(); //
-                        maps[j].gameConditionManager.GameConditionManagerDraw(maps[j]);                        
-                        MapEdgeClipDrawer.DrawClippers(maps[j]);
-                        maps[j].designationManager.DrawDesignations();
-                        maps[j].overlayDrawer.DrawAllOverlays();
-                        maps[j].temporaryThingDrawer.Draw();
-                    }
-                    
-                    try
-                    {
-                        maps[j].areaManager.AreaManagerUpdate();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.ToString());
-                    }
-
-                    maps[j].weatherManager.WeatherManagerUpdate();
-                    MapComponentUtility.MapComponentUpdate(maps[j]);
-                    */
+                {                    
                     maps[j].MapPostTick();
                 }
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WildPlantSpawner
@@ -992,6 +949,7 @@ namespace RimThreaded
             RegionAndRoomUpdater_Patch.workingInt = 0;
             allWorkerThreadsFinished = false;
             monitorThreadWaitHandle.Set();
+
             while (!allWorkerThreadsFinished)
             {
                 mainThreadWaitHandle.WaitOne();
@@ -1011,7 +969,7 @@ namespace RimThreaded
                         s.Item1.PlayOneShotOnCamera(s.Item2);
                     }
                 }
-                
+
             }
         }
 
