@@ -35,10 +35,19 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.13  
+-Changed how forced slowdowns work. They slowdowns happen, but can be overridden.  
+-RimThreaded now enables speed 4 even without dev mode  
+-Fixed bug in PawnRules.RimWorld_Pawn_GuestTracker_SetGuestStatus  
+-Fixed bug in BuildableDef.get_PlaceWorkers  
+-Fixed bug in GenCollection.RemoveAll_Pawn_SituationalThoughtHandler
+-Fixed bug in LordToil_Siege.UpdateAllDuties  
+-Fixed bug in PathGrid.ContainsPathCostIgnoreRepeater  
+
 Version 1.1.12  
 -Added Compatibility for Awesome Inventory  
--Fixed bug in RenderTexture.GetTemporaryImpl
--Fixed bug in Texture2D.getReadableTexture
+-Fixed bug in RenderTexture.GetTemporaryImpl  
+-Fixed bug in Texture2D.getReadableTexture  
 
 Version 1.1.11  
 -Optimized code for calling thread-safe functions from main thread  
