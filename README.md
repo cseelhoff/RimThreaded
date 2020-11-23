@@ -35,6 +35,12 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.14  
+-Fixed bug in CE_Utility.BlitCrop  
+-Fixed bug in CE_Utility.GetColorSafe  
+-Fixed bug in AttackTargetReservationManager.ReleaseAllForTarget  
+-Fixed bug in Texture2D.GetPixel  
+
 Version 1.1.13  
 -Changed how forced slowdowns work. They slowdowns happen, but can be overridden.  
 -RimThreaded now enables speed 4 even without dev mode  

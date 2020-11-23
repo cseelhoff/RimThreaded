@@ -14,6 +14,7 @@ using RimWorld.Planet;
 using System.Security.Policy;
 using System.Reflection.Emit;
 using System.Threading;
+using Verse.Grammar;
 
 namespace RimThreaded
 {
@@ -36,6 +37,7 @@ namespace RimThreaded
 		public static Type jobGiver_AwesomeInventory_TakeArm;
 		public static Type awesomeInventoryJobsJobGiver_FindItemByRadiusSub;
 		public static Type pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus;
+		public static Type combatExtendedCE_Utility;
 
 		public static List<CodeInstruction> GetLockCodeInstructions(
 			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
@@ -573,6 +575,7 @@ namespace RimThreaded
 			Prefix(original, patched, "ReleaseClaimedBy");
 			//Prefix(original, patched, "IsReservedBy");
 			Prefix(original, patched, "CanReserve");
+			Prefix(original, patched, "ReleaseAllForTarget");
 			//Prefix(original, patched, "ReleaseAllClaimedBy");
 			patched = typeof(AttackTargetReservationManager_Transpile);
 			Transpile(original, patched, "IsReservedBy");
@@ -904,6 +907,11 @@ namespace RimThreaded
 			patched = typeof(GrammarResolverSimple_Transpile);
 			Transpile(original, patched, "Formatted");
 
+			//GrammarResolver
+			original = typeof(GrammarResolver);
+			patched = typeof(GrammarResolver_Patch);
+			//Prefix(original, patched, "AddRule");
+
 			//JobQueue
 			original = typeof(JobQueue);
 			patched = typeof(JobQueue_Patch);
@@ -1132,6 +1140,7 @@ namespace RimThreaded
 			//Graphics (Giddy-Up)
 			original = typeof(Texture2D);
 			patched = typeof(Texture2D_Patch);
+			Prefix(original, patched, "GetPixel", new Type[] { typeof(int), typeof(int) });
 			Prefix(original, patched, "Internal_Create");
 			Prefix(original, patched, "ReadPixels", new Type[] { typeof(Rect), typeof(int), typeof(int), typeof(bool) });
 			Prefix(original, patched, "Apply", new Type[] { typeof(bool), typeof(bool) });
@@ -1172,6 +1181,7 @@ namespace RimThreaded
 			jobGiver_AwesomeInventory_TakeArm = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_AwesomeInventory_TakeArm");
 			awesomeInventoryJobsJobGiver_FindItemByRadiusSub = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius+<>c__DisplayClass17_0");
 			pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus = AccessTools.TypeByName("PawnRules.Patch.RimWorld_Pawn_GuestTracker_SetGuestStatus");
+
 
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
@@ -1227,16 +1237,6 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + hospitalityCompUtility.FullName + " " + methodName);
 				Transpile(hospitalityCompUtility, patched, methodName);
 			}
-			/*
-			if (jobGiver_AwesomeInventory_TakeArm != null)
-			{
-				string methodName = "TryGiveJob";
-				Log.Message("RimThreaded is patching " + jobGiver_AwesomeInventory_TakeArm.FullName + " " + methodName);
-				patched = typeof(JobGiver_AwesomeInventory_TakeArm_Transpile);
-				Transpile(jobGiver_AwesomeInventory_TakeArm, patched, methodName);
-			}
-			*/
-
 
 			if (awesomeInventoryJobsJobGiver_FindItemByRadius != null)
 			{
@@ -1256,6 +1256,18 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus.FullName + " " + methodName);
 				patched = typeof(RimWorld_Pawn_GuestTracker_SetGuestStatus_Transpile);
 				Transpile(pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus, patched, methodName);
+			}
+
+			combatExtendedCE_Utility = AccessTools.TypeByName("CombatExtended.CE_Utility");
+			if (combatExtendedCE_Utility != null)
+			{
+				string methodName = "BlitCrop";
+				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
+				patched = typeof(CE_Utility_Transpile);
+				Transpile(combatExtendedCE_Utility, patched, methodName);
+				methodName = "GetColorSafe";
+				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
+				Transpile(combatExtendedCE_Utility, patched, methodName);
 			}
 
 

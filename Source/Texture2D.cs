@@ -11,6 +11,26 @@ namespace RimThreaded
     public class Texture2D_Patch
 	{
 
+        public static bool GetPixel(Texture2D __instance, ref Color __result, int x, int y)
+        {
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            {
+                Func<object[], object> safeFunction3 = p => __instance.GetPixel((int)p[0], (int)p[1]);
+                object[] functionAndParameters = new object[] { safeFunction3, new object[] { x, y } };
+                lock (RimThreaded.safeFunctionRequests)
+                {
+                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
+                }
+                RimThreaded.mainThreadWaitHandle.Set();
+                eventWaitStart.WaitOne();
+                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
+                __result = (Color)safeFunctionResult;
+                return false;
+            }
+            return true;
+        }
+
         public static bool Texture2DWidthHeight(Texture2D __instance, int width, int height)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
@@ -92,39 +112,7 @@ namespace RimThreaded
             return true;
         }
 
-        static readonly Func<object[], object> safeFunction2 = p =>
-            safeGetReadableTexture((Texture2D)p[0]);
-        public static Texture2D getReadableTexture(Texture2D texture)
-        {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
-            {
-                object[] functionAndParameters = new object[] { safeFunction2, new object[] { texture } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                return (Texture2D)safeFunctionResult;
-            }
-            return safeGetReadableTexture(texture);
-        }        
-        
-        public static Texture2D safeGetReadableTexture(Texture2D texture)
-        {
-            RenderTexture temporary = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
-            Graphics.Blit(texture, temporary);
-            RenderTexture active = RenderTexture.active;
-            RenderTexture.active = temporary;
-            Texture2D texture2D = new Texture2D(texture.width, texture.height);
-            texture2D.ReadPixels(new Rect(0f, 0f, temporary.width, temporary.height), 0, 0);
-            texture2D.Apply();
-            RenderTexture.active = active;
-            RenderTexture_Patch.ReleaseTemporary(temporary);
-            return texture;
-        }
-        
+
+
     }
 }

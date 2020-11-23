@@ -10,14 +10,11 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.13
-    -Changed how forced slowdowns work. They slowdowns happen, but can be overridden.
-    -RimThreaded now enables speed 4 even without dev mode
-    -Fixed bug in PawnRules.RimWorld_Pawn_GuestTracker_SetGuestStatus
-    -Fixed bug in BuildableDef.get_PlaceWorkers
-    -Fixed bug in GenCollection.RemoveAll_Pawn_SituationalThoughtHandler
-    -Fixed bug in LordToil_Siege.UpdateAllDuties
-    -Fixed bug in PathGrid.ContainsPathCostIgnoreRepeater
+    Version 1.1.14
+    -Fixed bug in CE_Utility.BlitCrop
+    -Fixed bug in CE_Utility.GetColorSafe
+    -Fixed bug in AttackTargetReservationManager.ReleaseAllForTarget
+    -Fixed bug in Texture2D.GetPixel
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
