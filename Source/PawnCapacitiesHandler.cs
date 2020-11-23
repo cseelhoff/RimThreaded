@@ -68,14 +68,15 @@ namespace RimThreaded
                 __result = 0f;
                 return false;
             }
-
-            if (cachedCapacityLevelsDict[__instance] == null)
+            //if (cachedCapacityLevels == null) //REMOVED
+            if (cachedCapacityLevelsDict[__instance] == null) //ADDED
             {
                 Notify_CapacityLevelsDirty(__instance);
             }
 
-            CacheElement cacheElement = cachedCapacityLevelsDict[__instance][capacity];
-            lock (cacheElement)
+            //CacheElement cacheElement = cachedCapacityLevels[capacity]; //REMOVED
+            CacheElement cacheElement = cachedCapacityLevelsDict[__instance][capacity]; //ADDED
+            lock (cacheElement) //ADDED
             {
                 if (cacheElement.status == CacheStatus.Caching)
                 {

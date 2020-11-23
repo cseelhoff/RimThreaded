@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="JobGiver_FindItemByRadius_Transpile.cs" />
     <Compile Include="GraphicDatabaseHeadRecords.cs" />
     <Compile Include="MeshMakerShadows.cs" />
     <Compile Include="MeshMakerPlanes.cs" />

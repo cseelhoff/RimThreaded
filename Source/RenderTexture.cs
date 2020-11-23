@@ -17,13 +17,13 @@ namespace RimThreaded
 
     public class RenderTexture_Patch
     {
-        public static MethodInfo reflectionMethod = typeof(RenderTexture).GetMethod("GetTemporaryImpl", new Type[] { typeof(int), typeof(int), typeof(int), typeof(GraphicsFormat), typeof(int) , typeof(RenderTextureMemoryless), typeof(VRTextureUsage), typeof(bool)  });
+        public static MethodInfo reflectionMethod = AccessTools.Method(typeof(RenderTexture), "GetTemporaryImpl", new Type[] { typeof(int), typeof(int), typeof(int), typeof(GraphicsFormat), typeof(int) , typeof(RenderTextureMemoryless), typeof(VRTextureUsage), typeof(bool)  });
 
         static Func<int, int, int, GraphicsFormat, int, RenderTextureMemoryless, VRTextureUsage, bool, RenderTexture> getTemporaryImpl = 
             (Func<int, int, int, GraphicsFormat, int, RenderTextureMemoryless, VRTextureUsage, bool, RenderTexture>)Delegate.CreateDelegate
             (typeof(Func<int, int, int, GraphicsFormat, int, RenderTextureMemoryless, VRTextureUsage, bool, RenderTexture>), reflectionMethod);
 
-        static Func<object[], object> safeFunction = p =>
+        static readonly Func<object[], object> safeFunction = p =>
             getTemporaryImpl((int)p[0], (int)p[1], (int)p[2], (GraphicsFormat)p[3], (int)p[4], (RenderTextureMemoryless)p[5], (VRTextureUsage)p[6], (bool)p[7]);
 
         public static bool GetTemporaryImpl(ref RenderTexture __result, int width, int height, int depthBuffer, GraphicsFormat format, int antiAliasing = 1, RenderTextureMemoryless memorylessMode = RenderTextureMemoryless.None, VRTextureUsage vrUsage = VRTextureUsage.None, bool useDynamicScale = false)

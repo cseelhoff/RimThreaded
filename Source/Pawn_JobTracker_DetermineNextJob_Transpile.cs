@@ -11,16 +11,6 @@ namespace RimThreaded
 {
     public class Pawn_JobTracker_DetermineNextJob_Transpile
     {
-        private static void Postfix2(Pawn_JobTracker __instance, ref ThinkResult __result)
-        {
-            FieldRef<Pawn_JobTracker, Pawn> pawn = FieldRefAccess<Pawn_JobTracker, Pawn>("pawn");
-            Pawn value = pawn(__instance);
-            if(value.Name.Equals("test"))
-            {
-                Pawn value2 = value;
-                Log.Message(value2.Name.ToString());
-            }
-        }
 
         public static IEnumerable<CodeInstruction> Postfix(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {

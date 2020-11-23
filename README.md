@@ -35,6 +35,11 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.12  
+-Added Compatibility for Awesome Inventory  
+-Fixed bug in RenderTexture.GetTemporaryImpl
+-Fixed bug in Texture2D.getReadableTexture
+
 Version 1.1.11  
 -Optimized code for calling thread-safe functions from main thread  
 -Added feature for configurable thread timeout for long running methods  

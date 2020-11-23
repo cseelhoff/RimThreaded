@@ -94,7 +94,7 @@ namespace RimThreaded
 
         static readonly Func<object[], object> safeFunction2 = p =>
             safeGetReadableTexture((Texture2D)p[0]);
-        public static bool getReadableTexture(Texture2D texture)
+        public static Texture2D getReadableTexture(Texture2D texture)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
