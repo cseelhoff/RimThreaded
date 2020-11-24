@@ -35,6 +35,12 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.15  
+-Fixed bug in AttackTargetReservationManager.ReleaseAllForTarget  
+-Fixed bug in AttackTargetReservationManager.ReleaseAllClaimedBy  
+-Fixed bug in AttackTargetReservationManager.IsReservedBy  
+-Fixed bug in GrammarResolver.AddRule  
+
 Version 1.1.14  
 -Fixed bug in CE_Utility.BlitCrop  
 -Fixed bug in CE_Utility.GetColorSafe  
