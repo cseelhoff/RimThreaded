@@ -35,6 +35,9 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.16  
+-Fixed bug in PawnRules.RimWorld_Pawn_GuestTracker_SetGuestStatus  
+
 Version 1.1.15  
 -Fixed bug in AttackTargetReservationManager.ReleaseAllForTarget  
 -Fixed bug in AttackTargetReservationManager.ReleaseAllClaimedBy  

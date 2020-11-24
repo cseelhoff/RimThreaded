@@ -179,8 +179,6 @@ namespace RimThreaded
                    (FieldInfo)instructionsList[currentInstructionIndex + 2].operand == AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound")
                )
                 {
-                    Log.Message("---Found4---");
-
                     matchFound++;
                     // itemFound = true;
                     instructionsList[currentInstructionIndex].opcode = OpCodes.Ldc_I4_1;

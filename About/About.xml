@@ -10,11 +10,8 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.15
-    -Fixed bug in AttackTargetReservationManager.ReleaseAllForTarget
-    -Fixed bug in AttackTargetReservationManager.ReleaseAllClaimedBy
-    -Fixed bug in AttackTargetReservationManager.IsReservedBy
-    -Fixed bug in GrammarResolver.AddRule
+    Version 1.1.16
+    -Fixed bug in PawnRules.RimWorld_Pawn_GuestTracker_SetGuestStatus
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
