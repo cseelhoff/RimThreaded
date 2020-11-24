@@ -22,19 +22,22 @@ namespace RimThreaded
             int matchFound = 0;
             while (currentInstructionIndex < instructionsList.Count)
             {
-                if (currentInstructionIndex + 1 < instructionsList.Count &&
-                    instructionsList[currentInstructionIndex + 1].opcode == OpCodes.Call &&
-                    (MethodInfo)instructionsList[currentInstructionIndex + 1].operand == AccessTools.Method(typeof(Traverse), "Create"))
+                if (currentInstructionIndex + 2 < instructionsList.Count &&
+                    instructionsList[currentInstructionIndex + 2].opcode == OpCodes.Ldstr)
                 {
                     matchFound++;
-                    yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(RimWorld_Pawn_GuestTracker_SetGuestStatus_Transpile), "pawn"));
+                    instructionsList[currentInstructionIndex].opcode = OpCodes.Ldsfld;
+                    instructionsList[currentInstructionIndex].operand = AccessTools.Field(typeof(RimWorld_Pawn_GuestTracker_SetGuestStatus_Transpile), "pawn");
+                    yield return instructionsList[currentInstructionIndex];
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(AccessTools.FieldRef<Pawn_GuestTracker, Pawn>), "Invoke"));
                     yield return new CodeInstruction(OpCodes.Ldind_Ref);
                     currentInstructionIndex += 5;
+                } else
+                {
+                    yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
                 }
-                yield return instructionsList[currentInstructionIndex];
-                currentInstructionIndex++;
             }
             if (matchFound < 1)
             {
