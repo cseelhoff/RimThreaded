@@ -780,6 +780,8 @@ namespace RimThreaded
 			Transpile(original, patched, "PartIsMissing");
 			Transpile(original, patched, "HasDirectlyAddedPartFor");
 			Transpile(original, patched, "AddDirect");
+			patched = typeof(HediffSet_Patch);
+			Prefix(original, patched, "CacheMissingPartsCommonAncestors");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -790,6 +792,7 @@ namespace RimThreaded
 			original = typeof(JobGiver_ConfigurableHostilityResponse);
 			patched = typeof(JobGiver_ConfigurableHostilityResponse_Patch);
 			Prefix(original, patched, "TryGetFleeJob");
+
 
 			//Pawn_InteractionsTracker
 			original = typeof(Pawn_InteractionsTracker);
@@ -1114,6 +1117,11 @@ namespace RimThreaded
 			Prefix(original, patched, "GetCountIn", new Type[] { typeof(ThingRequestGroup) });
 			Prefix(original, patched, "UpdateResourceCounts");
 
+			//UniqueIDsManager	
+			original = typeof(UniqueIDsManager);
+			patched = typeof(UniqueIDsManager_Patch);
+			Prefix(original, patched, "GetNextID");
+
 			//MOD COMPATIBILITY
 
 			//MapGenerator (Z-levels)
@@ -1269,8 +1277,6 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
 				Transpile(combatExtendedCE_Utility, patched, methodName);
 			}
-
-
 
 			Log.Message("RimThreaded patching is complete.");
 		}

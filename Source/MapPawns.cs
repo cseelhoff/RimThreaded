@@ -219,7 +219,14 @@ namespace RimThreaded
                     {
                         pawnsInFactionSpawned(__instance)[p.Faction].Add(p);
                         if (p.Faction == Faction.OfPlayer)
-                            pawnsInFactionSpawned(__instance)[Faction.OfPlayer].InsertionSort<Pawn>((Comparison<Pawn>)((a, b) => (a.playerSettings != null ? a.playerSettings.joinTick : 0).CompareTo(b.playerSettings != null ? b.playerSettings.joinTick : 0)));
+                        {
+                            pawnsInFactionSpawned(__instance)[Faction.OfPlayer].InsertionSort(delegate (Pawn a, Pawn b)
+                            {
+                                int num = (a.playerSettings != null) ? a.playerSettings.joinTick : 0;
+                                int value = (b.playerSettings != null) ? b.playerSettings.joinTick : 0;
+                                return num.CompareTo(value);
+                            });
+                        }
                     }
                 }
                 lock (prisonersOfColonySpawned(__instance))
