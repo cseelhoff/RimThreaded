@@ -576,7 +576,7 @@ namespace RimThreaded
 			//Prefix(original, patched, "IsReservedBy");
 			Prefix(original, patched, "CanReserve");
 			Prefix(original, patched, "ReleaseAllForTarget");
-			//Prefix(original, patched, "ReleaseAllClaimedBy");
+			Prefix(original, patched, "ReleaseAllClaimedBy");
 			patched = typeof(AttackTargetReservationManager_Transpile);
 			Transpile(original, patched, "IsReservedBy");
 
@@ -909,8 +909,8 @@ namespace RimThreaded
 
 			//GrammarResolver
 			original = typeof(GrammarResolver);
-			patched = typeof(GrammarResolver_Patch);
-			//Prefix(original, patched, "AddRule");
+			patched = typeof(GrammarResolver_Transpile);
+			Transpile(original, patched, "AddRule");
 
 			//JobQueue
 			original = typeof(JobQueue);

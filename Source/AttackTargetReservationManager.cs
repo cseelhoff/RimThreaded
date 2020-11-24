@@ -21,26 +21,32 @@ namespace RimThreaded
 
 		public static bool ReleaseAllForTarget(AttackTargetReservationManager __instance, IAttackTarget target)
 		{
-			lock (reservations(__instance))
+			List<AttackTargetReservation> attackTargetReservations = reservations(__instance);
+			lock (attackTargetReservations)
 			{
-				reservations(__instance).RemoveAll((AttackTargetReservation x) => x.target == target);
+				for (int i = attackTargetReservations.Count - 1; i >= 0; i--)
+				{
+					AttackTargetReservation attackTargetReservation = attackTargetReservations[i];				
+					if (attackTargetReservation != null && attackTargetReservation.target == target)
+					{
+						attackTargetReservations.RemoveAt(i);
+					}
+				}
 			}
+			
 			return false;
 		}
 
 		public static bool ReleaseAllClaimedBy(AttackTargetReservationManager __instance, Pawn claimant)
 		{
-			for (int num = reservations(__instance).Count - 1; num >= 0; num--)
+			lock (reservations(__instance))
 			{
-				lock (reservations(__instance))
+				for (int num = reservations(__instance).Count - 1; num >= 0; num--)
 				{
 					AttackTargetReservation reservation = reservations(__instance)[num];
-					if (reservation != null)
+					if (reservation != null && reservation.claimant == claimant)
 					{
-						if (reservation.claimant == claimant)
-						{
-							reservations(__instance).RemoveAt(num);
-						}
+						reservations(__instance).RemoveAt(num);
 					}
 				}
 			}

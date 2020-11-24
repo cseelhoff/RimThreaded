@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="GrammarResolver_Transpile.cs" />
     <Compile Include="Verb_LaunchProjectileCE.cs" />
     <Compile Include="BuildableDef.cs" />
     <Compile Include="RimWorld_Pawn_GuestTracker_SetGuestStatus.cs" />

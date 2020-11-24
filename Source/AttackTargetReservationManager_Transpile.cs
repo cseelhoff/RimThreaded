@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using System.Reflection.Emit;
+using System.Reflection;
+using static Verse.AI.AttackTargetReservationManager;
+
 namespace RimThreaded
 {
     public class AttackTargetReservationManager_Transpile
@@ -19,12 +22,12 @@ namespace RimThreaded
             };
             List<CodeInstruction> instructionsList = instructions.ToList();
             int currentInstructionIndex = 0;
-            bool matchFound = false;
+            int matchFound = 0;
             while (currentInstructionIndex < instructionsList.Count)
             {
                 if(RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
                 {
-                    matchFound = true;
+                    matchFound++;
                     foreach (CodeInstruction codeInstruction in RimThreadedHarmony.UpdateTryCatchCodeInstructions(
                         iLGenerator, instructionsList, currentInstructionIndex, searchInstructions.Count))
                     {
@@ -32,13 +35,24 @@ namespace RimThreaded
                     }
                     currentInstructionIndex += searchInstructions.Count;
                 }
+                else if(
+                    instructionsList[currentInstructionIndex].opcode == OpCodes.Ldfld &&
+                    (FieldInfo)instructionsList[currentInstructionIndex].operand == AccessTools.Field(typeof(AttackTargetReservation), "target")
+                    )
+                {
+                    matchFound++;
+                    yield return new CodeInstruction(OpCodes.Brfalse, instructionsList[currentInstructionIndex + 2].operand);
+                    yield return new CodeInstruction(OpCodes.Ldloc_1);
+                    yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
+                }
                 else
                 {
                     yield return instructionsList[currentInstructionIndex];
                     currentInstructionIndex++;
                 }
             }
-            if(!matchFound)
+            if(matchFound < 2)
             {
                 Log.Error("IL code instructions not found");
             }
