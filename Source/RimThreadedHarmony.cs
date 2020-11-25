@@ -635,15 +635,18 @@ namespace RimThreaded
 			patched = typeof(MapPawns_Patch);
 			Prefix(original, patched, "get_AllPawns");
 			Prefix(original, patched, "LogListedPawns");
-			Prefix(original, patched, "RegisterPawn");
+			//Prefix(original, patched, "RegisterPawn");
 			Prefix(original, patched, "get_AnyPawnBlockingMapRemoval");
 			Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
-			Prefix(original, patched, "DeRegisterPawn");
+			//Prefix(original, patched, "DeRegisterPawn");
 			Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
-			Prefix(original, patched, "SpawnedPawnsInFaction");
+			//Prefix(original, patched, "SpawnedPawnsInFaction");
 			Prefix(original, patched, "get_AllPawnsUnspawned");
 			Prefix(original, patched, "get_SpawnedPawnsWithAnyHediff");
 			Prefix(original, patched, "PawnsInFaction");
+			patched = typeof(MapPawns_Transpile);
+			//Transpile(original, patched, "RegisterPawn");
+			//Transpile(original, patched, "DeRegisterPawn");
 
 			//MapTemperatures
 			original = typeof(MapTemperature);
@@ -714,6 +717,12 @@ namespace RimThreaded
 			Prefix(original, patched, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3) });
 			Prefix(original, patched, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
 
+			//GenAdj
+			original = typeof(GenAdj);
+			patched = typeof(GenAdj_Patch);
+			Prefix(original, patched, "TryFindRandomAdjacentCell8WayWithRoomGroup", new Type[] {
+				typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(Map), typeof(IntVec3).MakeByRefType() });
+
 			//LordToil_Siege
 			original = typeof(LordToil_Siege);
 			patched = typeof(LordToil_Siege_Patch);
@@ -758,15 +767,28 @@ namespace RimThreaded
 			//GenCollection
 			original = typeof(GenCollection);
 			patched = typeof(GenCollection_Patch);
-			//Prefix(original, patched, "RemoveAll", new Type[], { typeof(Dictionary<TKey, TValue>) , typeof(Predicate< KeyValuePair < TKey, TValue >>) });
 			MethodInfo[] genCollectionMethods = original.GetMethods();
-			//MethodInfo originalRemoveAll = original.GetMethod("RemoveAll");
-			//HACK - because I don't know how to get method the right way
-			MethodInfo originalRemoveAll = genCollectionMethods[29];
-			MethodInfo originalRemoveAllGeneric = originalRemoveAll.MakeGenericMethod(new Type[] { typeof(Pawn), typeof(SituationalThoughtHandler_Patch.CachedSocialThoughts) });
-			MethodInfo patchedRemoveAll = patched.GetMethod("RemoveAll_Pawn_SituationalThoughtHandler_Patch");
+			MethodInfo originalRemoveAll = null;
+			foreach (MethodInfo mi in genCollectionMethods)
+            {
+				if(mi.Name.Equals("RemoveAll") && mi.GetGenericArguments().Length == 2)
+                {
+					originalRemoveAll = mi;
+					break;
+				}
+            }
+			//public static int RemoveAll<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, Predicate<KeyValuePair<TKey, TValue>> predicate)
+			//Type pType = typeof(Predicate<>).MakeGenericType(new Type[] { typeof(KeyValuePair<,>) });
+			//originalRemoveAll = AccessTools.Method(original, "RemoveAll", new Type[] { typeof(Dictionary<,>), pType });
+
+			MethodInfo originalRemoveAllGeneric = originalRemoveAll.MakeGenericMethod(new Type[] { typeof(object), typeof(object) });
+			MethodInfo patchedRemoveAll = patched.GetMethod("RemoveAll_Object_Object_Patch");
 			HarmonyMethod prefixRemoveAll = new HarmonyMethod(patchedRemoveAll);
-			harmony.Patch(originalRemoveAllGeneric, prefix: prefixRemoveAll);
+			//harmony.Patch(originalRemoveAllGeneric, prefix: prefixRemoveAll);
+			//patched = typeof(GenCollection_Transpile);
+			//MethodInfo transpileRemoveAll = patched.GetMethod("RemoveAll");
+			//HarmonyMethod harmonyRemoveAll = new HarmonyMethod(transpileRemoveAll);
+			//harmony.Patch(originalRemoveAll, transpiler: harmonyRemoveAll);
 
 			//SoundSizeAggregator
 			original = typeof(SoundSizeAggregator);

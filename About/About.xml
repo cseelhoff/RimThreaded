@@ -10,9 +10,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.17
-    -Fixed bug in HediffSet.CacheMissingPartsCommonAncestors
-    -Fixed bug in UniqueIDsManager.GetNextID
+    Version 1.1.19
+    -Hotfix for MapPawns.RegisterPawn
+    -Hotfix for MapPawns.DeRegisterPawn
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

@@ -43,7 +43,39 @@ namespace RimThreaded
             result = list.RandomElement();
             return true;
         }
-        
+        public static bool RemoveAll_Object_Object_Patch(ref int __result, Dictionary<object, object> dictionary, Predicate<KeyValuePair<object, object>> predicate)
+        {
+            List<object> list = new List<object>();
+            lock (dictionary)
+            {
+                foreach (KeyValuePair<object, object> item in dictionary)
+                {
+                    if (predicate(item))
+                    {
+                        list.Add(item);
+                    }
+                }
+            }
+            if (list.Count > 0)
+            {
+                int i = 0;
+                for (int count = list.Count; i < count; i++)
+                {
+                    lock (dictionary)
+                    {
+                        dictionary.Remove(list[i]);
+                    }
+                }
+
+                __result = list.Count;
+                return false;
+            }
+
+            __result = 0;
+            return false;
+
+        }
+
         public static bool RemoveAll_Pawn_SituationalThoughtHandler_Patch(ref int __result, Dictionary<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts> dictionary, Predicate<KeyValuePair<Pawn, SituationalThoughtHandler_Patch.CachedSocialThoughts>> predicate)
         {
             List<Pawn> list = new List<Pawn>();

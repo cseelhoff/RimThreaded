@@ -131,19 +131,6 @@ namespace RimThreaded
             return false;
         }
 
-        public static bool SpawnedPawnsInFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
-        {
-            EnsureFactionsListsInit(__instance);
-            if (faction == null)
-            {
-                Log.Error("Called SpawnedPawnsInFaction with null faction.");
-                __result = new List<Pawn>();
-                return false;            }
-
-            __result = pawnsInFactionSpawned(__instance)[faction];
-            return false;
-        }
-
         public static bool get_AllPawns(MapPawns __instance, ref List<Pawn> __result)
         {
             List<Pawn> allPawnsUnspawned = __instance.AllPawnsUnspawned;
@@ -323,11 +310,11 @@ namespace RimThreaded
             List<Faction> factionsListForReading = Find.FactionManager.AllFactionsListForReading;
             for (int index = 0; index < factionsListForReading.Count; ++index)
             {
-                lock (pawnsInFactionSpawned(__instance))
-                {
+                //lock (pawnsInFactionSpawned(__instance))
+                //{
                     if (!pawnsInFactionSpawned(__instance).ContainsKey(factionsListForReading[index]))
                         pawnsInFactionSpawned(__instance).Add(factionsListForReading[index], new List<Pawn>());
-                }
+                //}
             }
         }
         private static void DoListChangedNotifications(MapPawns __instance)
