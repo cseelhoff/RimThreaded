@@ -153,11 +153,22 @@ namespace RimThreaded
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.AppendLine("MapPawns:");
             stringBuilder.AppendLine("pawnsSpawned");
-            lock (pawnsSpawned(__instance))
+            //lock (pawnsSpawned(__instance))
+            //{
+            //foreach (Pawn pawn in pawnsSpawned(__instance))
+            for (int i = 0; i < pawnsSpawned(__instance).Count; i++)
             {
-                foreach (Pawn pawn in pawnsSpawned(__instance))
-                    stringBuilder.AppendLine("    " + pawn.ToString());
+                Pawn pawn;
+                try
+                {
+                    pawn = pawnsSpawned(__instance)[i];
+                } catch(ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+                stringBuilder.AppendLine("    " + pawn.ToString());
             }
+            //}
             stringBuilder.AppendLine("AllPawnsUnspawned");
             foreach (Pawn pawn in __instance.AllPawnsUnspawned)
                 stringBuilder.AppendLine("    " + pawn.ToString());
@@ -171,15 +182,61 @@ namespace RimThreaded
                 }
             }
             stringBuilder.AppendLine("prisonersOfColonySpawned");
-            lock (prisonersOfColonySpawned(__instance))
+            //lock (prisonersOfColonySpawned(__instance))
+            //{
+            //foreach (Pawn pawn in prisonersOfColonySpawned(__instance))
+            for (int i = 0; i < prisonersOfColonySpawned(__instance).Count; i++)
             {
-                foreach (Pawn pawn in prisonersOfColonySpawned(__instance))
-                    stringBuilder.AppendLine("    " + pawn.ToString());
+                Pawn pawn;
+                try
+                {
+                    pawn = prisonersOfColonySpawned(__instance)[i];
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+                stringBuilder.AppendLine("    " + pawn.ToString());
             }
+            //}
             Log.Message(stringBuilder.ToString(), false);
             return false;
         }
-
+        public static void RegisterPawn1(MapPawns __instance, Pawn p)
+        {
+            lock (pawnsSpawned(__instance))
+            {
+                if (!pawnsSpawned(__instance).Contains(p))
+                    pawnsSpawned(__instance).Add(p);
+            }
+        }
+        public static void RegisterPawn2(MapPawns __instance, Pawn p)
+        {
+            lock (pawnsInFactionSpawned(__instance))
+            {
+                if (p.Faction != null && !pawnsInFactionSpawned(__instance)[p.Faction].Contains(p))
+                {
+                    pawnsInFactionSpawned(__instance)[p.Faction].Add(p);
+                    if (p.Faction == Faction.OfPlayer)
+                    {
+                        pawnsInFactionSpawned(__instance)[Faction.OfPlayer].InsertionSort(delegate (Pawn a, Pawn b)
+                        {
+                            int num = (a.playerSettings != null) ? a.playerSettings.joinTick : 0;
+                            int value = (b.playerSettings != null) ? b.playerSettings.joinTick : 0;
+                            return num.CompareTo(value);
+                        });
+                    }
+                }
+            }
+        }
+        public static void RegisterPawn3(MapPawns __instance, Pawn p)
+        {
+            lock (prisonersOfColonySpawned(__instance))
+            {
+                if (p.IsPrisonerOfColony && !prisonersOfColonySpawned(__instance).Contains(p))
+                    prisonersOfColonySpawned(__instance).Add(p);
+            }
+        }
         public static bool RegisterPawn(MapPawns __instance, Pawn p)
         {
             if (p.Dead)
@@ -195,32 +252,9 @@ namespace RimThreaded
                 if (!p.mindState.Active)
                     return false;
                 EnsureFactionsListsInit(__instance);
-                lock (pawnsSpawned(__instance))
-                {
-                    if (!pawnsSpawned(__instance).Contains(p))
-                        pawnsSpawned(__instance).Add(p);
-                }
-                lock (pawnsInFactionSpawned(__instance))
-                {
-                    if (p.Faction != null && !pawnsInFactionSpawned(__instance)[p.Faction].Contains(p))
-                    {
-                        pawnsInFactionSpawned(__instance)[p.Faction].Add(p);
-                        if (p.Faction == Faction.OfPlayer)
-                        {
-                            pawnsInFactionSpawned(__instance)[Faction.OfPlayer].InsertionSort(delegate (Pawn a, Pawn b)
-                            {
-                                int num = (a.playerSettings != null) ? a.playerSettings.joinTick : 0;
-                                int value = (b.playerSettings != null) ? b.playerSettings.joinTick : 0;
-                                return num.CompareTo(value);
-                            });
-                        }
-                    }
-                }
-                lock (prisonersOfColonySpawned(__instance))
-                {
-                    if (p.IsPrisonerOfColony && !prisonersOfColonySpawned(__instance).Contains(p))
-                        prisonersOfColonySpawned(__instance).Add(p);
-                }
+                RegisterPawn1(__instance, p);
+                RegisterPawn2(__instance, p);
+                RegisterPawn3(__instance, p);
                 DoListChangedNotifications(__instance);
             }
             return false;

@@ -635,18 +635,18 @@ namespace RimThreaded
 			patched = typeof(MapPawns_Patch);
 			Prefix(original, patched, "get_AllPawns");
 			Prefix(original, patched, "LogListedPawns");
-			//Prefix(original, patched, "RegisterPawn");
 			Prefix(original, patched, "get_AnyPawnBlockingMapRemoval");
 			Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
-			//Prefix(original, patched, "DeRegisterPawn");
 			Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
-			//Prefix(original, patched, "SpawnedPawnsInFaction");
 			Prefix(original, patched, "get_AllPawnsUnspawned");
 			Prefix(original, patched, "get_SpawnedPawnsWithAnyHediff");
 			Prefix(original, patched, "PawnsInFaction");
+			//Prefix(original, patched, "SpawnedPawnsInFaction");
+			//Prefix(original, patched, "RegisterPawn");
+			//Prefix(original, patched, "DeRegisterPawn");
 			patched = typeof(MapPawns_Transpile);
-			//Transpile(original, patched, "RegisterPawn");
-			//Transpile(original, patched, "DeRegisterPawn");
+			Transpile(original, patched, "RegisterPawn");
+			Transpile(original, patched, "DeRegisterPawn");
 
 			//MapTemperatures
 			original = typeof(MapTemperature);
