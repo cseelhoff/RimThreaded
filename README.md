@@ -35,6 +35,19 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.19  
+-Hotfix for MapPawns.RegisterPawn  
+-Hotfix for MapPawns.DeRegisterPawn  
+
+Version 1.1.18   
+-Fixed bug in GenAdj.TryFindRandomAdjacentCell8WayWithRoomGroup  
+-Fixed bug in GenCollections.RemoveAll  
+-Fixed bug in MapPawns.SpawnedPawnsInFaction  
+-Fixed bug in MapPawns.EnsureFactionsListsInit  
+-Fixed bug in MapPawns.EnsureFactionsListsInit  
+-Transpiled MapPawns.RegisterPawn  
+-Transpiled MapPawns.DeRegisterPawn  
+
 Version 1.1.17  
 -Fixed bug in HediffSet.CacheMissingPartsCommonAncestors  
 -Fixed bug in UniqueIDsManager.GetNextID  

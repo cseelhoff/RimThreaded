@@ -76,6 +76,8 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="GenAdj.cs" />
+    <Compile Include="MapPawns_Transpile.cs" />
     <Compile Include="UniqueIDsManager.cs" />
     <Compile Include="HediffSet.cs" />
     <Compile Include="GrammarResolver_Transpile.cs" />
