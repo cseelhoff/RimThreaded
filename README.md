@@ -35,6 +35,9 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.20  
+-Fixed bug in MapPawns.RegisterPawn  
+
 Version 1.1.19  
 -Hotfix for MapPawns.RegisterPawn  
 -Hotfix for MapPawns.DeRegisterPawn  

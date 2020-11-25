@@ -108,16 +108,23 @@ namespace RimThreaded
 				if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, i))
 				{
 					matchesFound[0]++;
+					
 					foreach (CodeInstruction codeInstruction in RimThreadedHarmony.GetLockCodeInstructions(
 						iLGenerator, instructionsList, i, searchInstructions.Count, loadLockObjectInstructions, loadLockObjectType))
 					{
 						yield return codeInstruction;
 					}
 					i += searchInstructions.Count;
+					
+					//yield return new CodeInstruction(OpCodes.Ldarg_0);
+					//yield return new CodeInstruction(OpCodes.Ldarg_1);
+					//yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MapPawns_Patch), "RegisterPawn3"));
+					//i += searchInstructions.Count;
 				}
 				else if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions2, instructionsList, i))
 				{
 					matchesFound[1]++;
+					/*
 					LocalBuilder lockObject = iLGenerator.DeclareLocal(loadLockObjectType2);
 					LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
 					loadLockObjectInstructions2[0].labels = instructionsList[i].labels;
@@ -156,16 +163,40 @@ namespace RimThreaded
 					codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
 					yield return (codeInstruction);
 					instructionsList[i].labels.Add(endHandlerDestination);
+					*/
+					
+					instructionsList[i].opcode = OpCodes.Ldarg_0;
+					instructionsList[i].operand = null;
+					yield return instructionsList[i];
+					//yield return new CodeInstruction(OpCodes.Ldarg_0);
+					yield return new CodeInstruction(OpCodes.Ldarg_1);
+					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MapPawns_Patch), "RegisterPawn2"));
+					while (i < instructionsList.Count - 1 && (instructionsList[i + 1].opcode != OpCodes.Callvirt ||
+						(MethodInfo)instructionsList[i + 1].operand != AccessTools.Method(typeof(Pawn), "get_IsPrisonerOfColony")))
+					{
+						//yield return (instructionsList[i]);
+						i++;
+					}
+					
 				}
 				else if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions3, instructionsList, i))
 				{
 					matchesFound[2]++;
+					/*
 					foreach (CodeInstruction codeInstruction in RimThreadedHarmony.GetLockCodeInstructions(
 						iLGenerator, instructionsList, i, searchInstructions3.Count, loadLockObjectInstructions3, loadLockObjectType3))
 					{
 						yield return codeInstruction;
 					}
-					i += searchInstructions.Count;
+					i += searchInstructions3.Count;
+					*/
+					instructionsList[i].opcode = OpCodes.Ldarg_0;
+					instructionsList[i].operand = null;
+					yield return instructionsList[i];
+					//yield return new CodeInstruction(OpCodes.Ldarg_0);
+					yield return new CodeInstruction(OpCodes.Ldarg_1);
+					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(MapPawns_Patch), "RegisterPawn3"));
+					i += searchInstructions3.Count;
 				}
 				else
 				{
