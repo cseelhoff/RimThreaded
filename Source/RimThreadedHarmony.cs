@@ -988,10 +988,11 @@ namespace RimThreaded
 			//patched = typeof(EditWindow_Log_Patch);
 			//Prefix(original, patched, "DoMessagesListing");
 
-			//ResourceCounter
+			//GUIStyle
 			original = typeof(GUIStyle);
 			patched = typeof(GUIStyle_Patch);
 			Prefix(original, patched, "CalcHeight");
+			Prefix(original, patched, "CalcSize");
 
 			//WorldGrid
 			original = typeof(WorldGrid);

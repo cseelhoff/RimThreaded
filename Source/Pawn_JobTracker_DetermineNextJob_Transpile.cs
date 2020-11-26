@@ -11,7 +11,7 @@ namespace RimThreaded
 {
     public class Pawn_JobTracker_DetermineNextJob_Transpile
     {
-
+        public static FieldRef<Pawn_JobTracker, Pawn> jobTrackerPawn = FieldRefAccess<Pawn_JobTracker, Pawn>("pawn");
         public static IEnumerable<CodeInstruction> Postfix(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             List<CodeInstruction> instructionsList = instructions.ToList();
@@ -23,12 +23,8 @@ namespace RimThreaded
                     instructionsList[i + 5].opcode == OpCodes.Stloc_0)
                 {
                     matchFound = true;
-                    instructionsList[i].opcode = OpCodes.Ldstr;
-                    instructionsList[i].operand = "pawn";
-                    yield return instructionsList[i];
-                    i++;
-                    instructionsList[i].opcode = OpCodes.Call;
-                    instructionsList[i].operand = Method(typeof(AccessTools), "FieldRefAccess", new Type[] { typeof(string) }).MakeGenericMethod(new Type[] { typeof(Pawn_JobTracker), typeof(Pawn) });
+                    instructionsList[i].opcode = OpCodes.Ldsfld;
+                    instructionsList[i].operand = Field(typeof(Pawn_JobTracker_DetermineNextJob_Transpile), "jobTrackerPawn");
                     yield return instructionsList[i];
                     i++;
                     instructionsList[i].opcode = OpCodes.Ldarg_0;
@@ -42,7 +38,7 @@ namespace RimThreaded
                     instructionsList[i].opcode = OpCodes.Ldind_Ref;
                     instructionsList[i].operand = null;
                     yield return instructionsList[i];
-                    i++;
+                    i+=2;
                 }
                 else
                 {
