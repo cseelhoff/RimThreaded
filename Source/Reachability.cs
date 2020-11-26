@@ -465,9 +465,14 @@ namespace RimThreaded
             if (pathGrid.WalkableFast(start))
             {
                 Region validRegionAt = regionGrid.GetValidRegionAt(start);
-                //if(validRegionAt != null)
-                QueueNewOpenRegion(validRegionAt, this_reachedIndex, this_openQueue, ref this_numRegionsOpened, regionsReached);
-                this_startingRegions.Add(validRegionAt);
+                if (validRegionAt != null)
+                {
+                    QueueNewOpenRegion(validRegionAt, this_reachedIndex, this_openQueue, ref this_numRegionsOpened, regionsReached);
+                    this_startingRegions.Add(validRegionAt);
+                } else
+                {
+                    Log.Warning("regionGrid.GetValidRegionAt returned null for start at: " + start.ToString());
+                }
             }
             else
             {

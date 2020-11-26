@@ -35,6 +35,11 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.21  
+-Fixed bug in GUIStyle.CalcSize  
+-Fixed bug in Reachability.DetermineStartRegions2  
+-Improved speed for Pawn_JobTracker_DetermineNextJob_Transpile (GiddyUp)  
+
 Version 1.1.20  
 -Fixed bug in MapPawns.RegisterPawn  
 
