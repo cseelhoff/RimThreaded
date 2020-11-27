@@ -10,16 +10,8 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.22
-    -Fixed bug in GenCollection.RemoveAll
-    -Fixed bug in RecipeWorkerCounter.GetCarriedCount
-    -Fixed bug in Pawn_RotationTracker.UpdateRotation
-    -Fixed bug in Texture2D.GetPixel
+    Version 1.1.23
     -Fixed bug in Verb_LaunchProjectileCE.CanHitFromCellIgnoringRange
-    -Fixed bug in Verb_LaunchProjectileCE.TryFindCEShootLineFromTo
-    -Fixed bug in Verb_MeleeAttackCE.TryCastShot
-    -Fixed bug in HediffSet.CacheMissingPartsCommonAncestors
-    -Fixed bug in JobDriver.get_CurToil
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

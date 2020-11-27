@@ -31,7 +31,7 @@ namespace RimThreaded
 
             //            if (
             //            this.CanHitCellFromCellIgnoringRange(shotSource, cell, thing) && 
-            //            (thing == null || thing.Map != this.caster.Map)
+            //            (thing == null || thing.Map == this.caster.Map)
             //            ) 
             yield return new CodeInstruction(OpCodes.Ldarg_0);
             yield return new CodeInstruction(OpCodes.Ldarg_1);
@@ -50,7 +50,7 @@ namespace RimThreaded
             yield return new CodeInstruction(OpCodes.Ldarg_0);
             yield return new CodeInstruction(OpCodes.Ldfld, Field(typeof(Verb), "caster"));
             yield return new CodeInstruction(OpCodes.Callvirt, Method(typeof(Thing), "get_Map"));
-            yield return new CodeInstruction(OpCodes.Beq_S, label25);
+            yield return new CodeInstruction(OpCodes.Bne_Un_S, label25);
 
             //{ goodDest = cell;
             CodeInstruction codeInstruction = new CodeInstruction(OpCodes.Ldarg_3);
