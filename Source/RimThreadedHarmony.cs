@@ -38,6 +38,8 @@ namespace RimThreaded
 		public static Type awesomeInventoryJobsJobGiver_FindItemByRadiusSub;
 		public static Type pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus;
 		public static Type combatExtendedCE_Utility;
+		public static Type combatExtendedVerb_LaunchProjectileCE;
+		public static Type combatExtendedVerb_MeleeAttackCE;
 
 		public static List<CodeInstruction> GetLockCodeInstructions(
 			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
@@ -784,7 +786,7 @@ namespace RimThreaded
 			MethodInfo originalRemoveAllGeneric = originalRemoveAll.MakeGenericMethod(new Type[] { typeof(object), typeof(object) });
 			MethodInfo patchedRemoveAll = patched.GetMethod("RemoveAll_Object_Object_Patch");
 			HarmonyMethod prefixRemoveAll = new HarmonyMethod(patchedRemoveAll);
-			//harmony.Patch(originalRemoveAllGeneric, prefix: prefixRemoveAll);
+			harmony.Patch(originalRemoveAllGeneric, prefix: prefixRemoveAll);
 			//patched = typeof(GenCollection_Transpile);
 			//MethodInfo transpileRemoveAll = patched.GetMethod("RemoveAll");
 			//HarmonyMethod harmonyRemoveAll = new HarmonyMethod(transpileRemoveAll);
@@ -1009,7 +1011,15 @@ namespace RimThreaded
 			patched = typeof(WorldFloodFiller_Patch);
 			Prefix(original, patched, "FloodFill", new Type[] { typeof(int), typeof(Predicate<int>) , typeof(Func<int, int, bool>) , typeof(int) , typeof(IEnumerable<int>) });
 
+			//RecipeWorkerCounter
+			original = typeof(RecipeWorkerCounter);
+			patched = typeof(RecipeWorkerCounter_Patch);
+			Prefix(original, patched, "GetCarriedCount");
 
+			//Pawn_RotationTracker
+			original = typeof(Pawn_RotationTracker);
+			patched = typeof(Pawn_RotationTracker_Patch);
+			Prefix(original, patched, "UpdateRotation");
 
 			//PERFORMANCE IMPROVEMENTS
 
@@ -1171,7 +1181,7 @@ namespace RimThreaded
 			//Graphics (Giddy-Up)
 			original = typeof(Texture2D);
 			patched = typeof(Texture2D_Patch);
-			Prefix(original, patched, "GetPixel", new Type[] { typeof(int), typeof(int) });
+			//Prefix(original, patched, "GetPixel", new Type[] { typeof(int), typeof(int) });
 			Prefix(original, patched, "Internal_Create");
 			Prefix(original, patched, "ReadPixels", new Type[] { typeof(Rect), typeof(int), typeof(int), typeof(bool) });
 			Prefix(original, patched, "Apply", new Type[] { typeof(bool), typeof(bool) });
@@ -1212,8 +1222,9 @@ namespace RimThreaded
 			jobGiver_AwesomeInventory_TakeArm = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_AwesomeInventory_TakeArm");
 			awesomeInventoryJobsJobGiver_FindItemByRadiusSub = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius+<>c__DisplayClass17_0");
 			pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus = AccessTools.TypeByName("PawnRules.Patch.RimWorld_Pawn_GuestTracker_SetGuestStatus");
-
-
+			combatExtendedCE_Utility = AccessTools.TypeByName("CombatExtended.CE_Utility");
+			combatExtendedVerb_LaunchProjectileCE = AccessTools.TypeByName("CombatExtended.Verb_LaunchProjectileCE");
+			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{
@@ -1289,7 +1300,6 @@ namespace RimThreaded
 				Transpile(pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus, patched, methodName);
 			}
 
-			combatExtendedCE_Utility = AccessTools.TypeByName("CombatExtended.CE_Utility");
 			if (combatExtendedCE_Utility != null)
 			{
 				string methodName = "BlitCrop";
@@ -1299,6 +1309,23 @@ namespace RimThreaded
 				methodName = "GetColorSafe";
 				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
 				Transpile(combatExtendedCE_Utility, patched, methodName);
+			}
+			if (combatExtendedVerb_LaunchProjectileCE != null)
+			{
+				string methodName = "CanHitFromCellIgnoringRange";
+				patched = typeof(Verb_LaunchProjectileCE_Transpile);
+				Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
+				Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
+				methodName = "TryFindCEShootLineFromTo";
+				Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
+				Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
+			}
+			if (combatExtendedVerb_MeleeAttackCE != null)
+			{
+				string methodName = "TryCastShot";
+				patched = typeof(Verb_MeleeAttackCE_Transpile);
+				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
+				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
 			}
 
 			Log.Message("RimThreaded patching is complete.");

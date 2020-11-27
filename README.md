@@ -35,6 +35,17 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.22  
+-Fixed bug in GenCollection.RemoveAll  
+-Fixed bug in RecipeWorkerCounter.GetCarriedCount  
+-Fixed bug in Pawn_RotationTracker.UpdateRotation  
+-Fixed bug in Texture2D.GetPixel  
+-Fixed bug in Verb_LaunchProjectileCE.CanHitFromCellIgnoringRange  
+-Fixed bug in Verb_LaunchProjectileCE.TryFindCEShootLineFromTo  
+-Fixed bug in Verb_MeleeAttackCE.TryCastShot  
+-Fixed bug in HediffSet.CacheMissingPartsCommonAncestors  
+-Fixed bug in JobDriver.get_CurToil  
+
 Version 1.1.21  
 -Fixed bug in GUIStyle.CalcSize  
 -Fixed bug in Reachability.DetermineStartRegions2  

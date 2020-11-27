@@ -35,7 +35,6 @@ namespace RimThreaded
             }
         }
 
-
         static readonly Func<object[], object> safeFunction2 = p => SafeGetReadableTexture((Texture2D)p[0]);
         public static Texture2D GetReadableTexture(Texture2D texture)
         {
@@ -66,7 +65,7 @@ namespace RimThreaded
             texture2D.Apply();
             RenderTexture.active = active;
             RenderTexture_Patch.ReleaseTemporary(temporary);
-            return texture;
+            return texture2D;
         }
     }
 }

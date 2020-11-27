@@ -4,6 +4,7 @@ using UnityEngine.Experimental.Rendering;
 using System;
 using System.Reflection;
 using HarmonyLib;
+using Verse;
 
 namespace RimThreaded
 {
