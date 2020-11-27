@@ -76,8 +76,8 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
-    <Compile Include="GenLabel.cs" />
     <Compile Include="Pawn_JobTracker_DetermineNextJob_Transpile.cs" />
+    <Compile Include="GenLabel_Transpile.cs" />
     <Compile Include="Pawn_RotationTracker.cs" />
     <Compile Include="GenAdj.cs" />
     <Compile Include="MapPawns_Transpile.cs" />

@@ -35,6 +35,9 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.23  
+-Fixed bug in Verb_LaunchProjectileCE.CanHitFromCellIgnoringRange  
+
 Version 1.1.22  
 -Fixed bug in GenCollection.RemoveAll  
 -Fixed bug in RecipeWorkerCounter.GetCarriedCount  
