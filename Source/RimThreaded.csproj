@@ -76,12 +76,15 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="GenLabel.cs" />
+    <Compile Include="Pawn_JobTracker_DetermineNextJob_Transpile.cs" />
+    <Compile Include="Pawn_RotationTracker.cs" />
     <Compile Include="GenAdj.cs" />
     <Compile Include="MapPawns_Transpile.cs" />
+    <Compile Include="RecipeWorkerCounter.cs" />
     <Compile Include="UniqueIDsManager.cs" />
     <Compile Include="HediffSet.cs" />
     <Compile Include="GrammarResolver_Transpile.cs" />
-    <Compile Include="Verb_LaunchProjectileCE.cs" />
     <Compile Include="BuildableDef.cs" />
     <Compile Include="RimWorld_Pawn_GuestTracker_SetGuestStatus.cs" />
     <Compile Include="JobGiver_FindItemByRadius_Transpile.cs" />
@@ -89,13 +92,14 @@
     <Compile Include="MeshMakerShadows.cs" />
     <Compile Include="MeshMakerPlanes.cs" />
     <Compile Include="CE_Utility_Transpile.cs" />
+    <Compile Include="Verb_MeleeAttackCE_Transpile.cs" />
     <Compile Include="WorldFloodFiller.cs" />
     <Compile Include="ReservationUtility.cs" />
     <Compile Include="PlayLog.cs" />
     <Compile Include="SectionLayer.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Mesh_Transpile.cs" />
-    <Compile Include="Pawn_JobTracker_DetermineNextJob_Transpile.cs" />
+    <Compile Include="Verb_LaunchProjectileCE_Transpile.cs" />
     <Compile Include="ListerThings_Transpile.cs" />
     <Compile Include="CompUtility_Transpile.cs" />
     <Compile Include="Pawn_InteractionsTracker_Transpile.cs" />

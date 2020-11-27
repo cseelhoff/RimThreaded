@@ -32,18 +32,27 @@ namespace RimThreaded
         }
         protected static Toil get_CurToil2(JobDriver __instance)
         {
-            if (curToilIndex(__instance) < 0 || __instance.job == null || __instance.pawn.CurJob != __instance.job)
+            int cti = curToilIndex(__instance);
+            if (cti < 0 || __instance.job == null || __instance.pawn.CurJob != __instance.job)
             {
                 return null;
             }
 
-            if (curToilIndex(__instance) >= toils(__instance).Count)
+            if (cti >= toils(__instance).Count)
             {
                 Log.Warning(__instance.pawn + " with job " + __instance.pawn.CurJob + " tried to get CurToil with curToilIndex=" + curToilIndex(__instance) + " but only has " + toils(__instance).Count + " toils.");
                 return null;
             }
-
-            return toils(__instance)[curToilIndex(__instance)];
+            Toil toil;
+            try
+            {
+                toil = toils(__instance)[cti];
+            } catch (ArgumentOutOfRangeException)
+            {
+                Log.Warning(__instance.pawn + " with job " + __instance.pawn.CurJob + " tried to get CurToil with curToilIndex=" + curToilIndex(__instance) + " but only has " + toils(__instance).Count + " toils.");
+                return null;
+            }
+            return toil;
         }
         private static bool CheckCurrentToilEndOrFail2(JobDriver __instance)
         {
