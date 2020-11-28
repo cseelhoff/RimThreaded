@@ -575,12 +575,12 @@ namespace RimThreaded
 			patched = typeof(AttackTargetReservationManager_Patch);
 			Prefix(original, patched, "FirstReservationFor");
 			Prefix(original, patched, "ReleaseClaimedBy");
-			//Prefix(original, patched, "IsReservedBy");
 			Prefix(original, patched, "CanReserve");
 			Prefix(original, patched, "ReleaseAllForTarget");
 			Prefix(original, patched, "ReleaseAllClaimedBy");
 			patched = typeof(AttackTargetReservationManager_Transpile);
 			Transpile(original, patched, "IsReservedBy");
+			Transpile(original, patched, "Reserve");
 
 
 			//PawnCollisionTweenerUtility
@@ -799,8 +799,10 @@ namespace RimThreaded
 			Prefix(original, patched, "RemoveReporter");
 
 			//HediffSet
-			original = typeof(HediffSet);
 			patched = typeof(HediffSet_Transpile);
+			//original = AccessTools.TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
+			//Transpile(original, patched, "MoveNext");
+			original = typeof(HediffSet);
 			Transpile(original, patched, "PartIsMissing");
 			Transpile(original, patched, "HasDirectlyAddedPartFor");
 			Transpile(original, patched, "AddDirect");
@@ -938,6 +940,7 @@ namespace RimThreaded
 			original = typeof(GrammarResolver);
 			patched = typeof(GrammarResolver_Transpile);
 			Transpile(original, patched, "AddRule");
+			Transpile(original, patched, "RandomPossiblyResolvableEntry");
 
 			//JobQueue
 			original = typeof(JobQueue);
@@ -1037,8 +1040,8 @@ namespace RimThreaded
 			//GenLabel
 			original = typeof(GenLabel);
 			patched = typeof(GenLabel_Transpile);
-			Transpile(original, patched, "ThingLabel", new Type[] { typeof(BuildableDef), typeof(ThingDef), typeof(int) });
-			Transpile(original, patched, "ThingLabel", new Type[] { typeof(Thing), typeof(int), typeof(bool) });
+			//Transpile(original, patched, "ThingLabel", new Type[] { typeof(BuildableDef), typeof(ThingDef), typeof(int) });
+			//Transpile(original, patched, "ThingLabel", new Type[] { typeof(Thing), typeof(int), typeof(bool) });
 
 			//Pawn_PathFollower
 			original = typeof(Pawn_PathFollower);
@@ -1047,7 +1050,7 @@ namespace RimThreaded
 
 			//CompSpawnSubplant
 			original = typeof(CompSpawnSubplant);
-			patched = typeof(CompSpawnSubplant_Patch);
+			patched = typeof(CompSpawnSubplant_Transpile);
 			Transpile(original, patched, "DoGrowSubplant");
 
 			//PERFORMANCE IMPROVEMENTS

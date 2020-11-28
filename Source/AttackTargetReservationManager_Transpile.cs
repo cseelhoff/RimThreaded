@@ -5,6 +5,8 @@ using Verse;
 using System.Reflection.Emit;
 using System.Reflection;
 using static Verse.AI.AttackTargetReservationManager;
+using Verse.AI;
+using System;
 
 namespace RimThreaded
 {
@@ -53,6 +55,46 @@ namespace RimThreaded
                 }
             }
             if(matchFound < 2)
+            {
+                Log.Error("IL code instructions not found");
+            }
+        }
+
+        public static IEnumerable<CodeInstruction> Reserve(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            Type loadLockObjectType = typeof(List<AttackTargetReservation>);
+            List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
+            {
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(AttackTargetReservationManager), "reservations"))
+            };
+            List<CodeInstruction> searchInstructions = loadLockObjectInstructions.ListFullCopy();
+            searchInstructions.Add(new CodeInstruction(OpCodes.Ldloc_0));
+            searchInstructions.Add(new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(loadLockObjectType, "Add")));
+
+            int i = 0;
+            int matchesFound = 0;
+
+            while (i < instructionsList.Count)
+            {
+                if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, i))
+                {
+                    matchesFound++;
+                    foreach (CodeInstruction codeInstruction in RimThreadedHarmony.GetLockCodeInstructions(
+                        iLGenerator, instructionsList, i, searchInstructions.Count, loadLockObjectInstructions, loadLockObjectType))
+                    {
+                        yield return codeInstruction;
+                    }
+                    i += searchInstructions.Count;
+                }
+                else
+                {
+                    yield return instructionsList[i];
+                    i++;
+                }
+            }
+            if (matchesFound < 1)
             {
                 Log.Error("IL code instructions not found");
             }

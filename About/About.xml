@@ -10,11 +10,10 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.25
-    -Fixed bug in GenLabel.ThingLabel
-    -Fixed bug in GrammarResolver.AddRule
-    -Fixed bug in CompSpawnSubplant.DoGrowSubplant
-    -Changed Error message to Warning in Pawn_PathFollower.StartPath
+    Version 1.1.26
+    -Temporily removed GenLabel.ThingLabel Patch from 1.1.25
+    -Transpiled AttackTargetReservationManager.Reserve
+    -Fixed bug in GrammarResolver.RandomPossiblyResolvableEntry
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

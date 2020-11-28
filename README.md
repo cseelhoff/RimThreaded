@@ -35,6 +35,11 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.26  
+-Temporily removed GenLabel.ThingLabel Patch from 1.1.25  
+-Transpiled AttackTargetReservationManager.Reserve  
+-Fixed bug in GrammarResolver.RandomPossiblyResolvableEntry  
+
 Version 1.1.25  
 -Fixed bug in GenLabel.ThingLabel  
 -Fixed bug in GrammarResolver.AddRule  

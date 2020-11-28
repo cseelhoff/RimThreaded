@@ -4,6 +4,7 @@ using System.Linq;
 using Verse;
 using System.Reflection.Emit;
 using RimWorld;
+using System.Reflection;
 
 namespace RimThreaded
 {
@@ -141,5 +142,37 @@ namespace RimThreaded
                 Log.Error("IL code instructions not found");
             }
         }
+        public static IEnumerable<CodeInstruction> MoveNext(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            int currentInstructionIndex = 0;
+            int matchFound = 0;
+            while (currentInstructionIndex < instructionsList.Count)
+            {
+                if (
+                    instructionsList[currentInstructionIndex].opcode == OpCodes.Call &&
+                    (MethodInfo)instructionsList[currentInstructionIndex].operand == AccessTools.Method(typeof(HediffSet), "PartIsMissing")) 
+                {
+                    matchFound++;
+                    yield return new CodeInstruction(OpCodes.Brfalse, instructionsList[currentInstructionIndex + 1].operand);
+                    yield return new CodeInstruction(OpCodes.Ldloc_1);
+                    yield return new CodeInstruction(OpCodes.Ldloc_2);
+                    yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
+                }
+                else
+                {
+                    yield return instructionsList[currentInstructionIndex];
+                    currentInstructionIndex++;
+                }
+            }
+            if (matchFound < 1)
+            {
+                Log.Error("IL code instructions not found");
+            }
+        }
+
+
     }
 }
