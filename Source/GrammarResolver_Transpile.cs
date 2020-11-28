@@ -4,7 +4,6 @@ using System.Linq;
 using Verse;
 using System.Reflection.Emit;
 using System.Reflection;
-using static Verse.AI.AttackTargetReservationManager;
 using Verse.Grammar;
 
 namespace RimThreaded
@@ -16,6 +15,11 @@ namespace RimThreaded
             List<CodeInstruction> instructionsList = instructions.ToList();
             int currentInstructionIndex = 0;
             int matchFound = 0;
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            Label notNull = iLGenerator.DefineLabel();
+            yield return new CodeInstruction(OpCodes.Brtrue, notNull);
+            yield return new CodeInstruction(OpCodes.Ret);
+            instructionsList[currentInstructionIndex].labels.Add(notNull);
             while (currentInstructionIndex < instructionsList.Count)
             {
                 if(

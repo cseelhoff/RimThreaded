@@ -1034,6 +1034,22 @@ namespace RimThreaded
 			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
 			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument[])});
 
+			//GenLabel
+			original = typeof(GenLabel);
+			patched = typeof(GenLabel_Transpile);
+			Transpile(original, patched, "ThingLabel", new Type[] { typeof(BuildableDef), typeof(ThingDef), typeof(int) });
+			Transpile(original, patched, "ThingLabel", new Type[] { typeof(Thing), typeof(int), typeof(bool) });
+
+			//Pawn_PathFollower
+			original = typeof(Pawn_PathFollower);
+			patched = typeof(Pawn_PathFollower_Transpile);
+			Transpile(original, patched, "StartPath");
+
+			//CompSpawnSubplant
+			original = typeof(CompSpawnSubplant);
+			patched = typeof(CompSpawnSubplant_Patch);
+			Transpile(original, patched, "DoGrowSubplant");
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
