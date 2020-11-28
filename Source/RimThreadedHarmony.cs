@@ -1021,6 +1021,19 @@ namespace RimThreaded
 			patched = typeof(Pawn_RotationTracker_Patch);
 			Prefix(original, patched, "UpdateRotation");
 
+			//GrammarResolverSimpleStringExtensions
+			original = typeof(GrammarResolverSimpleStringExtensions);
+			patched = typeof(GrammarResolverSimpleStringExtensions_Patch);
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument) });
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument) });
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument[])});
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat

@@ -10,8 +10,8 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.23
-    -Fixed bug in Verb_LaunchProjectileCE.CanHitFromCellIgnoringRange
+    Version 1.1.24
+    -Fixed bug in GrammarResolverSimpleStringExtensions.Formatted
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

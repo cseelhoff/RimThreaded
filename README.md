@@ -35,6 +35,9 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.24
+-Fixed bug in GrammarResolverSimpleStringExtensions.Formatted
+
 Version 1.1.23  
 -Fixed bug in Verb_LaunchProjectileCE.CanHitFromCellIgnoringRange  
 
