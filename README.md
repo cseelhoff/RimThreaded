@@ -35,8 +35,14 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
-Version 1.1.24
--Fixed bug in GrammarResolverSimpleStringExtensions.Formatted
+Version 1.1.25  
+-Fixed bug in GenLabel.ThingLabel  
+-Fixed bug in GrammarResolver.AddRule  
+-Fixed bug in CompSpawnSubplant.DoGrowSubplant  
+-Changed Error message to Warning in Pawn_PathFollower.StartPath  
+
+Version 1.1.24  
+-Fixed bug in GrammarResolverSimpleStringExtensions.Formatted  
 
 Version 1.1.23  
 -Fixed bug in Verb_LaunchProjectileCE.CanHitFromCellIgnoringRange  
