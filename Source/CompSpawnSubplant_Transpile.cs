@@ -9,7 +9,7 @@ using RimWorld;
 namespace RimThreaded
 {
 
-    public class CompSpawnSubplant_Patch
+    public class CompSpawnSubplant_Transpile
 	{
 		public static IEnumerable<CodeInstruction> DoGrowSubplant(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
