@@ -19,6 +19,8 @@ namespace RimThreaded
         public static bool AlwaysRedrawShadows =
             AccessTools.StaticFieldRefAccess<bool>(typeof(Map), "AlwaysRedrawShadows");
         public static Dictionary<Map, AutoResetEvent> skyManagerStartEvents = new Dictionary<Map, AutoResetEvent>();
+
+
         public static void SkyManagerUpdate2(Map __instance)
         {
             if (!skyManagerStartEvents.TryGetValue(__instance, out AutoResetEvent skyManagerStartEvent))
@@ -38,7 +40,17 @@ namespace RimThreaded
             }
             skyManagerStartEvent.Set();
         }
-
+        public static bool get_IsPlayerHome(Map __instance, ref bool __result)
+        {
+            if (__instance.info != null && __instance.info.parent != null && __instance.info.parent.def != null && __instance.info.parent.def.canBePlayerHome)
+            {
+                __result = __instance.info.parent.Faction == Faction.OfPlayer;
+                return false;
+            }
+            __result = false;
+            return false;
+            
+        }
 
         public static bool MapUpdate(Map __instance)
         {

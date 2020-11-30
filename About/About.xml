@@ -10,10 +10,34 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.26
-    -Temporily removed GenLabel.ThingLabel Patch from 1.1.25
-    -Transpiled AttackTargetReservationManager.Reserve
-    -Fixed bug in GrammarResolver.RandomPossiblyResolvableEntry
+    Version 1.1.27
+    -Fixed bug in BeautyUtility.FillBeautyRelevantCells
+    -Fixed bug in Building_Door.get_DoorPowerOn
+    -Fixed bug in ColoredText.Resolve
+    -Fixed bug in DijkstraIntVec3.Run
+    -Fixed bug in FastPriorityQueueKeyValuePairIntFloat
+    -Fixed bug in FastPriorityQueueRegionLinkQueueEntry
+    -Fixed bug in GenLabel.ThingLabel
+    -Fixed bug in GrammarResolver.RandomPossiblyResolvableEntryb__0
+    -Fixed bug in HediffSet.PartIsMissing
+    -Fixed bug in HediffSet.MoveNext
+    -Fixed bug in InfestationCellFinder.CalculateDistanceToColonyBuildingGrid
+    -Fixed bug in InfestationCellFinder.GetScoreAt
+    -Fixed bug in JobDriver.DriverTick
+    -Fixed bug in JobDriver.CheckCurrentToilEndOrFail
+    -Fixed bug in ListerThings.Add
+    -Fixed bug in Map.get_IsPlayerHome
+    -Fixed bug in PathFinder.getRegionCostCalculatorWrapper
+    -Fixed bug in PawnCapacitiesHandler.GetLevel
+    -Fixed bug in PawnCapacityUtility.CalculatePartEfficiency
+    -Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveLostThoughts
+    -Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveResuedRelativeThought
+    -Fixed bug in Pawn_HealthTracker.SetDead
+    -Fixed bug in Region.OverlapWith
+    -Fixed bug in Thing.SpawnSetup
+    -Fixed bug in Thing.DeSpawn
+    -Fixed bug in WildPlantSpawner.CalculatePlantsWhichCanGrowAt
+    -Added transpiling methods for developers
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

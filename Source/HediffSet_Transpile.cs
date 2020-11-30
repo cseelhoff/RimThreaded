@@ -38,6 +38,11 @@ namespace RimThreaded
                 if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, currentInstructionIndex))
                 {
                     matchFound = true;
+                    yield return new CodeInstruction(OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(HediffSet), "hediffs"));
+                    yield return new CodeInstruction(OpCodes.Ldloc_0);
+                    yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(List<Hediff>), "get_Item"));
+                    yield return new CodeInstruction(OpCodes.Brfalse, instructionsList[currentInstructionIndex+6].operand);
                     foreach (CodeInstruction codeInstruction in RimThreadedHarmony.UpdateTryCatchCodeInstructions(
                         iLGenerator, instructionsList, currentInstructionIndex, searchInstructions.Count))
                     {
@@ -150,14 +155,13 @@ namespace RimThreaded
             int matchFound = 0;
             while (currentInstructionIndex < instructionsList.Count)
             {
-                if (
-                    instructionsList[currentInstructionIndex].opcode == OpCodes.Call &&
-                    (MethodInfo)instructionsList[currentInstructionIndex].operand == AccessTools.Method(typeof(HediffSet), "PartIsMissing")) 
+                if (currentInstructionIndex + 2 < instructionsList.Count &&
+                    instructionsList[currentInstructionIndex + 2].opcode == OpCodes.Call &&
+                    (MethodInfo)instructionsList[currentInstructionIndex + 2].operand == AccessTools.Method(typeof(HediffSet), "PartIsMissing")) 
                 {
                     matchFound++;
-                    yield return new CodeInstruction(OpCodes.Brfalse, instructionsList[currentInstructionIndex + 1].operand);
                     yield return new CodeInstruction(OpCodes.Ldloc_1);
-                    yield return new CodeInstruction(OpCodes.Ldloc_2);
+                    yield return new CodeInstruction(OpCodes.Brfalse, instructionsList[currentInstructionIndex + 3].operand);
                     yield return instructionsList[currentInstructionIndex];
                     currentInstructionIndex++;
                 }

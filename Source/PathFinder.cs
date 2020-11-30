@@ -17,7 +17,9 @@ namespace RimThreaded
 
     public class PathFinder_Patch
     {
-        public static Dictionary<int, PathFinderNodeFast[]> calcGrids = 
+        public static Dictionary<int, RegionCostCalculatorWrapper> regionCostCalculatorWrappers =
+            new Dictionary<int, RegionCostCalculatorWrapper>();
+        public static Dictionary<int, PathFinderNodeFast[]> calcGrids =
             new Dictionary<int, PathFinderNodeFast[]>();
         public static Dictionary<int, FastPriorityQueue<CostNode2>> openLists =
             new Dictionary<int, FastPriorityQueue<CostNode2>>();
@@ -40,8 +42,8 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<PathFinder, Building[]>("edificeGrid");
         public static AccessTools.FieldRef<PathFinder, List<Blueprint>[]> blueprintGridField =
             AccessTools.FieldRefAccess<PathFinder, List<Blueprint>[]>("blueprintGrid");
-        public static AccessTools.FieldRef<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorField =
-            AccessTools.FieldRefAccess<PathFinder, RegionCostCalculatorWrapper>("regionCostCalculator");
+        //public static AccessTools.FieldRef<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorField =
+            //AccessTools.FieldRefAccess<PathFinder, RegionCostCalculatorWrapper>("regionCostCalculator");
         public static AccessTools.FieldRef<PathFinder, List<int>> disallowedCornerIndicesField =
             AccessTools.FieldRefAccess<PathFinder, List<int>>("disallowedCornerIndices");
         public static Type costNodeType = AccessTools.TypeByName("Verse.AI.PathFinder+CostNode");
@@ -262,6 +264,7 @@ namespace RimThreaded
             ushort statusOpenValue = getOpenValue();
             ushort statusClosedValue = getClosedValue();
             PathFinderNodeFast[] calcGrid = getCalcGrid(__instance);
+            RegionCostCalculatorWrapper regionCostCalculator = getRegionCostCalculatorWrapper(__instance);
 
             if (DebugSettings.pathThroughWalls)
             {
@@ -622,7 +625,7 @@ namespace RimThreaded
 
                     if (flag8)
                     {
-                        calcGrid[num14].heuristicCost = Mathf.RoundToInt((float)regionCostCalculatorField(__instance).GetPathCostFromDestToRegion(num14) * RegionHeuristicWeightByNodesOpened.Evaluate(num3));
+                        calcGrid[num14].heuristicCost = Mathf.RoundToInt((float)regionCostCalculator.GetPathCostFromDestToRegion(num14) * RegionHeuristicWeightByNodesOpened.Evaluate(num3));
                         if (calcGrid[num14].heuristicCost < 0)
                         {
                             Log.ErrorOnce(string.Concat("Heuristic cost overflow for ", pawn.ToStringSafe(), " pathing from ", start, " to ", dest, "."), pawn.GetHashCode() ^ 0xB8DC389);
@@ -658,7 +661,7 @@ namespace RimThreaded
                 if (num3 >= num4 && flag6 && !flag8)
                 {
                     flag8 = true;
-                    regionCostCalculatorField(__instance).Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, disallowedCornerIndicesField(__instance));
+                    regionCostCalculator.Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, disallowedCornerIndicesField(__instance));
                     InitStatusesAndPushStartNode3(ref curIndex, start, cellIndicesField(__instance), calcGrid, ref statusOpenValue, ref statusClosedValue);
                     openList.Clear();
                     openList.Push(new CostNode2(curIndex, 0));
@@ -699,7 +702,10 @@ namespace RimThreaded
             if (!openLists.TryGetValue(tID, out FastPriorityQueue<CostNode2> local_openList))
             {
                 local_openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
-                openLists[tID] = local_openList;
+                lock (openLists)
+                {
+                    openLists[tID] = local_openList;
+                }
             }
             return local_openList;
         }
@@ -711,9 +717,25 @@ namespace RimThreaded
             if (!calcGrids.TryGetValue(tID, out PathFinderNodeFast[] local_calcGrid) || local_calcGrid.Length < size)
             {
                 local_calcGrid = new PathFinderNodeFast[size];
-                calcGrids[tID] = local_calcGrid;
+                lock (calcGrids)
+                {
+                    calcGrids[tID] = local_calcGrid;
+                }
             }
             return local_calcGrid;
+        }
+        public static RegionCostCalculatorWrapper getRegionCostCalculatorWrapper(PathFinder __instance)
+        {
+            int tID = Thread.CurrentThread.ManagedThreadId;
+            if (!regionCostCalculatorWrappers.TryGetValue(tID, out RegionCostCalculatorWrapper regionCostCalculatorWrapper))
+            {
+                regionCostCalculatorWrapper = new RegionCostCalculatorWrapper(mapField(__instance));
+                lock (regionCostCalculatorWrappers)
+                {
+                    regionCostCalculatorWrappers[tID] = regionCostCalculatorWrapper;
+                }
+            }
+            return regionCostCalculatorWrapper;
         }
     }
 }
