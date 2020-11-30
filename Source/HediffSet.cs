@@ -59,5 +59,19 @@ namespace RimThreaded
             return false;
         }
 
+        public static bool PartIsMissing(HediffSet __instance, ref bool __result, BodyPartRecord part)
+        {
+            for (int i = 0; i < __instance.hediffs.Count; i++)
+            {
+                if (__instance.hediffs[i] != null && __instance.hediffs[i].Part == part && __instance.hediffs[i] is Hediff_MissingPart)
+                {
+                    __result = true;
+                    return false;
+                }
+            }
+            __result = false;
+            return false;
+        }
+
     }
 }

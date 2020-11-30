@@ -69,13 +69,24 @@ namespace RimThreaded
                 return false;
             }
             //if (cachedCapacityLevels == null) //REMOVED
-            if (cachedCapacityLevelsDict[__instance] == null) //ADDED
+            DefMap<PawnCapacityDef, CacheElement> defMap = cachedCapacityLevelsDict[__instance];
+            if (defMap == null) //ADDED
             {
-                Notify_CapacityLevelsDirty(__instance);
+                defMap = new DefMap<PawnCapacityDef, CacheElement>();
+                cachedCapacityLevelsDict[__instance] = defMap;
+                for (int i = 0; i < defMap.Count; i++)
+                {
+                    defMap[i].status = CacheStatus.Uncached;
+                }
             }
 
-            //CacheElement cacheElement = cachedCapacityLevels[capacity]; //REMOVED
-            CacheElement cacheElement = cachedCapacityLevelsDict[__instance][capacity]; //ADDED
+            //CacheElement cacheElement = cachedCapacityLevels[capacity]; //REMOVED    
+            if (capacity == null)
+            {
+                __result = 0f;
+                return false;
+            }
+            CacheElement cacheElement = defMap[capacity]; //ADDED
             lock (cacheElement) //ADDED
             {
                 if (cacheElement.status == CacheStatus.Caching)
@@ -98,6 +109,7 @@ namespace RimThreaded
                     }
                 }
             }
+
 
             __result = cacheElement.value;
             return false;

@@ -15,6 +15,8 @@ namespace RimThreaded
 
     public class Region_Patch
     {
+        public static AccessTools.FieldRef<Region, Dictionary<Area, AreaOverlap>> cachedAreaOverlaps =
+            AccessTools.FieldRefAccess<Region, Dictionary<Area, AreaOverlap>>("cachedAreaOverlaps");
         public static AccessTools.FieldRef<Region, int> cachedDangersForFrame =
             AccessTools.FieldRefAccess<Region, int>("cachedDangersForFrame");
         public static AccessTools.FieldRef<Region, List<KeyValuePair<Pawn, Danger>>> cachedDangers =
@@ -23,6 +25,56 @@ namespace RimThreaded
             AccessTools.StaticFieldRefAccess<Dictionary<Pawn, FloatRange>>(typeof(Region), "cachedSafeTemperatureRanges");
         public static int cachedSafeTemperatureRangesForFrame =
             AccessTools.StaticFieldRefAccess<int>(typeof(Region), "cachedSafeTemperatureRangesForFrame");
+
+        public static bool OverlapWith(Region __instance, ref AreaOverlap __result, Area a)
+        {
+            
+            if (a.TrueCount == 0)
+            {
+                __result = AreaOverlap.None;
+                return false;
+            }
+
+            if (__instance.Map != a.Map)
+            {
+                __result = AreaOverlap.None;
+                return false;
+            }
+
+            if (cachedAreaOverlaps(__instance) == null)
+            {
+                cachedAreaOverlaps(__instance) = new Dictionary<Area, AreaOverlap>();
+            }
+            Dictionary<Area, AreaOverlap> cao = cachedAreaOverlaps(__instance);
+            AreaOverlap value;
+            lock (cao)
+            {
+                bool valueExists = cao.TryGetValue(a, out value);
+                if (!valueExists)
+                {
+                    int num = 0;
+                    int num2 = 0;
+                    foreach (IntVec3 cell in __instance.Cells)
+                    {
+                        num2++;
+                        if (a[cell])
+                        {
+                            num++;
+                        }
+                    }
+
+                    value = ((num != 0) ? ((num == num2) ? AreaOverlap.Entire : AreaOverlap.Partial) : AreaOverlap.None);
+
+                    cao.Add(a, value);
+                }
+            }
+
+            __result = value;
+            return false;
+        }
+
+
+
         public static bool get_AnyCell(Region __instance, ref IntVec3 __result)
         {
             Map map = Find.Maps[__instance.mapIndex];

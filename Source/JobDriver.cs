@@ -20,6 +20,7 @@ namespace RimThreaded
         public static FieldRef<JobDriver, ToilCompleteMode> curToilCompleteMode = FieldRefAccess<JobDriver, ToilCompleteMode>("curToilCompleteMode");
         public static FieldRef<JobDriver, List<Toil>> toils = FieldRefAccess<JobDriver, List<Toil>>("toils");
 
+
         private static bool get_CanStartNextToilInBusyStance2(JobDriver __instance)
         {
             int num = curToilIndex(__instance) + 1;
@@ -30,7 +31,7 @@ namespace RimThreaded
 
             return toils(__instance)[num].atomicWithPrevious;
         }
-        protected static Toil get_CurToil2(JobDriver __instance)
+        public static Toil get_CurToil2(JobDriver __instance)
         {
             int cti = curToilIndex(__instance);
             if (cti < 0 || __instance.job == null || __instance.pawn.CurJob != __instance.job)
@@ -54,16 +55,17 @@ namespace RimThreaded
             }
             return toil;
         }
-        private static bool CheckCurrentToilEndOrFail2(JobDriver __instance)
+        public static bool CheckCurrentToilEndOrFail2(JobDriver __instance)
         {
             try
             {
                 Toil curToil = get_CurToil2(__instance);
-                if (__instance.globalFailConditions != null)
+                List<Func<JobCondition>> listFuncJobConditions = __instance.globalFailConditions;
+                if (listFuncJobConditions != null)
                 {
-                    for (int i = 0; i < __instance.globalFailConditions.Count; i++)
+                    for (int i = 0; i < listFuncJobConditions.Count; i++)
                     {
-                        JobCondition jobCondition = __instance.globalFailConditions[i]();
+                        JobCondition jobCondition = listFuncJobConditions[i]();
                         if (jobCondition != JobCondition.Ongoing)
                         {
                             if (__instance.pawn.jobs.debugLog)
@@ -236,6 +238,114 @@ namespace RimThreaded
                         __instance.ReadyForNextToil();
                     }
                 }
+            }
+            return false;
+        }
+
+        public static bool DriverTick(JobDriver __instance)
+        {
+            try
+            {
+                __instance.ticksLeftThisToil--;
+                __instance.debugTicksSpentThisToil++;
+                if (get_CurToil2(__instance) == null)
+                {
+                    if (!__instance.pawn.stances.FullBodyBusy || get_CanStartNextToilInBusyStance2(__instance))
+                    {
+                        __instance.ReadyForNextToil();
+                    }
+                }
+                else
+                {
+                    if (CheckCurrentToilEndOrFail2(__instance))
+                    {
+                        return false;
+                    }
+
+                    if (curToilCompleteMode(__instance) == ToilCompleteMode.Delay)
+                    {
+                        if (__instance.ticksLeftThisToil > 0)
+                        {
+                            goto IL_0099;
+                        }
+
+                        __instance.ReadyForNextToil();
+                    }
+                    else
+                    {
+                        if (curToilCompleteMode(__instance) != ToilCompleteMode.FinishedBusy || __instance.pawn.stances.FullBodyBusy)
+                        {
+                            goto IL_0099;
+                        }
+
+                        __instance.ReadyForNextToil();
+                    }
+
+                    return false;
+                }
+
+                goto end_IL_0000;
+            IL_01b8:
+                if (__instance.job.mote != null)
+                {
+                    __instance.job.mote.Maintain();
+                }
+
+                goto end_IL_0000;
+            IL_0099:
+                if (wantBeginNextToil(__instance))
+                {
+                    TryActuallyStartNextToil(__instance);
+                    return false;
+                }
+
+                if (curToilCompleteMode(__instance) == ToilCompleteMode.Instant && __instance.debugTicksSpentThisToil > 300)
+                {
+                    Log.Error(string.Concat(__instance.pawn, " had to be broken from frozen state. He was doing job ", __instance.job, ", toilindex=", curToilIndex));
+                    __instance.ReadyForNextToil();
+                    return false;
+                }
+
+                Job startingJob = __instance.pawn.CurJob;
+                int startingJobId = startingJob.loadID;
+                if (get_CurToil2(__instance) != null && get_CurToil2(__instance).preTickActions != null)
+                {
+                    Toil curToil = get_CurToil2(__instance);
+                    for (int i = 0; i < curToil.preTickActions.Count; i++)
+                    {
+                        curToil.preTickActions[i]();
+                        if (JobChanged() || get_CurToil2(__instance) != curToil || wantBeginNextToil(__instance))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                if (get_CurToil2(__instance).tickAction == null)
+                {
+                    goto IL_01b8;
+                }
+
+                get_CurToil2(__instance).tickAction();
+                if (!JobChanged())
+                {
+                    goto IL_01b8;
+                }
+
+            end_IL_0000:
+                bool JobChanged()
+                {
+                    if (__instance.pawn.CurJob == startingJob)
+                    {
+                        return __instance.pawn.CurJob.loadID != startingJobId;
+                    }
+
+                    return true;
+                }
+            }
+            catch (Exception exception)
+            {
+                JobUtility.TryStartErrorRecoverJob(__instance.pawn, "Exception in JobDriver tick for pawn " + __instance.pawn.ToStringSafe(), exception, __instance);
             }
             return false;
         }

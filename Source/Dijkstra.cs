@@ -17,10 +17,10 @@ namespace RimThreaded
         private Dictionary<IntVec3, float> distances = new Dictionary<IntVec3, float>();
         private FastPriorityQueue<KeyValuePair<IntVec3, float>> queue = new FastPriorityQueue<KeyValuePair<IntVec3, float>>((IComparer<KeyValuePair<IntVec3, float>>)new DistanceComparer());
         //private FastPriorityQueueKeyValuePairIntVec3Float_Patch queue = new FastPriorityQueue<KeyValuePair<IntVec3, float>>((IComparer<KeyValuePair<IntVec3, float>>)new DistanceComparer());
-        private List<IntVec3> singleNodeList = new List<IntVec3>();
+        private static List<IntVec3> singleNodeList = new List<IntVec3>();
         private List<KeyValuePair<IntVec3, float>> tmpResult = new List<KeyValuePair<IntVec3, float>>();
 
-        public void Run(
+        public static void Run(
           IntVec3 startingNode,
           Func<IntVec3, IEnumerable<IntVec3>> neighborsGetter,
           Func<IntVec3, IntVec3, float> distanceGetter,
@@ -32,7 +32,7 @@ namespace RimThreaded
             Run((IEnumerable<IntVec3>)singleNodeList, neighborsGetter, distanceGetter, outDistances, outParents);
         }
 
-        public void Run(
+        public static void Run(
           IEnumerable<IntVec3> startingNodes,
           Func<IntVec3, IEnumerable<IntVec3>> neighborsGetter,
           Func<IntVec3, IntVec3, float> distanceGetter,
@@ -40,8 +40,10 @@ namespace RimThreaded
           Dictionary<IntVec3, IntVec3> outParents = null)
         {
             outDistances.Clear();
-            distances.Clear();
-            queue.Clear();
+            //distances.Clear();
+            Dictionary<IntVec3, float> distances = new Dictionary<IntVec3, float>();
+            //queue.Clear();
+            FastPriorityQueue<KeyValuePair<IntVec3, float>> queue = new FastPriorityQueue<KeyValuePair<IntVec3, float>>((IComparer<KeyValuePair<IntVec3, float>>)new DistanceComparer());
             outParents?.Clear();
             if (startingNodes is IList<IntVec3> objList)
             {
@@ -83,12 +85,12 @@ namespace RimThreaded
                                 if (objs is IList<IntVec3> objList2)
                                 {
                                     for (int index = 0; index < objList2.Count; ++index)
-                                        HandleNeighbor(objList2[index], distance, node, distanceGetter, outParents);
+                                        HandleNeighbor2(distances, queue, objList2[index], distance, node, distanceGetter, outParents);
                                 }
                                 else
                                 {
                                     foreach (IntVec3 n in objs)
-                                        HandleNeighbor(n, distance, node, distanceGetter, outParents);
+                                        HandleNeighbor2(distances, queue, n, distance, node, distanceGetter, outParents);
                                 }
                             }
                         }
@@ -133,7 +135,8 @@ namespace RimThreaded
             tmpResult.Clear();
         }
 
-        private void HandleNeighbor(
+        private static void HandleNeighbor2(Dictionary<IntVec3, float> distances, 
+            FastPriorityQueue<KeyValuePair<IntVec3, float>> queue,
           IntVec3 n,
           float nodeDist,
           KeyValuePair<IntVec3, float> node,
@@ -186,7 +189,7 @@ namespace RimThreaded
             }
         }
         private static void HandleNeighbor(int n, float nodeDist, KeyValuePair<int, float> node, 
-            Func<int, int, float> distanceGetter, Dictionary<int, int> outParents, Dictionary<int, float> distances, FastPriorityQueue<KeyValuePair<int, float>> queue)
+            Func<int, int, float> distanceGetter, Dictionary<int, int> outParents, Dictionary<int, float> distances, FastPriorityQueueKeyValuePairIntFloat queue)
         {
             float num = nodeDist + Mathf.Max(distanceGetter(node.Key, n), 0f);
             bool flag = false;
@@ -231,7 +234,7 @@ namespace RimThreaded
             //distances.Clear();
             Dictionary<int, float> distances = new Dictionary<int, float>();
             //queue.Clear();
-            FastPriorityQueue<KeyValuePair<int, float>> queue = new FastPriorityQueue<KeyValuePair<int, float>>(new DistanceComparer());
+            FastPriorityQueueKeyValuePairIntFloat queue = new FastPriorityQueueKeyValuePairIntFloat(new DistanceComparer());
             outParents?.Clear();
             IList<int> list = startingNodes as IList<int>;
             if (list != null)
@@ -296,6 +299,19 @@ namespace RimThreaded
             }
 
             distances.Clear();
+        }
+
+        public static void Run(IEnumerable<int> startingNodes, Func<int, IEnumerable<int>> neighborsGetter, Func<int, int, float> distanceGetter, Dictionary<int, float> outDistances, Dictionary<int, int> outParents = null)
+        {
+            List<KeyValuePair<int, float>> tmpResult = new List<KeyValuePair<int, float>>();
+            Run(startingNodes, neighborsGetter, distanceGetter, tmpResult, outParents);
+            outDistances.Clear();
+            for (int i = 0; i < tmpResult.Count; i++)
+            {
+                outDistances.Add(tmpResult[i].Key, tmpResult[i].Value);
+            }
+
+            tmpResult.Clear();
         }
 
 

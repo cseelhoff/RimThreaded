@@ -18,11 +18,11 @@ namespace RimThreaded
 			if (!ListerThings.EverListable(t.def, __instance.use))
 				return false;
 			List<Thing> thingList1;
-			if (!listsByDef(__instance).TryGetValue(t.def, out thingList1))
+			lock (listsByDef(__instance)) //ADDED - updated
 			{
-				thingList1 = new List<Thing>();
-				lock (listsByDef(__instance)) //ADDED
+				if (!listsByDef(__instance).TryGetValue(t.def, out thingList1))
 				{
+					thingList1 = new List<Thing>();
 					listsByDef(__instance).Add(t.def, thingList1);
 				}
 			}
@@ -34,11 +34,15 @@ namespace RimThreaded
 			{
 				if ((__instance.use != ListerThingsUse.Region || allGroup.StoreInRegion()) && allGroup.Includes(t.def))
 				{
-					List<Thing> thingList2 = listsByGroup(__instance)[(int)allGroup];
-					if (thingList2 == null)
+					List<Thing> thingList2;
+					lock (listsByGroup(__instance)) //ADDED - updated
 					{
-						thingList2 = new List<Thing>();
-						listsByGroup(__instance)[(int)allGroup] = thingList2;
+						thingList2 = listsByGroup(__instance)[(int)allGroup];
+						if (thingList2 == null)
+						{
+							thingList2 = new List<Thing>();
+							listsByGroup(__instance)[(int)allGroup] = thingList2;
+						}
 					}
 					lock (thingList2) //ADDED
 					{

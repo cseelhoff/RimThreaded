@@ -329,6 +329,10 @@ namespace RimThreaded
             for (int j = 0; j < allWildPlants.Count; j++)
             {
                 ThingDef thingDef = allWildPlants[j];
+                if (thingDef == null)
+                {
+                    continue;
+                }
                 if (!thingDef.CanEverPlantAt_NewTemp(c, map(__instance)))
                 {
                     continue;

@@ -24,6 +24,7 @@ namespace RimThreaded
 			LocalBuilder local_calcGrid = iLGenerator.DeclareLocal(nodeFastTypeArray);
 			LocalBuilder local_statusOpenValue = iLGenerator.DeclareLocal(typeof(ushort));
 			LocalBuilder local_statusClosedValue = iLGenerator.DeclareLocal(typeof(ushort));
+			LocalBuilder local_regionCostCalculatorWrapper = iLGenerator.DeclareLocal(typeof(RegionCostCalculatorWrapper));
 			Type costNodeType = AccessTools.TypeByName("Verse.AI.PathFinder+CostNode");
 			Type costNodeType2 = typeof(CostNode2);
 			Type icomparerCostNodeType1 = typeof(IComparer<>).MakeGenericType(costNodeType);
@@ -54,6 +55,10 @@ namespace RimThreaded
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
 			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getCalcGrid"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_calcGrid.LocalIndex);
+
+			yield return new CodeInstruction(OpCodes.Ldarg_0);
+			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getRegionCostCalculatorWrapper"));
+			yield return new CodeInstruction(OpCodes.Stloc, local_regionCostCalculatorWrapper.LocalIndex);
 
 			// FastPriorityQueue<CostNode2> openList = getOpenList(managedThreadId);
 			//IL_0013: ldloc.0
@@ -420,6 +425,16 @@ namespace RimThreaded
 				{
 					instructionsList[i].operand = fastPriorityQueueCostNodeType2.GetConstructor(new Type[] { icomparerCostNodeType2 });
 					yield return instructionsList[i];
+					i++;
+				}
+				else if (i+1 < instructionsList.Count &&
+					instructionsList[i+1].opcode == OpCodes.Ldfld &&
+					(FieldInfo)instructionsList[i+1].operand == AccessTools.DeclaredField(typeof(PathFinder), "regionCostCalculator")
+				)
+				{
+					instructionsList[i].opcode = OpCodes.Ldloc;
+					instructionsList[i].operand = local_regionCostCalculatorWrapper.LocalIndex;
+					yield return instructionsList[i++];
 					i++;
 				}
 				/*

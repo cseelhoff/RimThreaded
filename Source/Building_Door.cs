@@ -28,11 +28,14 @@ namespace RimThreaded
 		{
 			CompPowerTrader pc = __instance.powerComp;
 			bool poweron = false;
-			try
+			if (pc != null)
 			{
-				poweron = pc.PowerOn;
+				try
+				{
+					poweron = pc.PowerOn;
+				}
+				catch (NullReferenceException) { }
 			}
-			catch (NullReferenceException) { }
 			__result = poweron;
 			return false;
 		}

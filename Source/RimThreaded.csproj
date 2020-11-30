@@ -76,9 +76,16 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="FastPriorityQueueRegionLinkQueueEntry.cs" />
+    <Compile Include="RegionCostCalculatorWrapper.cs" />
     <Compile Include="ColoredText_Transpile.cs" />
     <Compile Include="CompSpawnSubplant_Transpile.cs" />
+    <Compile Include="FastPriorityQueueKeyValuePairIntFloat.cs" />
+    <Compile Include="FastPriorityQueueKeyValuePairIntFloat_Patch.cs" />
     <Compile Include="GrammarResolverSimpleStringExtensions.cs" />
+    <Compile Include="Pawn.cs" />
+    <Compile Include="PawnCapacityUtility.cs" />
+    <Compile Include="Pawn_HealthTracker.cs" />
     <Compile Include="Pawn_PathFollower_Transpile.cs" />
     <Compile Include="Pawn_JobTracker_DetermineNextJob_Transpile.cs" />
     <Compile Include="GenLabel_Transpile.cs" />
@@ -86,6 +93,7 @@
     <Compile Include="GenAdj.cs" />
     <Compile Include="MapPawns_Transpile.cs" />
     <Compile Include="RecipeWorkerCounter.cs" />
+    <Compile Include="Thing_Transpile.cs" />
     <Compile Include="UniqueIDsManager.cs" />
     <Compile Include="HediffSet.cs" />
     <Compile Include="GrammarResolver_Transpile.cs" />

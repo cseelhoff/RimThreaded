@@ -41,6 +41,47 @@ namespace RimThreaded
 		public static Type combatExtendedVerb_LaunchProjectileCE;
 		public static Type combatExtendedVerb_MeleeAttackCE;
 
+
+		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
+		{
+			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
+			loadLockObjectInstructions[0].labels = instructionsList[currentInstructionIndex].labels;
+			for (int i = 0; i < loadLockObjectInstructions.Count; i++)
+			{
+				codeInstructions.Add(loadLockObjectInstructions[i]);
+			}
+			instructionsList[currentInstructionIndex].labels = new List<Label>();
+			codeInstructions.Add(new CodeInstruction(OpCodes.Stloc, lockObject.LocalIndex));
+			codeInstructions.Add(new CodeInstruction(OpCodes.Ldc_I4_0));
+			codeInstructions.Add(new CodeInstruction(OpCodes.Stloc, lockTaken.LocalIndex));
+			CodeInstruction codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex);
+			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
+			codeInstructions.Add(codeInstruction);
+			codeInstructions.Add(new CodeInstruction(OpCodes.Ldloca_S, lockTaken.LocalIndex));
+			codeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter",
+				new Type[] { typeof(object), typeof(bool).MakeByRefType() })));
+			return codeInstructions;
+		}
+		public static List<CodeInstruction> ExitLock(ILGenerator iLGenerator, LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
+		{
+			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
+			Label endHandlerDestination = iLGenerator.DefineLabel();
+			codeInstructions.Add(new CodeInstruction(OpCodes.Leave_S, endHandlerDestination));
+			CodeInstruction codeInstruction = new CodeInstruction(OpCodes.Ldloc, lockTaken.LocalIndex);
+			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginFinallyBlock));
+			codeInstructions.Add(codeInstruction);
+			Label endFinallyDestination = iLGenerator.DefineLabel();
+			codeInstructions.Add(new CodeInstruction(OpCodes.Brfalse_S, endFinallyDestination));
+			codeInstructions.Add(new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex));
+			codeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Exit")));
+			codeInstruction = new CodeInstruction(OpCodes.Endfinally);
+			codeInstruction.labels.Add(endFinallyDestination);
+			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
+			codeInstructions.Add(codeInstruction);
+			instructionsList[currentInstructionIndex].labels.Add(endHandlerDestination);
+			return codeInstructions;
+		}
+
 		public static List<CodeInstruction> GetLockCodeInstructions(
 			ILGenerator iLGenerator, List<CodeInstruction> instructionsList, int currentInstructionIndex,
 			int searchInstructionsCount, List<CodeInstruction> loadLockObjectInstructions,
@@ -237,13 +278,19 @@ namespace RimThreaded
 			Prefix(original, patched, "RegisterInRegions");
 
 			//ListerThings
-			original = typeof(ListerThings);
+			//original = typeof(ListerThings);
 			//patched = typeof(ListerThings_Patch);
 			//Prefix(original, patched, "Remove");
 			//Prefix(original, patched, "Add");
-			patched = typeof(ListerThings_Transpile);
-			Transpile(original, patched, "Remove");
-			Transpile(original, patched, "Add");
+			//patched = typeof(ListerThings_Transpile);
+			//Transpile(original, patched, "Remove");
+			//Transpile(original, patched, "Add");
+
+			//Thing
+			original = typeof(Thing);
+			patched = typeof(Thing_Transpile);
+			Transpile(original, patched, "SpawnSetup");
+			Transpile(original, patched, "DeSpawn");
 
 			//JobMaker
 			original = typeof(JobMaker);
@@ -444,6 +491,7 @@ namespace RimThreaded
 			patched = typeof(PawnDiedOrDownedThoughtsUtility_Patch);
 			Prefix(original, patched, "RemoveLostThoughts");
 			Prefix(original, patched, "RemoveDiedThoughts");
+			Prefix(original, patched, "RemoveResuedRelativeThought");
 
 			//AttackTargetFinder
 			original = typeof(AttackTargetFinder);
@@ -624,13 +672,24 @@ namespace RimThreaded
 			Transpile(original, patched, "CanHitFromCellIgnoringRange");
 
 			//FastPriorityQueue<KeyValuePair<IntVec3, float>>
-			original = typeof(FastPriorityQueue<KeyValuePair<IntVec3, float>>);
-			patched = typeof(FastPriorityQueueKeyValuePairIntVec3Float_Patch);
-			Prefix(original, patched, "Push");
-			Prefix(original, patched, "Pop");
-			Prefix(original, patched, "Clear");
+			//original = typeof(FastPriorityQueue<KeyValuePair<IntVec3, float>>);
+			//patched = typeof(FastPriorityQueueKeyValuePairIntVec3Float_Patch);
+			//Prefix(original, patched, "Push");
+			//Prefix(original, patched, "Pop");
+			//Prefix(original, patched, "Clear");
 			//Prefix(original, patched, "SwapElements");
 			//Prefix(original, patched, "CompareElements");
+			//original = typeof(FastPriorityQueue<KeyValuePair<int, float>>);
+			//patched = typeof(FastPriorityQueueKeyValuePairIntFloat_Patch);
+			//Prefix(original, patched, "Push");
+			//Prefix(original, patched, "Pop");
+			//Prefix(original, patched, "Clear");
+
+			//Dijkstra
+			//original = typeof(Dijkstra<int>);
+			//patched = typeof(DijkstraInt);
+			//Prefix(original, patched, "Run", new Type[] { typeof(IEnumerable<int>), typeof(Func< int, IEnumerable<int> >),
+			  //typeof(Func<int, int, float>),typeof(List< KeyValuePair<int, float> >),typeof(Dictionary<int, int>) });
 
 			//MapPawns
 			original = typeof(MapPawns);
@@ -660,7 +719,8 @@ namespace RimThreaded
 			patched = typeof(Region_Patch);
 			Prefix(original, patched, "DangerFor");
 			Prefix(original, patched, "get_AnyCell");
-
+			Prefix(original, patched, "OverlapWith");
+			
 			//Pawn_WorkSettings
 			original = typeof(Pawn_WorkSettings);
 			//patched = typeof(Pawn_WorkSettings_Patch);
@@ -800,14 +860,15 @@ namespace RimThreaded
 
 			//HediffSet
 			patched = typeof(HediffSet_Transpile);
-			//original = AccessTools.TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
-			//Transpile(original, patched, "MoveNext");
+			original = AccessTools.TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
+			Transpile(original, patched, "MoveNext");
 			original = typeof(HediffSet);
-			Transpile(original, patched, "PartIsMissing");
-			Transpile(original, patched, "HasDirectlyAddedPartFor");
+			//Transpile(original, patched, "PartIsMissing");
+			//Transpile(original, patched, "HasDirectlyAddedPartFor");
 			Transpile(original, patched, "AddDirect");
 			patched = typeof(HediffSet_Patch);
 			Prefix(original, patched, "CacheMissingPartsCommonAncestors");
+			Prefix(original, patched, "PartIsMissing");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -941,6 +1002,10 @@ namespace RimThreaded
 			patched = typeof(GrammarResolver_Transpile);
 			Transpile(original, patched, "AddRule");
 			Transpile(original, patched, "RandomPossiblyResolvableEntry");
+			original = AccessTools.TypeByName("Verse.Grammar.GrammarResolver+<>c__DisplayClass17_0");
+			MethodInfo oMethod = AccessTools.Method(original, "<RandomPossiblyResolvableEntry>b__0");
+			MethodInfo pMethod = AccessTools.Method(patched, "RandomPossiblyResolvableEntryb__0");
+			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 
 			//JobQueue
 			original = typeof(JobQueue);
@@ -967,7 +1032,7 @@ namespace RimThreaded
 			original = typeof(TimeControls);
 			patched = typeof(TimeControls_Patch);
 			Prefix(original, patched, "DoTimeControlsGUI");
-
+			
 			//PathGrid
 			original = typeof(PathGrid);
 			patched = typeof(PathGrid_Patch);
@@ -982,11 +1047,19 @@ namespace RimThreaded
 			original = typeof(InfestationCellFinder);
 			patched = typeof(InfestationCellFinder_Patch);
 			Prefix(original, patched, "CalculateDistanceToColonyBuildingGrid");
+			Prefix(original, patched, "GetScoreAt");
 
 			//RegionCostCalculator
 			original = typeof(RegionCostCalculator);
 			patched = typeof(RegionCostCalculator_Patch);
 			Prefix(original, patched, "GetPreciseRegionLinkDistances");
+			//Prefix(original, patched, "GetRegionDistance");
+			//Prefix(original, patched, "Init");
+
+			//RegionCostCalculatorWrapper
+			original = typeof(RegionCostCalculatorWrapper);
+			patched = typeof(RegionCostCalculatorWrapper_Patch);
+			//Prefix(original, patched, "Init");
 
 			//EditWindow_Log
 			//original = typeof(EditWindow_Log);
@@ -1040,7 +1113,7 @@ namespace RimThreaded
 			//GenLabel
 			original = typeof(GenLabel);
 			patched = typeof(GenLabel_Transpile);
-			//Transpile(original, patched, "ThingLabel", new Type[] { typeof(BuildableDef), typeof(ThingDef), typeof(int) });
+			//Transpile(original, patched, "ThingLabel", new Type[] { typeof(BuildableDef), typeof(ThingDef), typeof(int) }); causes Threadlock... JobDriver.TryActuallyStartNextToil? ThingOwnerTryAddOrTransfer? ThingOwner.TryAdd? GrammarResolverSimple.Formatted? GrammarResolverSimpleStringExtentions_Patch.Formatted? 
 			//Transpile(original, patched, "ThingLabel", new Type[] { typeof(Thing), typeof(int), typeof(bool) });
 
 			//Pawn_PathFollower
@@ -1052,6 +1125,26 @@ namespace RimThreaded
 			original = typeof(CompSpawnSubplant);
 			patched = typeof(CompSpawnSubplant_Transpile);
 			Transpile(original, patched, "DoGrowSubplant");
+
+			//PawnCapacityUtility
+			original = typeof(PawnCapacityUtility);
+			patched = typeof(PawnCapacityUtility_Patch);
+			Prefix(original, patched, "CalculatePartEfficiency");
+
+			//ColoredText
+			original = typeof(ColoredText);
+			patched = typeof(ColoredText_Transpile);
+			Transpile(original, patched, "Resolve");
+
+			//Pawn_HealthTracker
+			original = typeof(Pawn_HealthTracker);
+			patched = typeof(Pawn_HealthTracker_Patch);
+			Prefix(original, patched, "SetDead");						
+
+			//Pawn
+			//original = typeof(Pawn);
+			//patched = typeof(Pawn_Patch);
+			//Prefix(original, patched, "Destroy"); causes strange crash to desktop without error log
 
 			//PERFORMANCE IMPROVEMENTS
 
@@ -1129,7 +1222,7 @@ namespace RimThreaded
 			original = typeof(WorldComponentUtility);
 			patched = typeof(WorldComponentUtility_Patch);
 			Prefix(original, patched, "WorldComponentTick");
-
+			
 			//TickManager			
 			original = typeof(TickManager);
 			patched = typeof(TickManager_Patch);
@@ -1139,6 +1232,7 @@ namespace RimThreaded
 			original = typeof(Map);
 			patched = typeof(Map_Patch);
 			//Prefix(original, patched, "MapUpdate");
+			Prefix(original, patched, "get_IsPlayerHome");
 			patched = typeof(Map_Transpile);
 			Transpile(original, patched, "MapUpdate");
 
@@ -1156,6 +1250,7 @@ namespace RimThreaded
 			original = typeof(JobDriver);
 			patched = typeof(JobDriver_Patch);
 			Prefix(original, patched, "TryActuallyStartNextToil");
+			Prefix(original, patched, "DriverTick");
 
 			//TemperatureCache			
 			original = typeof(TemperatureCache);
@@ -1240,7 +1335,6 @@ namespace RimThreaded
 			patched = typeof(MeshMakerShadows_Patch);
 			Prefix(original, patched, "NewShadowMesh", new Type[] { typeof(float), typeof(float), typeof(float) });
 
-
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
 			giddyUpCoreJobsGUC_JobDefOf = AccessTools.TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
 			giddyUpCoreUtilitiesTextureUtility = AccessTools.TypeByName("GiddyUpCore.Utilities.TextureUtility");
@@ -1295,8 +1389,8 @@ namespace RimThreaded
 					{
 						Log.Message("RimThreaded is patching " + giddyUpCoreJobsJobDriver_Mounted.FullName + " " + methodName);
 						patched = typeof(JobDriver_Mounted_Transpile);
-						MethodInfo pMethod = patched.GetMethod("WaitForRider");
-						harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod));
+						MethodInfo pMethod2 = patched.GetMethod("WaitForRider");
+						harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod2));
 					}
 				}
 			}
@@ -1359,7 +1453,7 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
 				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
 			}
-
+			
 			Log.Message("RimThreaded patching is complete.");
 		}
 
