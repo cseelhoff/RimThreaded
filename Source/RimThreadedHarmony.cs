@@ -752,6 +752,8 @@ namespace RimThreaded
 			Prefix(original, patched, "RemoveRegion");
 			Prefix(original, patched, "Notify_RoofChanged");
 			Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
+			Prefix(original, patched, "get_ContainedAndAdjacentThings");
+			
 			patched = typeof(Room_Transpile);
 			//Transpile(original, patched, "RemoveRegion");
 
@@ -1139,12 +1141,17 @@ namespace RimThreaded
 			//Pawn_HealthTracker
 			original = typeof(Pawn_HealthTracker);
 			patched = typeof(Pawn_HealthTracker_Patch);
-			Prefix(original, patched, "SetDead");						
+			Prefix(original, patched, "SetDead");
 
 			//Pawn
 			//original = typeof(Pawn);
 			//patched = typeof(Pawn_Patch);
 			//Prefix(original, patched, "Destroy"); causes strange crash to desktop without error log
+
+			//Pawn_JobTracker_Patch
+			//original = typeof(Pawn_JobTracker);
+			//patched = typeof(Pawn_JobTracker_Patch);
+			//Prefix(original, patched, "StartJob"); conflict with giddyupcore calling MakeDriver
 
 			//PERFORMANCE IMPROVEMENTS
 

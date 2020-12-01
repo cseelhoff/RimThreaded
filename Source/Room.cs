@@ -19,8 +19,40 @@ namespace RimThreaded
 			AccessTools.FieldRefAccess<Room, bool>("statsAndRoleDirty");
 		public static AccessTools.FieldRef<Room, IEnumerator<IntVec3>> cachedOpenRoofState =
 			AccessTools.FieldRefAccess<Room, IEnumerator<IntVec3>>("cachedOpenRoofState");
+		public static AccessTools.FieldRef<Room, List<Region>> regions =
+			AccessTools.FieldRefAccess<Room, List<Region>>("regions");
 
 		public static object roomLock = new object();
+
+		public static bool get_ContainedAndAdjacentThings(Room __instance, ref List<Thing> __result)
+		{
+			HashSet<Thing> uniqueContainedThingsSet = new HashSet<Thing>();
+			List<Thing> uniqueContainedThings = new List<Thing>();
+			for (int i = 0; i < regions(__instance).Count; i++)
+			{
+				List<Thing> allThings = regions(__instance)[i].ListerThings.AllThings;
+				if (allThings == null)
+				{
+					continue;
+				}
+
+			for (int j = 0; j < allThings.Count; j++)
+				{
+					Thing item = allThings[j];
+					if (uniqueContainedThingsSet.Add(item))
+					{
+						uniqueContainedThings.Add(item);
+					}
+				}
+			}
+
+			__result = uniqueContainedThings;
+			return false;
+			
+		}
+
+
+
 		public static bool get_CellCount(Room __instance, ref int __result)
 		{
 			lock(__instance)

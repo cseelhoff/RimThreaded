@@ -52,8 +52,16 @@ namespace RimThreaded
             Job job = pawn.CurJob; //ADDED
             if (job != null) //CHANGED
             {
-                LocalTargetInfo target = job.GetTarget(pawn.jobs.curDriver.rotateToFace); //CHANGED
-                __instance.FaceTarget(target);
+                Pawn_JobTracker jobs = pawn.jobs;
+                if (jobs != null)
+                {
+                    JobDriver jobDriver = jobs.curDriver;
+                    if (jobDriver != null)
+                    {
+                        LocalTargetInfo target = job.GetTarget(jobDriver.rotateToFace); //CHANGED
+                        __instance.FaceTarget(target);
+                    }
+                }
             }
 
             if (pawn.Drafted)
