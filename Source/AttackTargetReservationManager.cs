@@ -141,18 +141,22 @@ namespace RimThreaded
 		}
 		public static bool ReleaseClaimedBy(AttackTargetReservationManager __instance, Pawn claimant, Job job)
 		{
-			for (int i = reservations(__instance).Count - 1; i >= 0; i--)
-			{
-				if (null != reservations(__instance)[i])
+			lock (reservations(__instance)) { 
+				for (int i = reservations(__instance).Count - 1; i >= 0; i--)
 				{
-					if (reservations(__instance)[i].claimant == claimant && reservations(__instance)[i].job == job)
+					AttackTargetReservation reservation;
+					
+					reservation = reservations(__instance)[i];
+					
+					if (reservation != null)
 					{
-						lock (reservations(__instance))
+						if (reservation.claimant == claimant && reservation.job == job)
 						{
-							reservations(__instance).RemoveAt(i);
+							{
+								reservations(__instance).RemoveAt(i);
+							}
 						}
 					}
-
 				}
 			}
 			return false;

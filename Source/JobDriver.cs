@@ -133,7 +133,10 @@ namespace RimThreaded
                 if (__instance.pawn.CurJob == __instance.job)
                 {
                     Toil curToil2 = toils(__instance)[curToilIndex(__instance)];
-                    curToil2.Cleanup(curToilIndex(__instance), __instance);
+                    if (curToil2 != null)
+                    {
+                        curToil2.Cleanup(curToilIndex(__instance), __instance);
+                    }
                 }
             }
             

@@ -35,6 +35,18 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.29  
+-Fixed bug in AttackTargetReservationManager.ReleaseClaimedBy  
+-Fixed bug in CompCauseGameCondition.CompTick  
+-Fixed bug in FoodUtility.FoodOptimality  
+-Fixed bug in HediffSet.HasDirectlyAddedPartFor  
+-Fixed bug in JobDriver.TryActuallyStartNextToil  
+-Fixed bug in JobGiver_OptimizeApparel.ApparelScoreGain  
+-Fixed bug in JobGiver_OptimizeApparel.ApparelScoreGain_NewTmp  
+-Fixed bug in PathGrid.CalculatedCostAt  
+-Fixed bug in PawnCapacitiesHandler.CapableOf  
+-Fixed bug in ReservationManager.CanReserve  
+
 Version 1.1.28  
 -Fixed bug in GenClosest.RegionwiseBFSWorker  
 -Fixed bug in JobDriver.DriverTick  

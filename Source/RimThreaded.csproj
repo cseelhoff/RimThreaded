@@ -76,6 +76,9 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="CompCauseGameCondition.cs" />
+    <Compile Include="JobGiver_OptimizeApparel.cs" />
+    <Compile Include="FoodUtility.cs" />
     <Compile Include="Pawn_JobTracker.cs" />
     <Compile Include="FastPriorityQueueRegionLinkQueueEntry.cs" />
     <Compile Include="RegionCostCalculatorWrapper.cs" />

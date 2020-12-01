@@ -72,6 +72,30 @@ namespace RimThreaded
             __result = false;
             return false;
         }
+        public static bool HasDirectlyAddedPartFor(HediffSet __instance, ref bool __result, BodyPartRecord part)
+        {
+            for (int i = 0; i < __instance.hediffs.Count; i++)
+            {
+                Hediff hediff;
+                try
+                {
+                    hediff = __instance.hediffs[i];
+                } catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+                if (hediff != null && hediff.Part == part && hediff is Hediff_AddedPart)
+                {
+                    __result = true;
+                    return false;
+                }
+            }
+            __result = false;
+            return false;
+        }
+
+
+
 
     }
 }
