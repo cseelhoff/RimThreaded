@@ -35,6 +35,12 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.28  
+-Fixed bug in GenClosest.RegionwiseBFSWorker  
+-Fixed bug in JobDriver.DriverTick  
+-Fixed bug in Pawn_RotationTracker.UpdateRotation  
+-Fixed bug in Room.get_ContainedAndAdjacentThings  
+
 Version 1.1.27  
 -Fixed bug in BeautyUtility.FillBeautyRelevantCells  
 -Fixed bug in Building_Door.get_DoorPowerOn  

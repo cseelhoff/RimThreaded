@@ -320,13 +320,13 @@ namespace RimThreaded
                         }
                     }
                 }
-
-                if (get_CurToil2(__instance).tickAction == null)
+                Toil gct = get_CurToil2(__instance);
+                if (gct.tickAction == null)
                 {
                     goto IL_01b8;
                 }
 
-                get_CurToil2(__instance).tickAction();
+                gct.tickAction();
                 if (!JobChanged())
                 {
                     goto IL_01b8;
