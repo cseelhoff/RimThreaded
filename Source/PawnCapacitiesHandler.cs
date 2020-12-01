@@ -52,15 +52,19 @@ namespace RimThreaded
             }
             return false;
         }
-        /*
+        
         public static bool CapableOf(PawnCapacitiesHandler __instance, ref bool __result, PawnCapacityDef capacity)
         {
             float levelResult = 0f;
-            GetLevel(__instance, ref levelResult, capacity);
-            __result = levelResult > capacity.minForCapable;
+            __result = false;
+            if (capacity != null)
+            {
+                GetLevel(__instance, ref levelResult, capacity);
+                __result = levelResult > capacity.minForCapable;
+            }
             return false;
         }
-        */
+        
         public static bool GetLevel(PawnCapacitiesHandler __instance, ref float __result, PawnCapacityDef capacity)
         {
             if (pawn(__instance).health.Dead)

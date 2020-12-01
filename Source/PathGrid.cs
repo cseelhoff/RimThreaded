@@ -60,7 +60,14 @@ namespace RimThreaded
             List<Thing> list = map(__instance).thingGrid.ThingsListAt(c);
             for (int i = 0; i < list.Count; i++)
             {
-                Thing thing = list[i];
+                Thing thing;
+                try
+                {
+                    thing = list[i];
+                } catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
                 if (thing != null)
                 {
                     if (thing.def.passability == Traversability.Impassable)
@@ -115,7 +122,13 @@ namespace RimThreaded
                     list = map(__instance).thingGrid.ThingsListAtFast(c2);
                     for (int k = 0; k < list.Count; k++)
                     {
-                        fire = (list[k] as Fire);
+                        try
+                        {
+                            fire = (list[k] as Fire);
+                        } catch (ArgumentOutOfRangeException)
+                        {
+                            break;
+                        }
                         if (fire != null)
                         {
                             break;

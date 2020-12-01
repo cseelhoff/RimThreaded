@@ -654,8 +654,9 @@ namespace RimThreaded
 			Prefix(original, patched, "FirstReservationFor");
 			Prefix(original, patched, "IsReservedByAnyoneOf");
 			Prefix(original, patched, "FirstRespectedReserver");
+			Prefix(original, patched, "CanReserve");
 			patched = typeof(ReservationManager_Transpile);
-			Transpile(original, patched, "CanReserve");
+			//Transpile(original, patched, "CanReserve");
 
 			//FloodFiller - inefficient global lock			
 			original = typeof(FloodFiller);
@@ -805,6 +806,7 @@ namespace RimThreaded
 			Prefix(original, patched, "GetLevel");
 			Prefix(original, patched, "Notify_CapacityLevelsDirty");
 			Prefix(original, patched, "Clear");
+			Prefix(original, patched, "CapableOf"); 
 			ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
 			MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
 			harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
@@ -871,6 +873,7 @@ namespace RimThreaded
 			patched = typeof(HediffSet_Patch);
 			Prefix(original, patched, "CacheMissingPartsCommonAncestors");
 			Prefix(original, patched, "PartIsMissing");
+			Prefix(original, patched, "HasDirectlyAddedPartFor");			
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -903,7 +906,9 @@ namespace RimThreaded
 			//FoodUtility
 			original = typeof(FoodUtility);
 			patched = typeof(FoodUtility_Transpile);
-			Transpile(original, patched, "FoodOptimality");
+			//Transpile(original, patched, "FoodOptimality");
+			patched = typeof(FoodUtility_Patch);
+			Prefix(original, patched, "FoodOptimality");
 
 			//TendUtility
 			original = typeof(TendUtility);
@@ -1153,6 +1158,12 @@ namespace RimThreaded
 			//patched = typeof(Pawn_JobTracker_Patch);
 			//Prefix(original, patched, "StartJob"); conflict with giddyupcore calling MakeDriver
 
+			//JobGiver_OptimizeApparel
+			original = typeof(JobGiver_OptimizeApparel);
+			patched = typeof(JobGiver_OptimizeApparel_Patch);
+			Prefix(original, patched, "ApparelScoreGain");
+			Prefix(original, patched, "ApparelScoreGain_NewTmp");
+
 			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
@@ -1288,6 +1299,11 @@ namespace RimThreaded
 			original = typeof(UniqueIDsManager);
 			patched = typeof(UniqueIDsManager_Patch);
 			Prefix(original, patched, "GetNextID");
+
+			//CompCauseGameCondition	
+			original = typeof(CompCauseGameCondition);
+			patched = typeof(CompCauseGameCondition_Patch);
+			Prefix(original, patched, "CompTick");
 
 			//MOD COMPATIBILITY
 

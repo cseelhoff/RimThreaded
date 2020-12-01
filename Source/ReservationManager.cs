@@ -367,5 +367,94 @@ namespace RimThreaded
 			__result = LocalTargetInfo.Invalid;
 			return false;
 		}
+		public static bool CanReserve(ReservationManager __instance, ref bool __result, Pawn claimant, LocalTargetInfo target, int maxPawns = 1, int stackCount = -1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
+		{
+			if (claimant == null)
+			{
+				Log.Error("CanReserve with null claimant");
+				return false;
+			}
+
+			if (!claimant.Spawned || claimant.Map != map(__instance))
+			{
+				return false;
+			}
+
+			if (!target.IsValid || target.ThingDestroyed)
+			{
+				return false;
+			}
+
+			if (target.HasThing && target.Thing.SpawnedOrAnyParentSpawned && target.Thing.MapHeld != map(__instance))
+			{
+				return false;
+			}
+
+			int num = (!target.HasThing) ? 1 : target.Thing.stackCount;
+			int num2 = (stackCount == -1) ? num : stackCount;
+			if (num2 > num)
+			{
+				return false;
+			}
+
+			if (!ignoreOtherReservations)
+			{
+				if (map(__instance).physicalInteractionReservationManager.IsReserved(target) && !map(__instance).physicalInteractionReservationManager.IsReservedBy(claimant, target))
+				{
+					return false;
+				}
+
+				for (int i = 0; i < reservations(__instance).Count; i++)
+				{
+					Reservation reservation;
+					try
+					{
+						reservation = reservations(__instance)[i];
+					} catch(ArgumentOutOfRangeException)
+                    {
+						break;
+                    }
+					if (reservation != null && reservation.Target == target && 
+						reservation.Layer == layer && reservation.Claimant == claimant && 
+						(reservation.StackCount == -1 || reservation.StackCount >= num2))
+					{
+						return true;
+					}
+				}
+
+				int num3 = 0;
+				int num4 = 0;
+				for (int j = 0; j < reservations(__instance).Count; j++)
+				{
+					Reservation reservation2;
+					try
+                    {
+						reservation2 = reservations(__instance)[j];
+					} catch(ArgumentOutOfRangeException)
+                    {
+						break;
+                    }
+					if (reservation2 != null && !(reservation2.Target != target) && reservation2.Layer == layer && reservation2.Claimant != claimant && RespectsReservationsOf(claimant, reservation2.Claimant))
+					{
+						if (reservation2.MaxPawns != maxPawns)
+						{
+							return false;
+						}
+
+						num3++;
+						num4 = ((reservation2.StackCount != -1) ? (num4 + reservation2.StackCount) : (num4 + num));
+						if (num3 >= maxPawns || num2 + num4 > num)
+						{
+							return false;
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+
+
+
 	}
 }
