@@ -42,21 +42,24 @@ namespace RimThreaded
             RegionTraverser.BreadthFirstTraverse(region, (RegionEntryPredicate)((from, reg) => reg.door == null || reg.door.Open), (RegionProcessor)(reg =>
             {
                 List<Thing> thingList2 = reg.ListerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
-                lock (thingList2)
+                for (int index = 0; index < thingList2.Count; ++index)
                 {
-                    for (int index = 0; index < thingList2.Count; ++index)
+                    Thing t;
+                    try
                     {
-                        Thing t = thingList2[index];
-                        if (null != t)
+                        t = thingList2[index];
+                    }
+                    catch (ArgumentOutOfRangeException) { break; }
+                    if (null != t)
+                    {
+                        if (SelfDefenseUtility.ShouldFleeFrom(t, pawn, true, true))
                         {
-                            if (SelfDefenseUtility.ShouldFleeFrom(t, pawn, true, true))
-                            {
-                                foundThreat = true;
-                                break;
-                            }
+                            foundThreat = true;
+                            break;
                         }
                     }
                 }
+
                 return foundThreat;
             }), 9, RegionType.Set_Passable);
             __result = foundThreat;

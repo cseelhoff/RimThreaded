@@ -16,12 +16,15 @@ namespace RimThreaded
 {
 
     public class GrammarResolver_Patch
-	{
+    {
         public static int loopCount = StaticFieldRefAccess<int>(typeof(GrammarResolver), "loopCount");
-        public static StringBuilder logSbTrace = StaticFieldRefAccess<StringBuilder>(typeof(GrammarResolver), "logSbTrace");
         public static Regex Spaces = StaticFieldRefAccess<Regex>(typeof(GrammarResolver), "Spaces");
-
+        public static StringBuilder logSbTrace = StaticFieldRefAccess<StringBuilder>(typeof(GrammarResolver), "logSbTrace");
+        public static StringBuilder logSbMid = StaticFieldRefAccess<StringBuilder>(typeof(GrammarResolver), "logSbMid");
+        public static StringBuilder logSbRules = StaticFieldRefAccess<StringBuilder>(typeof(GrammarResolver), "logSbRules");
         static Dictionary<string, List<RuleEntry>> rules = new Dictionary<string, List<RuleEntry>>();
+        static object resolveLock = new object();
+
         private static bool TryResolveRecursive(RuleEntry entry, int depth, Dictionary<string, string> constants, out string output, bool log, List<string> extraTags, List<string> resolvedTags)
         {
             string text = "";
@@ -255,14 +258,14 @@ namespace RimThreaded
         }
         public static bool ResolveUnsafe(ref string __result, string rootKeyword, GrammarRequest request, out bool success, string debugLabel = null, bool forceLog = false, bool useUntranslatedRules = false, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
         {
-            lock (logSbTrace)
+            string output;
+            lock (resolveLock)
             {
                 bool flag = forceLog || DebugViewSettings.logGrammarResolution;
+
                 rules.Clear();
+
                 //rulePool.Clear();
-                //StringBuilder logSbTrace = null;
-                StringBuilder logSbMid = null;
-                StringBuilder logSbRules = null;
                 if (flag)
                 {
                     logSbTrace = new StringBuilder();
@@ -387,7 +390,7 @@ namespace RimThreaded
                     logSbTrace.Append("GRAMMAR RESOLUTION TRACE");
                 }
 
-                string output = "err";
+                output = "err";
                 bool flag2 = false;
                 List<string> list5 = new List<string>();
                 if (TryResolveRecursive(new RuleEntry(new Rule_String("", "[" + rootKeyword + "]")), 0, constantsAllowNull, out output, flag, extraTags, list5))
@@ -447,10 +450,10 @@ namespace RimThreaded
                 }
 
                 success = !flag2;
-
-                __result = output;
-                return false;
             }
+            __result = output;
+            return false;
+
         }
         private static RuleEntry RandomPossiblyResolvableEntry(string keyword, Dictionary<string, string> constants, List<string> extraTags, List<string> resolvedTags)
         {
