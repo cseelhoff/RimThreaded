@@ -15,15 +15,17 @@ using System.Security.Policy;
 using System.Reflection.Emit;
 using System.Threading;
 using Verse.Grammar;
+using Verse.AI.Group;
 
 namespace RimThreaded
 {
 
 	[StaticConstructorOnStartup]
-	public class RimThreadedHarmony {
+	public class RimThreadedHarmony
+	{
 
 		public static BindingFlags bf = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-        public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
+		public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
 		public static Type giddyUpCoreUtilitiesTextureUtility;
 		public static Type giddyUpCoreStorageExtendedDataStorage;
 		public static Type giddyUpCoreStorageExtendedPawnData;
@@ -101,7 +103,7 @@ namespace RimThreaded
 			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
 			finalCodeInstructions.Add(codeInstruction);
 			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Ldloca_S, lockTaken.LocalIndex));
-			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter", 
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter",
 				new Type[] { typeof(object), typeof(bool).MakeByRefType() })));
 			for (int i = 0; i < searchInstructionsCount; i++)
 			{
@@ -200,7 +202,7 @@ namespace RimThreaded
 			}
 			return breakDestination;
 		}
-		public static List<CodeInstruction> UpdateTryCatchCodeInstructions(ILGenerator iLGenerator, 
+		public static List<CodeInstruction> UpdateTryCatchCodeInstructions(ILGenerator iLGenerator,
 			List<CodeInstruction> instructionsList, int currentInstructionIndex, int searchInstructionsCount)
 		{
 			Label breakDestination = GetBreakDestination(instructionsList, currentInstructionIndex, iLGenerator);
@@ -224,12 +226,13 @@ namespace RimThreaded
 			return finalCodeInstructions;
 		}
 
-		static RimThreadedHarmony() {
+		static RimThreadedHarmony()
+		{
 			Harmony.DEBUG = true;
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
-			
+
 			//ContentFinderTexture2D			
 			original = typeof(ContentFinder<Texture2D>);
 			patched = typeof(ContentFinder_Texture2D_Patch);
@@ -355,7 +358,7 @@ namespace RimThreaded
 			Prefix(original, patched, "MoteSpawned");
 			Prefix(original, patched, "MoteDespawned");
 			Prefix(original, patched, "MoteListUpdate");
-						
+
 			//RCellFinder			
 			original = typeof(RCellFinder);
 			patched = typeof(RCellFinder_Patch);
@@ -439,7 +442,7 @@ namespace RimThreaded
 			Prefix(original, patched, "TryFindRandomReachableCellNear");
 			Prefix(original, patched, "TryFindBestPawnStandCell");
 			Prefix(original, patched, "TryFindRandomCellNear");
-			
+
 			//ThingOwnerUtility
 			original = typeof(ThingOwnerUtility);
 			patched = typeof(ThingOwnerUtility_Patch);
@@ -484,6 +487,7 @@ namespace RimThreaded
 			patched = typeof(PawnsFinder_Patch);
 			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
 			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
 			Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
 
 			//PawnDiedOrDownedThoughtsUtility
@@ -556,7 +560,7 @@ namespace RimThreaded
 			Prefix(original, patched, "PlayOneShot");
 			Prefix(original, patched, "PlayOneShotOnCamera");
 			//Prefix(original, patched, "TrySpawnSustainer");
-			
+
 			//Pawn_RelationsTracker			
 			original = typeof(Pawn_RelationsTracker);
 			patched = typeof(Pawn_RelationsTracker_Patch);
@@ -655,6 +659,7 @@ namespace RimThreaded
 			Prefix(original, patched, "IsReservedByAnyoneOf");
 			Prefix(original, patched, "FirstRespectedReserver");
 			Prefix(original, patched, "CanReserve");
+			Prefix(original, patched, "CanReserveStack");
 			patched = typeof(ReservationManager_Transpile);
 			//Transpile(original, patched, "CanReserve");
 
@@ -690,7 +695,7 @@ namespace RimThreaded
 			//original = typeof(Dijkstra<int>);
 			//patched = typeof(DijkstraInt);
 			//Prefix(original, patched, "Run", new Type[] { typeof(IEnumerable<int>), typeof(Func< int, IEnumerable<int> >),
-			  //typeof(Func<int, int, float>),typeof(List< KeyValuePair<int, float> >),typeof(Dictionary<int, int>) });
+			//typeof(Func<int, int, float>),typeof(List< KeyValuePair<int, float> >),typeof(Dictionary<int, int>) });
 
 			//MapPawns
 			original = typeof(MapPawns);
@@ -721,7 +726,7 @@ namespace RimThreaded
 			Prefix(original, patched, "DangerFor");
 			Prefix(original, patched, "get_AnyCell");
 			Prefix(original, patched, "OverlapWith");
-			
+
 			//Pawn_WorkSettings
 			original = typeof(Pawn_WorkSettings);
 			//patched = typeof(Pawn_WorkSettings_Patch);
@@ -742,7 +747,7 @@ namespace RimThreaded
 			//ImmunityHandler
 			original = typeof(ImmunityHandler);
 			patched = typeof(ImmunityHandler_Patch);
-			Prefix(original, patched, "ImmunityHandlerTick"); 
+			Prefix(original, patched, "ImmunityHandlerTick");
 			Prefix(original, patched, "NeededImmunitiesNow");
 
 			//Room
@@ -754,7 +759,7 @@ namespace RimThreaded
 			Prefix(original, patched, "Notify_RoofChanged");
 			Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
 			Prefix(original, patched, "get_ContainedAndAdjacentThings");
-			
+
 			patched = typeof(Room_Transpile);
 			//Transpile(original, patched, "RemoveRegion");
 
@@ -806,11 +811,11 @@ namespace RimThreaded
 			Prefix(original, patched, "GetLevel");
 			Prefix(original, patched, "Notify_CapacityLevelsDirty");
 			Prefix(original, patched, "Clear");
-			Prefix(original, patched, "CapableOf"); 
+			Prefix(original, patched, "CapableOf");
 			ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
 			MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
 			harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
-			
+
 			//PathFinder
 			original = typeof(PathFinder);
 			patched = typeof(PathFinder_Transpile);
@@ -836,13 +841,13 @@ namespace RimThreaded
 			MethodInfo[] genCollectionMethods = original.GetMethods();
 			MethodInfo originalRemoveAll = null;
 			foreach (MethodInfo mi in genCollectionMethods)
-            {
-				if(mi.Name.Equals("RemoveAll") && mi.GetGenericArguments().Length == 2)
-                {
+			{
+				if (mi.Name.Equals("RemoveAll") && mi.GetGenericArguments().Length == 2)
+				{
 					originalRemoveAll = mi;
 					break;
 				}
-            }
+			}
 			//public static int RemoveAll<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, Predicate<KeyValuePair<TKey, TValue>> predicate)
 			//Type pType = typeof(Predicate<>).MakeGenericType(new Type[] { typeof(KeyValuePair<,>) });
 			//originalRemoveAll = AccessTools.Method(original, "RemoveAll", new Type[] { typeof(Dictionary<,>), pType });
@@ -861,6 +866,7 @@ namespace RimThreaded
 			patched = typeof(SoundSizeAggregator_Patch);
 			Prefix(original, patched, "RegisterReporter");
 			Prefix(original, patched, "RemoveReporter");
+			Prefix(original, patched, "get_AggregateSize");
 
 			//HediffSet
 			patched = typeof(HediffSet_Transpile);
@@ -873,7 +879,7 @@ namespace RimThreaded
 			patched = typeof(HediffSet_Patch);
 			Prefix(original, patched, "CacheMissingPartsCommonAncestors");
 			Prefix(original, patched, "PartIsMissing");
-			Prefix(original, patched, "HasDirectlyAddedPartFor");			
+			Prefix(original, patched, "HasDirectlyAddedPartFor");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -926,7 +932,7 @@ namespace RimThreaded
 			Prefix(original, patched, "FloodAndSetRoomGroups");
 			Prefix(original, patched, "CombineNewAndReusedRoomsIntoContiguousGroups");
 			Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
-			
+
 			//GenRadial
 			original = typeof(GenRadial);
 			patched = typeof(GenRadial_Transpile);
@@ -1006,6 +1012,8 @@ namespace RimThreaded
 
 			//GrammarResolver
 			original = typeof(GrammarResolver);
+			patched = typeof(GrammarResolver_Patch);
+			Prefix(original, patched, "ResolveUnsafe", new Type[] { typeof(string), typeof(GrammarRequest), typeof(bool).MakeByRefType(), typeof(string), typeof(bool), typeof(bool), typeof(List<string>), typeof(List<string>), typeof(bool) });
 			patched = typeof(GrammarResolver_Transpile);
 			Transpile(original, patched, "AddRule");
 			Transpile(original, patched, "RandomPossiblyResolvableEntry");
@@ -1039,7 +1047,7 @@ namespace RimThreaded
 			original = typeof(TimeControls);
 			patched = typeof(TimeControls_Patch);
 			Prefix(original, patched, "DoTimeControlsGUI");
-			
+
 			//PathGrid
 			original = typeof(PathGrid);
 			patched = typeof(PathGrid_Patch);
@@ -1092,7 +1100,7 @@ namespace RimThreaded
 			//WorldFloodFiller
 			original = typeof(WorldFloodFiller);
 			patched = typeof(WorldFloodFiller_Patch);
-			Prefix(original, patched, "FloodFill", new Type[] { typeof(int), typeof(Predicate<int>) , typeof(Func<int, int, bool>) , typeof(int) , typeof(IEnumerable<int>) });
+			Prefix(original, patched, "FloodFill", new Type[] { typeof(int), typeof(Predicate<int>), typeof(Func<int, int, bool>), typeof(int), typeof(IEnumerable<int>) });
 
 			//RecipeWorkerCounter
 			original = typeof(RecipeWorkerCounter);
@@ -1115,7 +1123,7 @@ namespace RimThreaded
 			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
 			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
 			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
-			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument[])});
+			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument[]) });
 
 			//GenLabel
 			original = typeof(GenLabel);
@@ -1149,9 +1157,9 @@ namespace RimThreaded
 			Prefix(original, patched, "SetDead");
 
 			//Pawn
-			//original = typeof(Pawn);
-			//patched = typeof(Pawn_Patch);
-			//Prefix(original, patched, "Destroy"); causes strange crash to desktop without error log
+			original = typeof(Pawn);
+			patched = typeof(Pawn_Patch);
+			Prefix(original, patched, "Destroy"); //causes strange crash to desktop without error log
 
 			//Pawn_JobTracker_Patch
 			//original = typeof(Pawn_JobTracker);
@@ -1163,8 +1171,6 @@ namespace RimThreaded
 			patched = typeof(JobGiver_OptimizeApparel_Patch);
 			Prefix(original, patched, "ApparelScoreGain");
 			Prefix(original, patched, "ApparelScoreGain_NewTmp");
-
-			//PERFORMANCE IMPROVEMENTS
 
 			//HediffGiver_Heat
 			original = typeof(HediffGiver_Heat);
@@ -1182,7 +1188,7 @@ namespace RimThreaded
 			original = typeof(Pawn_MindState);
 			patched = typeof(Pawn_MindState_Patch);
 			Prefix(original, patched, "MindStateTick");
-			
+
 			//WorldObjectsHolder
 			original = typeof(WorldObjectsHolder);
 			patched = typeof(WorldObjectsHolder_Patch);
@@ -1206,7 +1212,7 @@ namespace RimThreaded
 			//FactionManager
 			original = typeof(FactionManager);
 			patched = typeof(FactionManager_Patch);
-			Prefix(original, patched, "FactionManagerTick");			
+			Prefix(original, patched, "FactionManagerTick");
 
 			//WildPlantSpawner
 			original = typeof(WildPlantSpawner);
@@ -1217,7 +1223,7 @@ namespace RimThreaded
 			original = typeof(SeasonUtility);
 			patched = typeof(SeasonUtility_Patch);
 			Prefix(original, patched, "GetReportedSeason");
-			
+
 			//TradeShip
 			original = typeof(TradeShip);
 			patched = typeof(TradeShip_Patch);
@@ -1240,7 +1246,7 @@ namespace RimThreaded
 			original = typeof(WorldComponentUtility);
 			patched = typeof(WorldComponentUtility_Patch);
 			Prefix(original, patched, "WorldComponentTick");
-			
+
 			//TickManager			
 			original = typeof(TickManager);
 			patched = typeof(TickManager_Patch);
@@ -1263,7 +1269,7 @@ namespace RimThreaded
 			original = typeof(ThinkNode_QueuedJob);
 			patched = typeof(ThinkNode_QueuedJob_Patch);
 			Prefix(original, patched, "TryIssueJobPackage");
-			
+
 			//JobDriver			
 			original = typeof(JobDriver);
 			patched = typeof(JobDriver_Patch);
@@ -1305,8 +1311,6 @@ namespace RimThreaded
 			patched = typeof(CompCauseGameCondition_Patch);
 			Prefix(original, patched, "CompTick");
 
-			//MOD COMPATIBILITY
-
 			//MapGenerator (Z-levels)
 			original = typeof(MapGenerator);
 			patched = typeof(MapGenerator_Patch);
@@ -1317,12 +1321,12 @@ namespace RimThreaded
 			patched = typeof(RenderTexture_Patch);
 			//Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
 			Prefix(original, patched, "GetTemporaryImpl");
-			
+
 			//GetTemporary (CE)
 			//Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite), typeof(int) });
 			//Prefix(original, patched, "get_active");
 			//Prefix(original, patched, "set_active");
-			
+
 			//Graphics (Giddy-Up)
 			original = typeof(Graphics);
 			patched = typeof(Graphics_Patch);
@@ -1357,6 +1361,40 @@ namespace RimThreaded
 			original = typeof(MeshMakerShadows);
 			patched = typeof(MeshMakerShadows_Patch);
 			Prefix(original, patched, "NewShadowMesh", new Type[] { typeof(float), typeof(float), typeof(float) });
+			
+			//QuestUtility
+			original = typeof(QuestUtility);
+			patched = typeof(QuestUtility_Patch);
+			Prefix(original, patched, "GetExtraFaction");
+
+			//Job
+			original = typeof(Job);
+			patched = typeof(Job_Patch);
+			Prefix(original, patched, "MakeDriver");
+			Prefix(original, patched, "ToString", Type.EmptyTypes);
+
+			//RestUtility
+			original = typeof(RestUtility);
+			patched = typeof(RestUtility_Patch);
+			Prefix(original, patched, "GetBedSleepingSlotPosFor");
+
+			//Lord
+			original = typeof(Lord);
+			patched = typeof(Lord_Patch);
+			Prefix(original, patched, "AddPawn");
+			Prefix(original, patched, "RemovePawn");
+
+			//LordManager
+			original = typeof(LordManager);
+			patched = typeof(LordManager_Patch);
+			Prefix(original, patched, "LordOf", new Type[] { typeof(Pawn) });
+
+			//DamageWorker
+			original = typeof(DamageWorker);
+			patched = typeof(DamageWorker_Patch);
+			Prefix(original, patched, "ExplosionAffectCell");
+			
+			//MOD COMPATIBILITY
 
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
 			giddyUpCoreJobsGUC_JobDefOf = AccessTools.TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
@@ -1404,7 +1442,7 @@ namespace RimThreaded
 			}
 
 			if (giddyUpCoreJobsJobDriver_Mounted != null)
-            {
+			{
 				string methodName = "<waitForRider>b__8_0";
 				foreach (MethodInfo methodInfo in ((TypeInfo)giddyUpCoreJobsJobDriver_Mounted).DeclaredMethods)
 				{
@@ -1476,7 +1514,7 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
 				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
 			}
-			
+
 			Log.Message("RimThreaded patching is complete.");
 		}
 
@@ -1585,13 +1623,12 @@ namespace RimThreaded
 		{
 			MethodInfo oMethod = original.GetMethod(methodName, bf);
 			MethodInfo pMethod = patched.GetMethod(methodName);
-            HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod)
-            {
-                after = harmonyAfter
-            };
-            harmony.Patch(oMethod, transpiler: transpilerMethod);
+			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod)
+			{
+				after = harmonyAfter
+			};
+			harmony.Patch(oMethod, transpiler: transpilerMethod);
 		}
 	}
 
 }
-

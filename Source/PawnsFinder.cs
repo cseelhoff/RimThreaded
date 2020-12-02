@@ -11,8 +11,8 @@ using Verse.Sound;
 namespace RimThreaded
 {
 
-    public class PawnsFinder_Patch
-    {
+	public class PawnsFinder_Patch
+	{
 
 
 		public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result =
@@ -21,9 +21,10 @@ namespace RimThreaded
 			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_Result");
 		public static List<Pawn> allMapsWorldAndTemporary_Alive_Result =
 			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsWorldAndTemporary_Alive_Result");
-
+		public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result =
+			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result");
 		public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result =
-			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result");
+					AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result");
 
 		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive(ref List<Pawn> __result)
 		{
@@ -43,7 +44,7 @@ namespace RimThreaded
 			}
 			__result = allMapsCaravansAndTravelingTransportPods_Alive_Result;
 			return false;
-			
+
 		}
 		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists(ref List<Pawn> __result)
 		{
@@ -54,9 +55,9 @@ namespace RimThreaded
 			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive;
 			for (int i = 0; i < allMapsCaravansAndTravelingTransportPods_Alive.Count; i++)
 			{
-                Pawn mapsCaravansAndTravelingTransportPods_Alive;
+				Pawn mapsCaravansAndTravelingTransportPods_Alive;
 				try
-                {
+				{
 					mapsCaravansAndTravelingTransportPods_Alive = allMapsCaravansAndTravelingTransportPods_Alive[i];
 				}
 				catch (ArgumentOutOfRangeException) { break; }
@@ -106,6 +107,26 @@ namespace RimThreaded
 				allMapsWorldAndTemporary_Alive_Result.AddRange(PawnsFinder.Temporary_Alive);
 			}
 			__result = allMapsWorldAndTemporary_Alive_Result;
+			return false;
+		}
+		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners(ref List<Pawn> __result)
+		{
+			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists = null;
+			get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists(ref allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists);
+
+			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony;
+			if (allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony.Count == 0)
+			{
+				__result = allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists;
+				return false;
+			}
+			lock (allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result)
+			{
+				allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result.Clear();
+				allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result.AddRange(allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists);
+				allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result.AddRange(allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony);
+			}
+			__result = allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result;
 			return false;
 		}
 	}
