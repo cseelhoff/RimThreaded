@@ -13,22 +13,25 @@ namespace RimThreaded
         public static bool LordOf(LordManager __instance, ref Lord __result, Pawn p)
         {
             Lord lordResult = null;
-            if (!Lord_Patch.pawnsLord.TryGetValue(p, out lordResult))
+            if (p != null)
             {
-                for (int i = 0; i < __instance.lords.Count; i++)
+                if (!Lord_Patch.pawnsLord.TryGetValue(p, out lordResult))
                 {
-                    Lord lord = __instance.lords[i];
-                    for (int j = 0; j < lord.ownedPawns.Count; j++)
+                    for (int i = 0; i < __instance.lords.Count; i++)
                     {
-                        if (lord.ownedPawns[j] == p)
+                        Lord lord = __instance.lords[i];
+                        for (int j = 0; j < lord.ownedPawns.Count; j++)
                         {
-                            Lord_Patch.pawnsLord[p] = lord;
-                            __result = lord;
-                            return false;
+                            if (lord.ownedPawns[j] == p)
+                            {
+                                Lord_Patch.pawnsLord[p] = lord;
+                                __result = lord;
+                                return false;
+                            }
                         }
                     }
+                    Lord_Patch.pawnsLord[p] = null;
                 }
-                Lord_Patch.pawnsLord[p] = null;
             }
             __result = lordResult;
             return false;

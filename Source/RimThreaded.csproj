@@ -85,6 +85,7 @@
     <Compile Include="LordManager.cs" />
     <Compile Include="Pawn_JobTracker.cs" />
     <Compile Include="FastPriorityQueueRegionLinkQueueEntry.cs" />
+    <Compile Include="Pawn_PlayerSettings.cs" />
     <Compile Include="QuestUtility.cs" />
     <Compile Include="RegionCostCalculatorWrapper.cs" />
     <Compile Include="ColoredText_Transpile.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="MapPawns_Transpile.cs" />
     <Compile Include="RecipeWorkerCounter.cs" />
     <Compile Include="RestUtility.cs" />
+    <Compile Include="TaleManager.cs" />
     <Compile Include="Thing_Transpile.cs" />
     <Compile Include="UniqueIDsManager.cs" />
     <Compile Include="HediffSet.cs" />

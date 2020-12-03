@@ -55,6 +55,25 @@ namespace RimThreaded
             //{
             //item.playerSettings.Master = null;
             //}
+            //ClearMatchingMasters(__instance)
+            if (!Pawn_PlayerSettings_Patch.servants.TryGetValue(__instance, out List<Pawn> pawnList))
+            {
+                pawnList = Pawn_PlayerSettings_Patch.RebuildServants(__instance);
+            }
+            for (int i = 0; i < pawnList.Count; i++)
+            {
+                Pawn p;
+                try
+                {
+                    p = pawnList[i];
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+                p.playerSettings.Master = null;                
+            }
+            /*
             for (int i = 0; i < PawnsFinder.AllMapsWorldAndTemporary_Alive.Count; i++)
             {
                 Pawn p;
@@ -71,7 +90,7 @@ namespace RimThreaded
                     p.playerSettings.Master = null;
                 }
             }
-
+            */
             if (__instance.equipment != null)
             {
                 __instance.equipment.Notify_PawnDied();

@@ -41,49 +41,49 @@ namespace RimThreaded
             FieldRefAccess<RegionCostCalculatorWrapper, Region[]>("regionGrid");
         public static bool Init(RegionCostCalculatorWrapper __instance, CellRect end, TraverseParms traverseParms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, Area allowedArea, bool drafted, List<int> disallowedCorners)
         {
-            lock (__instance)
+            moveTicksCardinalField(__instance) = moveTicksCardinal;
+            moveTicksDiagonalField(__instance) = moveTicksDiagonal;
+            endCell(__instance) = end.CenterCell;
+            cachedRegion(__instance) = null;
+            cachedBestLink(__instance) = null;
+            cachedSecondBestLink(__instance) = null;
+            cachedBestLinkCost(__instance) = 0;
+            cachedSecondBestLinkCost(__instance) = 0;
+            cachedRegionIsDestination(__instance) = false;
+            Map map1 = map(__instance);
+            RegionGrid regionGrid1 = map1.regionGrid;
+            regionGrid(__instance) = regionGrid1.DirectGrid;
+            destRegions(__instance).Clear();
+            if (end.Width == 1 && end.Height == 1)
             {
-                moveTicksCardinalField(__instance) = moveTicksCardinal;
-                moveTicksDiagonalField(__instance) = moveTicksDiagonal;
-                endCell(__instance) = end.CenterCell;
-                cachedRegion(__instance) = null;
-                cachedBestLink(__instance) = null;
-                cachedSecondBestLink(__instance) = null;
-                cachedBestLinkCost(__instance) = 0;
-                cachedSecondBestLinkCost(__instance) = 0;
-                cachedRegionIsDestination(__instance) = false;
-                regionGrid(__instance) = map(__instance).regionGrid.DirectGrid;
-                destRegions(__instance).Clear();
-                if (end.Width == 1 && end.Height == 1)
+                Region region = endCell(__instance).GetRegion(map(__instance));
+                if (region != null)
                 {
-                    Region region = endCell(__instance).GetRegion(map(__instance));
-                    if (region != null)
-                    {
-                        destRegions(__instance).Add(region);
-                    }
+                    destRegions(__instance).Add(region);
                 }
-                else
+            }
+            else
+            {
+                foreach (IntVec3 item in end)
                 {
-                    foreach (IntVec3 item in end)
+                    if (item.InBounds(map(__instance)) && !disallowedCorners.Contains(map(__instance).cellIndices.CellToIndex(item)))
                     {
-                        if (item.InBounds(map(__instance)) && !disallowedCorners.Contains(map(__instance).cellIndices.CellToIndex(item)))
+                        Region region2 = item.GetRegion(map(__instance));
+                        if (region2 != null && region2.Allows(traverseParms, isDestination: true))
                         {
-                            Region region2 = item.GetRegion(map(__instance));
-                            if (region2 != null && region2.Allows(traverseParms, isDestination: true))
-                            {
-                                destRegions(__instance).Add(region2);
-                            }
+                            destRegions(__instance).Add(region2);
                         }
                     }
                 }
-
-                if (destRegions(__instance).Count == 0)
-                {
-                    Log.Error("Couldn't find any destination regions. This shouldn't ever happen because we've checked reachability.");
-                }
-
-                regionCostCalculator(__instance).Init(end, destRegions(__instance), traverseParms, moveTicksCardinal, moveTicksDiagonal, avoidGrid, allowedArea, drafted);
             }
+
+            if (destRegions(__instance).Count == 0)
+            {
+                Log.Error("Couldn't find any destination regions. This shouldn't ever happen because we've checked reachability.");
+            }
+
+            regionCostCalculator(__instance).Init(end, destRegions(__instance), traverseParms, moveTicksCardinal, moveTicksDiagonal, avoidGrid, allowedArea, drafted);
+            
             return false;
         }
         public static bool Init2(RegionCostCalculatorWrapper __instance, CellRect end, TraverseParms traverseParms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, Area allowedArea, bool drafted, List<int> disallowedCorners)

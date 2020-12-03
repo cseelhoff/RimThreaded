@@ -246,7 +246,7 @@ namespace RimThreaded
             }
             IntVec3 c = cell;
             int num3 = 0;
-            for (; c.IsValid && c != forPawn.Position; c = tmpParents[c])
+            while (c != null && c.IsValid && c != forPawn.Position)
             {
                 ++num3;
                 if (num3 >= 10000)
@@ -260,7 +260,12 @@ namespace RimThreaded
                     if (door == null || door.FreePassage)
                         cell = c;
                 }
+                if (!tmpParents.TryGetValue(c, out c))
+                {
+                    break;
+                }                
             }
+            
             __result = true;
             return false;
         label_23:

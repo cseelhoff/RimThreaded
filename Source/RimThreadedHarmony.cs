@@ -1393,6 +1393,17 @@ namespace RimThreaded
 			original = typeof(DamageWorker);
 			patched = typeof(DamageWorker_Patch);
 			Prefix(original, patched, "ExplosionAffectCell");
+
+			//TaleManager_Patch
+			original = typeof(TaleManager);
+			patched = typeof(TaleManager_Patch);
+			Prefix(original, patched, "CheckCullUnusedVolatileTales");
+
+			//Pawn_PlayerSettings
+			original = typeof(Pawn_PlayerSettings);
+			patched = typeof(Pawn_PlayerSettings_Patch);
+			Prefix(original, patched, "set_Master");
+
 			
 			//MOD COMPATIBILITY
 

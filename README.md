@@ -35,6 +35,28 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.30  
+-Fixed bug in BeautyUtility.FillBeautyRelevantCells  
+-Fixed bug in CellFinder.TryFindBestPawnStandCell
+-Fixed bug in DamageWorker.ExplosionAffectCell  
+-Fixed bug in GrammarResolver.ResolveUnsafe  
+-Fixed bug in Job.MakeDriver  
+-Fixed bug in Job.ToString  
+-Fixed bug in Pawn.Destroy  
+-Fixed bug in PawnRelationUtility.GetMostImportantColonyRelative  
+-Fixed bug in PawnsFinder.get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners  
+-Fixed bug in QuestUtility.GetExtraFaction  
+-Fixed bug in ReservationManager.CanReserveStack  
+-Fixed bug in ReservationManager.Reserve  
+-Fixed bug in RestUtility.GetBedSleepingSlotPosFor  
+-Fixed bug in SelfDefenseUtility.ShouldStartFleeing  
+-Fixed bug in SoundSizeAggregator.get_AggregateSize  
+-Fixed bug in TaleManager.CheckCullUnusedVolatileTales  
+-Improved performance for Pawn_PlayerSettings.set_Master  
+-Improved performance for Lord.AddPawn  
+-Improved performance for Lord.RemovePawn  
+-Improved performance for LordManager.LordOf  
+
 Version 1.1.29  
 -Fixed bug in AttackTargetReservationManager.ReleaseClaimedBy  
 -Fixed bug in CompCauseGameCondition.CompTick  

@@ -21,19 +21,31 @@ namespace RimThreaded
                 return false;
             }
 
-            IEnumerable<Pawn> enumerable = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners.Where((Pawn x) => x.relations.everSeenByPlayer);
             float num = 0f;
             Pawn pawn2 = null;
-            foreach (Pawn item in enumerable.ToList())
+            //IEnumerable<Pawn> enumerable = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners.Where((Pawn x) => x.relations.everSeenByPlayer);
+            List<Pawn> pawnList = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners;
+            for (int i = 0; i < pawnList.Count; i++)
             {
-                PawnRelationDef mostImportantRelation = pawn.GetMostImportantRelation(item);
-                if (mostImportantRelation != null && (pawn2 == null || mostImportantRelation.importance > num))
+                Pawn x;
+                try
                 {
-                    num = mostImportantRelation.importance;
-                    pawn2 = item;
+                    x = pawnList[i];
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+                if (x != null && x.relations.everSeenByPlayer)
+                {
+                    PawnRelationDef mostImportantRelation = pawn.GetMostImportantRelation(x);
+                    if (mostImportantRelation != null && (pawn2 == null || mostImportantRelation.importance > num))
+                    {
+                        num = mostImportantRelation.importance;
+                        pawn2 = x;
+                    }
                 }
             }
-
             __result = pawn2;
             return false;
         }
