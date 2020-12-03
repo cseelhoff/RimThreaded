@@ -26,6 +26,20 @@ namespace RimThreaded
             __result = false;
             return false;
         }
+
+        public static bool GetThingList(ref List<Thing> __result, IntVec3 c, Map map)
+        {
+            if (map != null && map.thingGrid != null)
+            {
+                __result = map.thingGrid.ThingsListAt(c);
+            } else
+            {
+                __result = new List<Thing>();
+            }
+            return false;
+        }
+
+
         public static bool GetTerrain(ref TerrainDef __result, IntVec3 c, Map map)
         {
             __result = null;

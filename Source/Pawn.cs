@@ -56,22 +56,25 @@ namespace RimThreaded
             //item.playerSettings.Master = null;
             //}
             //ClearMatchingMasters(__instance)
-            if (!Pawn_PlayerSettings_Patch.servants.TryGetValue(__instance, out List<Pawn> pawnList))
+            if (Pawn_PlayerSettings_Patch.petsInit == false)
             {
-                pawnList = Pawn_PlayerSettings_Patch.RebuildServants(__instance);
+                Pawn_PlayerSettings_Patch.RebuildPetsDictionary();
             }
-            for (int i = 0; i < pawnList.Count; i++)
+            if (Pawn_PlayerSettings_Patch.pets.TryGetValue(__instance, out List<Pawn> pawnList))
             {
-                Pawn p;
-                try
+                for (int i = 0; i < pawnList.Count; i++)
                 {
-                    p = pawnList[i];
+                    Pawn p;
+                    try
+                    {
+                        p = pawnList[i];
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        break;
+                    }
+                    p.playerSettings.Master = null;
                 }
-                catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
-                p.playerSettings.Master = null;                
             }
             /*
             for (int i = 0; i < PawnsFinder.AllMapsWorldAndTemporary_Alive.Count; i++)

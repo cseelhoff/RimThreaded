@@ -16,12 +16,13 @@ namespace RimThreaded
 
 		public static bool RemoveLostThoughts(Pawn pawn)
 		{
-			for(int p = 0; p < PawnsFinder.AllMapsWorldAndTemporary_Alive.Count; p++)
+            List<Pawn> pawnList = PawnsFinder.AllMapsWorldAndTemporary_Alive;
+			for (int p = 0; p < pawnList.Count; p++)
 			{
 				Pawn pawn2;
                 try
                 {
-					pawn2 = PawnsFinder.AllMapsWorldAndTemporary_Alive[p];
+					pawn2 = pawnList[p];
 				} catch (ArgumentOutOfRangeException)
                 {
 					break;
@@ -53,11 +54,20 @@ namespace RimThreaded
 		}
 		public static bool RemoveDiedThoughts(Pawn pawn)
 		{
-            Pawn[] pawnsAlive = PawnsFinder.AllMapsWorldAndTemporary_Alive.ToArray();
+            //Pawn[] pawnsAlive = PawnsFinder.AllMapsWorldAndTemporary_Alive.ToArray();
+			List<Pawn> pawnsAlive = PawnsFinder.AllMapsWorldAndTemporary_Alive;
 			//foreach (Pawn pawn2 in PawnsFinder.AllMapsWorldAndTemporary_Alive)
-			for (int a = 0; a < pawnsAlive.Length; a++)
+			for (int a = 0; a < pawnsAlive.Count; a++)
 			{
-				Pawn pawn2 = pawnsAlive[a];
+				Pawn pawn2;
+				try
+				{
+					pawn2 = pawnsAlive[a];
+				}
+				catch(ArgumentOutOfRangeException)
+                {
+					break;
+                }
 				if (null != pawn.needs)
 				{
 					if (pawn2.needs != null && pawn2.needs.mood != null && pawn2 != pawn)
@@ -83,12 +93,13 @@ namespace RimThreaded
 		}
 		public static bool RemoveResuedRelativeThought(Pawn pawn)
 		{
-			for(int i = 0; i < PawnsFinder.AllMapsWorldAndTemporary_Alive.Count; i++)
+            List<Pawn> pawnList = PawnsFinder.AllMapsWorldAndTemporary_Alive;
+			for (int i = 0; i < pawnList.Count; i++)
 			{
 				Pawn pawn2;
 				try
                 {
-					pawn2 = PawnsFinder.AllMapsWorldAndTemporary_Alive[i];
+					pawn2 = pawnList[i];
 				} catch (ArgumentOutOfRangeException)
 				{ break; }
 				if (pawn2 != null && pawn2.needs != null && pawn2.needs.mood != null && pawn2 != pawn)
