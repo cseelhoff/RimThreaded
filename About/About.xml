@@ -10,27 +10,15 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.30
-    -Fixed bug in BeautyUtility.FillBeautyRelevantCells
-    -Fixed bug in CellFinder.TryFindBestPawnStandCell
-    -Fixed bug in DamageWorker.ExplosionAffectCell
-    -Fixed bug in GrammarResolver.ResolveUnsafe
-    -Fixed bug in Job.MakeDriver
-    -Fixed bug in Job.ToString
+    Version 1.1.31
+    -Fixed bug in BodyPartDef.IsSolid
+    -Fixed bug in GridsUtility.GetThingList
     -Fixed bug in Pawn.Destroy
-    -Fixed bug in PawnRelationUtility.GetMostImportantColonyRelative
-    -Fixed bug in PawnsFinder.get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners
-    -Fixed bug in QuestUtility.GetExtraFaction
-    -Fixed bug in ReservationManager.CanReserveStack
-    -Fixed bug in ReservationManager.Reserve
-    -Fixed bug in RestUtility.GetBedSleepingSlotPosFor
-    -Fixed bug in SelfDefenseUtility.ShouldStartFleeing
-    -Fixed bug in SoundSizeAggregator.get_AggregateSize
-    -Fixed bug in TaleManager.CheckCullUnusedVolatileTales
-    -Improved performance for Pawn_PlayerSettings.set_Master
-    -Improved performance for Lord.AddPawn
-    -Improved performance for Lord.RemovePawn
-    -Improved performance for LordManager.LordOf
+    -Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveLostThoughts
+    -Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveDiedThoughts
+    -Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveResuedRelativeThought
+    -Fixed bug in Pawn_PlayerSettings.set_Master
+    -Fixed bug in SustainerAggregatorUtility.AggregateOrSpawnSustainerFor
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

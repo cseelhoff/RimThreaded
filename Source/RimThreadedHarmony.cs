@@ -646,8 +646,9 @@ namespace RimThreaded
 			patched = typeof(GridsUtility_Patch);
 			Prefix(original, patched, "GetTerrain");
 			Prefix(original, patched, "IsInPrisonCell");
+			Prefix(original, patched, "GetThingList");
 			patched = typeof(GridsUtility_Transpile);
-			Transpile(original, patched, "GetGas");
+			Transpile(original, patched, "GetGas");			
 
 			//ReservationManager
 			original = typeof(ReservationManager);
@@ -1404,7 +1405,12 @@ namespace RimThreaded
 			patched = typeof(Pawn_PlayerSettings_Patch);
 			Prefix(original, patched, "set_Master");
 
-			
+			//BodyPartDef
+			original = typeof(BodyPartDef);
+			patched = typeof(BodyPartDef_Patch);
+			Prefix(original, patched, "IsSolid");
+
+
 			//MOD COMPATIBILITY
 
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");

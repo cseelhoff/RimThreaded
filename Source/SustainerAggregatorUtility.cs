@@ -25,7 +25,7 @@ namespace RimThreaded
                 {
                     allSustainer = Find.SoundRoot.sustainerManager.AllSustainers[i];
                 } catch (ArgumentOutOfRangeException) { break; }
-                if (allSustainer.def == def && allSustainer.info.Maker.Map == info.Maker.Map && allSustainer.info.Maker.Cell.InHorDistOf(info.Maker.Cell, AggregateRadius))
+                if (allSustainer != null && allSustainer.def == def && allSustainer.info.Maker.Map == info.Maker.Map && allSustainer.info.Maker.Cell.InHorDistOf(info.Maker.Cell, AggregateRadius))
                 {
                     sustainer = allSustainer;
                     break;

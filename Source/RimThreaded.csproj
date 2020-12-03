@@ -76,6 +76,8 @@
   <ItemGroup>
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="BillUtility.cs" />
+    <Compile Include="BodyPartDef.cs" />
     <Compile Include="CompCauseGameCondition.cs" />
     <Compile Include="DamageWorker.cs" />
     <Compile Include="Job.cs" />

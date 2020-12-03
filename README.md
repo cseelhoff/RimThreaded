@@ -35,6 +35,16 @@ https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
 
+Version 1.1.31  
+-Fixed bug in BodyPartDef.IsSolid  
+-Fixed bug in GridsUtility.GetThingList  
+-Fixed bug in Pawn.Destroy  
+-Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveLostThoughts  
+-Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveDiedThoughts  
+-Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveResuedRelativeThought  
+-Fixed bug in Pawn_PlayerSettings.set_Master  
+-Fixed bug in SustainerAggregatorUtility.AggregateOrSpawnSustainerFor  
+
 Version 1.1.30  
 -Fixed bug in BeautyUtility.FillBeautyRelevantCells  
 -Fixed bug in CellFinder.TryFindBestPawnStandCell
