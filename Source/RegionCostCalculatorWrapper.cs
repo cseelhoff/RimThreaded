@@ -52,6 +52,11 @@ namespace RimThreaded
             cachedRegionIsDestination(__instance) = false;
             Map map1 = map(__instance);
             RegionGrid regionGrid1 = map1.regionGrid;
+            if (regionGrid1 == null)
+            {
+                Log.Error("regionGrid is null");
+                return false;
+            }
             regionGrid(__instance) = regionGrid1.DirectGrid;
             destRegions(__instance).Clear();
             if (end.Width == 1 && end.Height == 1)

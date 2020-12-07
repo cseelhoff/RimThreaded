@@ -10,15 +10,10 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.31
-    -Fixed bug in BodyPartDef.IsSolid
-    -Fixed bug in GridsUtility.GetThingList
-    -Fixed bug in Pawn.Destroy
-    -Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveLostThoughts
-    -Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveDiedThoughts
-    -Fixed bug in PawnDiedOrDownedThoughtsUtility.RemoveResuedRelativeThought
-    -Fixed bug in Pawn_PlayerSettings.set_Master
-    -Fixed bug in SustainerAggregatorUtility.AggregateOrSpawnSustainerFor
+    Version 1.1.32
+    -Improved performance for Reachability.CanReach
+    -Fixed bug in Projectile.CanHit
+    -Added Debug information to RegionCostCalculatorWrapper.Init
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

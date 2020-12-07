@@ -68,24 +68,22 @@ namespace RimThreaded
                 {
 					break;
                 }
-				if (null != pawn.needs)
+				if (pawn2 == null ||pawn2.needs == null || pawn2.needs.mood == null || pawn2 == pawn)
 				{
-					if (pawn2.needs != null && pawn2.needs.mood != null && pawn2 != pawn)
+					continue;
+				}
+				MemoryThoughtHandler memories = pawn2.needs.mood.thoughts.memories;
+				memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.KnowColonistDied, pawn);
+				memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.KnowPrisonerDiedInnocent, pawn);
+				memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.PawnWithGoodOpinionDied, pawn);
+				memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.PawnWithBadOpinionDied, pawn);
+				List<PawnRelationDef> allDefsListForReading = DefDatabase<PawnRelationDef>.AllDefsListForReading;
+				for (int i = 0; i < allDefsListForReading.Count; i++)
+				{
+					ThoughtDef genderSpecificDiedThought = allDefsListForReading[i].GetGenderSpecificDiedThought(pawn);
+					if (genderSpecificDiedThought != null)
 					{
-						MemoryThoughtHandler memories = pawn2.needs.mood.thoughts.memories;
-						memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.KnowColonistDied, pawn);
-						memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.KnowPrisonerDiedInnocent, pawn);
-						memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.PawnWithGoodOpinionDied, pawn);
-						memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.PawnWithBadOpinionDied, pawn);
-						List<PawnRelationDef> allDefsListForReading = DefDatabase<PawnRelationDef>.AllDefsListForReading;
-						for (int i = 0; i < allDefsListForReading.Count; i++)
-						{
-							ThoughtDef genderSpecificDiedThought = allDefsListForReading[i].GetGenderSpecificDiedThought(pawn);
-							if (genderSpecificDiedThought != null)
-							{
-								memories.RemoveMemoriesOfDefWhereOtherPawnIs(genderSpecificDiedThought, pawn);
-							}
-						}
+						memories.RemoveMemoriesOfDefWhereOtherPawnIs(genderSpecificDiedThought, pawn);
 					}
 				}
 			}

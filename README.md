@@ -6,34 +6,46 @@ https://discord.gg/3JJuWK8
 
 SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
 
-LOAD ORDER/MOD COMPATIBILITY:  
+JOIN OUR COMMUNITY ON DISCORD:
+https://discord.gg/3JJuWK8
+
+SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
+
+LOAD ORDER:
+Put RimThreaded last in load order.
+
+MOD COMPATIBILITY:
 https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!
 
-SUBMIT BUGS:  
+SUBMIT BUGS:
 https://github.com/cseelhoff/RimThreaded/issues/new/choose
 
-CREDITS:  
-Bug testing:  
-Special thank you for helping me test Austin (Stanui)!  
-And thank you to others in Rimworld community who have posted their bug findings!  
+CREDITS:
+Bug testing:
+Special thank you for helping me test Austin (Stanui)!
+And thank you to others in Rimworld community who have posted their bug findings!
 
-Coding:  
-Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!  
-Thank you bookdude 13 for your many bugfixes!  
-Thank you to Ataman for helping me fix the LVM deep storage bug  
+Coding:
+Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!
+Thank you bookdude 13 for your many bugfixes!
+Thank you to Ataman for helping me fix the LVM deep storage bug
 
-Logo:  
-Thank you ArchieV1 for the logo! https://github.com/ArchieV1  
+Logo:
+Thank you ArchieV1 for the logo! https://github.com/ArchieV1
 Logo help from: Marnador https://ludeon.com/forums/index.php?action=profile;u=36313 and JKimsey https://pixabay.com/users/jkimsey-253161/
 
 Video Review:
 Thank you BaRKy for reviewing my mod! I am honored! https://www.youtube.com/watch?v=EWudgTJksMU
 
 DONATE:
-Some subscribers insisted that I set up a donation page. For those looking, here it is:  
-https://ko-fi.com/rimthreaded
+Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
+
+Version 1.1.32  
+-Improved performance for Reachability.CanReach  
+-Fixed bug in Projectile.CanHit  
+-Added Debug information to RegionCostCalculatorWrapper.Init  
 
 Version 1.1.31  
 -Fixed bug in BodyPartDef.IsSolid  

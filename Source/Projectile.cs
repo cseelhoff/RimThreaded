@@ -104,7 +104,7 @@ namespace RimThreaded
 				//for (int i = 0; i < thingList.Count; i++)
 				foreach (Thing tlThing in enumThing) 
 				{
-					if (tlThing != thing && tlThing.def.Fillage == FillCategory.Full && tlThing.def.Altitude >= thing.def.Altitude)
+					if (tlThing != thing && tlThing.def != null && tlThing.def.Fillage == FillCategory.Full && tlThing.def.Altitude >= thing.def.Altitude)
 					{
 						flag2 = true;
 						break;
@@ -223,7 +223,14 @@ namespace RimThreaded
 			List<Thing> thingList = c.GetThingList(__instance.Map);
 			for (int index = 0; index < thingList.Count; ++index)
 			{
-				Thing thing = thingList[index];
+				Thing thing;
+				try
+				{
+					thing = thingList[index];
+				} catch(ArgumentOutOfRangeException)
+                {
+					break;
+                }
 				if (thing != null)
 				{
 					if (CanHit(__instance, thing))
