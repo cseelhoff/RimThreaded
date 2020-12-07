@@ -1462,7 +1462,7 @@ namespace RimThreaded
 			combatExtendedCE_Utility = AccessTools.TypeByName("CombatExtended.CE_Utility");
 			combatExtendedVerb_LaunchProjectileCE = AccessTools.TypeByName("CombatExtended.Verb_LaunchProjectileCE");
 			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
-			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("dubs_Skylights.patch_GetRoof");
+			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("dubs_Skylights.Patch_GetRoof");
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{
