@@ -42,7 +42,7 @@ namespace RimThreaded
 		public static Type combatExtendedCE_Utility;
 		public static Type combatExtendedVerb_LaunchProjectileCE;
 		public static Type combatExtendedVerb_MeleeAttackCE;
-		public static Type dubsSkylight_patch_GetRoof;
+		public static Type dubsSkylight_Patch_GetRoof;
 
 		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
 		{
@@ -1462,7 +1462,7 @@ namespace RimThreaded
 			combatExtendedCE_Utility = AccessTools.TypeByName("CombatExtended.CE_Utility");
 			combatExtendedVerb_LaunchProjectileCE = AccessTools.TypeByName("CombatExtended.Verb_LaunchProjectileCE");
 			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
-			dubsSkylight_patch_GetRoof = AccessTools.TypeByName("dubs_Skylights.patch_GetRoof");
+			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("dubs_Skylights.patch_GetRoof");
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{
@@ -1566,12 +1566,12 @@ namespace RimThreaded
 				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
 			}
 
-			if (dubsSkylight_patch_GetRoof != null)
+			if (dubsSkylight_Patch_GetRoof != null)
             {
 				string methodName = "Postfix";
 				patched = typeof(DubsSkylight_getPatch_Transpile);
 				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
-				Transpile(dubsSkylight_patch_GetRoof, patched, methodName);
+				Transpile(dubsSkylight_Patch_GetRoof, patched, methodName);
 			}
 
 			Log.Message("RimThreaded patching is complete.");
