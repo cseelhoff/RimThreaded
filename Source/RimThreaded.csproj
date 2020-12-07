@@ -78,6 +78,11 @@
     <Compile Include="AttackTargetFinder.cs" />
     <Compile Include="BillUtility.cs" />
     <Compile Include="BodyPartDef.cs" />
+    <Compile Include="AlertsReadout.cs" />
+    <Compile Include="Building_TurretGun.cs" />
+    <Compile Include="ListerBuildings.cs" />
+    <Compile Include="ReachabilityCache.cs" />
+    <Compile Include="WorkGiver_Grower.cs" />
     <Compile Include="CompCauseGameCondition.cs" />
     <Compile Include="DamageWorker.cs" />
     <Compile Include="Job.cs" />

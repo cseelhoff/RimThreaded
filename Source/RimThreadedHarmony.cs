@@ -615,7 +615,8 @@ namespace RimThreaded
 			original = typeof(GenGrid);
 			patched = typeof(GenGrid_Patch);
 			Prefix(original, patched, "InBounds", new Type[] { typeof(IntVec3), typeof(Map) });
-			Prefix(original, patched, "InBounds", new Type[] { typeof(Vector3), typeof(Map) });
+			Prefix(original, patched, "Standable");
+			Prefix(original, patched, "Walkable");
 
 			//Explosion
 			original = typeof(Explosion);
@@ -1075,7 +1076,7 @@ namespace RimThreaded
 			//RegionCostCalculatorWrapper
 			original = typeof(RegionCostCalculatorWrapper);
 			patched = typeof(RegionCostCalculatorWrapper_Patch);
-			//Prefix(original, patched, "Init");
+			Prefix(original, patched, "Init");
 
 			//EditWindow_Log
 			//original = typeof(EditWindow_Log);
@@ -1409,6 +1410,38 @@ namespace RimThreaded
 			original = typeof(BodyPartDef);
 			patched = typeof(BodyPartDef_Patch);
 			Prefix(original, patched, "IsSolid");
+
+			//AlertsReadout
+			original = typeof(AlertsReadout);
+			patched = typeof(AlertsReadout_Patch);
+			//Prefix(original, patched, "AlertsReadoutUpdate");
+
+			//WorkGiver_Grower
+			original = typeof(WorkGiver_Grower);
+			patched = typeof(WorkGiver_Grower_Patch);
+			//Prefix(original, patched, "PotentialWorkCellsGlobal");
+
+			//Building_TurretGun_Patch
+			original = typeof(Building_TurretGun);
+			patched = typeof(Building_TurretGun_Patch);
+			//Prefix(original, patched, "TryFindNewTarget");
+
+			//ListerBuildings
+			original = typeof(ListerBuildings);
+			patched = typeof(ListerBuildings_Patch);
+			//Prefix(original, patched, "Add");
+			//Prefix(original, patched, "Remove");
+
+			//ReachabilityCache_Patch
+			original = typeof(ReachabilityCache);
+			patched = typeof(ReachabilityCache_Patch);
+			Prefix(original, patched, "get_Count");
+			Prefix(original, patched, "CachedResultFor");
+			Prefix(original, patched, "AddCachedResult");
+			Prefix(original, patched, "Clear");
+			Prefix(original, patched, "ClearFor");
+			Prefix(original, patched, "ClearForHostile");
+
 
 
 			//MOD COMPATIBILITY

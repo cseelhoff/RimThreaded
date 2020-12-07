@@ -15,6 +15,8 @@ namespace RimThreaded
     {
         public static AccessTools.FieldRef<Reachability, Map> map =
             AccessTools.FieldRefAccess<Reachability, Map>("map");
+        public static AccessTools.FieldRef<Reachability, ReachabilityCache> cache =
+            AccessTools.FieldRefAccess<Reachability, ReachabilityCache>("cache");
         public static uint offsetReachedIndex = 1;
         private static readonly object reachedIndexLock = new object();
         public static bool CanReach(Reachability __instance, ref bool __result,
@@ -125,7 +127,7 @@ namespace RimThreaded
                     __result = false;
                     return false;
                 }
-                ReachabilityCache this_cache = new ReachabilityCache();
+                ReachabilityCache this_cache = cache(__instance);
                 if (this_startingRegions.Any<Region>() && this_destRegions.Any<Region>() && CanUseCache(traverseParams.mode))
                 {
 
@@ -262,7 +264,7 @@ namespace RimThreaded
                     __result = false;
                     return __result;
                 }
-                ReachabilityCache this_cache = new ReachabilityCache();
+                ReachabilityCache this_cache = cache(__instance);
                 if (this_startingRegions.Any<Region>() && this_destRegions.Any<Region>() && CanUseCache(traverseParams.mode))
                 {
 
@@ -328,7 +330,7 @@ namespace RimThreaded
                     for (int index2 = 0; index2 < 2; ++index2)
                     {
                         Region region2 = link.regions[index2];
-                        if (region2 != null && !regionsReached.Contains(region2) && (region2.type.Passable() && region2.Allows(traverseParams, false)))
+                        if (region2 != null && !regionsReached.Contains(region2) && region2.type.Passable() && region2.Allows(traverseParams, false))
                         {
                             if (this_destRegions.Contains(region2))
                             {
