@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /Assemblies/0Harmony.xml
 /Assemblies/UnityEngine.AssetBundleModule.dll
 /Assemblies/UnityEngine.TextRenderingModule.dll
+RimThreaded.csproj
