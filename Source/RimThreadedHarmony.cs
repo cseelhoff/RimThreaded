@@ -1570,7 +1570,7 @@ namespace RimThreaded
             {
 				string methodName = "Postfix";
 				patched = typeof(DubsSkylight_getPatch_Transpile);
-				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
+				Log.Message("RimThreaded is patching " + dubsSkylight_Patch_GetRoof.FullName + " " + methodName);
 				Transpile(dubsSkylight_Patch_GetRoof, patched, methodName);
 			}
 
