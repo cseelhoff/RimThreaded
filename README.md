@@ -43,7 +43,12 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 1.1.33
+Version 1.1.34  
+-Fixed bug in GUIStyle.CalcSize  
+-Fixed bug in DubsSkylight_getPatch.Postfix  
+-Fixed bug in JobsOfOpportunity.Hauling.CanHaul  
+
+Version 1.1.33  
 -Fixed bug in HediffSet.GetFirstHediffOfDef  
 -Fixed bug in HediffSet.HasTendableHediff  
 -Fixed bug in HediffSet.HasImmunizableNotImmuneHediff  

@@ -10,20 +10,10 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.33
-    -Fixed bug in HediffSet.GetFirstHediffOfDef
-    -Fixed bug in HediffSet.HasTendableHediff
-    -Fixed bug in HediffSet.HasImmunizableNotImmuneHediff
-    -Fixed bug in Pawn_HealthTracker.RemoveHediff
-    -Fixed bug in RecordWorker_TimeGettingJoy.ShouldMeasureTimeNow
-    -Fixed bug in Building_Trap.Tick
+    Version 1.1.34
+    -Fixed bug in GUIStyle.CalcSize
     -Fixed bug in DubsSkylight_getPatch.Postfix
-    -Fixed bug in ImmunityHandler.NeededImmunitiesNow
-    -Fixed bug in Lord.AddPawn
-    -Fixed bug in Lord.RemovePawn
-    -Fixed bug in LordManager.LordOf
-    -Fixed bug in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms
-    -Fixed bug in ReservationManager.Reserve
+    -Fixed bug in JobsOfOpportunity.Hauling.CanHaul
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

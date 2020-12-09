@@ -16,6 +16,7 @@ using System.Reflection.Emit;
 using System.Threading;
 using Verse.Grammar;
 using Verse.AI.Group;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -43,7 +44,8 @@ namespace RimThreaded
 		public static Type combatExtendedVerb_LaunchProjectileCE;
 		public static Type combatExtendedVerb_MeleeAttackCE;
 		public static Type dubsSkylight_Patch_GetRoof;
-
+		public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;
+		public static FieldInfo cachedStoreCell;
 		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
 		{
 			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
@@ -1475,7 +1477,8 @@ namespace RimThreaded
 			combatExtendedCE_Utility = AccessTools.TypeByName("CombatExtended.CE_Utility");
 			combatExtendedVerb_LaunchProjectileCE = AccessTools.TypeByName("CombatExtended.Verb_LaunchProjectileCE");
 			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
-			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("dubs_Skylights.Patch_GetRoof");
+			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("Dubs_Skylight.Patch_GetRoof");
+			jobsOfOpportunityJobsOfOpportunity_Hauling = AccessTools.TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{
@@ -1580,11 +1583,23 @@ namespace RimThreaded
 			}
 
 			if (dubsSkylight_Patch_GetRoof != null)
-            {
+			{
 				string methodName = "Postfix";
 				patched = typeof(DubsSkylight_getPatch_Transpile);
 				Log.Message("RimThreaded is patching " + dubsSkylight_Patch_GetRoof.FullName + " " + methodName);
 				Transpile(dubsSkylight_Patch_GetRoof, patched, methodName);
+			}
+
+			if (jobsOfOpportunityJobsOfOpportunity_Hauling != null)
+			{
+				cachedStoreCell = Field(jobsOfOpportunityJobsOfOpportunity_Hauling, "cachedStoreCell");
+				string methodName = "CanHaul";
+				patched = typeof(Hauling_Transpile);
+				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
+				Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
+				//methodName = "TryHaul";
+				//Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
+				//Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
 			}
 
 			Log.Message("RimThreaded patching is complete.");

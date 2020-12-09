@@ -35,7 +35,7 @@ namespace RimThreaded
             yield return new CodeInstruction(OpCodes.Brfalse_S, il_002b);
 
             //relt == true
-            yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(AccessTools.TypeByName("Dubs_SkyLight.Patch_GetRoof"), "relt"));
+            yield return new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(AccessTools.TypeByName("Dubs_Skylight.Patch_GetRoof"), "relt"));
             yield return new CodeInstruction(OpCodes.Brfalse_S, il_002b);
 
             //room.Role == IndoorGarden

@@ -82,6 +82,7 @@
     <Compile Include="Building_Trap.cs" />
     <Compile Include="Building_TurretGun.cs" />
     <Compile Include="DubsSkylight_getPatch_Transpile.cs" />
+    <Compile Include="Hauling.cs" />
     <Compile Include="ListerBuildings.cs" />
     <Compile Include="ReachabilityCache.cs" />
     <Compile Include="RecordWorker_TimeGettingJoy.cs" />

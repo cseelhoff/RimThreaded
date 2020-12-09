@@ -54,7 +54,7 @@ namespace RimThreaded
             RegionGrid regionGrid1 = map1.regionGrid;
             if (regionGrid1 == null)
             {
-                Log.Error("regionGrid is null");
+                Log.Error("regionGrid is null for map: " + map1.ToString() );
                 return false;
             }
             regionGrid(__instance) = regionGrid1.DirectGrid;
