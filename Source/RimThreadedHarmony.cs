@@ -882,6 +882,9 @@ namespace RimThreaded
 			Prefix(original, patched, "CacheMissingPartsCommonAncestors");
 			Prefix(original, patched, "PartIsMissing");
 			Prefix(original, patched, "HasDirectlyAddedPartFor");
+			Prefix(original, patched, "GetFirstHediffOfDef");
+			Prefix(original, patched, "HasTendableHediff");
+			Prefix(original, patched, "HasImmunizableNotImmuneHediff");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -1157,6 +1160,7 @@ namespace RimThreaded
 			original = typeof(Pawn_HealthTracker);
 			patched = typeof(Pawn_HealthTracker_Patch);
 			Prefix(original, patched, "SetDead");
+			Prefix(original, patched, "RemoveHediff");
 
 			//Pawn
 			original = typeof(Pawn);
@@ -1442,8 +1446,17 @@ namespace RimThreaded
 			Prefix(original, patched, "ClearFor");
 			Prefix(original, patched, "ClearForHostile");
 
+			//RecordWorker_TimeGettingJoy
+			original = typeof(RecordWorker_TimeGettingJoy);
+			patched = typeof(RecordWorker_TimeGettingJoy_Patch);
+			Prefix(original, patched, "ShouldMeasureTimeNow");
 
+			//Building_Trap
+			original = typeof(Building_Trap);
+			patched = typeof(Building_Trap_Patch);
+			Prefix(original, patched, "Tick");
 
+			
 			//MOD COMPATIBILITY
 
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");

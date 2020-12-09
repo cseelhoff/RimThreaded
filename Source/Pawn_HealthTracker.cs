@@ -29,6 +29,15 @@ namespace RimThreaded
             healthState(__instance) = PawnHealthState.Dead;
             return false;
         }
-
+        public static bool RemoveHediff(Pawn_HealthTracker __instance, Hediff hediff)
+        {
+            if (__instance.hediffSet != null && __instance.hediffSet.hediffs != null)
+            {
+                __instance.hediffSet.hediffs.Remove(hediff);
+                hediff.PostRemoved();
+                __instance.Notify_HediffChanged(null);
+            }
+            return false;
+        }
     }
 }

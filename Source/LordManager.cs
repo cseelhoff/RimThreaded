@@ -30,7 +30,17 @@ namespace RimThreaded
                             }
                         }
                     }
-                    Lord_Patch.pawnsLord[p] = null;
+                    try
+                    {
+                        lock (Lord_Patch.pawnsLord)
+                        {
+                            Lord_Patch.pawnsLord.SetOrAdd(p, null);
+                        }
+                    } catch (NullReferenceException)
+                    {
+
+                    }
+                    
                 }
             }
             __result = lordResult;

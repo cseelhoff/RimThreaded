@@ -17,6 +17,76 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<HediffSet, List<Hediff_MissingPart>>("cachedMissingPartsCommonAncestors");
         public static AccessTools.FieldRef<HediffSet, Queue<BodyPartRecord>> missingPartsCommonAncestorsQueue =
             AccessTools.FieldRefAccess<HediffSet, Queue<BodyPartRecord>>("missingPartsCommonAncestorsQueue");
+
+        public static bool HasImmunizableNotImmuneHediff(HediffSet __instance, ref bool __result)
+        {
+            __result = false;
+            if (__instance.hediffs != null)
+            {
+                for (int i = 0; i < __instance.hediffs.Count; i++)
+                {
+                    Hediff hediff = null;
+                    try
+                    {
+                        hediff = __instance.hediffs[i];
+                    }
+                    catch (ArgumentOutOfRangeException) { break; }
+                    if (hediff != null)
+                    {
+                        if (!(hediff is Hediff_Injury) && !(hediff is Hediff_MissingPart) && hediff.Visible && hediff.def != null && hediff.def.PossibleToDevelopImmunityNaturally() && !hediff.FullyImmune())
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+
+        public static bool HasTendableHediff(HediffSet __instance, ref bool __result, bool forAlert = false)
+        {
+            if (__instance.hediffs != null)
+            {
+                for (int i = 0; i < __instance.hediffs.Count; i++)
+                {
+                    Hediff hediff = null;
+                    try
+                    {
+                        hediff = __instance.hediffs[i];
+                    }
+                    catch (ArgumentOutOfRangeException) { break; }
+
+                    if (hediff != null)
+                    {
+                        if ((!forAlert || (hediff.def != null && hediff.def.makesAlert)) && hediff.TendableNow())
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+
+        public static bool GetFirstHediffOfDef(HediffSet __instance, ref Hediff __result, HediffDef def, bool mustBeVisible = false)
+        {
+            for (int i = 0; i < __instance.hediffs.Count; i++)
+            {
+                if (__instance.hediffs != null && __instance.hediffs[i] != null && __instance.hediffs[i].def == def && (!mustBeVisible || __instance.hediffs[i].Visible))
+                {
+                    __result = __instance.hediffs[i];
+                    return false;
+                }
+            }
+
+            return false;
+        }
         public static bool CacheMissingPartsCommonAncestors(HediffSet __instance)
         {
 
@@ -51,7 +121,10 @@ namespace RimThreaded
 
                         for (int i = 0; i < node.parts.Count; i++)
                         {
-                            missingPartsCommonAncestorsQueue(__instance).Enqueue(node.parts[i]);
+                            lock (missingPartsCommonAncestorsQueue(__instance))
+                            {
+                                missingPartsCommonAncestorsQueue(__instance).Enqueue(node.parts[i]);
+                            }
                         }
                     }
                 }

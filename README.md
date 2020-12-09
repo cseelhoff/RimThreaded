@@ -26,9 +26,10 @@ Special thank you for helping me test Austin (Stanui)!
 And thank you to others in Rimworld community who have posted their bug findings!
 
 Coding:
-Big thanks to Kiame Vivacity for all of his help! including fixing the sound issue that was driving me nuts!
-Thank you bookdude 13 for your many bugfixes!
-Thank you to Ataman for helping me fix the LVM deep storage bug
+Big thanks to JoJo for his continued help bug fixing and adding mod compatibility!
+Big thanks to Kiame Vivacity for his help with fixing sound!
+Thank you bookdude13 for your many bugfixes!
+Thank you to Ataman for helping me fix the LVM deep storage bug!
 
 Logo:
 Thank you ArchieV1 for the logo! https://github.com/ArchieV1
@@ -41,6 +42,21 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
+
+Version 1.1.33
+-Fixed bug in HediffSet.GetFirstHediffOfDef  
+-Fixed bug in HediffSet.HasTendableHediff  
+-Fixed bug in HediffSet.HasImmunizableNotImmuneHediff  
+-Fixed bug in Pawn_HealthTracker.RemoveHediff  
+-Fixed bug in RecordWorker_TimeGettingJoy.ShouldMeasureTimeNow  
+-Fixed bug in Building_Trap.Tick  
+-Fixed bug in DubsSkylight_getPatch.Postfix  
+-Fixed bug in ImmunityHandler.NeededImmunitiesNow  
+-Fixed bug in Lord.AddPawn  
+-Fixed bug in Lord.RemovePawn  
+-Fixed bug in LordManager.LordOf  
+-Fixed bug in RegionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms  
+-Fixed bug in ReservationManager.Reserve  
 
 Version 1.1.32  
 -Improved performance for Reachability.CanReach  

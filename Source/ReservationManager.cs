@@ -149,80 +149,72 @@ namespace RimThreaded
 		  bool errorOnFailed = true)
 		{
 			if (maxPawns > 1 && stackCount == -1)
+			{
 				Log.ErrorOnce("Reserving with maxPawns > 1 and stackCount = All; this will not have a useful effect (suppressing future warnings)", 83269, false);
+			}
+
 			if (job == null)
 			{
-				Log.Warning(claimant.ToStringSafe<Pawn>() + " tried to reserve thing " + target.ToStringSafe<LocalTargetInfo>() + " without a valid job", false);
+				Log.Warning(claimant.ToStringSafe() + " tried to reserve thing " + target.ToStringSafe() + " without a valid job");
 				__result = false;
 				return false;
 			}
-			int num1 = target.HasThing ? target.Thing.stackCount : 1;
+			int num1 = (!target.HasThing) ? 1 : target.Thing.stackCount;
 			int num2 = stackCount == -1 ? num1 : stackCount;
-			ReservationManager.Reservation reservation1;
-			for (int index = 0; index < reservations(__instance).Count; ++index)
-			{
-				try
-				{
-					reservation1 = reservations(__instance)[index];
-				} catch (ArgumentOutOfRangeException) { break; }
-				if(null == reservation1)
-                {
-					continue;
-                }
-				//if (reservation.Target == target && reservation.Claimant == claimant && (reservation.Job == job && reservation.Layer == layer) && (reservation.StackCount == -1 || reservation.StackCount >= num2))
-				bool test1 = reservation1.Target == target;
-				bool test2 = reservation1.Claimant == claimant;
-				bool test3 = reservation1.Job == job && reservation1.Layer == layer;
-				bool test4 = reservation1.StackCount == -1 || reservation1.StackCount >= num2;
-				if (test1 && test2 && test3 && test4) 
-				{
-					__result = true;
-					return false;
-				}
-			}
-			if (!target.IsValid || target.ThingDestroyed)
-			{
-				__result = false;
-				return false;
-			}
-			bool canReserveResult = __instance.CanReserve(claimant, target, maxPawns, stackCount, layer);
-			if (!canReserveResult)
-			{
-				bool canReserveResult2 =
-					__instance.CanReserve(claimant, target, maxPawns, stackCount, layer, true);
-				if (job != null && job.playerForced && canReserveResult2)
-				{
-					lock (reservations(__instance))
-					{
-						reservations(__instance).Add(new ReservationManager.Reservation(claimant, job, maxPawns, stackCount, target, layer));
-					}
-					//foreach (ReservationManager.Reservation reservation in reservations(__instance).ToList<ReservationManager.Reservation>())
-					ReservationManager.Reservation reservation2;
-					for (int index = 0; index < reservations(__instance).Count; index++)
-					{
-						try
-                        {
-							reservation2 = reservations(__instance)[index];
-						} catch (ArgumentOutOfRangeException) { break; }
-						if (reservation2.Target == target && reservation2.Claimant != claimant && (reservation2.Layer == layer && RespectsReservationsOf(claimant, reservation2.Claimant)))
-							reservation2.Claimant.jobs.EndCurrentOrQueuedJob(reservation2.Job, JobCondition.InterruptForced, true);
-					}
-					__result = true;
-					return false;
-				}
-				//HACK - Probably because Reserve is no longer valid after CanReserve time delay with multiple threads.
-				if (errorOnFailed)
-				{
-					//LogCouldNotReserveError(__instance, claimant, job, target, maxPawns, stackCount, layer);
-					Log.Warning("ReservationManager.Reserve cannot reserve. This is likely because reservation is no longer valid after CanReserve was called due to time delay with multiple threads.");
-				}
-				__result = false;
-				return false;
-			}
 			lock (reservations(__instance))
 			{
+				for (int index = 0; index < reservations(__instance).Count; ++index)
+				{
+					Reservation reservation1;
+					try
+					{
+						reservation1 = reservations(__instance)[index];
+					} catch (ArgumentOutOfRangeException) { break; }
+					if (reservation1 != null && reservation1.Target == target && reservation1.Claimant == claimant && reservation1.Job == job && reservation1.Layer == layer && (reservation1.StackCount == -1 || reservation1.StackCount >= num2))
+					{
+						__result = true;
+						return false;
+					}
+				}
+				if (!target.IsValid || target.ThingDestroyed)
+				{
+					__result = false;
+					return false;
+				}
+				bool canReserveResult = __instance.CanReserve(claimant, target, maxPawns, stackCount, layer);
+				if (!canReserveResult)
+				{
+					//bool canReserveResult2 = __instance.CanReserve(claimant, target, maxPawns, stackCount, layer);
+					if (job != null && job.playerForced && __instance.CanReserve(claimant, target, maxPawns, stackCount, layer))
+					{
+						reservations(__instance).Add(new Reservation(claimant, job, maxPawns, stackCount, target, layer));					
+						//foreach (ReservationManager.Reservation reservation in reservations(__instance).ToList<ReservationManager.Reservation>())
+						Reservation reservation2;
+						for (int index = 0; index < reservations(__instance).Count; index++)
+						{
+							try
+							{
+								reservation2 = reservations(__instance)[index];
+							}
+							catch (ArgumentOutOfRangeException) { break; }
+							if (reservation2.Target == target && reservation2.Claimant != claimant && (reservation2.Layer == layer && RespectsReservationsOf(claimant, reservation2.Claimant)))
+								reservation2.Claimant.jobs.EndCurrentOrQueuedJob(reservation2.Job, JobCondition.InterruptForced);
+						}
+						__result = true;
+						return false;
+					}
+				
+					//HACK - Probably because Reserve is no longer valid after CanReserve time delay with multiple threads.
+					if (errorOnFailed)
+					{
+						//LogCouldNotReserveError(__instance, claimant, job, target, maxPawns, stackCount, layer);
+						Log.Warning("ReservationManager.Reserve cannot reserve. This is likely because reservation is no longer valid after CanReserve was called due to time delay with multiple threads.");
+					}
+					__result = false;
+					return false;
+				}
 				reservations(__instance).Add(new ReservationManager.Reservation(claimant, job, maxPawns, stackCount, target, layer));
-            }
+			}
 			__result = true;
 			return false;
 		}

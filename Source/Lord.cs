@@ -31,7 +31,10 @@ namespace RimThreaded
                 {
                     __instance.ownedPawns.Add(p);
                 }
-                pawnsLord[p] = __instance;
+                lock (pawnsLord)
+                {
+                    pawnsLord[p] = __instance;
+                }
                 __instance.numPawnsEverGained++;
                 __instance.Map.attackTargetsCache.UpdateTarget(p);
                 curLordToil(__instance).UpdateAllDuties();
@@ -46,7 +49,10 @@ namespace RimThreaded
             {
                 __instance.ownedPawns.Remove(p);
             }
-            pawnsLord[p] = null;
+            lock (pawnsLord)
+            {
+                pawnsLord[p] = null;
+            }
             if (p.mindState != null)
             {
                 p.mindState.duty = null;

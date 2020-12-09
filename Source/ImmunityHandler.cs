@@ -39,7 +39,7 @@ namespace RimThreaded
             for (int i = 0; i < hediffs.Count; i++)
             {
                 Hediff hediff = hediffs[i];
-                if (hediff.def.PossibleToDevelopImmunityNaturally())
+                if (hediff != null && hediff.def != null && hediff.def.PossibleToDevelopImmunityNaturally())
                 {
                     //Changed to tmpNeededImmunitiesNow
                     tmpNeededImmunitiesNow.Add(new ImmunityInfo
