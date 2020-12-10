@@ -184,15 +184,17 @@ namespace RimThreaded
             List<CachedEntry2> tmpCachedEntries = getTmpCachedEntries();
             tmpCachedEntries.Clear();
             Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
-            foreach (KeyValuePair<CachedEntry2, bool> item in cacheDict)
+            lock (cacheDict)
             {
-                Pawn pawn = item.Key.TraverseParms.pawn;
-                if (pawn != null && pawn.HostileTo(hostileTo))
+                foreach (KeyValuePair<CachedEntry2, bool> item in cacheDict)
                 {
-                    tmpCachedEntries.Add(item.Key);
+                    Pawn pawn = item.Key.TraverseParms.pawn;
+                    if (pawn != null && pawn.HostileTo(hostileTo))
+                    {
+                        tmpCachedEntries.Add(item.Key);
+                    }
                 }
             }
-
             for (int i = 0; i < tmpCachedEntries.Count; i++)
             {
                 lock (cacheDict)

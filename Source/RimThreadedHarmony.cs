@@ -651,7 +651,7 @@ namespace RimThreaded
 			Prefix(original, patched, "IsInPrisonCell");
 			Prefix(original, patched, "GetThingList");
 			patched = typeof(GridsUtility_Transpile);
-			Transpile(original, patched, "GetGas");			
+			Transpile(original, patched, "GetGas");
 
 			//ReservationManager
 			original = typeof(ReservationManager);
@@ -962,7 +962,6 @@ namespace RimThreaded
 			patched = typeof(WorkGiver_DoBill_Transpile);
 			Transpile(original, patched, "TryFindBestBillIngredients");
 			Transpile(original, patched, "AddEveryMedicineToRelevantThings");
-			
 
 			//JobGiver_Work
 			original = typeof(JobGiver_Work);
@@ -1339,10 +1338,11 @@ namespace RimThreaded
 			//Prefix(original, patched, "get_active");
 			//Prefix(original, patched, "set_active");
 
-			//Graphics (Giddy-Up)
+			//Graphics (Giddy-Up and others)
 			original = typeof(Graphics);
 			patched = typeof(Graphics_Patch);
 			Prefix(original, patched, "Blit", new Type[] { typeof(Texture), typeof(RenderTexture) });
+			Prefix(original, patched, "DrawMesh", new Type[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(int) });
 
 			//Graphics (Giddy-Up)
 			original = typeof(Texture2D);
@@ -1373,7 +1373,7 @@ namespace RimThreaded
 			original = typeof(MeshMakerShadows);
 			patched = typeof(MeshMakerShadows_Patch);
 			Prefix(original, patched, "NewShadowMesh", new Type[] { typeof(float), typeof(float), typeof(float) });
-			
+
 			//QuestUtility
 			original = typeof(QuestUtility);
 			patched = typeof(QuestUtility_Patch);
@@ -1424,7 +1424,7 @@ namespace RimThreaded
 			//AlertsReadout
 			original = typeof(AlertsReadout);
 			patched = typeof(AlertsReadout_Patch);
-			//Prefix(original, patched, "AlertsReadoutUpdate");
+			Prefix(original, patched, "AlertsReadoutUpdate");
 
 			//WorkGiver_Grower
 			original = typeof(WorkGiver_Grower);
@@ -1460,9 +1460,9 @@ namespace RimThreaded
 			//Building_Trap
 			original = typeof(Building_Trap);
 			patched = typeof(Building_Trap_Patch);
-			Prefix(original, patched, "Tick");
-
-			
+			//Prefix(original, patched, "Tick");
+			patched = typeof(Building_Trap_Transpile);
+			Transpile(original, patched, "Tick");
 
 			//MOD COMPATIBILITY
 
@@ -1484,6 +1484,7 @@ namespace RimThreaded
 			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
 			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("Dubs_Skylight.Patch_GetRoof");
 			jobsOfOpportunityJobsOfOpportunity_Hauling = AccessTools.TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
+
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{

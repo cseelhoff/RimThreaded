@@ -52,11 +52,11 @@ namespace RimThreaded
             building.Tick();
             return false;
         }
-        private static void CheckSpring2(Building_Trap __instance, Pawn p)
+        public static void CheckSpring2(Building_Trap __instance, Pawn p)
         {
             if (Rand.Chance(SpringChance2(__instance, p)))
             {
-                Building building = __instance;
+                   Building building = __instance;
                 Map map = building.Map;
                 __instance.Spring(p);
                 if (p.Faction == Faction.OfPlayer || p.HostFaction == Faction.OfPlayer)
@@ -68,7 +68,7 @@ namespace RimThreaded
                 }
             }
         }
-        protected static float SpringChance2(Building_Trap __instance, Pawn p)
+        public static float SpringChance2(Building_Trap __instance, Pawn p)
         {
             float num = 1f;
             if (__instance.KnowsOfTrap(p))

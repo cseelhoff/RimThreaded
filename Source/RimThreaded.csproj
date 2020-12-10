@@ -80,6 +80,7 @@
     <Compile Include="BodyPartDef.cs" />
     <Compile Include="AlertsReadout.cs" />
     <Compile Include="Building_Trap.cs" />
+    <Compile Include="Building_Trap_Transpile.cs" />
     <Compile Include="Building_TurretGun.cs" />
     <Compile Include="DubsSkylight_getPatch_Transpile.cs" />
     <Compile Include="Hauling_Transpile.cs" />
