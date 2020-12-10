@@ -33,7 +33,7 @@ namespace RimThreaded
             int tID = Thread.CurrentThread.ManagedThreadId;
             if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
             {
-                Func<object[], object> safeFunction = p => __instance.CalcHeight((GUIContent)p[0], (float)p[1]);
+                Func<object[], object> safeFunction = p => __instance.CalcSize((GUIContent)p[0]);
                 object[] functionAndParameters = new object[] { safeFunction, new object[] { content } };
                 lock (RimThreaded.safeFunctionRequests)
                 {

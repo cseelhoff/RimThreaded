@@ -24,29 +24,19 @@ namespace RimThreaded
 		public static ILGenerator iLGenerator;
 		public static void Init()
 		{
-			aName = new AssemblyName("RimThreadedHarmonyOutput");
-			ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
-			modb = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
-			tb = modb.DefineType("PathFinder", TypeAttributes.Public);
-			methb = tb.DefineMethod("FindPath", MethodAttributes.Public, typeof(PawnPath), new Type[] { typeof(IntVec3), typeof(TraverseParms) });
-			//FieldBuilder fb1 = tb.DefineField("field1", typeof(int), FieldAttributes.Public);
-
-			iLGenerator = methb.GetILGenerator();
 			/*
-			foreach(LocalBuilder eVar in existingVariables)
-            {
-				_ = tb.DefineField(eVar.LocalIndex.ToString(), eVar.LocalType, FieldAttributes.Public);
-			}
+            AssemblyName assemblyName = new AssemblyName("RimWorld");
+            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+			ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, assemblyName.Name + ".dll");
+			TypeBuilder typeBuilder = moduleBuilder.DefineType("PathFinder", TypeAttributes.Public);
+			MethodBuilder methodBuilder = typeBuilder.DefineMethod("FindPath", MethodAttributes.Public, typeof(PawnPath), new Type[] { typeof(IntVec3), typeof(TraverseParms) });
+			FieldBuilder fieldBuilder = typeBuilder.DefineField("field1", typeof(int), FieldAttributes.Public);
+			iLGenerator = methodBuilder.GetILGenerator();
+			iLGenerator.Emit(OpCodes.Ldfld, fieldBuilder);
+			iLGenerator.Emit(OpCodes.Ret);
+			typeBuilder.CreateType();
+			assemblyBuilder.Save(aName.Name + ".dll");
 			*/
-			//foreach (CodeInstruction codeInstruction in codeInstructions)
-			//{
-			//iLGenerator.Emit(codeInstruction.opcode, codeInstruction.operand);
-			//}
-			//iLGenerator.Emit(OpCodes.Ldfld, fb1);
-			//iLGenerator.Emit(OpCodes.Ret);
-
-			//_ = tb.CreateType();
-			//ab.Save(aName.Name + ".dll");
 		}
 
     }

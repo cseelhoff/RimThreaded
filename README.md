@@ -43,7 +43,21 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 1.1.33
+Version 1.1.35  
+-Fixed bug in Graphics.DrawMesh  
+-Fixed bug in AlertsReadout.AlertsReadoutUpdate  
+-Fixed bug in ReachabilityCache.ClearForHostile  
+-Transpiled WorkGiver_DoBill.TryFindBestBillIngredients  
+-Transpiled WorkGiver_DoBill.AddEveryMedicineToRelevantThings  
+-Transpiled Building_Trap.Tick  
+-Transpiled JobsOfOpportunity.Hauling.CanHaul  
+
+Version 1.1.34  
+-Fixed bug in GUIStyle.CalcSize  
+-Fixed bug in DubsSkylight_getPatch.Postfix  
+-Fixed bug in JobsOfOpportunity.Hauling.CanHaul  
+
+Version 1.1.33  
 -Fixed bug in HediffSet.GetFirstHediffOfDef  
 -Fixed bug in HediffSet.HasTendableHediff  
 -Fixed bug in HediffSet.HasImmunizableNotImmuneHediff  

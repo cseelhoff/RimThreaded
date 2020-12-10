@@ -16,6 +16,7 @@ using System.Reflection.Emit;
 using System.Threading;
 using Verse.Grammar;
 using Verse.AI.Group;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -43,7 +44,8 @@ namespace RimThreaded
 		public static Type combatExtendedVerb_LaunchProjectileCE;
 		public static Type combatExtendedVerb_MeleeAttackCE;
 		public static Type dubsSkylight_Patch_GetRoof;
-
+		public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;
+		public static FieldInfo cachedStoreCell;
 		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
 		{
 			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
@@ -649,7 +651,7 @@ namespace RimThreaded
 			Prefix(original, patched, "IsInPrisonCell");
 			Prefix(original, patched, "GetThingList");
 			patched = typeof(GridsUtility_Transpile);
-			Transpile(original, patched, "GetGas");			
+			Transpile(original, patched, "GetGas");
 
 			//ReservationManager
 			original = typeof(ReservationManager);
@@ -919,7 +921,7 @@ namespace RimThreaded
 			patched = typeof(FoodUtility_Transpile);
 			//Transpile(original, patched, "FoodOptimality");
 			patched = typeof(FoodUtility_Patch);
-			Prefix(original, patched, "FoodOptimality");
+			//Prefix(original, patched, "FoodOptimality");
 
 			//TendUtility
 			original = typeof(TendUtility);
@@ -956,7 +958,10 @@ namespace RimThreaded
 			//WorkGiver_DoBill
 			original = typeof(WorkGiver_DoBill);
 			patched = typeof(WorkGiver_DoBill_Patch);
-			Prefix(original, patched, "TryFindBestBillIngredients");
+			//Prefix(original, patched, "TryFindBestBillIngredients");
+			patched = typeof(WorkGiver_DoBill_Transpile);
+			Transpile(original, patched, "TryFindBestBillIngredients");
+			Transpile(original, patched, "AddEveryMedicineToRelevantThings");
 
 			//JobGiver_Work
 			original = typeof(JobGiver_Work);
@@ -1333,10 +1338,11 @@ namespace RimThreaded
 			//Prefix(original, patched, "get_active");
 			//Prefix(original, patched, "set_active");
 
-			//Graphics (Giddy-Up)
+			//Graphics (Giddy-Up and others)
 			original = typeof(Graphics);
 			patched = typeof(Graphics_Patch);
 			Prefix(original, patched, "Blit", new Type[] { typeof(Texture), typeof(RenderTexture) });
+			Prefix(original, patched, "DrawMesh", new Type[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(int) });
 
 			//Graphics (Giddy-Up)
 			original = typeof(Texture2D);
@@ -1367,7 +1373,7 @@ namespace RimThreaded
 			original = typeof(MeshMakerShadows);
 			patched = typeof(MeshMakerShadows_Patch);
 			Prefix(original, patched, "NewShadowMesh", new Type[] { typeof(float), typeof(float), typeof(float) });
-			
+
 			//QuestUtility
 			original = typeof(QuestUtility);
 			patched = typeof(QuestUtility_Patch);
@@ -1418,7 +1424,7 @@ namespace RimThreaded
 			//AlertsReadout
 			original = typeof(AlertsReadout);
 			patched = typeof(AlertsReadout_Patch);
-			//Prefix(original, patched, "AlertsReadoutUpdate");
+			Prefix(original, patched, "AlertsReadoutUpdate");
 
 			//WorkGiver_Grower
 			original = typeof(WorkGiver_Grower);
@@ -1454,9 +1460,10 @@ namespace RimThreaded
 			//Building_Trap
 			original = typeof(Building_Trap);
 			patched = typeof(Building_Trap_Patch);
-			Prefix(original, patched, "Tick");
+			//Prefix(original, patched, "Tick");
+			patched = typeof(Building_Trap_Transpile);
+			Transpile(original, patched, "Tick");
 
-			
 			//MOD COMPATIBILITY
 
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
@@ -1475,7 +1482,9 @@ namespace RimThreaded
 			combatExtendedCE_Utility = AccessTools.TypeByName("CombatExtended.CE_Utility");
 			combatExtendedVerb_LaunchProjectileCE = AccessTools.TypeByName("CombatExtended.Verb_LaunchProjectileCE");
 			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
-			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("dubs_Skylights.Patch_GetRoof");
+			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("Dubs_Skylight.Patch_GetRoof");
+			jobsOfOpportunityJobsOfOpportunity_Hauling = AccessTools.TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
+
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{
@@ -1580,11 +1589,23 @@ namespace RimThreaded
 			}
 
 			if (dubsSkylight_Patch_GetRoof != null)
-            {
+			{
 				string methodName = "Postfix";
 				patched = typeof(DubsSkylight_getPatch_Transpile);
 				Log.Message("RimThreaded is patching " + dubsSkylight_Patch_GetRoof.FullName + " " + methodName);
 				Transpile(dubsSkylight_Patch_GetRoof, patched, methodName);
+			}
+
+			if (jobsOfOpportunityJobsOfOpportunity_Hauling != null)
+			{
+				cachedStoreCell = Field(jobsOfOpportunityJobsOfOpportunity_Hauling, "cachedStoreCell");
+				string methodName = "CanHaul";
+				patched = typeof(Hauling_Transpile);
+				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
+				Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
+				//methodName = "TryHaul";
+				//Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
+				//Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
 			}
 
 			Log.Message("RimThreaded patching is complete.");

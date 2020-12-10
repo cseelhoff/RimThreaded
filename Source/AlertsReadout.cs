@@ -43,7 +43,7 @@ namespace RimThreaded
 
             for (int i = curAlertIndex(__instance); i < AllAlerts(__instance).Count; i += 24)
             {
-                CheckAddOrRemoveAlert(__instance, AllAlerts(__instance)[i]);
+                CheckAddOrRemoveAlert2(__instance, AllAlerts(__instance)[i]);
             }
 
             if (Time.frameCount % 20 == 0)
@@ -65,7 +65,7 @@ namespace RimThreaded
                         {
                             bool flag = questsListForReading[j].State != QuestState.Ongoing || questPartActivable.State != QuestPartState.Enabled;
                             bool alertDirty = questPartActivable.AlertDirty;
-                            CheckAddOrRemoveAlert(__instance, cachedAlert, flag || alertDirty);
+                            CheckAddOrRemoveAlert2(__instance, cachedAlert, flag || alertDirty);
                             if (alertDirty)
                             {
                                 questPartActivable.ClearCachedAlert();
@@ -104,7 +104,7 @@ namespace RimThreaded
             mouseoverAlertIndex(__instance) = -1;
             return false;
         }
-        public static void CheckAddOrRemoveAlert(AlertsReadout __instance, Alert alert, bool forceRemove = false)
+        public static void CheckAddOrRemoveAlert2(AlertsReadout __instance, Alert alert, bool forceRemove = false)
         {
             try
             {
