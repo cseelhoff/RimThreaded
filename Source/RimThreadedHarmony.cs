@@ -921,7 +921,7 @@ namespace RimThreaded
 			patched = typeof(FoodUtility_Transpile);
 			//Transpile(original, patched, "FoodOptimality");
 			patched = typeof(FoodUtility_Patch);
-			Prefix(original, patched, "FoodOptimality");
+			//Prefix(original, patched, "FoodOptimality");
 
 			//TendUtility
 			original = typeof(TendUtility);
@@ -958,7 +958,11 @@ namespace RimThreaded
 			//WorkGiver_DoBill
 			original = typeof(WorkGiver_DoBill);
 			patched = typeof(WorkGiver_DoBill_Patch);
-			Prefix(original, patched, "TryFindBestBillIngredients");
+			//Prefix(original, patched, "TryFindBestBillIngredients");
+			patched = typeof(WorkGiver_DoBill_Transpile);
+			Transpile(original, patched, "TryFindBestBillIngredients");
+			Transpile(original, patched, "AddEveryMedicineToRelevantThings");
+			
 
 			//JobGiver_Work
 			original = typeof(JobGiver_Work);
@@ -1459,6 +1463,7 @@ namespace RimThreaded
 			Prefix(original, patched, "Tick");
 
 			
+
 			//MOD COMPATIBILITY
 
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");

@@ -11,12 +11,55 @@ using UnityEngine;
 
 namespace RimThreaded
 {
+    public class WorkGiver_DoBill_RegionProcessor
+    {
+		public List<Thing> newRelevantThings = new List<Thing>();
+		public List<IngredientCount> ingredientsOrdered = new List<IngredientCount>();
+		public List<Thing> relevantThings = new List<Thing>();
+		public HashSet<Thing> processedThings = new HashSet<Thing>();
+		public Bill bill;
+		public Pawn pawn;
+		public Predicate<Thing> baseValidator;
+		public bool billGiverIsPawn;
+		public int adjacentRegionsAvailable;
+		public IntVec3 rootCell;
+		public List<ThingCount> chosen;
+		public int regionsProcessed = 0;
+		public bool foundAll = false;
 
+        public WorkGiver_DoBill_RegionProcessor()
+        {
+        }
+
+        public bool Get_RegionProcessor(Region r)
+        {
+			List<Thing> thingList = r.ListerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.HaulableEver));
+			for (int index = 0; index < thingList.Count; ++index)
+			{
+				Thing thing = thingList[index];
+				if (!processedThings.Contains(thing) && ReachabilityWithinRegion.ThingFromRegionListerReachable(
+					thing, r, PathEndMode.ClosestTouch, pawn) && (baseValidator(thing) && !(thing.def.IsMedicine & billGiverIsPawn)))
+				{
+					newRelevantThings.Add(thing);
+					processedThings.Add(thing);
+				}
+			}
+			++regionsProcessed;
+			if (newRelevantThings.Count > 0 && regionsProcessed > adjacentRegionsAvailable)
+			{
+				relevantThings.AddRange(newRelevantThings);
+				newRelevantThings.Clear();
+				if (WorkGiver_DoBill_Patch.TryFindBestBillIngredientsInSet2(relevantThings, bill, chosen, rootCell, billGiverIsPawn, ingredientsOrdered))
+				{
+					foundAll = true;
+					return true;
+				}
+			}
+			return false;
+		}
+    }
     public class WorkGiver_DoBill_Patch
     {
-		public static AccessTools.FieldRef<AutoUndrafter, Pawn> pawn =
-			AccessTools.FieldRefAccess<AutoUndrafter, Pawn>("pawn");
-
 		public class DefCountList
 		{
 			private List<ThingDef> defs = new List<ThingDef>();
@@ -101,7 +144,7 @@ namespace RimThreaded
 				return billGiver.Position;
 			if (building.def.hasInteractionCell)
 				return building.InteractionCell;
-			Log.Error("Tried to find bill ingredients for " + (object)billGiver + " which has no interaction cell.", false);
+			Log.Error("Tried to find bill ingredients for " + billGiver + " which has no interaction cell.", false);
 			return forPawn.Position;
 		}
 		private static void MakeIngredientsListInProcessingOrder(
@@ -133,11 +176,11 @@ namespace RimThreaded
 			return billGiver is Pawn pawn && pawn.playerSettings != null ? pawn.playerSettings.medCare : MedicalCareCategory.Best;
 		}
 		private static void AddEveryMedicineToRelevantThings(
-	  Pawn pawn,
-	  Thing billGiver,
-	  List<Thing> relevantThings,
-	  Predicate<Thing> baseValidator,
-	  Map map)
+		  Pawn pawn,
+		  Thing billGiver,
+		  List<Thing> relevantThings,
+		  Predicate<Thing> baseValidator,
+		  Map map)
 		{
 			MedicalCareCategory medicalCareCategory = GetMedicalCareCategory(billGiver);
 			List<Thing> thingList = map.listerThings.ThingsInGroup(ThingRequestGroup.Medicine);
@@ -146,11 +189,11 @@ namespace RimThreaded
 			for (int index = 0; index < thingList.Count; ++index)
 			{
 				Thing thing = thingList[index];
-				if (medicalCareCategory.AllowsMedicine(thing.def) && baseValidator(thing) && pawn.CanReach((LocalTargetInfo)thing, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+				if (medicalCareCategory.AllowsMedicine(thing.def) && baseValidator(thing) && pawn.CanReach(thing, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
 					tmpMedicine.Add(thing);
 			}
-			tmpMedicine.SortBy<Thing, float, int>((Func<Thing, float>)(x => -x.GetStatValue(StatDefOf.MedicalPotency, true)), (Func<Thing, int>)(x => x.Position.DistanceToSquared(billGiver.Position)));
-			relevantThings.AddRange((IEnumerable<Thing>)tmpMedicine);
+			tmpMedicine.SortBy(x => -x.GetStatValue(StatDefOf.MedicalPotency, true), x => x.Position.DistanceToSquared(billGiver.Position));
+			relevantThings.AddRange(tmpMedicine);
 			//WorkGiver_DoBill.tmpMedicine.Clear();
 		}
 
@@ -160,9 +203,10 @@ namespace RimThreaded
 		  Thing billGiver,
 		  List<ThingCount> chosen)
 		{
+			WorkGiver_DoBill_RegionProcessor workGiver_DoBill_RegionProcessor = new WorkGiver_DoBill_RegionProcessor();
 			chosen.Clear();
 			//WorkGiver_DoBill.newRelevantThings.Clear();
-			List<Thing> newRelevantThings = new List<Thing>();
+			//workGiver_DoBill_RegionProcessor.newRelevantThings = new List<Thing>(); //ADD
 			if (bill.recipe.ingredients.Count == 0)
 			{
 				__result = true;
@@ -175,22 +219,24 @@ namespace RimThreaded
 				__result = false;
 				return false;
 			}
-			List<IngredientCount> ingredientsOrdered = new List<IngredientCount>();
-			MakeIngredientsListInProcessingOrder(ingredientsOrdered, bill);
+			//List<IngredientCount> ingredientsOrdered = new List<IngredientCount>(); //ADD
+			MakeIngredientsListInProcessingOrder(workGiver_DoBill_RegionProcessor.ingredientsOrdered, bill); //CHANGE
 			//WorkGiver_DoBill.relevantThings.Clear();
-			List<Thing> relevantThings = new List<Thing>();
+			//List<Thing> relevantThings = new List<Thing>();
 			//WorkGiver_DoBill.processedThings.Clear();
-			HashSet<Thing> processedThings = new HashSet<Thing>();
-			bool foundAll = false;
-			Predicate<Thing> baseValidator = (Predicate<Thing>)(t => t.Spawned && !t.IsForbidden(pawn) && ((double)(t.Position - billGiver.Position).LengthHorizontalSquared < (double)bill.ingredientSearchRadius * (double)bill.ingredientSearchRadius && bill.IsFixedOrAllowedIngredient(t) && bill.recipe.ingredients.Any<IngredientCount>((Predicate<IngredientCount>)(ingNeed => ingNeed.filter.Allows(t)))) && pawn.CanReserve((LocalTargetInfo)t, 1, -1, (ReservationLayerDef)null, false));
+			//HashSet<Thing> processedThings = new HashSet<Thing>();
+			Predicate<Thing> baseValidator = t => t.Spawned && !t.IsForbidden(pawn) && 
+			((t.Position - billGiver.Position).LengthHorizontalSquared < bill.ingredientSearchRadius * bill.ingredientSearchRadius && 
+			bill.IsFixedOrAllowedIngredient(t) && bill.recipe.ingredients.Any(
+				ingNeed => ingNeed.filter.Allows(t))) && pawn.CanReserve(t, 1, -1, null, false);
 			bool billGiverIsPawn = billGiver is Pawn;
 			if (billGiverIsPawn)
 			{
-				AddEveryMedicineToRelevantThings(pawn, billGiver, relevantThings, baseValidator, pawn.Map);
-				if (TryFindBestBillIngredientsInSet2(relevantThings, bill, chosen, rootCell, billGiverIsPawn, ingredientsOrdered))
+				AddEveryMedicineToRelevantThings(pawn, billGiver, workGiver_DoBill_RegionProcessor.relevantThings, baseValidator, pawn.Map); //CHANGE
+				if (TryFindBestBillIngredientsInSet2(workGiver_DoBill_RegionProcessor.relevantThings, bill, chosen, rootCell, billGiverIsPawn, workGiver_DoBill_RegionProcessor.ingredientsOrdered)) //CHANGE
 				{
-					relevantThings.Clear();
-					ingredientsOrdered.Clear();
+					workGiver_DoBill_RegionProcessor.relevantThings.Clear(); //CHANGE
+					workGiver_DoBill_RegionProcessor.ingredientsOrdered.Clear(); //CHANGE
 					{
 						__result = true;
 						return false;
@@ -198,67 +244,55 @@ namespace RimThreaded
 				}
 			}
 			TraverseParms traverseParams = TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false);
-			RegionEntryPredicate entryCondition = (RegionEntryPredicate)null;
-			if ((double)Math.Abs(999f - bill.ingredientSearchRadius) >= 1.0)
+			RegionEntryPredicate entryCondition = null;
+			if (Math.Abs(999f - bill.ingredientSearchRadius) >= 1.0)
 			{
 				float radiusSq = bill.ingredientSearchRadius * bill.ingredientSearchRadius;
-				entryCondition = (RegionEntryPredicate)((from, r) =>
+				entryCondition = ((from, r) =>
 				{
 					if (!r.Allows(traverseParams, false))
 						return false;
 					CellRect extentsClose = r.extentsClose;
 					int num1 = Math.Abs(billGiver.Position.x - Math.Max(extentsClose.minX, Math.Min(billGiver.Position.x, extentsClose.maxX)));
-					if ((double)num1 > (double)bill.ingredientSearchRadius)
+					if (num1 > bill.ingredientSearchRadius)
 						return false;
 					int num2 = Math.Abs(billGiver.Position.z - Math.Max(extentsClose.minZ, Math.Min(billGiver.Position.z, extentsClose.maxZ)));
-					return (double)num2 <= (double)bill.ingredientSearchRadius && (double)(num1 * num1 + num2 * num2) <= (double)radiusSq;
+					return num2 <= bill.ingredientSearchRadius && (num1 * num1 + num2 * num2) <= radiusSq;
 				});
 			}
 			else
-				entryCondition = (RegionEntryPredicate)((from, r) => r.Allows(traverseParams, false));
-			int adjacentRegionsAvailable = rootReg.Neighbors.Count<Region>((Func<Region, bool>)(region => entryCondition(rootReg, region)));
-			int regionsProcessed = 0;
-			processedThings.AddRange<Thing>(relevantThings);
-			RegionProcessor regionProcessor = (RegionProcessor)(r =>
-			{
-				List<Thing> thingList = r.ListerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.HaulableEver));
-				for (int index = 0; index < thingList.Count; ++index)
-				{
-					Thing thing = thingList[index];
-					if (!processedThings.Contains(thing) && ReachabilityWithinRegion.ThingFromRegionListerReachable(thing, r, PathEndMode.ClosestTouch, pawn) && (baseValidator(thing) && !(thing.def.IsMedicine & billGiverIsPawn)))
-					{
-						newRelevantThings.Add(thing);
-						processedThings.Add(thing);
-					}
-				}
-				++regionsProcessed;
-				if (newRelevantThings.Count > 0 && regionsProcessed > adjacentRegionsAvailable)
-				{
-					relevantThings.AddRange((IEnumerable<Thing>)newRelevantThings);
-					newRelevantThings.Clear();
-					if (TryFindBestBillIngredientsInSet2(relevantThings, bill, chosen, rootCell, billGiverIsPawn, ingredientsOrdered))
-					{
-						foundAll = true;
-						return true;
-					}
-				}
-				return false;
-			});
+				entryCondition = (from, r) => r.Allows(traverseParams, false);
+			int adjacentRegionsAvailable = rootReg.Neighbors.Count(region => entryCondition(rootReg, region));
+			//int regionsProcessed = 0;
+			workGiver_DoBill_RegionProcessor.processedThings.AddRange(workGiver_DoBill_RegionProcessor.relevantThings); //CHANGE x2
+			//processedThings, pawn, baseValidator, billGiverIsPawn, newRelevantThings, adjacentRegionsAvailable, relevantThings, bill, chosen, rootCell, ingredientsOrdered
+
+			workGiver_DoBill_RegionProcessor.pawn = pawn;
+			workGiver_DoBill_RegionProcessor.bill = bill;
+			workGiver_DoBill_RegionProcessor.baseValidator = baseValidator;
+			workGiver_DoBill_RegionProcessor.billGiverIsPawn = billGiverIsPawn;
+			workGiver_DoBill_RegionProcessor.adjacentRegionsAvailable = adjacentRegionsAvailable;
+			workGiver_DoBill_RegionProcessor.rootCell = rootCell;
+			workGiver_DoBill_RegionProcessor.chosen = chosen;
+
+			RegionProcessor regionProcessor = workGiver_DoBill_RegionProcessor.Get_RegionProcessor;
 			RegionTraverser.BreadthFirstTraverse(rootReg, entryCondition, regionProcessor, 99999, RegionType.Set_Passable);
 			//WorkGiver_DoBill.relevantThings.Clear();
 			//WorkGiver_DoBill.newRelevantThings.Clear();
 			//WorkGiver_DoBill.processedThings.Clear();
 			//WorkGiver_DoBill.ingredientsOrdered.Clear();
-			__result = foundAll;
+			__result = workGiver_DoBill_RegionProcessor.foundAll;
 			return false;
 		}
+
+
 		private static bool TryFindBestBillIngredientsInSet_AllowMix(
 	  List<Thing> availableThings,
 	  Bill bill,
 	  List<ThingCount> chosen)
 		{
 			chosen.Clear();
-			availableThings.Sort((Comparison<Thing>)((t, t2) => bill.recipe.IngredientValueGetter.ValuePerUnitOf(t2.def).CompareTo(bill.recipe.IngredientValueGetter.ValuePerUnitOf(t.def))));
+			availableThings.Sort((t, t2) => bill.recipe.IngredientValueGetter.ValuePerUnitOf(t2.def).CompareTo(bill.recipe.IngredientValueGetter.ValuePerUnitOf(t.def)));
 			for (int index1 = 0; index1 < bill.recipe.ingredients.Count; ++index1)
 			{
 				IngredientCount ingredient = bill.recipe.ingredients[index1];
@@ -271,18 +305,18 @@ namespace RimThreaded
 						float num = bill.recipe.IngredientValueGetter.ValuePerUnitOf(availableThing.def);
 						int countToAdd = Mathf.Min(Mathf.CeilToInt(baseCount / num), availableThing.stackCount);
 						ThingCountUtility.AddToList(chosen, availableThing, countToAdd);
-						baseCount -= (float)countToAdd * num;
-						if ((double)baseCount <= 9.99999974737875E-05)
+						baseCount -= countToAdd * num;
+						if (baseCount <= 9.99999974737875E-05)
 							break;
 					}
 				}
-				if ((double)baseCount > 9.99999974737875E-05)
+				if (baseCount > 9.99999974737875E-05)
 					return false;
 			}
 			return true;
 		}
 
-		private static bool TryFindBestBillIngredientsInSet2(
+		public static bool TryFindBestBillIngredientsInSet2(
 	  List<Thing> availableThings,
 	  Bill bill,
 	  List<ThingCount> chosen,
@@ -301,7 +335,7 @@ namespace RimThreaded
 		{
 			if (!alreadySorted)
 			{
-				Comparison<Thing> comparison = (Comparison<Thing>)((t1, t2) => ((float)(t1.Position - rootCell).LengthHorizontalSquared).CompareTo((float)(t2.Position - rootCell).LengthHorizontalSquared));
+				Comparison<Thing> comparison = (t1, t2) => ((float)(t1.Position - rootCell).LengthHorizontalSquared).CompareTo((t2.Position - rootCell).LengthHorizontalSquared);
 				availableThings.Sort(comparison);
 			}
 			RecipeDef recipe = bill.recipe;
@@ -315,8 +349,8 @@ namespace RimThreaded
 				bool flag = false;
 				for (int index2 = 0; index2 < availableCounts.Count; ++index2)
 				{
-					float f = (float)ingredient.CountRequiredOfFor(availableCounts.GetDef(index2), bill.recipe);
-					if ((recipe.ignoreIngredientCountTakeEntireStacks || (double)f <= (double)availableCounts.GetCount(index2)) && ingredient.filter.Allows(availableCounts.GetDef(index2)) && (ingredient.IsFixedIngredient || bill.ingredientFilter.Allows(availableCounts.GetDef(index2))))
+					float f = ingredient.CountRequiredOfFor(availableCounts.GetDef(index2), bill.recipe);
+					if ((recipe.ignoreIngredientCountTakeEntireStacks || f <= availableCounts.GetCount(index2)) && ingredient.filter.Allows(availableCounts.GetDef(index2)) && (ingredient.IsFixedIngredient || bill.ingredientFilter.Allows(availableCounts.GetDef(index2))))
 					{
 						for (int index3 = 0; index3 < availableThings.Count; ++index3)
 						{
@@ -332,11 +366,11 @@ namespace RimThreaded
 									}
 									int countToAdd = Mathf.Min(Mathf.FloorToInt(f), num);
 									ThingCountUtility.AddToList(chosen, availableThings[index3], countToAdd);
-									f -= (float)countToAdd;
-									if ((double)f < 1.0 / 1000.0)
+									f -= countToAdd;
+									if (f < 1.0 / 1000.0)
 									{
 										flag = true;
-										float val = availableCounts.GetCount(index2) - (float)ingredient.CountRequiredOfFor(availableCounts.GetDef(index2), bill.recipe);
+										float val = availableCounts.GetCount(index2) - ingredient.CountRequiredOfFor(availableCounts.GetDef(index2), bill.recipe);
 										availableCounts.SetCount(index2, val);
 										break;
 									}

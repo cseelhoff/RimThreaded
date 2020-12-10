@@ -54,7 +54,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
@@ -70,7 +70,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -82,11 +82,12 @@
     <Compile Include="Building_Trap.cs" />
     <Compile Include="Building_TurretGun.cs" />
     <Compile Include="DubsSkylight_getPatch_Transpile.cs" />
-    <Compile Include="Hauling.cs" />
+    <Compile Include="Hauling_Transpile.cs" />
     <Compile Include="ListerBuildings.cs" />
     <Compile Include="ReachabilityCache.cs" />
     <Compile Include="RecordWorker_TimeGettingJoy.cs" />
     <Compile Include="StatWorker.cs" />
+    <Compile Include="WorkGiver_DoBill_Transpile.cs" />
     <Compile Include="WorkGiver_Grower.cs" />
     <Compile Include="CompCauseGameCondition.cs" />
     <Compile Include="DamageWorker.cs" />
