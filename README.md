@@ -43,11 +43,14 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 1.1.35
--Fixed bug in Graphics.DrawMesh
--Fixed bug in AlertsReadout.AlertsReadoutUpdate
--Fixed bug in ReachabilityCache.ClearForHostile
--Transpiled Building_Trap.Tick
+Version 1.1.35  
+-Fixed bug in Graphics.DrawMesh  
+-Fixed bug in AlertsReadout.AlertsReadoutUpdate  
+-Fixed bug in ReachabilityCache.ClearForHostile  
+-Transpiled WorkGiver_DoBill.TryFindBestBillIngredients  
+-Transpiled WorkGiver_DoBill.AddEveryMedicineToRelevantThings  
+-Transpiled Building_Trap.Tick  
+-Transpiled JobsOfOpportunity.Hauling.CanHaul  
 
 Version 1.1.34  
 -Fixed bug in GUIStyle.CalcSize  
