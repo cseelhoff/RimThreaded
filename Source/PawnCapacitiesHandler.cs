@@ -15,10 +15,10 @@ namespace RimThreaded
     {
         public static AccessTools.FieldRef<PawnCapacitiesHandler, Pawn> pawn =
             AccessTools.FieldRefAccess<PawnCapacitiesHandler, Pawn>("pawn");
-        public static Dictionary<PawnCapacitiesHandler, DefMap<PawnCapacityDef, CacheElement>> cachedCapacityLevelsDict =
-            new Dictionary<PawnCapacitiesHandler, DefMap<PawnCapacityDef, CacheElement>>();
+        public static Dictionary<PawnCapacitiesHandler, DefMap<PawnCapacityDef, CacheElement2>> cachedCapacityLevelsDict =
+            new Dictionary<PawnCapacitiesHandler, DefMap<PawnCapacityDef, CacheElement2>>();
         
-            public class CacheElement        
+            public class CacheElement2        
         {
             public CacheStatus status;
 
@@ -32,7 +32,7 @@ namespace RimThreaded
         }
         public static void Postfix_Constructor(PawnCapacitiesHandler __instance, Pawn pawn)
         {
-            cachedCapacityLevelsDict[__instance] = new DefMap<PawnCapacityDef, CacheElement>();
+            cachedCapacityLevelsDict[__instance] = new DefMap<PawnCapacityDef, CacheElement2>();
         }
         public static bool Clear(PawnCapacitiesHandler __instance)
         {
@@ -43,7 +43,7 @@ namespace RimThreaded
         {
             if (cachedCapacityLevelsDict[__instance] == null)
             {
-                cachedCapacityLevelsDict[__instance] = new DefMap<PawnCapacityDef, CacheElement>();
+                cachedCapacityLevelsDict[__instance] = new DefMap<PawnCapacityDef, CacheElement2>();
             }
 
             for (int i = 0; i < cachedCapacityLevelsDict[__instance].Count; i++)
@@ -73,31 +73,25 @@ namespace RimThreaded
                 return false;
             }
             //if (cachedCapacityLevels == null) //REMOVED
-            DefMap<PawnCapacityDef, CacheElement> defMap = cachedCapacityLevelsDict[__instance];
-            if (defMap == null) //ADDED
-            {
-                defMap = new DefMap<PawnCapacityDef, CacheElement>();
-                cachedCapacityLevelsDict[__instance] = defMap;
-                for (int i = 0; i < defMap.Count; i++)
-                {
-                    defMap[i].status = CacheStatus.Uncached;
-                }
-            }
+            //CacheElement cacheElement = cachedCapacityLevels[capacity]; //REMOVED   
+            
+            __result = getCacheElementResult(__instance, capacity);
+            return false;
+        }
 
-            //CacheElement cacheElement = cachedCapacityLevels[capacity]; //REMOVED    
-            if (capacity == null)
+        private static float getCacheElementResult(PawnCapacitiesHandler __instance, PawnCapacityDef capacity)
+        {
+            if (capacity == null) //ADDED
             {
-                __result = 0f;
-                return false;
+                return 0f;
             }
-            CacheElement cacheElement = defMap[capacity]; //ADDED
+            CacheElement2 cacheElement = get_cacheElement(__instance, capacity); //ADDED
             lock (cacheElement) //ADDED
             {
                 if (cacheElement.status == CacheStatus.Caching)
                 {
                     Log.Error($"Detected infinite stat recursion when evaluating {capacity}");
-                    __result = 0f;
-                    return false;
+                    return 0f;
                 }
 
                 if (cacheElement.status == CacheStatus.Uncached)
@@ -113,12 +107,22 @@ namespace RimThreaded
                     }
                 }
             }
-
-
-            __result = cacheElement.value;
-            return false;
+            return cacheElement.value;
         }
 
-
+        private static CacheElement2 get_cacheElement(PawnCapacitiesHandler __instance, PawnCapacityDef capacity)
+        {
+            DefMap<PawnCapacityDef, CacheElement2> defMap = cachedCapacityLevelsDict[__instance];
+            if (defMap == null)
+            {
+                defMap = new DefMap<PawnCapacityDef, CacheElement2>();
+                cachedCapacityLevelsDict[__instance] = defMap;
+                for (int i = 0; i < defMap.Count; i++)
+                {
+                    defMap[i].status = CacheStatus.Uncached;
+                }
+            }
+            return defMap[capacity];
+        }
     }
 }

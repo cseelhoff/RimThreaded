@@ -230,7 +230,7 @@ namespace RimThreaded
 
 		static RimThreadedHarmony()
 		{
-			Harmony.DEBUG = true;
+			Harmony.DEBUG = false;
 			Log.Message("RimThreaded Harmony is loading...");
 			Type original = null;
 			Type patched = null;
@@ -812,13 +812,15 @@ namespace RimThreaded
 			//PawnCapacitiesHandler
 			original = typeof(PawnCapacitiesHandler);
 			patched = typeof(PawnCapacitiesHandler_Patch);
-			Prefix(original, patched, "GetLevel");
+			//Prefix(original, patched, "GetLevel");
 			Prefix(original, patched, "Notify_CapacityLevelsDirty");
 			Prefix(original, patched, "Clear");
 			Prefix(original, patched, "CapableOf");
 			ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
 			MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
 			harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
+			patched = typeof(PawnCapacitiesHandler_Transpile);
+			Transpile(original, patched, "GetLevel");
 
 			//PathFinder
 			original = typeof(PathFinder);
