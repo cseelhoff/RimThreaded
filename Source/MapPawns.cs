@@ -32,24 +32,49 @@ namespace RimThreaded
             List<Pawn> outThings = new List<Pawn>();
             List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
             map(__instance).GetChildHolders(tmpMapChildHolders);
-            List<Thing> tmpThings = new List<Thing>();
+            Stack<IThingHolder> tmpStack = new Stack<IThingHolder>();
+            List<IThingHolder> tmpHolders = new List<IThingHolder>();
             for (int j = 0; j < tmpMapChildHolders.Count; j++)
             {
-                tmpThings.Clear();                
-                ThingOwnerUtility.GetAllThingsRecursively(tmpMapChildHolders[j], tmpThings, true, null);
-                for (int k = 0; k < tmpThings.Count; k++)
-                {
-                    Pawn t2 = tmpThings[k] as Pawn;
-                    if (t2 != null && ThingRequest.ForGroup(ThingRequestGroup.Pawn).Accepts(t2) && !t2.Dead)
-                    {
-                        outThings.Add(t2);
-                    }
-                }
+                GetAllHeldPawns(tmpMapChildHolders[j], outThings, tmpStack, tmpHolders);
             }
             __result = outThings;
             return false;
 
         }
+
+        private static bool GetAllHeldPawns(IThingHolder holder, List<Pawn> outThings, Stack<IThingHolder> tmpStack, List<IThingHolder> tmpHolders)
+        {
+            tmpStack.Clear();            
+            tmpStack.Push(holder);
+            while (tmpStack.Count != 0)
+            {
+                IThingHolder thingHolder = tmpStack.Pop();
+
+                ThingOwner directlyHeldThings = thingHolder.GetDirectlyHeldThings();
+                if (directlyHeldThings != null)
+                {
+                    for(int i = 0; i < directlyHeldThings.Count; i++)
+                    {
+                        Pawn pawn = directlyHeldThings[i] as Pawn;
+                        if (pawn != null && ThingRequest.ForGroup(ThingRequestGroup.Pawn).Accepts(pawn) && !pawn.Dead)
+                        {
+                            outThings.Add(pawn);
+                        }
+                    }
+                }
+
+                tmpHolders.Clear();
+                thingHolder.GetChildHolders(tmpHolders);
+                for (int i = 0; i < tmpHolders.Count; i++)
+                {
+                    tmpStack.Push(tmpHolders[i]);
+                }
+            }
+            return false;
+
+        }
+
         public static bool get_SpawnedPawnsWithAnyHediff(MapPawns __instance, ref List<Pawn> __result)
         {
             //this.spawnedPawnsWithAnyHediffResult.Clear();

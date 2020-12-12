@@ -35,7 +35,12 @@ namespace RimThreaded
                 return false;
             }
 
-            curAlertIndex(__instance)++;
+            if (TickManager_Patch.curTimeSpeed(Find.TickManager) != TimeSpeed.Ultrafast)
+            {
+                return false;
+            }
+
+                curAlertIndex(__instance)++;
             if (curAlertIndex(__instance) >= 24)
             {
                 curAlertIndex(__instance) = 0;
@@ -108,7 +113,7 @@ namespace RimThreaded
         {
             try
             {
-                alert.Recalculate();
+                alert.Recalculate();                
                 if (!forceRemove && alert.Active)
                 {
                     if (!activeAlerts(__instance).Contains(alert))

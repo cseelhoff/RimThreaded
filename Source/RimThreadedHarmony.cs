@@ -1466,6 +1466,12 @@ namespace RimThreaded
 			patched = typeof(Building_Trap_Transpile);
 			Transpile(original, patched, "Tick");
 
+			//Alert_MinorBreakRisk
+			original = typeof(Alert_MinorBreakRisk);
+			patched = typeof(Alert_MinorBreakRisk_Patch);
+			Prefix(original, patched, "GetReport");
+
+
 			//MOD COMPATIBILITY
 
 			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
