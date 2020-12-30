@@ -11,7 +11,7 @@ using Verse;
 
 namespace RimThreaded
 {
-    class GeneratePawns_Patch_Transpile
+    public class GeneratePawns_Patch_Transpile
     {
         public static IEnumerable<CodeInstruction> Listener(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
@@ -58,7 +58,6 @@ namespace RimThreaded
                     m.GetParameters()[0].ParameterType == typeof(String)
                 );
 
-            Log.Message(i.Name + " <" + i.GetGenericArguments()[0].FullName + "> (" + i.GetParameters()[0] + ")");
 
             return i.MakeGenericMethod(typeof(Texture2D));
         }
