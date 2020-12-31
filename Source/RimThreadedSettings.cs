@@ -18,8 +18,8 @@ namespace RimThreaded
 	{
 		public int maxThreads = 8;
 		public string maxThreadsBuffer = "8";
-		public int timeoutMS = 1000;
-		public string timeoutMSBuffer = "1000";
+		public int timeoutMS = 3000;
+		public string timeoutMSBuffer = "3000";
 		public float timeSpeedNormal = 1f;
 		public string timeSpeedNormalBuffer = "1";
 		public float timeSpeedFast = 3f;
@@ -37,7 +37,7 @@ namespace RimThreaded
 		{
 			base.ExposeData();
 			Scribe_Values.Look(ref maxThreadsBuffer, "maxThreadsBuffer", "8");
-			Scribe_Values.Look(ref timeoutMSBuffer, "timeoutMSBuffer", "1000");
+			Scribe_Values.Look(ref timeoutMSBuffer, "timeoutMSBuffer", "3000");
 			Scribe_Values.Look(ref timeSpeedNormalBuffer, "timeSpeedNormalBuffer", "1");
 			Scribe_Values.Look(ref timeSpeedFastBuffer, "timeSpeedFastBuffer", "3");
 			Scribe_Values.Look(ref timeSpeedSuperfastBuffer, "timeSpeedSuperfastBuffer", "12");
@@ -51,7 +51,7 @@ namespace RimThreaded
 			listing_Standard.Begin(inRect);
 			Widgets.Label(listing_Standard.GetRect(30f), "Total worker threads (recommendation 1-2 per CPU core):");
 			Widgets.IntEntry(listing_Standard.GetRect(40f), ref maxThreads, ref maxThreadsBuffer);
-			Widgets.Label(listing_Standard.GetRect(30f), "Timeout (in miliseconds) waiting for threads (default: 1000):");
+			Widgets.Label(listing_Standard.GetRect(30f), "Timeout (in miliseconds) waiting for threads (default: 3000):");
 			Widgets.IntEntry(listing_Standard.GetRect(40f), ref timeoutMS, ref timeoutMSBuffer, 10);
 			Widgets.Label(listing_Standard.GetRect(30f), "Timespeed Normal (multiply by 60 for Max TPS):");
 			Widgets.TextFieldNumeric<float>(listing_Standard.GetRect(30f), ref timeSpeedNormal, ref timeSpeedNormalBuffer);

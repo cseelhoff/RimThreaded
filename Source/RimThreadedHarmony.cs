@@ -1470,6 +1470,12 @@ namespace RimThreaded
 			Transpile(original, patched, "Tick");
 
 
+			//Alert_MinorBreakRisk
+			original = typeof(Alert_MinorBreakRisk);
+			patched = typeof(Alert_MinorBreakRisk_Patch);
+			Prefix(original, patched, "GetReport");
+
+
 			// Resources_Patch
 			/* Doesn't work as Load is an external method (without a method body) and can therefor not be prefixed. Transpile would maybe be possible, but I dont think, it's a good idea...
 			 * Changed method call to a rimthreaded specific one instead. See Resources_Patch::Load
@@ -1477,6 +1483,7 @@ namespace RimThreaded
 			patched = typeof(Resources_Patch);
 			Prefix(original, patched, "Load", new Type[] { typeof(string), typeof(Type) });
 			*/
+
 
 
 			//MOD COMPATIBILITY
