@@ -45,7 +45,10 @@ namespace RimThreaded
 		public static Type combatExtendedVerb_MeleeAttackCE;
 		public static Type dubsSkylight_Patch_GetRoof;
 		public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;
+		public static Type androidTiers_GeneratePawns_Patch;
 		public static FieldInfo cachedStoreCell;
+		
+
 		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
 		{
 			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
@@ -1461,15 +1464,26 @@ namespace RimThreaded
 
 			//Building_Trap
 			original = typeof(Building_Trap);
-			patched = typeof(Building_Trap_Patch);
+			//patched = typeof(Building_Trap_Patch);
 			//Prefix(original, patched, "Tick");
 			patched = typeof(Building_Trap_Transpile);
 			Transpile(original, patched, "Tick");
+
 
 			//Alert_MinorBreakRisk
 			original = typeof(Alert_MinorBreakRisk);
 			patched = typeof(Alert_MinorBreakRisk_Patch);
 			Prefix(original, patched, "GetReport");
+
+
+			// Resources_Patch
+			/* Doesn't work as Load is an external method (without a method body) and can therefor not be prefixed. Transpile would maybe be possible, but I dont think, it's a good idea...
+			 * Changed method call to a rimthreaded specific one instead. See Resources_Patch::Load
+			original = typeof(Resources);
+			patched = typeof(Resources_Patch);
+			Prefix(original, patched, "Load", new Type[] { typeof(string), typeof(Type) });
+			*/
+
 
 
 			//MOD COMPATIBILITY
@@ -1492,7 +1506,7 @@ namespace RimThreaded
 			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
 			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("Dubs_Skylight.Patch_GetRoof");
 			jobsOfOpportunityJobsOfOpportunity_Hauling = AccessTools.TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
-
+			androidTiers_GeneratePawns_Patch = AccessTools.TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch").GetNestedType("GeneratePawns_Patch");
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{
@@ -1614,6 +1628,16 @@ namespace RimThreaded
 				//methodName = "TryHaul";
 				//Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
 				//Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
+			}
+
+			if (androidTiers_GeneratePawns_Patch != null)
+            {
+				string methodName = "Listener";
+				patched = typeof(GeneratePawns_Patch_Transpile);
+				Log.Message("RimThreaded is patching " + androidTiers_GeneratePawns_Patch.FullName + " " + methodName);
+				Log.Message("Utility_Patch::Listener != null: " + (AccessTools.Method(androidTiers_GeneratePawns_Patch, "Listener") != null));
+				Log.Message("Utility_Patch_Transpile::Listener != null: " + (AccessTools.Method(patched, "Listener") != null));
+				Transpile(androidTiers_GeneratePawns_Patch, patched, methodName);
 			}
 
 			Log.Message("RimThreaded patching is complete.");
