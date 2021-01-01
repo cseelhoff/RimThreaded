@@ -37,7 +37,8 @@ namespace RimThreaded
 
             if (TickManager_Patch.curTimeSpeed(Find.TickManager) != TimeSpeed.Ultrafast)
             {
-                return false;
+                //Uncommenting this will disable alert checks on ultrafast speed for an added speed boost
+                //return false;
             }
 
                 curAlertIndex(__instance)++;

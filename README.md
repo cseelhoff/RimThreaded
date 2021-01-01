@@ -15,7 +15,7 @@ LOAD ORDER:
 Put RimThreaded last in load order.
 
 MOD COMPATIBILITY:
-https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!
+See discord channel.
 
 SUBMIT BUGS:
 https://github.com/cseelhoff/RimThreaded/issues/new/choose
@@ -42,6 +42,12 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
+
+Version 1.1.37
+-Fixed bug in MOARANDROIDS.PawnGroupMakerUtility_Patch.androidTiers_GeneratePawns (Thanks JoJo!)
+-Performance improvement for Alert_MinorBreakRisk.GetReport()
+-Fixed bug in MapPawns.get_AllPawnsUnspawned()
+-Changed default setting for timeout from 1000ms to 3000ms
 
 Version 1.1.36  
 -Transpiled PawnCapacitiesHandler.GetLevel  

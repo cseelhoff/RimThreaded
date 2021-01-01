@@ -45,6 +45,7 @@ namespace RimThreaded
 		public static Type combatExtendedVerb_MeleeAttackCE;
 		public static Type dubsSkylight_Patch_GetRoof;
 		public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;
+		public static Type androidTiers_GeneratePawns_Patch1;
 		public static Type androidTiers_GeneratePawns_Patch;
 		public static FieldInfo cachedStoreCell;
 		
@@ -1506,7 +1507,11 @@ namespace RimThreaded
 			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
 			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("Dubs_Skylight.Patch_GetRoof");
 			jobsOfOpportunityJobsOfOpportunity_Hauling = AccessTools.TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
-			androidTiers_GeneratePawns_Patch = AccessTools.TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch").GetNestedType("GeneratePawns_Patch");
+			androidTiers_GeneratePawns_Patch1 = AccessTools.TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch");
+			if (androidTiers_GeneratePawns_Patch1 != null)
+			{
+				androidTiers_GeneratePawns_Patch = androidTiers_GeneratePawns_Patch1.GetNestedType("GeneratePawns_Patch");
+			}
 
 			if (giddyUpCoreUtilitiesTextureUtility != null)
 			{

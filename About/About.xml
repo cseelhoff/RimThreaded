@@ -10,8 +10,11 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.36
-    -Transpiled PawnCapacitiesHandler.GetLevel
+    Version 1.1.37
+    -Fixed bug in MOARANDROIDS.PawnGroupMakerUtility_Patch.androidTiers_GeneratePawns (Thanks JoJo!)
+    -Performance improvement for Alert_MinorBreakRisk.GetReport()
+    -Fixed bug in MapPawns.get_AllPawnsUnspawned()
+    -Changed default setting for timeout from 1000ms to 3000ms
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
@@ -22,7 +25,7 @@
     Put RimThreaded last in load order.
 
     MOD COMPATIBILITY:
-    https://trello.com/b/EG9T6VnW/rimthreaded - Thanks IcyBlackAgeis!
+    See discord channel.
 
     SUBMIT BUGS:
     https://github.com/cseelhoff/RimThreaded/issues/new/choose
