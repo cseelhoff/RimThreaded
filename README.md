@@ -43,7 +43,7 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 1.1.37
+Version 1.1.37  
 -Fixed bug in MOARANDROIDS.PawnGroupMakerUtility_Patch.androidTiers_GeneratePawns (Thanks JoJo!)  
 -Performance improvement for Alert_MinorBreakRisk.GetReport()  
 -Fixed bug in MapPawns.get_AllPawnsUnspawned()  
