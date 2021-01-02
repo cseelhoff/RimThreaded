@@ -16,7 +16,7 @@ namespace RimThreaded
     {
 		public static IEnumerable<CodeInstruction> TryFindBestBillIngredients(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
-			int[] matchesFound = new int[6]; //EDIT
+			int[] matchesFound = new int[8]; //EDIT
 			
 			List<CodeInstruction> instructionsList = instructions.ToList();
 
@@ -77,6 +77,30 @@ namespace RimThreaded
 					instructionsList[i].operand = workGiver_DoBill_RegionProcessor.LocalIndex;
 					yield return instructionsList[i++];
 					yield return new CodeInstruction(OpCodes.Ldfld, Field(typeof(WorkGiver_DoBill_RegionProcessor), "ingredientsOrdered"));
+					continue;
+				}
+				matchIndex++;
+				if (
+					 instructionsList[i].opcode == OpCodes.Call && //EDIT
+					 (MethodInfo)instructionsList[i].operand == Method(typeof(WorkGiver_DoBill), "AddEveryMedicineToRelevantThings") //EDIT
+					 )
+				{
+					matchesFound[matchIndex]++;
+					instructionsList[i].operand = Method(typeof(WorkGiver_DoBill_Patch), "AddEveryMedicineToRelevantThings2");
+					yield return instructionsList[i++];
+					continue;
+				}
+				matchIndex++;
+				if (
+					 instructionsList[i].opcode == OpCodes.Call && //EDIT
+					 (MethodInfo)instructionsList[i].operand == Method(typeof(WorkGiver_DoBill), "TryFindBestBillIngredientsInSet") //EDIT
+					 )
+				{
+					matchesFound[matchIndex]++;
+					yield return new CodeInstruction(OpCodes.Ldloc, workGiver_DoBill_RegionProcessor.LocalIndex);
+					yield return new CodeInstruction(OpCodes.Ldfld, Field(typeof(WorkGiver_DoBill_RegionProcessor), "ingredientsOrdered"));
+					instructionsList[i].operand = Method(typeof(WorkGiver_DoBill_Patch), "TryFindBestBillIngredientsInSet2");
+					yield return instructionsList[i++];
 					continue;
 				}
 				matchIndex++;
