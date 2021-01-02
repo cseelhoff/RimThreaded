@@ -14,6 +14,13 @@ namespace RimThreaded
 
     public class Verb_Patch
     {
+        public static bool get_DirectOwner(Verb __instance, ref IVerbOwner __result)
+        {
+            if (__instance != null && __instance.verbTracker != null) {
+                __result = __instance.verbTracker.directOwner;
+            }
+            return false;
+        }
         private static bool CanHitFromCellIgnoringRange2(Verb __instance, IntVec3 sourceCell, LocalTargetInfo targ, out IntVec3 goodDest)
         {
             if (targ.Thing != null)

@@ -42,6 +42,24 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
+  
+Version 1.1.38  
+-Fixed bug in BiomeDef.CachePlantCommonalitiesIfShould  
+-Fixed bug in Explosion.AffectCell  
+-Fixed bug in Explosion.Tick  
+-Fixed bug in Explosion.StartExplosion  
+-Fixed bug in FilthMaker.TryMakeFilth  
+-Fixed bug in GenCollection.TryRandomElementByWeight_Pawn  
+-Fixed bug in GenLeaving.DropFilthDueToDamage  
+-Fixed bug in ListerThings.ThingsOfDef  
+-Fixed bug in Projectile.CanHit  
+-Fixed bug in ReachabilityCache.AddCachedResult  
+-Fixed bug in RegionListersUpdater.RegisterAllAt  
+-Fixed bug in RoofGrid.SetRoof  
+-Fixed bug in SickPawnVisitUtility.FindRandomSickPawn  
+-Fixed bug in TemperatureCache.TryCacheRegionTempInfo  
+-Fixed bug in Verb.get_DirectOwner  
+-Fixed bug in WorkGiver_DoBill.TryFindBestBillIngredients  
 
 Version 1.1.37
 -Fixed bug in MOARANDROIDS.PawnGroupMakerUtility_Patch.androidTiers_GeneratePawns (Thanks JoJo!)

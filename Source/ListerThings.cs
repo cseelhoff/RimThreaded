@@ -13,6 +13,14 @@ namespace RimThreaded
 
 		private static readonly List<Thing> EmptyList = new List<Thing>();
 
+		public static bool ThingsOfDef(ListerThings __instance, ref List<Thing> __result, ThingDef def)
+		{
+			__result = EmptyList;
+			if(def != null)
+				__result = __instance.ThingsMatching(ThingRequest.ForDef(def));
+			return false;
+		}
+
 		public static bool Add(ListerThings __instance, Thing t)
 		{
 			if (!ListerThings.EverListable(t.def, __instance.use))

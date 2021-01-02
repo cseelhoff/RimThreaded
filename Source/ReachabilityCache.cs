@@ -109,8 +109,14 @@ namespace RimThreaded
         public static Dictionary<CachedEntry2, bool> getCacheDict(ReachabilityCache __instance)
         {
             if(!cacheDictDict.TryGetValue(__instance, out Dictionary<CachedEntry2, bool> cacheDict)) {
-                cacheDict = new Dictionary<CachedEntry2, bool>();
-                cacheDictDict[__instance] = cacheDict;
+                lock (cacheDictDict)
+                {
+                    if (!cacheDictDict.TryGetValue(__instance, out Dictionary<CachedEntry2, bool> cacheDict2))
+                    {
+                        cacheDict = new Dictionary<CachedEntry2, bool>();
+                        cacheDictDict[__instance] = cacheDict;
+                    }
+                }
             }
             return cacheDict;
         }
@@ -139,7 +145,10 @@ namespace RimThreaded
             {
                 lock (cacheDict)
                 {
-                    cacheDict.Add(key, reachable);
+                    if (!cacheDict.ContainsKey(key))
+                    {
+                        cacheDict.Add(key, reachable);
+                    }
                 }
             }
             return false;

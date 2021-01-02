@@ -58,30 +58,40 @@ namespace RimThreaded
             {
                 return false;
             }
-
-            cachedPlantCommonalities(__instance) = new Dictionary<ThingDef, float>();
-            for (int i = 0; i < wildPlants(__instance).Count; i++)
+            lock (__instance)
             {
-                if (wildPlants(__instance)[i].plant != null)
+                if (cachedPlantCommonalities(__instance) != null)
                 {
-                        cachedPlantCommonalities(__instance)[wildPlants(__instance)[i].plant] = wildPlants(__instance)[i].commonality;
+                    return false;
                 }
-            }
-
-            foreach (ThingDef allDef in DefDatabase<ThingDef>.AllDefs)
-            {
-                if (allDef.plant != null && allDef.plant.wildBiomes != null)
+                Dictionary<ThingDef, float> localCachedPlantCommonalities = new Dictionary<ThingDef, float>();
+                for (int i = 0; i < wildPlants(__instance).Count; i++)
                 {
-                    for (int j = 0; j < allDef.plant.wildBiomes.Count; j++)
+                    BiomePlantRecord wildPlant = wildPlants(__instance)[i];
+                    ThingDef plant = wildPlant.plant;
+                    if (plant != null)
                     {
-                        if (allDef.plant.wildBiomes[j].biome == __instance)
+                        localCachedPlantCommonalities[plant] = wildPlant.commonality;
+                    }
+                }
+
+                foreach (ThingDef allDef in DefDatabase<ThingDef>.AllDefs)
+                {
+                    if (allDef.plant != null && allDef.plant.wildBiomes != null)
+                    {
+                        for (int j = 0; j < allDef.plant.wildBiomes.Count; j++)
                         {
-                            cachedPlantCommonalities(__instance).Add(allDef, allDef.plant.wildBiomes[j].commonality);
+                            if (allDef.plant.wildBiomes[j].biome == __instance)
+                            {
+                                localCachedPlantCommonalities.Add(allDef, allDef.plant.wildBiomes[j].commonality);
+                            }
                         }
                     }
                 }
+                cachedPlantCommonalitiesSum(__instance) = localCachedPlantCommonalities.Sum((KeyValuePair<ThingDef, float> x) => x.Value);
+                cachedPlantCommonalities(__instance) = localCachedPlantCommonalities;
+
             }
-            cachedPlantCommonalitiesSum(__instance) = cachedPlantCommonalities(__instance).Sum((KeyValuePair<ThingDef, float> x) => x.Value);
             return false;
         }
 

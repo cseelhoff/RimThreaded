@@ -104,7 +104,7 @@ namespace RimThreaded
 				//for (int i = 0; i < thingList.Count; i++)
 				foreach (Thing tlThing in enumThing) 
 				{
-					if (tlThing != thing && tlThing.def != null && tlThing.def.Fillage == FillCategory.Full && tlThing.def.Altitude >= thing.def.Altitude)
+					if (tlThing != null && tlThing != thing && tlThing.def != null && tlThing.def.Fillage == FillCategory.Full && tlThing.def.Altitude >= thing.def.Altitude)
 					{
 						flag2 = true;
 						break;

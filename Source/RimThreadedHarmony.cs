@@ -285,10 +285,13 @@ namespace RimThreaded
 			patched = typeof(RegionListersUpdater_Patch);
 			Prefix(original, patched, "DeregisterInRegions");
 			Prefix(original, patched, "RegisterInRegions");
+			Prefix(original, patched, "RegisterAllAt");
+			
 
 			//ListerThings
-			//original = typeof(ListerThings);
-			//patched = typeof(ListerThings_Patch);
+			original = typeof(ListerThings);
+			patched = typeof(ListerThings_Patch);
+			Prefix(original, patched, "ThingsOfDef"); //maybe modify instead: JoyGiver_TakeDrug.BestIngestItem...  List<Thing> list = pawn.Map.listerThings.ThingsOfDef(JoyGiver_TakeDrug.takeableDrugs[k]);
 			//Prefix(original, patched, "Remove");
 			//Prefix(original, patched, "Add");
 			//patched = typeof(ListerThings_Transpile);
@@ -628,6 +631,9 @@ namespace RimThreaded
 			original = typeof(Explosion);
 			patched = typeof(Explosion_Patch);
 			Prefix(original, patched, "Tick");
+			Prefix(original, patched, "StartExplosion");
+			//Prefix(original, patched, "SpawnSetup");
+			//Prefix(original, patched, "DeSpawn");
 
 			//AttackTargetReservationManager
 			original = typeof(AttackTargetReservationManager);
@@ -678,7 +684,8 @@ namespace RimThreaded
 
 			//Verb
 			original = typeof(Verb);
-			//patched = typeof(Verb_Patch);
+			patched = typeof(Verb_Patch);
+			Prefix(original, patched, "get_DirectOwner");
 			//Prefix(original, patched, "CanHitFromCellIgnoringRange");
 			//Prefix(original, patched, "TryFindShootLineFromTo");
 			patched = typeof(Verb_Transpile);
@@ -877,7 +884,7 @@ namespace RimThreaded
 			Prefix(original, patched, "RegisterReporter");
 			Prefix(original, patched, "RemoveReporter");
 			Prefix(original, patched, "get_AggregateSize");
-
+			
 			//HediffSet
 			patched = typeof(HediffSet_Transpile);
 			original = AccessTools.TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
@@ -904,7 +911,7 @@ namespace RimThreaded
 			patched = typeof(JobGiver_ConfigurableHostilityResponse_Patch);
 			Prefix(original, patched, "TryGetFleeJob");
 
-
+			
 			//Pawn_InteractionsTracker
 			original = typeof(Pawn_InteractionsTracker);
 			//patched = typeof(Pawn_InteractionsTracker_Patch);
@@ -933,12 +940,12 @@ namespace RimThreaded
 			original = typeof(TendUtility);
 			patched = typeof(TendUtility_Patch);
 			Prefix(original, patched, "GetOptimalHediffsToTendWithSingleTreatment");
-
+			
 			//WanderUtility
 			original = typeof(WanderUtility);
 			patched = typeof(WanderUtility_Patch);
 			Prefix(original, patched, "GetColonyWanderRoot");
-
+			
 			//RegionAndRoomUpdater
 			original = typeof(RegionAndRoomUpdater);
 			patched = typeof(RegionAndRoomUpdater_Patch);
@@ -960,7 +967,7 @@ namespace RimThreaded
 			original = typeof(Medicine);
 			patched = typeof(Medicine_Patch);
 			Prefix(original, patched, "GetMedicineCountToFullyHeal");
-
+			
 			//WorkGiver_DoBill
 			original = typeof(WorkGiver_DoBill);
 			patched = typeof(WorkGiver_DoBill_Patch);
@@ -973,7 +980,7 @@ namespace RimThreaded
 			original = typeof(JobGiver_Work);
 			patched = typeof(JobGiver_Work_Patch);
 			//Prefix(original, patched, "TryIssueJobPackage");
-
+			
 			//ThingCountUtility
 			original = typeof(ThingCountUtility);
 			patched = typeof(ThingCountUtility_Patch);
@@ -1005,7 +1012,7 @@ namespace RimThreaded
 			original = typeof(TileTemperaturesComp);
 			patched = typeof(TileTemperaturesComp_Transpile);
 			Transpile(original, patched, "WorldComponentTick");
-
+			
 			//PawnRelationUtility
 			original = typeof(PawnRelationUtility);
 			patched = typeof(PawnRelationUtility_Patch);
@@ -1037,7 +1044,7 @@ namespace RimThreaded
 			MethodInfo oMethod = AccessTools.Method(original, "<RandomPossiblyResolvableEntry>b__0");
 			MethodInfo pMethod = AccessTools.Method(patched, "RandomPossiblyResolvableEntryb__0");
 			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
-
+			
 			//JobQueue
 			original = typeof(JobQueue);
 			patched = typeof(JobQueue_Patch);
@@ -1063,7 +1070,7 @@ namespace RimThreaded
 			original = typeof(TimeControls);
 			patched = typeof(TimeControls_Patch);
 			Prefix(original, patched, "DoTimeControlsGUI");
-
+			
 			//PathGrid
 			original = typeof(PathGrid);
 			patched = typeof(PathGrid_Patch);
@@ -1079,7 +1086,7 @@ namespace RimThreaded
 			patched = typeof(InfestationCellFinder_Patch);
 			Prefix(original, patched, "CalculateDistanceToColonyBuildingGrid");
 			Prefix(original, patched, "GetScoreAt");
-
+			
 			//RegionCostCalculator
 			original = typeof(RegionCostCalculator);
 			patched = typeof(RegionCostCalculator_Patch);
@@ -1122,7 +1129,7 @@ namespace RimThreaded
 			original = typeof(RecipeWorkerCounter);
 			patched = typeof(RecipeWorkerCounter_Patch);
 			Prefix(original, patched, "GetCarriedCount");
-
+			
 			//Pawn_RotationTracker
 			original = typeof(Pawn_RotationTracker);
 			patched = typeof(Pawn_RotationTracker_Patch);
@@ -1156,7 +1163,7 @@ namespace RimThreaded
 			original = typeof(CompSpawnSubplant);
 			patched = typeof(CompSpawnSubplant_Transpile);
 			Transpile(original, patched, "DoGrowSubplant");
-
+			
 			//PawnCapacityUtility
 			original = typeof(PawnCapacityUtility);
 			patched = typeof(PawnCapacityUtility_Patch);
@@ -1172,7 +1179,7 @@ namespace RimThreaded
 			patched = typeof(Pawn_HealthTracker_Patch);
 			Prefix(original, patched, "SetDead");
 			Prefix(original, patched, "RemoveHediff");
-
+			
 			//Pawn
 			original = typeof(Pawn);
 			patched = typeof(Pawn_Patch);
@@ -1205,7 +1212,7 @@ namespace RimThreaded
 			original = typeof(Pawn_MindState);
 			patched = typeof(Pawn_MindState_Patch);
 			Prefix(original, patched, "MindStateTick");
-
+			
 			//WorldObjectsHolder
 			original = typeof(WorldObjectsHolder);
 			patched = typeof(WorldObjectsHolder_Patch);
@@ -1235,7 +1242,7 @@ namespace RimThreaded
 			original = typeof(WildPlantSpawner);
 			patched = typeof(WildPlantSpawner_Patch);
 			Prefix(original, patched, "WildPlantSpawnerTickInternal");
-
+			
 			//SeasonUtility
 			original = typeof(SeasonUtility);
 			patched = typeof(SeasonUtility_Patch);
@@ -1286,13 +1293,13 @@ namespace RimThreaded
 			original = typeof(ThinkNode_QueuedJob);
 			patched = typeof(ThinkNode_QueuedJob_Patch);
 			Prefix(original, patched, "TryIssueJobPackage");
-
+			
 			//JobDriver			
 			original = typeof(JobDriver);
 			patched = typeof(JobDriver_Patch);
 			Prefix(original, patched, "TryActuallyStartNextToil");
 			Prefix(original, patched, "DriverTick");
-
+			
 			//TemperatureCache			
 			original = typeof(TemperatureCache);
 			patched = typeof(TemperatureCache_Patch);
@@ -1431,7 +1438,7 @@ namespace RimThreaded
 			original = typeof(AlertsReadout);
 			patched = typeof(AlertsReadout_Patch);
 			Prefix(original, patched, "AlertsReadoutUpdate");
-
+			
 			//WorkGiver_Grower
 			original = typeof(WorkGiver_Grower);
 			patched = typeof(WorkGiver_Grower_Patch);
@@ -1457,7 +1464,7 @@ namespace RimThreaded
 			Prefix(original, patched, "Clear");
 			Prefix(original, patched, "ClearFor");
 			Prefix(original, patched, "ClearForHostile");
-
+			
 			//RecordWorker_TimeGettingJoy
 			original = typeof(RecordWorker_TimeGettingJoy);
 			patched = typeof(RecordWorker_TimeGettingJoy_Patch);
@@ -1470,11 +1477,30 @@ namespace RimThreaded
 			patched = typeof(Building_Trap_Transpile);
 			Transpile(original, patched, "Tick");
 
-
 			//Alert_MinorBreakRisk
 			original = typeof(Alert_MinorBreakRisk);
 			patched = typeof(Alert_MinorBreakRisk_Patch);
 			Prefix(original, patched, "GetReport");
+
+			//FilthMaker
+			original = typeof(FilthMaker);
+			patched = typeof(FilthMaker_Patch);
+			Prefix(original, patched, "TryMakeFilth", new Type[] { typeof(IntVec3), typeof(Map), typeof(ThingDef), typeof(IEnumerable<string>), typeof(bool), typeof(FilthSourceFlags) });
+
+			//SickPawnVisitUtility
+			original = typeof(SickPawnVisitUtility);
+			patched = typeof(SickPawnVisitUtility_Patch);
+			Prefix(original, patched, "FindRandomSickPawn");
+
+			//RoofGrid
+			original = typeof(RoofGrid);
+			patched = typeof(RoofGrid_Patch);
+			Prefix(original, patched, "SetRoof");
+
+			//GenLeaving
+			original = typeof(GenLeaving);
+			patched = typeof(GenLeaving_Patch);
+			Prefix(original, patched, "DropFilthDueToDamage");
 
 
 			// Resources_Patch

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Verse;
 
@@ -65,6 +66,27 @@ namespace RimThreaded
 					{
 						listerThings.Add(thing);
 					}
+				}
+			}
+			return false;
+		}
+		public static bool RegisterAllAt(IntVec3 c, Map map, HashSet<Thing> processedThings = null)
+		{
+			List<Thing> thingList = c.GetThingList(map);
+			int count = thingList.Count;
+			for (int i = 0; i < count; i++)
+			{
+				Thing thing;
+				try
+				{
+					thing = thingList[i];
+				} catch(ArgumentOutOfRangeException)
+                {
+					break;
+                }
+				if (processedThings == null || processedThings.Add(thing))
+				{
+					RegisterInRegions(thing, map);
 				}
 			}
 			return false;

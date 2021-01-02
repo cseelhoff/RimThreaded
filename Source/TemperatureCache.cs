@@ -28,7 +28,10 @@ namespace RimThreaded
             if (room != null)
             {
                 RoomGroup group = room.Group;
-                SetCachedCellInfo2(__instance, c, new CachedTempInfo(group.ID, group.CellCount, group.Temperature));
+                if (group != null)
+                {
+                    SetCachedCellInfo2(__instance, c, new CachedTempInfo(group.ID, group.CellCount, group.Temperature));
+                }                
             }
             return false;
         }
