@@ -24,7 +24,14 @@ namespace RimThreaded
                         {
                             if (lord.ownedPawns[j] == p)
                             {
-                                Lord_Patch.pawnsLord[p] = lord;
+                                if(Lord_Patch.pawnsLord == null)
+                                {
+                                    Log.Error("Lord_Patch.pawnsLord is null");
+                                }
+                                lock (Lord_Patch.pawnsLord)
+                                {
+                                    Lord_Patch.pawnsLord.SetOrAdd(p, lord);
+                                }
                                 __result = lord;
                                 return false;
                             }

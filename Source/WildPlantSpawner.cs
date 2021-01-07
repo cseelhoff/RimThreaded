@@ -8,6 +8,7 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -38,7 +39,7 @@ namespace RimThreaded
         {
             Map map2 = map(__instance);
             int area = map2.Area;
-            int num = Mathf.CeilToInt((float)area * 0.0001f);
+            int num = Mathf.CeilToInt(area * 0.0001f);
             float currentPlantDensity = __instance.CurrentPlantDensity;
             if (!hasWholeMapNumDesiredPlantsCalculated(__instance))
             {
@@ -46,22 +47,24 @@ namespace RimThreaded
                 calculatedWholeMapNumNonZeroFertilityCells(__instance) = __instance.CurrentWholeMapNumNonZeroFertilityCells;
                 hasWholeMapNumDesiredPlantsCalculated(__instance) = true;
             }
-            int num2 = Mathf.CeilToInt(10000f);
-            float chance = calculatedWholeMapNumDesiredPlants(__instance) / (float)calculatedWholeMapNumNonZeroFertilityCells(__instance);
-            map2.cellsInRandomOrder.Get(0); //Create List If Should
-            RimThreaded.WildPlantSpawnerCycleIndexOffset = num + cycleIndex(__instance);
-            RimThreaded.WildPlantSpawnerArea = area;
-            RimThreaded.WildPlantSpawnerCellsInRandomOrder = map2.cellsInRandomOrder;
-            RimThreaded.WildPlantSpawnerMap = map2;
-            RimThreaded.WildPlantSpawnerCurrentPlantDensity = currentPlantDensity;
-            RimThreaded.DesiredPlants = calculatedWholeMapNumDesiredPlants(__instance);
-            RimThreaded.DesiredPlantsTmp1000 = 1000 * (int)calculatedWholeMapNumDesiredPlantsTmp(__instance);
-            RimThreaded.FertilityCellsTmp = calculatedWholeMapNumNonZeroFertilityCellsTmp(__instance);
-            RimThreaded.DesiredPlants2Tmp1000 = 0;
-            RimThreaded.FertilityCells2Tmp = 0;
-            RimThreaded.WildPlantSpawnerInstance = __instance;
-            RimThreaded.WildPlantSpawnerChance = chance;
-            RimThreaded.WildPlantSpawnerTicks = num;
+            //int num2 = Mathf.CeilToInt(10000f);
+            float chance = calculatedWholeMapNumDesiredPlants(__instance) / calculatedWholeMapNumNonZeroFertilityCells(__instance);
+            map2.cellsInRandomOrder.Get(0); //This helps call "Create List If Should"
+            int index = Interlocked.Increment(ref RimThreaded.wildPlantSpawnerCount) - 1;
+            int newNum = Interlocked.Add(ref RimThreaded.wildPlantSpawnerTicksCount, num);
+            RimThreaded.wildPlantSpawners[index].WildPlantSpawnerTicks = newNum;
+            RimThreaded.wildPlantSpawners[index].WildPlantSpawnerCycleIndexOffset = num + cycleIndex(__instance);
+            RimThreaded.wildPlantSpawners[index].WildPlantSpawnerArea = area;
+            RimThreaded.wildPlantSpawners[index].WildPlantSpawnerCellsInRandomOrder = map2.cellsInRandomOrder;
+            RimThreaded.wildPlantSpawners[index].WildPlantSpawnerMap = map2;
+            RimThreaded.wildPlantSpawners[index].WildPlantSpawnerCurrentPlantDensity = currentPlantDensity;
+            RimThreaded.wildPlantSpawners[index].DesiredPlants = calculatedWholeMapNumDesiredPlants(__instance);
+            RimThreaded.wildPlantSpawners[index].DesiredPlantsTmp1000 = 1000 * (int)calculatedWholeMapNumDesiredPlantsTmp(__instance);
+            RimThreaded.wildPlantSpawners[index].FertilityCellsTmp = calculatedWholeMapNumNonZeroFertilityCellsTmp(__instance);
+            RimThreaded.wildPlantSpawners[index].DesiredPlants2Tmp1000 = 0;
+            RimThreaded.wildPlantSpawners[index].FertilityCells2Tmp = 0;
+            RimThreaded.wildPlantSpawners[index].WildPlantSpawnerInstance = __instance;
+            RimThreaded.wildPlantSpawners[index].WildPlantSpawnerChance = chance;
             cycleIndex(__instance) = (cycleIndex(__instance) + num) % area;
             return false;
         }

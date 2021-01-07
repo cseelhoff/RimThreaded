@@ -31,7 +31,7 @@ namespace RimThreaded
             }
             return true;
         }
-
+        /*
         public static bool Texture2DWidthHeight(Texture2D __instance, int width, int height)
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
@@ -48,7 +48,7 @@ namespace RimThreaded
             }
             return true;
         }
-
+        */
         public static MethodInfo reflectionMethod = AccessTools.Method(typeof(Texture2D),"Internal_Create", new Type[] { typeof(Texture2D), typeof(int), typeof(int), typeof(int), typeof(GraphicsFormat), typeof(TextureCreationFlags), typeof(IntPtr) });
 
         static readonly Action<Texture2D, int, int, int, GraphicsFormat, TextureCreationFlags, IntPtr> internal_Create =

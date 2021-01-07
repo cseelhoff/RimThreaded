@@ -59,17 +59,7 @@ namespace RimThreaded
         public static Dictionary<int, object> safeFunctionResults =
             new Dictionary<int, object>();
 
-
-        public static Queue<int> buildDatabase = new Queue<int>();
-        public static Dictionary<int, SampleSustainer> tryMakeAndPlayResults = new Dictionary<int, SampleSustainer>();
-        public static Dictionary<int, object[]> newSustainerRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, Sustainer> newSustainerResults = new Dictionary<int, Sustainer>();
-        public static Dictionary<int, object[]> planeMeshRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, Mesh> planeMeshResults = new Dictionary<int, Mesh>();
-        public static Dictionary<string, Texture2D> texture2DResults = new Dictionary<string, Texture2D>();
-        public static Dictionary<int, string> texture2DRequests = new Dictionary<int, string>();
-        public static Dictionary<int, Mesh> meshRequests = new Dictionary<int, Mesh>();
-        public static Dictionary<int, Mesh> meshResults = new Dictionary<int, Mesh>();
+        /*
         public static Dictionary<MaterialRequest, Material> materialResults = new Dictionary<MaterialRequest, Material>();
         public static Dictionary<int, MaterialRequest> materialRequests = new Dictionary<int, MaterialRequest>();
         public static Dictionary<int, LayerSubMesh> layerSubMeshResults = new Dictionary<int, LayerSubMesh>();
@@ -97,9 +87,9 @@ namespace RimThreaded
         public static Dictionary<int, object[]> applyTextureRequests = new Dictionary<int, object[]>();
         public static Dictionary<int, RenderTexture> releaseTemporaryRequests = new Dictionary<int, RenderTexture>();
         public static Dictionary<int, RenderTexture> setActiveTextureRequests = new Dictionary<int, RenderTexture>();
-
         public static Dictionary<int, Mesh> newBoltMeshResults = new Dictionary<int, Mesh>();
         public static ConcurrentQueue<int> newBoltMeshRequests = new ConcurrentQueue<int>();
+        */
 
         //public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
         public static Dictionary<int, int> timeoutExemptThreads2 = new Dictionary<int, int>();
@@ -118,12 +108,20 @@ namespace RimThreaded
         public static int thingListLongTicks = 0;
 
         //SteadyEnvironmentEffects
-        public static MapCellsInRandomOrder steadyEnvironmentEffectsCellsInRandomOrder = null;
-        public static int steadyEnvironmentEffectsTicks = 0;
-        public static int steadyEnvironmentEffectsArea = 0;
-        public static int steadyEnvironmentEffectsCycleIndex = 0;
-        public static SteadyEnvironmentEffects steadyEnvironmentEffectsInstance = null;
-        public static int steadyEnvironmentEffectsCycleIndexOffset = 0;
+        public struct SteadyEnvironmentEffectsStructure
+        {
+            public SteadyEnvironmentEffects steadyEnvironmentEffects;
+            public MapCellsInRandomOrder steadyEnvironmentEffectsCellsInRandomOrder;
+            public int steadyEnvironmentEffectsTicks;
+            public int steadyEnvironmentEffectsArea;
+            public int steadyEnvironmentEffectsCycleIndex;
+            public int steadyEnvironmentEffectsCycleIndexOffset;
+        }
+        public static int totalSteadyEnvironmentEffectsTicks = 0;
+        public static int steadyEnvironmentEffectsTicksCompleted = 0;
+        public static int steadyEnvironmentEffectsCount = 0;
+        public static SteadyEnvironmentEffectsStructure[] steadyEnvironmentEffectsStructures = new SteadyEnvironmentEffectsStructure[99];
+        //public static SteadyEnvironmentEffects steadyEnvironmentEffectsInstance = null;
 
         //WorldObjectsHolder
         public static WorldObjectsHolder worldObjectsHolder = null;
@@ -144,26 +142,42 @@ namespace RimThreaded
         public static int allFactionsTicks = 0;
 
         //WildPlantSpawner
-        public static int WildPlantSpawnerTicks = 0;
-        public static int WildPlantSpawnerCycleIndexOffset = 0;
-        public static int WildPlantSpawnerArea = 0;
-        public static Map WildPlantSpawnerMap = null;
-        public static MapCellsInRandomOrder WildPlantSpawnerCellsInRandomOrder = null;
-        public static float WildPlantSpawnerCurrentPlantDensity = 0f;
-        public static float DesiredPlants = 0f;
-        public static float DesiredPlantsTmp = 0f;
-        public static int DesiredPlants1000 = 0;
-        public static int DesiredPlantsTmp1000 = 0;
-        public static int DesiredPlants2Tmp1000 = 0;
-        public static int FertilityCellsTmp = 0;
-        public static int FertilityCells2Tmp = 0;
-        public static int FertilityCells = 0;
-        public static WildPlantSpawner WildPlantSpawnerInstance = null;
-        public static float WildPlantSpawnerChance = 0f;
+        public struct WildPlantSpawnerStructure
+        {
+            public int WildPlantSpawnerTicks;
+            public int WildPlantSpawnerCycleIndexOffset;
+            public int WildPlantSpawnerArea;
+            public Map WildPlantSpawnerMap;
+            public MapCellsInRandomOrder WildPlantSpawnerCellsInRandomOrder;
+            public float WildPlantSpawnerCurrentPlantDensity;
+            public float DesiredPlants;
+            public float DesiredPlantsTmp;
+            public int DesiredPlants1000;
+            public int DesiredPlantsTmp1000;
+            public int DesiredPlants2Tmp1000;
+            public int FertilityCellsTmp;
+            public int FertilityCells2Tmp;
+            public int FertilityCells;
+            public WildPlantSpawner WildPlantSpawnerInstance;
+            public float WildPlantSpawnerChance;
+        }
+        public static int wildPlantSpawnerCount = 0;
+        public static int wildPlantSpawnerTicksCount = 0;
+        public static int wildPlantSpawnerTicksCompleted = 0;
+        public static WildPlantSpawnerStructure[] wildPlantSpawners = new WildPlantSpawnerStructure[9999];
 
         //TradeShip
-        public static int TradeShipTicks = 0;
-        public static ThingOwner TradeShipThings = null;
+        public struct TradeShipStructure
+        {
+            public int TradeShipTicks;
+            public ThingOwner TradeShipThings;
+        }
+        public static int totalTradeShipsCount = 0;
+        public static int totalTradeShipTicks = 0;
+        public static int totalTradeShipTicksCompleted = 0;
+        public static TradeShipStructure[] tradeShips = new TradeShipStructure[99];
+        //public static int TradeShipTicks = 0;
+        //public static ThingOwner TradeShipThings = null;
 
         //WorldComponents
         public static int WorldComponentTicks = 0;
@@ -185,6 +199,15 @@ namespace RimThreaded
         public static int workingOnMiscellaneous = -1;
         public static TickManager currentInstance;
         public static int listsFullyProcessed = 0;
+        public static bool mapPreTickComplete = false;
+        public static bool tickListNormalComplete = false;
+        public static bool tickListRareComplete = false;
+        public static bool tickListLongComplete = false;
+        public static bool dateNotifierTickComplete = false;
+        public static bool worldTickComplete = false;
+        public static bool mapPostTickComplete = false;
+        public static bool historyTickComplete = false;
+        public static bool miscellaneousComplete = false;
 
         static RimThreaded()
         {
@@ -413,22 +436,42 @@ namespace RimThreaded
                 {
                     maps[i].MapPreTick();
                 }
+                if (plantMaterialsCount == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                mapPreTickComplete = true;
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WindManager
             }
 
             if (Interlocked.Increment(ref workingOnTickListNormal) == 0)
             {
                 TickManager_Patch.tickListNormal(currentInstance).Tick();
+                if (thingListNormalTicks == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                tickListNormalComplete = true;
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickNormal
             }
             if (Interlocked.Increment(ref workingOnTickListRare) == 0)
             {
                 TickManager_Patch.tickListRare(currentInstance).Tick();
+                if (thingListRareTicks == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                tickListRareComplete = true;
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickRare
             }
             if (Interlocked.Increment(ref workingOnTickListLong) == 0)
             {
                 TickManager_Patch.tickListLong(currentInstance).Tick();
+                if (thingListLongTicks == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                tickListLongComplete = true;
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickLong
             }
             if (Interlocked.Increment(ref workingOnWorldTick) == 0)
@@ -447,6 +490,24 @@ namespace RimThreaded
                 {
                     Log.Error(ex3.ToString());
                 }
+                if (worldPawnsTicks == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                if (allFactionsTicks == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                if (worldObjectsTicks == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                if (WorldComponentTicks == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+
+                worldTickComplete = true;
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WorldPawns
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //Factions
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WorldObjects
@@ -459,6 +520,19 @@ namespace RimThreaded
                 {                    
                     maps[j].MapPostTick();
                 }
+                if (wildPlantSpawnerTicksCount == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                if (totalSteadyEnvironmentEffectsTicks == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                if (totalTradeShipsCount == 0)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+                mapPostTickComplete = true;
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WildPlantSpawner
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //SteadyEnvironment
                 prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //PassingShipManagerTick
@@ -468,7 +542,28 @@ namespace RimThreaded
 
         private static void ExecuteTicks()
         {
-            if (thingListNormalTicks > 0)
+            if (mapPreTickComplete && plantMaterialsCount > 0)
+            {
+                int index = Interlocked.Decrement(ref plantMaterialsCount);
+                while (index >= 0)
+                {
+                    try
+                    {
+                        WindManager_Patch.plantMaterials[index].SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("Exception ticking " + WindManager_Patch.plantMaterials[index].ToStringSafe() + ": " + ex);
+                    }
+                    index = Interlocked.Decrement(ref plantMaterialsCount);
+                }
+                if (index == -1)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+            }
+
+            else if (tickListNormalComplete && thingListNormalTicks > 0)
             {
                 int index = Interlocked.Decrement(ref thingListNormalTicks);
                 while (index >= 0)
@@ -500,7 +595,7 @@ namespace RimThreaded
                     Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-            else if (thingListRareTicks > 0)
+            else if (tickListRareComplete && thingListRareTicks > 0)
             {
                 int index = Interlocked.Decrement(ref thingListRareTicks);
                 while (index >= 0)
@@ -532,7 +627,7 @@ namespace RimThreaded
                     Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-            else if (thingListLongTicks > 0)
+            else if (tickListLongComplete && thingListLongTicks > 0)
             {
                 int index = Interlocked.Decrement(ref thingListLongTicks);
                 while (index >= 0)
@@ -564,7 +659,7 @@ namespace RimThreaded
                     Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-            else if (worldPawnsTicks > 0)
+            else if (worldTickComplete && worldPawnsTicks > 0)
             {
                 int index = Interlocked.Decrement(ref worldPawnsTicks);
                 while (index >= 0)
@@ -595,7 +690,7 @@ namespace RimThreaded
                 }
             }
 
-            else if (worldObjectsTicks > 0)
+            else if (worldTickComplete && worldObjectsTicks > 0)
             {
                 int index = Interlocked.Decrement(ref worldObjectsTicks);
                 while (index >= 0)
@@ -615,50 +710,7 @@ namespace RimThreaded
                 }
             }
 
-            else if (steadyEnvironmentEffectsTicks > 0)
-            {
-                int index = Interlocked.Decrement(ref steadyEnvironmentEffectsTicks);
-                while (index >= 0)
-                {
-                    int cycleIndex = (steadyEnvironmentEffectsCycleIndexOffset - index) % steadyEnvironmentEffectsArea;
-                    IntVec3 c = steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
-                    try
-                    {
-                        SteadyEnvironmentEffects_Patch.DoCellSteadyEffects(steadyEnvironmentEffectsInstance, c);
-                    } catch (Exception ex)
-                    {
-                            Log.Error("Exception ticking steadyEnvironmentEffectsCells " + index.ToStringSafe() + ": " + ex);
-                    }                    
-                    //Interlocked.Increment(ref SteadyEnvironmentEffects_Patch.cycleIndex(steadyEnvironmentEffectsInstance));
-                    index = Interlocked.Decrement(ref steadyEnvironmentEffectsTicks);
-                }
-                if (index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-
-            else if (plantMaterialsCount > 0)
-            {
-                int index = Interlocked.Decrement(ref plantMaterialsCount);
-                while (index >= 0)
-                {
-                    try
-                    {
-                        WindManager_Patch.plantMaterials[index].SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
-                    } catch (Exception ex)
-                    {
-                            Log.Error("Exception ticking " + WindManager_Patch.plantMaterials[index].ToStringSafe() + ": " + ex);
-                    }
-                    index = Interlocked.Decrement(ref plantMaterialsCount);
-                }
-                if (index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-
-            else if (allFactionsTicks > 0)
+            else if (worldTickComplete && allFactionsTicks > 0)
             {
                 int index = Interlocked.Decrement(ref allFactionsTicks);
                 while (index >= 0)
@@ -666,9 +718,10 @@ namespace RimThreaded
                     try
                     {
                         allFactions[index].FactionTick();
-                    } catch (Exception ex)
+                    }
+                    catch (Exception ex)
                     {
-                            Log.Error("Exception ticking " + allFactions[index].ToStringSafe() + ": " + ex);
+                        Log.Error("Exception ticking " + allFactions[index].ToStringSafe() + ": " + ex);
                     }
                     index = Interlocked.Decrement(ref allFactionsTicks);
                 }
@@ -678,75 +731,142 @@ namespace RimThreaded
                 }
             }
 
-            else if (WildPlantSpawnerTicks > 0)
+            else if (mapPostTickComplete && steadyEnvironmentEffectsTicksCompleted < totalSteadyEnvironmentEffectsTicks)
             {
-                int index = Interlocked.Decrement(ref WildPlantSpawnerTicks);
-                while (index >= 0)
+                int ticketIndex = Interlocked.Increment(ref steadyEnvironmentEffectsTicksCompleted) - 1;
+                int steadyEnvironmentEffectsIndex = 0;
+                while (ticketIndex < totalSteadyEnvironmentEffectsTicks)
                 {
-                    int cycleIndex = (WildPlantSpawnerCycleIndexOffset - index) % WildPlantSpawnerArea;
-                    try { 
-                        IntVec3 intVec = WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
+                    while (ticketIndex >= steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsTicks)
+                    {
+                        steadyEnvironmentEffectsIndex++;
+                    }
+                    int index = ticketIndex - steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsTicks;
+                    int cycleIndex = (steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsCycleIndexOffset
+                        - index) % steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsArea;
+                    IntVec3 c = steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
+                    try
+                    {
+                        SteadyEnvironmentEffects_Patch.DoCellSteadyEffects(
+                            steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffects, c);
+                    } catch (Exception ex)
+                    {
+                            Log.Error("Exception ticking steadyEnvironmentEffectsCells " + index.ToStringSafe() + ": " + ex);
+                    }
+                    //Interlocked.Increment(ref SteadyEnvironmentEffects_Patch.cycleIndex(steadyEnvironmentEffectsInstance));
+                    ticketIndex = Interlocked.Increment(ref steadyEnvironmentEffectsTicksCompleted) - 1;
+                }
+                if (ticketIndex == totalSteadyEnvironmentEffectsTicks)
+                {
+                    Interlocked.Increment(ref listsFullyProcessed);
+                }
+            }
 
-                        if ((WildPlantSpawnerCycleIndexOffset - index) > WildPlantSpawnerArea)
+            else if (mapPostTickComplete && wildPlantSpawnerTicksCompleted < wildPlantSpawnerTicksCount)
+            {
+                int ticketIndex = Interlocked.Increment(ref wildPlantSpawnerTicksCompleted) - 1;
+                int wildPlantSpawnerIndex = 0;
+                WildPlantSpawnerStructure wildPlantSpawner;
+                int index;
+                while (ticketIndex < wildPlantSpawnerTicksCount)
+                {
+                    while (ticketIndex >= wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerTicks)
+                    {
+                        wildPlantSpawnerIndex++;
+                    }
+                    try
+                    {
+                        wildPlantSpawner = wildPlantSpawners[wildPlantSpawnerIndex];
+                        index = ticketIndex - wildPlantSpawner.WildPlantSpawnerTicks;
+                        int cycleIndex = (wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) % wildPlantSpawner.WildPlantSpawnerArea;
+                        IntVec3 intVec = wildPlantSpawner.WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
+
+                        if ((wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) > wildPlantSpawner.WildPlantSpawnerArea)
                         {
-                            Interlocked.Add(ref DesiredPlants2Tmp1000,
-                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(WildPlantSpawnerMap, intVec, intVec, WildPlantSpawnerCurrentPlantDensity));
-                            if (intVec.GetTerrain(WildPlantSpawnerMap).fertility > 0f)
+                            Interlocked.Add(ref wildPlantSpawner.DesiredPlants2Tmp1000,
+                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(
+                                    wildPlantSpawner.WildPlantSpawnerMap, intVec, intVec,
+                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
+                            if (intVec.GetTerrain(wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerMap).fertility > 0f)
                             {
-                                Interlocked.Increment(ref FertilityCells2Tmp);
+                                Interlocked.Increment(ref wildPlantSpawner.FertilityCells2Tmp);
                             }
 
-                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(WildPlantSpawnerMap, intVec) ? 130f : WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                            if (Rand.Chance(WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && WildPlantSpawner_Patch.CanRegrowAt2(WildPlantSpawnerMap, intVec))
+                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(
+                                wildPlantSpawner.WildPlantSpawnerMap, intVec) ? 130f :
+                                wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
+                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && 
+                                WildPlantSpawner_Patch.CanRegrowAt2(wildPlantSpawner.WildPlantSpawnerMap, intVec))
                             {
-                                WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlantsTmp1000 / 1000.0f);
+                                wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec,
+                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity, wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f);
                             }
                         }
                         else
                         {
-                            Interlocked.Add(ref DesiredPlantsTmp1000,
-                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(WildPlantSpawnerMap, intVec, intVec, WildPlantSpawnerCurrentPlantDensity));
-                            if (intVec.GetTerrain(WildPlantSpawnerMap).fertility > 0f)
+                            Interlocked.Add(ref wildPlantSpawner.DesiredPlantsTmp1000,
+                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(
+                                    wildPlantSpawner.WildPlantSpawnerMap, intVec, intVec,
+                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
+                            if (intVec.GetTerrain(wildPlantSpawner.WildPlantSpawnerMap).fertility > 0f)
                             {
-                                Interlocked.Increment(ref FertilityCellsTmp);
+                                Interlocked.Increment(ref wildPlantSpawner.FertilityCellsTmp);
                             }
 
-                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(WildPlantSpawnerMap, intVec) ? 130f : WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                            if (Rand.Chance(WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && WildPlantSpawner_Patch.CanRegrowAt2(WildPlantSpawnerMap, intVec))
+                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(wildPlantSpawner.WildPlantSpawnerMap, intVec) ? 130f :
+                                wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
+                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && 
+                                WildPlantSpawner_Patch.CanRegrowAt2(wildPlantSpawner.WildPlantSpawnerMap, intVec))
                             {
-                                WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, WildPlantSpawnerCurrentPlantDensity, DesiredPlants);
+                                wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, 
+                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity, wildPlantSpawner.DesiredPlants);
                             }
                         }
+
+                        if(ticketIndex == wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerTicks - 1)
+                        {
+                            if ((wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) > wildPlantSpawner.WildPlantSpawnerArea)
+                            {
+                                WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlants(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f;
+                                WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.DesiredPlants2Tmp1000 / 1000.0f;
+                                WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.FertilityCellsTmp;
+                                WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCellsTmp(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.FertilityCells2Tmp;
+                            }
+                            else
+                            {
+                                WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f;
+                                WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.FertilityCellsTmp;
+                            }
+                            if (index == -1)
+                            {
+                                Interlocked.Increment(ref listsFullyProcessed);
+                            }
+                        }
+
                     }
                     catch (Exception ex)
                     {
                         Log.Error("Exception ticking WildPlantSpawner: " + ex);
                     }
-                    index = Interlocked.Decrement(ref WildPlantSpawnerTicks);
+                    ticketIndex = Interlocked.Increment(ref wildPlantSpawnerTicksCompleted) - 1;
                 }
-                if ((WildPlantSpawnerCycleIndexOffset - index) > WildPlantSpawnerArea)
-                {
-                    WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlants(WildPlantSpawnerInstance) = DesiredPlantsTmp1000 / 1000.0f;
-                    WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(WildPlantSpawnerInstance) = DesiredPlants2Tmp1000 / 1000.0f;
-                    WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(WildPlantSpawnerInstance) = FertilityCellsTmp;
-                    WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCellsTmp(WildPlantSpawnerInstance) = FertilityCells2Tmp;
-                }
-                else
-                {
-                    WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(WildPlantSpawnerInstance) = DesiredPlantsTmp1000 / 1000.0f;
-                    WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(WildPlantSpawnerInstance) = FertilityCellsTmp;
-                }
-                if (index == -1)
+                if (ticketIndex == wildPlantSpawnerTicksCount)
                 {
                     Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-            else if (TradeShipTicks > 0)
+            else if (mapPostTickComplete && totalTradeShipTicksCompleted < totalTradeShipTicks)
             {
-                int index = Interlocked.Decrement(ref TradeShipTicks);
-                while (index >= 0)
+                int ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted);
+                int totalTradeShipIndex = 0;
+                while (ticketIndex < totalTradeShipTicks)
                 {
-                    Pawn pawn = TradeShipThings[index] as Pawn;
+                    while (ticketIndex >= tradeShips[totalTradeShipIndex].TradeShipTicks)
+                    {
+                        totalTradeShipIndex++;
+                    }
+                    int index = ticketIndex - tradeShips[totalTradeShipIndex].TradeShipTicks;
+                    Pawn pawn = tradeShips[totalTradeShipIndex].TradeShipThings[index] as Pawn;
                     if (pawn != null)
                     {
                         try
@@ -759,20 +879,20 @@ namespace RimThreaded
                         }
                         if (pawn.Dead)
                         {
-                            lock (TradeShipThings)
+                            lock (tradeShips[totalTradeShipIndex].TradeShipThings)
                             {
-                                TradeShipThings.Remove(pawn);
+                                tradeShips[totalTradeShipIndex].TradeShipThings.Remove(pawn);
                             }
                         }
                     }
-                    index = Interlocked.Decrement(ref TradeShipTicks);
+                    ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted);
                 }
-                if (index == -1)
+                if (ticketIndex == totalTradeShipTicks)
                 {
                     Interlocked.Increment(ref listsFullyProcessed);
                 }
             }
-            else if (WorldComponentTicks > 0)
+            else if (worldTickComplete && WorldComponentTicks > 0)
             {
                 int index = Interlocked.Decrement(ref WorldComponentTicks);
                 while (index >= 0)
@@ -842,11 +962,29 @@ namespace RimThreaded
                 currentPrepsDone = -1;
                 workingOnMiscellaneous = -1;
                 listsFullyProcessed = 0;
+                totalSteadyEnvironmentEffectsTicks = 0;
+                steadyEnvironmentEffectsTicksCompleted = 0;
+                steadyEnvironmentEffectsCount = 0;
+                totalTradeShipTicks = 0;
+                totalTradeShipTicksCompleted = 0;
+                totalTradeShipsCount = 0;
+                wildPlantSpawnerCount = 0;
+                wildPlantSpawnerTicksCount = 0;
+                wildPlantSpawnerTicksCompleted = 0;
+                mapPreTickComplete = false;
+                tickListNormalComplete = false;
+                tickListRareComplete = false;
+                tickListLongComplete = false;
+                dateNotifierTickComplete = false;
+                worldTickComplete = false;
+                mapPostTickComplete = false;
+                historyTickComplete = false;
+                miscellaneousComplete = false;
                 foreach (EventWaitHandle eventWaitStart in eventWaitStarts.Values)
                 {
                     eventWaitStart.Set();
                 }
-                stopwatch.Restart();
+                //stopwatch.Restart();
                 foreach (int tID2 in eventWaitDones.Keys.ToList())
                 {
                     if (eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone))

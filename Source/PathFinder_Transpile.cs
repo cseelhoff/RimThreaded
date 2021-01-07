@@ -429,7 +429,7 @@ namespace RimThreaded
 				}
 				else if (i+1 < instructionsList.Count &&
 					instructionsList[i+1].opcode == OpCodes.Ldfld &&
-					(FieldInfo)instructionsList[i+1].operand == AccessTools.DeclaredField(typeof(PathFinder), "regionCostCalculator")
+					(FieldInfo)instructionsList[i+1].operand == AccessTools.Field(typeof(PathFinder), "regionCostCalculator")
 				)
 				{
 					instructionsList[i].opcode = OpCodes.Ldloc;
