@@ -636,8 +636,8 @@ namespace RimThreaded
 			original = typeof(GenGrid);
 			patched = typeof(GenGrid_Patch);
 			Prefix(original, patched, "InBounds", new Type[] { typeof(IntVec3), typeof(Map) });
-			//Prefix(original, patched, "Standable");
-			//Prefix(original, patched, "Walkable");
+			Prefix(original, patched, "Standable");
+			Prefix(original, patched, "Walkable");
 
 			//Explosion
 			original = typeof(Explosion);
@@ -1449,12 +1449,12 @@ namespace RimThreaded
 			//WorkGiver_Grower
 			original = typeof(WorkGiver_Grower);
 			patched = typeof(WorkGiver_Grower_Patch);
-			Prefix(original, patched, "PotentialWorkCellsGlobal");
+			//Prefix(original, patched, "PotentialWorkCellsGlobal");
 
 			//Building_TurretGun_Patch
 			original = typeof(Building_TurretGun);
 			patched = typeof(Building_TurretGun_Patch);
-			Prefix(original, patched, "TryFindNewTarget");
+			//Prefix(original, patched, "TryFindNewTarget");
 
 			//ListerBuildings
 			original = typeof(ListerBuildings);

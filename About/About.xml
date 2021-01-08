@@ -10,23 +10,18 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.1.38
-    -Fixed bug in BiomeDef.CachePlantCommonalitiesIfShould
-    -Fixed bug in Explosion.AffectCell
-    -Fixed bug in Explosion.Tick
-    -Fixed bug in Explosion.StartExplosion
-    -Fixed bug in FilthMaker.TryMakeFilth
-    -Fixed bug in GenCollection.TryRandomElementByWeight_Pawn
-    -Fixed bug in GenLeaving.DropFilthDueToDamage
-    -Fixed bug in ListerThings.ThingsOfDef
-    -Fixed bug in Projectile.CanHit
-    -Fixed bug in ReachabilityCache.AddCachedResult
-    -Fixed bug in RegionListersUpdater.RegisterAllAt
-    -Fixed bug in RoofGrid.SetRoof
-    -Fixed bug in SickPawnVisitUtility.FindRandomSickPawn
-    -Fixed bug in TemperatureCache.TryCacheRegionTempInfo
-    -Fixed bug in Verb.get_DirectOwner
-    -Fixed bug in WorkGiver_DoBill.TryFindBestBillIngredients
+    Version 1.2.0
+    -Major overhaul for RimThreaded.cs, improving multimap support
+    -Major overhaul for SteadyEnvironmentEffects.SteadyEnvironmentEffectsTick, improving multimap support
+    -Major overhaul for TradeShip.PassingShipTick, improving multimap support
+    -Major overhaul for WildPlantSpawner.WildPlantSpawnerTickInternal, improving multimap support
+    -Fixed bug in DijkstraIntVec3.Run
+    -Fixed bug in LordManager.LordOf
+    -Fixed bug in PathFinder.getRegionCostCalculatorWrapper
+    -Fixed bug in PawnDestinationReservationManager.MostRecentReservationFor
+    -Fixed bug in PhysicalInteractionReservationManager.FirstReserverOf
+    -Fixed bug in Thing.get_FlammableNow
+    -Fixed bug in FoodUtility.FoodOptimality
 
 
     JOIN OUR COMMUNITY ON DISCORD:

@@ -42,7 +42,20 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded
 
 CHANGE LOG:  
-  
+
+Version 1.2.0  
+-Major overhaul for RimThreaded.cs, improving multimap support  
+-Major overhaul for SteadyEnvironmentEffects.SteadyEnvironmentEffectsTick, improving multimap support  
+-Major overhaul for TradeShip.PassingShipTick, improving multimap support  
+-Major overhaul for WildPlantSpawner.WildPlantSpawnerTickInternal, improving multimap support  
+-Fixed bug in DijkstraIntVec3.Run  
+-Fixed bug in LordManager.LordOf  
+-Fixed bug in PathFinder.getRegionCostCalculatorWrapper  
+-Fixed bug in PawnDestinationReservationManager.MostRecentReservationFor  
+-Fixed bug in PhysicalInteractionReservationManager.FirstReserverOf  
+-Fixed bug in Thing.get_FlammableNow  
+-Fixed bug in FoodUtility.FoodOptimality  
+
 Version 1.1.38  
 -Fixed bug in BiomeDef.CachePlantCommonalitiesIfShould  
 -Fixed bug in Explosion.AffectCell  
