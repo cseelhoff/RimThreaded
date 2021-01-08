@@ -90,6 +90,8 @@
     <Compile Include="Hauling_Transpile.cs" />
     <Compile Include="ListerBuildings.cs" />
     <Compile Include="PawnCapacitiesHandler_Transpile.cs" />
+    <Compile Include="PawnDestinationReservationManager_Patch.cs" />
+    <Compile Include="PlayDataLoader_Patch.cs" />
     <Compile Include="ReachabilityCache.cs" />
     <Compile Include="RecordWorker_TimeGettingJoy.cs" />
     <Compile Include="Resources.cs" />

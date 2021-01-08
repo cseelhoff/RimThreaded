@@ -239,6 +239,11 @@ namespace RimThreaded
 			Type original = null;
 			Type patched = null;
 
+			//PlayDataLoader
+			original = typeof(PlayDataLoader);
+			patched = typeof(PlayDataLoader_Patch);
+			//Prefix(original, patched, "DoPlayLoad");
+
 			//TickManager			
 			original = typeof(TickManager);
 			patched = typeof(TickManager_Patch);
@@ -308,6 +313,8 @@ namespace RimThreaded
 			patched = typeof(Thing_Transpile);
 			Transpile(original, patched, "SpawnSetup");
 			Transpile(original, patched, "DeSpawn");
+			patched = typeof(Thing_Patch);
+			Prefix(original, patched, "get_FlammableNow");
 
 			//JobMaker
 			original = typeof(JobMaker);
@@ -937,7 +944,7 @@ namespace RimThreaded
 			//FoodUtility
 			original = typeof(FoodUtility);
 			patched = typeof(FoodUtility_Transpile);
-			//Transpile(original, patched, "FoodOptimality");
+			Transpile(original, patched, "FoodOptimality");
 			patched = typeof(FoodUtility_Patch);
 			//Prefix(original, patched, "FoodOptimality");
 
@@ -1045,9 +1052,9 @@ namespace RimThreaded
 			patched = typeof(GrammarResolver_Transpile);
 			Transpile(original, patched, "AddRule");
 			Transpile(original, patched, "RandomPossiblyResolvableEntry");
-			original = AccessTools.TypeByName("Verse.Grammar.GrammarResolver+<>c__DisplayClass17_0");
-			MethodInfo oMethod = AccessTools.Method(original, "<RandomPossiblyResolvableEntry>b__0");
-			MethodInfo pMethod = AccessTools.Method(patched, "RandomPossiblyResolvableEntryb__0");
+			original = TypeByName("Verse.Grammar.GrammarResolver+<>c__DisplayClass17_0");
+			MethodInfo oMethod = Method(original, "<RandomPossiblyResolvableEntry>b__0");
+			MethodInfo pMethod = Method(patched, "RandomPossiblyResolvableEntryb__0");
 			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 			
 			//JobQueue
@@ -1102,7 +1109,7 @@ namespace RimThreaded
 			//RegionCostCalculatorWrapper
 			original = typeof(RegionCostCalculatorWrapper);
 			patched = typeof(RegionCostCalculatorWrapper_Patch);
-			//Prefix(original, patched, "Init");
+			Prefix(original, patched, "Init");
 
 			//EditWindow_Log
 			//original = typeof(EditWindow_Log);
@@ -1437,17 +1444,17 @@ namespace RimThreaded
 			//AlertsReadout
 			original = typeof(AlertsReadout);
 			patched = typeof(AlertsReadout_Patch);
-			//Prefix(original, patched, "AlertsReadoutUpdate");
+			Prefix(original, patched, "AlertsReadoutUpdate");
 			
 			//WorkGiver_Grower
 			original = typeof(WorkGiver_Grower);
 			patched = typeof(WorkGiver_Grower_Patch);
-			//Prefix(original, patched, "PotentialWorkCellsGlobal");
+			Prefix(original, patched, "PotentialWorkCellsGlobal");
 
 			//Building_TurretGun_Patch
 			original = typeof(Building_TurretGun);
 			patched = typeof(Building_TurretGun_Patch);
-			//Prefix(original, patched, "TryFindNewTarget");
+			Prefix(original, patched, "TryFindNewTarget");
 
 			//ListerBuildings
 			original = typeof(ListerBuildings);
@@ -1458,12 +1465,12 @@ namespace RimThreaded
 			//ReachabilityCache_Patch
 			original = typeof(ReachabilityCache);
 			patched = typeof(ReachabilityCache_Patch);
-			//Prefix(original, patched, "get_Count");
-			//Prefix(original, patched, "CachedResultFor");
-			//Prefix(original, patched, "AddCachedResult");
-			//Prefix(original, patched, "Clear");
-			//Prefix(original, patched, "ClearFor");
-			//Prefix(original, patched, "ClearForHostile");
+			Prefix(original, patched, "get_Count");
+			Prefix(original, patched, "CachedResultFor");
+			Prefix(original, patched, "AddCachedResult");
+			Prefix(original, patched, "Clear");
+			Prefix(original, patched, "ClearFor");
+			Prefix(original, patched, "ClearForHostile");
 			
 			//RecordWorker_TimeGettingJoy
 			original = typeof(RecordWorker_TimeGettingJoy);
@@ -1501,6 +1508,11 @@ namespace RimThreaded
 			original = typeof(GenLeaving);
 			patched = typeof(GenLeaving_Patch);
 			Prefix(original, patched, "DropFilthDueToDamage");
+			
+			//PawnDestinationReservationManager
+			original = typeof(PawnDestinationReservationManager);
+			patched = typeof(PawnDestinationReservationManager_Patch);
+			Prefix(original, patched, "MostRecentReservationFor");
 
 
 			// Resources_Patch

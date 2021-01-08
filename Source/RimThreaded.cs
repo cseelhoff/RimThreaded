@@ -44,7 +44,7 @@ namespace RimThreaded
         public static Dictionary<int, EventWaitHandle> eventWaitDones = new Dictionary<int, EventWaitHandle>();
 
         //public static ConcurrentQueue<Thing> drawQueue = new ConcurrentQueue<Thing>();
-        private static Dictionary<int, Thread> allThreads = new Dictionary<int, Thread>();
+        public static Dictionary<int, Thread> allThreads = new Dictionary<int, Thread>();
         private static Thread monitorThread = null;
         private static bool allWorkerThreadsFinished = false;
         public static bool SingleTickComplete = true;
@@ -59,45 +59,11 @@ namespace RimThreaded
         public static Dictionary<int, object> safeFunctionResults =
             new Dictionary<int, object>();
 
-        /*
-        public static Dictionary<MaterialRequest, Material> materialResults = new Dictionary<MaterialRequest, Material>();
-        public static Dictionary<int, MaterialRequest> materialRequests = new Dictionary<int, MaterialRequest>();
-        public static Dictionary<int, LayerSubMesh> layerSubMeshResults = new Dictionary<int, LayerSubMesh>();
-        public static Dictionary<int, object[]> layerSubMeshRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, Map> generateMapResults = new Dictionary<int, Map>();
-        public static Dictionary<int, object[]> generateMapRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, AudioSource> newAudioSourceResults = new Dictionary<int, AudioSource>();
-        public static Dictionary<int, GameObject> newAudioSourceRequests = new Dictionary<int, GameObject>();
-        public static Dictionary<int, RenderTexture> renderTextureResults = new Dictionary<int, RenderTexture>();
-        public static Dictionary<int, object[]> renderTextureRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, RenderTexture> renderTextureAAResults = new Dictionary<int, RenderTexture>();
-        public static Dictionary<int, object[]> renderTextureAARequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, RenderTexture> renderTextureSetActiveRequests = new Dictionary<int, RenderTexture>();
-        public static Dictionary<int, RenderTexture> renderTextureGetActiveRequests = new Dictionary<int, RenderTexture>();
-        public static Dictionary<int, RenderTexture> renderTextureGetActiveResults = new Dictionary<int, RenderTexture>();
-        public static Dictionary<int, object[]> texture2dRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, Texture2D> texture2dResults = new Dictionary<int, Texture2D>();
-        public static Dictionary<int, object[]> calcHeightRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, float> calcHeightResults = new Dictionary<int, float>();
-        public static Dictionary<int, Texture2D> getReadableTextureRequests = new Dictionary<int, Texture2D>();
-        public static Dictionary<int, Texture2D> getReadableTextureResults = new Dictionary<int, Texture2D>();
-        public static Dictionary<int, object[]> blitRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, object[]> internal_CreateRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, object[]> readPixelRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, object[]> applyTextureRequests = new Dictionary<int, object[]>();
-        public static Dictionary<int, RenderTexture> releaseTemporaryRequests = new Dictionary<int, RenderTexture>();
-        public static Dictionary<int, RenderTexture> setActiveTextureRequests = new Dictionary<int, RenderTexture>();
-        public static Dictionary<int, Mesh> newBoltMeshResults = new Dictionary<int, Mesh>();
-        public static ConcurrentQueue<int> newBoltMeshRequests = new ConcurrentQueue<int>();
-        */
-
         //public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
         public static Dictionary<int, int> timeoutExemptThreads2 = new Dictionary<int, int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
-
-        public static Stopwatch stopwatch = new Stopwatch();
 
         //ThingListTicks
         public static List<Thing> thingListNormal;
