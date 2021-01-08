@@ -9,6 +9,7 @@ using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
 using Verse.Noise;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -33,7 +34,7 @@ namespace RimThreaded
         public static bool SteadyEnvironmentEffectsTick(SteadyEnvironmentEffects __instance)
         {
             Map map2 = map(__instance);
-            if ((float)Find.TickManager.TicksGame % 97f == 0f && Rand.Chance(0.02f))
+            if (Find.TickManager.TicksGame % 97f == 0f && Rand.Chance(0.02f))
             {
                 RollForRainFire2(map2);
             }
@@ -41,16 +42,21 @@ namespace RimThreaded
             outdoorMeltAmount(__instance) = MeltAmountAt2(map2.mapTemperature.OutdoorTemp);
             snowRate(__instance) = map2.weatherManager.SnowRate;
             rainRate(__instance) = map2.weatherManager.RainRate;
-            RimThreaded.steadyEnvironmentEffectsCellsInRandomOrder = map2.cellsInRandomOrder;
             deteriorationRate(__instance) = Mathf.Lerp(1f, 5f, rainRate(__instance));
+            int area = map2.Area;
+            int ticks = Mathf.CeilToInt(area * 0.0006f);
+            int index = RimThreaded.steadyEnvironmentEffectsCount;
+            RimThreaded.steadyEnvironmentEffectsStructures[index].steadyEnvironmentEffects = __instance;
+            RimThreaded.steadyEnvironmentEffectsStructures[index].steadyEnvironmentEffectsCellsInRandomOrder = map2.cellsInRandomOrder;
             //int num = Mathf.CeilToInt((float)map2.Area * 0.0006f);
-            //int area = map2.Area;
-            RimThreaded.steadyEnvironmentEffectsArea = map2.Area;
-            RimThreaded.steadyEnvironmentEffectsInstance = __instance;
-            int ticks = Mathf.CeilToInt((float)map2.Area * 0.0006f);
-            RimThreaded.steadyEnvironmentEffectsCycleIndexOffset = ticks + cycleIndex(__instance);
-            RimThreaded.steadyEnvironmentEffectsTicks = ticks;
-            cycleIndex(__instance) = (cycleIndex(__instance) + ticks) % map2.Area;
+            RimThreaded.steadyEnvironmentEffectsStructures[index].steadyEnvironmentEffectsArea = area;
+            //RimThreaded.steadyEnvironmentEffectsInstance = __instance;
+            RimThreaded.steadyEnvironmentEffectsStructures[index].steadyEnvironmentEffectsCycleIndexOffset = ticks + cycleIndex(__instance);
+            int ticks2 = Interlocked.Add(ref RimThreaded.totalSteadyEnvironmentEffectsTicks, ticks);
+            RimThreaded.steadyEnvironmentEffectsStructures[index].steadyEnvironmentEffectsTicks = ticks2;
+            Interlocked.Increment(ref RimThreaded.steadyEnvironmentEffectsCount);
+
+            cycleIndex(__instance) = (cycleIndex(__instance) + ticks) % area;
             //RimThreaded.MainThreadWaitLoop();
             /*
             for (int i = 0; i < num; i++)
@@ -70,9 +76,9 @@ namespace RimThreaded
         public static void AddFallenSnowAt(SteadyEnvironmentEffects __instance, IntVec3 c, float baseAmount)
         {
             if (snowNoise(__instance) == null)
-                snowNoise(__instance) = (ModuleBase)new Perlin(0.0399999991059303, 2.0, 0.5, 5, Rand.Range(0, 651431), Verse.Noise.QualityMode.Medium);
+                snowNoise(__instance) = new Perlin(0.0399999991059303, 2.0, 0.5, 5, Rand.Range(0, 651431), QualityMode.Medium);
             float num = (snowNoise(__instance).GetValue(c) + 1f) * 0.5f;
-            if ((double)num < 0.5)
+            if (num < 0.5)
                 num = 0.5f;
             float depthToAdd = baseAmount * num;
             map(__instance).snowGrid.AddDepth(c, depthToAdd);
@@ -96,9 +102,9 @@ namespace RimThreaded
             bool roomUsesOutdoorTemperature = room != null && roomGroup != null && room.UsesOutdoorTemperature;
             if ((room == null) | roomUsesOutdoorTemperature)
             {
-                if ((double)outdoorMeltAmount(__instance) > 0.0)
+                if (outdoorMeltAmount(__instance) > 0.0)
                     map2.snowGrid.AddDepth(c, -outdoorMeltAmount(__instance));
-                if (!roofed && (double)snowRate(__instance) > 1.0 / 1000.0)
+                if (!roofed && snowRate(__instance) > 1.0 / 1000.0)
                     AddFallenSnowAt(__instance, c, 23f / 500f * map2.weatherManager.SnowRate);
             }
             if (room != null)
@@ -122,15 +128,15 @@ namespace RimThreaded
                 if (!roomUsesOutdoorTemperature && roomGroup != null)
                 {
                     float temperature = roomGroup.Temperature;
-                    if ((double)temperature > 0.0)
+                    if (temperature > 0.0)
                     {
                         float num1 = MeltAmountAt(temperature);
-                        if ((double)num1 > 0.0)
+                        if (num1 > 0.0)
                             map2.snowGrid.AddDepth(c, -num1);
-                        if (room.RegionType.Passable() && (double)temperature > (double)AutoIgnitionTemperatureRange.min)
+                        if (room.RegionType.Passable() && temperature > (double)AutoIgnitionTemperatureRange.min)
                         {
-                            double num2 = (double)Rand.Value;
-                            if (num2 < (double)AutoIgnitionTemperatureRange.InverseLerpThroughRange(temperature) * 0.699999988079071 && Rand.Chance(FireUtility.ChanceToStartFireIn(c, map2)))
+                            double num2 = Rand.Value;
+                            if (num2 < AutoIgnitionTemperatureRange.InverseLerpThroughRange(temperature) * 0.699999988079071 && Rand.Chance(FireUtility.ChanceToStartFireIn(c, map2)))
                                 FireUtility.TryStartFireIn(c, map2, 0.1f);
                             if (num2 < 0.330000013113022)
                                 MoteMaker.ThrowHeatGlow(c, map2, 2.3f);
@@ -142,9 +148,9 @@ namespace RimThreaded
         }
         private static float MeltAmountAt(float temperature)
         {
-            if ((double)temperature < 0.0)
+            if (temperature < 0.0)
                 return 0.0f;
-            return (double)temperature < 10.0 ? (float)((double)temperature * (double)temperature * 0.00579999992623925 * 0.100000001490116) : temperature * 0.0058f;
+            return temperature < 10.0 ? (float)(temperature * (double)temperature * 0.00579999992623925 * 0.100000001490116) : temperature * 0.0058f;
         }
 
         private static void TryDoDeteriorate(SteadyEnvironmentEffects __instance,
@@ -158,34 +164,34 @@ namespace RimThreaded
             {
                 List<Apparel> wornApparel = corpse.InnerPawn.apparel.WornApparel;
                 for (int index = 0; index < wornApparel.Count; ++index)
-                    TryDoDeteriorate(__instance, (Thing)wornApparel[index], roofed, roomUsesOutdoorTemperature, protectedByEdifice, terrain);
+                    TryDoDeteriorate(__instance, wornApparel[index], roofed, roomUsesOutdoorTemperature, protectedByEdifice, terrain);
             }
-            float num1 = SteadyEnvironmentEffects.FinalDeteriorationRate(t, roofed, roomUsesOutdoorTemperature, protectedByEdifice, terrain, (List<string>)null);
-            if ((double)num1 < 1.0 / 1000.0 || !Rand.Chance((float)((double)deteriorationRate(__instance) * (double)num1 / 36.0)))
+            float num1 = SteadyEnvironmentEffects.FinalDeteriorationRate(t, roofed, roomUsesOutdoorTemperature, protectedByEdifice, terrain, null);
+            if (num1 < 1.0 / 1000.0 || !Rand.Chance((float)((double)deteriorationRate(__instance) * num1 / 36.0)))
                 return;
             IntVec3 position = t.Position;
             Map map = t.Map;
             int num2 = t.IsInAnyStorage() ? 1 : 0;
-            t.TakeDamage(new DamageInfo(DamageDefOf.Deterioration, 1f, 0.0f, -1f, (Thing)null, (BodyPartRecord)null, (ThingDef)null, DamageInfo.SourceCategory.ThingOrUnknown, (Thing)null));
+            t.TakeDamage(new DamageInfo(DamageDefOf.Deterioration, 1f, 0.0f, -1f, null, null, null, DamageInfo.SourceCategory.ThingOrUnknown, null));
             if (num2 == 0 || !t.Destroyed || !t.def.messageOnDeteriorateInStorage)
                 return;
-            Messages.Message((string)"MessageDeterioratedAway".Translate((NamedArgument)t.Label), (LookTargets)new TargetInfo(position, map, false), MessageTypeDefOf.NegativeEvent, true);
+            Messages.Message("MessageDeterioratedAway".Translate(t.Label), new TargetInfo(position, map, false), MessageTypeDefOf.NegativeEvent, true);
         }
         private static void RollForRainFire2(Map map2)
         {
-            if (!Rand.Chance(0.2f * (float)map2.listerBuildings.allBuildingsColonistElecFire.Count * 
+            if (!Rand.Chance(0.2f * map2.listerBuildings.allBuildingsColonistElecFire.Count * 
                 map2.weatherManager.RainRate))
                 return;
-            Building building = map2.listerBuildings.allBuildingsColonistElecFire.RandomElement<Building>();
+            Building building = map2.listerBuildings.allBuildingsColonistElecFire.RandomElement();
             if (map2.roofGrid.Roofed(building.Position))
                 return;
-            ShortCircuitUtility.TryShortCircuitInRain((Thing)building);
+            ShortCircuitUtility.TryShortCircuitInRain(building);
         }
         private static float MeltAmountAt2(float temperature)
         {
-            if ((double)temperature < 0.0)
+            if (temperature < 0.0)
                 return 0.0f;
-            return (double)temperature < 10.0 ? (float)((double)temperature * (double)temperature * 0.00579999992623925 * 0.100000001490116) : temperature * 0.0058f;
+            return temperature < 10.0 ? (float)(temperature * (double)temperature * 0.00579999992623925 * 0.100000001490116) : temperature * 0.0058f;
         }
     }
 }

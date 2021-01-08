@@ -27,10 +27,46 @@ namespace RimThreaded
 			AccessTools.FieldRefAccess<RegionDirtyer, List<IntVec3>>("dirtyCells");
 		//public static System.Reflection.MethodInfo removeRes = typeof(Thing).GetMethod("RemoveAllReservationsAndDesignationsOnThis", BindingFlags.Instance | BindingFlags.NonPublic);
 		//public static System.Reflection.MethodInfo notifyMethod = typeof(RegionDirtyer).GetMethod("Notify_ThingAffectingRegionsDespawned", BindingFlags.Instance | BindingFlags.NonPublic);
+		public static bool get_FlammableNow(Thing __instance, ref bool __result)
+		{
+			if (__instance.GetStatValue(StatDefOf.Flammability) < 0.01f)
+			{
+				__result = false;
+				return false;
+			}
 
+			if (__instance.Spawned && !__instance.FireBulwark)
+			{
+				List<Thing> thingList = __instance.Position.GetThingList(__instance.Map);
+				if (thingList != null)
+				{
+					for (int i = 0; i < thingList.Count; i++)
+					{
+						Thing thing;
+						try
+                        {
+							 thing = thingList[i];
+						} catch (ArgumentOutOfRangeException)
+                        {
+							break;
+                        }
+						if (thing != null && thing.FireBulwark)
+						{
+							__result = false;
+							return false;
+						}
+					}
+				}
+			}
+
+			__result = true;
+			return false;
+		}
 		public static bool TakeDamage(Thing __instance, ref DamageWorker.DamageResult __result, DamageInfo dinfo)
 		{
 			
+
+
 			if (__instance.Destroyed) {
 				__result = new DamageWorker.DamageResult();
 				return false;

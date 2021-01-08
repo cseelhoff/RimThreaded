@@ -22,7 +22,7 @@ namespace RimThreaded
         public static StringBuilder logSbTrace = StaticFieldRefAccess<StringBuilder>(typeof(GrammarResolver), "logSbTrace");
         public static StringBuilder logSbMid = StaticFieldRefAccess<StringBuilder>(typeof(GrammarResolver), "logSbMid");
         public static StringBuilder logSbRules = StaticFieldRefAccess<StringBuilder>(typeof(GrammarResolver), "logSbRules");
-        static Dictionary<string, List<RuleEntry>> rules = new Dictionary<string, List<RuleEntry>>();
+        public static Dictionary<string, List<RuleEntry>> rules = new Dictionary<string, List<RuleEntry>>();
         static object resolveLock = new object();
 
         private static bool TryResolveRecursive(RuleEntry entry, int depth, Dictionary<string, string> constants, out string output, bool log, List<string> extraTags, List<string> resolvedTags)
@@ -137,7 +137,7 @@ namespace RimThreaded
         }
 
 
-        private class RuleEntry
+        public class RuleEntry
         {
             public Rule rule;
 

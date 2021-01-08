@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace RimThreaded
 {
-
+    /*
     public class Mesh_Patch
     {
 		public static bool MeshSafe(ref Mesh __instance)
@@ -36,4 +36,5 @@ namespace RimThreaded
         }
 
 	}
+    */
 }

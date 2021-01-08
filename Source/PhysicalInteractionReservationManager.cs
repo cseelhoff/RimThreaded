@@ -94,9 +94,14 @@ namespace RimThreaded
             ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob =
                 instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
 
-            if (targetToPawnToJob.TryGetValue(target, out ConcurrentDictionary<Pawn, Job> pawnToJob))
+            if (targetToPawnToJob.TryGetValue(target, out ConcurrentDictionary<Pawn, Job> pawnToJob) && pawnToJob.Count > 0)
             {
-                __result = pawnToJob.First().Key;
+                try
+                {
+                    __result = pawnToJob.First().Key;
+                } catch (InvalidOperationException)
+                {
+                }
             }
             return false;
         }

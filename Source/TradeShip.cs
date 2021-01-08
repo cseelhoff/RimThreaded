@@ -7,6 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -20,8 +21,11 @@ namespace RimThreaded
             --__instance.ticksUntilDeparture;
             if (__instance.Departed)
                 __instance.Depart();
-            RimThreaded.TradeShipThings = things(__instance);
-            RimThreaded.TradeShipTicks = things(__instance).Count;
+            int index = Interlocked.Increment(ref RimThreaded.totalTradeShipsCount) - 1;
+            ThingOwner thingsOwner = things(__instance);
+            RimThreaded.tradeShips[index].TradeShipThings = thingsOwner;
+            RimThreaded.tradeShips[index].TradeShipTicks = thingsOwner.Count;
+            Interlocked.Add(ref RimThreaded.totalTradeShipTicks, thingsOwner.Count);
             return false;
         }
 

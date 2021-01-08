@@ -735,6 +735,15 @@ namespace RimThreaded
                     regionCostCalculatorWrappers[tID] = regionCostCalculatorWrapper;
                 }
             }
+            Map map = RegionCostCalculatorWrapper_Patch.map(regionCostCalculatorWrapper);
+            if(map.regionGrid == null)
+            {
+                regionCostCalculatorWrapper = new RegionCostCalculatorWrapper(mapField(__instance));
+                lock (regionCostCalculatorWrappers)
+                {
+                    regionCostCalculatorWrappers[tID] = regionCostCalculatorWrapper;
+                }
+            }
             return regionCostCalculatorWrapper;
         }
     }

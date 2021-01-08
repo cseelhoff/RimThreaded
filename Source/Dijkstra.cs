@@ -49,7 +49,14 @@ namespace RimThreaded
             {
                 for (int index = 0; index < objList.Count; ++index)
                 {
-                    IntVec3 key = objList[index];
+                    IntVec3 key;
+                    try
+                    {
+                        key = objList[index];
+                    } catch (ArgumentOutOfRangeException)
+                    {
+                        break;
+                    }
                     if (!distances.ContainsKey(key))
                     {
                         distances.Add(key, 0.0f);

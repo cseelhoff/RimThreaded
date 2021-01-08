@@ -318,7 +318,7 @@ namespace RimThreaded
                 ++this_numRegionsOpened;
             }
         }
-        private static bool CheckRegionBasedReachability(TraverseParms traverseParams, Queue<Region> this_openQueue, uint this_reachedIndex, 
+        private static bool CheckRegionBasedReachability(TraverseParms traverseParams, Queue<Region> this_openQueue, uint this_reachedIndex,
             List<Region> this_destRegions, List<Region> this_startingRegions, ReachabilityCache this_cache, ref int this_numRegionsOpened, HashSet<Region> regionsReached)
         {
             while (this_openQueue.Count > 0)
@@ -338,11 +338,11 @@ namespace RimThreaded
                                 {
                                     Region regionA = this_startingRegions[index3];
                                     Room roomA = null;
-                                    if(regionA != null)
+                                    if (regionA != null)
                                     {
                                         roomA = regionA.Room;
                                         this_cache.AddCachedResult(roomA, region2.Room, traverseParams, true);
-                                    }                                    
+                                    }
                                 }
                                 return true;
                             }
@@ -365,7 +365,7 @@ namespace RimThreaded
           IntVec3 start,
           LocalTargetInfo dest,
           PathEndMode peMode,
-          TraverseParms traverseParams, RegionGrid regionGrid, Reachability __instance, List<Region> this_startingRegions, 
+          TraverseParms traverseParams, RegionGrid regionGrid, Reachability __instance, List<Region> this_startingRegions,
           ReachabilityCache this_cache, List<Region> this_destRegions)
         {
             IntVec3 foundCell = IntVec3.Invalid;
@@ -375,7 +375,7 @@ namespace RimThreaded
             map(__instance).floodFiller.FloodFill(start, (Predicate<IntVec3>)(c =>
             {
                 int index = cellIndices.CellToIndex(c);
-                if ((traverseParams.mode == TraverseMode.PassAllDestroyableThingsNotWater || traverseParams.mode == TraverseMode.NoPassClosedDoorsOrWater) && 
+                if ((traverseParams.mode == TraverseMode.PassAllDestroyableThingsNotWater || traverseParams.mode == TraverseMode.NoPassClosedDoorsOrWater) &&
                 c.GetTerrain(map(__instance)).IsWater)
                     return false;
                 if (traverseParams.mode == TraverseMode.PassAllDestroyableThings || traverseParams.mode == TraverseMode.PassAllDestroyableThingsNotWater)
@@ -448,7 +448,7 @@ namespace RimThreaded
                             case BoolUnknown.Unknown:
                                 flag = true;
                                 break;
-                        }                        
+                        }
                     }
                 }
             }
@@ -460,7 +460,7 @@ namespace RimThreaded
             return mode != TraverseMode.PassAllDestroyableThingsNotWater && mode != TraverseMode.NoPassClosedDoorsOrWater;
         }
 
-        private static void DetermineStartRegions2(Reachability __instance, IntVec3 start, List<Region> this_startingRegions, PathGrid pathGrid, 
+        private static void DetermineStartRegions2(Reachability __instance, IntVec3 start, List<Region> this_startingRegions, PathGrid pathGrid,
             RegionGrid regionGrid, uint this_reachedIndex, Queue<Region> this_openQueue, ref int this_numRegionsOpened, HashSet<Region> regionsReached)
         {
             //this_startingRegions.Clear();
@@ -471,7 +471,8 @@ namespace RimThreaded
                 {
                     QueueNewOpenRegion(validRegionAt, this_reachedIndex, this_openQueue, ref this_numRegionsOpened, regionsReached);
                     this_startingRegions.Add(validRegionAt);
-                } else
+                }
+                else
                 {
                     Log.Warning("regionGrid.GetValidRegionAt returned null for start at: " + start.ToString());
                 }
@@ -495,6 +496,6 @@ namespace RimThreaded
         }
 
 
-        
+
     }
 }
