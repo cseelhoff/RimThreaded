@@ -10,11 +10,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.2.1
-    -Fixed bug in GenTemperature.GetTemperatureFromSeasonAtTile
-    -Fixed bug in World.NaturalRockTypesIn
-    -Fixed bug in CellFinder.TryFindRandomCellNear
-    -Fixed bug in TradeShip.PassingShipTick
+    Version 1.2.2
+    -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor
+    -Fixed various bugs in RimThreaded.cs
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

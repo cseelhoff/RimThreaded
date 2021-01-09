@@ -136,6 +136,8 @@ namespace RimThreaded
 			return emptySet;
 		}
 
+
+
 		public static bool GetPotentialTargetsFor(AttackTargetsCache __instance, ref List<IAttackTarget> __result, IAttackTargetSearcher th)
 		{
 			Thing thing = th.Thing;
@@ -143,11 +145,17 @@ namespace RimThreaded
 			Faction faction = thing.Faction;
 			if (faction != null)
 			{
-                IAttackTarget[] targetsArray = TargetsHostileToFaction2(__instance, faction).ToArray();
-				for (int index = 0; index < targetsArray.Length; index++)
+				//IAttackTarget[] targetsArray = TargetsHostileToFaction2(__instance, faction).ToArray();
+				HashSet<IAttackTarget> targetsHashSet = TargetsHostileToFaction2(__instance, faction);
+				int count = targetsHashSet.Count;
+				IAttackTarget[] targetsArray = new IAttackTarget[count + 100]; //prevent overflow
+				targetsHashSet.CopyTo(targetsArray, 0);
+
+				for (int index = 0; index < count; index++)
 				{
-					IAttackTarget attackTarget = targetsArray[index];
-					if (thing.HostileTo(attackTarget.Thing))
+					IAttackTarget attackTarget;
+					attackTarget = targetsArray[index];
+					if (attackTarget != null && thing.HostileTo(attackTarget.Thing))
 					{
 						targets.Add(attackTarget);
 					}

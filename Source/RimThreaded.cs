@@ -703,11 +703,13 @@ namespace RimThreaded
                 int steadyEnvironmentEffectsIndex = 0;
                 while (ticketIndex < totalSteadyEnvironmentEffectsTicks)
                 {
+                    int index = ticketIndex;
                     while (ticketIndex >= steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsTicks)
                     {
                         steadyEnvironmentEffectsIndex++;
                     }
-                    int index = ticketIndex - steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsTicks;
+                    if(steadyEnvironmentEffectsIndex > 0)
+                        index = ticketIndex - steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex-1].steadyEnvironmentEffectsTicks;
                     int cycleIndex = (steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsCycleIndexOffset
                         - index) % steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsArea;
                     IntVec3 c = steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
@@ -736,14 +738,16 @@ namespace RimThreaded
                 int index;
                 while (ticketIndex < wildPlantSpawnerTicksCount)
                 {
+                    index = ticketIndex;
                     while (ticketIndex >= wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerTicks)
                     {
                         wildPlantSpawnerIndex++;
                     }
+                    if(wildPlantSpawnerIndex > 0)
+                        index = ticketIndex - wildPlantSpawners[wildPlantSpawnerIndex-1].WildPlantSpawnerTicks;
                     try
                     {
-                        wildPlantSpawner = wildPlantSpawners[wildPlantSpawnerIndex];
-                        index = ticketIndex - wildPlantSpawner.WildPlantSpawnerTicks;
+                        wildPlantSpawner = wildPlantSpawners[wildPlantSpawnerIndex];                        
                         int cycleIndex = (wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) % wildPlantSpawner.WildPlantSpawnerArea;
                         IntVec3 intVec = wildPlantSpawner.WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
 
@@ -823,15 +827,17 @@ namespace RimThreaded
             }
             else if (mapPostTickComplete && totalTradeShipTicksCompleted < totalTradeShipTicks)
             {
-                int ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted);
+                int ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted) - 1;
                 int totalTradeShipIndex = 0;
                 while (ticketIndex < totalTradeShipTicks)
                 {
+                    int index = ticketIndex;
                     while (ticketIndex >= tradeShips[totalTradeShipIndex].TradeShipTicks)
-                    {
+                    {                        
                         totalTradeShipIndex++;
                     }
-                    int index = ticketIndex - tradeShips[totalTradeShipIndex].TradeShipTicks;
+                    if(totalTradeShipIndex > 0)
+                        index = ticketIndex - tradeShips[totalTradeShipIndex - 1].TradeShipTicks;
                     Pawn pawn = tradeShips[totalTradeShipIndex].TradeShipThings[index] as Pawn;
                     if (pawn != null)
                     {
@@ -851,7 +857,7 @@ namespace RimThreaded
                             }
                         }
                     }
-                    ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted);
+                    ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted) - 1;
                 }
                 if (ticketIndex == totalTradeShipTicks)
                 {

@@ -25,7 +25,7 @@ namespace RimThreaded
             ThingOwner thingsOwner = things(__instance);
             RimThreaded.tradeShips[index].TradeShipThings = thingsOwner;
             int totalTradeShipTicks = Interlocked.Add(ref RimThreaded.totalTradeShipTicks, thingsOwner.Count);
-            RimThreaded.tradeShips[index].TradeShipTicks = totalTradeShipTicks;
+            RimThreaded.tradeShips[index].TradeShipTicks = RimThreaded.totalTradeShipTicks;
             return false;
         }
 
