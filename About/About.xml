@@ -12,6 +12,7 @@
 
     Version 1.2.2
     -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor
+    -Fixed various bugs in RimThreaded.cs
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

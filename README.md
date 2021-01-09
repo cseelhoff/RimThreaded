@@ -45,6 +45,7 @@ CHANGE LOG:
 
 Version 1.2.2  
 -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor  
+-Fixed various bugs in RimThreaded.cs  
 
 Version 1.2.1  
 -Fixed bug in GenTemperature.GetTemperatureFromSeasonAtTile  
