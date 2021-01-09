@@ -15,6 +15,13 @@ namespace RimThreaded
     {
         public static bool TryFindRandomCellNear(ref bool __result, IntVec3 root, Map map, int squareRadius, Predicate<IntVec3> validator, out IntVec3 result, int maxTries = -1)
         {
+            if (map == null || map.Size == null)
+            {
+                result = root;
+                __result = false;
+                return false;
+            }
+
             int num = root.x - squareRadius;
             int num2 = root.x + squareRadius;
             int num3 = root.z - squareRadius;

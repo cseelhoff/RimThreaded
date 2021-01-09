@@ -73,12 +73,21 @@ namespace RimThreaded
                 regions.Clear();
             }
             IntVec3 result;
-            if (!CellFinder.TryFindRandomCellNear(root, pawn.Map, Mathf.FloorToInt(radius), (Predicate<IntVec3>)(c =>
-            {
-                if (!c.InBounds(pawn.Map) || !pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) || c.IsForbidden(pawn))
-                    return false;
-                return validator == null || validator(pawn, c, root);
-            }), out result, -1) && !CellFinder.TryFindRandomCellNear(root, pawn.Map, Mathf.FloorToInt(radius), (Predicate<IntVec3>)(c => c.InBounds(pawn.Map) && pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) && !c.IsForbidden(pawn)), out result, -1) && (!CellFinder.TryFindRandomCellNear(root, pawn.Map, Mathf.FloorToInt(radius), (Predicate<IntVec3>)(c => c.InBounds(pawn.Map) && pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn)), out result, -1) && !CellFinder.TryFindRandomCellNear(root, pawn.Map, 20, (Predicate<IntVec3>)(c => c.InBounds(pawn.Map) && pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) && !c.IsForbidden(pawn)), out result, -1)) && (!CellFinder.TryFindRandomCellNear(root, pawn.Map, 30, (Predicate<IntVec3>)(c => c.InBounds(pawn.Map) && pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn)), out result, -1) && !CellFinder.TryFindRandomCellNear(pawn.Position, pawn.Map, 5, (Predicate<IntVec3>)(c => c.InBounds(pawn.Map) && pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn)), out result, -1)))
+            if (!CellFinder.TryFindRandomCellNear(root, pawn.Map, Mathf.FloorToInt(radius), c =>
+                {
+                    if (!c.InBounds(pawn.Map) || !pawn.CanReach(c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) || c.IsForbidden(pawn))
+                        return false;
+                    return validator == null || validator(pawn, c, root);
+                }, out result, -1) && !CellFinder.TryFindRandomCellNear(root, pawn.Map, Mathf.FloorToInt(radius), c => c.InBounds(pawn.Map) && 
+                pawn.CanReach(c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) && !c.IsForbidden(pawn), out result, -1) && 
+                (!CellFinder.TryFindRandomCellNear(root, pawn.Map, Mathf.FloorToInt(radius), c => c.InBounds(pawn.Map) && 
+                pawn.CanReach(c, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn), out result, -1) && 
+                !CellFinder.TryFindRandomCellNear(root, pawn.Map, 20, c => c.InBounds(pawn.Map) && 
+                pawn.CanReach(c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) && !c.IsForbidden(pawn), out result, -1)) && 
+                (!CellFinder.TryFindRandomCellNear(root, pawn.Map, 30, c => c.InBounds(pawn.Map) && 
+                pawn.CanReach(c, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn), out result, -1) && 
+                !CellFinder.TryFindRandomCellNear(pawn.Position, pawn.Map, 5, c => c.InBounds(pawn.Map) &&
+                pawn.CanReach(c, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn), out result, -1)))
                 result = pawn.Position;
             if (flag)
                 pawn.Map.debugDrawer.FlashCell(result, 0.4f, "fallback", 50);

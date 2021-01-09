@@ -51,7 +51,10 @@ namespace RimThreaded
 					tileTemperature[tile] = temperatureFromTile;
 				}
 				temperature = temperatureFromTile + GenTemperature.OffsetFromSeasonCycle(absTick, tile);
-				absTickTemperature[absTick] = temperature;
+				lock (absTickTemperature)
+				{
+					absTickTemperature.SetOrAdd(absTick, temperature);
+				}
 			}
 			__result = temperature;
 			return false;

@@ -1508,11 +1508,16 @@ namespace RimThreaded
 			original = typeof(GenLeaving);
 			patched = typeof(GenLeaving_Patch);
 			Prefix(original, patched, "DropFilthDueToDamage");
-			
+
 			//PawnDestinationReservationManager
 			original = typeof(PawnDestinationReservationManager);
 			patched = typeof(PawnDestinationReservationManager_Patch);
 			Prefix(original, patched, "MostRecentReservationFor");
+
+			//World
+			original = typeof(World);
+			patched = typeof(World_Patch);
+			Prefix(original, patched, "NaturalRockTypesIn");
 
 
 			// Resources_Patch

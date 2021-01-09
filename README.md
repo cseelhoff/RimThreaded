@@ -43,6 +43,12 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.2.1  
+-Fixed bug in GenTemperature.GetTemperatureFromSeasonAtTile  
+-Fixed bug in World.NaturalRockTypesIn  
+-Fixed bug in CellFinder.TryFindRandomCellNear  
+-Fixed bug in TradeShip.PassingShipTick  
+
 Version 1.2.0  
 -Major overhaul for RimThreaded.cs, improving multimap support  
 -Major overhaul for SteadyEnvironmentEffects.SteadyEnvironmentEffectsTick, improving multimap support  

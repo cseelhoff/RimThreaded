@@ -327,6 +327,7 @@
     <Compile Include="TickList.cs" />
     <Compile Include="TickManager.cs" />
     <Compile Include="Verb.cs" />
+    <Compile Include="World_Patch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

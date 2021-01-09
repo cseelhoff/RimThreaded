@@ -10,19 +10,11 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.2.0
-    -Major overhaul for RimThreaded.cs, improving multimap support
-    -Major overhaul for SteadyEnvironmentEffects.SteadyEnvironmentEffectsTick, improving multimap support
-    -Major overhaul for TradeShip.PassingShipTick, improving multimap support
-    -Major overhaul for WildPlantSpawner.WildPlantSpawnerTickInternal, improving multimap support
-    -Fixed bug in DijkstraIntVec3.Run
-    -Fixed bug in LordManager.LordOf
-    -Fixed bug in PathFinder.getRegionCostCalculatorWrapper
-    -Fixed bug in PawnDestinationReservationManager.MostRecentReservationFor
-    -Fixed bug in PhysicalInteractionReservationManager.FirstReserverOf
-    -Fixed bug in Thing.get_FlammableNow
-    -Fixed bug in FoodUtility.FoodOptimality
-
+    Version 1.2.1
+    -Fixed bug in GenTemperature.GetTemperatureFromSeasonAtTile
+    -Fixed bug in World.NaturalRockTypesIn
+    -Fixed bug in CellFinder.TryFindRandomCellNear
+    -Fixed bug in TradeShip.PassingShipTick
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
