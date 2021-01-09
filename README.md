@@ -43,6 +43,9 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.2.2  
+-Fixed bug in AttackTargetsCache.GetPotentialTargetsFor  
+
 Version 1.2.1  
 -Fixed bug in GenTemperature.GetTemperatureFromSeasonAtTile  
 -Fixed bug in World.NaturalRockTypesIn  
