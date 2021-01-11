@@ -25,7 +25,7 @@ namespace RimThreaded
                 {
                     break;
                 }
-                if (SickPawnVisitUtility.CanVisit(pawn, pawn2, maxPatientJoy)) {
+                if (pawn2 != null && SickPawnVisitUtility.CanVisit(pawn, pawn2, maxPatientJoy)) {
                     source.Add(pawn2);
                 }
             }

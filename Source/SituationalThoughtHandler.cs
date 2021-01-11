@@ -76,7 +76,7 @@ namespace RimThreaded
                 if (!this_cachedSocialThoughts[__instance].TryGetValue(otherPawn, out cachedSocialThoughts))
                 {
                     cachedSocialThoughts = new CachedSocialThoughts();
-                    this_cachedSocialThoughts[__instance].Add(otherPawn, cachedSocialThoughts);
+                    this_cachedSocialThoughts[__instance].SetOrAdd(otherPawn, cachedSocialThoughts);
                 }
                 if (!cachedSocialThoughts.ShouldRecalculateState)
                     return;

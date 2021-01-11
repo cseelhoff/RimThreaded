@@ -3,6 +3,7 @@ using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -41,7 +42,7 @@ namespace RimThreaded
                 //return false;
             }
 
-                curAlertIndex(__instance)++;
+            curAlertIndex(__instance)++;
             if (curAlertIndex(__instance) >= 24)
             {
                 curAlertIndex(__instance) = 0;
@@ -50,6 +51,7 @@ namespace RimThreaded
             for (int i = curAlertIndex(__instance); i < AllAlerts(__instance).Count; i += 24)
             {
                 CheckAddOrRemoveAlert2(__instance, AllAlerts(__instance)[i]);
+                //actionCheckAddOrRemoveAlert(__instance, AllAlerts(__instance)[i], false);
             }
 
             if (Time.frameCount % 20 == 0)
@@ -72,6 +74,7 @@ namespace RimThreaded
                             bool flag = questsListForReading[j].State != QuestState.Ongoing || questPartActivable.State != QuestPartState.Enabled;
                             bool alertDirty = questPartActivable.AlertDirty;
                             CheckAddOrRemoveAlert2(__instance, cachedAlert, flag || alertDirty);
+                            //actionCheckAddOrRemoveAlert(__instance, cachedAlert, flag || alertDirty);
                             if (alertDirty)
                             {
                                 questPartActivable.ClearCachedAlert();
@@ -110,6 +113,10 @@ namespace RimThreaded
             mouseoverAlertIndex(__instance) = -1;
             return false;
         }
+
+        //Func<char, int> delegateCheckAddOrRemoveAlert = (Func <Type[] {}, int>) Delegate.CreateDelegate(typeof(Func<char, int>), "Hello", method);
+        static Action<AlertsReadout, Alert, bool> actionCheckAddOrRemoveAlert = (Action<AlertsReadout, Alert, bool>) Delegate.CreateDelegate
+            (typeof(Action<AlertsReadout, Alert, bool>), Method(typeof(AlertsReadout), "CheckAddOrRemoveAlert"));
         public static void CheckAddOrRemoveAlert2(AlertsReadout __instance, Alert alert, bool forceRemove = false)
         {
             try

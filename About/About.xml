@@ -10,9 +10,10 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.2.2
-    -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor
-    -Fixed various bugs in RimThreaded.cs
+    Version 1.2.3
+    -Fixed bug in SickPawnVisitUtility.FindRandomSickPawn
+    -Fixed bug in SustainerManager.UpdateAllSustainerScopes
+    -Fixed bug in Camera.set_targetTexture
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

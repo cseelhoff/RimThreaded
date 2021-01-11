@@ -88,7 +88,7 @@ namespace RimThreaded
                     sust = __instance.AllSustainers[index];
                 }
                 catch (ArgumentOutOfRangeException) { break; }
-                if (null == sust)
+                if (null == sust || sust.def == null)
                 {
                     continue;
                 }
@@ -114,32 +114,31 @@ namespace RimThreaded
                     {
                         value[j].scopeFader.inScope = true;
                     }
+                    continue;
                 }
-                else
+
+                for (int k = 0; k < value.Count; k++)
                 {
-                    for (int k = 0; k < value.Count; k++)
-                    {
-                        value[k].scopeFader.inScope = false;
-                    }
+                    value[k].scopeFader.inScope = false;
+                }
 
-                    value.Sort(SortSustainersByCameraDistanceCached);
-                    int num = 0;
-                    for (int l = 0; l < value.Count; l++)
+                value.Sort(SortSustainersByCameraDistanceCached);
+                int num = 0;
+                for (int l = 0; l < value.Count; l++)
+                {
+                    value[l].scopeFader.inScope = true;
+                    num++;
+                    if (num >= key.maxVoices)
                     {
-                        value[l].scopeFader.inScope = true;
-                        num++;
-                        if (num >= key.maxVoices)
-                        {
-                            break;
-                        }
+                        break;
                     }
+                }
 
-                    for (int m = 0; m < value.Count; m++)
+                for (int m = 0; m < value.Count; m++)
+                {
+                    if (!value[m].scopeFader.inScope)
                     {
-                        if (!value[m].scopeFader.inScope)
-                        {
-                            value[m].scopeFader.inScopePercent = 0f;
-                        }
+                        value[m].scopeFader.inScopePercent = 0f;
                     }
                 }
             }

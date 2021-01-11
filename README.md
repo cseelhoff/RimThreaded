@@ -43,6 +43,11 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.2.3  
+-Fixed bug in SickPawnVisitUtility.FindRandomSickPawn  
+-Fixed bug in SustainerManager.UpdateAllSustainerScopes  
+-Fixed bug in Camera.set_targetTexture  
+
 Version 1.2.2  
 -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor  
 -Fixed various bugs in RimThreaded.cs  
