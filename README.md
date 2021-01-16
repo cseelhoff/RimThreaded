@@ -15,7 +15,7 @@ LOAD ORDER:
 Put RimThreaded last in load order.
 
 MOD COMPATIBILITY:
-See discord channel.
+Since more mods are made compatible every week, the mod compatibility list is maintained by the community as a dedicated channel on our discord. If the mod is not listed there, it is most likely compatible.
 
 SUBMIT BUGS:
 https://github.com/cseelhoff/RimThreaded/issues/new/choose
@@ -44,6 +44,9 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 CHANGE LOG:  
 
 Version 1.2.3  
+-Overhauled multithreading for LongEventHandler  
+-Overhauled RegionAndRoomUpdater (related to pathing errors)  
+-Fixed bug in SituationalThoughtHandler.RemoveExpiredThoughtsFromCache  
 -Fixed bug in SickPawnVisitUtility.FindRandomSickPawn  
 -Fixed bug in SustainerManager.UpdateAllSustainerScopes  
 -Fixed bug in Camera.set_targetTexture  

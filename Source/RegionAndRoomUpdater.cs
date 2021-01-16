@@ -21,20 +21,25 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<RegionDirtyer, Map>("map");
         public static void SetAllClean2(RegionDirtyer __instance)
         {
-            List<IntVec3> dirtyCells = __instance.DirtyCells;
-            for (int i = 0; i < dirtyCells.Count; i++)
+            ConcurrentQueue<IntVec3> dirtyCells = RegionDirtyer_Patch.get_DirtyCells(__instance);
+            while (dirtyCells.TryDequeue(out IntVec3 dirtyCell))
             {
-                IntVec3 dirtyCell;
-                try
-                {
-                    dirtyCell = dirtyCells[i];
-                }
-                catch(ArgumentOutOfRangeException) { break;  }
+                //IntVec3 dirtyCell;
+                //try
+                //{
+                    //dirtyCell = dirtyCells[i];
+                //}
+                //catch(ArgumentOutOfRangeException) { break;  }
                     
                 maprd(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
             }
 
-            dirtyCells.Clear();
+            //dirtyCells.Clear();
+            dirtyCells = new ConcurrentQueue<IntVec3>();
+            lock (RegionDirtyer_Patch.dirtyCellsDict)
+            {
+                RegionDirtyer_Patch.dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
+            }
         }
 
         public static AccessTools.FieldRef<RegionAndRoomUpdater, Map> map =
@@ -161,7 +166,7 @@ namespace RimThreaded
         public static AccessTools.FieldRef<RegionDirtyer, List<IntVec3>> dirtyCells =
             AccessTools.FieldRefAccess<RegionDirtyer, List<IntVec3>>("dirtyCells");
 
-        public static bool TryRebuildDirtyRegionsAndRoomsBackup(RegionAndRoomUpdater __instance)
+        public static bool TryRebuildDirtyRegionsAndRooms(RegionAndRoomUpdater __instance)
         {
             //todo: optimize lock speedup fix
 
@@ -191,7 +196,8 @@ namespace RimThreaded
                 __instance.RebuildAllRegionsAndRooms();
             }
 
-            if (!map(__instance).regionDirtyer.AnyDirty)
+            //if (!map(__instance).regionDirtyer.AnyDirty)
+            if (RegionDirtyer_Patch.get_DirtyCells(map(__instance).regionDirtyer).IsEmpty)
             {
                 //working(__instance) = false;
                 resumeThreads();
@@ -224,7 +230,7 @@ namespace RimThreaded
             return false;
         }
 
-        public static bool TryRebuildDirtyRegionsAndRooms(RegionAndRoomUpdater __instance)
+        public static bool TryRebuildDirtyRegionsAndRooms2(RegionAndRoomUpdater __instance)
         {
             //if (working || !Enabled)
             //  return;
@@ -306,7 +312,7 @@ namespace RimThreaded
                 }
                 gate2WaitHandle.WaitOne();
                 int gate2Remaining = Interlocked.Decrement(ref gate2Count.integer);
-                if (gate1Remaining == 0)
+                if (gate2Remaining == 0)
                 {
                     gate2WaitHandle.Reset();
                     gate1WaitHandle.Set();
@@ -509,10 +515,10 @@ namespace RimThreaded
                     //Region region = regionTryGenerateRegionFrom2(map(__instance).regionMaker, intVec);
                     if (region != null)
                     {
-                        lock (newRegions(__instance))
-                        {
+                        //lock (newRegions(__instance))
+                        //{
                             newRegions(__instance).Add(region);
-                        }
+                        //}
                     }
                 }
                 //oldDirtyCells.Add(dirtyCell);
@@ -610,7 +616,6 @@ namespace RimThreaded
                     {
                         currentRegionGroup(__instance)[k].Room = room2;
                     }
-
                     reusedOldRooms(__instance).Add(room2);
                 }
                 else

@@ -148,7 +148,23 @@ namespace RimThreaded
             if (!this_cachedSocialThoughts.ContainsKey(__instance))
                 this_cachedSocialThoughts.Add(__instance, new Dictionary<Pawn, CachedSocialThoughts>());
             Dictionary<Pawn, CachedSocialThoughts> this_cachedSocialThoughtsInstance = this_cachedSocialThoughts[__instance];
-            this_cachedSocialThoughtsInstance.RemoveAll(x => x.Value.Expired || x.Key.Discarded);
+            //this_cachedSocialThoughtsInstance.RemoveAll(x => x.Value.Expired || x.Key.Discarded);
+            List<Pawn> RemoveList = new List<Pawn>();
+            lock (this_cachedSocialThoughtsInstance) { 
+                foreach(KeyValuePair<Pawn, CachedSocialThoughts> x in this_cachedSocialThoughtsInstance)
+                {
+                    if ((x.Value != null && x.Value.Expired) || (x.Key != null && x.Key.Discarded))
+                    {
+                        RemoveList.Add(x.Key);
+                        continue;
+                    }
+                }
+                foreach(Pawn r in RemoveList)
+                {
+                    this_cachedSocialThoughtsInstance.Remove(r);
+                }
+            }
+
             return false;
         }
 

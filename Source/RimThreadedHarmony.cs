@@ -17,6 +17,7 @@ using System.Threading;
 using Verse.Grammar;
 using Verse.AI.Group;
 using static HarmonyLib.AccessTools;
+using System.Collections;
 
 namespace RimThreaded
 {
@@ -793,10 +794,28 @@ namespace RimThreaded
 
 			
 			//LongEventHandler
+			
 			original = typeof(LongEventHandler);
 			patched = typeof(LongEventHandler_Patch);
 			Prefix(original, patched, "ExecuteToExecuteWhenFinished");
-
+			Prefix(original, patched, "ExecuteWhenFinished");
+			/*
+			Prefix(original, patched, "DrawLongEventWindowContents");
+			Prefix(original, patched, "get_AnyEventNowOrWaiting");
+			Prefix(original, patched, "get_AnyEventWhichDoesntUseStandardWindowNowOrWaiting");
+			Prefix(original, patched, "get_ShouldWaitForEvent");
+			Prefix(original, patched, "LongEventsOnGUI");
+			Prefix(original, patched, "LongEventsUpdate");
+			Prefix(original, patched, "UpdateCurrentEnumeratorEvent");
+			Prefix(original, patched, "UpdateCurrentAsynchronousEvent");
+			Prefix(original, patched, "UpdateCurrentSynchronousEvent");
+			Prefix(original, patched, "RunEventFromAnotherThread");
+			Prefix(original, patched, "SetCurrentEventText");
+			Prefix(original, patched, "ClearQueuedEvents");
+			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(Action), typeof(string), typeof(bool), typeof(Action < Exception >), typeof(bool) });
+			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(IEnumerable) , typeof(string) , typeof(Action < Exception >), typeof(bool) });
+			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(Action), typeof(string), typeof(string), typeof(bool), typeof(Action < Exception >), typeof(bool) });
+			*/
 			//SituationalThoughtHandler
 			original = typeof(SituationalThoughtHandler);
 			patched = typeof(SituationalThoughtHandler_Patch);

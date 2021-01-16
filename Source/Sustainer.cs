@@ -56,7 +56,7 @@ namespace RimThreaded
         {
             if (__instance.Ended)
             {
-                Log.Warning("Tried to maintain ended sustainer: " + __instance.def);
+                //Log.Warning("Tried to maintain ended sustainer: " + __instance.def);
             }
             else if (__instance.info.Maintenance == MaintenanceType.PerTick)
             {

@@ -283,7 +283,7 @@ namespace RimThreaded
 					yield return new CodeInstruction(OpCodes.Ldloc_S, local_openList.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldloc_3); //curIndex
 					yield return new CodeInstruction(OpCodes.Ldc_I4_0);
-					Log.Message(costNodeType2.GetConstructor(new Type[] { typeof(Int32), typeof(Int32) }).ToString());
+					//Log.Message(costNodeType2.GetConstructor(new Type[] { typeof(Int32), typeof(Int32) }).ToString());
 					yield return new CodeInstruction(OpCodes.Newobj, costNodeType2.GetConstructor(new Type[] { typeof(Int32), typeof(Int32) }));
 					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(fastPriorityQueueCostNodeType2, "Push"));
 					//yield return new CodeInstruction(OpCodes.Ldloc_S, openList.LocalIndex);
