@@ -44,12 +44,24 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 CHANGE LOG:  
 
 Version 1.2.3  
--Overhauled multithreading for LongEventHandler  
--Overhauled RegionAndRoomUpdater (related to pathing errors)  
--Fixed bug in SituationalThoughtHandler.RemoveExpiredThoughtsFromCache  
--Fixed bug in SickPawnVisitUtility.FindRandomSickPawn  
--Fixed bug in SustainerManager.UpdateAllSustainerScopes  
+-Overhauled LongEventHandler multithreading  
+-Overhauled RegionAndRoomUpdater (pathing)  
+-Overhauled RegionCostCalculator (pathing)  
+-Overhauled RegionDirtyer (pathing)  
+-Fixed bug in AlertsReadout.AlertsReadoutUpdate  
+-Fixed bug in AttackTargetsCache.GetPotentialTargetsFor  
 -Fixed bug in Camera.set_targetTexture  
+-Fixed bug in Camera.Render  
+-Fixed bug in CastPositionFinder.CastPositionPreference  
+-Fixed bug in Explosion.StartExplosion  
+-Fixed bug in ImmunityHandler.NeededImmunitiesNow  
+-Fixed bug in MemoryThoughtHandler.MemoryThoughtInterval  
+-Fixed bug in PortraitRenderer.RenderPortrait  
+-Fixed bug in SickPawnVisitUtility.FindRandomSickPawn  
+-Fixed bug in SituationalThoughtHandler.CheckRecalculateSocialThoughts  
+-Fixed bug in SituationalThoughtHandler.RemoveExpiredThoughtsFromCache  
+-Fixed bug in SustainerManager.UpdateAllSustainerScopes  
+-Fixed bug in Sustainer.Maintain  
 
 Version 1.2.2  
 -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor  
