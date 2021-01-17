@@ -19,7 +19,6 @@
     -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor
     -Fixed bug in Camera.set_targetTexture
     -Fixed bug in Camera.Render
-    -Fixed bug in CastPositionFinder.CastPositionPreference
     -Fixed bug in Explosion.StartExplosion
     -Fixed bug in ImmunityHandler.NeededImmunitiesNow
     -Fixed bug in MemoryThoughtHandler.MemoryThoughtInterval

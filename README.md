@@ -1,45 +1,45 @@
-# RimThreaded
-RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
+# RimThreaded  
+RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.  
 
 JOIN OUR COMMUNITY ON DISCORD:  
-https://discord.gg/3JJuWK8
+https://discord.gg/3JJuWK8  
 
-SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
+SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
 
-JOIN OUR COMMUNITY ON DISCORD:
-https://discord.gg/3JJuWK8
+JOIN OUR COMMUNITY ON DISCORD:  
+https://discord.gg/3JJuWK8  
 
-SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
+SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
 
-LOAD ORDER:
-Put RimThreaded last in load order.
+LOAD ORDER:  
+Put RimThreaded last in load order.  
 
-MOD COMPATIBILITY:
-Since more mods are made compatible every week, the mod compatibility list is maintained by the community as a dedicated channel on our discord. If the mod is not listed there, it is most likely compatible.
+MOD COMPATIBILITY:  
+Since more mods are made compatible every week, the mod compatibility list is maintained by the community as a dedicated channel on our discord. If the mod is not listed there, it is most likely compatible.  
 
-SUBMIT BUGS:
-https://github.com/cseelhoff/RimThreaded/issues/new/choose
+SUBMIT BUGS:  
+https://github.com/cseelhoff/RimThreaded/issues/new/choose  
 
-CREDITS:
-Bug testing:
-Special thank you for helping me test Austin (Stanui)!
-And thank you to others in Rimworld community who have posted their bug findings!
+CREDITS:  
+Bug testing:  
+Special thank you for helping me test Austin (Stanui)!  
+And thank you to others in Rimworld community who have posted their bug findings!  
+  
+Coding:  
+Big thanks to JoJo for his continued help bug fixing and adding mod compatibility!  
+Big thanks to Kiame Vivacity for his help with fixing sound!  
+Thank you bookdude13 for your many bugfixes!  
+Thank you to Ataman for helping me fix the LVM deep storage bug!  
 
-Coding:
-Big thanks to JoJo for his continued help bug fixing and adding mod compatibility!
-Big thanks to Kiame Vivacity for his help with fixing sound!
-Thank you bookdude13 for your many bugfixes!
-Thank you to Ataman for helping me fix the LVM deep storage bug!
+Logo:  
+Thank you ArchieV1 for the logo! https://github.com/ArchieV1  
+Logo help from: Marnador https://ludeon.com/forums/index.php?action=profile;u=36313 and JKimsey https://pixabay.com/users/jkimsey-253161/  
 
-Logo:
-Thank you ArchieV1 for the logo! https://github.com/ArchieV1
-Logo help from: Marnador https://ludeon.com/forums/index.php?action=profile;u=36313 and JKimsey https://pixabay.com/users/jkimsey-253161/
+Video Review:  
+Thank you BaRKy for reviewing my mod! I am honored! https://www.youtube.com/watch?v=EWudgTJksMU  
 
-Video Review:
-Thank you BaRKy for reviewing my mod! I am honored! https://www.youtube.com/watch?v=EWudgTJksMU
-
-DONATE:
-Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded
+DONATE:  
+Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
 
@@ -52,7 +52,6 @@ Version 1.2.3
 -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor  
 -Fixed bug in Camera.set_targetTexture  
 -Fixed bug in Camera.Render  
--Fixed bug in CastPositionFinder.CastPositionPreference  
 -Fixed bug in Explosion.StartExplosion  
 -Fixed bug in ImmunityHandler.NeededImmunitiesNow  
 -Fixed bug in MemoryThoughtHandler.MemoryThoughtInterval  

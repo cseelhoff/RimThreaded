@@ -1538,22 +1538,22 @@ namespace RimThreaded
 			original = typeof(World);
 			patched = typeof(World_Patch);
 			Prefix(original, patched, "NaturalRockTypesIn");
-
+			
 			//MemoryThoughtHandler
 			original = typeof(MemoryThoughtHandler);
 			patched = typeof(MemoryThoughtHandler_Patch);
 			Prefix(original, patched, "MemoryThoughtInterval");
-
+			
 			//PortraitRenderer
 			original = typeof(PortraitRenderer);
 			patched = typeof(PortraitRenderer_Patch);
 			Prefix(original, patched, "RenderPortrait");
-
+			
 			//CastPositionFinder
-			original = typeof(CastPositionFinder);
-			patched = typeof(CastPositionFinder_Patch);
-			Prefix(original, patched, "CastPositionPreference");
-
+			//original = typeof(CastPositionFinder);
+			//patched = typeof(CastPositionFinder_Patch);
+			//Prefix(original, patched, "CastPositionPreference");
+			
 			//RegionDirtyer
 			original = typeof(RegionDirtyer);
 			patched = typeof(RegionDirtyer_Patch);

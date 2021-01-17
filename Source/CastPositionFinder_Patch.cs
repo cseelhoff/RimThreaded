@@ -23,25 +23,23 @@ namespace RimThreaded
         public static bool CastPositionPreference(IntVec3 c, ref float __result)
         {
             bool flag = true;
-            if(req.caster == null || req.caster.Map == null)
+            if (req.caster != null && req.caster.Map != null)
             {
-                __result = -1f;
-                return false;
-            }
-            List<Thing> list = req.caster.Map.thingGrid.ThingsListAtFast(c);
-            for (int i = 0; i < list.Count; i++)
-            {
-                Thing thing = list[i];
-                Fire fire = thing as Fire;
-                if (fire != null && fire.parent == null)
+                List<Thing> list = req.caster.Map.thingGrid.ThingsListAtFast(c);
+                for (int i = 0; i < list.Count; i++)
                 {
-                    __result = - 1f;
-                    return false;
-                }
+                    Thing thing = list[i];
+                    Fire fire = thing as Fire;
+                    if (fire != null && fire.parent == null)
+                    {
+                        __result = -1f;
+                        return false;
+                    }
 
-                if (thing.def.passability == Traversability.PassThroughOnly)
-                {
-                    flag = false;
+                    if (thing.def.passability == Traversability.PassThroughOnly)
+                    {
+                        flag = false;
+                    }
                 }
             }
 
