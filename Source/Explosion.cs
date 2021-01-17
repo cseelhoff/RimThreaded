@@ -136,7 +136,7 @@ namespace RimThreaded
                 cells.Clear();
                 damagedThings(__instance).Clear();
                 addedCellsAffectedOnlyByDamage(__instance).Clear();
-                cells.AddRange(__instance.damType.Worker.ExplosionCellsToHit(__instance));
+                cells.AddRange(__instance.damType.Worker.ExplosionCellsToHit(__instance).ToList());
                 if (__instance.applyDamageToExplosionCellsNeighbors)
                 {
                     AddCellsNeighbors2(__instance, cells);

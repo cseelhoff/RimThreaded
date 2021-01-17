@@ -9,6 +9,7 @@ using Verse.AI;
 using Verse.Sound;
 using System.Reflection;
 using System.Threading;
+using System.Collections.Concurrent;
 
 namespace RimThreaded
 {
@@ -20,20 +21,25 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<RegionDirtyer, Map>("map");
         public static void SetAllClean2(RegionDirtyer __instance)
         {
-            List<IntVec3> dirtyCells = __instance.DirtyCells;
-            for (int i = 0; i < dirtyCells.Count; i++)
+            ConcurrentQueue<IntVec3> dirtyCells = RegionDirtyer_Patch.get_DirtyCells(__instance);
+            while (dirtyCells.TryDequeue(out IntVec3 dirtyCell))
             {
-                IntVec3 dirtyCell;
-                try
-                {
-                    dirtyCell = dirtyCells[i];
-                }
-                catch(ArgumentOutOfRangeException) { break;  }
+                //IntVec3 dirtyCell;
+                //try
+                //{
+                    //dirtyCell = dirtyCells[i];
+                //}
+                //catch(ArgumentOutOfRangeException) { break;  }
                     
                 maprd(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
             }
 
-            dirtyCells.Clear();
+            //dirtyCells.Clear();
+            dirtyCells = new ConcurrentQueue<IntVec3>();
+            lock (RegionDirtyer_Patch.dirtyCellsDict)
+            {
+                RegionDirtyer_Patch.dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
+            }
         }
 
         public static AccessTools.FieldRef<RegionAndRoomUpdater, Map> map =
@@ -65,12 +71,29 @@ namespace RimThreaded
             typeof(RegionDirtyer).GetMethod("SetAllClean", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static Dictionary<int, bool> threadRebuilding = new Dictionary<int, bool>();
+        public static Dictionary<RegionAndRoomUpdater, EventWaitHandle> gate1WaitHandles = new Dictionary<RegionAndRoomUpdater, EventWaitHandle>();
+        public static Dictionary<RegionAndRoomUpdater, EventWaitHandle> gate2WaitHandles = new Dictionary<RegionAndRoomUpdater, EventWaitHandle>();
+        public static Dictionary<RegionAndRoomUpdater, HashSet<IntVec3>> oldDirtyCellsDict = new Dictionary<RegionAndRoomUpdater, HashSet<IntVec3>>();
+        public static Dictionary<RegionAndRoomUpdater, HashSet<int>> gate1ThreadSets = new Dictionary<RegionAndRoomUpdater, HashSet<int>>();
+        public static Dictionary<RegionAndRoomUpdater, HashSet<int>> gate2ThreadSets = new Dictionary<RegionAndRoomUpdater, HashSet<int>>();
+        public static Dictionary<RegionAndRoomUpdater, Integer> gate1Counts = new Dictionary<RegionAndRoomUpdater, Integer>();
+        public static Dictionary<RegionAndRoomUpdater, Integer> gate2Counts = new Dictionary<RegionAndRoomUpdater, Integer>();
 
         public static object workingLock = new object();
         public static int workingInt = 0;
+        public static object initializingLock = new object();
+        public static object regionMakerLock = new object();
+
+
+        public struct Integer
+        {
+            public int integer;
+        }
+        //public static Dictionary<RegionDirtyer, int> dirtyCellsCompleted = new Dictionary<RegionDirtyer, int>();
 
         public static EventWaitHandle regionCleaning = new ManualResetEvent(false);
 
+        public static int dirtyCellsStartIndex = 0;
         private static bool ShouldBeInTheSameRoomGroup(Room a, Room b)
         {
             RegionType regionType1 = a.RegionType;
@@ -173,7 +196,8 @@ namespace RimThreaded
                 __instance.RebuildAllRegionsAndRooms();
             }
 
-            if (!map(__instance).regionDirtyer.AnyDirty)
+            //if (!map(__instance).regionDirtyer.AnyDirty)
+            if (RegionDirtyer_Patch.get_DirtyCells(map(__instance).regionDirtyer).IsEmpty)
             {
                 //working(__instance) = false;
                 resumeThreads();
@@ -204,6 +228,241 @@ namespace RimThreaded
                 Autotests_RegionListers.CheckBugs(map(__instance));
             }
             return false;
+        }
+
+        public static bool TryRebuildDirtyRegionsAndRooms2(RegionAndRoomUpdater __instance)
+        {
+            //if (working || !Enabled)
+            //  return;
+            if (!__instance.Enabled)
+            {
+                return false;
+            }
+            if (getThreadRebuilding())
+            {
+                return false;
+            }
+            //working = true;
+            setThreadRebuilding(true);
+            if (!initialized(__instance))
+            {
+                lock (initializingLock)
+                {
+                    if (!initialized(__instance))
+                    {
+                        __instance.RebuildAllRegionsAndRooms();
+                    }
+                    initialized(__instance) = true;
+                }
+            }
+
+            if (RegionDirtyer_Patch.get_DirtyCells(map(__instance).regionDirtyer).IsEmpty)
+            {
+                //working = false;
+                setThreadRebuilding(false);
+                return false;
+            }
+
+            try
+            {
+                int tid = Thread.CurrentThread.ManagedThreadId;
+                //HashSet<int> gate1ThreadSet = getGate1ThreadSet(__instance);
+                //gate1ThreadSet.Add(tid);
+                Integer gate1Count = getGate1Count(__instance);
+                int gate1Ticket = Interlocked.Increment(ref gate1Count.integer);
+                EventWaitHandle gate1WaitHandle = getGate1WaitHandle(__instance);
+                gate1WaitHandle.WaitOne();
+                //EventWaitHandle gate2WaitHandle = getGate2WaitHandle(__instance);
+                //gate2WaitHandle.Reset();
+                if (gate1Ticket == 1)
+                {
+                    RegenerateNewRegionsFromDirtyCells2(__instance);
+
+                    CreateOrUpdateRooms2(__instance);
+                    if (DebugSettings.detectRegionListersBugs)
+                    {
+                        Autotests_RegionListers.CheckBugs(map(__instance));
+                    }
+                    newRegions(__instance).Clear();
+
+                    gate1WaitHandle.Reset();
+                }
+                //HashSet<int> gate2ThreadSet = getGate2ThreadSet(__instance);
+                //gate2ThreadSet.Add(tid);
+                Integer gate2Count = getGate2Count(__instance);
+                Interlocked.Increment(ref gate2Count.integer);
+                int gate1Remaining = Interlocked.Decrement(ref gate1Count.integer);
+                EventWaitHandle gate2WaitHandle = getGate2WaitHandle(__instance);
+                if (gate1Remaining == 0)
+                {
+                    //CreateOrUpdateRooms2(__instance);
+                    /*
+                    HashSet<IntVec3> oldDirtyCells = getOldDirtyCells(__instance);
+                    foreach(IntVec3 oldDirtyCell in oldDirtyCells)
+                    {
+                        map(__instance).temperatureCache.ResetCachedCellInfo(oldDirtyCell);
+                    }
+                    */
+                    //if (DebugSettings.detectRegionListersBugs)
+                    //{
+                        //Autotests_RegionListers.CheckBugs(map(__instance));
+                    //}
+                    //newRegions(__instance).Clear();
+                    gate2WaitHandle.Set();
+                }
+                gate2WaitHandle.WaitOne();
+                int gate2Remaining = Interlocked.Decrement(ref gate2Count.integer);
+                if (gate2Remaining == 0)
+                {
+                    gate2WaitHandle.Reset();
+                    gate1WaitHandle.Set();
+                }
+            }
+            catch (Exception arg)
+            {
+                Log.Error("Exception while rebuilding dirty regions: " + arg);
+            }
+
+            //newRegions.Clear();
+            //map.regionDirtyer.SetAllClean();
+            //initialized = true; //Moved to earlier code above
+            
+            //working = false;
+            setThreadRebuilding(false);
+
+            return false;
+        }
+
+        private static Integer getGate1Count(RegionAndRoomUpdater __instance)
+        {
+            if (!gate1Counts.TryGetValue(__instance, out Integer getGate1Count))
+            {
+                getGate1Count = new Integer
+                {
+                    integer = 0
+                };
+                lock (gate1Counts)
+                {
+                    if (!gate1Counts.TryGetValue(__instance, out Integer getGate1Count2))
+                    {
+                        gate1Counts.Add(__instance, getGate1Count);
+                    } else
+                    {
+                        return getGate1Count2;
+                    }
+                }
+            }
+            return getGate1Count;
+        }
+
+        private static Integer getGate2Count(RegionAndRoomUpdater __instance)
+        {
+            if (!gate2Counts.TryGetValue(__instance, out Integer getGate2Count))
+            {
+                getGate2Count = new Integer
+                {
+                    integer = 0
+                };
+                lock (gate2Counts)
+                {
+                    if (!gate2Counts.TryGetValue(__instance, out Integer getGate2Count2))
+                    {
+                        gate2Counts.Add(__instance, getGate2Count);
+                    }
+                    else
+                    {
+                        return getGate2Count2;
+                    }
+                }
+            }
+            return getGate2Count;
+        }
+
+        private static EventWaitHandle getGate1WaitHandle(RegionAndRoomUpdater __instance)
+        {
+            if (!gate1WaitHandles.TryGetValue(__instance, out EventWaitHandle gate1WaitHandle))
+            {
+                gate1WaitHandle = new ManualResetEvent(true);
+                lock (gate1WaitHandles)
+                {
+                    if (!gate1WaitHandles.TryGetValue(__instance, out EventWaitHandle gate1WaitHandle2))
+                    {
+                        gate1WaitHandles.SetOrAdd(__instance, gate1WaitHandle);
+                    } else
+                    {
+                        return gate1WaitHandle2;
+                    }
+                }
+            }
+            return gate1WaitHandle;
+        }
+
+        private static EventWaitHandle getGate2WaitHandle(RegionAndRoomUpdater __instance)
+        {
+            if (!gate2WaitHandles.TryGetValue(__instance, out EventWaitHandle gate2WaitHandle))
+            {
+                gate2WaitHandle = new ManualResetEvent(false);
+                lock (gate2WaitHandles)
+                {
+                    if (!gate2WaitHandles.TryGetValue(__instance, out EventWaitHandle gate2WaitHandle2))
+                    {
+                        gate2WaitHandles.SetOrAdd(__instance, gate2WaitHandle);
+                    }
+                    else
+                    {
+                        return gate2WaitHandle2;
+                    }
+                }
+            }
+            return gate2WaitHandle;
+        }
+
+        private static HashSet<IntVec3> getOldDirtyCells(RegionAndRoomUpdater __instance)
+        {
+            if (!oldDirtyCellsDict.TryGetValue(__instance, out HashSet<IntVec3> oldDirtyCells))
+            {
+                oldDirtyCells = new HashSet<IntVec3>();
+                lock (oldDirtyCellsDict)
+                {
+                    if (!oldDirtyCellsDict.TryGetValue(__instance, out oldDirtyCells))
+                    {
+                        oldDirtyCellsDict.Add(__instance, oldDirtyCells);
+                    }
+                }
+            }
+            return oldDirtyCells;
+        }
+
+        private static HashSet<int> getGate1ThreadSet(RegionAndRoomUpdater __instance)
+        {
+            if (!gate1ThreadSets.TryGetValue(__instance, out HashSet<int> gate1ThreadSet))
+            {
+                gate1ThreadSet = new HashSet<int>();
+                lock (gate1ThreadSets)
+                {
+                    if (!gate1ThreadSets.TryGetValue(__instance, out gate1ThreadSet))
+                    {
+                        gate1ThreadSets.Add(__instance, gate1ThreadSet);
+                    }
+                }
+            }
+            return gate1ThreadSet;
+        }
+
+        private static HashSet<int> getGate2ThreadSet(RegionAndRoomUpdater __instance)
+        {
+            if (!gate2ThreadSets.TryGetValue(__instance, out HashSet<int> gate2ThreadSet))
+            {
+                gate2ThreadSet = new HashSet<int>();
+                lock (gate2ThreadSets)
+                {
+                    if (!gate2ThreadSets.TryGetValue(__instance, out gate2ThreadSet))
+                    {
+                        gate2ThreadSets.Add(__instance, gate2ThreadSet);
+                    }
+                }
+            }
+            return gate2ThreadSet;
         }
 
         private static void resumeThreads()
@@ -237,29 +496,34 @@ namespace RimThreaded
         }
 
         private static void RegenerateNewRegionsFromDirtyCells2(RegionAndRoomUpdater __instance)
-        {            
-            newRegions(__instance).Clear();
-            List<IntVec3> dirtyCells = map(__instance).regionDirtyer.DirtyCells;
-            for (int i = 0; i < dirtyCells.Count; i++)
+        {
+            newRegions(__instance).Clear(); //already cleared at end of method TryRebuildDirtyRegionsAndRooms()
+            //List<IntVec3> dirtyCells = map(__instance).regionDirtyer.DirtyCells;
+            Map localMap = map(__instance);
+            RegionDirtyer regionDirtyer = localMap.regionDirtyer;
+            ConcurrentQueue<IntVec3> dirtyCells = RegionDirtyer_Patch.get_DirtyCells(regionDirtyer);
+            //HashSet<IntVec3> oldDirtyCells = getOldDirtyCells(__instance);
+            while (dirtyCells.TryDequeue(out IntVec3 dirtyCell))
             {
-                IntVec3 intVec;
-                try
+                if (dirtyCell.GetRegion(localMap, RegionType.Set_All) == null)
                 {
-                    intVec = dirtyCells[i];
-                } catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
-                if (intVec.GetRegion(map(__instance), RegionType.Set_All) == null)
-                {
-                    Region region = map(__instance).regionMaker.TryGenerateRegionFrom(intVec);
+                    Region region;
+                    lock (regionMakerLock) //TODO OPTIMIZE for multithreading
+                    {
+                        region = localMap.regionMaker.TryGenerateRegionFrom(dirtyCell);
+                    }
                     //Region region = regionTryGenerateRegionFrom2(map(__instance).regionMaker, intVec);
                     if (region != null)
                     {
-                        newRegions(__instance).Add(region);
+                        //lock (newRegions(__instance))
+                        //{
+                            newRegions(__instance).Add(region);
+                        //}
                     }
                 }
-            }            
+                //oldDirtyCells.Add(dirtyCell);
+                localMap.temperatureCache.ResetCachedCellInfo(dirtyCell);
+            } 
         }
 
 
@@ -352,7 +616,6 @@ namespace RimThreaded
                     {
                         currentRegionGroup(__instance)[k].Room = room2;
                     }
-
                     reusedOldRooms(__instance).Add(room2);
                 }
                 else

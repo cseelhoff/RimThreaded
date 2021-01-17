@@ -147,9 +147,11 @@ namespace RimThreaded
 			{
 				//IAttackTarget[] targetsArray = TargetsHostileToFaction2(__instance, faction).ToArray();
 				HashSet<IAttackTarget> targetsHashSet = TargetsHostileToFaction2(__instance, faction);
-				int count = targetsHashSet.Count;
-				IAttackTarget[] targetsArray = new IAttackTarget[count + 100]; //prevent overflow
-				targetsHashSet.CopyTo(targetsArray, 0);
+                //int count = targetsHashSet.Count;
+                //IAttackTarget[] targetsArray = new IAttackTarget[count + 100]; //prevent overflow
+                //targetsHashSet.CopyTo(targetsArray, 0);
+                List<IAttackTarget> targetsArray = targetsHashSet.ToList();
+				int count = targetsArray.Count;
 
 				for (int index = 0; index < count; index++)
 				{

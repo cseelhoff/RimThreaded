@@ -475,6 +475,7 @@ namespace RimThreaded
                 else
                 {
                     Log.Warning("regionGrid.GetValidRegionAt returned null for start at: " + start.ToString());
+                    //validRegionAt = regionGrid.GetValidRegionAt(start); //USE THIS LINE FOR DEBUG BREAKPOINT
                 }
             }
             else

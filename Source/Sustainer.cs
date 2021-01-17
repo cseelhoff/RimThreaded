@@ -18,6 +18,10 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<Sustainer, List<SubSustainer>>("subSustainers");
         public static AccessTools.FieldRef<Sustainer, GameObject> worldRootObject =
             AccessTools.FieldRefAccess<Sustainer, GameObject>("worldRootObject");
+        public static AccessTools.FieldRef<Sustainer, int> lastMaintainTick =
+            AccessTools.FieldRefAccess<Sustainer, int>("lastMaintainTick");
+        public static AccessTools.FieldRef<Sustainer, int> lastMaintainFrame =
+            AccessTools.FieldRefAccess<Sustainer, int>("lastMaintainFrame");
         public static bool Cleanup(Sustainer __instance)
         {
             if (__instance.def.subSounds.Count > 0)
@@ -33,7 +37,7 @@ namespace RimThreaded
             {
                 lock (worldRootObject(__instance))
                 {
-                    if ((UnityEngine.Object)worldRootObject(__instance) != (UnityEngine.Object)null)
+                    if (worldRootObject(__instance) != null)
                     {
                         Map map = __instance.info.Maker.Map;
                         if (map != null)
@@ -42,12 +46,27 @@ namespace RimThreaded
                     else
                         __instance.def.sustainStopSound.PlayOneShot(SoundInfo.OnCamera(MaintenanceType.None));
                 }
-            if ((UnityEngine.Object)worldRootObject(__instance) != (UnityEngine.Object)null)
-                UnityEngine.Object.Destroy((UnityEngine.Object)worldRootObject(__instance));
+            if (worldRootObject(__instance) != null)
+                UnityEngine.Object.Destroy(worldRootObject(__instance));
             }
             DebugSoundEventsLog.Notify_SustainerEnded(__instance, __instance.info);
             return false;
         }
-
+        public static bool Maintain(Sustainer __instance)
+        {
+            if (__instance.Ended)
+            {
+                //Log.Warning("Tried to maintain ended sustainer: " + __instance.def);
+            }
+            else if (__instance.info.Maintenance == MaintenanceType.PerTick)
+            {
+                lastMaintainTick(__instance) = Find.TickManager.TicksGame;
+            }
+            else if (__instance.info.Maintenance == MaintenanceType.PerFrame)
+            {
+                lastMaintainFrame(__instance) = Time.frameCount;
+            }
+            return false;
+        }
     }
 }

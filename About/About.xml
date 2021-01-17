@@ -10,20 +10,36 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.2.2
+    Version 1.2.3
+    -Overhauled LongEventHandler multithreading
+    -Overhauled RegionAndRoomUpdater (pathing)
+    -Overhauled RegionCostCalculator (pathing)
+    -Overhauled RegionDirtyer (pathing)
+    -Fixed bug in AlertsReadout.AlertsReadoutUpdate
     -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor
-    -Fixed various bugs in RimThreaded.cs
+    -Fixed bug in Camera.set_targetTexture
+    -Fixed bug in Camera.Render
+    -Fixed bug in Explosion.StartExplosion
+    -Fixed bug in ImmunityHandler.NeededImmunitiesNow
+    -Fixed bug in MemoryThoughtHandler.MemoryThoughtInterval
+    -Fixed bug in PortraitRenderer.RenderPortrait
+    -Fixed bug in SickPawnVisitUtility.FindRandomSickPawn
+    -Fixed bug in SituationalThoughtHandler.CheckRecalculateSocialThoughts
+    -Fixed bug in SituationalThoughtHandler.RemoveExpiredThoughtsFromCache
+    -Fixed bug in SustainerManager.UpdateAllSustainerScopes
+    -Fixed bug in Sustainer.Maintain
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
 
-    SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
+    SETTINGS:
+    The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.
 
     LOAD ORDER:
     Put RimThreaded last in load order.
 
     MOD COMPATIBILITY:
-    See discord channel.
+    Since more mods are made compatible every week, the mod compatibility list is maintained by the community as a dedicated channel on our discord. If the mod is not listed there, it is most likely compatible.
 
     SUBMIT BUGS:
     https://github.com/cseelhoff/RimThreaded/issues/new/choose

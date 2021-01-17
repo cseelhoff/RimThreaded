@@ -17,6 +17,7 @@ using System.Threading;
 using Verse.Grammar;
 using Verse.AI.Group;
 using static HarmonyLib.AccessTools;
+using System.Collections;
 
 namespace RimThreaded
 {
@@ -235,7 +236,7 @@ namespace RimThreaded
 		static RimThreadedHarmony()
 		{
 			Harmony.DEBUG = false;
-			Log.Message("RimThreaded Harmony is loading...");
+			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "  is patching methods...");
 			Type original = null;
 			Type patched = null;
 
@@ -770,7 +771,8 @@ namespace RimThreaded
 			original = typeof(Sustainer);
 			patched = typeof(Sustainer_Patch);
 			Prefix(original, patched, "Cleanup");
-
+			Prefix(original, patched, "Maintain");
+			
 			//ImmunityHandler
 			original = typeof(ImmunityHandler);
 			patched = typeof(ImmunityHandler_Patch);
@@ -792,10 +794,28 @@ namespace RimThreaded
 
 			
 			//LongEventHandler
+			
 			original = typeof(LongEventHandler);
 			patched = typeof(LongEventHandler_Patch);
 			Prefix(original, patched, "ExecuteToExecuteWhenFinished");
-
+			Prefix(original, patched, "ExecuteWhenFinished");
+			/*
+			Prefix(original, patched, "DrawLongEventWindowContents");
+			Prefix(original, patched, "get_AnyEventNowOrWaiting");
+			Prefix(original, patched, "get_AnyEventWhichDoesntUseStandardWindowNowOrWaiting");
+			Prefix(original, patched, "get_ShouldWaitForEvent");
+			Prefix(original, patched, "LongEventsOnGUI");
+			Prefix(original, patched, "LongEventsUpdate");
+			Prefix(original, patched, "UpdateCurrentEnumeratorEvent");
+			Prefix(original, patched, "UpdateCurrentAsynchronousEvent");
+			Prefix(original, patched, "UpdateCurrentSynchronousEvent");
+			Prefix(original, patched, "RunEventFromAnotherThread");
+			Prefix(original, patched, "SetCurrentEventText");
+			Prefix(original, patched, "ClearQueuedEvents");
+			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(Action), typeof(string), typeof(bool), typeof(Action < Exception >), typeof(bool) });
+			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(IEnumerable) , typeof(string) , typeof(Action < Exception >), typeof(bool) });
+			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(Action), typeof(string), typeof(string), typeof(bool), typeof(Action < Exception >), typeof(bool) });
+			*/
 			//SituationalThoughtHandler
 			original = typeof(SituationalThoughtHandler);
 			patched = typeof(SituationalThoughtHandler_Patch);
@@ -1518,6 +1538,32 @@ namespace RimThreaded
 			original = typeof(World);
 			patched = typeof(World_Patch);
 			Prefix(original, patched, "NaturalRockTypesIn");
+			
+			//MemoryThoughtHandler
+			original = typeof(MemoryThoughtHandler);
+			patched = typeof(MemoryThoughtHandler_Patch);
+			Prefix(original, patched, "MemoryThoughtInterval");
+			
+			//PortraitRenderer
+			original = typeof(PortraitRenderer);
+			patched = typeof(PortraitRenderer_Patch);
+			Prefix(original, patched, "RenderPortrait");
+			
+			//CastPositionFinder
+			//original = typeof(CastPositionFinder);
+			//patched = typeof(CastPositionFinder_Patch);
+			//Prefix(original, patched, "CastPositionPreference");
+			
+			//RegionDirtyer
+			original = typeof(RegionDirtyer);
+			patched = typeof(RegionDirtyer_Patch);
+			Prefix(original, patched, "SetAllClean");
+			Prefix(original, patched, "Notify_WalkabilityChanged");
+			Prefix(original, patched, "Notify_ThingAffectingRegionsSpawned");
+			Prefix(original, patched, "Notify_ThingAffectingRegionsDespawned");
+			Prefix(original, patched, "SetAllDirty");
+			Prefix(original, patched, "SetRegionDirty");
+
 
 
 			// Resources_Patch
