@@ -6,8 +6,6 @@ https://discord.gg/3JJuWK8
 
 SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
 
-SETTINGS: The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
-
 LOAD ORDER:  
 Put RimThreaded last in load order.  
 
