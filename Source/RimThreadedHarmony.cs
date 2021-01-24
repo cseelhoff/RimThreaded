@@ -1708,10 +1708,10 @@ namespace RimThreaded
 			}
 			if (combatExtended_ProjectileCE != null)
 			{
-				string methodName = "CheckCellForCollision";
-				patched = typeof(ProjectileCE_Transpile);
-				Log.Message("RimThreaded is patching " + combatExtended_ProjectileCE.FullName + " " + methodName);
-				Transpile(combatExtended_ProjectileCE, patched, methodName);
+				//string methodName = "CheckCellForCollision";
+				//patched = typeof(ProjectileCE_Transpile);
+				//Log.Message("RimThreaded is patching " + combatExtended_ProjectileCE.FullName + " " + methodName);
+				//Transpile(combatExtended_ProjectileCE, patched, methodName);
 				//methodName = "CheckForCollisionBetween";
 				//patched = typeof(ProjectileCE_Transpile);
 				//Log.Message("RimThreaded is patching " + combatExtended_ProjectileCE.FullName + " " + methodName);

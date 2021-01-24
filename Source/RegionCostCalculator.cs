@@ -349,7 +349,7 @@ namespace RimThreaded
             }
             return false;
         }
-        public bool PathableNeighborIndices(RegionCostCalculator __instance, ref List<int> __result, int index)
+        public static bool PathableNeighborIndices(RegionCostCalculator __instance, ref List<int> __result, int index)
         {
             //tmpPathableNeighborIndices.Clear();
             List<int> tmpPathableNeighborIndices = new List<int>();
