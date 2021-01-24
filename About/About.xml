@@ -10,24 +10,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.2.3
-    -Overhauled LongEventHandler multithreading
-    -Overhauled RegionAndRoomUpdater (pathing)
-    -Overhauled RegionCostCalculator (pathing)
-    -Overhauled RegionDirtyer (pathing)
-    -Fixed bug in AlertsReadout.AlertsReadoutUpdate
-    -Fixed bug in AttackTargetsCache.GetPotentialTargetsFor
-    -Fixed bug in Camera.set_targetTexture
-    -Fixed bug in Camera.Render
-    -Fixed bug in Explosion.StartExplosion
-    -Fixed bug in ImmunityHandler.NeededImmunitiesNow
-    -Fixed bug in MemoryThoughtHandler.MemoryThoughtInterval
-    -Fixed bug in PortraitRenderer.RenderPortrait
-    -Fixed bug in SickPawnVisitUtility.FindRandomSickPawn
-    -Fixed bug in SituationalThoughtHandler.CheckRecalculateSocialThoughts
-    -Fixed bug in SituationalThoughtHandler.RemoveExpiredThoughtsFromCache
-    -Fixed bug in SustainerManager.UpdateAllSustainerScopes
-    -Fixed bug in Sustainer.Maintain
+    Version 1.2.4 - The Ken(obi) path(fix) to the Dark Side
+    -Fixed bug in RegionCostCalculator.PathableNeighborIndices (kudos to Ken!)
+    -Fixed bug in Djikstra.Compare
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
@@ -54,6 +39,7 @@
     Big thanks to Kiame Vivacity for his help with fixing sound!
     Thank you bookdude13 for your many bugfixes!
     Thank you to Ataman for helping me fix the LVM deep storage bug!
+    Thank you Ken for fixing RegionCostCalculator.PathableNeighborIndices!
 
     Logo:
     Thank you ArchieV1 for the logo! https://github.com/ArchieV1
