@@ -44,6 +44,7 @@ namespace RimThreaded
 		public static Type combatExtendedCE_Utility;
 		public static Type combatExtendedVerb_LaunchProjectileCE;
 		public static Type combatExtendedVerb_MeleeAttackCE;
+		public static Type combatExtended_ProjectileCE;		
 		public static Type dubsSkylight_Patch_GetRoof;
 		public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;
 		public static Type androidTiers_GeneratePawns_Patch1;
@@ -1123,6 +1124,7 @@ namespace RimThreaded
 			original = typeof(RegionCostCalculator);
 			patched = typeof(RegionCostCalculator_Patch);
 			Prefix(original, patched, "GetPreciseRegionLinkDistances");
+			Prefix(original, patched, "PathableNeighborIndices");			
 			//Prefix(original, patched, "GetRegionDistance");
 			//Prefix(original, patched, "Init");
 
@@ -1578,25 +1580,26 @@ namespace RimThreaded
 
 			//MOD COMPATIBILITY
 
-			giddyUpCoreStorageExtendedPawnData = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
-			giddyUpCoreJobsGUC_JobDefOf = AccessTools.TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
-			giddyUpCoreUtilitiesTextureUtility = AccessTools.TypeByName("GiddyUpCore.Utilities.TextureUtility");
-			giddyUpCoreStorageExtendedDataStorage = AccessTools.TypeByName("GiddyUpCore.Storage.ExtendedDataStorage");
-			giddyUpCoreJobsJobDriver_Mounted = AccessTools.TypeByName("GiddyUpCore.Jobs.JobDriver_Mounted");
-			giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob = AccessTools.TypeByName("GiddyUpCore.Harmony.Pawn_JobTracker_DetermineNextJob");
-			hospitalityCompUtility = AccessTools.TypeByName("Hospitality.CompUtility");
-			hospitalityCompGuest = AccessTools.TypeByName("Hospitality.CompGuest");
-			awesomeInventoryJobsJobGiver_FindItemByRadius = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius");
-			awesomeInventoryErrorMessage = AccessTools.TypeByName("AwesomeInventory.ErrorMessage");
-			jobGiver_AwesomeInventory_TakeArm = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_AwesomeInventory_TakeArm");
-			awesomeInventoryJobsJobGiver_FindItemByRadiusSub = AccessTools.TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius+<>c__DisplayClass17_0");
-			pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus = AccessTools.TypeByName("PawnRules.Patch.RimWorld_Pawn_GuestTracker_SetGuestStatus");
-			combatExtendedCE_Utility = AccessTools.TypeByName("CombatExtended.CE_Utility");
-			combatExtendedVerb_LaunchProjectileCE = AccessTools.TypeByName("CombatExtended.Verb_LaunchProjectileCE");
-			combatExtendedVerb_MeleeAttackCE = AccessTools.TypeByName("CombatExtended.Verb_MeleeAttackCE");
-			dubsSkylight_Patch_GetRoof = AccessTools.TypeByName("Dubs_Skylight.Patch_GetRoof");
-			jobsOfOpportunityJobsOfOpportunity_Hauling = AccessTools.TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
-			androidTiers_GeneratePawns_Patch1 = AccessTools.TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch");
+			giddyUpCoreStorageExtendedPawnData = TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
+			giddyUpCoreJobsGUC_JobDefOf = TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
+			giddyUpCoreUtilitiesTextureUtility = TypeByName("GiddyUpCore.Utilities.TextureUtility");
+			giddyUpCoreStorageExtendedDataStorage = TypeByName("GiddyUpCore.Storage.ExtendedDataStorage");
+			giddyUpCoreJobsJobDriver_Mounted = TypeByName("GiddyUpCore.Jobs.JobDriver_Mounted");
+			giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob = TypeByName("GiddyUpCore.Harmony.Pawn_JobTracker_DetermineNextJob");
+			hospitalityCompUtility = TypeByName("Hospitality.CompUtility");
+			hospitalityCompGuest = TypeByName("Hospitality.CompGuest");
+			awesomeInventoryJobsJobGiver_FindItemByRadius = TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius");
+			awesomeInventoryErrorMessage = TypeByName("AwesomeInventory.ErrorMessage");
+			jobGiver_AwesomeInventory_TakeArm = TypeByName("AwesomeInventory.Jobs.JobGiver_AwesomeInventory_TakeArm");
+			awesomeInventoryJobsJobGiver_FindItemByRadiusSub = TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius+<>c__DisplayClass17_0");
+			pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus = TypeByName("PawnRules.Patch.RimWorld_Pawn_GuestTracker_SetGuestStatus");
+			combatExtendedCE_Utility = TypeByName("CombatExtended.CE_Utility");
+			combatExtendedVerb_LaunchProjectileCE = TypeByName("CombatExtended.Verb_LaunchProjectileCE");
+			combatExtendedVerb_MeleeAttackCE = TypeByName("CombatExtended.Verb_MeleeAttackCE");
+			combatExtended_ProjectileCE = TypeByName("CombatExtended.ProjectileCE");
+			dubsSkylight_Patch_GetRoof = TypeByName("Dubs_Skylight.Patch_GetRoof");
+			jobsOfOpportunityJobsOfOpportunity_Hauling = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
+			androidTiers_GeneratePawns_Patch1 = TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch");
 			if (androidTiers_GeneratePawns_Patch1 != null)
 			{
 				androidTiers_GeneratePawns_Patch = androidTiers_GeneratePawns_Patch1.GetNestedType("GeneratePawns_Patch");
@@ -1702,6 +1705,17 @@ namespace RimThreaded
 				patched = typeof(Verb_MeleeAttackCE_Transpile);
 				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
 				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
+			}
+			if (combatExtended_ProjectileCE != null)
+			{
+				string methodName = "CheckCellForCollision";
+				patched = typeof(ProjectileCE_Transpile);
+				Log.Message("RimThreaded is patching " + combatExtended_ProjectileCE.FullName + " " + methodName);
+				Transpile(combatExtended_ProjectileCE, patched, methodName);
+				//methodName = "CheckForCollisionBetween";
+				//patched = typeof(ProjectileCE_Transpile);
+				//Log.Message("RimThreaded is patching " + combatExtended_ProjectileCE.FullName + " " + methodName);
+				//Transpile(combatExtended_ProjectileCE, patched, methodName);
 			}
 
 			if (dubsSkylight_Patch_GetRoof != null)

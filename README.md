@@ -38,6 +38,9 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.2.4  
+-Fixed bug in CombatExtended.ProjectileCE.CheckCellForCollision   
+
 Version 1.2.3  
 -Overhauled LongEventHandler multithreading  
 -Overhauled RegionAndRoomUpdater (pathing)  

@@ -288,7 +288,17 @@ namespace RimThreaded
                 {
                     for (int j = 0; j < list2.Count; j++)
                     {
-                        HandleNeighbor(list2[j], num, node, distanceGetter, outParents, distances, queue);
+                        int i2;
+                        try
+                        {
+                            i2 = list2[j];
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            break;
+                        }
+
+                        HandleNeighbor(i2, num, node, distanceGetter, outParents, distances, queue);
                     }
                 }
                 else
