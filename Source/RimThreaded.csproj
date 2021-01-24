@@ -96,6 +96,7 @@
     <Compile Include="PawnDestinationReservationManager_Patch.cs" />
     <Compile Include="PlayDataLoader_Patch.cs" />
     <Compile Include="PortraitRenderer_Patch.cs" />
+    <Compile Include="ProjectileCE_Transpile.cs" />
     <Compile Include="ReachabilityCache.cs" />
     <Compile Include="RecordWorker_TimeGettingJoy.cs" />
     <Compile Include="RegionDirtyer_Patch.cs" />

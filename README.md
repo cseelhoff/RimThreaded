@@ -25,6 +25,7 @@ Big thanks to JoJo for his continued help bug fixing and adding mod compatibilit
 Big thanks to Kiame Vivacity for his help with fixing sound!  
 Thank you bookdude13 for your many bugfixes!  
 Thank you to Ataman for helping me fix the LVM deep storage bug!  
+Thank you Ken for fixing RegionCostCalculator.PathableNeighborIndices!  
 
 Logo:  
 Thank you ArchieV1 for the logo! https://github.com/ArchieV1  
@@ -37,6 +38,10 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+
+Version 1.2.4 - The Ken(obi) path(fix) to the Dark Side  
+-Fixed bug in RegionCostCalculator.PathableNeighborIndices (kudos to Ken!)  
+-Fixed bug in Djikstra.Compare  
 
 Version 1.2.3  
 -Overhauled LongEventHandler multithreading  

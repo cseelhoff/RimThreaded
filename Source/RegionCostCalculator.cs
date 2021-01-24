@@ -349,6 +349,66 @@ namespace RimThreaded
             }
             return false;
         }
+        public static bool PathableNeighborIndices(RegionCostCalculator __instance, ref List<int> __result, int index)
+        {
+            //tmpPathableNeighborIndices.Clear();
+            List<int> tmpPathableNeighborIndices = new List<int>();
+            PathGrid pathGrid = map(__instance).pathGrid;
+            int x = map(__instance).Size.x;
+            bool num = index % x > 0;
+            bool flag = index % x < x - 1;
+            bool flag2 = index >= x;
+            bool flag3 = index / x < map(__instance).Size.z - 1;
+            if (flag2 && pathGrid.WalkableFast(index - x))
+            {
+                tmpPathableNeighborIndices.Add(index - x);
+            }
 
+            if (flag && pathGrid.WalkableFast(index + 1))
+            {
+                tmpPathableNeighborIndices.Add(index + 1);
+            }
+
+            if (num && pathGrid.WalkableFast(index - 1))
+            {
+                tmpPathableNeighborIndices.Add(index - 1);
+            }
+
+            if (flag3 && pathGrid.WalkableFast(index + x))
+            {
+                tmpPathableNeighborIndices.Add(index + x);
+            }
+
+            bool flag4 = !num || PathFinder.BlocksDiagonalMovement(index - 1, map(__instance));
+            bool flag5 = !flag || PathFinder.BlocksDiagonalMovement(index + 1, map(__instance));
+            if (flag2 && !PathFinder.BlocksDiagonalMovement(index - x, map(__instance)))
+            {
+                if (!flag5 && pathGrid.WalkableFast(index - x + 1))
+                {
+                    tmpPathableNeighborIndices.Add(index - x + 1);
+                }
+
+                if (!flag4 && pathGrid.WalkableFast(index - x - 1))
+                {
+                    tmpPathableNeighborIndices.Add(index - x - 1);
+                }
+            }
+
+            if (flag3 && !PathFinder.BlocksDiagonalMovement(index + x, map(__instance)))
+            {
+                if (!flag5 && pathGrid.WalkableFast(index + x + 1))
+                {
+                    tmpPathableNeighborIndices.Add(index + x + 1);
+                }
+
+                if (!flag4 && pathGrid.WalkableFast(index + x - 1))
+                {
+                    tmpPathableNeighborIndices.Add(index + x - 1);
+                }
+            }
+
+            __result = tmpPathableNeighborIndices;
+            return false;
+        }
     }
 }
