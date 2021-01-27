@@ -1,7 +1,6 @@
 ---
 name: Reproducible Non-Vanilla Bug Report (Medium Priority)
-about: Submit a bug report that occurs in modded RimWorld that can be reproduced fairly
-  consistantly
+about: Submit a bug report that occurs in modded RimWorld that can be reproduced fairly consistantly
 title: ''
 labels: Bug, Reproducible
 assignees: ''
