@@ -1,8 +1,9 @@
 ---
 name: Reproducible Vanilla Bug Report (High Priority)
-about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs that can be reproduced fairly consistantly
+about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs
+  that can be reproduced fairly consistantly
 title: ''
-labels: bug, reproducible, vanilla
+labels: Bug, Reproducible, Vanilla RT
 assignees: ''
 
 ---
