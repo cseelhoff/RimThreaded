@@ -1,7 +1,6 @@
 ---
 name: Non-Reproducible Non-Vanilla Bug Report (Lowest Priority)
-about: Submit a bug report that occurs in modded RimWorld that cannot be reproduced
-  fairly consistantly
+about: Submit a bug report that occurs in modded RimWorld that cannot be reproduced fairly consistantly
 title: ''
 labels: Bug
 assignees: ''
