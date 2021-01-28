@@ -187,6 +187,11 @@ namespace RimThreaded
             {
                 prepEventWaitStarts.Add(new ManualResetEvent(false));
             }
+            string potentialConflicts = RimThreadedMod.getPotentialModConflicts();
+            if(potentialConflicts.Length > 0)
+            {
+                Log.Warning("Potential RimThreaded mod conflicts :\n" + potentialConflicts);
+            }
         }
 
         public static void RestartAllWorkerThreads()

@@ -27,52 +27,8 @@ namespace RimThreaded
 			if (Settings.modsText.Length == 0)
 			{
 				Settings.modsText = "Potential RimThreaded mod conflicts :\n";
-
-				IEnumerable<MethodBase> originalMethods = Harmony.GetAllPatchedMethods();
-				foreach (MethodBase originalMethod in originalMethods)
-				{
-					Patches patches = Harmony.GetPatchInfo(originalMethod);
-					if (patches is null) { }
-					else
-					{
-						bool isRimThreadedPrefixed = false;
-						foreach (Patch patch in patches.Prefixes)
-						{
-							
-							if (patch.owner.Equals("majorhoff.rimthreaded") && (patches.Prefixes.Count > 1 || patches.Postfixes.Count > 0 || patches.Transpilers.Count > 0))
-							{
-								isRimThreadedPrefixed = true;
-								Settings.modsText += "\n---Patch method: " + patch.PatchMethod.DeclaringType.FullName + " " + patch.PatchMethod + "-- -\n";
-								Settings.modsText += "RimThreaded priority: " + patch.priority + "\n";
-								break;
-							}
-						}
-						if (isRimThreadedPrefixed)
-						{
-							foreach (Patch patch in patches.Prefixes)
-							{
-								if (!patch.owner.Equals("majorhoff.rimthreaded"))
-								{
-									//Settings.modsText += "method: " + patch.PatchMethod + " - ";
-									Settings.modsText += "owner: " + patch.owner + " - ";
-									Settings.modsText += "priority: " + patch.priority + "\n";
-								}
-							}
-							foreach (Patch patch in patches.Postfixes)
-							{
-								//Settings.modsText += "method: " + patch.PatchMethod + " - ";
-								Settings.modsText += "owner: " + patch.owner + " - ";
-								Settings.modsText += "priority: " + patch.priority + "\n";
-							}
-							foreach (Patch patch in patches.Transpilers)
-							{
-								//Settings.modsText += "method: " + patch.PatchMethod + " - ";
-								Settings.modsText += "owner: " + patch.owner + " - ";
-								Settings.modsText += "priority: " + patch.priority + "\n";
-							}
-						}
-					}
-				}
+				Settings.modsText += getPotentialModConflicts();
+				
 				//string path = "hmodText.txt";
 				//StreamWriter writer = new StreamWriter(path, true);
 				//writer.WriteLine(Settings.modsText);
@@ -92,7 +48,58 @@ namespace RimThreaded
 
 		}
 
-		public override string SettingsCategory()
+        public static string getPotentialModConflicts()
+        {
+			string modsText = "";
+			IEnumerable<MethodBase> originalMethods = Harmony.GetAllPatchedMethods();
+			foreach (MethodBase originalMethod in originalMethods)
+			{
+				Patches patches = Harmony.GetPatchInfo(originalMethod);
+				if (patches is null) { }
+				else
+				{
+					bool isRimThreadedPrefixed = false;
+					foreach (Patch patch in patches.Prefixes)
+					{
+
+						if (patch.owner.Equals("majorhoff.rimthreaded") && !RimThreadedHarmony.nonDestructivePrefixes.Contains(patch.PatchMethod) && (patches.Prefixes.Count > 1 || patches.Postfixes.Count > 0 || patches.Transpilers.Count > 0))
+						{
+							isRimThreadedPrefixed = true;
+							modsText += "\n  ---Patch method: " + patch.PatchMethod.DeclaringType.FullName + " " + patch.PatchMethod + "---\n";
+							modsText += "  RimThreaded priority: " + patch.priority + "\n";
+							break;
+						}
+					}
+					if (isRimThreadedPrefixed)
+					{
+						foreach (Patch patch in patches.Prefixes)
+						{
+							if (!patch.owner.Equals("majorhoff.rimthreaded"))
+							{
+								//Settings.modsText += "method: " + patch.PatchMethod + " - ";
+								modsText += "  owner: " + patch.owner + " - ";
+								modsText += "  priority: " + patch.priority + "\n";
+							}
+						}
+						foreach (Patch patch in patches.Postfixes)
+						{
+							//Settings.modsText += "method: " + patch.PatchMethod + " - ";
+							modsText += "  owner: " + patch.owner + " - ";
+							modsText += "  priority: " + patch.priority + "\n";
+						}
+						foreach (Patch patch in patches.Transpilers)
+						{
+							//Settings.modsText += "method: " + patch.PatchMethod + " - ";
+							modsText += "  owner: " + patch.owner + " - ";
+							modsText += "  priority: " + patch.priority + "\n";
+						}
+					}
+				}
+			}
+			return modsText;
+		}
+
+        public override string SettingsCategory()
 		{
 			return "RimThreaded";
 

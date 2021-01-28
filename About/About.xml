@@ -10,9 +10,10 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.2.4 - The Ken(obi) path(fix) to the Dark Side
-    -Fixed bug in RegionCostCalculator.PathableNeighborIndices (kudos to Ken!)
-    -Fixed bug in Djikstra.Compare
+    Version 1.2.5 - Jon the super medic
+    -Fixed bug in HediffSet.CacheMissingPartsCommonAncestors (kudos to Jon!)
+    -Fixed bug in PawnCapacityUtility.PawnCapacityUtility (kudos to Jon!)
+    -Added warning to log when there are potential mod incompatiblities (thanks kertiek!)
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
