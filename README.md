@@ -39,6 +39,11 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.2.5 - Jon the super medic  
+-Fixed bug in HediffSet.CacheMissingPartsCommonAncestors (kudos to Jon!)  
+-Fixed bug in PawnCapacityUtility.PawnCapacityUtility (kudos to Jon!)  
+-Added warning to log when there are potential mod incompatiblities (thanks kertiek!)  
+
 Version 1.2.4 - The Ken(obi) path(fix) to the Dark Side  
 -Fixed bug in RegionCostCalculator.PathableNeighborIndices (kudos to Ken!)  
 -Fixed bug in Djikstra.Compare  

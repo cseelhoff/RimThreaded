@@ -235,20 +235,20 @@ namespace RimThreaded
 
 			while (i < instructionsList.Count)
 			{
-				if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions, instructionsList, i))
+				if (IsCodeInstructionsMatching(searchInstructions, instructionsList, i))
 				{
 					matchesFound++;
-					foreach (CodeInstruction codeInstruction in RimThreadedHarmony.GetLockCodeInstructions(
+					foreach (CodeInstruction codeInstruction in GetLockCodeInstructions(
 						iLGenerator, instructionsList, i, searchInstructions.Count, loadLockObjectInstructions, loadLockObjectType))
 					{
 						yield return codeInstruction;
 					}
 					i += searchInstructions.Count;
 				}
-				else if (RimThreadedHarmony.IsCodeInstructionsMatching(searchInstructions2, instructionsList, i))
+				else if (IsCodeInstructionsMatching(searchInstructions2, instructionsList, i))
 				{
 					matchesFound++;
-					foreach (CodeInstruction codeInstruction in RimThreadedHarmony.GetLockCodeInstructions(
+					foreach (CodeInstruction codeInstruction in GetLockCodeInstructions(
 						iLGenerator, instructionsList, i, searchInstructions2.Count, loadLockObjectInstructions2, loadLockObjectType2))
 					{
 						yield return codeInstruction;

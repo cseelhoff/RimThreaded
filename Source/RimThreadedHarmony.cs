@@ -50,7 +50,7 @@ namespace RimThreaded
 		public static Type androidTiers_GeneratePawns_Patch1;
 		public static Type androidTiers_GeneratePawns_Patch;
 		public static FieldInfo cachedStoreCell;
-		
+		public static HashSet<MethodInfo> nonDestructivePrefixes = new HashSet<MethodInfo>();
 
 		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
 		{
@@ -68,7 +68,7 @@ namespace RimThreaded
 			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
 			codeInstructions.Add(codeInstruction);
 			codeInstructions.Add(new CodeInstruction(OpCodes.Ldloca_S, lockTaken.LocalIndex));
-			codeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter",
+			codeInstructions.Add(new CodeInstruction(OpCodes.Call, Method(typeof(Monitor), "Enter",
 				new Type[] { typeof(object), typeof(bool).MakeByRefType() })));
 			return codeInstructions;
 		}
@@ -83,7 +83,7 @@ namespace RimThreaded
 			Label endFinallyDestination = iLGenerator.DefineLabel();
 			codeInstructions.Add(new CodeInstruction(OpCodes.Brfalse_S, endFinallyDestination));
 			codeInstructions.Add(new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex));
-			codeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Exit")));
+			codeInstructions.Add(new CodeInstruction(OpCodes.Call, Method(typeof(Monitor), "Exit")));
 			codeInstruction = new CodeInstruction(OpCodes.Endfinally);
 			codeInstruction.labels.Add(endFinallyDestination);
 			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
@@ -111,7 +111,7 @@ namespace RimThreaded
 			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
 			finalCodeInstructions.Add(codeInstruction);
 			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Ldloca_S, lockTaken.LocalIndex));
-			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Enter",
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Call, Method(typeof(Monitor), "Enter",
 				new Type[] { typeof(object), typeof(bool).MakeByRefType() })));
 			for (int i = 0; i < searchInstructionsCount; i++)
 			{
@@ -126,7 +126,7 @@ namespace RimThreaded
 			Label endFinallyDestination = iLGenerator.DefineLabel();
 			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Brfalse_S, endFinallyDestination));
 			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Ldloc, lockObject.LocalIndex));
-			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Monitor), "Exit")));
+			finalCodeInstructions.Add(new CodeInstruction(OpCodes.Call, Method(typeof(Monitor), "Exit")));
 			codeInstruction = new CodeInstruction(OpCodes.Endfinally);
 			codeInstruction.labels.Add(endFinallyDestination);
 			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
@@ -920,20 +920,22 @@ namespace RimThreaded
 			
 			//HediffSet
 			patched = typeof(HediffSet_Transpile);
-			original = AccessTools.TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
+			original = TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
 			Transpile(original, patched, "MoveNext");
 			original = typeof(HediffSet);
 			//Transpile(original, patched, "PartIsMissing");
 			//Transpile(original, patched, "HasDirectlyAddedPartFor");
 			Transpile(original, patched, "AddDirect");
 			patched = typeof(HediffSet_Patch);
-			Prefix(original, patched, "CacheMissingPartsCommonAncestors");
+			//Prefix(original, patched, "CacheMissingPartsCommonAncestors");
 			Prefix(original, patched, "PartIsMissing");
 			Prefix(original, patched, "HasDirectlyAddedPartFor");
 			Prefix(original, patched, "GetFirstHediffOfDef");
 			Prefix(original, patched, "HasTendableHediff");
 			Prefix(original, patched, "HasImmunizableNotImmuneHediff");
-			
+			Prefix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPrefix", false);
+			Postfix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPostfix");
+
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
 			patched = typeof(LanguageWordInfo_Patch);
@@ -1199,9 +1201,9 @@ namespace RimThreaded
 			Transpile(original, patched, "DoGrowSubplant");
 			
 			//PawnCapacityUtility
-			original = typeof(PawnCapacityUtility);
-			patched = typeof(PawnCapacityUtility_Patch);
-			Prefix(original, patched, "CalculatePartEfficiency");
+			//original = typeof(PawnCapacityUtility);
+			//patched = typeof(PawnCapacityUtility_Patch);
+			//Prefix(original, patched, "CalculatePartEfficiency"); //not sure why this was made
 
 			//ColoredText
 			original = typeof(ColoredText);
@@ -1743,15 +1745,15 @@ namespace RimThreaded
 				string methodName = "Listener";
 				patched = typeof(GeneratePawns_Patch_Transpile);
 				Log.Message("RimThreaded is patching " + androidTiers_GeneratePawns_Patch.FullName + " " + methodName);
-				Log.Message("Utility_Patch::Listener != null: " + (AccessTools.Method(androidTiers_GeneratePawns_Patch, "Listener") != null));
-				Log.Message("Utility_Patch_Transpile::Listener != null: " + (AccessTools.Method(patched, "Listener") != null));
+				Log.Message("Utility_Patch::Listener != null: " + (Method(androidTiers_GeneratePawns_Patch, "Listener") != null));
+				Log.Message("Utility_Patch_Transpile::Listener != null: " + (Method(patched, "Listener") != null));
 				Transpile(androidTiers_GeneratePawns_Patch, patched, methodName);
 			}
 
 			Log.Message("RimThreaded patching is complete.");
 		}
 
-		public static void Prefix(Type original, Type patched, String methodName, Type[] orig_type)
+		public static void Prefix(Type original, Type patched, string methodName, Type[] orig_type)
 		{
 			MethodInfo oMethod = original.GetMethod(methodName, bf, null, orig_type, null);
 			Type[] patch_type = new Type[orig_type.Length];
@@ -1783,10 +1785,10 @@ namespace RimThreaded
 			}
 			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod));
 		}
-		public static void Prefix(Type original, Type patched, String methodName)
+		public static void Prefix(Type original, Type patched, string methodName, bool destructive = true)
 		{
-			MethodInfo oMethod = original.GetMethod(methodName, bf);
-			MethodInfo pMethod = patched.GetMethod(methodName);
+			MethodInfo oMethod = Method(original, methodName);
+			MethodInfo pMethod = Method(patched, methodName);
 			if (null == oMethod)
 			{
 				Log.Message(original.ToString() + "." + methodName + " not found");
@@ -1796,11 +1798,33 @@ namespace RimThreaded
 				Log.Message(patched.ToString() + "." + methodName + " not found");
 			}
 			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod));
+			if (!destructive)
+			{
+				nonDestructivePrefixes.Add(pMethod);
+			}
 		}
-		public static void Postfix(Type original, Type patched, String methodName)
+		public static void Prefix(Type original, Type patched, string originalMethodName, string patchedMethodName, bool destructive = true)
 		{
-			MethodInfo oMethod = original.GetMethod(methodName, bf);
-			MethodInfo pMethod = patched.GetMethod(methodName);
+			MethodInfo oMethod = Method(original, originalMethodName);
+			MethodInfo pMethod = Method(patched, patchedMethodName);
+			if (null == oMethod)
+			{
+				Log.Message(original.ToString() + "." + originalMethodName + " not found");
+			}
+			if (null == pMethod)
+			{
+				Log.Message(patched.ToString() + "." + patchedMethodName + " not found");
+			}
+			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod));
+			if (!destructive)
+			{
+				nonDestructivePrefixes.Add(pMethod);
+			}
+		}
+		public static void Postfix(Type original, Type patched, string methodName)
+		{
+			MethodInfo oMethod = Method(original, methodName);
+			MethodInfo pMethod = Method(patched, methodName);
 			if (null == oMethod)
 			{
 				Log.Message(original.ToString() + "." + methodName + " not found");
@@ -1811,15 +1835,29 @@ namespace RimThreaded
 			}
 			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
 		}
-
-		public static void Transpile(Type original, Type patched, String methodName)
+		public static void Postfix(Type original, Type patched, string originalMethodName, string patchedMethodName)
 		{
-			MethodInfo oMethod = original.GetMethod(methodName, bf);
-			MethodInfo pMethod = patched.GetMethod(methodName);
+			MethodInfo oMethod = Method(original, originalMethodName);
+			MethodInfo pMethod = Method(patched, patchedMethodName);
+			if (null == oMethod)
+			{
+				Log.Message(original.ToString() + "." + originalMethodName + " not found");
+			}
+			if (null == pMethod)
+			{
+				Log.Message(patched.ToString() + "." + patchedMethodName + " not found");
+			}
+			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
+		}
+
+		public static void Transpile(Type original, Type patched, string methodName)
+		{
+			MethodInfo oMethod = Method(original, methodName);
+			MethodInfo pMethod = Method(patched, methodName);
 			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 		}
 
-		public static void Transpile(Type original, Type patched, String methodName, Type[] orig_type)
+		public static void Transpile(Type original, Type patched, string methodName, Type[] orig_type)
 		{
 			MethodInfo oMethod = original.GetMethod(methodName, bf, null, orig_type, null);
 			Type[] patch_type = new Type[orig_type.Length];
@@ -1840,7 +1878,7 @@ namespace RimThreaded
 				Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
 			}
 
-			MethodInfo pMethod = patched.GetMethod(methodName);
+			MethodInfo pMethod = Method(patched, methodName);
 			if (null == oMethod)
 			{
 				Log.Message(original.ToString() + "." + methodName + "(" + string.Join(",", orig_type.Select(x => x.ToString()).ToArray()) + ") not found");
@@ -1852,10 +1890,10 @@ namespace RimThreaded
 			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 		}
 
-		public static void Transpile(Type original, Type patched, String methodName, string[] harmonyAfter)
+		public static void Transpile(Type original, Type patched, string methodName, string[] harmonyAfter)
 		{
-			MethodInfo oMethod = original.GetMethod(methodName, bf);
-			MethodInfo pMethod = patched.GetMethod(methodName);
+			MethodInfo oMethod = Method(original, methodName);
+			MethodInfo pMethod = Method(patched, methodName);
 			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod)
 			{
 				after = harmonyAfter

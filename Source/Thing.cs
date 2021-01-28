@@ -81,7 +81,7 @@ namespace RimThreaded
 				{
 					if (__instance.def.damageMultipliers[index].damageDef == dinfo.Def)
 					{
-						int num = UnityEngine.Mathf.RoundToInt(dinfo.Amount * __instance.def.damageMultipliers[index].multiplier);
+						int num = Mathf.RoundToInt(dinfo.Amount * __instance.def.damageMultipliers[index].multiplier);
 						dinfo.SetAmount((float)num);
 					}
 				}
