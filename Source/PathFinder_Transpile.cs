@@ -11,6 +11,7 @@ using System;
 using System.Threading;
 using Verse.AI;
 using static RimThreaded.PathFinder_Patch;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -25,13 +26,14 @@ namespace RimThreaded
 			LocalBuilder local_statusOpenValue = iLGenerator.DeclareLocal(typeof(ushort));
 			LocalBuilder local_statusClosedValue = iLGenerator.DeclareLocal(typeof(ushort));
 			LocalBuilder local_regionCostCalculatorWrapper = iLGenerator.DeclareLocal(typeof(RegionCostCalculatorWrapper));
-			Type costNodeType = AccessTools.TypeByName("Verse.AI.PathFinder+CostNode");
+			Type costNodeType = TypeByName("Verse.AI.PathFinder+CostNode");
 			Type costNodeType2 = typeof(CostNode2);
 			Type icomparerCostNodeType1 = typeof(IComparer<>).MakeGenericType(costNodeType);
 			Type icomparerCostNodeType2 = typeof(IComparer<>).MakeGenericType(costNodeType2);
 			Type fastPriorityQueueCostNodeType1 = typeof(FastPriorityQueue<>).MakeGenericType(costNodeType);
 			Type fastPriorityQueueCostNodeType2 = typeof(FastPriorityQueue<>).MakeGenericType(costNodeType2);
 			LocalBuilder local_openList = iLGenerator.DeclareLocal(fastPriorityQueueCostNodeType2);
+			LocalBuilder localDisallowedCornerIndices = iLGenerator.DeclareLocal(typeof(List<int>));
 			//LocalBuilder tID = iLGenerator.DeclareLocal(typeof(int));
 			//LocalBuilder size = iLGenerator.DeclareLocal(typeof(int));
 
@@ -53,11 +55,11 @@ namespace RimThreaded
 			//IL_0012: stloc.1
 			//yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getCalcGrid"));
+			yield return new CodeInstruction(OpCodes.Call, Method(typeof(PathFinder_Patch), "getCalcGrid"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_calcGrid.LocalIndex);
 
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getRegionCostCalculatorWrapper"));
+			yield return new CodeInstruction(OpCodes.Call, Method(typeof(PathFinder_Patch), "getRegionCostCalculatorWrapper"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_regionCostCalculatorWrapper.LocalIndex);
 
 			// FastPriorityQueue<CostNode2> openList = getOpenList(managedThreadId);
@@ -65,7 +67,7 @@ namespace RimThreaded
 			//IL_0014: call class ['Assembly-CSharp'] Verse.FastPriorityQueue`1<valuetype RimThreaded.PathFinder_Patch/CostNode2> RimThreaded.PathFinder_Patch::getOpenList(int32)
 			//IL_0019: stloc.2
 			//yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getOpenList"));
+			yield return new CodeInstruction(OpCodes.Call, Method(typeof(PathFinder_Patch), "getOpenList"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_openList.LocalIndex);
 
 			// ushort local_statusOpenValue = getOpenValue(managedThreadId);
@@ -73,7 +75,7 @@ namespace RimThreaded
 			//IL_001b: call uint16 RimThreaded.PathFinder_Patch::getOpenValue(int32)
 			//IL_0020: stloc.3
 			//yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getOpenValue"));
+			yield return new CodeInstruction(OpCodes.Call, Method(typeof(PathFinder_Patch), "getOpenValue"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_statusOpenValue.LocalIndex);
 
 			// ushort local_statusClosedValue = getClosedValue(managedThreadId);
@@ -81,7 +83,7 @@ namespace RimThreaded
 			//IL_0022: call uint16 RimThreaded.PathFinder_Patch::getClosedValue(int32)
 			//IL_0027: stloc.s 4
 			//yield return new CodeInstruction(OpCodes.Ldloc, tID.LocalIndex);
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "getClosedValue"));
+			yield return new CodeInstruction(OpCodes.Call, Method(typeof(PathFinder_Patch), "getClosedValue"));
 			yield return new CodeInstruction(OpCodes.Stloc, local_statusClosedValue.LocalIndex);
 
 			/*
@@ -228,12 +230,25 @@ namespace RimThreaded
 
 			while (i < instructionsList.Count)
 			{
+				if (
+					i + 3 < instructionsList.Count &&
+					instructionsList[i + 3].opcode == OpCodes.Call &&
+					(MethodInfo)instructionsList[i + 3].operand == Method(typeof(PathFinder), "CalculateAndAddDisallowedCorners")
+					)
+				{
+					instructionsList[i + 3].operand = Method(typeof(PathFinder_Patch), "getDisallowedCornerIndices");
+					i++;
+					yield return instructionsList[i++];
+					yield return instructionsList[i++];
+					yield return instructionsList[i++];
+					yield return new CodeInstruction(OpCodes.Stloc, localDisallowedCornerIndices.LocalIndex);
+				}
 				// InitStatusesAndPushStartNode(ref curIndex, start);
 				//IL_0363: ldarg.0
 				//IL_0364: ldloca.s 3
 				//IL_0366: ldarg.1
 				//IL_0367: call instance void Verse.AI.PathFinder::InitStatusesAndPushStartNode(int32 &, valuetype Verse.IntVec3)
-				if (
+				else if (
 					i + 3 < instructionsList.Count && 
 					instructionsList[i + 3].opcode == OpCodes.Call && 
 					instructionsList[i + 3].operand.ToString().Equals("Void InitStatusesAndPushStartNode(Int32 ByRef, Verse.IntVec3)")
@@ -258,20 +273,20 @@ namespace RimThreaded
 					yield return instructionsList[i];
 					i+=2;
 					yield return new CodeInstruction(OpCodes.Ldarg_0);
-					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PathFinder), "cellIndices"));
+					yield return new CodeInstruction(OpCodes.Ldfld, Field(typeof(PathFinder), "cellIndices"));
 					yield return new CodeInstruction(OpCodes.Ldloc, local_calcGrid.LocalIndex);
 					//yield return new CodeInstruction(OpCodes.Ldarg_0);
 					//yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PathFinder), "openList"));
 					yield return new CodeInstruction(OpCodes.Ldloca, local_statusOpenValue.LocalIndex);
 					yield return new CodeInstruction(OpCodes.Ldloca, local_statusClosedValue.LocalIndex);
-					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "InitStatusesAndPushStartNode3"));
+					yield return new CodeInstruction(OpCodes.Call, Method(typeof(PathFinder_Patch), "InitStatusesAndPushStartNode3"));
 
 					// openList.Clear();
 					// fastPriorityQueue.Clear();
 					//IL_0502: ldloc.3
 					//IL_0503: callvirt instance void class ['Assembly-CSharp'] Verse.FastPriorityQueue`1<valuetype Verse.AI.PathFinder_Target/CostNode>::Clear()
 					yield return new CodeInstruction(OpCodes.Ldloc_S, local_openList.LocalIndex);
-					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(fastPriorityQueueCostNodeType2, "Clear"));
+					yield return new CodeInstruction(OpCodes.Callvirt, Method(fastPriorityQueueCostNodeType2, "Clear"));
 
 					// openList.Push(new CostNode(curIndex, 0));
 					// fastPriorityQueue.Push(new CostNode(num3, 0));
@@ -285,7 +300,7 @@ namespace RimThreaded
 					yield return new CodeInstruction(OpCodes.Ldc_I4_0);
 					//Log.Message(costNodeType2.GetConstructor(new Type[] { typeof(Int32), typeof(Int32) }).ToString());
 					yield return new CodeInstruction(OpCodes.Newobj, costNodeType2.GetConstructor(new Type[] { typeof(Int32), typeof(Int32) }));
-					yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(fastPriorityQueueCostNodeType2, "Push"));
+					yield return new CodeInstruction(OpCodes.Callvirt, Method(fastPriorityQueueCostNodeType2, "Push"));
 					//yield return new CodeInstruction(OpCodes.Ldloc_S, openList.LocalIndex);
 				}
 				//call instance class ['Assembly-CSharp']Verse.AI.PawnPath Verse.AI.PathFinder_Original::FinalizedPath(int32, bool)
@@ -309,9 +324,9 @@ namespace RimThreaded
 					yield return instructionsList[i];
 					i+=2;
 					yield return new CodeInstruction(OpCodes.Ldarg_0);
-					yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(PathFinder), "cellIndices"));
+					yield return new CodeInstruction(OpCodes.Ldfld, Field(typeof(PathFinder), "cellIndices"));
 					yield return new CodeInstruction(OpCodes.Ldloc, local_calcGrid.LocalIndex);
-					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PathFinder_Patch), "FinalizedPath2"));
+					yield return new CodeInstruction(OpCodes.Call, Method(typeof(PathFinder_Patch), "FinalizedPath2"));
 				}
 
 				//ldsfld valuetype Verse.AI.PathFinder_Original/PathFinderNodeFast[] Verse.AI.PathFinder_Original::calcGrid
@@ -365,47 +380,47 @@ namespace RimThreaded
 				}
 				else if (
 					instructionsList[i].opcode == OpCodes.Callvirt &&
-					(MethodInfo)instructionsList[i].operand == AccessTools.Method(fastPriorityQueueCostNodeType1, "get_Count")
+					(MethodInfo)instructionsList[i].operand == Method(fastPriorityQueueCostNodeType1, "get_Count")
 					)
 				{
-					instructionsList[i].operand = AccessTools.Method(fastPriorityQueueCostNodeType2, "get_Count");
+					instructionsList[i].operand = Method(fastPriorityQueueCostNodeType2, "get_Count");
 					yield return instructionsList[i];
 					i++;
 				}
 				else if (
 					instructionsList[i].opcode == OpCodes.Callvirt &&
-					(MethodInfo)instructionsList[i].operand == AccessTools.Method(fastPriorityQueueCostNodeType1, "Pop")
+					(MethodInfo)instructionsList[i].operand == Method(fastPriorityQueueCostNodeType1, "Pop")
 				)
 				{
-					instructionsList[i].operand = AccessTools.Method(fastPriorityQueueCostNodeType2, "Pop");
+					instructionsList[i].operand = Method(fastPriorityQueueCostNodeType2, "Pop");
 					yield return instructionsList[i];
 					i++;
 				}
 				else if (
 					instructionsList[i].opcode == OpCodes.Callvirt &&
-					(MethodInfo)instructionsList[i].operand == AccessTools.Method(fastPriorityQueueCostNodeType1, "Push")
+					(MethodInfo)instructionsList[i].operand == Method(fastPriorityQueueCostNodeType1, "Push")
 				)
 				{
-					instructionsList[i].operand = AccessTools.Method(fastPriorityQueueCostNodeType2, "Push");
+					instructionsList[i].operand = Method(fastPriorityQueueCostNodeType2, "Push");
 					yield return instructionsList[i];
 					i++;
 				}
 				
 				else if (
 					instructionsList[i].opcode == OpCodes.Ldfld &&
-					(FieldInfo)instructionsList[i].operand == AccessTools.Field(costNodeType, "index")
+					(FieldInfo)instructionsList[i].operand == Field(costNodeType, "index")
 				)
 				{
-					instructionsList[i].operand = AccessTools.Field(costNodeType2, "index");
+					instructionsList[i].operand = Field(costNodeType2, "index");
 					yield return instructionsList[i];
 					i++;
 				}
 				else if (
 					instructionsList[i].opcode == OpCodes.Ldfld &&
-					(FieldInfo)instructionsList[i].operand == AccessTools.Field(costNodeType, "cost")
+					(FieldInfo)instructionsList[i].operand == Field(costNodeType, "cost")
 )
 				{
-					instructionsList[i].operand = AccessTools.Field(costNodeType2, "cost");
+					instructionsList[i].operand = Field(costNodeType2, "cost");
 					yield return instructionsList[i];
 					i++;
 				}
@@ -427,13 +442,23 @@ namespace RimThreaded
 					yield return instructionsList[i];
 					i++;
 				}
-				else if (i+1 < instructionsList.Count &&
-					instructionsList[i+1].opcode == OpCodes.Ldfld &&
-					(FieldInfo)instructionsList[i+1].operand == AccessTools.Field(typeof(PathFinder), "regionCostCalculator")
+				else if (i + 1 < instructionsList.Count &&
+					instructionsList[i + 1].opcode == OpCodes.Ldfld &&
+					(FieldInfo)instructionsList[i + 1].operand == Field(typeof(PathFinder), "regionCostCalculator")
 				)
 				{
 					instructionsList[i].opcode = OpCodes.Ldloc;
 					instructionsList[i].operand = local_regionCostCalculatorWrapper.LocalIndex;
+					yield return instructionsList[i++];
+					i++;
+				}
+				else if (i + 1 < instructionsList.Count &&
+				   instructionsList[i + 1].opcode == OpCodes.Ldfld &&
+				   (FieldInfo)instructionsList[i + 1].operand == Field(typeof(PathFinder), "disallowedCornerIndices")
+			   )
+				{
+					instructionsList[i].opcode = OpCodes.Ldloc;
+					instructionsList[i].operand = localDisallowedCornerIndices.LocalIndex;
 					yield return instructionsList[i++];
 					i++;
 				}

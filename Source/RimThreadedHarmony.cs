@@ -688,6 +688,7 @@ namespace RimThreaded
 			Prefix(original, patched, "FirstRespectedReserver");
 			Prefix(original, patched, "CanReserve");
 			Prefix(original, patched, "CanReserveStack");
+			Prefix(original, patched, "ReleaseAllForTarget");
 			patched = typeof(ReservationManager_Transpile);
 			//Transpile(original, patched, "CanReserve");
 
@@ -985,7 +986,7 @@ namespace RimThreaded
 			original = typeof(RegionAndRoomUpdater);
 			patched = typeof(RegionAndRoomUpdater_Patch);
 			Prefix(original, patched, "FloodAndSetRoomGroups");
-			Prefix(original, patched, "CombineNewAndReusedRoomsIntoContiguousGroups");
+			//Prefix(original, patched, "CombineNewAndReusedRoomsIntoContiguousGroups");
 			Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
 
 			//GenRadial
@@ -1222,8 +1223,9 @@ namespace RimThreaded
 			Prefix(original, patched, "Destroy"); //causes strange crash to desktop without error log
 
 			//Pawn_JobTracker_Patch
-			//original = typeof(Pawn_JobTracker);
-			//patched = typeof(Pawn_JobTracker_Patch);
+			original = typeof(Pawn_JobTracker);
+			patched = typeof(Pawn_JobTracker_Patch);
+			Prefix(original, patched, "TryFindAndStartJob");
 			//Prefix(original, patched, "StartJob"); conflict with giddyupcore calling MakeDriver
 
 			//JobGiver_OptimizeApparel
@@ -1231,6 +1233,7 @@ namespace RimThreaded
 			patched = typeof(JobGiver_OptimizeApparel_Patch);
 			Prefix(original, patched, "ApparelScoreGain");
 			Prefix(original, patched, "ApparelScoreGain_NewTmp");
+			Prefix(original, patched, "TryGiveJob");
 
 			//HediffGiver_Heat
 			original = typeof(HediffGiver_Heat);
@@ -1568,7 +1571,20 @@ namespace RimThreaded
 			Prefix(original, patched, "SetAllDirty");
 			Prefix(original, patched, "SetRegionDirty");
 
+			//HaulAIUtility
+			original = typeof(HaulAIUtility);
+			patched = typeof(HaulAIUtility_Patch);
+			Prefix(original, patched, "TryFindSpotToPlaceHaulableCloseTo");
 
+			//DrugAIUtility
+			original = typeof(DrugAIUtility);
+			patched = typeof(DrugAIUtility_Patch);
+			Prefix(original, patched, "IngestAndTakeToInventoryJob");
+
+			//JoyGiver_Ingest
+			//original = typeof(JoyGiver_Ingest);
+			//patched = typeof(JoyGiver_Ingest_Patch);
+			//Prefix(original, patched, "BestIngestItem");
 
 			// Resources_Patch
 			/* Doesn't work as Load is an external method (without a method body) and can therefor not be prefixed. Transpile would maybe be possible, but I dont think, it's a good idea...

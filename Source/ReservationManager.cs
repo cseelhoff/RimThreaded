@@ -30,7 +30,7 @@ namespace RimThreaded
 			}
 			for (int i = 0; i < reservations(__instance).Count; i++)
 			{
-                Reservation reservation = reservations(__instance)[i];
+				Reservation reservation = reservations(__instance)[i];
 				if (reservation != null)
 				{
 					if (reservation.Target == target && reservation.Claimant.Faction == faction)
@@ -48,17 +48,18 @@ namespace RimThreaded
 		{
 			List<Reservation> reservationList = reservations(__instance);
 			//ReservationManager.Reservation[] reservations2 = reservations(__instance).ToArray();
-				
+
 			for (int i = reservationList.Count - 1; i >= 0; i--)
 			{
 				Reservation r;
 				try
 				{
 					r = reservationList[i];
-				} catch(ArgumentOutOfRangeException)
-                {
+				}
+				catch (ArgumentOutOfRangeException)
+				{
 					break;
-                }
+				}
 				if (null != r)
 				{
 					if (r.Claimant == claimant && r.Job == job)
@@ -68,15 +69,16 @@ namespace RimThreaded
 							if (i < reservationList.Count && r == reservationList[i])
 							{
 								reservationList.RemoveAt(i);
-							} else
-                            {
+							}
+							else
+							{
 								Log.Warning("Reservation " + r.ToString() + " was not at expected list index when attempting to remove.");
 							}
 						}
 					}
 				}
 			}
-			
+
 			return false;
 		}
 		public static bool Release(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
@@ -85,14 +87,15 @@ namespace RimThreaded
 			{
 				Log.Warning("Releasing destroyed thing " + target + " for " + claimant);
 			}
-            Reservation reservation1 = null;
-            Reservation reservation2;
+			Reservation reservation1 = null;
+			Reservation reservation2;
 			for (int index = 0; index < reservations(__instance).Count; ++index)
 			{
 				try
 				{
 					reservation2 = reservations(__instance)[index];
-				} catch (ArgumentOutOfRangeException) { break; }
+				}
+				catch (ArgumentOutOfRangeException) { break; }
 				if (reservation2.Target == target && reservation2.Claimant == claimant && reservation2.Job == job)
 				{
 					reservation1 = reservation2;
@@ -102,12 +105,13 @@ namespace RimThreaded
 			if (reservation1 == null && !target.ThingDestroyed)
 				Log.Error("Tried to release " + target + " that wasn't reserved by " + claimant + ".", false);
 			else
-				lock (reservations(__instance)) {
+				lock (reservations(__instance))
+				{
 					reservations(__instance).Remove(reservation1);
 				}
 			return false;
 		}
-		
+
 		private static bool RespectsReservationsOf(Pawn newClaimant, Pawn oldClaimant)
 		{
 			return newClaimant == oldClaimant || newClaimant.Faction != null && oldClaimant.Faction != null && (newClaimant.Faction == oldClaimant.Faction || !newClaimant.Faction.HostileTo(oldClaimant.Faction) || oldClaimant.HostFaction != null && oldClaimant.HostFaction == newClaimant.HostFaction || newClaimant.HostFaction != null && (oldClaimant.HostFaction != null || newClaimant.HostFaction == oldClaimant.Faction));
@@ -125,11 +129,12 @@ namespace RimThreaded
 				try
 				{
 					reservation = reservations(__instance)[i];
-				} catch (ArgumentOutOfRangeException) { break; }
-				if(null == reservation)
-                {
+				}
+				catch (ArgumentOutOfRangeException) { break; }
+				if (null == reservation)
+				{
 					continue;
-                }
+				}
 				if (reservation.Target == target && RespectsReservationsOf(claimant, reservation.Claimant))
 				{
 					__result = reservation.Claimant;
@@ -169,7 +174,8 @@ namespace RimThreaded
 					try
 					{
 						reservation1 = reservations(__instance)[index];
-					} catch (ArgumentOutOfRangeException) { break; }
+					}
+					catch (ArgumentOutOfRangeException) { break; }
 					if (reservation1 != null && reservation1.Target == target && reservation1.Claimant == claimant && reservation1.Job == job && reservation1.Layer == layer && (reservation1.StackCount == -1 || reservation1.StackCount >= num2))
 					{
 						__result = true;
@@ -187,7 +193,7 @@ namespace RimThreaded
 					//bool canReserveResult2 = __instance.CanReserve(claimant, target, maxPawns, stackCount, layer);
 					if (job != null && job.playerForced && __instance.CanReserve(claimant, target, maxPawns, stackCount, layer))
 					{
-						reservations(__instance).Add(new Reservation(claimant, job, maxPawns, stackCount, target, layer));					
+						reservations(__instance).Add(new Reservation(claimant, job, maxPawns, stackCount, target, layer));
 						//foreach (ReservationManager.Reservation reservation in reservations(__instance).ToList<ReservationManager.Reservation>())
 						Reservation reservation2;
 						for (int index = 0; index < reservations(__instance).Count; index++)
@@ -203,7 +209,7 @@ namespace RimThreaded
 						__result = true;
 						return false;
 					}
-				
+
 					//HACK - Probably because Reserve is no longer valid after CanReserve time delay with multiple threads.
 					if (errorOnFailed)
 					{
@@ -304,7 +310,8 @@ namespace RimThreaded
 					try
 					{
 						reservation = reservations(__instance)[i];
-					} catch(ArgumentOutOfRangeException) { break; }
+					}
+					catch (ArgumentOutOfRangeException) { break; }
 					if (null != reservation)
 					{
 						if (!(reservation.Target != target) && reservation.Layer == layer && reservation.Claimant != claimant && RespectsReservationsOf(claimant, reservation.Claimant))
@@ -346,7 +353,8 @@ namespace RimThreaded
 				try
 				{
 					r = reservations(__instance)[i];
-				} catch (ArgumentOutOfRangeException) { break; }
+				}
+				catch (ArgumentOutOfRangeException) { break; }
 				if (null != r)
 				{
 					if (r.Claimant == claimant)
@@ -402,12 +410,13 @@ namespace RimThreaded
 					try
 					{
 						reservation = reservations(__instance)[i];
-					} catch(ArgumentOutOfRangeException)
-                    {
+					}
+					catch (ArgumentOutOfRangeException)
+					{
 						break;
-                    }
-					if (reservation != null && reservation.Target == target && 
-						reservation.Layer == layer && reservation.Claimant == claimant && 
+					}
+					if (reservation != null && reservation.Target == target &&
+						reservation.Layer == layer && reservation.Claimant == claimant &&
 						(reservation.StackCount == -1 || reservation.StackCount >= num2))
 					{
 						return true;
@@ -420,12 +429,13 @@ namespace RimThreaded
 				{
 					Reservation reservation2;
 					try
-                    {
+					{
 						reservation2 = reservations(__instance)[j];
-					} catch(ArgumentOutOfRangeException)
-                    {
+					}
+					catch (ArgumentOutOfRangeException)
+					{
 						break;
-                    }
+					}
 					if (reservation2 != null && !(reservation2.Target != target) && reservation2.Layer == layer && reservation2.Claimant != claimant && RespectsReservationsOf(claimant, reservation2.Claimant))
 					{
 						if (reservation2.MaxPawns != maxPawns)
@@ -445,6 +455,25 @@ namespace RimThreaded
 
 			return true;
 		}
+		public static bool ReleaseAllForTarget(ReservationManager __instance, Thing t)
+		{
+			if (t == null)
+			{
+				return false;
+			}
+			lock (reservations(__instance))
+			{
+				for (int num = reservations(__instance).Count - 1; num >= 0; num--)
+				{
+					if (reservations(__instance)[num].Target.Thing == t)
+					{
+						reservations(__instance).RemoveAt(num);
+					}
+				}
+			}
+			return false;
+		}
+
 
 
 

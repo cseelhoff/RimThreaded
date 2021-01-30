@@ -85,11 +85,14 @@
     <Compile Include="Building_TurretGun.cs" />
     <Compile Include="Camera_Patch.cs" />
     <Compile Include="CastPositionFinder_Patch.cs" />
+    <Compile Include="DrugAIUtility_Patch.cs" />
     <Compile Include="DubsSkylight_getPatch_Transpile.cs" />
     <Compile Include="FilthMaker.cs" />
     <Compile Include="GeneratePawns_Patch.cs" />
     <Compile Include="GenLeaving.cs" />
+    <Compile Include="HaulAIUtility_Patch.cs" />
     <Compile Include="Hauling_Transpile.cs" />
+    <Compile Include="JoyGiver_Ingest_Patch.cs" />
     <Compile Include="ListerBuildings.cs" />
     <Compile Include="MemoryThoughtHandler_Patch.cs" />
     <Compile Include="PawnCapacitiesHandler_Transpile.cs" />
@@ -104,6 +107,7 @@
     <Compile Include="RoofGrid.cs" />
     <Compile Include="SickPawnVisitUtility.cs" />
     <Compile Include="StatWorker.cs" />
+    <Compile Include="thinkTree.cs" />
     <Compile Include="WorkGiver_DoBill_Transpile.cs" />
     <Compile Include="WorkGiver_Grower.cs" />
     <Compile Include="CompCauseGameCondition.cs" />
@@ -147,6 +151,7 @@
     <Compile Include="MeshMakerPlanes.cs" />
     <Compile Include="CE_Utility_Transpile.cs" />
     <Compile Include="Verb_MeleeAttackCE_Transpile.cs" />
+    <Compile Include="WorkGiver_GrowerSow_Patch.cs" />
     <Compile Include="WorldFloodFiller.cs" />
     <Compile Include="ReservationUtility.cs" />
     <Compile Include="PlayLog.cs" />

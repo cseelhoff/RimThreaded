@@ -39,6 +39,17 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.2.6 - The Rebel Alliance Hoff Base  
+-Fixed bug in DrugAIUtility.IngestAndTakeToInventoryJob  
+-Fixed bug in GenClosest.ClosestThing_Global  
+-Fixed bug in HaulAIUtility.TryFindSpotToPlaceHaulableCloseTo  
+-Fixed bug in JobGiver_OptimizeApparel.ApparelScoreGain  
+-Fixed bug in JobGiver_OptimizeApparel.TryGiveJob  
+-Fixed bug in PathFinder.DisallowedCornerIndices  
+-Fixed bug in Pawn_JobTracker.TryFindAndStartJob  
+-Fixed bug in ReservationManager.ReleaseAllForTarget  
+-Added many thread locks to RegionDirtyer class  
+
 Version 1.2.5 - Jon the super medic  
 -Fixed bug in HediffSet.CacheMissingPartsCommonAncestors (kudos to Jon!)  
 -Fixed bug in PawnCapacityUtility.PawnCapacityUtility (kudos to Jon!)  

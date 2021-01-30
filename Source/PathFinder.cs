@@ -11,12 +11,16 @@ using System.Diagnostics;
 using UnityEngine;
 using System.Threading;
 using System.Reflection;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class PathFinder_Patch
     {
+        [ThreadStatic]
+        static List<int> disallowedCornerIndices;
+
         public static Dictionary<int, RegionCostCalculatorWrapper> regionCostCalculatorWrappers =
             new Dictionary<int, RegionCostCalculatorWrapper>();
         public static Dictionary<int, PathFinderNodeFast[]> calcGrids =
@@ -28,35 +32,38 @@ namespace RimThreaded
         public static Dictionary<int, ushort> closedValues =
             new Dictionary<int, ushort>();
 
-        public static AccessTools.FieldRef<PathFinder, Map> mapField =
-            AccessTools.FieldRefAccess<PathFinder, Map>("map");
-        public static AccessTools.FieldRef<PathFinder, int> mapSizeXField =
-            AccessTools.FieldRefAccess<PathFinder, int>("mapSizeX");
-        public static AccessTools.FieldRef<PathFinder, int> mapSizeZField =
-            AccessTools.FieldRefAccess<PathFinder, int>("mapSizeZ");
-        public static AccessTools.FieldRef<PathFinder, CellIndices> cellIndicesField =
-            AccessTools.FieldRefAccess<PathFinder, CellIndices>("cellIndices");
-        public static AccessTools.FieldRef<PathFinder, PathGrid> pathGridField =
-            AccessTools.FieldRefAccess<PathFinder, PathGrid>("pathGrid");
-        public static AccessTools.FieldRef<PathFinder, Building[]> edificeGridField =
-            AccessTools.FieldRefAccess<PathFinder, Building[]>("edificeGrid");
-        public static AccessTools.FieldRef<PathFinder, List<Blueprint>[]> blueprintGridField =
-            AccessTools.FieldRefAccess<PathFinder, List<Blueprint>[]>("blueprintGrid");
+        public static FieldRef<PathFinder, Map> mapField =
+            FieldRefAccess<PathFinder, Map>("map");
+        public static FieldRef<PathFinder, int> mapSizeXField =
+            FieldRefAccess<PathFinder, int>("mapSizeX");
+        public static FieldRef<PathFinder, int> mapSizeZField =
+            FieldRefAccess<PathFinder, int>("mapSizeZ");
+        public static FieldRef<PathFinder, CellIndices> cellIndicesField =
+            FieldRefAccess<PathFinder, CellIndices>("cellIndices");
+        public static FieldRef<PathFinder, PathGrid> pathGridField =
+            FieldRefAccess<PathFinder, PathGrid>("pathGrid");
+        public static FieldRef<PathFinder, Building[]> edificeGridField =
+            FieldRefAccess<PathFinder, Building[]>("edificeGrid");
+        public static FieldRef<PathFinder, List<Blueprint>[]> blueprintGridField =
+            FieldRefAccess<PathFinder, List<Blueprint>[]>("blueprintGrid");
         //public static AccessTools.FieldRef<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorField =
             //AccessTools.FieldRefAccess<PathFinder, RegionCostCalculatorWrapper>("regionCostCalculator");
-        public static AccessTools.FieldRef<PathFinder, List<int>> disallowedCornerIndicesField =
-            AccessTools.FieldRefAccess<PathFinder, List<int>>("disallowedCornerIndices");
-        public static Type costNodeType = AccessTools.TypeByName("Verse.AI.PathFinder+CostNode");
+        public static Type costNodeType = TypeByName("Verse.AI.PathFinder+CostNode");
         public static ConstructorInfo constructorCostNode = costNodeType.GetConstructors()[0];
         public static Dictionary<int, PathFinderNodeFast[]> calcGridDict2 =
             new Dictionary<int, PathFinderNodeFast[]>();
 
         public static readonly SimpleCurve NonRegionBasedHeuristicStrengthHuman_DistanceCurve =
-            AccessTools.StaticFieldRefAccess<SimpleCurve>(typeof(PathFinder), "NonRegionBasedHeuristicStrengthHuman_DistanceCurve");
+            StaticFieldRefAccess<SimpleCurve>(typeof(PathFinder), "NonRegionBasedHeuristicStrengthHuman_DistanceCurve");
         public static readonly int[] Directions =
-            AccessTools.StaticFieldRefAccess<int[]>(typeof(PathFinder), "Directions");
+            StaticFieldRefAccess<int[]>(typeof(PathFinder), "Directions");
 
-        
+        static readonly MethodInfo methodIsCornerTouchAllowed =
+            Method(typeof(PathFinder), "IsCornerTouchAllowed", new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) });
+        static readonly Func<PathFinder, int, int, int, int, int, int, bool> funcIsCornerTouchAllowed =
+            (Func<PathFinder, int, int, int, int, int, int, bool>)Delegate.CreateDelegate(typeof(Func<PathFinder, int, int, int, int, int, int, bool>), methodIsCornerTouchAllowed);
+
+
         public struct CostNode2
         {
             public int index;
@@ -349,8 +356,8 @@ namespace RimThreaded
                 num8 = 13;
                 num9 = 18;
             }
-
-            CalculateAndAddDisallowedCorners2(disallowedCornerIndicesField(__instance), mapField(__instance), peMode, destinationRect);
+            List<int> localDisallowedCornerIndices = getDisallowedCornerIndices(__instance, peMode, destinationRect);
+            //CalculateAndAddDisallowedCorners2(disallowedCornerIndicesField(__instance), mapField(__instance), peMode, destinationRect);
             InitStatusesAndPushStartNode3(ref curIndex, start, cellIndicesField(__instance), calcGrid, ref statusOpenValue, ref statusClosedValue);
             openList.Clear();
             openList.Push(new CostNode2(curIndex, 0));
@@ -399,7 +406,7 @@ namespace RimThreaded
                         return false;
                     }
                 }
-                else if (destinationRect.Contains(c) && !disallowedCornerIndicesField(__instance).Contains(curIndex))
+                else if (destinationRect.Contains(c) && !localDisallowedCornerIndices.Contains(curIndex))
                 {
                     PfProfilerEndSample();
                     PawnPath result2 = FinalizedPath2(curIndex, flag8, cellIndicesField(__instance), calcGrid);
@@ -661,7 +668,7 @@ namespace RimThreaded
                 if (num3 >= num4 && flag6 && !flag8)
                 {
                     flag8 = true;
-                    regionCostCalculator.Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, disallowedCornerIndicesField(__instance));
+                    regionCostCalculator.Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, localDisallowedCornerIndices);
                     InitStatusesAndPushStartNode3(ref curIndex, start, cellIndicesField(__instance), calcGrid, ref statusOpenValue, ref statusClosedValue);
                     openList.Clear();
                     openList.Push(new CostNode2(curIndex, 0));
@@ -745,6 +752,46 @@ namespace RimThreaded
                 }
             }
             return regionCostCalculatorWrapper;
+        }
+
+        public static List<int> getDisallowedCornerIndices(PathFinder __instance, PathEndMode peMode, CellRect destinationRect)
+        {
+            if (disallowedCornerIndices == null)
+            {
+                disallowedCornerIndices = new List<int>(4);
+            }
+            else
+            {
+                disallowedCornerIndices.Clear();
+                if (peMode == PathEndMode.Touch)
+                {
+                    int minX = destinationRect.minX;
+                    int minZ = destinationRect.minZ;
+                    int maxX = destinationRect.maxX;
+                    int maxZ = destinationRect.maxZ;
+                    Map map = mapField(__instance);
+                    if (!funcIsCornerTouchAllowed(__instance, minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
+                    {
+                        disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, minZ));
+                    }
+
+                    if (!funcIsCornerTouchAllowed(__instance, minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
+                    {
+                        disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, maxZ));
+                    }
+
+                    if (!funcIsCornerTouchAllowed(__instance, maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
+                    {
+                        disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, maxZ));
+                    }
+
+                    if (!funcIsCornerTouchAllowed(__instance, maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
+                    {
+                        disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, minZ));
+                    }
+                }
+            }
+            return disallowedCornerIndices;
         }
     }
 }

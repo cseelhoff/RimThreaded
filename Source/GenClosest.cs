@@ -138,8 +138,8 @@ namespace RimThreaded
             float maxDistSquared = maxDistance * maxDistance;
             RegionEntryPredicate entryCondition = (RegionEntryPredicate)((from, to) =>
             {
-                if (!to.Allows(traverseParams, false))                
-                    return false;                
+                if (!to.Allows(traverseParams, false))
+                    return false;
                 return (double)maxDistance > 5000.0 || (double)to.extentsClose.ClosestDistSquaredTo(root) < (double)maxDistSquared;
             });
             Thing closestThing = (Thing)null;
@@ -158,7 +158,7 @@ namespace RimThreaded
                     List<Thing> thingList = r.ListerThings.ThingsMatching(req);
                     //lock (thingList)
                     //{
-                        //arrayThingList = thingList.ToArray();
+                    //arrayThingList = thingList.ToArray();
                     //}
                     for (int index = 0; index < thingList.Count; ++index)
                     {
@@ -166,7 +166,8 @@ namespace RimThreaded
                         try
                         {
                             thing = thingList[index];
-                        } catch(ArgumentOutOfRangeException)
+                        }
+                        catch (ArgumentOutOfRangeException)
                         {
                             break;
                         }
@@ -184,7 +185,7 @@ namespace RimThreaded
                                 }
                             }
                         }
-                    }                    
+                    }
                 }
                 return regionsSeenScan >= minRegions && closestThing != null;
             });
@@ -214,15 +215,15 @@ namespace RimThreaded
                 DateTime now = DateTime.Now;
                 //if (thingList.Count > 100 && now.Subtract(RimThreaded.lastClosestThingGlobal).TotalMilliseconds < 1000)
                 //{
-                    //Log.Error("ClosestThing_Global was called within the last 1000ms");
+                //Log.Error("ClosestThing_Global was called within the last 1000ms");
                 //}
                 //else
                 //{
-                    RimThreaded.lastClosestThingGlobal = now;
-                    for (int index = 0; index < thingList.Count; ++index)
-                    {
-                        Process2(thingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
-                    }
+                RimThreaded.lastClosestThingGlobal = now;
+                for (int index = 0; index < thingList.Count; ++index)
+                {
+                    Process2(thingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                }
                 //}
             }
             else if (searchSet is IList<Pawn> pawnList)
@@ -248,9 +249,21 @@ namespace RimThreaded
             }
             else
             {
-                foreach (Thing search in searchSet)
+                List<Thing> listThings = new List<Thing>();
+
+                try
                 {
-                    Process2(search, center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                    foreach (Thing search in searchSet)
+                    {
+                        listThings.Add(search);
+                    }
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                }
+                for (int index = 0; index < listThings.Count; ++index)
+                {
+                    Process2(listThings[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
                 }
             }
             __result = chosen;
@@ -258,8 +271,8 @@ namespace RimThreaded
 
         }
 
-        public static void Process2(Thing t, IntVec3 center, float maxDistanceSquared, 
-            Func<Thing, float> priorityGetter, ref float bestPrio, ref float closestDistSquared, 
+        public static void Process2(Thing t, IntVec3 center, float maxDistanceSquared,
+            Func<Thing, float> priorityGetter, ref float bestPrio, ref float closestDistSquared,
             ref Thing chosen, Predicate<Thing> validator)
         {
             if (null != t)
