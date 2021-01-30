@@ -957,6 +957,7 @@ namespace RimThreaded
                 mapPostTickComplete = false;
                 historyTickComplete = false;
                 miscellaneousComplete = false;
+                RegionAndRoomUpdater_Patch.regionCleaning.Set();
                 foreach (EventWaitHandle eventWaitStart in eventWaitStarts.Values)
                 {
                     eventWaitStart.Set();
@@ -1060,8 +1061,7 @@ namespace RimThreaded
         }
 
         public static void MainThreadWaitLoop()
-        {
-            RegionAndRoomUpdater_Patch.workingInt = 0;
+        {            
             allWorkerThreadsFinished = false;
             monitorThreadWaitHandle.Set();
 

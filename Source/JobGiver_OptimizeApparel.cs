@@ -7,12 +7,15 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class JobGiver_OptimizeApparel_Patch
-	{
+    {
+        public static StringBuilder debugSb = StaticFieldRefAccess<StringBuilder>(typeof(JobGiver_OptimizeApparel), "debugSb");
+        public static NeededWarmth neededWarmth = StaticFieldRefAccess<NeededWarmth>(typeof(JobGiver_OptimizeApparel), "neededWarmth");
         public static bool ApparelScoreGain(ref float __result, Pawn pawn, Apparel ap)
         {
             List<float> wornApparelScores = new List<float>();
@@ -23,7 +26,8 @@ namespace RimThreaded
                 try
                 {
                     apparel = pawn.apparel.WornApparel[i];
-                } catch(ArgumentOutOfRangeException)
+                }
+                catch (ArgumentOutOfRangeException)
                 {
                     break;
                 }
@@ -38,7 +42,7 @@ namespace RimThreaded
         {
             if (ap is ShieldBelt && pawn.equipment.Primary != null && pawn.equipment.Primary.def.IsWeaponUsingProjectiles)
             {
-                __result = - 1000f;
+                __result = -1000f;
                 return false;
             }
 
@@ -51,7 +55,8 @@ namespace RimThreaded
                 try
                 {
                     apparel = wornApparel[i];
-                } catch (ArgumentOutOfRangeException)
+                }
+                catch (ArgumentOutOfRangeException)
                 {
                     break;
                 }
@@ -59,7 +64,7 @@ namespace RimThreaded
                 {
                     if (!pawn.outfits.forcedHandler.AllowedToAutomaticallyDrop(apparel) || pawn.apparel.IsLocked(apparel))
                     {
-                        __result = - 1000f;
+                        __result = -1000f;
                         return false;
                     }
 
@@ -76,5 +81,115 @@ namespace RimThreaded
             __result = num;
             return false;
         }
+
+        public static bool TryGiveJob(JobGiver_OptimizeApparel __instance, ref Job __result, Pawn pawn)
+        {
+            if (pawn.outfits == null)
+            {
+                Log.ErrorOnce(string.Concat(pawn, " tried to run JobGiver_OptimizeApparel without an OutfitTracker"), 5643897);
+                __result = null;
+                return false;
+            }
+
+            if (pawn.Faction != Faction.OfPlayer)
+            {
+                Log.ErrorOnce(string.Concat("Non-colonist ", pawn, " tried to optimize apparel."), 764323);
+                __result = null;
+                return false;
+            }
+
+            if (pawn.IsQuestLodger())
+            {
+                __result = null;
+                return false;
+            }
+
+            if (!DebugViewSettings.debugApparelOptimize)
+            {
+                if (Find.TickManager.TicksGame < pawn.mindState.nextApparelOptimizeTick)
+                {
+                    __result = null;
+                    return false;
+                }
+            }
+            else
+            {
+                debugSb = new StringBuilder();
+                debugSb.AppendLine(string.Concat("Scanning for ", pawn, " at ", pawn.Position));
+            }
+
+            Outfit currentOutfit = pawn.outfits.CurrentOutfit;
+            List<Apparel> wornApparel = pawn.apparel.WornApparel;
+            for (int num = wornApparel.Count - 1; num >= 0; num--)
+            {
+                if (!currentOutfit.filter.Allows(wornApparel[num]) && pawn.outfits.forcedHandler.AllowedToAutomaticallyDrop(wornApparel[num]) && !pawn.apparel.IsLocked(wornApparel[num]))
+                {
+                    Job job = JobMaker.MakeJob(JobDefOf.RemoveApparel, wornApparel[num]);
+                    job.haulDroppedApparel = true;
+                    __result = job;
+                    return false;
+                }
+            }
+
+            Thing thing = null;
+            float num2 = 0f;
+            List<Thing> list = pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.Apparel);
+            if (list.Count == 0)
+            {
+                SetNextOptimizeTick2(pawn);
+                __result = null;
+                return false;
+            }
+
+            neededWarmth = PawnApparelGenerator.CalculateNeededWarmth(pawn, pawn.Map.Tile, GenLocalDate.Twelfth(pawn));
+            //wornApparelScores.Clear();
+            List<float> wornApparelScores = new List<float>();
+            for (int i = 0; i < wornApparel.Count; i++)
+            {
+                wornApparelScores.Add(JobGiver_OptimizeApparel.ApparelScoreRaw(pawn, wornApparel[i]));
+            }
+
+            for (int j = 0; j < list.Count; j++)
+            {
+                Apparel apparel = (Apparel)list[j];
+                if (currentOutfit.filter.Allows(apparel) && apparel.IsInAnyStorage() && !apparel.IsForbidden(pawn) && !apparel.IsBurning() && (apparel.def.apparel.gender == Gender.None || apparel.def.apparel.gender == pawn.gender))
+                {
+                    float num3 = JobGiver_OptimizeApparel.ApparelScoreGain_NewTmp(pawn, apparel, wornApparelScores);
+                    if (DebugViewSettings.debugApparelOptimize)
+                    {
+                        debugSb.AppendLine(apparel.LabelCap + ": " + num3.ToString("F2"));
+                    }
+
+                    if (!(num3 < 0.05f) && !(num3 < num2) && (!EquipmentUtility.IsBiocoded(apparel) || EquipmentUtility.IsBiocodedFor(apparel, pawn)) && ApparelUtility.HasPartsToWear(pawn, apparel.def) && pawn.CanReserveAndReach(apparel, PathEndMode.OnCell, pawn.NormalMaxDanger()))
+                    {
+                        thing = apparel;
+                        num2 = num3;
+                    }
+                }
+            }
+
+            if (DebugViewSettings.debugApparelOptimize)
+            {
+                debugSb.AppendLine("BEST: " + thing);
+                Log.Message(debugSb.ToString());
+                debugSb = null;
+            }
+
+            if (thing == null)
+            {
+                SetNextOptimizeTick2(pawn);
+                __result = null;
+                return false;
+            }
+
+            __result = JobMaker.MakeJob(JobDefOf.Wear, thing);
+            return false;
+        }
+        private static void SetNextOptimizeTick2(Pawn pawn)
+        {
+            pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range(6000, 9000);
+        }
+
+
     }
 }

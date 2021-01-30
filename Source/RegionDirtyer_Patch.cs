@@ -11,26 +11,30 @@ namespace RimThreaded
 {
     public class RegionDirtyer_Patch
     {
-        public static Dictionary<RegionDirtyer, ConcurrentQueue<IntVec3>> dirtyCellsDict = new Dictionary<RegionDirtyer, ConcurrentQueue<IntVec3>>();
+        //public static Dictionary<RegionDirtyer, ConcurrentQueue<IntVec3>> dirtyCellsDict = new Dictionary<RegionDirtyer, ConcurrentQueue<IntVec3>>();
+        public static Dictionary<RegionDirtyer, List<IntVec3>> dirtyCellsDict = new Dictionary<RegionDirtyer, List<IntVec3>>();
 
         public static FieldRef<RegionDirtyer, Map> map = FieldRefAccess<RegionDirtyer, Map>("map");
+
         public static bool SetAllClean(RegionDirtyer __instance)
         {
-            ConcurrentQueue<IntVec3> dirtyCells = get_DirtyCells(__instance);            
-            while (dirtyCells.TryDequeue(out IntVec3 dirtyCell))
+            List<IntVec3> dirtyCells = get_DirtyCells(__instance);
+            lock (dirtyCells)
             {
-                map(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
+                foreach (IntVec3 dirtyCell in dirtyCells)
+                {
+                    map(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
+                }
+                dirtyCells.Clear();
             }
-
-            //dirtyCells.Clear();
             return false;
         }
 
-        public static ConcurrentQueue<IntVec3> get_DirtyCells(RegionDirtyer __instance)
+        public static List<IntVec3> get_DirtyCells(RegionDirtyer __instance)
         {
-            if(!dirtyCellsDict.TryGetValue(__instance, out ConcurrentQueue<IntVec3> dirtyCells))
+            if(!dirtyCellsDict.TryGetValue(__instance, out List<IntVec3> dirtyCells))
             {
-                dirtyCells = new ConcurrentQueue<IntVec3>();
+                dirtyCells = new List<IntVec3>();
                 lock(dirtyCellsDict)
                 {
                     dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
@@ -63,10 +67,13 @@ namespace RimThreaded
             }
 
             //regionsToDirty.Clear();
-            ConcurrentQueue<IntVec3> dirtyCells = get_DirtyCells(__instance);
-            if (c.Walkable(map(__instance)) && !dirtyCells.Contains(c))
+            List<IntVec3> dirtyCells = get_DirtyCells(__instance);
+            lock (dirtyCells)
             {
-                dirtyCells.Enqueue(c);
+                if (c.Walkable(map(__instance)) && !dirtyCells.Contains(c))
+                {
+                    dirtyCells.Add(c);
+                }
             }
             return false;
         }
@@ -125,20 +132,23 @@ namespace RimThreaded
             }
 
             regionsToDirty.Clear();
-            ConcurrentQueue<IntVec3> dirtyCells = get_DirtyCells(__instance);
-            if (b.def.size.x == 1 && b.def.size.z == 1)
+            List<IntVec3> dirtyCells = get_DirtyCells(__instance);
+            lock (dirtyCells)
             {
-                dirtyCells.Enqueue(b.Position);
-                return false;
-            }
-
-            CellRect cellRect = b.OccupiedRect();
-            for (int j = cellRect.minZ; j <= cellRect.maxZ; j++)
-            {
-                for (int k = cellRect.minX; k <= cellRect.maxX; k++)
+                if (b.def.size.x == 1 && b.def.size.z == 1)
                 {
-                    IntVec3 item = new IntVec3(k, 0, j);
-                    dirtyCells.Enqueue(item);
+                    dirtyCells.Add(b.Position);
+                    return false;
+                }
+
+                CellRect cellRect = b.OccupiedRect();
+                for (int j = cellRect.minZ; j <= cellRect.maxZ; j++)
+                {
+                    for (int k = cellRect.minX; k <= cellRect.maxX; k++)
+                    {
+                        IntVec3 item = new IntVec3(k, 0, j);
+                        dirtyCells.Add(item);
+                    }
                 }
             }
             return false;
@@ -146,16 +156,22 @@ namespace RimThreaded
 
         public static bool SetAllDirty(RegionDirtyer __instance)
         {
-            ConcurrentQueue<IntVec3> dirtyCells = new ConcurrentQueue<IntVec3>();
-            foreach (IntVec3 item in map(__instance))
+            List<IntVec3> dirtyCells = new List<IntVec3>();
+            lock (dirtyCells)
             {
-                dirtyCells.Enqueue(item);
+                foreach (IntVec3 item in map(__instance))
+                {
+                    dirtyCells.Add(item);
+                }
             }
-            dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
+            lock (dirtyCellsDict) { 
+                dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
+            }
             foreach (Region item2 in map(__instance).regionGrid.AllRegions_NoRebuild_InvalidAllowed)
             {
                 SetRegionDirty(__instance, item2, addCellsToDirtyCells: false);
             }
+            
             return false;
         }
 
@@ -179,13 +195,16 @@ namespace RimThreaded
             {
                 return false;
             }
-            ConcurrentQueue<IntVec3> dirtyCells = get_DirtyCells(__instance);
-            foreach (IntVec3 cell in reg.Cells)
-            {                
-                dirtyCells.Enqueue(cell);
-                if (DebugViewSettings.drawRegionDirties)
+            List<IntVec3> dirtyCells = get_DirtyCells(__instance);
+            lock (dirtyCells)
+            {
+                foreach (IntVec3 cell in reg.Cells)
                 {
-                    map(__instance).debugDrawer.FlashCell(cell);
+                    dirtyCells.Add(cell);
+                    if (DebugViewSettings.drawRegionDirties)
+                    {
+                        map(__instance).debugDrawer.FlashCell(cell);
+                    }
                 }
             }
             return false;
