@@ -1223,8 +1223,9 @@ namespace RimThreaded
 			Prefix(original, patched, "Destroy"); //causes strange crash to desktop without error log
 
 			//Pawn_JobTracker_Patch
-			//original = typeof(Pawn_JobTracker);
-			//patched = typeof(Pawn_JobTracker_Patch);
+			original = typeof(Pawn_JobTracker);
+			patched = typeof(Pawn_JobTracker_Patch);
+			Prefix(original, patched, "TryFindAndStartJob");
 			//Prefix(original, patched, "StartJob"); conflict with giddyupcore calling MakeDriver
 
 			//JobGiver_OptimizeApparel

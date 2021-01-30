@@ -71,33 +71,35 @@ namespace RimThreaded
         {
             if (!__instance.Enabled || working) return false;
             //regionCleaning.WaitOne();
-            working = true;
-            if (!initialized(__instance)) __instance.RebuildAllRegionsAndRooms();
-            List<IntVec3> dirtyCells = RegionDirtyer_Patch.get_DirtyCells(map(__instance).regionDirtyer);
-            lock (dirtyCells)
+            lock (RegionDirtyer_Patch.regionDirtyerLock)
             {
-                if (dirtyCells.Count == 0)
+                working = true;
+                if (!initialized(__instance)) __instance.RebuildAllRegionsAndRooms();
+                List<IntVec3> dirtyCells = RegionDirtyer_Patch.get_DirtyCells(map(__instance).regionDirtyer);
                 {
+                    if (dirtyCells.Count == 0)
+                    {
+                        working = false;
+                        //regionCleaning.Set();
+                        return false;
+                    }
+                    try
+                    {
+                        RegenerateNewRegionsFromDirtyCells2(__instance, dirtyCells);
+                        CreateOrUpdateRooms2(__instance);
+                    }
+                    catch (Exception arg) { Log.Error("Exception while rebuilding dirty regions: " + arg); }
+                    foreach (IntVec3 dirtyCell in dirtyCells)
+                    {
+                        map(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
+                    }
+                    dirtyCells.Clear();
+                    initialized(__instance) = true;
                     working = false;
                     //regionCleaning.Set();
-                    return false;
                 }
-                try
-                {
-                    RegenerateNewRegionsFromDirtyCells2(__instance, dirtyCells);
-                    CreateOrUpdateRooms2(__instance);
-                }
-                catch (Exception arg) { Log.Error("Exception while rebuilding dirty regions: " + arg); }
-                foreach (IntVec3 dirtyCell in dirtyCells)
-                {
-                    map(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
-                }
-                dirtyCells.Clear();
-                initialized(__instance) = true;
-                working = false;
-                //regionCleaning.Set();
+                if (DebugSettings.detectRegionListersBugs) Autotests_RegionListers.CheckBugs(map(__instance));
             }
-            if (DebugSettings.detectRegionListersBugs) Autotests_RegionListers.CheckBugs(map(__instance));
             return false;
         }
 
@@ -110,48 +112,13 @@ namespace RimThreaded
             {
                 if (dirtyCell.GetRegion(localMap, RegionType.Set_All) == null)
                 {
-                    /*
-                    if(newRegions(__instance).Count > 0 && newRegions(__instance).Count < 4)
-                    {
-                        foreach(Region reg in newRegions(__instance))
-                        {
-                            if(reg.extentsClose.Contains(dirtyCell))
-                            {
-                                Log.Warning("DirtyCell inside of previously created region");
-                            }
-                        }
-                    }
-                    */
                     Region region = localMap.regionMaker.TryGenerateRegionFrom(dirtyCell);
                     if (region != null)
                     {
                         newRegions(__instance).Add(region);
                     }
                 }
-                //localMap.temperatureCache.ResetCachedCellInfo(dirtyCell);
             }
-            //TODO: this is a bad hack to remove broken empty regions after they were created
-            for (int i = newRegions(__instance).Count - 1; i > 0; i--)
-            {
-                Region currentRegionGroup3 = newRegions(__instance)[i];
-                Map map2 = currentRegionGroup3.Map;
-                CellIndices cellIndices = map2.cellIndices;
-                Region[] directGrid = map2.regionGrid.DirectGrid;
-                bool cellExists = false;
-                foreach (IntVec3 intVec3 in currentRegionGroup3.extentsClose)
-                {
-                    if (directGrid[cellIndices.CellToIndex(intVec3)] == currentRegionGroup3)
-                    {
-                        cellExists = true;
-                        break;
-                    }
-                }
-                if (!cellExists)
-                {
-                    newRegions(__instance).RemoveAt(i);
-                }
-            }
-
         }
 
         private static void CreateOrUpdateRooms2(RegionAndRoomUpdater __instance)
@@ -161,29 +128,6 @@ namespace RimThreaded
             newRoomGroups(__instance).Clear();
             reusedOldRoomGroups(__instance).Clear();
             int numRegionGroups = funcCombineNewRegionsIntoContiguousGroups(__instance); //CombineNewRegionsIntoContiguousGroups2(__instance);
-
-            //TODO: this is a bad hack to remove broken empty regions after they were created
-            for (int i = newRegions(__instance).Count - 1; i > 0; i--)
-            {
-                Region currentRegionGroup3 = newRegions(__instance)[i];
-                Map map2 = currentRegionGroup3.Map;
-                CellIndices cellIndices = map2.cellIndices;
-                Region[] directGrid = map2.regionGrid.DirectGrid;
-                bool cellExists = false;
-                foreach (IntVec3 intVec3 in currentRegionGroup3.extentsClose)
-                {
-                    if (directGrid[cellIndices.CellToIndex(intVec3)] == currentRegionGroup3)
-                    {
-                        cellExists = true;
-                        break;
-                    }
-                }
-                if (!cellExists)
-                {
-                    newRegions(__instance).RemoveAt(i);
-                    //Log.Warning("REMOVED AGAIN");
-                }
-            }
             //actionCreateOrAttachToExistingRooms(__instance, numRegionGroups); //CreateOrAttachToExistingRooms2(__instance, numRegionGroups);
             CreateOrAttachToExistingRooms2(__instance, numRegionGroups);
             int numRoomGroups = CombineNewAndReusedRoomsIntoContiguousGroups2(__instance);
@@ -193,28 +137,9 @@ namespace RimThreaded
         
         private static void CreateOrAttachToExistingRooms2(RegionAndRoomUpdater __instance, int numRegionGroups)
         {
-            //TODO: this is a bad hack to remove broken empty regions after they were created
             Region currentRegionGroup3;
             for (int i = 0; i < numRegionGroups; i++)
             {
-                currentRegionGroup3 = newRegions(__instance)[i];
-                Map map2 = currentRegionGroup3.Map;
-                CellIndices cellIndices = map2.cellIndices;
-                Region[] directGrid = map2.regionGrid.DirectGrid;
-                bool cellExists = false;
-                foreach (IntVec3 intVec3 in currentRegionGroup3.extentsClose)
-                {
-                    if (directGrid[cellIndices.CellToIndex(intVec3)] == currentRegionGroup3)
-                    {
-                        cellExists = true;
-                        break;
-                    }
-                }
-                if (!cellExists)
-                {
-                    //Log.Error("still bad regions");
-                    continue;
-                }
                 List<Region> currentRegionGroup2 = currentRegionGroup(__instance);
                 currentRegionGroup2.Clear();
                 for (int j = 0; j < newRegions(__instance).Count; j++)

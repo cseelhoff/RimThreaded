@@ -107,6 +107,7 @@
     <Compile Include="RoofGrid.cs" />
     <Compile Include="SickPawnVisitUtility.cs" />
     <Compile Include="StatWorker.cs" />
+    <Compile Include="thinkTree.cs" />
     <Compile Include="WorkGiver_DoBill_Transpile.cs" />
     <Compile Include="WorkGiver_Grower.cs" />
     <Compile Include="CompCauseGameCondition.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="MeshMakerPlanes.cs" />
     <Compile Include="CE_Utility_Transpile.cs" />
     <Compile Include="Verb_MeleeAttackCE_Transpile.cs" />
+    <Compile Include="WorkGiver_GrowerSow_Patch.cs" />
     <Compile Include="WorldFloodFiller.cs" />
     <Compile Include="ReservationUtility.cs" />
     <Compile Include="PlayLog.cs" />
