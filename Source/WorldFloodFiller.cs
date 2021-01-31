@@ -8,18 +8,37 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using RimWorld.Planet;
+using static HarmonyLib.AccessTools;
+using System.Reflection;
 
 namespace RimThreaded
 {
 
     public class WorldFloodFiller_Patch
     {
+        [ThreadStatic]
+        static Queue<int> openSet;
+        [ThreadStatic]
+        static List<int> traversalDistance;
+        [ThreadStatic]
+        static List<int> visited;
+        [ThreadStatic]
+        static bool working;
+
         public static bool FloodFill(WorldFloodFiller __instance, int rootTile, Predicate<int> passCheck, Func<int, int, bool> processor, int maxTilesToProcess = int.MaxValue, IEnumerable<int> extraRootTiles = null)
-        {
-            bool working = false;
-            Queue<int> openSet = new Queue<int>();    
-            List<int> traversalDistance = new List<int>();
-            List<int> visited = new List<int>();
+        {            
+            if (openSet == null)
+            {
+                openSet = new Queue<int>();
+            }
+            if (traversalDistance == null)
+            {
+                 traversalDistance = new List<int>();
+            }
+            if (visited == null)
+            {
+                visited = new List<int>();
+            }
 
             if (working)
             {
@@ -27,7 +46,13 @@ namespace RimThreaded
             }
 
             working = true;
-            //ClearVisited();
+            int j = 0;
+            for (int count = visited.Count; j < count; j++)
+            {
+                traversalDistance[visited[j]] = -1;
+            }
+            visited.Clear();
+            openSet.Clear();
             if (rootTile != -1 && extraRootTiles == null && !passCheck(rootTile))
             {
                 working = false;
@@ -35,7 +60,6 @@ namespace RimThreaded
             }
 
             int tilesCount = Find.WorldGrid.TilesCount;
-            int num = tilesCount;
             if (traversalDistance.Count != tilesCount)
             {
                 traversalDistance.Clear();
@@ -48,7 +72,6 @@ namespace RimThreaded
             WorldGrid worldGrid = Find.WorldGrid;
             List<int> tileIDToNeighbors_offsets = worldGrid.tileIDToNeighbors_offsets;
             List<int> tileIDToNeighbors_values = worldGrid.tileIDToNeighbors_values;
-            int num2 = 0;
             openSet.Clear();
             if (rootTile != -1)
             {
@@ -63,23 +86,26 @@ namespace RimThreaded
                 IList<int> list = extraRootTiles as IList<int>;
                 if (list != null)
                 {
-                    for (int j = 0; j < list.Count; j++)
-                    {
-                        int num3 = list[j];
-                        traversalDistance[num3] = 0;
-                        openSet.Enqueue(num3);
-                    }
+                    loop1(list);
                 }
                 else
                 {
-                    foreach (int extraRootTile in extraRootTiles)
-                    {
-                        traversalDistance[extraRootTile] = 0;
-                        openSet.Enqueue(extraRootTile);
-                    }
+                    loop2(extraRootTiles);
                 }
             }
 
+            loop3(processor, maxTilesToProcess, tileIDToNeighbors_offsets, 
+                tileIDToNeighbors_values, passCheck, tilesCount);
+
+            working = false;
+            return false;
+        }
+
+        private static void loop3(Func<int, int, bool> processor, int maxTilesToProcess, 
+            List<int> tileIDToNeighbors_offsets, List<int> tileIDToNeighbors_values,
+            Predicate<int> passCheck, int num)
+        {
+            int num2 = 0;
             while (openSet.Count > 0)
             {
                 int num4 = openSet.Dequeue();
@@ -111,15 +137,28 @@ namespace RimThreaded
                 {
                     Log.Error("Overflow on world flood fill (>" + num + " cells). Make sure we're not flooding over the same area after we check it.");
                     working = false;
-                    return false;
+                    return;
                 }
             }
-
-            working = false;
-            return false;
         }
 
+        private static void loop2(IEnumerable<int> extraRootTiles)
+        {
+            foreach (int extraRootTile in extraRootTiles)
+            {
+                traversalDistance[extraRootTile] = 0;
+                openSet.Enqueue(extraRootTile);
+            }
+        }
 
-
+        private static void loop1(IList<int> list)
+        {
+            for (int j = 0; j < list.Count; j++)
+            {
+                int num3 = list[j];
+                traversalDistance[num3] = 0;
+                openSet.Enqueue(num3);
+            }
+        }
     }
 }

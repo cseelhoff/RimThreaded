@@ -927,6 +927,7 @@ namespace RimThreaded
 			//Transpile(original, patched, "PartIsMissing");
 			//Transpile(original, patched, "HasDirectlyAddedPartFor");
 			Transpile(original, patched, "AddDirect");
+			Transpile(original, patched, "CacheMissingPartsCommonAncestors");
 			patched = typeof(HediffSet_Patch);
 			//Prefix(original, patched, "CacheMissingPartsCommonAncestors");
 			Prefix(original, patched, "PartIsMissing");
@@ -934,8 +935,8 @@ namespace RimThreaded
 			Prefix(original, patched, "GetFirstHediffOfDef");
 			Prefix(original, patched, "HasTendableHediff");
 			Prefix(original, patched, "HasImmunizableNotImmuneHediff");
-			Prefix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPrefix", false);
-			Postfix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPostfix");
+			//Prefix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPrefix", false);
+			//Postfix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPostfix");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -1436,17 +1437,18 @@ namespace RimThreaded
 			original = typeof(RestUtility);
 			patched = typeof(RestUtility_Patch);
 			Prefix(original, patched, "GetBedSleepingSlotPosFor");
-
+			
 			//Lord
 			original = typeof(Lord);
 			patched = typeof(Lord_Patch);
 			Prefix(original, patched, "AddPawn");
 			Prefix(original, patched, "RemovePawn");
-
+			
 			//LordManager
 			original = typeof(LordManager);
 			patched = typeof(LordManager_Patch);
 			Prefix(original, patched, "LordOf", new Type[] { typeof(Pawn) });
+			Prefix(original, patched, "RemoveLord");
 
 			//DamageWorker
 			original = typeof(DamageWorker);
@@ -1580,6 +1582,16 @@ namespace RimThreaded
 			original = typeof(DrugAIUtility);
 			patched = typeof(DrugAIUtility_Patch);
 			Prefix(original, patched, "IngestAndTakeToInventoryJob");
+
+			//Verb_MeleeAttack
+			//original = typeof(Verb_MeleeAttack);
+			//patched = typeof(Verb_MeleeAttack_Patch);
+			//Prefix(original, patched, "TryCastShot");
+
+			//Verb_Tracker
+			original = typeof(VerbTracker);
+			patched = typeof(VerbTracker_Patch);
+			Prefix(original, patched, "VerbsTick");
 
 			//JoyGiver_Ingest
 			//original = typeof(JoyGiver_Ingest);
