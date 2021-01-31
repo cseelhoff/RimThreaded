@@ -9,17 +9,13 @@
 	</supportedVersions>
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
-    
-    Version 1.2.6 - The Rebel Alliance Hoff Base
-    -Fixed bug in DrugAIUtility.IngestAndTakeToInventoryJob
-    -Fixed bug in GenClosest.ClosestThing_Global
-    -Fixed bug in HaulAIUtility.TryFindSpotToPlaceHaulableCloseTo
-    -Fixed bug in JobGiver_OptimizeApparel.ApparelScoreGain
-    -Fixed bug in JobGiver_OptimizeApparel.TryGiveJob
-    -Fixed bug in PathFinder.DisallowedCornerIndices
-    -Fixed bug in Pawn_JobTracker.TryFindAndStartJob
-    -Fixed bug in ReservationManager.ReleaseAllForTarget
-    -Added many thread locks to RegionDirtyer class
+
+    Version 1.2.7 - Grand Hoff Wilhoff Tarkin
+    -Transpiled HediffSet.CacheMissingPartsCommonAncestors
+    -Fixed bug in LordManager.RemoveLord
+    -Fixed bug in VerbTracker.VerbsTick
+    -Fixed bug in Verb_MeleeAttack.TryCastShot
+    -Fixed bug in WorldFloodFiller.FloodFill
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8

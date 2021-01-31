@@ -39,6 +39,13 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.2.7 - Grand Hoff Wilhoff Tarkin  
+-Transpiled HediffSet.CacheMissingPartsCommonAncestors  
+-Fixed bug in LordManager.RemoveLord  
+-Fixed bug in VerbTracker.VerbsTick  
+-Fixed bug in Verb_MeleeAttack.TryCastShot  
+-Fixed bug in WorldFloodFiller.FloodFill  
+
 Version 1.2.6 - The Rebel Alliance Hoff Base  
 -Fixed bug in DrugAIUtility.IngestAndTakeToInventoryJob  
 -Fixed bug in GenClosest.ClosestThing_Global  
