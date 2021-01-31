@@ -53,5 +53,19 @@ namespace RimThreaded
             __result = lordResult;
             return false;
         }
+        public static bool RemoveLord(LordManager __instance, Lord oldLord)
+        {
+            for (int j = 0; j < oldLord.ownedPawns.Count; j++)
+            {
+                lock (Lord_Patch.pawnsLord)
+                {
+                    Lord_Patch.pawnsLord.SetOrAdd(oldLord.ownedPawns[j], null);
+                }
+            }
+            __instance.lords.Remove(oldLord);
+            Find.SignalManager.DeregisterReceiver(oldLord);
+            oldLord.Cleanup();
+            return false;
+        }
     }
 }

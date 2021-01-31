@@ -5,6 +5,9 @@ using Verse;
 using System.Reflection.Emit;
 using RimWorld;
 using System.Reflection;
+using System;
+using static HarmonyLib.AccessTools;
+using static RimThreaded.RimThreadedHarmony;
 
 namespace RimThreaded
 {
@@ -177,6 +180,29 @@ namespace RimThreaded
             }
         }
 
+        
+        public static IEnumerable<CodeInstruction> CacheMissingPartsCommonAncestors(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            int i = 0;
+            List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
+            {
+                new CodeInstruction(OpCodes.Ldarg_0)
+            };
+            LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
+            LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+            foreach (CodeInstruction ci in EnterLock(
+                lockObject, lockTaken, loadLockObjectInstructions, instructionsList, ref i))
+                yield return ci;
+            while (i < instructionsList.Count - 1)
+            {
+                yield return instructionsList[i++];
+            }
+            foreach (CodeInstruction ci in ExitLock(
+                iLGenerator, lockObject, lockTaken, instructionsList, ref i))
+                yield return ci;
+            yield return instructionsList[i++];
+        }
 
     }
 }
