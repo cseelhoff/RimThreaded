@@ -20,18 +20,6 @@ namespace RimThreaded
         public static AccessTools.FieldRef<HediffSet, Queue<BodyPartRecord>> missingPartsCommonAncestorsQueue =
             AccessTools.FieldRefAccess<HediffSet, Queue<BodyPartRecord>>("missingPartsCommonAncestorsQueue");
 
-        public static object rebuildCacheMissingPartsCommonAncestors = new object();
-
-        public static bool CacheMissingPartsCommonAncestorsPrefix(HediffSet __instance)
-        {
-            Monitor.Enter(rebuildCacheMissingPartsCommonAncestors);
-            return true;
-        }
-        public static void CacheMissingPartsCommonAncestorsPostfix(HediffSet __instance)
-        {
-            Monitor.Exit(rebuildCacheMissingPartsCommonAncestors);
-        }
-
 
         public static bool HasImmunizableNotImmuneHediff(HediffSet __instance, ref bool __result)
         {
