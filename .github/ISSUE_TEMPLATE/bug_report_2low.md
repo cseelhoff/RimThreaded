@@ -1,7 +1,6 @@
 ---
 name: Non-Reproducible Vanilla Bug Report (Low Priority)
-about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs
-  that cannot be reproduced fairly consistantly.
+about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs that cannot be reproduced fairly consistantly.   
 title: ''
 labels: Bug, Vanilla RT
 assignees: ''
