@@ -1,6 +1,6 @@
 ---
 name: Reproducible Community Modpack Bug Report (Medium Priority)
-about: " Submit a bug report that occurs in the Community Modpack that can be reproduced fairly consistantly."   
+about: Submit a bug report that occurs in the Community Modpack that can be reproduced fairly consistantly.   
 title: ''
 labels: Bug, Reproducible, Community Modpack
 assignees: pastorismylord
