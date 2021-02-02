@@ -62,6 +62,16 @@ namespace RimThreaded
 			int[] matchesFound = new int[2];
 			List<CodeInstruction> instructionsList = instructions.ToList();
 			int i = 0;
+			yield return new CodeInstruction(OpCodes.Ldsfld, Field(typeof(RegionTraverser_Patch), "freeWorkers"));
+			yield return new CodeInstruction(OpCodes.Ldnull);
+			yield return new CodeInstruction(OpCodes.Ceq);
+			Label freeWorkersNullLabel = iLGenerator.DefineLabel();
+			yield return new CodeInstruction(OpCodes.Brfalse_S, freeWorkersNullLabel);
+			yield return new CodeInstruction(OpCodes.Newobj, Constructor(typeof(Queue<object>)));
+			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Patch), "freeWorkers"));
+			yield return new CodeInstruction(OpCodes.Ldc_I4_8);
+			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Patch), "NumWorkers"));
+			instructionsList[i].labels.Add(freeWorkersNullLabel);
 			while (i < instructionsList.Count)
 			{
 				int matchIndex = 0;

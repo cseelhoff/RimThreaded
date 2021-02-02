@@ -391,15 +391,18 @@ namespace RimThreaded
 
 			//ThinkNode_PrioritySorter
 			original = typeof(ThinkNode_PrioritySorter);
-			patched = typeof(ThinkNode_PrioritySorter_Patch);
-			Prefix(original, patched, "TryIssueJobPackage");
+			//patched = typeof(ThinkNode_PrioritySorter_Patch);
+			//Prefix(original, patched, "TryIssueJobPackage");
+			patched = typeof(ThinkNode_PrioritySorter_Transpile);
+			Transpile(original, patched, "TryIssueJobPackage");
 
 			//ThingGrid
 			original = typeof(ThingGrid);
 
 			//ThingGrid_Transpile
 			//patched = typeof(ThingGrid_Transpile);
-			//TranspileGeneric(original, patched, "ThingAt", new Type[] { typeof(IntVec3) });
+			//harmony.Patch(Method(original, "ThingAt", new Type[] { typeof(IntVec3) }), transpiler: new HarmonyMethod(Method(patched, "ThingAt")));
+			
 
 			patched = typeof(ThingGrid_Patch);
 			Prefix(original, patched, "RegisterInCell");
@@ -433,7 +436,7 @@ namespace RimThreaded
 
 			//RCellFinder			
 			original = typeof(RCellFinder);
-			patched = typeof(RCellFinder_Patch);
+			patched = typeof(RCellFinder_Patch); //TODO add threadstatics and transpile in
 			Prefix(original, patched, "RandomWanderDestFor");
 
 			//GenSpawn

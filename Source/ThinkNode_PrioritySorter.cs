@@ -10,15 +10,26 @@ using Verse.AI;
 
 namespace RimThreaded
 {
-    
     public class ThinkNode_PrioritySorter_Patch
     {
+        [ThreadStatic]
+        public static List<ThinkNode> workingNodes;
+
         public static bool TryIssueJobPackage(ThinkNode_PrioritySorter __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
         {
-            List<ThinkNode> workingNodes = new List<ThinkNode>();
+            if(workingNodes == null)
+            {
+                workingNodes = new List<ThinkNode>();
+            } else
+            {
+                workingNodes.Clear();
+            }
+            //List<ThinkNode> workingNodes = new List<ThinkNode>();
             int count = __instance.subNodes.Count;
-            for (int index = 0; index < count; ++index)
-                workingNodes.Insert(Rand.Range(0, workingNodes.Count - 1), __instance.subNodes[index]);
+            for (int i = 0; i < count; i++)
+            {
+                workingNodes.Insert(Rand.Range(0, workingNodes.Count - 1), __instance.subNodes[i]);
+            }
             while (workingNodes.Count > 0)
             {
                 float num1 = 0.0f;

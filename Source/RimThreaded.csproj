@@ -110,6 +110,7 @@
     <Compile Include="RoofGrid.cs" />
     <Compile Include="SickPawnVisitUtility.cs" />
     <Compile Include="StatWorker.cs" />
+    <Compile Include="ThinkNode_PrioritySorter_Transpile.cs" />
     <Compile Include="thinkTree.cs" />
     <Compile Include="TickList_Transpile.cs" />
     <Compile Include="VerbTracker_Patch.cs" />

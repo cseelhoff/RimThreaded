@@ -8,13 +8,28 @@ using Verse;
 using Verse.AI;
 using UnityEngine;
 using System.Reflection;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class RCellFinder_Patch
     {
-        public static MethodInfo CanWanderToCell = typeof(RCellFinder).GetMethod("CanWanderToCell", BindingFlags.NonPublic | BindingFlags.Static);
+        [ThreadStatic]
+        public static List<Region> regions = new List<Region>();
+        [ThreadStatic]
+        public static HashSet<Thing> tmpBuildings = new HashSet<Thing>();
+        [ThreadStatic]
+        public static List<Thing> tmpSpotThings = new List<Thing>();
+        [ThreadStatic]
+        public static List<IntVec3> tmpSpotsToAvoid = new List<IntVec3>();
+        [ThreadStatic]
+        public static List<IntVec3> tmpEdgeCells = new List<IntVec3>();
+
+        private static readonly MethodInfo methodCanWanderToCell = Method(typeof(RCellFinder), "CanWanderToCell");
+        private static readonly Func<IntVec3, Pawn, IntVec3, Func<Pawn, IntVec3, IntVec3, bool>, int, Danger, bool> funcCanWanderToCell =
+            (Func< IntVec3, Pawn, IntVec3, Func<Pawn, IntVec3, IntVec3, bool>, int, Danger, bool>)Delegate.CreateDelegate(
+                typeof(Func<IntVec3, Pawn, IntVec3, Func<Pawn, IntVec3, IntVec3, bool>, int, Danger, bool>), methodCanWanderToCell);
 
         public static bool RandomWanderDestFor(ref IntVec3 __result, Pawn pawn,
             IntVec3 root,
@@ -22,16 +37,21 @@ namespace RimThreaded
             Func<Pawn, IntVec3, IntVec3, bool> validator,
             Danger maxDanger)
         {
-            if ((double)radius > 12.0)
-                Log.Warning("wanderRadius of " + (object)radius + " is greater than Region.GridSize of " + (object)12 + " and will break.", false);
+            if (radius > 12f)
+            {
+                Log.Warning("wanderRadius of " + radius + " is greater than Region.GridSize of " + 12 + " and will break.");
+            }
+
             bool flag = false;
-            if (root.GetRegion(pawn.Map, RegionType.Set_Passable) != null)
+            if (root.GetRegion(pawn.Map) != null)
             {
                 int maxRegions = Mathf.Max((int)radius / 3, 13);
                 List<Region> regions = new List<Region>();
-                CellFinder.AllRegionsNear(regions, root.GetRegion(pawn.Map, RegionType.Set_Passable), maxRegions, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false), (Predicate<Region>)(reg => (double)reg.extentsClose.ClosestDistSquaredTo(root) <= (double)radius * (double)radius), (Pawn)null, RegionType.Set_Passable);
+                CellFinder.AllRegionsNear(regions, root.GetRegion(pawn.Map), maxRegions, TraverseParms.For(pawn), (Region reg) => reg.extentsClose.ClosestDistSquaredTo(root) <= radius * radius);
                 if (flag)
-                    pawn.Map.debugDrawer.FlashCell(root, 0.6f, nameof(root), 50);
+                {
+                    pawn.Map.debugDrawer.FlashCell(root, 0.6f, "root");
+                }
                 if (regions.Count > 0)
                 {
                     for (int tryIndex = 0; tryIndex < 35; ++tryIndex)
@@ -39,11 +59,11 @@ namespace RimThreaded
                         IntVec3 c = IntVec3.Invalid;
                         for (int index = 0; index < 5; ++index)
                         {
-                            _ = regions.TryRandomElementByWeight<Region>((Func<Region, float>)(reg => (float)reg.CellCount), out Region randomRegion);
+                            _ = regions.TryRandomElementByWeight((reg => reg.CellCount), out Region randomRegion);
                             if (randomRegion != null)
                             {
                                 IntVec3 randomCell = randomRegion.RandomCell;
-                                if ((double)randomCell.DistanceToSquared(root) <= (double)radius * (double)radius)
+                                if (randomCell.DistanceToSquared(root) <= radius * radius)
                                 {
                                     c = randomCell;
                                     break;
@@ -55,7 +75,7 @@ namespace RimThreaded
                             if (flag)
                                 pawn.Map.debugDrawer.FlashCell(c, 0.32f, "distance", 50);
                         }
-                        else if (!(bool)CanWanderToCell.Invoke(null, new object[] { c, pawn, root, validator, tryIndex, maxDanger }))
+                        else if (!funcCanWanderToCell(c, pawn, root, validator, tryIndex, maxDanger))
                         {
                             if (flag)
                                 pawn.Map.debugDrawer.FlashCell(c, 0.6f, "validation", 50);
