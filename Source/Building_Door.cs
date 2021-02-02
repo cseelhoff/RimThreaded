@@ -8,21 +8,24 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using System.Reflection;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class Building_Door_Patch
     {
-		public static AccessTools.FieldRef<CompPowerTrader, bool> powerOnInt =
-			AccessTools.FieldRefAccess<CompPowerTrader, bool>("powerOnInt");
-		public static AccessTools.FieldRef<Building_Door, bool> openInt =
-			AccessTools.FieldRefAccess<Building_Door, bool>("openInt");
-		public static AccessTools.FieldRef<Building_Door, bool> holdOpenInt =
-			AccessTools.FieldRefAccess<Building_Door, bool>("holdOpenInt");
-		public static AccessTools.FieldRef<Building_Door, int> ticksUntilClose =
-			AccessTools.FieldRefAccess<Building_Door, int>("ticksUntilClose");
-		public static PropertyInfo canTryCloseAutomatically = AccessTools.DeclaredProperty(typeof(Building_Door), "CanTryCloseAutomatically");
+		public static FieldRef<CompPowerTrader, bool> powerOnInt =
+            FieldRefAccess<CompPowerTrader, bool>("powerOnInt");
+		public static FieldRef<Building_Door, bool> openInt =
+            FieldRefAccess<Building_Door, bool>("openInt");
+		public static FieldRef<Building_Door, bool> holdOpenInt =
+            FieldRefAccess<Building_Door, bool>("holdOpenInt");
+		public static FieldRef<Building_Door, int> ticksUntilClose =
+            FieldRefAccess<Building_Door, int>("ticksUntilClose");
+		public static PropertyInfo canTryCloseAutomatically = DeclaredProperty(typeof(Building_Door), "CanTryCloseAutomatically");
+
+		public static FieldRef<CompPowerTrader, bool> powerOnIntFieldRef = FieldRefAccess<CompPowerTrader, bool>("powerOnInt");
 
 		public static bool get_DoorPowerOn(Building_Door __instance, ref bool __result)
 		{
@@ -32,7 +35,8 @@ namespace RimThreaded
 			{
 				try
 				{
-					poweron = pc.PowerOn;
+					//poweron = pc.PowerOn;
+					poweron = powerOnIntFieldRef(pc);
 				}
 				catch (NullReferenceException) { }
 			}

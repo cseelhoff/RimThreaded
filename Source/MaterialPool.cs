@@ -2,28 +2,24 @@
 using System.Threading;
 using UnityEngine;
 using Verse;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {    
     public class MaterialPool_Patch
     {
-		static readonly Func<object[], object> safeFunction = p =>
-			MaterialPool.MatFrom((MaterialRequest)p[0]);
+		static readonly Func<object[], object> safeFunction = parameters =>
+			MaterialPool.MatFrom((MaterialRequest)parameters[0]);
 
 		public static bool MatFrom(ref Material __result, MaterialRequest req)
 		{
-			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+			if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
 			{
-				object[] functionAndParameters = new object[] { safeFunction, new object[] { req } };
-				lock (RimThreaded.safeFunctionRequests)
-				{
-					RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-				}
-				RimThreaded.mainThreadWaitHandle.Set();
-				eventWaitStart.WaitOne();
-				RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-				__result = (Material)safeFunctionResult;
+				threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { req } };
+				mainThreadWaitHandle.Set();
+				threadInfo.eventWaitStart.WaitOne();
+				__result = (Material)threadInfo.safeFunctionResult;
 				return false;
 			}
 			return true;

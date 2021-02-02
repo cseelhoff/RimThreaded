@@ -1,14 +1,11 @@
 ﻿using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.Camera_Patch;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
@@ -17,8 +14,7 @@ namespace RimThreaded
         public static FieldRef<PortraitRenderer, Pawn> pawnFR = FieldRefAccess<PortraitRenderer, Pawn>("pawn");
         public static bool RenderPortrait(PortraitRenderer __instance, Pawn pawn, RenderTexture renderTexture, Vector3 cameraOffset, float cameraZoom)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
                 Camera portraitCamera = Find.PortraitCamera;
                 //portraitCamera.targetTexture = renderTexture;

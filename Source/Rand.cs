@@ -20,6 +20,8 @@ namespace RimThreaded
         //public static uint iterations = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
         //public static uint iterations2 = 0;
         //public static uint seed2 = (uint)DateTime.Now.GetHashCode();
+        [ThreadStatic]
+        public static List<int> tmpRange;
 
         public static uint seed = StaticFieldRefAccess<uint>(typeof(Rand), "seed");
         public static uint iterations = StaticFieldRefAccess<uint>(typeof(Rand), "iterations");

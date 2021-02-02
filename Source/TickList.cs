@@ -1,28 +1,30 @@
 ﻿using HarmonyLib;
-using RimWorld;
-using RimWorld.Planet;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using System.Reflection;
 using System.Threading;
-using UnityEngine;
 using Verse;
-using Verse.Sound;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     public class TickList_Patch
     {
-        public static AccessTools.FieldRef<TickList, List<List<Thing>>> thingLists =
-            AccessTools.FieldRefAccess<TickList, List<List<Thing>>>("thingLists");
-        public static AccessTools.FieldRef<TickList, List<Thing>> thingsToRegister =
-            AccessTools.FieldRefAccess<TickList, List<Thing>>("thingsToRegister");
-        public static AccessTools.FieldRef<TickList, List<Thing>> thingsToDeregister =
-            AccessTools.FieldRefAccess<TickList, List<Thing>>("thingsToDeregister");
-        public static AccessTools.FieldRef<TickList, TickerType> tickType =
-            AccessTools.FieldRefAccess<TickList, TickerType>("tickType");
+        public static FieldRef<TickList, List<List<Thing>>> thingLists =
+            FieldRefAccess<TickList, List<List<Thing>>>("thingLists");
+        public static FieldRef<TickList, List<Thing>> thingsToRegister =
+            FieldRefAccess<TickList, List<Thing>>("thingsToRegister");
+        public static FieldRef<TickList, List<Thing>> thingsToDeregister =
+            FieldRefAccess<TickList, List<Thing>>("thingsToDeregister");
+        public static FieldRef<TickList, TickerType> tickType =
+            FieldRefAccess<TickList, TickerType>("tickType");
+
+
+        private static readonly MethodInfo methodGetTickInterval =
+            Method(typeof(TickList), "get_TickInterval");
+        private static readonly Func<TickList, int> funcGetTickInterval =
+            (Func<TickList, int>)Delegate.CreateDelegate(typeof(Func<TickList, int>), methodGetTickInterval);
+
         public static bool DeregisterThing(TickList __instance, Thing t)
         {
             lock (thingsToDeregister(__instance))
@@ -39,20 +41,7 @@ namespace RimThreaded
             }
             return false;
         }
-        private static int get_TickInterval2(TickList __instance)
-        {
-            switch (tickType(__instance))
-            {
-                case TickerType.Normal:
-                    return 1;
-                case TickerType.Rare:
-                    return 250;
-                case TickerType.Long:
-                    return 2000;
-                default:
-                    return -1;
-            }            
-        }
+
         private static List<Thing> BucketOf2(TickList __instance, Thing t, int currentTickInterval)
         {
             int hashCode = t.GetHashCode();
@@ -63,7 +52,7 @@ namespace RimThreaded
         public static bool Tick(TickList __instance)
         {
             TickerType currentTickType = tickType(__instance);
-            int currentTickInterval = get_TickInterval2(__instance);
+            int currentTickInterval = funcGetTickInterval(__instance);
 
             Thing i;
             List<Thing> tr = thingsToRegister(__instance);

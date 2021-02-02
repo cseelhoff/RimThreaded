@@ -1,49 +1,34 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using RimWorld.Planet;
-using static HarmonyLib.AccessTools;
-using System.Threading;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
 
     public class MapGenerator_Patch
 	{
-        static readonly Func<object[], object> safeFunction = p =>
-            MapGenerator.GenerateMap((IntVec3)p[0], (MapParent)p[1], (MapGeneratorDef)p[2], (IEnumerable<GenStepWithParams>)p[3], (Action<Map>)p[4]);
+        static readonly Func<object[], object> safeFunction = parameters =>
+            MapGenerator.GenerateMap(
+                (IntVec3)parameters[0], 
+                (MapParent)parameters[1],
+                (MapGeneratorDef)parameters[2], 
+                (IEnumerable<GenStepWithParams>)parameters[3], 
+                (Action<Map>)parameters[4]);
 
         public static bool GenerateMap(ref Map __result, IntVec3 mapSize, MapParent parent, MapGeneratorDef mapGenerator, IEnumerable<GenStepWithParams> extraGenStepDefs = null, Action<Map> extraInitBeforeContentGen = null)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunction, new object[] { mapSize, parent, mapGenerator, extraGenStepDefs, extraInitBeforeContentGen } };
-                lock (RimThreaded.timeoutExemptThreads2)
-                {
-                    RimThreaded.timeoutExemptThreads2.Add(tID, 60000); //60 sec timeout
-                }
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                lock (RimThreaded.timeoutExemptThreads2)
-                {
-                    if (RimThreaded.timeoutExemptThreads2.ContainsKey(tID))
-                    {
-                        RimThreaded.timeoutExemptThreads2.Remove(tID);
-                    }
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                __result = (Map)safeFunctionResult;
+                threadInfo.timeoutExempt = 60000;
+                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { 
+                    mapSize, parent, mapGenerator, extraGenStepDefs, extraInitBeforeContentGen } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
+                threadInfo.timeoutExempt = 0;
+                __result = (Map)threadInfo.safeFunctionResult;
                 return false;
             }
             return true;

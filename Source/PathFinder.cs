@@ -1,15 +1,9 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
-using System.Diagnostics;
 using UnityEngine;
-using System.Threading;
 using System.Reflection;
 using static HarmonyLib.AccessTools;
 
@@ -19,43 +13,34 @@ namespace RimThreaded
     public class PathFinder_Patch
     {
         [ThreadStatic]
-        static List<int> disallowedCornerIndices;
+        public static List<int> disallowedCornerIndices;
+        [ThreadStatic]
+        static PathFinderNodeFast2[] calcGrid;
+        [ThreadStatic]
+        public static FastPriorityQueue<CostNode2> openList;
+        [ThreadStatic]
+        public static ushort statusOpenValue;
+        [ThreadStatic]
+        public static ushort statusClosedValue;
 
-        public static Dictionary<int, RegionCostCalculatorWrapper> regionCostCalculatorWrappers =
-            new Dictionary<int, RegionCostCalculatorWrapper>();
-        public static Dictionary<int, PathFinderNodeFast[]> calcGrids =
-            new Dictionary<int, PathFinderNodeFast[]>();
-        public static Dictionary<int, FastPriorityQueue<CostNode2>> openLists =
-            new Dictionary<int, FastPriorityQueue<CostNode2>>();
-        public static Dictionary<int, ushort> openValues =
-            new Dictionary<int, ushort>();
-        public static Dictionary<int, ushort> closedValues =
-            new Dictionary<int, ushort>();
-
-        public static FieldRef<PathFinder, Map> mapField =
+        static readonly FieldRef<PathFinder, Map> mapField =
             FieldRefAccess<PathFinder, Map>("map");
-        public static FieldRef<PathFinder, int> mapSizeXField =
+        static readonly FieldRef<PathFinder, int> mapSizeXField =
             FieldRefAccess<PathFinder, int>("mapSizeX");
-        public static FieldRef<PathFinder, int> mapSizeZField =
+        static readonly FieldRef<PathFinder, int> mapSizeZField =
             FieldRefAccess<PathFinder, int>("mapSizeZ");
-        public static FieldRef<PathFinder, CellIndices> cellIndicesField =
+        static readonly FieldRef<PathFinder, CellIndices> cellIndicesField =
             FieldRefAccess<PathFinder, CellIndices>("cellIndices");
-        public static FieldRef<PathFinder, PathGrid> pathGridField =
+        static readonly FieldRef<PathFinder, PathGrid> pathGridField =
             FieldRefAccess<PathFinder, PathGrid>("pathGrid");
-        public static FieldRef<PathFinder, Building[]> edificeGridField =
+        static readonly FieldRef<PathFinder, Building[]> edificeGridField =
             FieldRefAccess<PathFinder, Building[]>("edificeGrid");
-        public static FieldRef<PathFinder, List<Blueprint>[]> blueprintGridField =
+        static readonly FieldRef<PathFinder, List<Blueprint>[]> blueprintGridField =
             FieldRefAccess<PathFinder, List<Blueprint>[]>("blueprintGrid");
-        //public static AccessTools.FieldRef<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorField =
-            //AccessTools.FieldRefAccess<PathFinder, RegionCostCalculatorWrapper>("regionCostCalculator");
-        public static Type costNodeType = TypeByName("Verse.AI.PathFinder+CostNode");
-        public static ConstructorInfo constructorCostNode = costNodeType.GetConstructors()[0];
-        public static Dictionary<int, PathFinderNodeFast[]> calcGridDict2 =
-            new Dictionary<int, PathFinderNodeFast[]>();
+        static readonly FieldRef<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorField =
+            FieldRefAccess<PathFinder, RegionCostCalculatorWrapper>("regionCostCalculator");
 
-        public static readonly SimpleCurve NonRegionBasedHeuristicStrengthHuman_DistanceCurve =
-            StaticFieldRefAccess<SimpleCurve>(typeof(PathFinder), "NonRegionBasedHeuristicStrengthHuman_DistanceCurve");
-        public static readonly int[] Directions =
+        static readonly int[] Directions =
             StaticFieldRefAccess<int[]>(typeof(PathFinder), "Directions");
 
         static readonly MethodInfo methodIsCornerTouchAllowed =
@@ -63,7 +48,46 @@ namespace RimThreaded
         static readonly Func<PathFinder, int, int, int, int, int, int, bool> funcIsCornerTouchAllowed =
             (Func<PathFinder, int, int, int, int, int, int, bool>)Delegate.CreateDelegate(typeof(Func<PathFinder, int, int, int, int, int, int, bool>), methodIsCornerTouchAllowed);
 
+        static readonly MethodInfo methodCalculateDestinationRect =
+            Method(typeof(PathFinder), "CalculateDestinationRect");
+        static readonly Func<PathFinder, LocalTargetInfo, PathEndMode, CellRect> funcCalculateDestinationRect =
+            (Func<PathFinder, LocalTargetInfo, PathEndMode, CellRect>)Delegate.CreateDelegate(typeof(Func<PathFinder, LocalTargetInfo, PathEndMode, CellRect>), methodCalculateDestinationRect);
 
+        static readonly MethodInfo methodGetAllowedArea =
+            Method(typeof(PathFinder), "GetAllowedArea");
+        static readonly Func<PathFinder, Pawn, Area> funcGetAllowedArea =
+            (Func<PathFinder, Pawn, Area>)Delegate.CreateDelegate(typeof(Func<PathFinder, Pawn, Area>), methodGetAllowedArea);
+
+        static readonly MethodInfo methodDetermineHeuristicStrength =
+            Method(typeof(PathFinder), "DetermineHeuristicStrength");
+        static readonly Func<PathFinder, Pawn, IntVec3, LocalTargetInfo, float> funcDetermineHeuristicStrength =
+            (Func<PathFinder, Pawn, IntVec3, LocalTargetInfo, float>)Delegate.CreateDelegate(typeof(Func<PathFinder, Pawn, IntVec3, LocalTargetInfo, float>), methodDetermineHeuristicStrength);
+
+        private static readonly MethodInfo methodDebugDrawRichData =
+            Method(typeof(PathFinder), "DebugDrawRichData");
+        private static readonly Action<PathFinder> actionDebugDrawRichData =
+            (Action<PathFinder>)Delegate.CreateDelegate(typeof(Action<PathFinder>), methodDebugDrawRichData);
+
+        private static readonly MethodInfo methodPfProfilerEndSample =
+            Method(typeof(PathFinder), "PfProfilerEndSample");
+        private static readonly Action<PathFinder> actionPfProfilerEndSample =
+            (Action<PathFinder>)Delegate.CreateDelegate(typeof(Action<PathFinder>), methodPfProfilerEndSample);
+
+        private static readonly MethodInfo methodPfProfilerBeginSample =
+            Method(typeof(PathFinder), "PfProfilerBeginSample");
+        private static readonly Action<PathFinder, string> actionPfProfilerBeginSample =
+            (Action<PathFinder, string>)Delegate.CreateDelegate(typeof(Action<PathFinder, string>), methodPfProfilerBeginSample);
+
+        private static readonly SimpleCurve RegionHeuristicWeightByNodesOpened =
+            StaticFieldRefAccess<SimpleCurve>(typeof(PathFinder), "RegionHeuristicWeightByNodesOpened");
+
+        public class CostNodeComparer2 : IComparer<CostNode2>
+        {
+            public int Compare(CostNode2 a, CostNode2 b)
+            {
+                return a.cost.CompareTo(b.cost);
+            }
+        }
         public struct CostNode2
         {
             public int index;
@@ -76,7 +100,7 @@ namespace RimThreaded
                 this.cost = cost;
             }
         }
-        public struct PathFinderNodeFast
+        public struct PathFinderNodeFast2
         {
             public int knownCost;
 
@@ -88,110 +112,19 @@ namespace RimThreaded
 
             public ushort status;
         }
-        [Conditional("PFPROFILE")]
-        private static void PfProfilerBeginSample(string s)
+
+        public static void InitStatusesAndPushStartNode2(PathFinder __instance, ref int curIndex, IntVec3 start)
         {
-        }
-        private static CellRect CalculateDestinationRect(LocalTargetInfo dest, PathEndMode peMode)
-        {
-            CellRect result = (dest.HasThing && peMode != PathEndMode.OnCell) ? dest.Thing.OccupiedRect() : CellRect.SingleCell(dest.Cell);
-            if (peMode == PathEndMode.Touch)
+            statusOpenValue += 2;
+            statusClosedValue += 2;
+
+            int size = mapSizeXField(__instance) * mapSizeZField(__instance);
+            if (calcGrid == null || calcGrid.Length < size)
             {
-                result = result.ExpandedBy(1);
+                calcGrid = new PathFinderNodeFast2[size];
             }
 
-            return result;
-        }
-        private static Area GetAllowedArea(Pawn pawn)
-        {
-            if (pawn != null && pawn.playerSettings != null && !pawn.Drafted && ForbidUtility.CaresAboutForbidden(pawn, cellTarget: true))
-            {
-                Area area = pawn.playerSettings.EffectiveAreaRestrictionInPawnCurrentMap;
-                if (area != null && area.TrueCount <= 0)
-                {
-                    area = null;
-                }
-
-                return area;
-            }
-
-            return null;
-        }
-        private static float DetermineHeuristicStrength(Pawn pawn, IntVec3 start, LocalTargetInfo dest)
-        {
-            if (pawn != null && pawn.RaceProps.Animal)
-            {
-                return 1.75f;
-            }
-
-            float lengthHorizontal = (start - dest.Cell).LengthHorizontal;
-            return Mathf.RoundToInt(NonRegionBasedHeuristicStrengthHuman_DistanceCurve.Evaluate(lengthHorizontal));
-        }
-        public static void CalculateAndAddDisallowedCorners2(List<int> disallowedCornerIndices, Map map, PathEndMode peMode, CellRect destinationRect)
-        {
-            disallowedCornerIndices.Clear();
-            if (peMode == PathEndMode.Touch)
-            {
-                int minX = destinationRect.minX;
-                int minZ = destinationRect.minZ;
-                int maxX = destinationRect.maxX;
-                int maxZ = destinationRect.maxZ;
-                if (!IsCornerTouchAllowed2(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1, map))
-                {
-                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, minZ));
-                }
-
-                if (!IsCornerTouchAllowed2(minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1, map))
-                {
-                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, maxZ));
-                }
-
-                if (!IsCornerTouchAllowed2(maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1, map))
-                {
-                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, maxZ));
-                }
-
-                if (!IsCornerTouchAllowed2(maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1, map))
-                {
-                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, minZ));
-                }
-            }
-        }
-        private static bool IsCornerTouchAllowed2(int cornerX, int cornerZ, int adjCardinal1X, int adjCardinal1Z, int adjCardinal2X, int adjCardinal2Z, Map map)
-        {
-            return TouchPathEndModeUtility.IsCornerTouchAllowed(cornerX, cornerZ, adjCardinal1X, adjCardinal1Z, adjCardinal2X, adjCardinal2Z, map);
-        }
-        public static void InitStatusesAndPushStartNode2(ref int curIndex, IntVec3 start, CellIndices cellIndices, PathFinderNodeFast[] pathFinderNodeFast, FastPriorityQueue<CostNode2> fastPriorityQueue, ref ushort local_statusOpenValue, ref ushort local_statusClosedValue)
-        {
-            local_statusOpenValue += 2;
-            local_statusClosedValue += 2;
-            if (local_statusClosedValue >= 65435)
-            {
-                int num = pathFinderNodeFast.Length;
-                for (int i = 0; i < num; i++)
-                {
-                    pathFinderNodeFast[i].status = 0;
-                }
-
-                local_statusOpenValue = 1;
-                local_statusClosedValue = 2;
-            }
-            curIndex = cellIndices.CellToIndex(start);
-            pathFinderNodeFast[curIndex].knownCost = 0;
-            pathFinderNodeFast[curIndex].heuristicCost = 0;
-            pathFinderNodeFast[curIndex].costNodeCost = 0;
-            pathFinderNodeFast[curIndex].parentIndex = curIndex;
-            pathFinderNodeFast[curIndex].status = local_statusOpenValue;
-            fastPriorityQueue.Clear();
-
-            //CostNode2 newCostNode = constructorCostNode.Invoke(new object[] { curIndex, 0 });
-            fastPriorityQueue.Push(new CostNode2(curIndex, 0));
-        }
-        public static void InitStatusesAndPushStartNode3(ref int curIndex, IntVec3 start, CellIndices cellIndices, PathFinderNodeFast[] calcGrid, ref ushort local_statusOpenValue, ref ushort local_statusClosedValue)
-        {
-            local_statusOpenValue += 2;
-            local_statusClosedValue += 2;
-            if (local_statusClosedValue >= 65435)
+            if (statusClosedValue >= 65435)
             {
                 int num = calcGrid.Length;
                 for (int i = 0; i < num; i++)
@@ -199,31 +132,20 @@ namespace RimThreaded
                     calcGrid[i].status = 0;
                 }
 
-                local_statusOpenValue = 1;
-                local_statusClosedValue = 2;
+                statusOpenValue = 1;
+                statusClosedValue = 2;
             }
-            openValues[Thread.CurrentThread.ManagedThreadId] = local_statusOpenValue;
-            closedValues[Thread.CurrentThread.ManagedThreadId] = local_statusClosedValue;
-            curIndex = cellIndices.CellToIndex(start);
+            curIndex = cellIndicesField(__instance).CellToIndex(start);
             calcGrid[curIndex].knownCost = 0;
             calcGrid[curIndex].heuristicCost = 0;
             calcGrid[curIndex].costNodeCost = 0;
             calcGrid[curIndex].parentIndex = curIndex;
-            calcGrid[curIndex].status = local_statusOpenValue;
-
-            //fastPriorityQueue.Clear();
-            //object newCostNode = constructorCostNode.Invoke(new object[] { curIndex, 0 });
-            //fastPriorityQueue.Push(newCostNode);
+            calcGrid[curIndex].status = statusOpenValue;
+            openList.Clear();
+            openList.Push(new CostNode2(curIndex, 0));
         }
 
-        private static void DebugDrawRichData()
-        {
-        }
-        [Conditional("PFPROFILE")]
-        private static void PfProfilerEndSample()
-        {
-        }
-        public static PawnPath FinalizedPath2(int finalIndex, bool usedRegionHeuristics, CellIndices cellIndices, PathFinderNodeFast[] calcGrid)
+        public static PawnPath FinalizedPath2(PathFinder __instance, int finalIndex, bool usedRegionHeuristics)
         {
             //HACK - fix pool
             //PawnPath emptyPawnPath = map(__instance).pawnPathPool.GetEmptyPawnPath();
@@ -232,7 +154,7 @@ namespace RimThreaded
             while (true)
             {
                 int parentIndex = calcGrid[num].parentIndex;
-                emptyPawnPath.AddNode(cellIndices.IndexToCell(num));
+                emptyPawnPath.AddNode(cellIndicesField(__instance).IndexToCell(num));
                 if (num == parentIndex)
                 {
                     break;
@@ -244,35 +166,40 @@ namespace RimThreaded
             return emptyPawnPath;
         }
 
-        private static readonly SimpleCurve RegionHeuristicWeightByNodesOpened = new SimpleCurve
+        public static void CalculateAndAddDisallowedCorners2(PathFinder __instance, TraverseParms traverseParms, PathEndMode peMode, CellRect destinationRect)
         {
-            new CurvePoint(0f, 1f),
-            new CurvePoint(3500f, 1f),
-            new CurvePoint(4500f, 5f),
-            new CurvePoint(30000f, 50f),
-            new CurvePoint(100000f, 500f)
-        };
-
-        public class CostNodeComparer2 : IComparer<CostNode2>
-        {
-            public int Compare(CostNode2 a, CostNode2 b)
+            disallowedCornerIndices.Clear();
+            if (peMode == PathEndMode.Touch)
             {
-                return a.cost.CompareTo(b.cost);
+                int minX = destinationRect.minX;
+                int minZ = destinationRect.minZ;
+                int maxX = destinationRect.maxX;
+                int maxZ = destinationRect.maxZ;
+                Map map = mapField(__instance);
+                if (!funcIsCornerTouchAllowed(__instance, minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
+                {
+                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, minZ));
+                }
+
+                if (!funcIsCornerTouchAllowed(__instance, minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
+                {
+                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, maxZ));
+                }
+
+                if (!funcIsCornerTouchAllowed(__instance, maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
+                {
+                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, maxZ));
+                }
+
+                if (!funcIsCornerTouchAllowed(__instance, maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
+                {
+                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, minZ));
+                }
             }
         }
 
-        //public static FastPriorityQueue<CostNode2> openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
-        //public static PathFinderNodeFast[] calcGrid = new PathFinderNodeFast[40000];
-        //public static ushort statusOpenValue = 1;
-        //public static ushort statusClosedValue = 2;
         public static bool FindPath(PathFinder __instance, ref PawnPath __result, IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)
         {
-            FastPriorityQueue<CostNode2> openList = getOpenList();
-            ushort statusOpenValue = getOpenValue();
-            ushort statusClosedValue = getClosedValue();
-            PathFinderNodeFast[] calcGrid = getCalcGrid(__instance);
-            RegionCostCalculatorWrapper regionCostCalculator = getRegionCostCalculatorWrapper(__instance);
-
             if (DebugSettings.pathThroughWalls)
             {
                 traverseParms.mode = TraverseMode.PassAllDestroyableThings;
@@ -314,7 +241,7 @@ namespace RimThreaded
                 return false;
             }
 
-            PfProfilerBeginSample(string.Concat("FindPath for ", pawn, " from ", start, " to ", dest, dest.HasThing ? (" at " + dest.Cell) : ""));
+            actionPfProfilerBeginSample(__instance, string.Concat("FindPath for ", pawn, " from ", start, " to ", dest, dest.HasThing ? (" at " + dest.Cell) : ""));
             cellIndicesField(__instance) = mapField(__instance).cellIndices;
             pathGridField(__instance) = mapField(__instance).pathGrid;
             edificeGridField(__instance) = mapField(__instance).edificeGrid.InnerArray;
@@ -327,14 +254,14 @@ namespace RimThreaded
             bool flag = traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater;
             bool flag2 = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
             bool flag3 = !flag;
-            CellRect destinationRect = CalculateDestinationRect(dest, peMode);
+            CellRect destinationRect = funcCalculateDestinationRect(__instance, dest, peMode);
             bool flag4 = destinationRect.Width == 1 && destinationRect.Height == 1;
             int[] array = mapField(__instance).pathGrid.pathGrid;
             TerrainDef[] topGrid = mapField(__instance).terrainGrid.topGrid;
             EdificeGrid edificeGrid = mapField(__instance).edificeGrid;
             int num2 = 0;
             int num3 = 0;
-            Area allowedArea = GetAllowedArea(pawn);
+            Area allowedArea = funcGetAllowedArea(__instance, pawn);
             bool flag5 = pawn != null && PawnUtility.ShouldCollideWithPawns(pawn);
             bool flag6 = !flag && start.GetRegion(mapField(__instance)) != null && flag2;
             bool flag7 = !flag || !flag3;
@@ -343,7 +270,7 @@ namespace RimThreaded
             int num4 = (pawn?.IsColonist ?? false) ? 100000 : 2000;
             int num5 = 0;
             int num6 = 0;
-            float num7 = DetermineHeuristicStrength(pawn, start, dest);
+            float num7 = funcDetermineHeuristicStrength(__instance, pawn, start, dest);
             int num8;
             int num9;
             if (pawn != null)
@@ -356,22 +283,19 @@ namespace RimThreaded
                 num8 = 13;
                 num9 = 18;
             }
-            List<int> localDisallowedCornerIndices = getDisallowedCornerIndices(__instance, peMode, destinationRect);
-            //CalculateAndAddDisallowedCorners2(disallowedCornerIndicesField(__instance), mapField(__instance), peMode, destinationRect);
-            InitStatusesAndPushStartNode3(ref curIndex, start, cellIndicesField(__instance), calcGrid, ref statusOpenValue, ref statusClosedValue);
-            openList.Clear();
-            openList.Push(new CostNode2(curIndex, 0));
+            CalculateAndAddDisallowedCorners2(__instance, traverseParms, peMode, destinationRect);
+            InitStatusesAndPushStartNode2(__instance, ref curIndex, start);
             while (true)
             {
-                PfProfilerBeginSample("Open cell");
+                actionPfProfilerBeginSample(__instance, "Open cell");
                 if (openList.Count <= 0)
                 {
                     string text = (pawn != null && pawn.CurJob != null) ? pawn.CurJob.ToString() : "null";
                     string text2 = (pawn != null && pawn.Faction != null) ? pawn.Faction.ToString() : "null";
                     Log.Warning(string.Concat(pawn, " pathing from ", start, " to ", dest, " ran out of cells to process.\nJob:", text, "\nFaction: ", text2));
-                    DebugDrawRichData();
-                    PfProfilerEndSample();
-                    PfProfilerEndSample();
+                    actionDebugDrawRichData(__instance);
+                    actionPfProfilerEndSample(__instance);
+                    actionPfProfilerEndSample(__instance);
                     __result = PawnPath.NotFound;
                     return false;
                 }
@@ -382,13 +306,13 @@ namespace RimThreaded
                 curIndex = costNode.index;
                 if (costNode.cost != calcGrid[curIndex].costNodeCost)
                 {
-                    PfProfilerEndSample();
+                    actionPfProfilerEndSample(__instance);
                     continue;
                 }
 
                 if (calcGrid[curIndex].status == statusClosedValue)
                 {
-                    PfProfilerEndSample();
+                    actionPfProfilerEndSample(__instance);
                     continue;
                 }
 
@@ -399,18 +323,18 @@ namespace RimThreaded
                 {
                     if (curIndex == num)
                     {
-                        PfProfilerEndSample();
-                        PawnPath result = FinalizedPath2(curIndex, flag8, cellIndicesField(__instance), calcGrid);
-                        PfProfilerEndSample();
+                        actionPfProfilerEndSample(__instance);
+                        PawnPath result = FinalizedPath2(__instance, curIndex, flag8);
+                        actionPfProfilerEndSample(__instance);
                         __result = result;
                         return false;
                     }
                 }
-                else if (destinationRect.Contains(c) && !localDisallowedCornerIndices.Contains(curIndex))
+                else if (destinationRect.Contains(c) && !disallowedCornerIndices.Contains(curIndex))
                 {
-                    PfProfilerEndSample();
-                    PawnPath result2 = FinalizedPath2(curIndex, flag8, cellIndicesField(__instance), calcGrid);
-                    PfProfilerEndSample();
+                    actionPfProfilerEndSample(__instance);
+                    PawnPath result2 = FinalizedPath2(__instance, curIndex, flag8);
+                    actionPfProfilerEndSample(__instance);
                     __result = result2;
                     return false;
                 }
@@ -420,8 +344,8 @@ namespace RimThreaded
                     break;
                 }
 
-                PfProfilerEndSample();
-                PfProfilerBeginSample("Neighbor consideration");
+                actionPfProfilerEndSample(__instance);
+                actionPfProfilerBeginSample(__instance, "Neighbor consideration");
                 for (int i = 0; i < 8; i++)
                 {
                     uint num10 = (uint)(x2 + Directions[i]);
@@ -582,22 +506,22 @@ namespace RimThreaded
                     Building building2 = edificeGridField(__instance)[num14];
                     if (building2 != null)
                     {
-                        PfProfilerBeginSample("Edifices");
+                        actionPfProfilerBeginSample(__instance, "Edifices");
                         int buildingCost = PathFinder.GetBuildingCost(building2, traverseParms, pawn);
                         if (buildingCost == int.MaxValue)
                         {
-                            PfProfilerEndSample();
+                            actionPfProfilerEndSample(__instance);
                             continue;
                         }
 
                         num16 += buildingCost;
-                        PfProfilerEndSample();
+                        actionPfProfilerEndSample(__instance);
                     }
 
                     List<Blueprint> list = blueprintGridField(__instance)[num14];
                     if (list != null)
                     {
-                        PfProfilerBeginSample("Blueprints");
+                        actionPfProfilerBeginSample(__instance, "Blueprints");
                         int num17 = 0;
                         for (int j = 0; j < list.Count; j++)
                         {
@@ -606,12 +530,12 @@ namespace RimThreaded
 
                         if (num17 == int.MaxValue)
                         {
-                            PfProfilerEndSample();
+                            actionPfProfilerEndSample(__instance);
                             continue;
                         }
 
                         num16 += num17;
-                        PfProfilerEndSample();
+                        actionPfProfilerEndSample(__instance);
                     }
 
                     int num18 = num16 + calcGrid[curIndex].knownCost;
@@ -632,7 +556,7 @@ namespace RimThreaded
 
                     if (flag8)
                     {
-                        calcGrid[num14].heuristicCost = Mathf.RoundToInt((float)regionCostCalculator.GetPathCostFromDestToRegion(num14) * RegionHeuristicWeightByNodesOpened.Evaluate(num3));
+                        calcGrid[num14].heuristicCost = Mathf.RoundToInt((float)regionCostCalculatorField(__instance).GetPathCostFromDestToRegion(num14) * RegionHeuristicWeightByNodesOpened.Evaluate(num3));
                         if (calcGrid[num14].heuristicCost < 0)
                         {
                             Log.ErrorOnce(string.Concat("Heuristic cost overflow for ", pawn.ToStringSafe(), " pathing from ", start, " to ", dest, "."), pawn.GetHashCode() ^ 0xB8DC389);
@@ -662,14 +586,14 @@ namespace RimThreaded
                     openList.Push(new CostNode2(num14, num21));
                 }
 
-                PfProfilerEndSample();
+                actionPfProfilerEndSample(__instance);
                 num2++;
                 calcGrid[curIndex].status = statusClosedValue;
                 if (num3 >= num4 && flag6 && !flag8)
                 {
                     flag8 = true;
-                    regionCostCalculator.Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, localDisallowedCornerIndices);
-                    InitStatusesAndPushStartNode3(ref curIndex, start, cellIndicesField(__instance), calcGrid, ref statusOpenValue, ref statusClosedValue);
+                    regionCostCalculatorField(__instance).Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, disallowedCornerIndices);
+                    InitStatusesAndPushStartNode2(__instance, ref curIndex, start);
                     openList.Clear();
                     openList.Push(new CostNode2(curIndex, 0));
                     num3 = 0;
@@ -678,120 +602,12 @@ namespace RimThreaded
             }
 
             Log.Warning(string.Concat(pawn, " pathing from ", start, " to ", dest, " hit search limit of ", 160000, " cells."));
-            DebugDrawRichData();
-            PfProfilerEndSample();
-            PfProfilerEndSample();
+            actionDebugDrawRichData(__instance);
+            actionPfProfilerEndSample(__instance);
+            actionPfProfilerEndSample(__instance);
             __result = PawnPath.NotFound;
             return false;
         }
 
-        public static ushort getClosedValue()
-        {            
-            if (!closedValues.TryGetValue(Thread.CurrentThread.ManagedThreadId, out ushort local_statusClosedValue))
-            {
-                local_statusClosedValue = 2;
-            }
-            return local_statusClosedValue;
-        }
-
-        public static ushort getOpenValue()
-        {
-            if (!openValues.TryGetValue(Thread.CurrentThread.ManagedThreadId, out ushort local_statusOpenValue))
-            {
-                local_statusOpenValue = 1;
-            }
-            return local_statusOpenValue;
-        }
-
-        public static FastPriorityQueue<CostNode2> getOpenList()
-        {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (!openLists.TryGetValue(tID, out FastPriorityQueue<CostNode2> local_openList))
-            {
-                local_openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
-                lock (openLists)
-                {
-                    openLists[tID] = local_openList;
-                }
-            }
-            return local_openList;
-        }
-
-        public static PathFinderNodeFast[] getCalcGrid(PathFinder __instance)
-        {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            int size = mapSizeXField(__instance) * mapSizeZField(__instance);
-            if (!calcGrids.TryGetValue(tID, out PathFinderNodeFast[] local_calcGrid) || local_calcGrid.Length < size)
-            {
-                local_calcGrid = new PathFinderNodeFast[size];
-                lock (calcGrids)
-                {
-                    calcGrids[tID] = local_calcGrid;
-                }
-            }
-            return local_calcGrid;
-        }
-        public static RegionCostCalculatorWrapper getRegionCostCalculatorWrapper(PathFinder __instance)
-        {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (!regionCostCalculatorWrappers.TryGetValue(tID, out RegionCostCalculatorWrapper regionCostCalculatorWrapper))
-            {
-                regionCostCalculatorWrapper = new RegionCostCalculatorWrapper(mapField(__instance));
-                lock (regionCostCalculatorWrappers)
-                {
-                    regionCostCalculatorWrappers[tID] = regionCostCalculatorWrapper;
-                }
-            }
-            Map map = RegionCostCalculatorWrapper_Patch.map(regionCostCalculatorWrapper);
-            if(map.regionGrid == null)
-            {
-                regionCostCalculatorWrapper = new RegionCostCalculatorWrapper(mapField(__instance));
-                lock (regionCostCalculatorWrappers)
-                {
-                    regionCostCalculatorWrappers[tID] = regionCostCalculatorWrapper;
-                }
-            }
-            return regionCostCalculatorWrapper;
-        }
-
-        public static List<int> getDisallowedCornerIndices(PathFinder __instance, PathEndMode peMode, CellRect destinationRect)
-        {
-            if (disallowedCornerIndices == null)
-            {
-                disallowedCornerIndices = new List<int>(4);
-            }
-            else
-            {
-                disallowedCornerIndices.Clear();
-                if (peMode == PathEndMode.Touch)
-                {
-                    int minX = destinationRect.minX;
-                    int minZ = destinationRect.minZ;
-                    int maxX = destinationRect.maxX;
-                    int maxZ = destinationRect.maxZ;
-                    Map map = mapField(__instance);
-                    if (!funcIsCornerTouchAllowed(__instance, minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
-                    {
-                        disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, minZ));
-                    }
-
-                    if (!funcIsCornerTouchAllowed(__instance, minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
-                    {
-                        disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, maxZ));
-                    }
-
-                    if (!funcIsCornerTouchAllowed(__instance, maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
-                    {
-                        disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, maxZ));
-                    }
-
-                    if (!funcIsCornerTouchAllowed(__instance, maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
-                    {
-                        disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, minZ));
-                    }
-                }
-            }
-            return disallowedCornerIndices;
-        }
     }
 }
