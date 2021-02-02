@@ -1,6 +1,7 @@
 ---
 name: Non-Reproducible Vanilla Bug Report (Low Priority)
-about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs that cannot be reproduced fairly consistantly
+about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs
+  that cannot be reproduced fairly consistantly.
 title: ''
 labels: Bug, Vanilla RT
 assignees: ''
@@ -10,6 +11,8 @@ assignees: ''
 **Describe the bug**
 IMPORTANT: Please first search existing bugs to ensure you are not creating a duplicate bug report.  
 
+* bug description here !!!
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
@@ -18,7 +21,8 @@ Steps to reproduce the behavior:
 4. See error
 
 **Error Log**
-Link to contents of Player.log or Error.log (Please use something like gist or pastebin. DO NOT PASTE HERE)
+* Link to contents of Player.log or Error.log (MUST BE LINK)
+* Link to HugsLib log. (MUST BE LINK)
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem.
+* If applicable, add screenshots to help explain your problem.
