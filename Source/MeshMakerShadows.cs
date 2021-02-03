@@ -1,32 +1,28 @@
 ﻿using UnityEngine;
 using System.Threading;
-using UnityEngine.Experimental.Rendering;
 using System;
-using System.Reflection;
 using Verse;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
-
     public class MeshMakerShadows_Patch
     {
-        static readonly Func<object[], object> safeFunction = p =>
-            MeshMakerShadows.NewShadowMesh((float)p[0], (float)p[1], (float)p[2]);
+        static readonly Func<object[], object> safeFunction = parameters =>
+            MeshMakerShadows.NewShadowMesh(
+                (float)parameters[0], 
+                (float)parameters[1], 
+                (float)parameters[2]);
 
         public static bool NewShadowMesh(ref Mesh __result, float baseWidth, float baseHeight, float tallness)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunction, new object[] { baseWidth, baseHeight, tallness } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                __result = (Mesh)safeFunctionResult;
+                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { baseWidth, baseHeight, tallness } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
+                __result = (Mesh)threadInfo.safeFunctionResult;
                 return false;
             }
             return true;        

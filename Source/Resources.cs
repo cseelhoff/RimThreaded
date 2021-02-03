@@ -1,34 +1,29 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
     class Resources_Patch
     {
-        public static Func<object[], UnityEngine.Object> safeFunction = p => Resources.Load((string)p[0], (Type)p[1]);
+        public static Func<object[], UnityEngine.Object> safeFunction = parameters => 
+        Resources.Load(
+            (string)parameters[0], 
+            (Type)parameters[1]);
 
         public static UnityEngine.Object Load(string path, Type type)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunction, new object[] { path, type } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                return (UnityEngine.Object) safeFunctionResult;
+                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { path, type } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
+                return (UnityEngine.Object)threadInfo.safeFunctionResult;
             }
             Log.Error("Could not load Resource of type " + type.ToString() + " at path " + path);
             return null;

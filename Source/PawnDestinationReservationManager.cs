@@ -18,7 +18,8 @@ namespace RimThreaded
     {
         private static readonly Material DestinationMat = MaterialPool.MatFrom("UI/Overlays/ReservedDestination");
         private static readonly Material DestinationSelectionMat = MaterialPool.MatFrom("UI/Overlays/ReservedDestinationSelection");
-        public static ConcurrentDictionary<Faction, PawnDestinationSet> reservedDestinations = new ConcurrentDictionary<Faction, PawnDestinationReservationManager.PawnDestinationSet>();
+        public static ConcurrentDictionary<Faction, PawnDestinationSet> reservedDestinations = 
+            new ConcurrentDictionary<Faction, PawnDestinationSet>();
 
         public static bool FirstObsoleteReservationFor(PawnDestinationReservationManager __instance, ref IntVec3 __result, Pawn p)
         {
@@ -115,9 +116,9 @@ namespace RimThreaded
             __result = value;
             return false;
         }
-        public static PawnDestinationReservationManager.PawnDestinationSet GetPawnDestinationSetFor2(Faction faction)
+        public static PawnDestinationSet GetPawnDestinationSetFor2(Faction faction)
         {
-            PawnDestinationReservationManager.PawnDestinationSet value = reservedDestinations.GetOrAdd(faction, new PawnDestinationReservationManager.PawnDestinationSet());
+            PawnDestinationSet value = reservedDestinations.GetOrAdd(faction, new PawnDestinationSet());
             return value;
         }
         public static bool Reserve(PawnDestinationReservationManager __instance, Pawn p, Job job, IntVec3 loc)
@@ -125,14 +126,14 @@ namespace RimThreaded
             if (p.Faction == null)
                 return false;
             Pawn claimant;
-            if (p.Drafted && p.Faction == Faction.OfPlayer && (__instance.IsReserved(loc, out claimant) && claimant != p) && (!claimant.HostileTo((Thing)p) && claimant.Faction != p.Faction) && (claimant.mindState == null || claimant.mindState.mentalStateHandler == null || !claimant.mindState.mentalStateHandler.InMentalState || claimant.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Aggro && claimant.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Malicious))
+            if (p.Drafted && p.Faction == Faction.OfPlayer && (__instance.IsReserved(loc, out claimant) && claimant != p) && (!claimant.HostileTo(p) && claimant.Faction != p.Faction) && (claimant.mindState == null || claimant.mindState.mentalStateHandler == null || !claimant.mindState.mentalStateHandler.InMentalState || claimant.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Aggro && claimant.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Malicious))
                 claimant.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
             ObsoleteAllClaimedBy2(p);
-            PawnDestinationReservationManager.PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
-            List<PawnDestinationReservationManager.PawnDestinationReservation> list = destinationSet.list;
+            PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
+            List<PawnDestinationReservation> list = destinationSet.list;
             lock (list)
             {
-                list.Add(new PawnDestinationReservationManager.PawnDestinationReservation()
+                list.Add(new PawnDestinationReservation()
                 {
                     target = loc,
                     claimant = p,
@@ -146,8 +147,8 @@ namespace RimThreaded
         {
             if (p.Faction == null)
                 return;
-            PawnDestinationReservationManager.PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
-            List<PawnDestinationReservationManager.PawnDestinationReservation> list = destinationSet.list;
+            PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
+            List<PawnDestinationReservation> list = destinationSet.list;
             lock (list)
             {
                 for (int index = 0; index < list.Count; ++index)
@@ -170,8 +171,8 @@ namespace RimThreaded
         {
             if (p.Faction == null)
                 return false;
-            PawnDestinationReservationManager.PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
-            List<PawnDestinationReservationManager.PawnDestinationReservation> list = destinationSet.list;
+            PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
+            List<PawnDestinationReservation> list = destinationSet.list;
             lock (list)
             {
                 for (int index = 0; index < list.Count; ++index)
@@ -195,8 +196,8 @@ namespace RimThreaded
         {
             if (p.Faction == null)
                 return false;
-            PawnDestinationReservationManager.PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
-            List<PawnDestinationReservationManager.PawnDestinationReservation> list = destinationSet.list;
+            PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
+            List<PawnDestinationReservation> list = destinationSet.list;
             int index = 0;
             lock (list)
             {
@@ -218,8 +219,8 @@ namespace RimThreaded
         {
             if (p.Faction == null)
                 return false;
-            PawnDestinationReservationManager.PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
-            List<PawnDestinationReservationManager.PawnDestinationReservation> list = destinationSet.list;
+            PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
+            List<PawnDestinationReservation> list = destinationSet.list;
             int index = 0;
             lock (list)
             {
@@ -241,8 +242,8 @@ namespace RimThreaded
         {
             if (p.Faction == null)
                 return false;
-            PawnDestinationReservationManager.PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
-            List<PawnDestinationReservationManager.PawnDestinationReservation> list = destinationSet.list;
+            PawnDestinationSet destinationSet = GetPawnDestinationSetFor2(p.Faction);
+            List<PawnDestinationReservation> list = destinationSet.list;
             lock (list)
             {
                 for (int index = 0; index < list.Count; ++index)
@@ -265,12 +266,12 @@ namespace RimThreaded
         public static bool DebugDrawReservations(PawnDestinationReservationManager __instance)
         {
 
-            foreach (KeyValuePair<Faction, PawnDestinationReservationManager.PawnDestinationSet> reservedDestination in reservedDestinations)
+            foreach (KeyValuePair<Faction, PawnDestinationSet> reservedDestination in reservedDestinations)
             {
-                List<PawnDestinationReservationManager.PawnDestinationReservation> list = reservedDestination.Value.list;
+                List<PawnDestinationReservation> list = reservedDestination.Value.list;
                 lock (list)
                 {
-                    foreach (PawnDestinationReservationManager.PawnDestinationReservation destinationReservation in list)
+                    foreach (PawnDestinationReservation destinationReservation in list)
                     {
                         IntVec3 target = destinationReservation.target;
                         MaterialPropertyBlock properties = new MaterialPropertyBlock();
@@ -292,9 +293,9 @@ namespace RimThreaded
         public static bool IsReserved(PawnDestinationReservationManager __instance, ref bool __result, IntVec3 loc, out Pawn claimant)
         {
 
-            foreach (KeyValuePair<Faction, PawnDestinationReservationManager.PawnDestinationSet> reservedDestination in reservedDestinations)
+            foreach (KeyValuePair<Faction, PawnDestinationSet> reservedDestination in reservedDestinations)
             {
-                List<PawnDestinationReservationManager.PawnDestinationReservation> list = reservedDestination.Value.list;
+                List<PawnDestinationReservation> list = reservedDestination.Value.list;
                 lock (list)
                 {
                     for (int index = 0; index < list.Count; ++index)

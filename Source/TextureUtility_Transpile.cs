@@ -6,7 +6,8 @@ using System.Reflection.Emit;
 using System;
 using System.Reflection;
 using UnityEngine;
-using System.Threading;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
@@ -35,21 +36,16 @@ namespace RimThreaded
             }
         }
 
-        static readonly Func<object[], object> safeFunction2 = p => SafeGetReadableTexture((Texture2D)p[0]);
+        static readonly Func<object[], object> safeFunction2 = parameters => 
+            SafeGetReadableTexture((Texture2D)parameters[0]);
         public static Texture2D GetReadableTexture(Texture2D texture)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunction2, new object[] { texture } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                return (Texture2D)safeFunctionResult;
+                threadInfo.safeFunctionRequest = new object[] { safeFunction2, new object[] { texture } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
+                return (Texture2D)threadInfo.safeFunctionResult;
             }
             return SafeGetReadableTexture(texture);
         }

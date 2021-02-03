@@ -87,7 +87,8 @@ namespace RimThreaded
                 Log.Error("Couldn't find any destination regions. This shouldn't ever happen because we've checked reachability.");
             }
 
-            regionCostCalculator(__instance).Init(end, destRegions(__instance), traverseParms, moveTicksCardinal, moveTicksDiagonal, avoidGrid, allowedArea, drafted);
+            regionCostCalculator(__instance).Init(
+                end, destRegions(__instance), traverseParms, moveTicksCardinal, moveTicksDiagonal, avoidGrid, allowedArea, drafted);
             
             return false;
         }

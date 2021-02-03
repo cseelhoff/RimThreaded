@@ -1,8 +1,9 @@
 ﻿using RimWorld.Planet;
 using System;
-using System.Threading;
 using Verse;
 using Verse.Sound;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
@@ -58,28 +59,24 @@ namespace RimThreaded
 				return false;
 			}
 
-			RimThreaded.PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
+			PlayOneShotCamera.Enqueue(new Tuple<SoundDef, Map>(soundDef, onlyThisMap));
 			return false;
 		}
 
 
-		static readonly Func<object[], object> safeFunction = p =>
-			SoundStarter.TrySpawnSustainer((SoundDef)p[0], (SoundInfo)p[1]);
+		static readonly Func<object[], object> safeFunction = parameters =>
+			SoundStarter.TrySpawnSustainer(
+				(SoundDef)parameters[0], 
+				(SoundInfo)parameters[1]);
 
 		public static bool TrySpawnSustainer(ref Sustainer __result, SoundDef soundDef, SoundInfo info)
 		{
-			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+			if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
 			{
-				object[] functionAndParameters = new object[] { safeFunction, new object[] { soundDef, info } };
-				lock (RimThreaded.safeFunctionRequests)
-				{
-					RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-				}
-				RimThreaded.mainThreadWaitHandle.Set();
-				eventWaitStart.WaitOne();
-				RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-				__result = (Sustainer)safeFunctionResult;
+				threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { soundDef, info } };
+				mainThreadWaitHandle.Set();
+				threadInfo.eventWaitStart.WaitOne();
+				__result = (Sustainer)threadInfo.safeFunctionResult;
 				return false;
 			}
 			return true;

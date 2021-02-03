@@ -6,7 +6,8 @@ using System.Reflection.Emit;
 using System;
 using System.Reflection;
 using UnityEngine;
-using System.Threading;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
@@ -57,22 +58,20 @@ namespace RimThreaded
             }
         }
 
+        static readonly Func<object[], object> safeFunction = pparameters => 
+            SafeBlit(
+                (Texture2D)pparameters[0], 
+                (Rect)pparameters[1], 
+                (int[])pparameters[2]);
 
-        static readonly Func<object[], object> safeFunction = p => SafeBlit((Texture2D)p[0], (Rect)p[1], (int[])p[2]);
         public static Texture2D Blit(Texture2D texture, Rect blitRect, int[] rtSize)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunction, new object[] { texture, blitRect, rtSize } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                return (Texture2D)safeFunctionResult;
+                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { texture, blitRect, rtSize } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
+                return (Texture2D)threadInfo.safeFunctionResult;
             }
             return SafeBlit(texture, blitRect, rtSize);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
-using System.Threading;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
@@ -12,16 +13,11 @@ namespace RimThreaded
 
         public static bool Blit(Texture source, RenderTexture dest)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunction, new object[] { source, dest } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
+                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { source, dest } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
                 return false;
             }
             return true;
@@ -32,16 +28,11 @@ namespace RimThreaded
 
         public static bool DrawMesh(Mesh mesh, Vector3 position, Quaternion rotation, Material material, int layer)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunctionDrawMesh, new object[] { mesh, position, rotation, material, layer } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
+                threadInfo.safeFunctionRequest = new object[] { safeFunctionDrawMesh, new object[] { mesh, position, rotation, material, layer } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
                 return false;
             }
             return true;

@@ -17,23 +17,25 @@ namespace RimThreaded
             List<Verb> verbs = verbsFieldRef(__instance);
             if (verbs != null)
             {
-                int i = 0;
-                while (i < verbs.Count)
+                for (int i = verbs.Count - 1; i >= 0; i--)
                 {
-                    Verb verb = verbs[i];
-                    if (verb.state == VerbState.Bursting && verb.CurrentTarget == null)
+                    Verb verb = null;
+                    try
+                    {
+                        verb = verbs[i];
+                    } catch (ArgumentOutOfRangeException)
+                    {
+
+                    }
+                    if (verb != null && verb.state == VerbState.Bursting && verb.CurrentTarget == null)
                     {
                         //TODO: fix hack. prevent this from starting
                         Log.Warning("Removing verb that no longer has a target: " + verb.ToString());
                         verbs.RemoveAt(i);                        
-                    } else
-                    {
-                        verbs[i].VerbTick();
-                        i++;
-                    }                    
+                    }                 
                 }
             }
-            return false;
+            return true;
         }
     }
 }

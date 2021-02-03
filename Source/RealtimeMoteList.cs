@@ -16,27 +16,38 @@ namespace RimThreaded
 
         public static bool Clear(RealtimeMoteList __instance)
         {
-            allMotes.Clear();
+            //allMotes.Clear();
+            lock(__instance.allMotes)
+            {
+                __instance.allMotes.Clear();
+            }
             return false;
         }
 
         public static bool MoteSpawned(RealtimeMoteList __instance, Mote newMote)
         {
-            allMotes.TryAdd(newMote, newMote);
+            //allMotes.TryAdd(newMote, newMote);
+            lock (__instance.allMotes)
+            {
+                __instance.allMotes.Add(newMote);
+            }
             return false;
         }
 
         public static bool MoteDespawned(RealtimeMoteList __instance, Mote oldMote)
         {
-            allMotes.TryRemove(oldMote, out _);
+            lock (__instance.allMotes)
+            {
+                __instance.allMotes.Remove(oldMote);
+            }
             return false;
         }
 
         public static bool MoteListUpdate(RealtimeMoteList __instance)
         {
-            foreach (Mote mote in allMotes.Values.ToList())
+            for (int num = allMotes.Count - 1; num >= 0; num--)
             {
-                mote.RealtimeUpdate();
+                __instance.allMotes[num].RealtimeUpdate();
             }
             return false;
         }

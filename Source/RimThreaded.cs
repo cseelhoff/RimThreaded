@@ -1,22 +1,13 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
-using UnityEngine;
-using Verse.AI;
 using RimWorld;
 using Verse.Sound;
 using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Diagnostics;
-using System.Reflection.Emit;
-using UnityEngine.Experimental.Rendering;
-using static Verse.ImmunityHandler;
+using static RimThreaded.PathFinder_Patch;
 
 namespace RimThreaded
 {
@@ -27,7 +18,6 @@ namespace RimThreaded
 
         public static int maxThreads = Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1);
         public static int timeoutMS = Math.Max(int.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 1);
-        public static int timeoutMS2 = 300000; //five minute timeout for timeout exempt threads
         public static bool suppressTexture2dError = RimThreadedMod.Settings.suppressTexture2dError;
         public static float timeSpeedNormal = float.Parse(RimThreadedMod.Settings.timeSpeedNormalBuffer);
         public static float timeSpeedFast = float.Parse(RimThreadedMod.Settings.timeSpeedFastBuffer);
@@ -39,28 +29,8 @@ namespace RimThreaded
 
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
-        public static Dictionary<int, EventWaitHandle> eventWaitStarts = new Dictionary<int, EventWaitHandle>();
-
-        public static Dictionary<int, EventWaitHandle> eventWaitDones = new Dictionary<int, EventWaitHandle>();
-
-        //public static ConcurrentQueue<Thing> drawQueue = new ConcurrentQueue<Thing>();
-        public static Dictionary<int, Thread> allThreads = new Dictionary<int, Thread>();
         private static Thread monitorThread = null;
         private static bool allWorkerThreadsFinished = false;
-        public static bool SingleTickComplete = true;
-
-        //MainThreadRequests
-        
-        public static Dictionary<int, EventWaitHandle> mainRequestWaits = new Dictionary<int, EventWaitHandle>();
-        public static Dictionary<int, object[]> tryMakeAndPlayRequests = new Dictionary<int, object[]>();
-
-        public static Dictionary<int, object[]> safeFunctionRequests =
-            new Dictionary<int, object[]>();
-        public static Dictionary<int, object> safeFunctionResults =
-            new Dictionary<int, object>();
-
-        //public static HashSet<int> timeoutExemptThreads = new HashSet<int>();
-        public static Dictionary<int, int> timeoutExemptThreads2 = new Dictionary<int, int>();
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
@@ -87,7 +57,6 @@ namespace RimThreaded
         public static int steadyEnvironmentEffectsTicksCompleted = 0;
         public static int steadyEnvironmentEffectsCount = 0;
         public static SteadyEnvironmentEffectsStructure[] steadyEnvironmentEffectsStructures = new SteadyEnvironmentEffectsStructure[99];
-        //public static SteadyEnvironmentEffects steadyEnvironmentEffectsInstance = null;
 
         //WorldObjectsHolder
         public static WorldObjectsHolder worldObjectsHolder = null;
@@ -142,8 +111,6 @@ namespace RimThreaded
         public static int totalTradeShipTicks = 0;
         public static int totalTradeShipTicksCompleted = 0;
         public static TradeShipStructure[] tradeShips = new TradeShipStructure[99];
-        //public static int TradeShipTicks = 0;
-        //public static ThingOwner TradeShipThings = null;
 
         //WorldComponents
         public static int WorldComponentTicks = 0;
@@ -175,12 +142,22 @@ namespace RimThreaded
         public static bool historyTickComplete = false;
         public static bool miscellaneousComplete = false;
 
+        public static Dictionary<Thread, ThreadInfo> allThreads2 = new Dictionary<Thread, ThreadInfo>();
+
+        public class ThreadInfo
+        {
+            public EventWaitHandle mainRequestWait = new AutoResetEvent(false);
+            public EventWaitHandle eventWaitStart = new AutoResetEvent(false);
+            public EventWaitHandle eventWaitDone = new AutoResetEvent(false);
+            public int timeoutExempt = 0;
+            public Thread thread;
+            public object[] safeFunctionRequest;
+            public object safeFunctionResult;
+        }   
+
         static RimThreaded()
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
             CreateWorkerThreads();
-            ImmunityHandler_Patch.immunityInfoLists[tID] = new List<ImmunityInfo>();
-
             monitorThread = new Thread(() => MonitorThreads());
             monitorThread.Start();
             for(int index = 0; index < totalPrepsCount; index++)
@@ -190,83 +167,54 @@ namespace RimThreaded
             string potentialConflicts = RimThreadedMod.getPotentialModConflicts();
             if(potentialConflicts.Length > 0)
             {
-                Log.Warning("Potential RimThreaded mod conflicts :\n" + potentialConflicts);
+                Log.Warning("Potential RimThreaded mod conflicts :" + potentialConflicts);
             }
         }
 
         public static void RestartAllWorkerThreads()
         {
-            foreach (int tID2 in eventWaitDones.Keys.ToArray())
+            foreach(Thread thread in allThreads2.Keys.ToArray())
             {
-                AbortWorkerThread(tID2);
+                thread.Abort();
             }
+            allThreads2.Clear();
             CreateWorkerThreads();
         }
 
         private static void CreateWorkerThreads()
         {
-            while (allThreads.Count < maxThreads)
+            while(allThreads2.Count < maxThreads)
             {
-                CreateWorkerThread();
+                ThreadInfo threadInfo = CreateWorkerThread();
+                allThreads2.Add(threadInfo.thread, threadInfo);
             }
         }
 
-        private static void CreateWorkerThread()
+        private static ThreadInfo CreateWorkerThread()
         {
-            Thread thread = new Thread(() => ProcessTicks());
-            int tID = thread.ManagedThreadId;
-            allThreads.Add(tID, thread);
-            lock (eventWaitStarts)
-            {
-                eventWaitStarts[tID] = new AutoResetEvent(false);
-            }
-            lock (eventWaitDones)
-            {
-                eventWaitDones[tID] = new AutoResetEvent(false);
-            }
-            lock (mainRequestWaits)
-            {
-                mainRequestWaits[tID] = new AutoResetEvent(false);
-            }
-            lock (ImmunityHandler_Patch.immunityInfoLists)
-            {
-                ImmunityHandler_Patch.immunityInfoLists[tID] = new List<ImmunityInfo>();
-            }
-            lock (RegionListersUpdater_Patch.tmpRegionsLists)
-            {
-                RegionListersUpdater_Patch.tmpRegionsLists[tID] = new List<Region>();
-            }
-            lock (PathFinder_Patch.calcGrids)
-            {
-                PathFinder_Patch.calcGrids[tID] = new PathFinder_Patch.PathFinderNodeFast[0];
-            }
-            lock (PathFinder_Patch.openLists)
-            {
-                PathFinder_Patch.openLists[tID] = new FastPriorityQueue<PathFinder_Patch.CostNode2>(new PathFinder_Patch.CostNodeComparer2());
-            }
-            lock (PathFinder_Patch.openValues)
-            {
-                PathFinder_Patch.openValues[tID] = 1;
-            }
-            lock (PathFinder_Patch.closedValues)
-            {
-                PathFinder_Patch.closedValues[tID] = 2;
-            }
-            lock (ThingOwnerUtility_Patch.tmpHoldersDict)
-            {
-                ThingOwnerUtility_Patch.tmpHoldersDict[tID] = new List<IThingHolder>();
-            }
-            thread.Start();
+            ThreadInfo threadInfo = new ThreadInfo();
+            threadInfo.thread = new Thread(() => InitializeThread(threadInfo));
+            threadInfo.thread.Start();
+            return threadInfo;
         }
 
-        private static void ProcessTicks()
+        private static void InitializeThread(ThreadInfo threadInfo)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            eventWaitStarts.TryGetValue(tID, out EventWaitHandle eventWaitStart);
-            eventWaitDones.TryGetValue(tID, out EventWaitHandle eventWaitDone);
+            PathFinder_Patch.openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
+            PathFinder_Patch.statusOpenValue = 1;
+            PathFinder_Patch.statusClosedValue = 2;
+            PathFinder_Patch.disallowedCornerIndices = new List<int>(4);
+            Rand_Patch.tmpRange = new List<int>();
+            Projectile_Patch.cellThingsFiltered = new List<Thing>();
+            Projectile_Patch.checkedCells = new List<IntVec3>();
+            ProcessTicks(threadInfo);
+        }
+
+        private static void ProcessTicks(ThreadInfo threadInfo)
+        {
             while (true)
             {
-                eventWaitStart.WaitOne();
+                threadInfo.eventWaitStart.WaitOne();
                 PrepareWorkLists();
                 for(int loopsCompleted = listsFullyProcessed; loopsCompleted < totalPrepsCount; loopsCompleted++)
                 {
@@ -274,7 +222,7 @@ namespace RimThreaded
                     ExecuteTicks();
                 }
                 CompletePostWorkLists();
-                eventWaitDone.Set();
+                threadInfo.eventWaitDone.Set();
                 //WaitingForAllThreadsToComplete.WaitOne();
             }
         }
@@ -958,105 +906,32 @@ namespace RimThreaded
                 historyTickComplete = false;
                 miscellaneousComplete = false;
                 RegionAndRoomUpdater_Patch.regionCleaning.Set();
-                foreach (EventWaitHandle eventWaitStart in eventWaitStarts.Values)
+                foreach (ThreadInfo threadInfo in allThreads2.Values)
                 {
-                    eventWaitStart.Set();
+                    threadInfo.eventWaitStart.Set();
                 }
-                //stopwatch.Restart();
-                foreach (int tID2 in eventWaitDones.Keys.ToList())
+                List<KeyValuePair<Thread, ThreadInfo>> threadPairs = allThreads2.ToList();
+                foreach(KeyValuePair<Thread, ThreadInfo> threadPair in threadPairs)
                 {
-                    if (eventWaitDones.TryGetValue(tID2, out EventWaitHandle eventWaitDone))
-                    {
-                        if (!eventWaitDone.WaitOne(timeoutMS))
+                    ThreadInfo threadInfo = threadPair.Value;
+                    if (!threadInfo.eventWaitDone.WaitOne(timeoutMS))
+                    {         
+                        if (threadInfo.timeoutExempt == 0)
                         {
-                            bool timoutExempt;
-                            lock (timeoutExemptThreads2)
-                            {
-                                timoutExempt = timeoutExemptThreads2.ContainsKey(tID2);
-                            }
-                                if (!timoutExempt)
-                            {
-                                Log.Error("Thread: " + tID2.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
-                                AbortWorkerThread(tID2);
-                                CreateWorkerThread();
-                            } else
-                            {
-                                int timeoutOverride;
-                                lock (timeoutExemptThreads2)
-                                {
-                                    timeoutOverride = timeoutExemptThreads2[tID2];
-                                }
-                                eventWaitDone.WaitOne(timeoutOverride);
-                                lock (timeoutExemptThreads2)
-                                {
-                                    if (timeoutExemptThreads2.ContainsKey(tID2))
-                                    {
-                                        timeoutExemptThreads2.Remove(tID2);
-                                    }
-                                }
-                            }
-                        }                            
-                    }
-                    else
-                    {
-                        Log.Error("Thread monitor cannot find thread: " + tID2.ToString());
+                            Log.Error("Thread: " + threadInfo.thread.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
+                            Thread thread = threadPair.Key;
+                            thread.Abort();
+                            allThreads2.Remove(thread);
+                            CreateWorkerThread();
+                        } else
+                        {
+                            threadInfo.eventWaitDone.WaitOne(threadInfo.timeoutExempt);
+                            threadInfo.timeoutExempt = 0;
+                        }
                     }
                 }
                 allWorkerThreadsFinished = true;
                 mainThreadWaitHandle.Set();
-            }
-        }
-
-        private static void AbortWorkerThread(int managedThreadID)
-        {
-            if (allThreads.TryGetValue(managedThreadID, out Thread thread))
-            {
-                thread.Abort();
-                allThreads.Remove(managedThreadID);
-                lock (eventWaitStarts)
-                {
-                    eventWaitStarts.Remove(managedThreadID);
-                }
-                lock (eventWaitDones)
-                {
-                    eventWaitDones.Remove(managedThreadID);
-                }
-                lock (mainRequestWaits)
-                {
-                    mainRequestWaits.Remove(managedThreadID);
-                }
-                lock (ImmunityHandler_Patch.immunityInfoLists)
-                {
-                    ImmunityHandler_Patch.immunityInfoLists.Remove(managedThreadID);
-                }
-                lock (RegionListersUpdater_Patch.tmpRegionsLists)
-                {
-                    RegionListersUpdater_Patch.tmpRegionsLists.Remove(managedThreadID);
-                }
-                lock (PathFinder_Patch.calcGrids)
-                {
-                    PathFinder_Patch.calcGrids.Remove(managedThreadID);
-                }
-                lock (PathFinder_Patch.openLists)
-                {
-                    PathFinder_Patch.openLists.Remove(managedThreadID);
-                }
-                lock (PathFinder_Patch.openValues)
-                {
-                    PathFinder_Patch.openValues.Remove(managedThreadID);
-                }
-                lock (PathFinder_Patch.closedValues)
-                {
-                    PathFinder_Patch.closedValues.Remove(managedThreadID);
-                }
-                lock(ThingOwnerUtility_Patch.tmpHoldersDict)
-                {
-                    ThingOwnerUtility_Patch.tmpHoldersDict.Remove(managedThreadID);
-                }
-            }
-            else
-            {
-                Log.Error("Error finding timed out thread: " + managedThreadID.ToString());
             }
         }
 
@@ -1091,33 +966,28 @@ namespace RimThreaded
 
         private static void RespondToSafeFunctionRequests()
         {
-            while (safeFunctionRequests.Count > 0)
-            {
-                object[] functionAndParameters;
-                int key;
-                lock (safeFunctionRequests)
+            ThreadInfo[] threadInfos = allThreads2.Values.ToArray();
+            for (int i = 0; i < threadInfos.Length; i++) { 
+                ThreadInfo threadInfo = threadInfos[i];
+                object[] functionAndParameters = threadInfo.safeFunctionRequest;
+                if (functionAndParameters != null)
                 {
-                    key = safeFunctionRequests.Keys.First();
-                    functionAndParameters = safeFunctionRequests[key];
-                    safeFunctionRequests.Remove(key);
+                    object[] parameters = (object[])functionAndParameters[1];
+                    if (functionAndParameters[0] is Func<object[], object> safeFunction)
+                    {
+                        threadInfo.safeFunctionResult = safeFunction(parameters);
+                    }
+                    else if (functionAndParameters[0] is Action<object[]> safeAction)
+                    {
+                        safeAction(parameters);
+                    }
+                    else
+                    {
+                        Log.Error("First parameter of thread-safe function request was not an action or function");
+                    }
+                    threadInfo.safeFunctionRequest = null;
+                    threadInfo.eventWaitStart.Set();
                 }
-                object result;
-                object[] parameters = (object[])functionAndParameters[1];
-
-                if (functionAndParameters[0] is Func<object[], object> safeFunction) {
-                    result = safeFunction(parameters);
-                    safeFunctionResults[key] = result;
-                } else if (functionAndParameters[0] is Action<object[]> safeAction)
-                {
-                    safeAction(parameters);
-                } else
-                {
-                    Log.Error("First perameter of thread-safe function request was not an action or function");
-                }            
-                if (mainRequestWaits.TryGetValue(key, out EventWaitHandle eventWaitStart))
-                    eventWaitStart.Set();
-                else
-                    Log.Error("Thread " + key.ToString() + " ended during main Thread request.");
             }
         }
 

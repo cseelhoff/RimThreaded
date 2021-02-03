@@ -11,6 +11,19 @@ namespace RimThreaded
 {
     public class BFSWorker_Patch
     {
+        [ThreadStatic]
+        public static Dictionary<Region, uint[]> regionClosedIndex;
+
+        public static uint[] getRegionClosedIndex(Region region)
+        {
+            if(regionClosedIndex == null)
+                regionClosedIndex = new Dictionary<Region, uint[]>();
+            if (!regionClosedIndex.TryGetValue(region, out uint[] closedIndex)) { 
+                    closedIndex = new uint[8];
+                    regionClosedIndex[region] = closedIndex;
+            }
+            return closedIndex;
+        }
         private Queue<Region> open = new Queue<Region>();
         private uint closedIndex = 1;
         private int numRegionsProcessed;
@@ -31,19 +44,11 @@ namespace RimThreaded
 
         private void QueueNewOpenRegion(Region region)
         {
-            if (regionTraverser.regionClosedIndex.ContainsKey(region) == false)
-            {
-                regionTraverser.regionClosedIndex.Add(region, new uint[8]);
-            }
-
-            if ((int)regionTraverser.regionClosedIndex[region][this.closedArrayPos] == (int)this.closedIndex)
+            uint[] regionClosedIndex = getRegionClosedIndex(region);
+            if (regionClosedIndex[closedArrayPos] == closedIndex)
                 throw new InvalidOperationException("Region is already closed; you can't open it. Region: " + region.ToString());
-            this.open.Enqueue(region);
-            if (regionTraverser.regionClosedIndex.ContainsKey(region) == false)
-            {
-                regionTraverser.regionClosedIndex.Add(region, new uint[8]);
-            }
-            regionTraverser.regionClosedIndex[region][this.closedArrayPos] = this.closedIndex;
+            open.Enqueue(region);
+            regionClosedIndex[closedArrayPos] = closedIndex;
         }
 
         private void FinalizeSearch()

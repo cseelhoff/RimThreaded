@@ -1,37 +1,25 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using RimWorld;
-using Verse;
-using Verse.AI;
-using Verse.Sound;
-using System.Threading;
 using UnityEngine;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {
 
     public class LightningBoltMeshMaker_Patch
     {
-        static readonly Func<object[], object> safeFunction = p =>
+        static readonly Func<object[], object> safeFunction = parameters =>
             LightningBoltMeshMaker.NewBoltMesh();
 
         public static bool NewBoltMesh(ref Mesh __result)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunction, new object[] {  } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                __result = (Mesh)safeFunctionResult;
+                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] {  } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
+                __result = (Mesh)threadInfo.safeFunctionResult;
                 return false;
             }
             return true;

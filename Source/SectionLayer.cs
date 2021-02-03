@@ -1,36 +1,24 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
-using System.Threading;
+using static System.Threading.Thread;
+using static RimThreaded.RimThreaded;
 
 namespace RimThreaded
 {
 
     public class SectionLayer_Patch
     {
-
         public static bool GetSubMesh(SectionLayer __instance, ref LayerSubMesh __result, Material material)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                Func<object[], object> safeFunction = p => __instance.GetSubMesh((Material)p[0]);
-                object[] functionAndParameters = new object[] { safeFunction, new object[] { material } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                __result = (LayerSubMesh)safeFunctionResult;
+                Func<object[], object> safeFunction = parameters => __instance.GetSubMesh((Material)parameters[0]);
+                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { material } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
+                __result = (LayerSubMesh)threadInfo.safeFunctionResult;
                 return false;
             }
             return true;

@@ -1,32 +1,26 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
+﻿using System;
 using UnityEngine;
 using Verse;
+using static RimThreaded.RimThreaded;
+using static System.Threading.Thread;
 
 namespace RimThreaded
 {    
     public class ContentFinder_Texture2D_Patch
     {
-        static readonly Func<object[], object> safeFunction = p =>
-         ContentFinder<Texture2D>.Get((string)p[0], (bool)p[1]);
+        static readonly Func<object[], object> safeFunction = parameters =>
+         ContentFinder<Texture2D>.Get(
+             (string)parameters[0], 
+             (bool)parameters[1]);
 
         public static bool Get(ref Texture2D __result, string itemPath, bool reportFailure = true)
         {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
+            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                object[] functionAndParameters = new object[] { safeFunction, new object[] { itemPath, reportFailure } };
-                lock (RimThreaded.safeFunctionRequests)
-                {
-                    RimThreaded.safeFunctionRequests[tID] = functionAndParameters;
-                }
-                RimThreaded.mainThreadWaitHandle.Set();
-                eventWaitStart.WaitOne();
-                RimThreaded.safeFunctionResults.TryGetValue(tID, out object safeFunctionResult);
-                __result = (Texture2D)safeFunctionResult;
+                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { itemPath, reportFailure } };
+                mainThreadWaitHandle.Set();
+                threadInfo.eventWaitStart.WaitOne();
+                __result = (Texture2D)threadInfo.safeFunctionResult;
                 return false;
             }
             return true;
