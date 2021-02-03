@@ -166,7 +166,7 @@ namespace RimThreaded
             }
             catch (Exception ex)
             {
-                Log.Error("Error in WorldPawnGCTick(): " + (object)ex, false);
+                Log.Error("Error in WorldPawnGCTick(): " + ex, false);
             }
             
             return false;

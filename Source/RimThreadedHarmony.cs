@@ -679,7 +679,10 @@ namespace RimThreaded
 			original = typeof(Projectile);
 			patched = typeof(Projectile_Patch);
 			Prefix(original, patched, "ImpactSomething");
-			Prefix(original, patched, "Tick");
+			Prefix(original, patched, "CanHit");
+			Prefix(original, patched, "CheckForFreeInterceptBetween");
+			Prefix(original, patched, "CheckForFreeIntercept");
+
 
 			//GenGrid_Patch			
 			original = typeof(GenGrid);
@@ -920,12 +923,6 @@ namespace RimThreaded
 			Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
 			//patched = typeof(PathFinder_Patch);
 			//Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
-
-
-			//WorldPawns
-			original = typeof(WorldPawns);
-			patched = typeof(WorldPawns_Patch);
-			Prefix(original, patched, "get_AllPawnsAlive");
 
 			//PawnPath
 			original = typeof(PawnPath);
@@ -1309,6 +1306,7 @@ namespace RimThreaded
 			original = typeof(WorldPawns);
 			patched = typeof(WorldPawns_Patch);
 			Prefix(original, patched, "WorldPawnsTick");
+			Prefix(original, patched, "get_AllPawnsAlive");
 
 			//SteadyEnvironmentEffects
 			original = typeof(SteadyEnvironmentEffects);

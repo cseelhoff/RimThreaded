@@ -205,6 +205,8 @@ namespace RimThreaded
             PathFinder_Patch.statusClosedValue = 2;
             PathFinder_Patch.disallowedCornerIndices = new List<int>(4);
             Rand_Patch.tmpRange = new List<int>();
+            Projectile_Patch.cellThingsFiltered = new List<Thing>();
+            Projectile_Patch.checkedCells = new List<IntVec3>();
             ProcessTicks(threadInfo);
         }
 

@@ -168,7 +168,14 @@ namespace RimThreaded
 
         public static void CalculateAndAddDisallowedCorners2(PathFinder __instance, TraverseParms traverseParms, PathEndMode peMode, CellRect destinationRect)
         {
-            disallowedCornerIndices.Clear();
+            if (disallowedCornerIndices == null)
+            {
+                disallowedCornerIndices = new List<int>();
+            }
+            else
+            {
+                disallowedCornerIndices.Clear();
+            }
             if (peMode == PathEndMode.Touch)
             {
                 int minX = destinationRect.minX;
