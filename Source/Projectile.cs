@@ -29,7 +29,6 @@ namespace RimThreaded
 		public static FieldRef<Projectile, int> ticksToImpact = FieldRefAccess<Projectile, int>("ticksToImpact");
 		public static FieldRef<Projectile, Sustainer> ambientSustainer = FieldRefAccess<Projectile, Sustainer>("ambientSustainer");
 		public static FieldRef<Projectile, ThingDef> targetCoverDef = FieldRefAccess<Projectile, ThingDef>("targetCoverDef");
-		public static FieldRef<Projectile, IntVec3> DestinationCellFieldRef = FieldRefAccess<Projectile, IntVec3>("DestinationCell");
 
 		public static FieldRef<ThingWithComps, List<ThingComp>> comps = FieldRefAccess<ThingWithComps, List<ThingComp>>("comps");
 
@@ -374,7 +373,7 @@ namespace RimThreaded
 				}
 				else if (thing.def.fillPercent > 0.2f)
 				{
-					num2 = (flag2 ? 0.05f : ((!DestinationCellFieldRef(__instance).AdjacentTo8Way(c)) ? (thing.def.fillPercent * 0.15f) : (thing.def.fillPercent * 1f)));
+					num2 = (flag2 ? 0.05f : ((!new IntVec3(destinationField(__instance)).AdjacentTo8Way(c)) ? (thing.def.fillPercent * 0.15f) : (thing.def.fillPercent * 1f)));
 				}
 
 				num2 *= num;
