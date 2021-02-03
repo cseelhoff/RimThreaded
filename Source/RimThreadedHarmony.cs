@@ -323,14 +323,14 @@ namespace RimThreaded
 
 			//RegionListersUpdater
 			original = typeof(RegionListersUpdater);
-			//patched = typeof(RegionListersUpdater_Patch);
-			//Prefix(original, patched, "DeregisterInRegions");
-			//Prefix(original, patched, "RegisterInRegions");
-			//Prefix(original, patched, "RegisterAllAt");
-			patched = typeof(RegionListersUpdater_Transpile);
-			Transpile(original, patched, "DeregisterInRegions");
-			Transpile(original, patched, "RegisterInRegions");
-			Transpile(original, patched, "RegisterAllAt");
+			patched = typeof(RegionListersUpdater_Patch);
+			Prefix(original, patched, "DeregisterInRegions");
+			Prefix(original, patched, "RegisterInRegions");
+			Prefix(original, patched, "RegisterAllAt");
+			//patched = typeof(RegionListersUpdater_Transpile);
+			//Transpile(original, patched, "DeregisterInRegions");
+			//Transpile(original, patched, "RegisterInRegions");
+			//Transpile(original, patched, "RegisterAllAt");
 
 
 			//ListerThings

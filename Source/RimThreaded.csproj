@@ -263,7 +263,6 @@
     <Compile Include="SoundSizeAggregator.cs" />
     <Compile Include="GenCollection.cs" />
     <Compile Include="PawnPath.cs" />
-    <Compile Include="WorldPawnGC_Patch.cs" />
     <Compile Include="WorldPawns.cs" />
     <Compile Include="PawnCapacitiesHandler.cs" />
     <Compile Include="PathFinder.cs" />
