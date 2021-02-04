@@ -77,6 +77,7 @@
     <Compile Include="Alert_MinorBreakRisk_Patch.cs" />
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="AttackTargetFinder.cs" />
+    <Compile Include="AudioSource_Patch.cs" />
     <Compile Include="BFSWorker_Transpile.cs" />
     <Compile Include="BillUtility.cs" />
     <Compile Include="BodyPartDef.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="RoofGrid.cs" />
     <Compile Include="SickPawnVisitUtility.cs" />
     <Compile Include="StatWorker.cs" />
+    <Compile Include="ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch.cs" />
     <Compile Include="ThinkNode_PrioritySorter_Transpile.cs" />
     <Compile Include="thinkTree.cs" />
     <Compile Include="TickList_Transpile.cs" />

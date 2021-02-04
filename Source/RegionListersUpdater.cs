@@ -7,19 +7,19 @@ namespace RimThreaded
 {
     public class RegionListersUpdater_Patch
     {
+		[ThreadStatic]
+		public static List<Region> tmpRegions = new List<Region>();
 
-		public static Dictionary<int, List<Region>> tmpRegionsLists = new Dictionary<int, List<Region>>();
+		//public static Dictionary<int, List<Region>> tmpRegionsLists = new Dictionary<int, List<Region>>();
 		public static bool DeregisterInRegions(Thing thing, Map map)
 		{
 			if (!ListerThings.EverListable(thing.def, ListerThingsUse.Region))
 			{
 				return false;
 			}
-			int tID = Thread.CurrentThread.ManagedThreadId;
-			if(!tmpRegionsLists.TryGetValue(tID, out List<Region> tmpRegions))
+			if(tmpRegions == null)
             {
 				tmpRegions = new List<Region>();
-				tmpRegionsLists[tID] = tmpRegions;
 			} else
             {
 				tmpRegions.Clear();
@@ -46,11 +46,9 @@ namespace RimThreaded
 			{
 				return false;
 			}
-			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (!tmpRegionsLists.TryGetValue(tID, out List<Region> tmpRegions))
+			if (tmpRegions == null)
 			{
 				tmpRegions = new List<Region>();
-				tmpRegionsLists[tID] = tmpRegions;
 			}
 			else
 			{

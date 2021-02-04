@@ -58,11 +58,11 @@ namespace RimThreaded
             }
         }
 
-        static readonly Func<object[], object> safeFunction = pparameters => 
+        static readonly Func<object[], object> safeFunction = parameters => 
             SafeBlit(
-                (Texture2D)pparameters[0], 
-                (Rect)pparameters[1], 
-                (int[])pparameters[2]);
+                (Texture2D)parameters[0], 
+                (Rect)parameters[1], 
+                (int[])parameters[2]);
 
         public static Texture2D Blit(Texture2D texture, Rect blitRect, int[] rtSize)
         {

@@ -94,6 +94,17 @@ namespace RimThreaded
 				}
 				matchIndex++;
 				if (
+					instructionsList[i].opcode == OpCodes.Ldfld &&
+					(FieldInfo)instructionsList[i].operand == Field(typeof(PathFinder), "regionCostCalculator")
+					)
+				{
+					instructionsList[i].opcode = OpCodes.Call;
+					instructionsList[i].operand = Method(typeof(PathFinder_Patch), "get_regionCostCalculator");
+					yield return instructionsList[i++];
+					matchesFound[matchIndex]++;
+					continue;
+				}
+				if (
 					i + 1 < instructionsList.Count &&
 					instructionsList[i + 1].opcode == OpCodes.Ldfld &&
 					(FieldInfo)instructionsList[i + 1].operand == Field(typeof(PathFinder), "openList")

@@ -1,50 +1,36 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
-using Verse;
 using System.Reflection.Emit;
-using System;
-using RimWorld.Planet;
-
-using System.Threading;
-using System.Reflection;
+using static HarmonyLib.AccessTools;
+using static RimThreaded.RimThreadedHarmony;
 
 namespace RimThreaded
 {
     public class TileTemperaturesComp_Transpile
     {
-        public static IEnumerable<CodeInstruction> WorldComponentTick(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
+		public static IEnumerable<CodeInstruction> WorldComponentTick(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
             List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
-
-			LocalBuilder usedSlot = iLGenerator.DeclareLocal(AccessTools.TypeByName("RimWorld.Planet.TileTemperaturesComp+CachedTileTemperatureData"));
-            Label startLoop = iLGenerator.DefineLabel();
-
-            while (i < instructionsList.Count)
+            List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
             {
-                if (i + 7 < instructionsList.Count && instructionsList[i + 7].opcode == OpCodes.Ldelem_Ref)                    
-                {
-                    instructionsList[i].labels.Add(startLoop);
-                    yield return instructionsList[i];
-                    i++;
-
-                }
-                else if (instructionsList[i].opcode == OpCodes.Ldelem_Ref)
-                {
-                    yield return instructionsList[i];
-                    i++;
-                    yield return (new CodeInstruction(OpCodes.Stloc, usedSlot.LocalIndex));
-                    yield return (new CodeInstruction(OpCodes.Ldloc, usedSlot.LocalIndex));
-                    yield return (new CodeInstruction(OpCodes.Brfalse, startLoop));
-                    yield return (new CodeInstruction(OpCodes.Ldloc, usedSlot.LocalIndex));
-                }
-                else
-                {
-                    yield return instructionsList[i];
-                    i++;
-                }
+                new CodeInstruction(OpCodes.Ldsfld, Field(typeof(TileTemperaturesComp_Patch), "worldComponentTickLock"))
+            };
+            LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
+            LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+            foreach (CodeInstruction ci in EnterLock(
+                lockObject, lockTaken, loadLockObjectInstructions, instructionsList, ref i))
+                yield return ci;
+            while (i < instructionsList.Count - 1)
+            {
+                yield return instructionsList[i++];
             }
+            foreach (CodeInstruction ci in ExitLock(
+                iLGenerator, lockObject, lockTaken, instructionsList, ref i))
+                yield return ci;
+            yield return instructionsList[i++];
+            
         }
-    }
+	}
 }

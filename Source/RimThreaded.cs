@@ -7,6 +7,7 @@ using Verse.Sound;
 using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
+using Verse.AI;
 using static RimThreaded.PathFinder_Patch;
 
 namespace RimThreaded
@@ -204,6 +205,7 @@ namespace RimThreaded
             PathFinder_Patch.statusOpenValue = 1;
             PathFinder_Patch.statusClosedValue = 2;
             PathFinder_Patch.disallowedCornerIndices = new List<int>(4);
+            PathFinder_Patch.regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
             Rand_Patch.tmpRange = new List<int>();
             Projectile_Patch.cellThingsFiltered = new List<Thing>();
             Projectile_Patch.checkedCells = new List<IntVec3>();

@@ -100,38 +100,5 @@ namespace RimThreaded
 					Log.Error("IL code instruction set " + mIndex + " not found");
 			}
 		}
-		public static IEnumerable<CodeInstruction> ctor(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-		{
-			int[] matchesFound = new int[2];
-			List<CodeInstruction> instructionsList = instructions.ToList();
-			int i = 0;
-			while (i < instructionsList.Count)
-			{
-				int matchIndex = 0;
-				if (
-					instructionsList[i].opcode == OpCodes.Stsfld &&
-					(FieldInfo)instructionsList[i].operand == Field(typeof(RegionTraverser), "freeWorkers")
-				)
-				{
-					instructionsList[i].operand = Field(typeof(RegionTraverser_Patch), "freeWorkers");
-					matchesFound[matchIndex]++;
-				}
-				matchIndex++;
-				if (
-					instructionsList[i].opcode == OpCodes.Stsfld &&
-					(FieldInfo)instructionsList[i].operand == Field(typeof(RegionTraverser), "NumWorkers")
-				)
-				{
-					instructionsList[i].operand = Field(typeof(RegionTraverser_Patch), "NumWorkers");
-					matchesFound[matchIndex]++;
-				}
-				yield return instructionsList[i++];
-			}
-			for (int mIndex = 0; mIndex < matchesFound.Length; mIndex++)
-			{
-				if (matchesFound[mIndex] < 1)
-					Log.Error("IL code instruction set " + mIndex + " not found");
-			}
-		}
 	}
 }

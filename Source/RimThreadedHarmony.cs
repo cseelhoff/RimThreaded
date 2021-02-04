@@ -360,14 +360,17 @@ namespace RimThreaded
 
 			//RegionTraverser
 			original = typeof(RegionTraverser);
-			//patched = typeof(RegionTraverser_Patch);
-			//Prefix(original, patched, "BreadthFirstTraverse", new Type[] {
-				//typeof(Region),
-				//typeof(RegionEntryPredicate),
-				//typeof(RegionProcessor),
-				//typeof(int),
-				//typeof(RegionType)
-			//});
+			/*
+			patched = typeof(RegionTraverser_Patch);
+			Prefix(original, patched, "BreadthFirstTraverse", new Type[] {
+				typeof(Region),
+				typeof(RegionEntryPredicate),
+				typeof(RegionProcessor),
+				typeof(int),
+				typeof(RegionType)
+			});
+			*/
+			
 			patched = typeof(RegionTraverser_Transpile);
 			Transpile(original, patched, "BreadthFirstTraverse", new Type[] {
 				typeof(Region),
@@ -376,8 +379,8 @@ namespace RimThreaded
 				typeof(int),
 				typeof(RegionType)
 			});
-			Transpile(original, patched, "RecreateWorkers");
-			//harmony.Patch(Constructor(original), transpiler: new HarmonyMethod(Method(patched, "ctor")));
+			Transpile(original, patched, "RecreateWorkers");		
+			
 
 			original = TypeByName("Verse.RegionTraverser+BFSWorker");
 			patched = typeof(BFSWorker_Transpile);
@@ -611,6 +614,11 @@ namespace RimThreaded
 			original = typeof(AudioSourceMaker);
 			patched = typeof(AudioSourceMaker_Patch);
 			Prefix(original, patched, "NewAudioSourceOn");
+
+			//AudioSource			
+			original = typeof(AudioSource);
+			patched = typeof(AudioSource_Patch);
+			Prefix(original, patched, "Stop", Type.EmptyTypes);
 
 			//SampleSustainer			
 			original = typeof(SampleSustainer);
@@ -851,23 +859,7 @@ namespace RimThreaded
 			patched = typeof(LongEventHandler_Patch);
 			Prefix(original, patched, "ExecuteToExecuteWhenFinished");
 			Prefix(original, patched, "ExecuteWhenFinished");
-			/*
-			Prefix(original, patched, "DrawLongEventWindowContents");
-			Prefix(original, patched, "get_AnyEventNowOrWaiting");
-			Prefix(original, patched, "get_AnyEventWhichDoesntUseStandardWindowNowOrWaiting");
-			Prefix(original, patched, "get_ShouldWaitForEvent");
-			Prefix(original, patched, "LongEventsOnGUI");
-			Prefix(original, patched, "LongEventsUpdate");
-			Prefix(original, patched, "UpdateCurrentEnumeratorEvent");
-			Prefix(original, patched, "UpdateCurrentAsynchronousEvent");
-			Prefix(original, patched, "UpdateCurrentSynchronousEvent");
-			Prefix(original, patched, "RunEventFromAnotherThread");
-			Prefix(original, patched, "SetCurrentEventText");
-			Prefix(original, patched, "ClearQueuedEvents");
-			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(Action), typeof(string), typeof(bool), typeof(Action < Exception >), typeof(bool) });
-			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(IEnumerable) , typeof(string) , typeof(Action < Exception >), typeof(bool) });
-			Prefix(original, patched, "QueueLongEvent", new Type[] { typeof(Action), typeof(string), typeof(string), typeof(bool), typeof(Action < Exception >), typeof(bool) });
-			*/
+
 			//SituationalThoughtHandler
 			original = typeof(SituationalThoughtHandler);
 			patched = typeof(SituationalThoughtHandler_Patch);
@@ -1091,8 +1083,19 @@ namespace RimThreaded
 
 			//TileTemperaturesComp
 			original = typeof(TileTemperaturesComp);
-			patched = typeof(TileTemperaturesComp_Transpile);
-			Transpile(original, patched, "WorldComponentTick");
+			patched = typeof(TileTemperaturesComp_Patch);
+			Prefix(original, patched, "WorldComponentTick");
+			Prefix(original, patched, "ClearCaches");
+			Prefix(original, patched, "GetOutdoorTemp");
+			Prefix(original, patched, "GetSeasonalTemp");
+			Prefix(original, patched, "OutdoorTemperatureAt");
+			Prefix(original, patched, "OffsetFromDailyRandomVariation");
+			Prefix(original, patched, "AverageTemperatureForTwelfth");
+			Prefix(original, patched, "SeasonAcceptableFor");
+			Prefix(original, patched, "OutdoorTemperatureAcceptableFor");
+			Prefix(original, patched, "SeasonAndOutdoorTemperatureAcceptableFor");
+			//patched = typeof(TileTemperaturesComp_Transpile);
+			//Transpile(original, patched, "WorldComponentTick");
 
 			//PawnRelationUtility
 			original = typeof(PawnRelationUtility);
@@ -1637,6 +1640,13 @@ namespace RimThreaded
 			original = typeof(VerbTracker);
 			patched = typeof(VerbTracker_Patch);
 			Prefix(original, patched, "VerbsTick", false); //TODO loops twice... and removes verblist target == null - could also be transpiled although not ideal
+
+			//ThinkNode_ConditionalAnyColonistTryingToExitMap
+			original = typeof(ThinkNode_ConditionalAnyColonistTryingToExitMap);
+			patched = typeof(ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch);
+			Prefix(original, patched, "Satisfied"); //TODO loops twice... and removes verblist target == null - could also be transpiled although not ideal
+
+			
 
 			//JoyGiver_Ingest
 			//original = typeof(JoyGiver_Ingest);

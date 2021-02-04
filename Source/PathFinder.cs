@@ -22,6 +22,8 @@ namespace RimThreaded
         public static ushort statusOpenValue;
         [ThreadStatic]
         public static ushort statusClosedValue;
+        [ThreadStatic]
+        public static Dictionary<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorDict;
 
         static readonly FieldRef<PathFinder, Map> mapField =
             FieldRefAccess<PathFinder, Map>("map");
@@ -37,8 +39,8 @@ namespace RimThreaded
             FieldRefAccess<PathFinder, Building[]>("edificeGrid");
         static readonly FieldRef<PathFinder, List<Blueprint>[]> blueprintGridField =
             FieldRefAccess<PathFinder, List<Blueprint>[]>("blueprintGrid");
-        static readonly FieldRef<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorField =
-            FieldRefAccess<PathFinder, RegionCostCalculatorWrapper>("regionCostCalculator");
+        //static readonly FieldRef<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorField =
+            //FieldRefAccess<PathFinder, RegionCostCalculatorWrapper>("regionCostCalculator");
 
         static readonly int[] Directions =
             StaticFieldRefAccess<int[]>(typeof(PathFinder), "Directions");
@@ -563,7 +565,7 @@ namespace RimThreaded
 
                     if (flag8)
                     {
-                        calcGrid[num14].heuristicCost = Mathf.RoundToInt((float)regionCostCalculatorField(__instance).GetPathCostFromDestToRegion(num14) * RegionHeuristicWeightByNodesOpened.Evaluate(num3));
+                        calcGrid[num14].heuristicCost = Mathf.RoundToInt(get_regionCostCalculator(__instance).GetPathCostFromDestToRegion(num14) * RegionHeuristicWeightByNodesOpened.Evaluate(num3));
                         if (calcGrid[num14].heuristicCost < 0)
                         {
                             Log.ErrorOnce(string.Concat("Heuristic cost overflow for ", pawn.ToStringSafe(), " pathing from ", start, " to ", dest, "."), pawn.GetHashCode() ^ 0xB8DC389);
@@ -575,7 +577,7 @@ namespace RimThreaded
                         int dx = Math.Abs(num12 - x);
                         int dz = Math.Abs(num13 - z);
                         int num20 = GenMath.OctileDistance(dx, dz, num8, num9);
-                        calcGrid[num14].heuristicCost = Mathf.RoundToInt((float)num20 * num7);
+                        calcGrid[num14].heuristicCost = Mathf.RoundToInt(num20 * num7);
                     }
 
                     int num21 = num18 + calcGrid[num14].heuristicCost;
@@ -599,7 +601,7 @@ namespace RimThreaded
                 if (num3 >= num4 && flag6 && !flag8)
                 {
                     flag8 = true;
-                    regionCostCalculatorField(__instance).Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, disallowedCornerIndices);
+                    get_regionCostCalculator(__instance).Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, disallowedCornerIndices);
                     InitStatusesAndPushStartNode2(__instance, ref curIndex, start);
                     openList.Clear();
                     openList.Push(new CostNode2(curIndex, 0));
@@ -616,5 +618,13 @@ namespace RimThreaded
             return false;
         }
 
+        public static RegionCostCalculatorWrapper get_regionCostCalculator(PathFinder __instance)
+        {
+            if (!regionCostCalculatorDict.TryGetValue(__instance, out RegionCostCalculatorWrapper regionCostCalculatorWrapper)) {
+                regionCostCalculatorWrapper = new RegionCostCalculatorWrapper(mapField(__instance));
+                regionCostCalculatorDict[__instance] = regionCostCalculatorWrapper;
+            }
+            return regionCostCalculatorWrapper;
+        }
     }
 }
