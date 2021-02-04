@@ -450,7 +450,7 @@ namespace RimThreaded
 
 			//PawnDestinationReservationManager
 			original = typeof(PawnDestinationReservationManager);
-			patched = typeof(Verse_PawnDestinationReservationManager_Patch);
+			patched = typeof(PawnDestinationReservationManager_Patch);
 			Prefix(original, patched, "GetPawnDestinationSetFor");
 			Prefix(original, patched, "IsReserved", new Type[] { typeof(IntVec3), typeof(Pawn).MakeByRefType() });
 			Prefix(original, patched, "Notify_FactionRemoved");
@@ -462,7 +462,7 @@ namespace RimThreaded
 			Prefix(original, patched, "ReleaseClaimedBy");
 			Prefix(original, patched, "CanReserve");
 			Prefix(original, patched, "FirstObsoleteReservationFor");
-
+			Prefix(original, patched, "MostRecentReservationFor");
 
 			//DynamicDrawManager
 			original = typeof(DynamicDrawManager);
@@ -971,6 +971,7 @@ namespace RimThreaded
 			Prefix(original, patched, "GetFirstHediffOfDef");
 			Prefix(original, patched, "HasTendableHediff");
 			Prefix(original, patched, "HasImmunizableNotImmuneHediff");
+			Prefix(original, patched, "GetPartHealth");
 			//Prefix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPrefix", false);
 			//Postfix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPostfix");
 
@@ -1586,11 +1587,6 @@ namespace RimThreaded
 			patched = typeof(GenLeaving_Patch);
 			Prefix(original, patched, "DropFilthDueToDamage");
 
-			//PawnDestinationReservationManager
-			original = typeof(PawnDestinationReservationManager);
-			patched = typeof(PawnDestinationReservationManager_Patch);
-			Prefix(original, patched, "MostRecentReservationFor");
-
 			//World
 			original = typeof(World);
 			patched = typeof(World_Patch);
@@ -1600,6 +1596,7 @@ namespace RimThreaded
 			original = typeof(MemoryThoughtHandler);
 			patched = typeof(MemoryThoughtHandler_Patch);
 			Prefix(original, patched, "MemoryThoughtInterval");
+			Prefix(original, patched, "ExposeData");
 
 			//PortraitRenderer
 			original = typeof(PortraitRenderer);
@@ -1644,9 +1641,26 @@ namespace RimThreaded
 			//ThinkNode_ConditionalAnyColonistTryingToExitMap
 			original = typeof(ThinkNode_ConditionalAnyColonistTryingToExitMap);
 			patched = typeof(ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch);
-			Prefix(original, patched, "Satisfied"); //TODO loops twice... and removes verblist target == null - could also be transpiled although not ideal
+			Prefix(original, patched, "Satisfied");
 
-			
+			//TODO - should transpile ReplacePotentiallyRelatedPawns instead
+			//FocusStrengthOffset_GraveCorpseRelationship.CanApply
+			original = typeof(FocusStrengthOffset_GraveCorpseRelationship);
+			patched = typeof(Pawn_RelationsTracker_Transpile);
+			pMethod = Method(patched, "ReplacePotentiallyRelatedPawns");
+			harmony.Patch(Method(original, "CanApply"), transpiler: new HarmonyMethod(pMethod));
+			//PawnDiedOrDownedThoughtsUtility.AppendThoughts_Relations
+			original = typeof(PawnDiedOrDownedThoughtsUtility);
+			harmony.Patch(Method(original, "AppendThoughts_Relations"), transpiler: new HarmonyMethod(pMethod));
+			//Pawn_RelationsTracker.get_RelatedPawns
+			original = TypeByName("RimWorld.Pawn_RelationsTracker+<get_RelatedPawns>d__30");
+			harmony.Patch(Method(original, "MoveNext"), transpiler: new HarmonyMethod(pMethod));
+			original = typeof(Pawn_RelationsTracker);
+			//Pawn_RelationsTracker.Notify_PawnKilled
+			harmony.Patch(Method(original, "Notify_PawnKilled"), transpiler: new HarmonyMethod(pMethod));
+			//Pawn_RelationsTracker.Notify_PawnSold
+			harmony.Patch(Method(original, "Notify_PawnSold"), transpiler: new HarmonyMethod(pMethod));
+
 
 			//JoyGiver_Ingest
 			//original = typeof(JoyGiver_Ingest);

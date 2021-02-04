@@ -39,6 +39,10 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.3.1 - The Threads Awaken  
+-Large overhaul that fixed many mod incompatibilities and simplified maintenance  
+-Way too many bugfixes and transpiles to list here  
+
 Version 1.2.7 - Grand Hoff Wilhoff Tarkin  
 -Transpiled HediffSet.CacheMissingPartsCommonAncestors  
 -Fixed bug in LordManager.RemoveLord  

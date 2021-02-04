@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Verse;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -33,5 +34,30 @@ namespace RimThreaded
             actionRemoveExpiredMemories(__instance);
             return false;
         }
+
+        public static bool ExposeData(MemoryThoughtHandler __instance)
+        {
+            List<Thought_Memory> memories = __instance.Memories;
+            Scribe_Collections.Look(ref memories, "memories", LookMode.Deep);
+            if (Scribe.mode != LoadSaveMode.PostLoadInit)
+            {
+                return false;
+            }
+
+            for (int num = memories.Count - 1; num >= 0; num--)
+            {
+                Thought_Memory memory = memories[num];
+                if (memory == null || memory.def == null)
+                {
+                    memories.RemoveAt(num);
+                }
+                else
+                {
+                    memory.pawn = __instance.pawn;
+                }
+            }
+            return false;
+        }
+
     }
 }

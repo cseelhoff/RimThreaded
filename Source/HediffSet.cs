@@ -8,6 +8,7 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using System.Threading;
+using UnityEngine;
 
 namespace RimThreaded
 {
@@ -21,29 +22,71 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<HediffSet, Queue<BodyPartRecord>>("missingPartsCommonAncestorsQueue");
 
 
+        public static bool GetPartHealth(HediffSet __instance, ref float __result, BodyPartRecord part)
+        {
+            if (part == null || part.def == null)
+            {
+                __result = 0f;
+                return false;
+            }
+
+            float num = part.def.GetMaxHealth(__instance.pawn);
+            for (int i = __instance.hediffs.Count - 1; i >= 0; i--)
+            {
+                Hediff hediff = null;
+                try
+                {
+                    hediff = __instance.hediffs[i];
+                } catch(ArgumentOutOfRangeException) {}
+                if (hediff != null && hediff is Hediff_MissingPart && hediff.Part == part)
+                {
+                    __result = 0f;
+                    return false;
+                }
+
+                if (hediff != null && hediff.Part == part)
+                {
+                    Hediff_Injury hediff_Injury = hediff as Hediff_Injury;
+                    if (hediff_Injury != null)
+                    {
+                        num -= hediff_Injury.Severity;
+                    }
+                }
+            }
+
+            num = Mathf.Max(num, 0f);
+            if (!part.def.destroyableByDamage)
+            {
+                num = Mathf.Max(num, 1f);
+            }
+
+            __result = Mathf.RoundToInt(num);
+            return false;
+        }
+
         public static bool HasImmunizableNotImmuneHediff(HediffSet __instance, ref bool __result)
         {
             __result = false;
             if (__instance.hediffs != null)
             {
-                for (int i = 0; i < __instance.hediffs.Count; i++)
+                for (int i = __instance.hediffs.Count - 1; i >= 0; i--)
                 {
                     Hediff hediff = null;
                     try
                     {
                         hediff = __instance.hediffs[i];
                     }
-                    catch (ArgumentOutOfRangeException) { break; }
+                    catch (ArgumentOutOfRangeException) {}
                     if (hediff != null)
                     {
                         if (!(hediff is Hediff_Injury) && !(hediff is Hediff_MissingPart) && hediff.Visible && hediff.def != null && hediff.def.PossibleToDevelopImmunityNaturally() && !hediff.FullyImmune())
                         {
-                            return true;
+                            __result = true;
+                            return false;
                         }
                     }
                 }
             }
-
             return false;
         }
 

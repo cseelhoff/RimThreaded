@@ -10,12 +10,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.2.7 - Grand Hoff Wilhoff Tarkin
-    -Transpiled HediffSet.CacheMissingPartsCommonAncestors
-    -Fixed bug in LordManager.RemoveLord
-    -Fixed bug in VerbTracker.VerbsTick
-    -Fixed bug in Verb_MeleeAttack.TryCastShot
-    -Fixed bug in WorldFloodFiller.FloodFill
+    Version 1.3.1 - The Threads Awaken
+    -Large overhaul that fixed many mod incompatibilities and simplified maintenance
+    -Way too many bugfixes and transpiles to list here
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
