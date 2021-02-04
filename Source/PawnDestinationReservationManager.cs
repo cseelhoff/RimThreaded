@@ -14,12 +14,44 @@ using static Verse.PawnDestinationReservationManager;
 namespace RimThreaded
 {
     [StaticConstructorOnStartup]
-    public class Verse_PawnDestinationReservationManager_Patch
+    public class PawnDestinationReservationManager_Patch
     {
         private static readonly Material DestinationMat = MaterialPool.MatFrom("UI/Overlays/ReservedDestination");
         private static readonly Material DestinationSelectionMat = MaterialPool.MatFrom("UI/Overlays/ReservedDestinationSelection");
         public static ConcurrentDictionary<Faction, PawnDestinationSet> reservedDestinations = 
             new ConcurrentDictionary<Faction, PawnDestinationSet>();
+
+        public static bool MostRecentReservationFor(PawnDestinationReservationManager __instance, ref PawnDestinationReservation __result, Pawn p)
+        {
+            if (p.Faction == null)
+            {
+                __result = null;
+                return false;
+            }
+
+            List<PawnDestinationReservation> list = __instance.GetPawnDestinationSetFor(p.Faction).list;
+            for (int i = 0; i < list.Count; i++)
+            {
+                PawnDestinationReservation pawnDestinationReservation;
+                try
+                {
+                    pawnDestinationReservation = list[i];
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    break;
+                }
+
+                if (pawnDestinationReservation != null && pawnDestinationReservation.claimant == p && !pawnDestinationReservation.obsolete)
+                {
+                    __result = pawnDestinationReservation;
+                    return false;
+                }
+            }
+
+            __result = null;
+            return false;
+        }
 
         public static bool FirstObsoleteReservationFor(PawnDestinationReservationManager __instance, ref IntVec3 __result, Pawn p)
         {

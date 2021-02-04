@@ -22,11 +22,69 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, bool>("familyByBloodIsCached");
         public static AccessTools.FieldRef<Pawn_RelationsTracker, HashSet<Pawn>> cachedFamilyByBlood =
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, HashSet<Pawn>>("cachedFamilyByBlood");
+        public static AccessTools.FieldRef<Pawn_RelationsTracker, HashSet<Pawn>> pawnsWithDirectRelationsWithMe =
+            AccessTools.FieldRefAccess<Pawn_RelationsTracker, HashSet<Pawn>>("pawnsWithDirectRelationsWithMe");
+
         public static ConcurrentStack<HashSet<Pawn>> pawnHashsetStack = new ConcurrentStack<HashSet<Pawn>>();
         public static ConcurrentStack<List<Pawn>> pawnListStack = new ConcurrentStack<List<Pawn>>();
 
         public static AccessTools.FieldRef<Pawn_RelationsTracker, List<DirectPawnRelation>> directRelations =
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, List<DirectPawnRelation>>("directRelations");
+
+        public static IEnumerable<Pawn> get_PotentiallyRelatedPawns2(Pawn_RelationsTracker __instance)
+        {
+            if (!__instance.RelatedToAnyoneOrAnyoneRelatedToMe)
+            {
+                yield break;
+            }
+
+            List<Pawn> stack = new List<Pawn>();
+            HashSet<Pawn> visited = new HashSet<Pawn>();
+            try
+            {
+                //stack = SimplePool<List<Pawn>>.Get();
+                //visited = SimplePool<HashSet<Pawn>>.Get();
+                stack.Add(pawn(__instance));
+                visited.Add(pawn(__instance));
+                while (stack.Any())
+                {
+                    Pawn p = stack[stack.Count - 1];
+                    stack.RemoveLast();
+                    if (p != pawn(__instance))
+                    {
+                        yield return p;
+                    }
+
+                    for (int i = 0; i < directRelations(p.relations).Count; i++)
+                    {
+                        Pawn otherPawn = directRelations(p.relations)[i].otherPawn;
+                        if (!visited.Contains(otherPawn))
+                        {
+                            stack.Add(otherPawn);
+                            visited.Add(otherPawn);
+                        }
+                    }
+
+                    foreach (Pawn item in pawnsWithDirectRelationsWithMe(p.relations))
+                    {
+                        if (!visited.Contains(item))
+                        {
+                            stack.Add(item);
+                            visited.Add(item);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                //stack.Clear();
+                //SimplePool<List<Pawn>>.Return(stack);
+                //visited.Clear();
+                //SimplePool<HashSet<Pawn>>.Return(visited);
+            }
+            
+        }
+
 
 
         public static void Notify_PawnKilled(Pawn_RelationsTracker __instance, DamageInfo? dinfo, Map mapBeforeDeath)
