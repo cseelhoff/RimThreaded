@@ -31,12 +31,13 @@ namespace RimThreaded
         }
         public static bool RemoveHediff(Pawn_HealthTracker __instance, Hediff hediff)
         {
-            if (__instance.hediffSet != null && __instance.hediffSet.hediffs != null)
-            {
-                __instance.hediffSet.hediffs.Remove(hediff);
-                hediff.PostRemoved();
-                __instance.Notify_HediffChanged(null);
-            }
+            if (__instance.hediffSet == null || __instance.hediffSet.hediffs == null)
+                return false;
+            
+            __instance.hediffSet.hediffs.Remove(hediff);
+            hediff.PostRemoved();
+            __instance.Notify_HediffChanged(null);
+            
             return false;
         }
     }

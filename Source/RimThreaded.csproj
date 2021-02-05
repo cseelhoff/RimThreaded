@@ -98,6 +98,7 @@
     <Compile Include="ListerBuildings.cs" />
     <Compile Include="MemoryThoughtHandler_Patch.cs" />
     <Compile Include="PawnCapacitiesHandler_Transpile.cs" />
+    <Compile Include="Pawn_HealthTracker_Transpile.cs" />
     <Compile Include="Pawn_RelationsTracker_Transpile.cs" />
     <Compile Include="PlayDataLoader_Patch.cs" />
     <Compile Include="PortraitRenderer_Patch.cs" />

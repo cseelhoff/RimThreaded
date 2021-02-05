@@ -674,7 +674,8 @@ namespace RimThreaded
 			original = typeof(FireUtility);
 			patched = typeof(FireUtility_Patch);
 			Prefix(original, patched, "ContainsStaticFire");
-
+			Prefix(original, patched, "ChanceToStartFireIn");
+			
 			//Fire			
 			original = typeof(Fire);
 			patched = typeof(Fire_Transpile);
@@ -1264,7 +1265,9 @@ namespace RimThreaded
 			original = typeof(Pawn_HealthTracker);
 			patched = typeof(Pawn_HealthTracker_Patch);
 			Prefix(original, patched, "SetDead");
-			Prefix(original, patched, "RemoveHediff");
+			//Prefix(original, patched, "RemoveHediff");
+			patched = typeof(Pawn_HealthTracker_Transpile);			
+			Transpile(original, patched, "RemoveHediff");
 
 			//Pawn
 			original = typeof(Pawn);
