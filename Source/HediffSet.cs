@@ -1,7 +1,8 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using RimWorld;
 using Verse;
@@ -20,7 +21,8 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<HediffSet, List<Hediff_MissingPart>>("cachedMissingPartsCommonAncestors");
         public static AccessTools.FieldRef<HediffSet, Queue<BodyPartRecord>> missingPartsCommonAncestorsQueue =
             AccessTools.FieldRefAccess<HediffSet, Queue<BodyPartRecord>>("missingPartsCommonAncestorsQueue");
-
+        public static MethodInfo makeshiftEbfEndpoint = AccessTools.Method("EBF.VanillaExtender:GetMaxHealth");
+        public static FastInvokeHandler myDelegate = null;
 
         public static bool GetPartHealth(HediffSet __instance, ref float __result, BodyPartRecord part)
         {
@@ -30,7 +32,7 @@ namespace RimThreaded
                 return false;
             }
 
-            float num = part.def.GetMaxHealth(__instance.pawn);
+            float num = EBF_GetMaxHealth(part.def, __instance.pawn, part); //part.def.GetMaxHealth(__instance.pawn); 
             for (int i = __instance.hediffs.Count - 1; i >= 0; i--)
             {
                 Hediff hediff = null;
@@ -168,9 +170,19 @@ namespace RimThreaded
             __result = false;
             return false;
         }
-
-
-
+        //Elite_Bionics_Framework_Patch
+        public static float EBF_GetMaxHealth(BodyPartDef def, Pawn pawn, BodyPartRecord record)
+        {
+            if (makeshiftEbfEndpoint != null)
+            {
+                if (myDelegate == null)
+                {
+                    myDelegate = MethodInvoker.GetHandler(makeshiftEbfEndpoint);
+                }
+                return (float)myDelegate(null, new object[] { def, pawn, record });
+            }
+            return def.GetMaxHealth(pawn);
+        }
 
     }
 }
