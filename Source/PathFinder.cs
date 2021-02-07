@@ -143,6 +143,10 @@ namespace RimThreaded
             calcGrid[curIndex].costNodeCost = 0;
             calcGrid[curIndex].parentIndex = curIndex;
             calcGrid[curIndex].status = statusOpenValue;
+            if(openList == null)
+            {
+                openList = new FastPriorityQueue<CostNode2>();
+            }
             openList.Clear();
             openList.Push(new CostNode2(curIndex, 0));
         }

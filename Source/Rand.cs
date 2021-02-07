@@ -76,7 +76,12 @@ namespace RimThreaded
                 }
             }
             //Rand.tmpRange.Clear();
-            List<int> tmpRange = getTmpRange();
+            //List<int> tmpRange = getTmpRange();
+            if(tmpRange == null)
+            {
+                tmpRange = new List<int>();
+            }
+            tmpRange.Clear();
             for (int index = from; index <= to; ++index)
                 tmpRange.Add(index);
             tmpRange.Shuffle<int>();

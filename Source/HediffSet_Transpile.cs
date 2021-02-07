@@ -179,8 +179,55 @@ namespace RimThreaded
                 Log.Error("IL code instructions not found");
             }
         }
-
-
+        public static IEnumerable<CodeInstruction> GetPartHealth(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            int[] matchesFound = new int[3];
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            int i = 0;
+            Label breakDestinationLabel = iLGenerator.DefineLabel();
+            while (i < instructionsList.Count)
+            {
+                int matchIndex = 0;
+                if (
+                    i - 2 >= 0 &&
+                    instructionsList[i - 2].opcode == OpCodes.Ldarg_1 &&
+                    instructionsList[i - 1].opcode == OpCodes.Brtrue_S
+                    )
+                {
+                    matchesFound[matchIndex]++;
+                    yield return new CodeInstruction(OpCodes.Ldarg_1);
+                    yield return new CodeInstruction(OpCodes.Ldfld, Field(typeof(BodyPartRecord), "def"));
+                    yield return new CodeInstruction(instructionsList[i - 1].opcode, instructionsList[i - 1].operand);
+                }
+                matchIndex++;
+                if (
+                        i + 2 < instructionsList.Count &&
+                        instructionsList[i + 2].opcode == OpCodes.Callvirt &&
+                        (MethodInfo)instructionsList[i + 2].operand == Method(typeof(List<Hediff>), "get_Item")
+                    )
+                {
+                    breakDestinationLabel = iLGenerator.DefineLabel();
+                    StartTryAndAddBreakDestinationLabel(instructionsList, ref i, breakDestinationLabel);
+                    matchesFound[matchIndex]++;
+                }
+                matchIndex++;
+                if (
+                    i - 1 >= 0 &&
+                    instructionsList[i - 1].opcode == OpCodes.Callvirt &&
+                    (MethodInfo)instructionsList[i - 1].operand == Method(typeof(List<Hediff>), "get_Item")
+                )
+                {
+                    EndTryStartCatchArgumentExceptionOutOfRange(instructionsList, ref i, iLGenerator, breakDestinationLabel);
+                    matchesFound[matchIndex]++;
+                }
+                yield return instructionsList[i++];
+            }
+            for (int mIndex = 0; mIndex < matchesFound.Length; mIndex++)
+            {
+                if (matchesFound[mIndex] < 1)
+                    Log.Error("IL code instruction set " + mIndex + " not found");
+            }
+        }
         public static IEnumerable<CodeInstruction> CacheMissingPartsCommonAncestors ( IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator )
         {
             List<CodeInstruction> instructionsList = instructions.ToList();

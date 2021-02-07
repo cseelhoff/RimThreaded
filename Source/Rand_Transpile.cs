@@ -94,16 +94,16 @@ namespace RimThreaded
             int[] matchesFound = new int[1];
             List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
-            /*
+            
             yield return new CodeInstruction(OpCodes.Ldsfld, Field(typeof(Rand_Patch), "tmpRange"));
             yield return new CodeInstruction(OpCodes.Ldnull);
             yield return new CodeInstruction(OpCodes.Ceq);
-            Label tmpRangeLabel = iLGenerator.DefineLabel();
+            Label tmpRangeNullLabel = iLGenerator.DefineLabel();
             yield return new CodeInstruction(OpCodes.Brfalse_S, tmpRangeNullLabel);
             yield return new CodeInstruction(OpCodes.Newobj, Constructor(typeof(List<int>)));
             yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(Rand_Patch), "tmpRange"));
             instructionsList[i].labels.Add(tmpRangeNullLabel);
-            */
+            
             while (i < instructionsList.Count)
             {
                 int matchIndex = 0;

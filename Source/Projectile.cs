@@ -54,7 +54,7 @@ namespace RimThreaded
 
 		public static bool CanHit(Projectile __instance, ref bool __result, Thing thing)
 		{
-			if (!thing.Spawned)
+			if (thing == null || !thing.Spawned)
 			{
 				__result = false;
 				return false;
