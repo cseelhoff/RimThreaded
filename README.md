@@ -39,6 +39,17 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 1.3.2 - The Child of the Force
+-Fixed bug in FireUtility.ChanceToStartFireIn  
+-Fixed bug in GenClamor.DoClamor  
+-Transpiled HediffSet.GetPartHealth  
+-Fixed bug in TryOpportunisticJob  
+-Fixed bug in PathFinder.InitStatusesAndPushStartNode  
+-Transpiled Pawn_HealthTracker.RemoveHediff  
+-Fixed bug in Rand_Transpile.TryRangeInclusiveWhere  
+-Set minimum thread timeout to 5000ms  
+-Fixed bug in Children.HediffComp_Discoverable_CheckDiscovered.CheckDiscovered_Pre  
+
 Version 1.3.1 - The Threads Awaken  
 -Large overhaul that fixed many mod incompatibilities and simplified maintenance  
 -Way too many bugfixes and transpiles to list here  
