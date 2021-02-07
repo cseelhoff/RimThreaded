@@ -24,28 +24,45 @@ namespace RimThreaded
 
         public static bool GetPartHealth(HediffSet __instance, ref float __result, BodyPartRecord part)
         {
-            if (part == null || part.def == null)
+            if (part == null)
             {
                 __result = 0f;
                 return false;
             }
 
-            float num = part.def.GetMaxHealth(__instance.pawn);
-            for (int i = __instance.hediffs.Count - 1; i >= 0; i--)
+            //---START ADD---
+            if (part.def == null)
             {
-                Hediff hediff = null;
+                __result = 0f;
+                return false;
+            }
+            //---END ADD---
+
+            float num = part.def.GetMaxHealth(__instance.pawn);
+            for (int i = 0; i < __instance.hediffs.Count; i++)
+            {
+                //---START ADD---
+                Hediff hediff;
                 try
                 {
                     hediff = __instance.hediffs[i];
-                } catch(ArgumentOutOfRangeException) {}
-                if (hediff != null && hediff is Hediff_MissingPart && hediff.Part == part)
+                }
+                catch (ArgumentOutOfRangeException) {
+                    break;
+                }
+                //---END ADD---
+
+                //REPLACE hediffs[i] with hediff
+                if (hediff is Hediff_MissingPart && hediff.Part == part)
                 {
                     __result = 0f;
                     return false;
                 }
 
-                if (hediff != null && hediff.Part == part)
+                //REPLACE hediffs[i] with hediff
+                if (hediff.Part == part)
                 {
+                    //REPLACE hediffs[i] with hediff
                     Hediff_Injury hediff_Injury = hediff as Hediff_Injury;
                     if (hediff_Injury != null)
                     {

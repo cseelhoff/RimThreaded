@@ -47,6 +47,8 @@ namespace RimThreaded
 		public static Type combatExtended_ProjectileCE;
 		public static Type dubsSkylight_Patch_GetRoof;
 		public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;
+		public static Type jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob;
+		public static Type childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch;
 		public static Type androidTiers_GeneratePawns_Patch1;
 		public static Type androidTiers_GeneratePawns_Patch;
 		public static FieldInfo cachedStoreCell;
@@ -263,7 +265,7 @@ namespace RimThreaded
 
 		static RimThreadedHarmony()
 		{
-			Harmony.DEBUG = true;
+			Harmony.DEBUG = false;
 			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "  is patching methods...");
 			Type original = null;
 			Type patched = null;
@@ -961,8 +963,7 @@ namespace RimThreaded
 			original = TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
 			Transpile(original, patched, "MoveNext");
 			original = typeof(HediffSet);
-			//Transpile(original, patched, "PartIsMissing");
-			//Transpile(original, patched, "HasDirectlyAddedPartFor");
+			Transpile(original, patched, "GetPartHealth");
 			Transpile(original, patched, "AddDirect");
 			Transpile(original, patched, "CacheMissingPartsCommonAncestors");
 			patched = typeof(HediffSet_Patch);
@@ -972,7 +973,7 @@ namespace RimThreaded
 			Prefix(original, patched, "GetFirstHediffOfDef");
 			Prefix(original, patched, "HasTendableHediff");
 			Prefix(original, patched, "HasImmunizableNotImmuneHediff");
-			Prefix(original, patched, "GetPartHealth");
+			//Prefix(original, patched, "GetPartHealth");
 			//Prefix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPrefix", false);
 			//Postfix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPostfix");
 
@@ -1646,6 +1647,13 @@ namespace RimThreaded
 			patched = typeof(ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch);
 			Prefix(original, patched, "Satisfied");
 
+			//GenClamor+<>c__DisplayClass1_0
+			original = TypeByName("Verse.GenClamor+<>c__DisplayClass1_0");
+			patched = typeof(GenClamor_Patch);
+			oMethod = Method(original, "<DoClamor>b__1");
+			pMethod = Method(patched, "DoClamorb__1");
+			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
+
 			//TODO - should transpile ReplacePotentiallyRelatedPawns instead
 			//FocusStrengthOffset_GraveCorpseRelationship.CanApply
 			original = typeof(FocusStrengthOffset_GraveCorpseRelationship);
@@ -1701,6 +1709,8 @@ namespace RimThreaded
 			combatExtended_ProjectileCE = TypeByName("CombatExtended.ProjectileCE");
 			dubsSkylight_Patch_GetRoof = TypeByName("Dubs_Skylight.Patch_GetRoof");
 			jobsOfOpportunityJobsOfOpportunity_Hauling = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
+			jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Patch_TryOpportunisticJob");
+			childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch = TypeByName("Children.ChildrenHarmony+HediffComp_Discoverable_CheckDiscovered_Patch");
 			androidTiers_GeneratePawns_Patch1 = TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch");
 			if (androidTiers_GeneratePawns_Patch1 != null)
 			{
@@ -1827,7 +1837,7 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + dubsSkylight_Patch_GetRoof.FullName + " " + methodName);
 				Transpile(dubsSkylight_Patch_GetRoof, patched, methodName);
 			}
-
+			
 			if (jobsOfOpportunityJobsOfOpportunity_Hauling != null)
 			{
 				cachedStoreCell = Field(jobsOfOpportunityJobsOfOpportunity_Hauling, "cachedStoreCell");
@@ -1835,9 +1845,22 @@ namespace RimThreaded
 				patched = typeof(Hauling_Transpile);
 				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
 				Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
-				//methodName = "TryHaul";
-				//Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
-				//Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
+			}
+
+			if (jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob != null)
+			{
+				string methodName = "TryOpportunisticJob";
+				patched = typeof(Patch_TryOpportunisticJob_Transpile);
+				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob.FullName + " " + methodName);
+				Transpile(jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob, patched, methodName);
+			}
+
+			if (childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch != null)
+			{
+				string methodName = "CheckDiscovered_Pre";
+				patched = typeof(childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch_Transpile);
+				Log.Message("RimThreaded is patching " + childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch.FullName + " " + methodName);
+				Transpile(childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch, patched, methodName);
 			}
 
 			if (androidTiers_GeneratePawns_Patch != null)

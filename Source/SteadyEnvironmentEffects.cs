@@ -112,7 +112,7 @@ namespace RimThreaded
                 bool protectedByEdifice = ProtectedByEdifice(c, map2);
                 TerrainDef terrain = c.GetTerrain(map2);
                 List<Thing> thingList = c.GetThingList(map2);
-                for (int index = 0; index < thingList.Count; ++index)
+                for (int index = 0; index < thingList.Count; index++)
                 {
                     Thing t = thingList[index];
                     if (t is Filth filth)

@@ -87,9 +87,11 @@
     <Compile Include="Building_TurretGun.cs" />
     <Compile Include="Camera_Patch.cs" />
     <Compile Include="CastPositionFinder_Patch.cs" />
+    <Compile Include="childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch_Transpile.cs" />
     <Compile Include="DrugAIUtility_Patch.cs" />
     <Compile Include="DubsSkylight_getPatch_Transpile.cs" />
     <Compile Include="FilthMaker.cs" />
+    <Compile Include="GenClamor_Patch.cs" />
     <Compile Include="GeneratePawns_Patch.cs" />
     <Compile Include="GenLeaving.cs" />
     <Compile Include="HaulAIUtility_Patch.cs" />
@@ -97,6 +99,8 @@
     <Compile Include="JoyGiver_Ingest_Patch.cs" />
     <Compile Include="ListerBuildings.cs" />
     <Compile Include="MemoryThoughtHandler_Patch.cs" />
+    <Compile Include="Patch_TryOpportunisticJob.cs" />
+    <Compile Include="Patch_TryOpportunisticJob_Transpile.cs" />
     <Compile Include="PawnCapacitiesHandler_Transpile.cs" />
     <Compile Include="Pawn_HealthTracker_Transpile.cs" />
     <Compile Include="Pawn_RelationsTracker_Transpile.cs" />
