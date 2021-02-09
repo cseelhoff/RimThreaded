@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +70,7 @@ namespace RimThreaded
             else
             {
                 TimeControls_Patch.lastTickForcedSlow = false;
-                TimeControls_Patch.overrideForcedSlow = false;
+                if (!RimThreadedMod.Settings.disableforcedslowdowns) TimeControls_Patch.overrideForcedSlow = false;
             }
             
             switch (curTimeSpeed(__instance))
