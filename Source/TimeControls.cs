@@ -231,7 +231,7 @@ namespace RimThreaded
                 rect.x += rect.width;
             }
 
-            if (Find.TickManager.slower.ForcedNormalSpeed)
+            if (Find.TickManager.slower.ForcedNormalSpeed && !RimThreadedMod.Settings.disableforcedslowdowns)
             {
                 Widgets.DrawLineHorizontal(rect.width * 2f, rect.height / 2f, rect.width * 2f);
             }
