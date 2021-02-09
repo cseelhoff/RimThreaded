@@ -20,6 +20,7 @@ namespace RimThreaded
         public string timeSpeedUltrafastBuffer = "150";
         public bool disablesomealets = false;
         public bool disablelimits = false;
+        public bool disableforcedslowdowns = false;
         public float scrollViewHeight;
         public Vector2 scrollPosition;
         public string modsText = "";
@@ -46,6 +47,7 @@ namespace RimThreaded
             Scribe_Values.Look(ref timeSpeedUltrafastBuffer, "timeSpeedUltrafastBuffer", "150");
             Scribe_Values.Look(ref disablesomealets, "disablesomealets", false);
             Scribe_Values.Look(ref disablelimits, "disablelimits", false);
+            Scribe_Values.Look(ref disableforcedslowdowns, "disableforcedslowdowns", false);
 
         }
 
@@ -68,6 +70,7 @@ namespace RimThreaded
             Widgets.TextFieldNumeric(listing_Standard.GetRect(30f), ref timeSpeedUltrafast, ref timeSpeedUltrafastBuffer);
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Disable alert updates at 4x speed:", ref disablesomealets);
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Disable thread/worker limit (debugging):", ref disablelimits);
+            Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Disable slowdown on combat:", ref disableforcedslowdowns);
             Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText, ref scrollPos);
             listing_Standard.EndScrollView(ref viewRect);
             scrollViewHeight = viewRect.height;
