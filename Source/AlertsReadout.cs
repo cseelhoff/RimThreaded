@@ -36,10 +36,10 @@ namespace RimThreaded
                 return false;
             }
 
-            if (TickManager_Patch.curTimeSpeed(Find.TickManager) != TimeSpeed.Ultrafast)
+            if (TickManager_Patch.curTimeSpeed(Find.TickManager) == TimeSpeed.Ultrafast && RimThreadedMod.Settings.disablesomealets)
             {
-                //Uncommenting this will disable alert checks on ultrafast speed for an added speed boost
-                //return false;
+                //this will disable alert checks on ultrafast speed for an added speed boost
+                return false; 
             }
 
             curAlertIndex(__instance)++;
