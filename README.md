@@ -10,7 +10,7 @@ LOAD ORDER:
 Put RimThreaded last in load order.  
 
 MOD COMPATIBILITY:  
-Since more mods are made compatible every week, the mod compatibility list is maintained by the community as a dedicated channel on our discord. If the mod is not listed there, it is most likely compatible.  
+Since more mods are made compatible every week, the mod incompatibility list is maintained by the community as a dedicated channel on our discord. If the mod is not listed there, it is most likely compatible.  
 
 SUBMIT BUGS:  
 https://github.com/cseelhoff/RimThreaded/issues/new/choose  
