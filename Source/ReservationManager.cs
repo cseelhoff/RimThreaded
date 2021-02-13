@@ -191,7 +191,7 @@ namespace RimThreaded
 				if (!canReserveResult)
 				{
 					//bool canReserveResult2 = __instance.CanReserve(claimant, target, maxPawns, stackCount, layer);
-					if (job != null && job.playerForced && __instance.CanReserve(claimant, target, maxPawns, stackCount, layer))
+					if (job.playerForced && __instance.CanReserve(claimant, target, maxPawns, stackCount, layer, true))
 					{
 						reservations(__instance).Add(new Reservation(claimant, job, maxPawns, stackCount, target, layer));
 						//foreach (ReservationManager.Reservation reservation in reservations(__instance).ToList<ReservationManager.Reservation>())
