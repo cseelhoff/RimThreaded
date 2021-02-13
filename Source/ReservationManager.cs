@@ -83,10 +83,10 @@ namespace RimThreaded
 		}
 		public static bool Release(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
 		{
-			if (target.ThingDestroyed)
+			/*if (target.ThingDestroyed)
 			{
 				Log.Warning("Releasing destroyed thing " + target + " for " + claimant);
-			}
+			}*/
 			Reservation reservation1 = null;
 			Reservation reservation2;
 			for (int index = 0; index < reservations(__instance).Count; ++index)
