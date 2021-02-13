@@ -58,7 +58,7 @@ namespace RimThreaded
 
         public static bool get_TickRateMultiplier(TickManager __instance, ref float __result)
         {
-            if (__instance.slower.ForcedNormalSpeed)
+            if (__instance.slower.ForcedNormalSpeed && !RimThreadedMod.Settings.disableforcedslowdowns)
             {
                 TimeControls_Patch.lastTickForcedSlow = true;
                 if (!TimeControls_Patch.overrideForcedSlow)
@@ -70,7 +70,7 @@ namespace RimThreaded
             else
             {
                 TimeControls_Patch.lastTickForcedSlow = false;
-                if (!RimThreadedMod.Settings.disableforcedslowdowns) TimeControls_Patch.overrideForcedSlow = false;
+                TimeControls_Patch.overrideForcedSlow = false;
             }
             
             switch (curTimeSpeed(__instance))
