@@ -1,27 +1,37 @@
 ---
 name: Non-Reproducible Vanilla Bug Report (Low Priority)
-about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs that cannot be reproduced fairly consistantly.   
+about: Submit a bug report that occurs in RimWorld running only RimThreaded and DLCs
+  that cannot be reproduced fairly consistantly.
 title: ''
 labels: Bug, Vanilla RT
 assignees: ''
 
 ---
 
+IMPORTANT: Please first search existing bugs to ensure you are not creating a duplicate bug report!  
+
 **Describe the bug**
-IMPORTANT: Please first search existing bugs to ensure you are not creating a duplicate bug report.  
+!!! bug description here !!!
 
-* bug description here !!!
-
-**To Reproduce**
-Steps to reproduce the behavior:
+**Steps to reproduce the behavior (VERY IMPORTANT)**
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
 **Error Log**
-* Link to contents of Player.log or Error.log (MUST BE LINK)
-* Link to HugsLib log. (MUST BE LINK)
+!!! Link to contents of Player.log or Error.log (MUST BE LINK) !!!
+!!! Link to HugsLib log. (MUST BE LINK) !!!
+
+**Save file**
+!!! Please add a save file where the issue occurs to speed up testing and fixing of the issue !!!
 
 **Screenshots**
-* If applicable, add screenshots to help explain your problem.
+!!! Add screenshots to help explain your problem here !!!
+
+**Mod list (For vanilla report, it has to be same as below list.)**
+* Harmony
+* Core
+* Royalty (optional)
+* HugsLib
+* RimThreaded
