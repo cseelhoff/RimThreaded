@@ -3,15 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
 using UnityEngine;
-using Verse.AI;
-using RimWorld;
-using Verse.Sound;
-using RimWorld.Planet;
-using System.IO;
 
 namespace RimThreaded 
 { 
@@ -45,13 +38,12 @@ namespace RimThreaded
             RimThreaded.timeSpeedFast = Settings.timeSpeedFast;
             RimThreaded.timeSpeedSuperfast = Settings.timeSpeedSuperfast;
             RimThreaded.timeSpeedUltrafast = Settings.timeSpeedUltrafast;
-
         }
-
         public static string getPotentialModConflicts()
         {
             string modsText = "";
             IEnumerable<MethodBase> originalMethods = Harmony.GetAllPatchedMethods();
+
             foreach (MethodBase originalMethod in originalMethods)
             {
                 Patches patches = Harmony.GetPatchInfo(originalMethod);
@@ -99,12 +91,49 @@ namespace RimThreaded
             return modsText;
         }
 
+        public static void getPotentialModConflicts_2()
+        {
+            string[] IncompatibleMods = { "biomesteam.biomesislands", "mlie.bestmix", "rwmt.Multiplayer", "pyrce.terrain.movement.modkit" }; //Add/Remove mods here.
+            bool WrongLoadOrder = false;
+            bool Conflictingmods = false;
+            string ModConflictsMessage = "";
+            int RTpos = LoadedModManager.RunningModsListForReading.FindIndex(i => i.PackageId == "majorhoff.rimthreaded");
+            int LoadOrderLength = LoadedModManager.RunningModsListForReading.Count;
+            if (RTpos != (LoadOrderLength - 1))
+            {
+                WrongLoadOrder = true;
+            }
+            if (WrongLoadOrder)
+            {
+                ModConflictsMessage = "_______________________" + Environment.NewLine + Environment.NewLine + "Critical incompatibility:" + Environment.NewLine + "_______________________" +
+                                      Environment.NewLine + Environment.NewLine + "RimThreaded is NOT last in your mod load order, fix immediately." + Environment.NewLine;
+            }
+            ModConflictsMessage = ModConflictsMessage + "_______________________" + Environment.NewLine + "" + Environment.NewLine + "Highly incompatible:" + Environment.NewLine + "_______________________" + Environment.NewLine + Environment.NewLine;
+            for (int i = 0; i < LoadOrderLength; i++)
+            {
+                if (IncompatibleMods.Contains(LoadedModManager.RunningModsListForReading[i].PackageId))
+                {
+                    ModConflictsMessage = ModConflictsMessage + LoadedModManager.RunningModsListForReading[i].Name + Environment.NewLine;
+                    Conflictingmods = true;
+                }
+            }
+            if (!Conflictingmods) ModConflictsMessage = ModConflictsMessage + "No Conflicts detected :D" + Environment.NewLine;
+
+            ModConflictsMessage = ModConflictsMessage + "_______________________" + Environment.NewLine + Environment.NewLine + "Other (potential) incompatibilities:" + Environment.NewLine + "_______________________" + Environment.NewLine +
+                                  Environment.NewLine + "Check out the wiki on github for more information" + Environment.NewLine + "_______________________";
+            Dialog_MessageBox window2 = new Dialog_MessageBox(ModConflictsMessage, "Ill take my chances", null, "Disable this alert in settings", null, "RimThreaded Mod Conflicts detected:", true, null);
+            if (WrongLoadOrder || Conflictingmods) Find.WindowStack.Add(window2);
+        }
+        private static Action DisableAlert() //Not implemented yet.
+        {
+            RimThreadedMod.Settings.showModConflictsAlert = false;
+            return null;
+        }
         public override string SettingsCategory()
         {
             return "RimThreaded";
 
         }
-
     }
 
 }
