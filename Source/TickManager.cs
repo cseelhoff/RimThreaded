@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +58,7 @@ namespace RimThreaded
 
         public static bool get_TickRateMultiplier(TickManager __instance, ref float __result)
         {
-            if (__instance.slower.ForcedNormalSpeed)
+            if (__instance.slower.ForcedNormalSpeed && !RimThreadedMod.Settings.disableforcedslowdowns)
             {
                 TimeControls_Patch.lastTickForcedSlow = true;
                 if (!TimeControls_Patch.overrideForcedSlow)
