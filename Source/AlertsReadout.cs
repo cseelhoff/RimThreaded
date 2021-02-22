@@ -1,11 +1,7 @@
-﻿using RimWorld;
+using RimWorld;
 using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using static HarmonyLib.AccessTools;
@@ -22,9 +18,15 @@ namespace RimThreaded
             FieldRefAccess<AlertsReadout, List<Alert>>("AllAlerts");
         public static FieldRef<AlertsReadout, int> mouseoverAlertIndex =
             FieldRefAccess<AlertsReadout, int>("mouseoverAlertIndex");
+        private static bool runonce = true;
 
         public static bool AlertsReadoutUpdate(AlertsReadout __instance)
         {
+            if (runonce && RimThreadedMod.Settings.showModConflictsAlert)
+            {
+                RimThreadedMod.getPotentialModConflicts_2(); //Not sure where to put this, making it run on the main menu without black screen will have been perfect.
+                runonce = false;
+            }
             if (Mathf.Max(Find.TickManager.TicksGame, Find.TutorialState.endTick) < 600)
             {
                 return false;
