@@ -93,34 +93,34 @@ namespace RimThreaded
 
         public static void getPotentialModConflicts_2()
         {
-            string[] IncompatibleMods = { "biomesteam.biomesislands", "mlie.bestmix", "rwmt.Multiplayer", "pyrce.terrain.movement.modkit" }; //Add/Remove mods here.
             bool WrongLoadOrder = false;
             bool Conflictingmods = false;
             string ModConflictsMessage = "";
-            int RTpos = LoadedModManager.RunningModsListForReading.FindIndex(i => i.PackageId == "majorhoff.rimthreaded");
-            int LoadOrderLength = LoadedModManager.RunningModsListForReading.Count;
-            if (RTpos != (LoadOrderLength - 1))
+            string[] IncompatibleMods = { "biomesteam.biomesislands", "mlie.bestmix", "rwmt.Multiplayer", "pyrce.terrain.movement.modkit" }; //Add/Remove mods here.
+            string NewLine = "_______________________" + Environment.NewLine + Environment.NewLine;
+            var LoadOrder = LoadedModManager.RunningModsListForReading;
+            int RTpos = LoadOrder.FindIndex(i => i.PackageId == "majorhoff.rimthreaded");
+
+            if (RTpos != (LoadOrder.Count - 1))
             {
                 WrongLoadOrder = true;
             }
             if (WrongLoadOrder)
             {
-                ModConflictsMessage = "_______________________" + Environment.NewLine + Environment.NewLine + "Critical incompatibility:" + Environment.NewLine + "_______________________" +
-                                      Environment.NewLine + Environment.NewLine + "RimThreaded is NOT last in your mod load order, fix immediately." + Environment.NewLine;
+                ModConflictsMessage = NewLine + "Critical incompatibility:" + Environment.NewLine + NewLine + "RimThreaded is NOT last in your mod load order, fix immediately." + Environment.NewLine;
             }
-            ModConflictsMessage = ModConflictsMessage + "_______________________" + Environment.NewLine + "" + Environment.NewLine + "Highly incompatible:" + Environment.NewLine + "_______________________" + Environment.NewLine + Environment.NewLine;
-            for (int i = 0; i < LoadOrderLength; i++)
+            ModConflictsMessage = ModConflictsMessage + NewLine + "Highly incompatible:" + Environment.NewLine + NewLine;
+            for (int i = 0; i < LoadOrder.Count; i++)
             {
-                if (IncompatibleMods.Contains(LoadedModManager.RunningModsListForReading[i].PackageId))
+                if (IncompatibleMods.Contains(LoadOrder[i].PackageId))
                 {
-                    ModConflictsMessage = ModConflictsMessage + LoadedModManager.RunningModsListForReading[i].Name + Environment.NewLine;
+                    ModConflictsMessage = ModConflictsMessage + LoadOrder[i].Name + Environment.NewLine;
                     Conflictingmods = true;
                 }
             }
             if (!Conflictingmods) ModConflictsMessage = ModConflictsMessage + "No Conflicts detected :D" + Environment.NewLine;
 
-            ModConflictsMessage = ModConflictsMessage + "_______________________" + Environment.NewLine + Environment.NewLine + "Other (potential) incompatibilities:" + Environment.NewLine + "_______________________" + Environment.NewLine +
-                                  Environment.NewLine + "Check out the wiki on github for more information" + Environment.NewLine + "_______________________";
+            ModConflictsMessage = ModConflictsMessage + NewLine + "Other (potential) incompatibilities:" + Environment.NewLine + NewLine + "Check out the wiki on github for more information" + Environment.NewLine + "_______________________";
             Dialog_MessageBox window2 = new Dialog_MessageBox(ModConflictsMessage, "Ill take my chances", null, "Disable this alert in settings", null, "RimThreaded Mod Conflicts detected:", true, null);
             if (WrongLoadOrder || Conflictingmods) Find.WindowStack.Add(window2);
         }
