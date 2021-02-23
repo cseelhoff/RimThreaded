@@ -104,9 +104,6 @@ namespace RimThreaded
             if (RTpos != (LoadOrder.Count - 1))
             {
                 WrongLoadOrder = true;
-            }
-            if (WrongLoadOrder)
-            {
                 ModConflictsMessage = NewLine + "Critical incompatibility:" + Environment.NewLine + NewLine + "RimThreaded is NOT last in your mod load order, fix immediately." + Environment.NewLine;
             }
             ModConflictsMessage = ModConflictsMessage + NewLine + "Highly incompatible:" + Environment.NewLine + NewLine;
@@ -121,7 +118,7 @@ namespace RimThreaded
             if (!Conflictingmods) ModConflictsMessage = ModConflictsMessage + "No Conflicts detected :D" + Environment.NewLine;
 
             ModConflictsMessage = ModConflictsMessage + NewLine + "Other (potential) incompatibilities:" + Environment.NewLine + NewLine + "Check out the wiki on github for more information" + Environment.NewLine + "_______________________";
-            Dialog_MessageBox window2 = new Dialog_MessageBox(ModConflictsMessage, "Ill take my chances", null, "Disable this alert in settings", null, "RimThreaded Mod Conflicts detected:", true, null);
+            Dialog_MessageBox window2 = new Dialog_MessageBox(ModConflictsMessage, "Ill take my chances", null, "Disable this alert in settings", null, "RimThreaded Mod Conflicts detected:", true);
             if (WrongLoadOrder || Conflictingmods) Find.WindowStack.Add(window2);
         }
         private static Action DisableAlert() //Not implemented yet.
