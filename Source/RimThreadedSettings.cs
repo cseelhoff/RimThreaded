@@ -20,7 +20,7 @@ namespace RimThreaded
         public string timeSpeedUltrafastBuffer = "150";
         public bool disablesomealets = false;
         public bool disablelimits = false;
-        public bool disableforcedslowdowns = false;
+        public bool disableforcedslowdowns = true;
         public bool showModConflictsAlert = true;
         public float scrollViewHeight;
         public Vector2 scrollPosition;
@@ -48,7 +48,7 @@ namespace RimThreaded
             Scribe_Values.Look(ref timeSpeedUltrafastBuffer, "timeSpeedUltrafastBuffer", "150");
             Scribe_Values.Look(ref disablesomealets, "disablesomealets", false);
             Scribe_Values.Look(ref disablelimits, "disablelimits", false);
-            Scribe_Values.Look(ref disableforcedslowdowns, "disableforcedslowdowns", false);
+            Scribe_Values.Look(ref disableforcedslowdowns, "disableforcedslowdowns", true);
             Scribe_Values.Look(ref showModConflictsAlert, "showModConflictsAlert", true);
 
         }
