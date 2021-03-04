@@ -1,11 +1,7 @@
-﻿using HarmonyLib;
-using System;
+using HarmonyLib;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
+using System.Reflection;
 using Verse;
-using Verse.AI;
 using UnityEngine;
 
 namespace RimThreaded
@@ -20,6 +16,9 @@ namespace RimThreaded
 		public static Dictionary<int, Dictionary<int, float>> tileAbsTickTemperature = new Dictionary<int, Dictionary<int, float>>();
 
 		public static RoomGroup[] beqRoomGroups = AccessTools.StaticFieldRefAccess<RoomGroup[]>(typeof(GenTemperature), "beqRoomGroups");
+        public static MethodInfo InsulateUtility = AccessTools.Method("InsulateUtility:GetInsulationRate");
+        private static FastInvokeHandler GetInsulationRate = null;
+
 		public static bool SeasonalShiftAmplitudeAt(ref float __result, int tile)
 		{
 			if (!SeasonalShiftAmplitudeCache.TryGetValue(tile, out __result))
@@ -99,6 +98,11 @@ namespace RimThreaded
 		{
 			int num = 0;
 			float num2 = 0f;
+            if (InsulateUtility != null)
+            {
+                if (GetInsulationRate == null) GetInsulationRate = MethodInvoker.GetHandler(InsulateUtility);
+				rate = (float)GetInsulationRate(null, new object[] { b, rate});
+			}
 			if (twoWay)
 			{
 				for (int i = 0; i < 2; i++)
