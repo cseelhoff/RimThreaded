@@ -1,23 +1,19 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
 using UnityEngine;
 using Verse.AI;
 using RimWorld;
 using Verse.Sound;
 using RimWorld.Planet;
-using System.Security.Policy;
 using System.Reflection.Emit;
 using System.Threading;
 using Verse.Grammar;
 using Verse.AI.Group;
 using static HarmonyLib.AccessTools;
-using System.Collections;
 
 namespace RimThreaded
 {
@@ -51,6 +47,7 @@ namespace RimThreaded
 		public static Type childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch;
 		public static Type androidTiers_GeneratePawns_Patch1;
 		public static Type androidTiers_GeneratePawns_Patch;
+        	public static Type Insulation_unpatch;
 		public static FieldInfo cachedStoreCell;
 		public static HashSet<MethodInfo> nonDestructivePrefixes = new HashSet<MethodInfo>();
 
@@ -1712,6 +1709,16 @@ namespace RimThreaded
 			jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Patch_TryOpportunisticJob");
 			childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch = TypeByName("Children.ChildrenHarmony+HediffComp_Discoverable_CheckDiscovered_Patch");
 			androidTiers_GeneratePawns_Patch1 = TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch");
+			Insulation_unpatch = TypeByName("Insulation.EqualizeTempsBuilding_Patch");
+
+            		if (Insulation_unpatch != null)
+            		{
+                	Log.Message("RimThreaded is Unpatching Insulation (Continued)");
+				Type org_type = typeof(GenTemperature);
+				MethodInfo org_Method = Method(org_type, "EqualizeTemperaturesThroughBuilding");
+				harmony.Unpatch(org_Method, HarmonyPatchType.Prefix, "com.Pelador.Rimworld.Insulation");
+			}
+
 			if (androidTiers_GeneratePawns_Patch1 != null)
 			{
 				androidTiers_GeneratePawns_Patch = androidTiers_GeneratePawns_Patch1.GetNestedType("GeneratePawns_Patch");
