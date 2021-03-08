@@ -10,11 +10,6 @@ namespace RimThreaded
 
         public int Count => innerList.Count;
 
-        public FastPriorityQueueKeyValuePairIntFloat()
-        {
-            comparer = Comparer<KeyValuePair<int, float>>.Default;
-        }
-
         public FastPriorityQueueKeyValuePairIntFloat(IComparer<KeyValuePair<int, float>> comparer)
         {
             this.comparer = comparer;

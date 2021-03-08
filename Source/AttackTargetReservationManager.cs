@@ -21,17 +21,19 @@ namespace RimThreaded
 
 		public static bool ReleaseAllForTarget(AttackTargetReservationManager __instance, IAttackTarget target)
 		{
-			List<AttackTargetReservation> attackTargetReservations = reservations(__instance);
-			lock (attackTargetReservations)
+			lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
 			{
-				for (int i = attackTargetReservations.Count - 1; i >= 0; i--)
+				List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+				List<AttackTargetReservation> newAttackTargetReservations = new List<AttackTargetReservation>(snapshotReservations.Count);
+				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
-					AttackTargetReservation attackTargetReservation = attackTargetReservations[i];				
-					if (attackTargetReservation != null && attackTargetReservation.target == target)
+					AttackTargetReservation attackTargetReservation = snapshotReservations[i];				
+					if (attackTargetReservation.target != target)
 					{
-						attackTargetReservations.RemoveAt(i);
+						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 				}
+				reservations(__instance) = newAttackTargetReservations;
 			}
 			
 			return false;
@@ -39,145 +41,113 @@ namespace RimThreaded
 
 		public static bool ReleaseAllClaimedBy(AttackTargetReservationManager __instance, Pawn claimant)
 		{
-			lock (reservations(__instance))
+			lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
 			{
-				for (int num = reservations(__instance).Count - 1; num >= 0; num--)
+				List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+				List<AttackTargetReservation> newAttackTargetReservations = new List<AttackTargetReservation>(snapshotReservations.Count);
+				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
-					AttackTargetReservation reservation = reservations(__instance)[num];
-					if (reservation != null && reservation.claimant == claimant)
+					AttackTargetReservation attackTargetReservation = snapshotReservations[i];
+					if (attackTargetReservation.claimant != claimant)
 					{
-						reservations(__instance).RemoveAt(num);
+						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 				}
+				reservations(__instance) = newAttackTargetReservations;
 			}
-			return false;
-		}
-		private static int GetReservationsCount2(AttackTargetReservationManager __instance, IAttackTarget target, Faction faction)
-		{
-			int num = 0;
-			for (int i = 0; i < reservations(__instance).Count; i++)
-			{
-				AttackTargetReservation attackTargetReservation = reservations(__instance)[i];
-				if (attackTargetReservation != null)
-				{
-					if (attackTargetReservation.target == target && attackTargetReservation.claimant != null && attackTargetReservation.claimant.Faction == faction)
-					{
-						num++;
-					}
-                }				
-			}
-
-			return num;
-		}
-		private static int GetMaxPreferredReservationsCount2(AttackTargetReservationManager __instance, IAttackTarget target)
-		{
-			int num = 0;
-			CellRect cellRect = target.Thing.OccupiedRect();
-			foreach (IntVec3 item in cellRect.ExpandedBy(1))
-			{
-				if (!cellRect.Contains(item) && item.InBounds(map(__instance)) && item.Standable(map(__instance)))
-				{
-					num++;
-				}
-			}
-
-			return num;
-		}
-
-
-		public static bool CanReserve(AttackTargetReservationManager __instance, ref bool __result, Pawn claimant, IAttackTarget target)
-		{
-			if (__instance.IsReservedBy(claimant, target))
-			{
-				__result = true;
-				return false;
-			}
-
-			int reservationsCount = GetReservationsCount2(__instance, target, claimant.Faction);
-			int maxPreferredReservationsCount = GetMaxPreferredReservationsCount2(__instance, target);
-			__result = reservationsCount < maxPreferredReservationsCount;
 			return false;
 		}
 
 
-		public void Reserve(AttackTargetReservationManager __instance, Pawn claimant, Job job, IAttackTarget target)
+		public static bool Reserve(AttackTargetReservationManager __instance, Pawn claimant, Job job, IAttackTarget target)
 		{
-			bool isReservedBy = __instance.IsReservedBy(claimant, target);
 			if (target == null)
 			{
-				Log.Warning(claimant + " tried to reserve null attack target.");
+				Log.Warning(string.Concat(claimant, " tried to reserve null attack target."));
 			}
-			else if (!isReservedBy)
+			else if (!__instance.IsReservedBy(claimant, target))
 			{
-				AttackTargetReservation attackTargetReservation = new AttackTargetReservation();
-				attackTargetReservation.target = target;
-				attackTargetReservation.claimant = claimant;
-				attackTargetReservation.job = job;
-				lock (reservations(__instance))
+                AttackTargetReservation attackTargetReservation = new AttackTargetReservation
+                {
+                    target = target,
+                    claimant = claimant,
+                    job = job
+                };
+                lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
 				{
-					reservations(__instance).Add(attackTargetReservation);
+					reservations(__instance) = new List<AttackTargetReservation>(reservations(__instance))
+                    {
+                        attackTargetReservation
+                    };
 				}
 			}
+			return false;
 		}
 
 		public static bool FirstReservationFor(AttackTargetReservationManager __instance, ref IAttackTarget __result, Pawn claimant)
 		{
-			lock (reservations(__instance))
+            List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+			for (int i = snapshotReservations.Count - 1; i >= 0; i--)
 			{
-				for (int i = reservations(__instance).Count - 1; i >= 0; i--)
+                AttackTargetReservation reservation = snapshotReservations[i];
+				if (reservation.claimant == claimant)
 				{
-					if (null != reservations(__instance)[i])
-					{
-						if (reservations(__instance)[i].claimant == claimant)
-						{
-							__result = reservations(__instance)[i].target;
-							return false;
-						}
-					}
+					__result = reservation.target;
+					return false;
 				}
-			}
+			}			
 			__result = null;
 			return false;
 		}
 		public static bool ReleaseClaimedBy(AttackTargetReservationManager __instance, Pawn claimant, Job job)
 		{
-			lock (reservations(__instance)) { 
-				for (int i = reservations(__instance).Count - 1; i >= 0; i--)
+			lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
+			{
+				List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+				List<AttackTargetReservation> newAttackTargetReservations = new List<AttackTargetReservation>(snapshotReservations.Count);
+				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
-					AttackTargetReservation reservation;
-					
-					reservation = reservations(__instance)[i];
-					
-					if (reservation != null)
+					AttackTargetReservation attackTargetReservation = snapshotReservations[i];
+					if (attackTargetReservation.claimant != claimant || attackTargetReservation.job != job)
 					{
-						if (reservation.claimant == claimant && reservation.job == job)
-						{
-							{
-								reservations(__instance).RemoveAt(i);
-							}
-						}
+						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 				}
+				reservations(__instance) = newAttackTargetReservations;
 			}
 			return false;
 		}
 		public static bool IsReservedBy(AttackTargetReservationManager __instance, ref bool __result, Pawn claimant, IAttackTarget target)
 		{
-			AttackTargetReservation attackTargetReservation;
-			for (int i = 0; i < reservations(__instance).Count; i++)
+			List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+			for (int i = 0; i < snapshotReservations.Count; i++)
 			{
-				try
-				{
-					attackTargetReservation = reservations(__instance)[i];
-				}
-				catch (ArgumentOutOfRangeException) { break; }
-				if (attackTargetReservation != null && attackTargetReservation.target == target && attackTargetReservation.claimant == claimant)
+				AttackTargetReservation attackTargetReservation = snapshotReservations[i];
+				if (attackTargetReservation.target == target && attackTargetReservation.claimant == claimant)
 				{
 					__result = true;
 					return false;
 				}
 			}
+
 			__result = false;
+			return false;
+		}
+
+		public static bool GetReservationsCount(AttackTargetReservationManager __instance, ref int __result, IAttackTarget target, Faction faction)
+		{
+			int num = 0;
+			List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+			for (int i = 0; i < snapshotReservations.Count; i++)
+			{
+				AttackTargetReservation attackTargetReservation = snapshotReservations[i];
+				if (attackTargetReservation.target == target && attackTargetReservation.claimant.Faction == faction)
+				{
+					num++;
+				}
+			}
+
+			__result = num;
 			return false;
 		}
 	}

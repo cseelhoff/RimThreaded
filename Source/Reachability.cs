@@ -337,10 +337,9 @@ namespace RimThreaded
                                 for (int index3 = 0; index3 < this_startingRegions.Count; ++index3)
                                 {
                                     Region regionA = this_startingRegions[index3];
-                                    Room roomA = null;
                                     if (regionA != null)
                                     {
-                                        roomA = regionA.Room;
+                                        Room roomA = regionA.Room;
                                         this_cache.AddCachedResult(roomA, region2.Room, traverseParams, true);
                                     }
                                 }

@@ -5,73 +5,71 @@ using System.Linq;
 using System.Reflection;
 using Verse;
 using Verse.Sound;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     class AmbientSoundManager_Patch
     {
-        static readonly PropertyInfo altitudeWindSoundCreatedPI = typeof(AmbientSoundManager).GetProperty("AltitudeWindSoundCreated", BindingFlags.NonPublic | BindingFlags.Static);
-        static readonly FieldInfo biomeAmbientSustainersFI = typeof(AmbientSoundManager).GetField("biomeAmbientSustainers", BindingFlags.Static | BindingFlags.NonPublic);
+        //private static readonly PropertyInfo AltitudeWindSoundCreated = Property(typeof(AmbientSoundManager), "AltitudeWindSoundCreated");
+        private static List<Sustainer> biomeAmbientSustainers = StaticFieldRefAccess<List<Sustainer>>(typeof(AmbientSoundManager), "biomeAmbientSustainers");
+        
+
         public static bool RecreateMapSustainers()
         {
-            if (!(bool)altitudeWindSoundCreatedPI.GetValue(null))
+            if (!Find.SoundRoot.sustainerManager.SustainerExists(SoundDefOf.Ambient_AltitudeWind))
             {
-                SoundDefOf.Ambient_AltitudeWind.TrySpawnSustainer(SoundInfo.OnCamera(MaintenanceType.None));
+                SoundDefOf.Ambient_AltitudeWind.TrySpawnSustainer(SoundInfo.OnCamera());
             }
             SustainerManager sustainerManager = Find.SoundRoot.sustainerManager;
-            List<Sustainer> sustainers = (biomeAmbientSustainersFI.GetValue(null) as List<Sustainer>);
-            //lock (sustainerManager.AllSustainers)
-            //{
-                foreach (Sustainer s in sustainers)
+            for (int i = 0; i < biomeAmbientSustainers.Count; i++)
+            {
+                Sustainer sustainer = biomeAmbientSustainers[i];
+                if (sustainerManager.AllSustainers.Contains(sustainer) && !sustainer.Ended)
                 {
-                    if (sustainerManager.AllSustainers.Contains(s) && !s.Ended)
-                    {
-                        s.End();
-                    }
+                    sustainer.End();
                 }
-                sustainers.Clear();
+            }
+            lock (RimThreaded.biomeAmbientSustainersLock)
+            {
+                List<Sustainer> newBiomeAmbientSustainers = new List<Sustainer>();
                 if (Find.CurrentMap != null)
                 {
                     List<SoundDef> soundsAmbient = Find.CurrentMap.Biome.soundsAmbient;
                     for (int j = 0; j < soundsAmbient.Count; j++)
                     {
-                        Sustainer item = soundsAmbient[j].TrySpawnSustainer(SoundInfo.OnCamera(MaintenanceType.None));
-                        try
-                        {
-                            lock (sustainerManager.AllSustainers)
-                            {
-                                sustainerManager.AllSustainers.Add(item);
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            item.End();
-                        }
+                        Sustainer item = soundsAmbient[j].TrySpawnSustainer(SoundInfo.OnCamera());
+                        newBiomeAmbientSustainers.Add(item);
                     }
                 }
-            //}
+                biomeAmbientSustainers = newBiomeAmbientSustainers;
+            }
             return false;
         }
         public static bool EnsureWorldAmbientSoundCreated()
         {
-            SoundDef aSpace = null;
             SoundRoot soundRoot = Find.SoundRoot;
             if (null != soundRoot)
             {
                 SustainerManager sManager = soundRoot.sustainerManager;
                 if (null != sManager)
                 {
-                    aSpace = SoundDefOf.Ambient_Space;
+                    SoundDef aSpace = SoundDefOf.Ambient_Space;
                     if (null != aSpace)
                     {
-                        if (sManager.SustainerExists(aSpace))
+                        lock (sManager.AllSustainers)
                         {
-                            return false;
+                            if (sManager.SustainerExists(aSpace))
+                            {
+                                return false;
+                            } else
+                            {
+                                aSpace.TrySpawnSustainer(SoundInfo.OnCamera());                                
+                            }
                         }
                     }
                 }
             }
-            aSpace.TrySpawnSustainer(SoundInfo.OnCamera());
             return false;
         }
     }

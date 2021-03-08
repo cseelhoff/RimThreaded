@@ -76,7 +76,12 @@ namespace RimThreaded
                 //Thing[] drawThingsArray;
 
                 //for (int index = 0; index < drawThingsArray.Length; index++)
-                foreach (Thing drawThing in drawThings(__instance).ToList())
+                List<Thing> drawThingsList;
+                lock (drawThings(__instance))
+                {
+                    drawThingsList = drawThings(__instance).ToList();
+                }
+                foreach (Thing drawThing in drawThingsList)
                 {
                     //drawThing = drawThingsArray[index];
                     IntVec3 position = drawThing.Position;

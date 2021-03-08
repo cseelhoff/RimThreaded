@@ -89,38 +89,65 @@ namespace RimThreaded
             return false;
         }
 
+        public static Dictionary<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesSpawnedOfFactionDict = new Dictionary<MapPawns, Dictionary<Faction, List<Pawn>>>();
+        
+
+        public static void RegisterPawn_FreeHumanlikesSpawnedOfFaction(MapPawns __instance, Pawn p)
+        {
+            Faction faction = p.Faction;
+            if (faction != null && p.HostFaction == null && p.RaceProps.Humanlike)
+            {
+                List<Pawn> pawnList = getFreeHumanlikesSpawnedOfFaction(__instance, faction);
+                if (!pawnList.Contains(p))
+                {
+                    pawnList.Add(p);
+                    if (faction == Faction.OfPlayer)
+                    {
+                        pawnList.InsertionSort(delegate (Pawn a, Pawn b)
+                        {
+                            int num = (a.playerSettings != null) ? a.playerSettings.joinTick : 0;
+                            int value = (b.playerSettings != null) ? b.playerSettings.joinTick : 0;
+                            return num.CompareTo(value);
+                        });
+                    }
+                }                
+            }
+        }
+
+        public static void DeRegisterPawn_FreeHumanlikesSpawnedOfFaction(MapPawns __instance, Pawn p)
+        {
+            List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
+            for (int i = 0; i < allFactionsListForReading.Count; i++)
+            {
+                Faction faction = allFactionsListForReading[i];
+                if (faction != null)
+                {
+                    getFreeHumanlikesSpawnedOfFaction(__instance, faction).Remove(p);
+                }
+            }
+        }
+
         public static bool FreeHumanlikesSpawnedOfFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
         {
-            List<Pawn> pawnList1;
-            lock (freeHumanlikesSpawnedOfFactionResult(__instance))
-            {
-                if (!freeHumanlikesSpawnedOfFactionResult(__instance).TryGetValue(faction, out pawnList1))
-                {
-                    pawnList1 = new List<Pawn>();
-                    freeHumanlikesSpawnedOfFactionResult(__instance)[faction] = pawnList1;
-                }
-            }
-            lock (pawnList1)
-            {
-                pawnList1.Clear();
-                List<Pawn> list = __instance.SpawnedPawnsInFaction(faction);
-                for (int i = 0; i < list.Count; i++)
-                {
-                    Pawn pawn;
-                    try
-                    {
-                        pawn = list[i];
-                    }
-                    catch (ArgumentOutOfRangeException) { break; }
-                    if (pawn.HostFaction == null && pawn.RaceProps.Humanlike)
-                    {
-                        pawnList1.Add(pawn);
-                    }
-                }
-            }
-            __result = pawnList1;
+            __result = getFreeHumanlikesSpawnedOfFaction(__instance, faction); ;
             return false;
         }
+
+        private static List<Pawn> getFreeHumanlikesSpawnedOfFaction(MapPawns __instance, Faction faction)
+        {
+            if (!freeHumanlikesSpawnedOfFactionDict.TryGetValue(__instance, out Dictionary<Faction, List<Pawn>> thisFreeHumanlikesSpawnedOfFactionDict))
+            {
+                thisFreeHumanlikesSpawnedOfFactionDict = new Dictionary<Faction, List<Pawn>>();
+                freeHumanlikesSpawnedOfFactionDict[__instance] = thisFreeHumanlikesSpawnedOfFactionDict;
+            }
+            if (!thisFreeHumanlikesSpawnedOfFactionDict.TryGetValue(faction, out List<Pawn> pawnList))
+            {
+                pawnList = new List<Pawn>();
+                thisFreeHumanlikesSpawnedOfFactionDict[faction] = pawnList;
+            }
+            return pawnList;
+        }
+
         public static bool PawnsInFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
         {
             if (faction == null)

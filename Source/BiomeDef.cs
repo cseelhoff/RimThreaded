@@ -58,12 +58,12 @@ namespace RimThreaded
             {
                 return false;
             }
-            lock (__instance)
+            if (cachedPlantCommonalities(__instance) != null)
             {
-                if (cachedPlantCommonalities(__instance) != null)
-                {
-                    return false;
-                }
+                return false;
+            }
+            lock (__instance) //TODO more efficient lock
+            {
                 Dictionary<ThingDef, float> localCachedPlantCommonalities = new Dictionary<ThingDef, float>();
                 for (int i = 0; i < wildPlants(__instance).Count; i++)
                 {

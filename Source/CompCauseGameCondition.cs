@@ -8,14 +8,23 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 using static HarmonyLib.AccessTools;
+using System.Reflection;
 
 namespace RimThreaded
 {
 
     public class CompCauseGameCondition_Patch
     {
+        [ThreadStatic]
+        private static List<Map> tmpDeadConditionMaps;
+
         public static FieldRef<CompCauseGameCondition, Dictionary<Map, GameCondition>> causedConditions = 
             FieldRefAccess<CompCauseGameCondition, Dictionary<Map, GameCondition>>("causedConditions");
+
+        private static readonly MethodInfo methodEnforceConditionOn =
+            Method(typeof(CompCauseGameCondition), "EnforceConditionOn", new Type[] { typeof(Action) });
+        private static readonly Action<CompCauseGameCondition, Map> actionEnforceConditionOn =
+            (Action<CompCauseGameCondition, Map>)Delegate.CreateDelegate(typeof(Action<CompCauseGameCondition, Map>), methodEnforceConditionOn);
 
         public static bool CompTick(CompCauseGameCondition __instance)
 		{
@@ -25,12 +34,18 @@ namespace RimThreaded
                 {
                     if (__instance.InAoE(map.Tile))
                     {
-                        EnforceConditionOn2(__instance, map);
+                        actionEnforceConditionOn(__instance, map);
                     }
                 }
             }
+            if (tmpDeadConditionMaps == null)
+            {
+                tmpDeadConditionMaps = new List<Map>();
+            } else
+            {
+                tmpDeadConditionMaps.Clear();
+            }
 
-            List<Map> tmpDeadConditionMaps = new List<Map>();
             foreach (KeyValuePair<Map, GameCondition> causedCondition in causedConditions(__instance))
             {
                 if (causedCondition.Value.Expired || !causedCondition.Key.GameConditionManager.ConditionIsActive(causedCondition.Value.def))
@@ -41,52 +56,17 @@ namespace RimThreaded
 
             foreach (Map tmpDeadConditionMap in tmpDeadConditionMaps)
             {
-                causedConditions(__instance).Remove(tmpDeadConditionMap);
+                if (causedConditions(__instance).ContainsKey(tmpDeadConditionMap))
+                {
+                    lock (__instance)
+                    {
+                        causedConditions(__instance).Remove(tmpDeadConditionMap); //TODO is this thread safe?
+                    }
+                }
             }
             return false;
         }
-        public static GameCondition EnforceConditionOn2(CompCauseGameCondition __instance, Map map)
-        {
-            GameCondition gameCondition = GetConditionInstance2(__instance, map);
-            if (gameCondition == null)
-            {
-                gameCondition = CreateConditionOn2(__instance, map);
-            }
-            else
-            {
-                gameCondition.TicksLeft = gameCondition.TransitionTicks;
-            }
-
-            return gameCondition;
-        }
-        public static GameCondition GetConditionInstance2(CompCauseGameCondition __instance, Map map)
-        {
-            if (!causedConditions(__instance).TryGetValue(map, out GameCondition value) && __instance.Props.preventConditionStacking)
-            {
-                value = map.GameConditionManager.GetActiveCondition(__instance.Props.conditionDef);
-                if (value != null)
-                {
-                    causedConditions(__instance).Add(map, value);
-                    SetupCondition2(value, map);
-                }
-            }
-
-            return value;
-        }
-        public static GameCondition CreateConditionOn2(CompCauseGameCondition __instance, Map map)
-        {
-            GameCondition gameCondition = GameConditionMaker.MakeCondition(__instance.ConditionDef);
-            gameCondition.Duration = gameCondition.TransitionTicks;
-            gameCondition.conditionCauser = __instance.parent;
-            map.gameConditionManager.RegisterCondition(gameCondition);
-            causedConditions(__instance).Add(map, gameCondition);
-            SetupCondition2(gameCondition, map);
-            return gameCondition;
-        }
-        public static void SetupCondition2(GameCondition condition, Map map)
-        {
-            condition.suppressEndMessage = true;
-        }
+    
 
 
 

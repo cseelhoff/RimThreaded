@@ -2,16 +2,37 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using static Verse.DamageWorker;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     class DamageWorker_Patch
     {
+        [ThreadStatic]
+        private static List<Thing> thingsToAffect;
+
+        [ThreadStatic]
+        private static List<IntVec3> openCells;
+
+        [ThreadStatic]
+        private static List<IntVec3> adjWallCells;
+
+        private static readonly MethodInfo methodExplosionDamageThing =
+            Method(typeof(DamageWorker), "ExplosionDamageThing", new Type[] { typeof(Explosion), typeof(Thing), typeof(List<Thing>), typeof(List<Thing>), typeof(IntVec3) });
+        private static readonly Action<DamageWorker, Explosion, Thing, List<Thing>, List<Thing>, IntVec3> actionExplosionDamageThing =
+            (Action<DamageWorker, Explosion, Thing, List<Thing>, List<Thing>, IntVec3>)Delegate.CreateDelegate(typeof(Action<DamageWorker, Explosion, Thing, List<Thing>, List<Thing>, IntVec3>), methodExplosionDamageThing);
+
+        private static readonly MethodInfo methodExplosionDamageTerrain =
+            Method(typeof(DamageWorker), "ExplosionDamageTerrain", new Type[] { typeof(Explosion), typeof(IntVec3) });
+        private static readonly Action<DamageWorker, Explosion, IntVec3> actionExplosionDamageTerrain =
+            (Action<DamageWorker, Explosion, IntVec3>)Delegate.CreateDelegate(typeof(Action<DamageWorker, Explosion, IntVec3>), methodExplosionDamageTerrain);
+
         public static bool ExplosionAffectCell(DamageWorker __instance, Explosion explosion, IntVec3 c, List<Thing> damagedThings, List<Thing> ignoredThings, bool canThrowMotes)
         {
             if (__instance.def.explosionCellMote != null && canThrowMotes)
@@ -29,8 +50,13 @@ namespace RimThreaded
                 }
             }
 
-            //thingsToAffect.Clear();
-            List<Thing> thingsToAffect = new List<Thing>();
+            if (thingsToAffect == null)
+            {
+                thingsToAffect = new List<Thing>();
+            } else
+            {
+                thingsToAffect.Clear();
+            }
             float num = float.MinValue;
             bool flag = false;
             List<Thing> list = explosion.Map.thingGrid.ThingsListAt(c);
@@ -52,13 +78,13 @@ namespace RimThreaded
             {
                 if (thingsToAffect[j].def.Altitude >= num) //Null Reference Exception
                 {
-                    ExplosionDamageThing(__instance, explosion, thingsToAffect[j], damagedThings, ignoredThings, c);
+                    actionExplosionDamageThing(__instance, explosion, thingsToAffect[j], damagedThings, ignoredThings, c);
                 }
             }
 
             if (!flag)
             {
-                ExplosionDamageTerrain(__instance, explosion, c);
+                actionExplosionDamageTerrain(__instance, explosion, c);
             }
 
             if (__instance.def.explosionSnowMeltAmount > 0.0001f)
@@ -88,58 +114,67 @@ namespace RimThreaded
             return false;
         }
 
-        public static void ExplosionDamageThing(DamageWorker __instance, Explosion explosion, Thing t, List<Thing> damagedThings, List<Thing> ignoredThings, IntVec3 cell)
+        public static bool ExplosionCellsToHit(DamageWorker __instance, ref IEnumerable<IntVec3> __result, IntVec3 center, Map map, float radius, IntVec3? needLOSToCell1 = null, IntVec3? needLOSToCell2 = null)
         {
-            if (t.def.category == ThingCategory.Mote || t.def.category == ThingCategory.Ethereal || damagedThings.Contains(t))
+            if (openCells == null)
             {
-                return;
+                openCells = new List<IntVec3>();
             }
-
-            damagedThings.Add(t);
-            if (ignoredThings != null && ignoredThings.Contains(t))
+            else
             {
-                return;
+                openCells.Clear();
             }
-
-            if (__instance.def == DamageDefOf.Bomb && t.def == ThingDefOf.Fire && !t.Destroyed)
+            if (adjWallCells == null)
             {
-                t.Destroy();
-                return;
+                adjWallCells = new List<IntVec3>();
             }
-
-            DamageInfo dinfo = new DamageInfo(angle: (!(t.Position == explosion.Position)) ? (t.Position - explosion.Position).AngleFlat : ((float)Rand.RangeInclusive(0, 359)), def: __instance.def, amount: explosion.GetDamageAmountAt(cell), armorPenetration: explosion.GetArmorPenetrationAt(cell), instigator: explosion.instigator, hitPart: null, weapon: explosion.weapon, category: DamageInfo.SourceCategory.ThingOrUnknown, intendedTarget: explosion.intendedTarget);
-            if (__instance.def.explosionAffectOutsidePartsOnly)
+            else
             {
-                dinfo.SetBodyRegion(BodyPartHeight.Undefined, BodyPartDepth.Outside);
+                adjWallCells.Clear();
             }
-
-            BattleLogEntry_ExplosionImpact battleLogEntry_ExplosionImpact = null;
-            Pawn pawn = t as Pawn;
-            if (pawn != null)
+            int num = GenRadial.NumCellsInRadius(radius);
+            for (int i = 0; i < num; i++)
             {
-                battleLogEntry_ExplosionImpact = new BattleLogEntry_ExplosionImpact(explosion.instigator, t, explosion.weapon, explosion.projectile, __instance.def);
-                Find.BattleLog.Add(battleLogEntry_ExplosionImpact);
-            }
-
-            DamageResult damageResult = t.TakeDamage(dinfo);
-            damageResult.AssociateWithLog(battleLogEntry_ExplosionImpact);
-            if (pawn != null && damageResult.wounded && pawn.stances != null)
-            {
-                pawn.stances.StaggerFor(95);
-            }
-        }
-        public static void ExplosionDamageTerrain(DamageWorker __instance, Explosion explosion, IntVec3 c)
-        {
-            if (__instance.def == DamageDefOf.Bomb && explosion.Map.terrainGrid.CanRemoveTopLayerAt(c))
-            {
-                TerrainDef terrain = c.GetTerrain(explosion.Map);
-                if (!(terrain.destroyOnBombDamageThreshold < 0f) && (float)explosion.GetDamageAmountAt(c) >= terrain.destroyOnBombDamageThreshold)
+                IntVec3 intVec = center + GenRadial.RadialPattern[i];
+                if (!intVec.InBounds(map) || !GenSight.LineOfSight(center, intVec, map, skipFirstCell: true))
                 {
-                    explosion.Map.terrainGrid.Notify_TerrainDestroyed(c);
+                    continue;
+                }
+
+                if (needLOSToCell1.HasValue || needLOSToCell2.HasValue)
+                {
+                    bool flag = needLOSToCell1.HasValue && GenSight.LineOfSight(needLOSToCell1.Value, intVec, map);
+                    bool flag2 = needLOSToCell2.HasValue && GenSight.LineOfSight(needLOSToCell2.Value, intVec, map);
+                    if (!flag && !flag2)
+                    {
+                        continue;
+                    }
+                }
+
+                openCells.Add(intVec);
+            }
+
+            for (int j = 0; j < openCells.Count; j++)
+            {
+                IntVec3 intVec2 = openCells[j];
+                if (!intVec2.Walkable(map))
+                {
+                    continue;
+                }
+
+                for (int k = 0; k < 4; k++)
+                {
+                    IntVec3 intVec3 = intVec2 + GenAdj.CardinalDirections[k];
+                    if (intVec3.InHorDistOf(center, radius) && intVec3.InBounds(map) && !intVec3.Standable(map) && intVec3.GetEdifice(map) != null && !openCells.Contains(intVec3) && adjWallCells.Contains(intVec3))
+                    {
+                        adjWallCells.Add(intVec3);
+                    }
                 }
             }
-        }
 
+            __result = openCells.Concat(adjWallCells);
+            return false;
+        }
 
 
     }

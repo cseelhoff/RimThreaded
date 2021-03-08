@@ -15,7 +15,12 @@ namespace RimThreaded
 
     public class BeautyUtility_Patch
     {
-
+        [ThreadStatic]
+        static List<Thing> tempCountedThings;
+        [ThreadStatic]
+        static List<IntVec3> tmpBeautyRelevantCells;
+        [ThreadStatic]
+        static List<Room> tmpVisibleRooms;
 
         public static bool AverageBeautyPerceptible(ref float __result, IntVec3 root, Map map)
         {
@@ -24,37 +29,47 @@ namespace RimThreaded
                 __result = 0.0f;
                 return false;
             }
-            //BeautyUtility.tempCountedThings.Clear();
-            List<Thing> tempCountedThings = new List<Thing>();
-            float num1 = 0.0f;
-            int num2 = 0;
-            FillBeautyRelevantCells(root, map);
-            IntVec3 cells;
-            for (int index = 0; index < BeautyUtility.beautyRelevantCells.Count; ++index)
+            if (tempCountedThings == null)
             {
-                try
-                {
-                    cells = BeautyUtility.beautyRelevantCells[index];
-                }
-                catch (ArgumentOutOfRangeException) { break; }
-                num1 += BeautyUtility.CellBeauty(cells, map, tempCountedThings);
-                ++num2;
+                tempCountedThings = new List<Thing>();
+            } else
+            {
+                tempCountedThings.Clear();
             }
-            //BeautyUtility.tempCountedThings.Clear();
-            __result = num2 == 0 ? 0.0f : num1 / (float)num2;
+            float num = 0.0f;
+            int num2 = 0;
+            List<IntVec3> beautyRelevantCells = FillBeautyRelevantCells(root, map);
+            for (int i = 0; i < beautyRelevantCells.Count; i++)
+            {
+                num += BeautyUtility.CellBeauty(beautyRelevantCells[i], map, tempCountedThings);
+                num2++;
+            }
+            __result = num2 == 0 ? 0.0f : num / num2;
             return false;
         }
-        public static bool FillBeautyRelevantCells(IntVec3 root, Map map)
+        public static List<IntVec3> FillBeautyRelevantCells(IntVec3 root, Map map)
         {
-            List<IntVec3> tmpBeautyRelevantCells = new List<IntVec3>();
-            //beautyRelevantCells.Clear();
+            if (tmpBeautyRelevantCells == null)
+            {
+                tmpBeautyRelevantCells = new List<IntVec3>();
+            }
+            else
+            {
+                tmpBeautyRelevantCells.Clear();
+            }
             Room room = root.GetRoom(map);
             if (room == null)
             {
-                return false;
+                return tmpBeautyRelevantCells;
             }
-            List<Room> tmpVisibleRooms = new List<Room>();
-            //visibleRooms.Clear();
+            if (tmpVisibleRooms == null)
+            {
+                tmpVisibleRooms = new List<Room>();
+            }
+            else
+            {
+                tmpVisibleRooms.Clear();
+            }
             tmpVisibleRooms.Add(room);
             if (room.Regions.Count == 1 && room.Regions[0].type == RegionType.Portal)
             {
@@ -94,11 +109,9 @@ namespace RimThreaded
                         continue;
                     }
                 }
-
                 tmpBeautyRelevantCells.Add(intVec);
             }
-            BeautyUtility.beautyRelevantCells = tmpBeautyRelevantCells;
-            return false;
+            return tmpBeautyRelevantCells;
         }
 
 

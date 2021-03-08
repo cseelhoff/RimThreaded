@@ -39,8 +39,6 @@ namespace RimThreaded
             FieldRefAccess<PathFinder, Building[]>("edificeGrid");
         static readonly FieldRef<PathFinder, List<Blueprint>[]> blueprintGridField =
             FieldRefAccess<PathFinder, List<Blueprint>[]>("blueprintGrid");
-        //static readonly FieldRef<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorField =
-            //FieldRefAccess<PathFinder, RegionCostCalculatorWrapper>("regionCostCalculator");
 
         static readonly int[] Directions =
             StaticFieldRefAccess<int[]>(typeof(PathFinder), "Directions");

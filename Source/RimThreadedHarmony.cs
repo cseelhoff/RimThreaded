@@ -361,18 +361,7 @@ namespace RimThreaded
 			Prefix(original, patched, "ReturnToPool");
 
 			//RegionTraverser
-			original = typeof(RegionTraverser);
-			/*
-			patched = typeof(RegionTraverser_Patch);
-			Prefix(original, patched, "BreadthFirstTraverse", new Type[] {
-				typeof(Region),
-				typeof(RegionEntryPredicate),
-				typeof(RegionProcessor),
-				typeof(int),
-				typeof(RegionType)
-			});
-			*/
-			
+			original = typeof(RegionTraverser);			
 			patched = typeof(RegionTraverser_Transpile);
 			Transpile(original, patched, "BreadthFirstTraverse", new Type[] {
 				typeof(Region),
@@ -467,12 +456,12 @@ namespace RimThreaded
 			Prefix(original, patched, "MostRecentReservationFor");
 
 			//DynamicDrawManager
-			original = typeof(DynamicDrawManager);
-			patched = typeof(Verse_DynamicDrawManager_Patch);
-			Prefix(original, patched, "RegisterDrawable");
-			Prefix(original, patched, "DeRegisterDrawable");
+			//original = typeof(DynamicDrawManager);
+			//patched = typeof(Verse_DynamicDrawManager_Patch);
+			//Prefix(original, patched, "RegisterDrawable");
+			//Prefix(original, patched, "DeRegisterDrawable");
 			//Prefix(original, patched, "DrawDynamicThings");
-			Prefix(original, patched, "LogDynamicDrawThings");
+			//Prefix(original, patched, "LogDynamicDrawThings");
 
 			//Reachability - needs code rewrite - not efficient
 			original = typeof(Reachability);
@@ -522,6 +511,11 @@ namespace RimThreaded
 			Prefix(original, patched, "TryFindRandomReachableCellNear");
 			Prefix(original, patched, "TryFindBestPawnStandCell");
 			Prefix(original, patched, "TryFindRandomCellNear");
+			Prefix(original, patched, "TryFindRandomCellInsideWith");
+			Prefix(original, patched, "TryFindRandomEdgeCellWith", new Type[] { typeof(Predicate<IntVec3>), typeof(Map), typeof(float), typeof(IntVec3).MakeByRefType() });
+			Prefix(original, patched, "TryFindRandomEdgeCellWith", new Type[] { typeof(Predicate<IntVec3>), typeof(Map), typeof(Rot4), typeof(float), typeof(IntVec3).MakeByRefType() });
+			Prefix(original, patched, "FindNoWipeSpawnLocNear");
+			Prefix(original, patched, "RandomRegionNear");
 
 			//ThingOwnerUtility
 			original = typeof(ThingOwnerUtility);
@@ -550,17 +544,15 @@ namespace RimThreaded
 			patched = typeof(Pawn_MeleeVerbs_Patch);
 			Prefix(original, patched, "GetUpdatedAvailableVerbsList");
 
-			//AutoUndrafter
-			original = typeof(AutoUndrafter);
-			patched = typeof(AutoUndrafter_Patch);
-			Prefix(original, patched, "AnyHostilePreventingAutoUndraft");
-
 			//AttackTargetsCache
 			original = typeof(AttackTargetsCache);
 			patched = typeof(AttackTargetsCache_Patch);
 			Prefix(original, patched, "GetPotentialTargetsFor");
 			Prefix(original, patched, "RegisterTarget");
 			Prefix(original, patched, "DeregisterTarget");
+			Prefix(original, patched, "Notify_FactionHostilityChanged");
+			Prefix(original, patched, "TargetsHostileToFaction");
+			Prefix(original, patched, "UpdateTarget");
 
 			//PawnsFinder
 			original = typeof(PawnsFinder);
@@ -583,8 +575,8 @@ namespace RimThreaded
 			Transpile(original, patched, "BestAttackTarget");
 			Transpile(original, patched, "CanSee");
 
-			patched = typeof(AttackTargetFinder_Patch);
-			Prefix(original, patched, "GetRandomShootingTargetByScore");
+			//patched = typeof(AttackTargetFinder_Patch);
+			//Prefix(original, patched, "GetRandomShootingTargetByScore");
 			//Prefix(original, patched, "BestAttackTarget");
 			//Prefix(original, patched, "CanSee");
 
@@ -703,10 +695,10 @@ namespace RimThreaded
 			Prefix(original, patched, "Walkable");
 
 			//Explosion
-			original = typeof(Explosion);
-			patched = typeof(Explosion_Patch);
-			Prefix(original, patched, "Tick");
-			Prefix(original, patched, "StartExplosion");
+			//original = typeof(Explosion);
+			//patched = typeof(Explosion_Patch);
+			//Prefix(original, patched, "Tick");
+			//Prefix(original, patched, "StartExplosion");
 			//Prefix(original, patched, "SpawnSetup");
 			//Prefix(original, patched, "DeSpawn");
 
@@ -715,12 +707,14 @@ namespace RimThreaded
 			patched = typeof(AttackTargetReservationManager_Patch);
 			Prefix(original, patched, "FirstReservationFor");
 			Prefix(original, patched, "ReleaseClaimedBy");
-			Prefix(original, patched, "CanReserve");
 			Prefix(original, patched, "ReleaseAllForTarget");
 			Prefix(original, patched, "ReleaseAllClaimedBy");
-			patched = typeof(AttackTargetReservationManager_Transpile);
-			Transpile(original, patched, "IsReservedBy");
-			Transpile(original, patched, "Reserve");
+			Prefix(original, patched, "GetReservationsCount");
+			Prefix(original, patched, "Reserve");
+			Prefix(original, patched, "IsReservedBy");
+			//patched = typeof(AttackTargetReservationManager_Transpile);
+			//Transpile(original, patched, "IsReservedBy"); changed back to prefix for now TODO
+			//Transpile(original, patched, "Reserve"); changed back to prefix for now TODO
 
 
 			//PawnCollisionTweenerUtility
@@ -768,26 +762,6 @@ namespace RimThreaded
 			Transpile(original, patched, "TryFindShootLineFromTo");
 			Transpile(original, patched, "CanHitFromCellIgnoringRange");
 
-			//FastPriorityQueue<KeyValuePair<IntVec3, float>>
-			//original = typeof(FastPriorityQueue<KeyValuePair<IntVec3, float>>);
-			//patched = typeof(FastPriorityQueueKeyValuePairIntVec3Float_Patch);
-			//Prefix(original, patched, "Push");
-			//Prefix(original, patched, "Pop");
-			//Prefix(original, patched, "Clear");
-			//Prefix(original, patched, "SwapElements");
-			//Prefix(original, patched, "CompareElements");
-			//original = typeof(FastPriorityQueue<KeyValuePair<int, float>>);
-			//patched = typeof(FastPriorityQueueKeyValuePairIntFloat_Patch);
-			//Prefix(original, patched, "Push");
-			//Prefix(original, patched, "Pop");
-			//Prefix(original, patched, "Clear");
-
-			//Dijkstra
-			//original = typeof(Dijkstra<int>);
-			//patched = typeof(DijkstraInt);
-			//Prefix(original, patched, "Run", new Type[] { typeof(IEnumerable<int>), typeof(Func< int, IEnumerable<int> >),
-			//typeof(Func<int, int, float>),typeof(List< KeyValuePair<int, float> >),typeof(Dictionary<int, int>) });
-
 			//MapPawns
 			original = typeof(MapPawns);
 			patched = typeof(MapPawns_Patch);
@@ -799,6 +773,15 @@ namespace RimThreaded
 			Prefix(original, patched, "get_AllPawnsUnspawned");
 			Prefix(original, patched, "get_SpawnedPawnsWithAnyHediff");
 			Prefix(original, patched, "PawnsInFaction");
+
+			MethodInfo oMethodRegisterPawn = Method(original, "RegisterPawn");
+			MethodInfo pMethodRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "RegisterPawn_FreeHumanlikesSpawnedOfFaction");
+			harmony.Patch(oMethodRegisterPawn, postfix: new HarmonyMethod(pMethodRegisterPawn_FreeHumanlikesSpawnedOfFaction));
+
+			MethodInfo oMethodDeRegisterPawn = Method(original, "DeRegisterPawn");
+			MethodInfo pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "DeRegisterPawn_FreeHumanlikesSpawnedOfFaction");
+			harmony.Patch(oMethodDeRegisterPawn, postfix: new HarmonyMethod(pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction));
+
 			//Prefix(original, patched, "SpawnedPawnsInFaction");
 			//Prefix(original, patched, "RegisterPawn");
 			//Prefix(original, patched, "DeRegisterPawn");
@@ -894,8 +877,6 @@ namespace RimThreaded
 
 			//BattleLog
 			original = typeof(BattleLog);
-			//patched = typeof(BattleLog_Patch);
-			//Prefix(original, patched, "Add");
 			patched = typeof(BattleLog_Transpile);
 			Transpile(original, patched, "Add");
 
@@ -964,10 +945,11 @@ namespace RimThreaded
 			Transpile(original, patched, "MoveNext");
 			original = typeof(HediffSet);
 			Transpile(original, patched, "GetPartHealth");
-			Transpile(original, patched, "AddDirect");
+			//Transpile(original, patched, "AddDirect"); TODO re-add transpile
 			Transpile(original, patched, "CacheMissingPartsCommonAncestors");
 			patched = typeof(HediffSet_Patch);
 			//Prefix(original, patched, "CacheMissingPartsCommonAncestors");
+			Prefix(original, patched, "AddDirect");
 			Prefix(original, patched, "PartIsMissing");
 			Prefix(original, patched, "HasDirectlyAddedPartFor");
 			Prefix(original, patched, "GetFirstHediffOfDef");
@@ -1187,11 +1169,6 @@ namespace RimThreaded
 			patched = typeof(RegionCostCalculatorWrapper_Patch);
 			Prefix(original, patched, "Init");
 
-			//EditWindow_Log
-			//original = typeof(EditWindow_Log);
-			//patched = typeof(EditWindow_Log_Patch);
-			//Prefix(original, patched, "DoMessagesListing");
-
 			//GUIStyle
 			original = typeof(GUIStyle);
 			patched = typeof(GUIStyle_Patch);
@@ -1265,10 +1242,9 @@ namespace RimThreaded
 			//Pawn_HealthTracker
 			original = typeof(Pawn_HealthTracker);
 			patched = typeof(Pawn_HealthTracker_Patch);
-			Prefix(original, patched, "SetDead");
-			//Prefix(original, patched, "RemoveHediff");
-			patched = typeof(Pawn_HealthTracker_Transpile);			
-			Transpile(original, patched, "RemoveHediff");
+			Prefix(original, patched, "RemoveHediff");
+			//patched = typeof(Pawn_HealthTracker_Transpile);			
+			//Transpile(original, patched, "RemoveHediff"); TODO re-add transpile
 
 			//Pawn
 			original = typeof(Pawn);
@@ -1420,7 +1396,7 @@ namespace RimThreaded
 
 			//CompCauseGameCondition	
 			original = typeof(CompCauseGameCondition);
-			patched = typeof(CompCauseGameCondition_Patch);
+			patched = typeof(CompCauseGameCondition_Patch); //TODO causedConditions is not thread-safe
 			Prefix(original, patched, "CompTick");
 
 			//MapGenerator (Z-levels)
@@ -1507,6 +1483,7 @@ namespace RimThreaded
 			original = typeof(DamageWorker);
 			patched = typeof(DamageWorker_Patch);
 			Prefix(original, patched, "ExplosionAffectCell");
+			Prefix(original, patched, "ExplosionCellsToHit", new Type[] { typeof(IntVec3), typeof(Map), typeof(float), typeof(IntVec3), typeof(IntVec3) });
 
 			//TaleManager_Patch
 			original = typeof(TaleManager);
@@ -1518,31 +1495,10 @@ namespace RimThreaded
 			patched = typeof(Pawn_PlayerSettings_Patch);
 			Prefix(original, patched, "set_Master");
 
-			//BodyPartDef
-			original = typeof(BodyPartDef);
-			patched = typeof(BodyPartDef_Patch);
-			Prefix(original, patched, "IsSolid");
-
 			//AlertsReadout
 			original = typeof(AlertsReadout);
 			patched = typeof(AlertsReadout_Patch);
 			Prefix(original, patched, "AlertsReadoutUpdate");
-
-			//WorkGiver_Grower
-			original = typeof(WorkGiver_Grower);
-			patched = typeof(WorkGiver_Grower_Patch);
-			//Prefix(original, patched, "PotentialWorkCellsGlobal");
-
-			//Building_TurretGun_Patch
-			original = typeof(Building_TurretGun);
-			patched = typeof(Building_TurretGun_Patch);
-			//Prefix(original, patched, "TryFindNewTarget");
-
-			//ListerBuildings
-			original = typeof(ListerBuildings);
-			patched = typeof(ListerBuildings_Patch);
-			//Prefix(original, patched, "Add");
-			//Prefix(original, patched, "Remove");
 
 			//ReachabilityCache_Patch
 			original = typeof(ReachabilityCache);
@@ -1561,8 +1517,6 @@ namespace RimThreaded
 
 			//Building_Trap
 			original = typeof(Building_Trap);
-			//patched = typeof(Building_Trap_Patch);
-			//Prefix(original, patched, "Tick");
 			patched = typeof(Building_Trap_Transpile);
 			Transpile(original, patched, "Tick");
 
@@ -1606,11 +1560,6 @@ namespace RimThreaded
 			original = typeof(PortraitRenderer);
 			patched = typeof(PortraitRenderer_Patch);
 			Prefix(original, patched, "RenderPortrait");
-
-			//CastPositionFinder
-			//original = typeof(CastPositionFinder);
-			//patched = typeof(CastPositionFinder_Patch);
-			//Prefix(original, patched, "CastPositionPreference");
 
 			//RegionDirtyer
 			original = typeof(RegionDirtyer);

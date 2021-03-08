@@ -10,12 +10,13 @@ namespace RimThreaded
 {
     public class BattleLog_Transpile
     {
-        public static IEnumerable<CodeInstruction> Add(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		public static object addLogEntryLock = new object();
+		public static IEnumerable<CodeInstruction> Add(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             Type lockObjectType = typeof(object);
             List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
             {
-                new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(BattleLog_Patch), "addLogEntryLock")),
+                new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(typeof(BattleLog_Transpile), "addLogEntryLock")),
             };
 
             List<CodeInstruction> instructionsList = instructions.ToList();

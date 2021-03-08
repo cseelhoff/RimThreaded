@@ -144,6 +144,9 @@ namespace RimThreaded
 
         public static Dictionary<Thread, ThreadInfo> allThreads2 = new Dictionary<Thread, ThreadInfo>();
 
+        public static object allSustainersLock = new object();
+        public static object biomeAmbientSustainersLock = new object();
+        public static object map_AttackTargetReservationManager_reservations_Lock = new object();
         public class ThreadInfo
         {
             public EventWaitHandle mainRequestWait = new AutoResetEvent(false);

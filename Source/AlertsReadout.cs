@@ -23,6 +23,11 @@ namespace RimThreaded
         public static FieldRef<AlertsReadout, int> mouseoverAlertIndex =
             FieldRefAccess<AlertsReadout, int>("mouseoverAlertIndex");
 
+        private static readonly MethodInfo methodCheckAddOrRemoveAlert =
+            Method(typeof(AlertsReadout), "CheckAddOrRemoveAlert", new Type[] { typeof(Alert), typeof(bool) });
+        private static readonly Action<AlertsReadout, Alert, bool> actionCheckAddOrRemoveAlert =
+            (Action<AlertsReadout, Alert, bool>)Delegate.CreateDelegate(typeof(Action<AlertsReadout, Alert, bool>), methodCheckAddOrRemoveAlert);
+
         public static bool AlertsReadoutUpdate(AlertsReadout __instance)
         {
             if (Mathf.Max(Find.TickManager.TicksGame, Find.TutorialState.endTick) < 600)
@@ -36,7 +41,7 @@ namespace RimThreaded
                 return false;
             }
 
-            if (TickManager_Patch.curTimeSpeed(Find.TickManager) == TimeSpeed.Ultrafast && RimThreadedMod.Settings.disablesomealets)
+            if (TickManager_Patch.curTimeSpeed(Find.TickManager) == TimeSpeed.Ultrafast && RimThreadedMod.Settings.disablesomealerts)
             {
                 //this will disable alert checks on ultrafast speed for an added speed boost
                 return false; 
@@ -50,8 +55,8 @@ namespace RimThreaded
 
             for (int i = curAlertIndex(__instance); i < AllAlerts(__instance).Count; i += 24)
             {
-                CheckAddOrRemoveAlert2(__instance, AllAlerts(__instance)[i]);
-                //actionCheckAddOrRemoveAlert(__instance, AllAlerts(__instance)[i], false);
+                //CheckAddOrRemoveAlert2(__instance, AllAlerts(__instance)[i]);
+                actionCheckAddOrRemoveAlert(__instance, AllAlerts(__instance)[i], false);
             }
 
             if (Time.frameCount % 20 == 0)
@@ -73,8 +78,8 @@ namespace RimThreaded
                         {
                             bool flag = questsListForReading[j].State != QuestState.Ongoing || questPartActivable.State != QuestPartState.Enabled;
                             bool alertDirty = questPartActivable.AlertDirty;
-                            CheckAddOrRemoveAlert2(__instance, cachedAlert, flag || alertDirty);
-                            //actionCheckAddOrRemoveAlert(__instance, cachedAlert, flag || alertDirty);
+                            //CheckAddOrRemoveAlert(__instance, cachedAlert, flag || alertDirty);
+                            actionCheckAddOrRemoveAlert(__instance, cachedAlert, flag || alertDirty);
                             if (alertDirty)
                             {
                                 questPartActivable.ClearCachedAlert();
@@ -113,35 +118,6 @@ namespace RimThreaded
             mouseoverAlertIndex(__instance) = -1;
             return false;
         }
-
-        //Func<char, int> delegateCheckAddOrRemoveAlert = (Func <Type[] {}, int>) Delegate.CreateDelegate(typeof(Func<char, int>), "Hello", method);
-        static Action<AlertsReadout, Alert, bool> actionCheckAddOrRemoveAlert = (Action<AlertsReadout, Alert, bool>) Delegate.CreateDelegate
-            (typeof(Action<AlertsReadout, Alert, bool>), Method(typeof(AlertsReadout), "CheckAddOrRemoveAlert"));
-        public static void CheckAddOrRemoveAlert2(AlertsReadout __instance, Alert alert, bool forceRemove = false)
-        {
-            try
-            {
-                alert.Recalculate();                
-                if (!forceRemove && alert.Active)
-                {
-                    if (!activeAlerts(__instance).Contains(alert))
-                    {
-                        activeAlerts(__instance).Add(alert);
-                        alert.Notify_Started();
-                    }
-                }
-                else
-                {
-                    activeAlerts(__instance).Remove(alert);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.ErrorOnce("Exception processing alert " + alert.ToString() + ": " + ex.ToString(), 743575);
-                activeAlerts(__instance).Remove(alert);
-            }
-        }
-
 
     }
 }
