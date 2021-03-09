@@ -263,7 +263,13 @@ namespace RimThreaded
             return false;
         }
 
-
+        public static void DirtyCacheSetInvisbility(HediffSet __instance)
+        {
+            lock (PawnUtility_Patch.isPawnInvisible)
+            {
+                PawnUtility_Patch.RecalculateInvisibility(__instance.pawn);
+            }
+        }
 
     }
 }

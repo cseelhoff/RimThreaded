@@ -9,6 +9,11 @@ namespace RimThreaded
 
     public class Room_Patch
 	{
+		[ThreadStatic]
+		private static HashSet<Thing> uniqueContainedThingsSet;
+		[ThreadStatic]
+		private static HashSet<Room> uniqueNeighborsSet;
+
 		public static AccessTools.FieldRef<Room, int> cachedOpenRoofCount =
 			AccessTools.FieldRefAccess<Room, int>("cachedOpenRoofCount");
 		public static AccessTools.FieldRef<Room, int> cachedCellCount =
@@ -26,7 +31,13 @@ namespace RimThreaded
 
 		public static bool get_ContainedAndAdjacentThings(Room __instance, ref List<Thing> __result)
 		{
-			HashSet<Thing> uniqueContainedThingsSet = new HashSet<Thing>();
+			if(uniqueContainedThingsSet == null)
+            {
+				uniqueContainedThingsSet = new HashSet<Thing>();
+			} else
+            {
+				uniqueContainedThingsSet.Clear();
+			}
 			List<Thing> uniqueContainedThings = new List<Thing>();
 			for (int i = 0; i < regions(__instance).Count; i++)
 			{
@@ -47,6 +58,31 @@ namespace RimThreaded
 			}
 
 			__result = uniqueContainedThings;
+			return false;
+			
+		}
+		public static bool get_Neighbors(Room __instance, ref List<Room> __result)
+		{
+			if(uniqueNeighborsSet == null)
+            {
+				uniqueNeighborsSet = new HashSet<Room>();
+			} else
+            {
+				uniqueNeighborsSet.Clear();
+			}
+			List<Room> uniqueNeighbors = new List<Room>();            
+            List<Region> regionsList = regions(__instance);
+			for (int i = 0; i < regionsList.Count; i++)
+			{
+				foreach (Region neighbor in regionsList[i].Neighbors)
+				{
+					if (uniqueNeighborsSet.Add(neighbor.Room) && neighbor.Room != __instance)
+					{
+						uniqueNeighbors.Add(neighbor.Room);
+					}
+				}
+			}
+			__result = uniqueNeighbors;
 			return false;
 			
 		}

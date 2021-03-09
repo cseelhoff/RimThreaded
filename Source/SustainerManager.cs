@@ -74,7 +74,8 @@ namespace RimThreaded
                 playingPerDef.Clear();
             List<Sustainer> snapshotAllSustainers = __instance.AllSustainers;
 
-            for (int index = 0; index < snapshotAllSustainers.Count; index++)
+            int count = snapshotAllSustainers.Count;
+            for (int index = 0; index < count; index++)
             {
                 Sustainer sustainer = snapshotAllSustainers[index];
                 if (!playingPerDef.ContainsKey(sustainer.def))
@@ -95,23 +96,24 @@ namespace RimThreaded
             {
                 SoundDef key = item.Key;
                 List<Sustainer> value = item.Value;
-                if (value.Count - key.maxVoices < 0)
+                int valueCount = value.Count;
+                if (valueCount - key.maxVoices < 0)
                 {
-                    for (int j = 0; j < value.Count; j++)
+                    for (int j = 0; j < valueCount; j++)
                     {
                         value[j].scopeFader.inScope = true;
                     }
                     continue;
                 }
 
-                for (int k = 0; k < value.Count; k++)
+                for (int k = 0; k < valueCount; k++)
                 {
                     value[k].scopeFader.inScope = false;
                 }
 
                 value.Sort(SortSustainersByCameraDistanceCached);
                 int num = 0;
-                for (int l = 0; l < value.Count; l++)
+                for (int l = 0; l < valueCount; l++)
                 {
                     value[l].scopeFader.inScope = true;
                     num++;
@@ -121,7 +123,7 @@ namespace RimThreaded
                     }
                 }
 
-                for (int m = 0; m < value.Count; m++)
+                for (int m = 0; m < valueCount; m++)
                 {
                     if (!value[m].scopeFader.inScope)
                     {
@@ -130,11 +132,11 @@ namespace RimThreaded
                 }
             }
 
-            foreach (KeyValuePair<SoundDef, List<Sustainer>> item2 in playingPerDef)
-            {
-                item2.Value.Clear();
+            //foreach (KeyValuePair<SoundDef, List<Sustainer>> item2 in playingPerDef)
+            //{
+                //item2.Value.Clear();
                 //SimplePool<List<Sustainer>>.Return(item2.Value);
-            }
+            //}
 
             //playingPerDef.Clear();
             return false;

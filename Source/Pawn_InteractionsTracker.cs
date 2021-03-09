@@ -22,8 +22,17 @@ namespace RimThreaded
 			int tID = Thread.CurrentThread.ManagedThreadId;
 			if (!workingLists.TryGetValue(tID, out List<Pawn> workingList))
 			{
-				workingList = new List<Pawn>();
-				workingLists[tID] = workingList;
+				lock (workingLists)
+				{
+					if (!workingLists.TryGetValue(tID, out List<Pawn> workingList2))
+					{
+						workingList = new List<Pawn>();
+						workingLists[tID] = workingList;
+					} else
+                    {
+						workingList = workingList2;
+					}
+				}
 			}
 			return workingList;
 		}

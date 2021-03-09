@@ -59,7 +59,7 @@ namespace RimThreaded
                 return false;
             }
             ThinkTreeDef thinkTree;
-            lock (determineNextJobLock)
+            lock (determineNextJobLock) //TODO change to ReservationManager.reservations?
             {
                 ThinkResult result = DetermineNextJob2(__instance, out thinkTree);
                 if (result.IsValid)

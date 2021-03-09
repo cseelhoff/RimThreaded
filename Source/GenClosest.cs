@@ -80,7 +80,7 @@ namespace RimThreaded
                     Log.ErrorOnce("ClosestThingReachable had to do a global search, but traversableRegionTypes is not set to passable only. It's not supported, because Reachability is based on passable regions only.", 14384767, false);
                 // Predicate<Thing> validator1 = t => map.reachability.CanReach(root, t, peMode, traverseParams) && (validator == null || validator(t));
                 //Predicate<Thing> validator1 = t => Reachability_Patch.CanReach2(map.reachability, root, t, peMode, traverseParams) && (validator == null || validator(t));
-                Predicate<Thing> validator1 = t => (validator == null || validator(t) && Reachability_Patch.CanReach2(map.reachability, root, t, peMode, traverseParams));
+                Predicate<Thing> validator1 = t => (validator == null || validator(t) && map.reachability.CanReach(root, t, peMode, traverseParams));
                 IEnumerable<Thing> things = customGlobalSearchSet ?? map.listerThings.ThingsMatching(thingReq);
 
                 //null check needed - bug #55

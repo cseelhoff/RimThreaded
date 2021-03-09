@@ -456,14 +456,14 @@ namespace RimThreaded
 			Prefix(original, patched, "MostRecentReservationFor");
 
 			//DynamicDrawManager
-			//original = typeof(DynamicDrawManager);
-			//patched = typeof(Verse_DynamicDrawManager_Patch);
-			//Prefix(original, patched, "RegisterDrawable");
-			//Prefix(original, patched, "DeRegisterDrawable");
-			//Prefix(original, patched, "DrawDynamicThings");
-			//Prefix(original, patched, "LogDynamicDrawThings");
+			original = typeof(DynamicDrawManager);
+			patched = typeof(Verse_DynamicDrawManager_Patch);
+			Prefix(original, patched, "RegisterDrawable");
+			Prefix(original, patched, "DeRegisterDrawable");
+			Prefix(original, patched, "DrawDynamicThings");
+			Prefix(original, patched, "LogDynamicDrawThings");
 
-			//Reachability - needs code rewrite - not efficient
+			//Reachability
 			original = typeof(Reachability);
 			patched = typeof(Reachability_Patch);
 			Prefix(original, patched, "CanReach", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
@@ -494,7 +494,7 @@ namespace RimThreaded
 			original = typeof(GenClosest);
 			patched = typeof(GenClosest_Patch);
 			Prefix(original, patched, "RegionwiseBFSWorker");
-			Prefix(original, patched, "ClosestThingReachable");
+			//Prefix(original, patched, "ClosestThingReachable");
 			Prefix(original, patched, "ClosestThing_Global");
 
 			//PawnUtility
@@ -834,6 +834,8 @@ namespace RimThreaded
 			Prefix(original, patched, "Notify_RoofChanged");
 			Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
 			Prefix(original, patched, "get_ContainedAndAdjacentThings");
+			Prefix(original, patched, "get_Neighbors");
+			
 
 			patched = typeof(Room_Transpile);
 			//Transpile(original, patched, "RemoveRegion");
@@ -958,6 +960,7 @@ namespace RimThreaded
 			//Prefix(original, patched, "GetPartHealth");
 			//Prefix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPrefix", false);
 			//Postfix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPostfix");
+			Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
 
 			//LanguageWordInfo
 			original = typeof(LanguageWordInfo);
@@ -1621,6 +1624,9 @@ namespace RimThreaded
 			//Pawn_RelationsTracker.Notify_PawnSold
 			harmony.Patch(Method(original, "Notify_PawnSold"), transpiler: new HarmonyMethod(pMethod));
 
+			original = typeof(JobGiver_Haul);
+			patched = typeof(JobGiver_Haul_Patch);
+			Prefix(original, patched, "TryGiveJob");
 
 			//JoyGiver_Ingest
 			//original = typeof(JoyGiver_Ingest);

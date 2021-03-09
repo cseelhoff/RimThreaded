@@ -93,6 +93,7 @@
     <Compile Include="GenLeaving.cs" />
     <Compile Include="HaulAIUtility_Patch.cs" />
     <Compile Include="Hauling_Transpile.cs" />
+    <Compile Include="JobGiver_Haul_Patch.cs" />
     <Compile Include="JoyGiver_Ingest_Patch.cs" />
     <Compile Include="MemoryThoughtHandler_Patch.cs" />
     <Compile Include="Patch_TryOpportunisticJob.cs" />

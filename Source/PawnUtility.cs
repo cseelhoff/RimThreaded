@@ -1,52 +1,86 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
 	public static class PawnUtility_Patch
 	{
+        public static Dictionary<Pawn, bool> isPawnInvisible = new Dictionary<Pawn, bool>();
 
 		public static bool EnemiesAreNearby(ref bool __result, Pawn pawn, int regionsToScan = 9, bool passDoors = false)
 		{
 			TraverseParms tp = passDoors ? TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false) : TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false);
 			bool foundEnemy = false;
-			RegionTraverser.BreadthFirstTraverse(pawn.Position, pawn.Map, (RegionEntryPredicate)((from, to) => to.Allows(tp, false)), (RegionProcessor)(r =>
-			{
-				List<Thing> thingList = r.ListerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
+			RegionTraverser.BreadthFirstTraverse(pawn.Position, pawn.Map, (from, to) => to.Allows(tp, false), r =>
+            {
+                List<Thing> thingList = r.ListerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
                 for (int index = 0; index < thingList.Count; ++index)
-				{
+                {
                     Thing t;
                     try
                     {
                         t = thingList[index];
-                    } catch(ArgumentOutOfRangeException)
+                    }
+                    catch (ArgumentOutOfRangeException)
                     {
                         break;
                     }
-					if (null != t)
-					{
-						if (t.HostileTo(pawn))
-						{
-							foundEnemy = true;
-							return true;
-						}
-					}
-				}
-				
-				return foundEnemy;
-			}), regionsToScan, RegionType.Set_Passable);
+                    if (null != t)
+                    {
+                        if (t.HostileTo(pawn))
+                        {
+                            foundEnemy = true;
+                            return true;
+                        }
+                    }
+                }
+
+                return foundEnemy;
+            }, regionsToScan, RegionType.Set_Passable);
 			__result = foundEnemy;
 			return false;
 		}
+        public static bool IsInvisible(ref bool __result, Pawn pawn)
+        {
+            if (!isPawnInvisible.TryGetValue(pawn, out bool isInvisible))
+            {
+                lock (isPawnInvisible)
+                {
+                    if (!isPawnInvisible.TryGetValue(pawn, out bool isInvisible2))
+                    {
+                        isInvisible = RecalculateInvisibility(pawn);
+                    }
+                    else
+                    {
+                        isInvisible = isInvisible2;
+                    }
+                }
+            }
+            __result = isInvisible;
+            return false;
+        }
 
-		private static bool PawnsCanShareCellBecauseOfBodySize(Pawn p1, Pawn p2)
+        public static bool RecalculateInvisibility(Pawn pawn)
+        {
+            bool isInvisible = false;
+            List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+            for (int i = 0; i < hediffs.Count; i++)
+            {
+                if (hediffs[i].TryGetComp<HediffComp_Invisibility>() != null)
+                {
+                    isInvisible = true;
+                    break;
+                }
+            }
+            isPawnInvisible[pawn] = isInvisible;
+            return isInvisible;
+        }
+
+        private static bool PawnsCanShareCellBecauseOfBodySize(Pawn p1, Pawn p2)
 		{
 			if (p1.BodySize >= 1.5f || p2.BodySize >= 1.5f)
 			{

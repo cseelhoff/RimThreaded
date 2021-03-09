@@ -16,8 +16,8 @@ namespace RimThreaded
 
 	public class ReservationManager_Patch
 	{
-		public static AccessTools.FieldRef<ReservationManager, List<ReservationManager.Reservation>> reservations =
-			AccessTools.FieldRefAccess<ReservationManager, List<ReservationManager.Reservation>>("reservations");
+		public static AccessTools.FieldRef<ReservationManager, List<Reservation>> reservations =
+			AccessTools.FieldRefAccess<ReservationManager, List<Reservation>>("reservations");
 		public static AccessTools.FieldRef<ReservationManager, Map> map =
 			AccessTools.FieldRefAccess<ReservationManager, Map>("map");
 
@@ -219,7 +219,7 @@ namespace RimThreaded
 					__result = false;
 					return false;
 				}
-				reservations(__instance).Add(new ReservationManager.Reservation(claimant, job, maxPawns, stackCount, target, layer));
+				reservations(__instance).Add(new Reservation(claimant, job, maxPawns, stackCount, target, layer));
 			}
 			__result = true;
 			return false;
@@ -243,7 +243,7 @@ namespace RimThreaded
 					num1 = claimant.jobs.curDriver.CurToilIndex;
 			}
 			string str2 = !target.HasThing || target.Thing.def.stackLimit == 1 ? "" : "(current stack count: " + (object)target.Thing.stackCount + ")";
-			string str3 = "Could not reserve " + target.ToStringSafe<LocalTargetInfo>() + str2 + " (layer: " + layer.ToStringSafe<ReservationLayerDef>() + ") for " + claimant.ToStringSafe<Pawn>() + " for job " + job.ToStringSafe<Job>() + " (now doing job " + str1 + "(curToil=" + (object)num1 + ")) for maxPawns " + (object)maxPawns + " and stackCount " + (object)stackCount + ".";
+			string str3 = "Could not reserve " + target.ToStringSafe() + str2 + " (layer: " + layer.ToStringSafe() + ") for " + claimant.ToStringSafe() + " for job " + job.ToStringSafe() + " (now doing job " + str1 + "(curToil=" + (object)num1 + ")) for maxPawns " + (object)maxPawns + " and stackCount " + (object)stackCount + ".";
 			Pawn pawn1 = __instance.FirstRespectedReserver(target, claimant);
 			string text;
 			if (pawn1 != null)
@@ -253,17 +253,17 @@ namespace RimThreaded
 				Job curJob2 = pawn1.CurJob;
 				if (curJob2 != null)
 				{
-					str4 = curJob2.ToStringSafe<Job>();
+					str4 = curJob2.ToStringSafe();
 					if (pawn1.jobs.curDriver != null)
 						num2 = pawn1.jobs.curDriver.CurToilIndex;
 				}
-				text = str3 + " Existing reserver: " + pawn1.ToStringSafe<Pawn>() + " doing job " + str4 + " (toilIndex=" + (object)num2 + ")";
+				text = str3 + " Existing reserver: " + pawn1.ToStringSafe() + " doing job " + str4 + " (toilIndex=" + (object)num2 + ")";
 			}
 			else
 				text = str3 + " No existing reserver.";
 			Pawn pawn2 = map(__instance).physicalInteractionReservationManager.FirstReserverOf(target);
 			if (pawn2 != null)
-				text = text + " Physical interaction reserver: " + pawn2.ToStringSafe<Pawn>();
+				text = text + " Physical interaction reserver: " + pawn2.ToStringSafe();
 			Log.Error(text, false);
 		}
 		public static bool CanReserveStack(ReservationManager __instance, ref int __result, Pawn claimant, LocalTargetInfo target, int maxPawns = 1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
@@ -346,8 +346,8 @@ namespace RimThreaded
 				__result = LocalTargetInfo.Invalid;
 				return false;
 			}
-			//ReservationManager.Reservation[] reservations2 = reservations(__instance).ToArray();
-			ReservationManager.Reservation r;
+            //ReservationManager.Reservation[] reservations2 = reservations(__instance).ToArray();
+            Reservation r;
 			for (int i = 0; i < reservations(__instance).Count; i++)
 			{
 				try
