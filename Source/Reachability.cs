@@ -26,20 +26,15 @@ namespace RimThreaded
         //public static uint offsetReachedIndex = 1;
         //private static readonly object reachedIndexLock = new object();
 
-        private static readonly MethodInfo methodGetCachedResult =
-            Method(typeof(Reachability), "GetCachedResult", new Type[] { typeof(TraverseParms) });
-        private static readonly Func<Reachability, TraverseParms, BoolUnknown> funcGetCachedResult =
-            (Func<Reachability, TraverseParms, BoolUnknown>)Delegate.CreateDelegate(typeof(Func<Reachability, TraverseParms, BoolUnknown>), methodGetCachedResult);
-
         private static readonly MethodInfo methodCheckCellBasedReachability =
             Method(typeof(Reachability), "CheckCellBasedReachability", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
         private static readonly Func<Reachability, IntVec3, LocalTargetInfo, PathEndMode, TraverseParms, bool> funcCheckCellBasedReachability =
             (Func<Reachability, IntVec3, LocalTargetInfo, PathEndMode, TraverseParms, bool>)Delegate.CreateDelegate(typeof(Func<Reachability, IntVec3, LocalTargetInfo, PathEndMode, TraverseParms, bool>), methodCheckCellBasedReachability);
 
         private static readonly MethodInfo methodCanUseCache =
-            Method(typeof(Reachability), "CanUseCache", new Type[] { typeof(TraverseParms) });
-        private static readonly Func<Reachability, TraverseParms, bool> funcCanUseCache =
-            (Func<Reachability, TraverseParms, bool>)Delegate.CreateDelegate(typeof(Func<Reachability, TraverseParms, bool>), methodCanUseCache);
+            Method(typeof(Reachability), "CanUseCache", new Type[] { typeof(TraverseMode) });
+        private static readonly Func<Reachability, TraverseMode, bool> funcCanUseCache =
+            (Func<Reachability, TraverseMode, bool>)Delegate.CreateDelegate(typeof(Func<Reachability, TraverseMode, bool>), methodCanUseCache);
 
         private static void QueueNewOpenRegion(Region region, Queue<Region> openQueueParam, HashSet<Region> regionsReached)
         {
@@ -206,7 +201,7 @@ namespace RimThreaded
 
                 if (startingRegions.Any() && destRegions.Any() && funcCanUseCache(__instance, traverseParams.mode))
                 {
-                    switch (funcGetCachedResult(__instance, traverseParams))
+                    switch (GetCachedResult(__instance, traverseParams, startingRegions, destRegions))
                     {
                         case BoolUnknown.True:
                             __result = true;
@@ -224,7 +219,7 @@ namespace RimThreaded
                     return false;
                 }
 
-                bool result2 = CheckRegionBasedReachability(__instance, traverseParams, openQueue, regionsReached);
+                bool result2 = CheckRegionBasedReachability(__instance, traverseParams, openQueue, regionsReached, startingRegions, destRegions);
                 //FinalizeCheck();
                 __result = result2;
                 return false;
@@ -234,12 +229,46 @@ namespace RimThreaded
                 //working = false;
             }
         }
-        private static bool CheckRegionBasedReachability(Reachability __instance, TraverseParms traverseParams, Queue<Region> openQueueParam, HashSet<Region> regionsReached)
+
+        private static BoolUnknown GetCachedResult(Reachability __instance, TraverseParms traverseParams, List<Region> startingRegionsParams, List<Region> destRegionsParams)
+        {
+            bool flag = false;
+            ReachabilityCache cache = cacheFieldRef(__instance);
+            for (int i = 0; i < startingRegionsParams.Count; i++)
+            {
+                for (int j = 0; j < destRegionsParams.Count; j++)
+                {
+                    if (destRegionsParams[j] == startingRegionsParams[i])
+                    {
+                        return BoolUnknown.True;
+                    }
+
+                    switch (cache.CachedResultFor(startingRegionsParams[i].Room, destRegionsParams[j].Room, traverseParams))
+                    {
+                        case BoolUnknown.True:
+                            return BoolUnknown.True;
+                        case BoolUnknown.Unknown:
+                            flag = true;
+                            break;
+                    }
+                }
+            }
+
+            if (!flag)
+            {
+                return BoolUnknown.False;
+            }
+
+            return BoolUnknown.Unknown;
+        }
+
+        private static bool CheckRegionBasedReachability(Reachability __instance, TraverseParms traverseParams, Queue<Region> openQueueParam, 
+            HashSet<Region> regionsReached, List<Region> startingRegionsParam, List<Region> destRegionsParam)
         {
             ReachabilityCache cache = cacheFieldRef(__instance);
-            while (openQueue.Count > 0)
+            while (openQueueParam.Count > 0)
             {
-                Region region = openQueue.Dequeue();
+                Region region = openQueueParam.Dequeue();
                 for (int i = 0; i < region.links.Count; i++)
                 {
                     RegionLink regionLink = region.links[i];
@@ -251,11 +280,11 @@ namespace RimThreaded
                             continue;
                         }
 
-                        if (destRegions.Contains(region2))
+                        if (destRegionsParam.Contains(region2))
                         {
-                            for (int k = 0; k < startingRegions.Count; k++)
+                            for (int k = 0; k < startingRegionsParam.Count; k++)
                             {
-                                cache.AddCachedResult(startingRegions[k].Room, region2.Room, traverseParams, reachable: true);
+                                cache.AddCachedResult(startingRegionsParam[k].Room, region2.Room, traverseParams, reachable: true);
                             }
 
                             return true;
@@ -265,11 +294,11 @@ namespace RimThreaded
                 }
             }
 
-            for (int l = 0; l < startingRegions.Count; l++)
+            for (int l = 0; l < startingRegionsParam.Count; l++)
             {
-                for (int m = 0; m < destRegions.Count; m++)
+                for (int m = 0; m < destRegionsParam.Count; m++)
                 {
-                    cache.AddCachedResult(startingRegions[l].Room, destRegions[m].Room, traverseParams, reachable: false);
+                    cache.AddCachedResult(startingRegionsParam[l].Room, destRegionsParam[m].Room, traverseParams, reachable: false);
                 }
             }
 

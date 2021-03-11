@@ -30,69 +30,64 @@ namespace RimThreaded
             }
             if (!start.InBounds(map))
             {
-                Log.Error("Did FindClosestThing with start out of bounds (" + (object)start + "), thingReq=" + (object)thingReq, false);
+                Log.Error("Did FindClosestThing with start out of bounds (" + start + "), thingReq=" + thingReq, false);
                 return true;
             }
             return thingReq.group == ThingRequestGroup.Nothing || (thingReq.IsUndefined || map.listerThings.ThingsMatching(thingReq).Count == 0) && customGlobalSearchSet.EnumerableNullOrEmpty<Thing>();
         }
 
-        public static bool ClosestThingReachable(ref Thing __result,
-          IntVec3 root,
-          Map map,
-          ThingRequest thingReq,
-          PathEndMode peMode,
-          TraverseParms traverseParams,
-          float maxDistance = 9999f,
-          Predicate<Thing> validator = null,
-          IEnumerable<Thing> customGlobalSearchSet = null,
-          int searchRegionsMin = 0,
-          int searchRegionsMax = -1,
-          bool forceAllowGlobalSearch = false,
-          RegionType traversableRegionTypes = RegionType.Set_Passable,
-          bool ignoreEntirelyForbiddenRegions = false)
+        public static Thing ClosestThingReachable2(
+          IntVec3 root, Map map, ThingRequest thingReq, PathEndMode peMode, TraverseParms traverseParams, float maxDistance = 9999f, Predicate<Thing> validator = null, IEnumerable<Thing> customGlobalSearchSet = null, int searchRegionsMin = 0, int searchRegionsMax = -1, bool forceAllowGlobalSearch = false, RegionType traversableRegionTypes = RegionType.Set_Passable, bool ignoreEntirelyForbiddenRegions = false)
         {
-            bool flag1 = searchRegionsMax < 0 | forceAllowGlobalSearch;
-            if (!flag1 && customGlobalSearchSet != null)
-                Log.ErrorOnce("searchRegionsMax >= 0 && customGlobalSearchSet != null && !forceAllowGlobalSearch. customGlobalSearchSet will never be used.", 634984, false);
-            if (!flag1 && !thingReq.IsUndefined && !thingReq.CanBeFoundInRegion)
+            bool flag = searchRegionsMax < 0 || forceAllowGlobalSearch;
+            if (!flag && customGlobalSearchSet != null)
             {
-                Log.ErrorOnce("ClosestThingReachable with thing request group " + thingReq.group + " and global search not allowed. This will never find anything because this group is never stored in regions. Either allow global search or don't call this method at all.", 518498981, false);
-                __result = null;
-                return false;
+                Log.ErrorOnce("searchRegionsMax >= 0 && customGlobalSearchSet != null && !forceAllowGlobalSearch. customGlobalSearchSet will never be used.", 634984);
             }
+
+            if (!flag && !thingReq.IsUndefined && !thingReq.CanBeFoundInRegion)
+            {
+                Log.ErrorOnce(string.Concat("ClosestThingReachable with thing request group ", thingReq.group, " and global search not allowed. This will never find anything because this group is never stored in regions. Either allow global search or don't call this method at all."), 518498981);
+            }
+
             if (EarlyOutSearch(root, map, thingReq, customGlobalSearchSet, validator))
             {
-                __result = null;
-                return false;
+                return null;
             }
+
             Thing thing = null;
             bool flag2 = false;
             if (!thingReq.IsUndefined && thingReq.CanBeFoundInRegion)
             {
-                int maxRegions = searchRegionsMax > 0 ? searchRegionsMax : 30;
-                int regionsSeen;
-                thing = GenClosest.RegionwiseBFSWorker(root, map, thingReq, peMode, traverseParams, validator, null, searchRegionsMin, maxRegions, maxDistance, out regionsSeen, traversableRegionTypes, ignoreEntirelyForbiddenRegions);
-                flag2 = thing == null && regionsSeen < maxRegions;
+                int num = (searchRegionsMax > 0) ? searchRegionsMax : 30;
+                thing = GenClosest.RegionwiseBFSWorker(root, map, thingReq, peMode, traverseParams, validator, null, searchRegionsMin, num, maxDistance, out int regionsSeen, traversableRegionTypes, ignoreEntirelyForbiddenRegions);
+                flag2 = (thing == null && regionsSeen < num);
             }
-            if (thing == null & flag1 && !flag2)
+
+            if (thing == null && flag && !flag2)
             {
                 if (traversableRegionTypes != RegionType.Set_Passable)
-                    Log.ErrorOnce("ClosestThingReachable had to do a global search, but traversableRegionTypes is not set to passable only. It's not supported, because Reachability is based on passable regions only.", 14384767, false);
-                // Predicate<Thing> validator1 = t => map.reachability.CanReach(root, t, peMode, traverseParams) && (validator == null || validator(t));
-                //Predicate<Thing> validator1 = t => Reachability_Patch.CanReach2(map.reachability, root, t, peMode, traverseParams) && (validator == null || validator(t));
-                Predicate<Thing> validator1 = t => (validator == null || validator(t) && map.reachability.CanReach(root, t, peMode, traverseParams));
-                IEnumerable<Thing> things = customGlobalSearchSet ?? map.listerThings.ThingsMatching(thingReq);
+                {
+                    Log.ErrorOnce("ClosestThingReachable had to do a global search, but traversableRegionTypes is not set to passable only. It's not supported, because Reachability is based on passable regions only.", 14384767);
+                }
 
-                //null check needed - bug #55
-                //if(RimThreaded.stopwatch.ElapsedMilliseconds > 200)
-                //{
-                //    long eMilliseconds = RimThreaded.stopwatch.ElapsedMilliseconds;
-                //    Log.ErrorOnce(thingReq.ToString(), thingReq.ToString().GetHashCode());
-                //}
-                thing = GenClosest.ClosestThing_Global(root, things, maxDistance, validator1, null);
+                bool validator2(Thing t)
+                {
+                    if (validator != null && !validator(t))
+                    {
+                        return false;
+                    }
+                    if (!map.reachability.CanReach(root, t, peMode, traverseParams))
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+                IEnumerable<Thing> searchSet = customGlobalSearchSet ?? map.listerThings.ThingsMatching(thingReq);
+                thing = GenClosest.ClosestThing_Global(root, searchSet, maxDistance, validator2);                
             }
-            __result = thing;
-            return false;
+
+            return thing;
         }
 
         public static bool RegionwiseBFSWorker(ref Thing __result,
@@ -114,39 +109,39 @@ namespace RimThreaded
             if (traverseParams.mode == TraverseMode.PassAllDestroyableThings)
             {
                 Log.Error("RegionwiseBFSWorker with traverseParams.mode PassAllDestroyableThings. Use ClosestThingGlobal.", false);
-                __result = (Thing)null;
+                __result = null;
                 return false;
             }
             if (traverseParams.mode == TraverseMode.PassAllDestroyableThingsNotWater)
             {
                 Log.Error("RegionwiseBFSWorker with traverseParams.mode PassAllDestroyableThingsNotWater. Use ClosestThingGlobal.", false);
-                __result = (Thing)null;
+                __result = null;
                 return false;
             }
             if (!req.IsUndefined && !req.CanBeFoundInRegion)
             {
-                Log.ErrorOnce("RegionwiseBFSWorker with thing request group " + (object)req.group + ". This group is never stored in regions. Most likely a global search should have been used.", 385766189, false);
-                __result = (Thing)null;
+                Log.ErrorOnce("RegionwiseBFSWorker with thing request group " + req.group + ". This group is never stored in regions. Most likely a global search should have been used.", 385766189, false);
+                __result = null;
                 return false;
             }
             Region region = root.GetRegion(map, traversableRegionTypes);
             if (region == null)
             {
-                __result = (Thing)null;
+                __result = null;
                 return false;
             }
             float maxDistSquared = maxDistance * maxDistance;
-            RegionEntryPredicate entryCondition = (RegionEntryPredicate)((from, to) =>
+            RegionEntryPredicate entryCondition = (from, to) =>
             {
                 if (!to.Allows(traverseParams, false))
                     return false;
-                return (double)maxDistance > 5000.0 || (double)to.extentsClose.ClosestDistSquaredTo(root) < (double)maxDistSquared;
-            });
-            Thing closestThing = (Thing)null;
+                return maxDistance > 5000.0 || to.extentsClose.ClosestDistSquaredTo(root) < (double)maxDistSquared;
+            };
+            Thing closestThing = null;
             float closestDistSquared = 9999999f;
             float bestPrio = float.MinValue;
             int regionsSeenScan = 0;
-            RegionProcessor regionProcessor = (RegionProcessor)(r =>
+            RegionProcessor regionProcessor = r =>
             {
                 if (RegionTraverser.ShouldCountRegion(r))
                     ++regionsSeenScan;
@@ -174,10 +169,10 @@ namespace RimThreaded
                         if (ReachabilityWithinRegion.ThingFromRegionListerReachable(thing, r, peMode, traverseParams.pawn))
                         {
                             float num = priorityGetter != null ? priorityGetter(thing) : 0.0f;
-                            if ((double)num >= (double)bestPrio)
+                            if (num >= (double)bestPrio)
                             {
-                                float horizontalSquared = (float)(thing.Position - root).LengthHorizontalSquared;
-                                if (((double)num > (double)bestPrio || (double)horizontalSquared < (double)closestDistSquared) && (double)horizontalSquared < (double)maxDistSquared && (validator == null || validator(thing)))
+                                float horizontalSquared = (thing.Position - root).LengthHorizontalSquared;
+                                if ((num > (double)bestPrio || horizontalSquared < (double)closestDistSquared) && horizontalSquared < (double)maxDistSquared && (validator == null || validator(thing)))
                                 {
                                     closestThing = thing;
                                     closestDistSquared = horizontalSquared;
@@ -188,7 +183,7 @@ namespace RimThreaded
                     }
                 }
                 return regionsSeenScan >= minRegions && closestThing != null;
-            });
+            };
             RegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
             regionsSeen = regionsSeenScan;
             __result = closestThing;
@@ -206,38 +201,31 @@ namespace RimThreaded
                 __result = null;
                 return false;
             }
-            float closestDistSquared = (float)int.MaxValue;
-            Thing chosen = (Thing)null;
+            float closestDistSquared = int.MaxValue;
+            Thing chosen = null;
             float bestPrio = float.MinValue;
             float maxDistanceSquared = maxDistance * maxDistance;
+
+            RimThreaded.lastClosestThingGlobal = DateTime.Now;
             if (searchSet is IList<Thing> thingList)
             {
-                DateTime now = DateTime.Now;
-                //if (thingList.Count > 100 && now.Subtract(RimThreaded.lastClosestThingGlobal).TotalMilliseconds < 1000)
-                //{
-                //Log.Error("ClosestThing_Global was called within the last 1000ms");
-                //}
-                //else
-                //{
-                RimThreaded.lastClosestThingGlobal = now;
                 for (int index = 0; index < thingList.Count; ++index)
                 {
                     Process2(thingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
                 }
-                //}
             }
             else if (searchSet is IList<Pawn> pawnList)
             {
                 for (int index = 0; index < pawnList.Count; ++index)
                 {
-                    Process2((Thing)pawnList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                    Process2(pawnList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
                 }
             }
             else if (searchSet is IList<Building> buildingList)
             {
                 for (int index = 0; index < buildingList.Count; ++index)
                 {
-                    Process2((Thing)buildingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
+                    Process2(buildingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
                 }
             }
             else if (searchSet is IList<IAttackTarget> attackTargetList)
@@ -249,18 +237,7 @@ namespace RimThreaded
             }
             else
             {
-                List<Thing> listThings = new List<Thing>();
-
-                try
-                {
-                    foreach (Thing search in searchSet)
-                    {
-                        listThings.Add(search);
-                    }
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                }
+                List<Thing> listThings = new List<Thing>((IEnumerable<Thing>)searchSet);
                 for (int index = 0; index < listThings.Count; ++index)
                 {
                     Process2(listThings[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
@@ -275,18 +252,25 @@ namespace RimThreaded
             Func<Thing, float> priorityGetter, ref float bestPrio, ref float closestDistSquared,
             ref Thing chosen, Predicate<Thing> validator)
         {
+            DateTime now = DateTime.Now;
+            if (now.Subtract(RimThreaded.lastClosestThingGlobal).TotalMilliseconds > 50)
+            {
+                Log.Error("ClosestThing_Global was called over 50ms ago. Resetting last check. Processing: " + t.ToString());
+                RimThreaded.lastClosestThingGlobal = DateTime.Now;
+            }            
+
             if (null != t)
             {
                 if (!t.Spawned)
                     return;
-                float horizontalSquared = (float)(center - t.Position).LengthHorizontalSquared;
-                if ((double)horizontalSquared > (double)maxDistanceSquared || priorityGetter == null && (double)horizontalSquared >= (double)closestDistSquared || validator != null && !validator(t))
+                float horizontalSquared = (center - t.Position).LengthHorizontalSquared;
+                if (horizontalSquared > maxDistanceSquared || priorityGetter == null && horizontalSquared >= (double)closestDistSquared || validator != null && !validator(t))
                     return;
                 float num = 0.0f;
                 if (priorityGetter != null)
                 {
                     num = priorityGetter(t);
-                    if ((double)num < (double)bestPrio || (double)num == (double)bestPrio && (double)horizontalSquared >= (double)closestDistSquared)
+                    if (num < (double)bestPrio || num == (double)bestPrio && horizontalSquared >= (double)closestDistSquared)
                         return;
                 }
                 chosen = t;

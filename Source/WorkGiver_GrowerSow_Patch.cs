@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Verse;
 using Verse.AI;
@@ -29,15 +30,12 @@ namespace RimThreaded
                 __result = null;
                 return false;
             }
-
-            if (wantedPlantDef == null)
+            ThingDef localWantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(c, map);
+            wantedPlantDef = localWantedPlantDef;
+            if (localWantedPlantDef == null)
             {
-                wantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(c, map);
-                if (wantedPlantDef == null)
-                {
-                    __result = null;
-                    return false;
-                }
+                __result = null;
+                return false;
             }
 
             List<Thing> thingList = c.GetThingList(map);
@@ -45,7 +43,7 @@ namespace RimThreaded
             for (int i = 0; i < thingList.Count; i++)
             {
                 Thing thing = thingList[i];
-                if (thing.def == wantedPlantDef)
+                if (thing.def == localWantedPlantDef)
                 {
                     __result = null;
                     return false;
@@ -67,7 +65,7 @@ namespace RimThreaded
                 }
             }
 
-            if (wantedPlantDef.plant.cavePlant)
+            if (localWantedPlantDef.plant.cavePlant)
             {
                 if (!c.Roofed(map))
                 {
@@ -84,7 +82,7 @@ namespace RimThreaded
                 }
             }
 
-            if (wantedPlantDef.plant.interferesWithRoof && c.Roofed(pawn.Map))
+            if (localWantedPlantDef.plant.interferesWithRoof && c.Roofed(pawn.Map))
             {
                 __result = null;
                 return false;
@@ -103,12 +101,14 @@ namespace RimThreaded
                 return false;
             }
 
-            Thing thing2 = PlantUtility.AdjacentSowBlocker(wantedPlantDef, c, map);
+            Thing thing2 = PlantUtility.AdjacentSowBlocker(localWantedPlantDef, c, map);
             if (thing2 != null)
             {
                 Plant plant2 = thing2 as Plant;
+                //Interlocked.Add(ref RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell, 100000);
                 if (plant2 != null && pawn.CanReserve(plant2, 1, -1, null, forced) && !plant2.IsForbidden(pawn))
                 {
+                    //Interlocked.Add(ref RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell, 100000);
                     IPlantToGrowSettable plantToGrowSettable = plant2.Position.GetPlantToGrowSettable(plant2.Map);
                     if (plantToGrowSettable == null || plantToGrowSettable.GetPlantDefToGrow() != plant2.def)
                     {
@@ -121,11 +121,11 @@ namespace RimThreaded
                 return false;
             }
 
-            ThingDef thingdef = wantedPlantDef;
-            if (thingdef != null && thingdef.plant != null && thingdef.plant.sowMinSkill > 0 && pawn != null && pawn.skills != null && pawn.skills.GetSkill(SkillDefOf.Plants).Level < wantedPlantDef.plant.sowMinSkill)
+            ThingDef thingdef = localWantedPlantDef;
+            if (thingdef != null && thingdef.plant != null && thingdef.plant.sowMinSkill > 0 && pawn != null && pawn.skills != null && pawn.skills.GetSkill(SkillDefOf.Plants).Level < localWantedPlantDef.plant.sowMinSkill)
             {
                 WorkGiver workGiver = __instance;
-                JobFailReason.Is("UnderAllowedSkill".Translate(wantedPlantDef.plant.sowMinSkill), workGiver.def.label);
+                JobFailReason.Is("UnderAllowedSkill".Translate(localWantedPlantDef.plant.sowMinSkill), workGiver.def.label);
                 __result = null;
                 return false;
             }
@@ -137,13 +137,13 @@ namespace RimThreaded
                 {
                     continue;
                 }
-
+                //Interlocked.Add(ref RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell, 1);
                 if (!pawn.CanReserve(thing3, 1, -1, null, forced))
                 {
                     __result = null;
                     return false;
                 }
-
+                //Interlocked.Add(ref RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell, 1);
                 if (thing3.def.category == ThingCategory.Plant)
                 {
                     if (!thing3.IsForbidden(pawn))
@@ -166,14 +166,14 @@ namespace RimThreaded
                 return false;
             }
 
-            if (!wantedPlantDef.CanEverPlantAt_NewTemp(c, map) || !PlantUtility.GrowthSeasonNow(c, map, forSowing: true) || !pawn.CanReserve(c, 1, -1, null, forced))
+            if (!localWantedPlantDef.CanEverPlantAt_NewTemp(c, map) || !PlantUtility.GrowthSeasonNow(c, map, forSowing: true) || !pawn.CanReserve(c, 1, -1, null, forced))
             {
                 __result = null;
                 return false;
             }
 
             Job job = JobMaker.MakeJob(JobDefOf.Sow, c);
-            job.plantDefToSow = wantedPlantDef;
+            job.plantDefToSow = localWantedPlantDef;
             __result = job;
             return false;
         }

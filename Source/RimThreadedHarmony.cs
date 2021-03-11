@@ -494,8 +494,8 @@ namespace RimThreaded
 			original = typeof(GenClosest);
 			patched = typeof(GenClosest_Patch);
 			Prefix(original, patched, "RegionwiseBFSWorker");
-			//Prefix(original, patched, "ClosestThingReachable");
-			Prefix(original, patched, "ClosestThing_Global");
+			//Prefix(original, patched, "ClosestThingReachable"); //Debugging
+			//Prefix(original, patched, "ClosestThing_Global"); //Debugging
 
 			//PawnUtility
 			original = typeof(PawnUtility);
@@ -1040,7 +1040,7 @@ namespace RimThreaded
 			//JobGiver_Work
 			original = typeof(JobGiver_Work);
 			patched = typeof(JobGiver_Work_Patch);
-			//Prefix(original, patched, "TryIssueJobPackage");
+			Prefix(original, patched, "TryIssueJobPackage");
 
 			//ThingCountUtility
 			original = typeof(ThingCountUtility);
@@ -1627,6 +1627,14 @@ namespace RimThreaded
 			original = typeof(JobGiver_Haul);
 			patched = typeof(JobGiver_Haul_Patch);
 			Prefix(original, patched, "TryGiveJob");
+
+			original = typeof(WorkGiver_Grower);
+			patched = typeof(WorkGiver_Grower_Patch);
+			//Prefix(original, patched, "WorkGiver_Grower_Patch");
+
+			original = typeof(WorkGiver_GrowerSow);
+			patched = typeof(WorkGiver_GrowerSow_Patch);
+			Prefix(original, patched, "JobOnCell");
 
 			//JoyGiver_Ingest
 			//original = typeof(JoyGiver_Ingest);

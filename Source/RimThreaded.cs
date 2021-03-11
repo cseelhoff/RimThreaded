@@ -15,6 +15,8 @@ namespace RimThreaded
     [StaticConstructorOnStartup]
     public class RimThreaded
     {
+        public static int WorkGiver_GrowerSow_Patch_JobOnCell; //debugging
+
         public static DateTime lastClosestThingGlobal = DateTime.Now;
 
         public static int maxThreads = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1), 128);
@@ -147,6 +149,8 @@ namespace RimThreaded
         public static object allSustainersLock = new object();
         public static object biomeAmbientSustainersLock = new object();
         public static object map_AttackTargetReservationManager_reservations_Lock = new object();
+
+
         public class ThreadInfo
         {
             public EventWaitHandle mainRequestWait = new AutoResetEvent(false);

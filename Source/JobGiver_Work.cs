@@ -172,7 +172,42 @@ namespace RimThreaded
 							}
 							else
 							{
-								thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+								//TODO: use better ThingRequest groups
+								if (
+									workGiver.def.defName.Equals("DoctorFeedAnimals") ||
+									workGiver.def.defName.Equals("DoctorFeedHumanlikes") ||
+									workGiver.def.defName.Equals("DoctorTendToAnimals") ||
+									workGiver.def.defName.Equals("DoctorTendToHumanlikes") ||
+									workGiver.def.defName.Equals("DoBillsUseCraftingSpot") ||
+									workGiver.def.defName.Equals("DoctorTendEmergency") ||
+									workGiver.def.defName.Equals("HaulCorpses") ||
+									workGiver.def.defName.Equals("FillFermentingBarrel") ||
+									//workGiver.def.defName.Equals("HaulGeneral") ||
+									workGiver.def.defName.Equals("HandlingFeedPatientAnimals") ||
+									workGiver.def.defName.Equals("DoBillsButcherFlesh") ||
+									workGiver.def.defName.Equals("DoBillsCook") ||
+									workGiver.def.defName.Equals("DoBillsMakeApparel") ||
+									workGiver.def.defName.Equals("Train") ||
+									workGiver.def.defName.Equals("VisitSickPawn")
+								)
+								{
+									//ClosestThingReachable2 checks validator before CanReach
+									DateTime startTime = DateTime.Now;
+									thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
+									{
+										Log.Warning("ClosestThingReachable2 Took over 200ms for workGiver: " + workGiver.def.defName);
+									}
+								}
+								else
+                                {
+									DateTime startTime = DateTime.Now;
+									thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
+									{
+										Log.Warning("ClosestThingReachable Took over 200ms for workGiver: " + workGiver.def.defName);
+									}
+								}
 							}
 							if (thing != null)
 							{
@@ -188,22 +223,38 @@ namespace RimThreaded
 							prioritized = scanner.Prioritized;
 							allowUnreachable = scanner.AllowUnreachable;
 							maxPathDanger = scanner.MaxPathDanger(pawn);
-							IEnumerable<IntVec3> enumerable4 = scanner.PotentialWorkCellsGlobal(pawn);
-							IList<IntVec3> list2;
-							if ((list2 = (enumerable4 as IList<IntVec3>)) != null)
+							IEnumerable<IntVec3> enumerable4;
+							if (scanner is WorkGiver_Grower workGiver_Grower)
 							{
-								for (int k = 0; k < list2.Count; k++)
+								RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell = 0;
+								enumerable4 = WorkGiver_Grower_Patch.PotentialWorkCellsGlobalWithoutCanReach(workGiver_Grower, pawn);
+								List<IntVec3> SortedList = enumerable4.OrderBy(o => (o - pawnPosition).LengthHorizontalSquared).ToList();
+								foreach (IntVec3 item in SortedList)
 								{
-									ProcessCell(list2[k]);
-								}
+									ProcessCell(item);
+								}								
+								//Log.Message(RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell.ToString());
 							}
 							else
 							{
-								foreach (IntVec3 item in enumerable4)
+								enumerable4 = scanner.PotentialWorkCellsGlobal(pawn);
+								IList<IntVec3> list2;
+								if ((list2 = (enumerable4 as IList<IntVec3>)) != null)
 								{
-									ProcessCell(item);
+									for (int k = 0; k < list2.Count; k++)
+									{
+										ProcessCell(list2[k]);
+									}
+								}
+								else
+								{
+									foreach (IntVec3 item in enumerable4)
+									{
+										ProcessCell(item);
+									}
 								}
 							}
+
 						}
 					}
 					void ProcessCell(IntVec3 c)
@@ -213,7 +264,7 @@ namespace RimThreaded
 						float num3 = 0f;
 						if (prioritized)
 						{
-							if (!c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
+							if (num2 < closestDistSquared && !c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
 							{
 								if (!allowUnreachable && !pawn.CanReach(c, scanner.PathEndMode, maxPathDanger))
 								{

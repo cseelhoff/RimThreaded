@@ -369,13 +369,15 @@ namespace RimThreaded
 		}
 		public static bool CanReserve(ReservationManager __instance, ref bool __result, Pawn claimant, LocalTargetInfo target, int maxPawns = 1, int stackCount = -1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
 		{
+			Map mapInstance = map(__instance);
+
 			if (claimant == null)
 			{
 				Log.Error("CanReserve with null claimant");
 				return false;
 			}
 
-			if (!claimant.Spawned || claimant.Map != map(__instance))
+			if (!claimant.Spawned || claimant.Map != mapInstance)
 			{
 				return false;
 			}
@@ -385,7 +387,7 @@ namespace RimThreaded
 				return false;
 			}
 
-			if (target.HasThing && target.Thing.SpawnedOrAnyParentSpawned && target.Thing.MapHeld != map(__instance))
+			if (target.HasThing && target.Thing.SpawnedOrAnyParentSpawned && target.Thing.MapHeld != mapInstance)
 			{
 				return false;
 			}
@@ -396,20 +398,21 @@ namespace RimThreaded
 			{
 				return false;
 			}
+			
 
 			if (!ignoreOtherReservations)
 			{
-				if (map(__instance).physicalInteractionReservationManager.IsReserved(target) && !map(__instance).physicalInteractionReservationManager.IsReservedBy(claimant, target))
+				if (mapInstance.physicalInteractionReservationManager.IsReserved(target) && !mapInstance.physicalInteractionReservationManager.IsReservedBy(claimant, target))
 				{
 					return false;
 				}
-
-				for (int i = 0; i < reservations(__instance).Count; i++)
+				List<Reservation> reservationsInstance = reservations(__instance);
+				for (int i = 0; i < reservationsInstance.Count; i++)
 				{
 					Reservation reservation;
 					try
 					{
-						reservation = reservations(__instance)[i];
+						reservation = reservationsInstance[i];
 					}
 					catch (ArgumentOutOfRangeException)
 					{
@@ -425,12 +428,12 @@ namespace RimThreaded
 
 				int num3 = 0;
 				int num4 = 0;
-				for (int j = 0; j < reservations(__instance).Count; j++)
+				for (int j = 0; j < reservationsInstance.Count; j++)
 				{
 					Reservation reservation2;
 					try
 					{
-						reservation2 = reservations(__instance)[j];
+						reservation2 = reservationsInstance[j];
 					}
 					catch (ArgumentOutOfRangeException)
 					{
