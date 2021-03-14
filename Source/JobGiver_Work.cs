@@ -141,10 +141,11 @@ namespace RimThreaded
 					Job job2 = workGiver.NonScanJob(pawn);
 					if (job2 != null)
 					{
-						__result = new ThinkResult(job2, __instance, list[j].def.tagToGive);
+						__result = new ThinkResult(job2, __instance, workGiver.def.tagToGive);
 						return false;
 					}
 					scanner = (workGiver as WorkGiver_Scanner);
+
 					if (scanner != null)
 					{
 						if (scanner.def.scanThings)
@@ -159,7 +160,9 @@ namespace RimThreaded
 								{
 									enumerable2 = pawn.Map.listerThings.ThingsMatching(scanner.PotentialWorkThingRequest);
 								}
-								thing = ((!scanner.AllowUnreachable) ? GenClosest.ClosestThing_Global_Reachable(pawn.Position, pawn.Map, enumerable2, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, (Thing x) => scanner.GetPriority(pawn, x)) : GenClosest.ClosestThing_Global(pawn.Position, enumerable2, 99999f, validator, (Thing x) => scanner.GetPriority(pawn, x)));
+								thing = ((!scanner.AllowUnreachable) ? 
+									GenClosest.ClosestThing_Global_Reachable(pawn.Position, pawn.Map, enumerable2, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)),    9999f, validator, (Thing x) => scanner.GetPriority(pawn, x)) : 
+									GenClosest.ClosestThing_Global(pawn.Position, enumerable2,     99999f, validator, (Thing x) => scanner.GetPriority(pawn, x)));
 							}
 							else if (scanner.AllowUnreachable)
 							{
@@ -193,7 +196,10 @@ namespace RimThreaded
 								{
 									//ClosestThingReachable2 checks validator before CanReach
 									DateTime startTime = DateTime.Now;
+									
+									//long
 									thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+									
 									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
 									{
 										Log.Warning("ClosestThingReachable2 Took over 200ms for workGiver: " + workGiver.def.defName);
@@ -227,12 +233,14 @@ namespace RimThreaded
 							if (scanner is WorkGiver_Grower workGiver_Grower)
 							{
 								RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell = 0;
+								
 								enumerable4 = WorkGiver_Grower_Patch.PotentialWorkCellsGlobalWithoutCanReach(workGiver_Grower, pawn);
 								List<IntVec3> SortedList = enumerable4.OrderBy(o => (o - pawnPosition).LengthHorizontalSquared).ToList();
 								foreach (IntVec3 item in SortedList)
 								{
-									ProcessCell(item);
-								}								
+									ProcessCell(item); //long
+								}
+								
 								//Log.Message(RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell.ToString());
 							}
 							else
@@ -259,38 +267,29 @@ namespace RimThreaded
 					}
 					void ProcessCell(IntVec3 c)
 					{
-						bool flag = false;
-						float num2 = (c - pawnPosition).LengthHorizontalSquared;
-						float num3 = 0f;
+						float newDistanceSquared = (c - pawnPosition).LengthHorizontalSquared;
+						float newPriority = 0f;
+
 						if (prioritized)
 						{
-							if (num2 < closestDistSquared && !c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
+							newPriority = scanner.GetPriority(pawn, c);
+							if (newPriority < bestPriority)
 							{
-								if (!allowUnreachable && !pawn.CanReach(c, scanner.PathEndMode, maxPathDanger))
-								{
-									return;
-								}
-								num3 = scanner.GetPriority(pawn, c);
-								if (num3 > bestPriority || (num3 == bestPriority && num2 < closestDistSquared))
-								{
-									flag = true;
-								}
+								return;
 							}
 						}
-						else if (num2 < closestDistSquared && !c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
+
+						if (newDistanceSquared < closestDistSquared && !c.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, c))
 						{
 							if (!allowUnreachable && !pawn.CanReach(c, scanner.PathEndMode, maxPathDanger))
 							{
 								return;
 							}
-							flag = true;
-						}
-						if (flag)
-						{
+
 							bestTargetOfLastPriority = new TargetInfo(c, pawn.Map);
 							scannerWhoProvidedTarget = scanner;
-							closestDistSquared = num2;
-							bestPriority = num3;
+							closestDistSquared = newDistanceSquared;
+							bestPriority = newPriority;
 						}
 					}
 				}

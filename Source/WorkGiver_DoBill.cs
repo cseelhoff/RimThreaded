@@ -33,15 +33,23 @@ namespace RimThreaded
 
         public bool Get_RegionProcessor(Region r)
         {
-			List<Thing> thingList = r.ListerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.HaulableEver));
-			for (int index = 0; index < thingList.Count; ++index)
+			RecipeDef recipe = bill.recipe;
+            Dictionary<float, List<ThingDef>> thingDefValues = RimThreaded.recipeThingDefValues[recipe];
+			foreach (float value in RimThreaded.sortedRecipeValues[recipe])
 			{
-				Thing thing = thingList[index];
-				if (!processedThings.Contains(thing) && ReachabilityWithinRegion.ThingFromRegionListerReachable(
-					thing, r, PathEndMode.ClosestTouch, pawn) && (baseValidator(thing) && !(thing.def.IsMedicine & billGiverIsPawn)))
+				foreach (ThingDef thingDef in thingDefValues[value])
 				{
-					newRelevantThings.Add(thing);
-					processedThings.Add(thing);
+					List<Thing> thingList = r.ListerThings.ThingsOfDef(thingDef);
+					for (int index = 0; index < thingList.Count; ++index)
+					{
+						Thing thing = thingList[index];
+						if (!processedThings.Contains(thing) && ReachabilityWithinRegion.ThingFromRegionListerReachable(
+							thing, r, PathEndMode.ClosestTouch, pawn) && (baseValidator(thing) && !(thing.def.IsMedicine & billGiverIsPawn)))
+						{
+							newRelevantThings.Add(thing);
+							processedThings.Add(thing);
+						}
+					}
 				}
 			}
 			++regionsProcessed;
@@ -278,6 +286,7 @@ namespace RimThreaded
 
 			RegionProcessor regionProcessor = workGiver_DoBill_RegionProcessor.Get_RegionProcessor; //CHANGE
 			RegionTraverser.BreadthFirstTraverse(rootReg, entryCondition, regionProcessor, 99999);
+
 			//WorkGiver_DoBill.relevantThings.Clear(); REMOVE
 			//WorkGiver_DoBill.newRelevantThings.Clear(); REMOVE
 			//WorkGiver_DoBill.processedThings.Clear(); REMOVE
@@ -292,18 +301,19 @@ namespace RimThreaded
 	  Bill bill,
 	  List<ThingCount> chosen)
 		{
+			RecipeDef recipe = bill.recipe;
 			chosen.Clear();
-			availableThings.Sort((t, t2) => bill.recipe.IngredientValueGetter.ValuePerUnitOf(t2.def).CompareTo(bill.recipe.IngredientValueGetter.ValuePerUnitOf(t.def)));
-			for (int index1 = 0; index1 < bill.recipe.ingredients.Count; ++index1)
+			availableThings.Sort((t, t2) => recipe.IngredientValueGetter.ValuePerUnitOf(t2.def).CompareTo(recipe.IngredientValueGetter.ValuePerUnitOf(t.def)));
+			for (int index1 = 0; index1 < recipe.ingredients.Count; ++index1)
 			{
-				IngredientCount ingredient = bill.recipe.ingredients[index1];
+				IngredientCount ingredient = recipe.ingredients[index1];
 				float baseCount = ingredient.GetBaseCount();
 				for (int index2 = 0; index2 < availableThings.Count; ++index2)
 				{
 					Thing availableThing = availableThings[index2];
 					if (ingredient.filter.Allows(availableThing) && (ingredient.IsFixedIngredient || bill.ingredientFilter.Allows(availableThing)))
 					{
-						float num = bill.recipe.IngredientValueGetter.ValuePerUnitOf(availableThing.def);
+						float num = recipe.IngredientValueGetter.ValuePerUnitOf(availableThing.def);
 						int countToAdd = Mathf.Min(Mathf.CeilToInt(baseCount / num), availableThing.stackCount);
 						ThingCountUtility.AddToList(chosen, availableThing, countToAdd);
 						baseCount -= countToAdd * num;

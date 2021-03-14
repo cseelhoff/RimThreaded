@@ -17,6 +17,12 @@ namespace RimThreaded
     {
         public static int WorkGiver_GrowerSow_Patch_JobOnCell; //debugging
 
+        //TODO clear on new game or load
+        public static HashSet<ThingDef> recipeThingDefs = new HashSet<ThingDef>();
+        public static Dictionary<RecipeDef, List<float>> sortedRecipeValues = new Dictionary<RecipeDef, List<float>>();
+        public static Dictionary<RecipeDef, Dictionary<float, List<ThingDef>>> recipeThingDefValues = new Dictionary<RecipeDef, Dictionary<float, List<ThingDef>>>();
+        public static Dictionary<Bill_Production, List<Pawn>> billFreeColonistsSpawned = new Dictionary<Bill_Production, List<Pawn>>();
+
         public static DateTime lastClosestThingGlobal = DateTime.Now;
 
         public static int maxThreads = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1), 128);

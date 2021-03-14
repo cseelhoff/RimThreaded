@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using RimWorld;
 using System.Collections.Generic;
 using Verse;
 
@@ -23,39 +24,64 @@ namespace RimThreaded
 
 		public static bool Add(ListerThings __instance, Thing t)
 		{
-			if (!ListerThings.EverListable(t.def, __instance.use))
+			ThingDef thingDef = t.def;
+			if (!ListerThings.EverListable(thingDef, __instance.use))
 				return false;
 			List<Thing> thingList1;
-			lock (listsByDef(__instance)) //ADDED - updated
+			lock (__instance)
 			{
-				if (!listsByDef(__instance).TryGetValue(t.def, out thingList1))
+				if (!listsByDef(__instance).TryGetValue(thingDef, out thingList1))
 				{
 					thingList1 = new List<Thing>();
-					listsByDef(__instance).Add(t.def, thingList1);
+					listsByDef(__instance).Add(thingDef, thingList1);
+					if (!RimThreaded.recipeThingDefs.Contains(thingDef))
+					{
+						lock (RimThreaded.recipeThingDefs)
+						{
+							Log.Message("RimThreaded is building new recipe caches for: " + thingDef.ToString());
+							RimThreaded.recipeThingDefs.Add(thingDef);
+							foreach (RecipeDef recipe in DefDatabase<RecipeDef>.AllDefs)
+							{
+								if (!RimThreaded.sortedRecipeValues.TryGetValue(recipe, out List<float> valuesPerUnitOf))
+								{
+									valuesPerUnitOf = new List<float>();
+									RimThreaded.sortedRecipeValues[recipe] = valuesPerUnitOf;
+								}
+								if (!RimThreaded.recipeThingDefValues.TryGetValue(recipe, out Dictionary<float, List<ThingDef>> thingDefValues))
+								{
+									thingDefValues = new Dictionary<float, List<ThingDef>>();
+									RimThreaded.recipeThingDefValues[recipe] = thingDefValues;
+								}
+								float valuePerUnitOf = recipe.IngredientValueGetter.ValuePerUnitOf(thingDef);
+								if (!thingDefValues.TryGetValue(valuePerUnitOf, out List<ThingDef> thingDefs))
+								{
+									thingDefs = new List<ThingDef>();
+									thingDefValues[valuePerUnitOf] = thingDefs;
+									valuesPerUnitOf.Add(valuePerUnitOf);
+									valuesPerUnitOf.Sort();
+								}
+								thingDefs.Add(thingDef);
+							}
+						}
+					}					
 				}
-			}
-			lock (thingList1) //ADDED
-			{
 				thingList1.Add(t);
 			}
-			foreach (ThingRequestGroup allGroup in ThingListGroupHelper.AllGroups)
+			
+
+			ThingRequestGroup[] allGroups = ThingListGroupHelper.AllGroups;
+			foreach (ThingRequestGroup thingRequestGroup in allGroups)
 			{
-				if ((__instance.use != ListerThingsUse.Region || allGroup.StoreInRegion()) && allGroup.Includes(t.def))
+				if ((__instance.use != ListerThingsUse.Region || thingRequestGroup.StoreInRegion()) && thingRequestGroup.Includes(thingDef))
 				{
-					List<Thing> thingList2;
-					lock (listsByGroup(__instance)) //ADDED - updated
+					List<Thing> list = listsByGroup(__instance)[(uint)thingRequestGroup];
+					if (list == null)
 					{
-						thingList2 = listsByGroup(__instance)[(int)allGroup];
-						if (thingList2 == null)
-						{
-							thingList2 = new List<Thing>();
-							listsByGroup(__instance)[(int)allGroup] = thingList2;
-						}
+						list = new List<Thing>();
+						listsByGroup(__instance)[(uint)thingRequestGroup] = list;
 					}
-					lock (thingList2) //ADDED
-					{
-						thingList2.Add(t);
-					}
+
+					list.Add(t);
 				}
 			}
 			return false;

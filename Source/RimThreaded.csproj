@@ -289,7 +289,6 @@
     <Compile Include="ContentFinder.cs" />
     <Compile Include="DynamicDrawManager.cs" />
     <Compile Include="Explosion.cs" />
-    <Compile Include="Fire.cs" />
     <Compile Include="FireUtility.cs" />
     <Compile Include="FloodFiller.cs" />
     <Compile Include="GenClosest.cs" />

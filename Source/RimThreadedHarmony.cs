@@ -340,7 +340,7 @@ namespace RimThreaded
 			patched = typeof(ListerThings_Patch);
 			Prefix(original, patched, "ThingsOfDef"); //maybe modify instead: JoyGiver_TakeDrug.BestIngestItem...  List<Thing> list = pawn.Map.listerThings.ThingsOfDef(JoyGiver_TakeDrug.takeableDrugs[k]);
 													  //Prefix(original, patched, "Remove");
-													  //Prefix(original, patched, "Add");
+													  Prefix(original, patched, "Add");
 													  //patched = typeof(ListerThings_Transpile);
 													  //Transpile(original, patched, "Remove");
 													  //Transpile(original, patched, "Add");
@@ -351,8 +351,8 @@ namespace RimThreaded
 			Transpile(original, patched, "SpawnSetup");
 			Transpile(original, patched, "DeSpawn");
 			Transpile(original, patched, "get_FlammableNow");
-			//patched = typeof(Thing_Patch);
-			//Prefix(original, patched, "get_FlammableNow");
+			patched = typeof(Thing_Patch);
+			Postfix(original, patched, "SpawnSetup");
 
 			//JobMaker
 			original = typeof(JobMaker);
@@ -674,9 +674,6 @@ namespace RimThreaded
 			original = typeof(Fire);
 			patched = typeof(Fire_Transpile);
 			Transpile(original, patched, "DoComplexCalcs");
-			//patched = typeof(Fire_Patch);
-			//Prefix(original, patched, "DoComplexCalcs");
-			//Prefix(original, patched, "Tick");
 
 			//Projectile			
 			original = typeof(Projectile);
@@ -686,21 +683,12 @@ namespace RimThreaded
 			Prefix(original, patched, "CheckForFreeInterceptBetween");
 			Prefix(original, patched, "CheckForFreeIntercept");
 
-
 			//GenGrid_Patch			
 			original = typeof(GenGrid);
 			patched = typeof(GenGrid_Patch);
 			Prefix(original, patched, "InBounds", new Type[] { typeof(IntVec3), typeof(Map) });
 			Prefix(original, patched, "Standable");
 			Prefix(original, patched, "Walkable");
-
-			//Explosion
-			//original = typeof(Explosion);
-			//patched = typeof(Explosion_Patch);
-			//Prefix(original, patched, "Tick");
-			//Prefix(original, patched, "StartExplosion");
-			//Prefix(original, patched, "SpawnSetup");
-			//Prefix(original, patched, "DeSpawn");
 
 			//AttackTargetReservationManager
 			original = typeof(AttackTargetReservationManager);
@@ -735,15 +723,23 @@ namespace RimThreaded
 			//ReservationManager
 			original = typeof(ReservationManager);
 			patched = typeof(ReservationManager_Patch);
-			Prefix(original, patched, "ReleaseClaimedBy");
+			Prefix(original, patched, "CanReserve");
+			Prefix(original, patched, "CanReserveStack");
 			Prefix(original, patched, "Reserve");
 			Prefix(original, patched, "Release");
+			Prefix(original, patched, "ReleaseAllForTarget");
+			Prefix(original, patched, "ReleaseClaimedBy");
+			Prefix(original, patched, "ReleaseAllClaimedBy");
 			Prefix(original, patched, "FirstReservationFor");
 			Prefix(original, patched, "IsReservedByAnyoneOf");
 			Prefix(original, patched, "FirstRespectedReserver");
-			Prefix(original, patched, "CanReserve");
-			Prefix(original, patched, "CanReserveStack");
-			Prefix(original, patched, "ReleaseAllForTarget");
+			Prefix(original, patched, "ReservedBy", new Type[] { typeof(LocalTargetInfo), typeof(Pawn), typeof(Job) });
+			//Prefix(original, patched, "ReservedByJobDriver_TakeToBed"); //TODO FIX!
+			Prefix(original, patched, "AllReservedThings");
+			Prefix(original, patched, "DebugString");
+			Prefix(original, patched, "DebugDrawReservations");
+			Prefix(original, patched, "ExposeData");
+
 			patched = typeof(ReservationManager_Transpile);
 			//Transpile(original, patched, "CanReserve");
 
@@ -756,8 +752,6 @@ namespace RimThreaded
 			original = typeof(Verb);
 			patched = typeof(Verb_Patch);
 			Prefix(original, patched, "get_DirectOwner");
-			//Prefix(original, patched, "CanHitFromCellIgnoringRange");
-			//Prefix(original, patched, "TryFindShootLineFromTo");
 			patched = typeof(Verb_Transpile);
 			Transpile(original, patched, "TryFindShootLineFromTo");
 			Transpile(original, patched, "CanHitFromCellIgnoringRange");
@@ -782,9 +776,6 @@ namespace RimThreaded
 			MethodInfo pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "DeRegisterPawn_FreeHumanlikesSpawnedOfFaction");
 			harmony.Patch(oMethodDeRegisterPawn, postfix: new HarmonyMethod(pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction));
 
-			//Prefix(original, patched, "SpawnedPawnsInFaction");
-			//Prefix(original, patched, "RegisterPawn");
-			//Prefix(original, patched, "DeRegisterPawn");
 			patched = typeof(MapPawns_Transpile);
 			Transpile(original, patched, "RegisterPawn");
 			Transpile(original, patched, "DeRegisterPawn");
@@ -803,8 +794,6 @@ namespace RimThreaded
 
 			//Pawn_WorkSettings
 			original = typeof(Pawn_WorkSettings);
-			//patched = typeof(Pawn_WorkSettings_Patch);
-			//Prefix(original, patched, "CacheWorkGiversInOrder");
 			patched = typeof(Pawn_WorkSettings_Transpile);
 			Transpile(original, patched, "CacheWorkGiversInOrder");
 
@@ -835,14 +824,8 @@ namespace RimThreaded
 			Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
 			Prefix(original, patched, "get_ContainedAndAdjacentThings");
 			Prefix(original, patched, "get_Neighbors");
-			
-
-			patched = typeof(Room_Transpile);
-			//Transpile(original, patched, "RemoveRegion");
-
 
 			//LongEventHandler
-
 			original = typeof(LongEventHandler);
 			patched = typeof(LongEventHandler_Patch);
 			Prefix(original, patched, "ExecuteToExecuteWhenFinished");
@@ -885,7 +868,6 @@ namespace RimThreaded
 			//PawnCapacitiesHandler
 			original = typeof(PawnCapacitiesHandler);
 			patched = typeof(PawnCapacitiesHandler_Patch);
-			//Prefix(original, patched, "GetLevel");
 			Prefix(original, patched, "Notify_CapacityLevelsDirty");
 			Prefix(original, patched, "Clear");
 			Prefix(original, patched, "CapableOf");
@@ -899,8 +881,6 @@ namespace RimThreaded
 			original = typeof(PathFinder);
 			patched = typeof(PathFinder_Transpile);
 			Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
-			//patched = typeof(PathFinder_Patch);
-			//Prefix(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
 
 			//PawnPath
 			original = typeof(PawnPath);
@@ -921,18 +901,11 @@ namespace RimThreaded
 					break;
 				}
 			}
-			//public static int RemoveAll<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, Predicate<KeyValuePair<TKey, TValue>> predicate)
-			//Type pType = typeof(Predicate<>).MakeGenericType(new Type[] { typeof(KeyValuePair<,>) });
-			//originalRemoveAll = AccessTools.Method(original, "RemoveAll", new Type[] { typeof(Dictionary<,>), pType });
 
 			MethodInfo originalRemoveAllGeneric = originalRemoveAll.MakeGenericMethod(new Type[] { typeof(object), typeof(object) });
 			MethodInfo patchedRemoveAll = patched.GetMethod("RemoveAll_Object_Object_Patch");
 			HarmonyMethod prefixRemoveAll = new HarmonyMethod(patchedRemoveAll);
 			harmony.Patch(originalRemoveAllGeneric, prefix: prefixRemoveAll);
-			//patched = typeof(GenCollection_Transpile);
-			//MethodInfo transpileRemoveAll = patched.GetMethod("RemoveAll");
-			//HarmonyMethod harmonyRemoveAll = new HarmonyMethod(transpileRemoveAll);
-			//harmony.Patch(originalRemoveAll, transpiler: harmonyRemoveAll);
 
 			//SoundSizeAggregator
 			original = typeof(SoundSizeAggregator);
@@ -950,16 +923,12 @@ namespace RimThreaded
 			//Transpile(original, patched, "AddDirect"); TODO re-add transpile
 			Transpile(original, patched, "CacheMissingPartsCommonAncestors");
 			patched = typeof(HediffSet_Patch);
-			//Prefix(original, patched, "CacheMissingPartsCommonAncestors");
 			Prefix(original, patched, "AddDirect");
 			Prefix(original, patched, "PartIsMissing");
 			Prefix(original, patched, "HasDirectlyAddedPartFor");
 			Prefix(original, patched, "GetFirstHediffOfDef");
 			Prefix(original, patched, "HasTendableHediff");
 			Prefix(original, patched, "HasImmunizableNotImmuneHediff");
-			//Prefix(original, patched, "GetPartHealth");
-			//Prefix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPrefix", false);
-			//Postfix(original, patched, "CacheMissingPartsCommonAncestors", "CacheMissingPartsCommonAncestorsPostfix");
 			Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
 
 			//LanguageWordInfo
@@ -975,8 +944,6 @@ namespace RimThreaded
 
 			//Pawn_InteractionsTracker
 			original = typeof(Pawn_InteractionsTracker);
-			//patched = typeof(Pawn_InteractionsTracker_Patch);
-			//Prefix(original, patched, "TryInteractRandomly");
 			patched = typeof(Pawn_InteractionsTracker_Transpile);
 			Transpile(original, patched, "TryInteractRandomly");
 
@@ -994,8 +961,6 @@ namespace RimThreaded
 			original = typeof(FoodUtility);
 			patched = typeof(FoodUtility_Transpile);
 			Transpile(original, patched, "FoodOptimality");
-			patched = typeof(FoodUtility_Patch);
-			//Prefix(original, patched, "FoodOptimality");
 
 			//TendUtility
 			original = typeof(TendUtility);
@@ -1011,7 +976,6 @@ namespace RimThreaded
 			original = typeof(RegionAndRoomUpdater);
 			patched = typeof(RegionAndRoomUpdater_Patch);
 			Prefix(original, patched, "FloodAndSetRoomGroups");
-			//Prefix(original, patched, "CombineNewAndReusedRoomsIntoContiguousGroups");
 			Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
 
 			//GenRadial
@@ -1031,8 +995,6 @@ namespace RimThreaded
 
 			//WorkGiver_DoBill
 			original = typeof(WorkGiver_DoBill);
-			patched = typeof(WorkGiver_DoBill_Patch);
-			//Prefix(original, patched, "TryFindBestBillIngredients");
 			patched = typeof(WorkGiver_DoBill_Transpile);
 			Transpile(original, patched, "TryFindBestBillIngredients");
 			Transpile(original, patched, "AddEveryMedicineToRelevantThings");
@@ -1626,7 +1588,7 @@ namespace RimThreaded
 
 			original = typeof(JobGiver_Haul);
 			patched = typeof(JobGiver_Haul_Patch);
-			Prefix(original, patched, "TryGiveJob");
+			//Prefix(original, patched, "TryGiveJob"); debugging
 
 			original = typeof(WorkGiver_Grower);
 			patched = typeof(WorkGiver_Grower_Patch);
