@@ -1,49 +1,34 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
 using Verse.Noise;
+using static HarmonyLib.AccessTools;
+using System.Reflection;
 
 namespace RimThreaded
 {
 
     public class WindManager_Patch
     {
-        public static AccessTools.FieldRef<WindManager, float> plantSwayHead =
-            AccessTools.FieldRefAccess<WindManager, float>("plantSwayHead");
-        public static AccessTools.FieldRef<WindManager, float> cachedWindSpeed =
-            AccessTools.FieldRefAccess<WindManager, float>("cachedWindSpeed");
-        public static AccessTools.FieldRef<WindManager, ModuleBase> windNoise =
-            AccessTools.FieldRefAccess<WindManager, ModuleBase>("windNoise");
-        public static AccessTools.FieldRef<WindManager, Map> map =
-            AccessTools.FieldRefAccess<WindManager, Map>("map");
+        public static FieldRef<WindManager, float> plantSwayHead = FieldRefAccess<WindManager, float>("plantSwayHead");
+        public static FieldRef<WindManager, float> cachedWindSpeed = FieldRefAccess<WindManager, float>("cachedWindSpeed");
+        public static FieldRef<WindManager, ModuleBase> windNoise = FieldRefAccess<WindManager, ModuleBase>("windNoise");
+        public static FieldRef<WindManager, Map> map = FieldRefAccess<WindManager, Map>("map");
 
         private static readonly FloatRange WindSpeedRange =
-            AccessTools.StaticFieldRefAccess<FloatRange>(typeof(WindManager), "WindSpeedRange");
+            StaticFieldRefAccess<FloatRange>(typeof(WindManager), "WindSpeedRange");
         public static List<Material> plantMaterials =
-            AccessTools.StaticFieldRefAccess<List<Material>>(typeof(WindManager), "plantMaterials");
-        private static float BaseWindSpeedAt2(WindManager __instance, int ticksAbs)
-        {
-            if (windNoise(__instance) == null)
-            {
-                int seed = Gen.HashCombineInt(map(__instance).Tile, 122049541) ^ Find.World.info.Seed;
-                windNoise(__instance) = new Perlin(3.9999998989515007E-05, 2.0, 0.5, 4, seed, QualityMode.Medium);
-                windNoise(__instance) = new ScaleBias(1.5, 0.5, windNoise(__instance));
-                windNoise(__instance) = new Clamp(WindSpeedRange.min, WindSpeedRange.max, windNoise(__instance));
-            }
+            StaticFieldRefAccess<List<Material>>(typeof(WindManager), "plantMaterials");
 
-            return (float)windNoise(__instance).GetValue(ticksAbs, 0.0, 0.0);
-        }
+        private static readonly MethodInfo methodBaseWindSpeedAt =
+            Method(typeof(WindManager), "BaseWindSpeedAt", new Type[] { typeof(int) });
+        private static readonly Func<WindManager, int, float> funcBaseWindSpeedAt =
+            (Func<WindManager, int, float>)Delegate.CreateDelegate(typeof(Func<WindManager, int, float>), methodBaseWindSpeedAt);
 
         public static bool WindManagerTick(WindManager __instance)
         {
-            cachedWindSpeed(__instance) = BaseWindSpeedAt2(__instance, Find.TickManager.TicksAbs) * map(__instance).weatherManager.CurWindSpeedFactor;
+            cachedWindSpeed(__instance) = funcBaseWindSpeedAt(__instance, Find.TickManager.TicksAbs) * map(__instance).weatherManager.CurWindSpeedFactor;
             float curWindSpeedOffset = map(__instance).weatherManager.CurWindSpeedOffset;
             if (curWindSpeedOffset > 0f)
             {

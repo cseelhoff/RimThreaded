@@ -28,7 +28,7 @@ namespace RimThreaded
                 Log.Error("Did FindClosestThing with start out of bounds (" + start + "), thingReq=" + thingReq, false);
                 return true;
             }
-            return thingReq.group == ThingRequestGroup.Nothing || (thingReq.IsUndefined || map.listerThings.ThingsMatching(thingReq).Count == 0) && customGlobalSearchSet.EnumerableNullOrEmpty<Thing>();
+            return thingReq.group == ThingRequestGroup.Nothing || (thingReq.IsUndefined || map.listerThings.ThingsMatching(thingReq).Count == 0) && customGlobalSearchSet.EnumerableNullOrEmpty();
         }
 
         public static Thing ClosestThingReachable2(

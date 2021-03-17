@@ -36,7 +36,7 @@ namespace RimThreaded
                 }
                 TendUtility.SortByTendPriority(tmpHediffs);
             }
-            if (!tmpHediffs.Any<Hediff>())
+            if (!tmpHediffs.Any())
                 return false;
             Hediff tmpHediff1 = tmpHediffs[0];
             outHediffsToTend.Add(tmpHediff1);

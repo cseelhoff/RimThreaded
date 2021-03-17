@@ -19,7 +19,7 @@ namespace RimThreaded
         {
             List<Thought> tmpThoughts = new List<Thought>();
             __instance.GetMoodThoughts(group, tmpThoughts);
-            if (!tmpThoughts.Any<Thought>())
+            if (!tmpThoughts.Any())
             {
                 __result = 0.0f;
                 return false;
@@ -67,7 +67,7 @@ namespace RimThreaded
                 if ((double)tmpSocialThoughts[index].OpinionOffset() == 0.0)
                     tmpSocialThoughts.RemoveAt(index);
             }
-            if (!tmpSocialThoughts.Any<ISocialThought>())
+            if (!tmpSocialThoughts.Any())
             {
                 __result = 0;
                 return false;

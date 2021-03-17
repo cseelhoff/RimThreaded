@@ -14,7 +14,7 @@ namespace RimThreaded
 
         public static IEnumerable<CodeInstruction> MapUpdate(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            List<CodeInstruction> instructionsList = instructions.ToList<CodeInstruction>();
+            List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
             while (i < instructionsList.Count)
             {

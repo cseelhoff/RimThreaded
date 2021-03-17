@@ -1018,6 +1018,7 @@ namespace RimThreaded
 			original = typeof(WildPlantSpawner);
 			patched = typeof(WildPlantSpawner_Patch);
 			Prefix(original, patched, "CheckSpawnWildPlantAt");
+			Prefix(original, patched, "WildPlantSpawnerTickInternal");
 
 			//TileTemperaturesComp
 			original = typeof(TileTemperaturesComp);
@@ -1132,6 +1133,9 @@ namespace RimThreaded
 			original = typeof(WorldGrid);
 			patched = typeof(WorldGrid_Patch);
 			Prefix(original, patched, "IsNeighbor");
+			Prefix(original, patched, "GetNeighborId");
+			Prefix(original, patched, "GetTileNeighbor");
+			Prefix(original, patched, "FindMostReasonableAdjacentTileForDisplayedPathCost");
 
 			//ReservationUtility
 			original = typeof(ReservationUtility);
@@ -1259,11 +1263,6 @@ namespace RimThreaded
 			original = typeof(FactionManager);
 			patched = typeof(FactionManager_Patch);
 			Prefix(original, patched, "FactionManagerTick");
-
-			//WildPlantSpawner
-			original = typeof(WildPlantSpawner);
-			patched = typeof(WildPlantSpawner_Patch);
-			Prefix(original, patched, "WildPlantSpawnerTickInternal");
 
 			//SeasonUtility
 			original = typeof(SeasonUtility);
@@ -1502,6 +1501,7 @@ namespace RimThreaded
 			original = typeof(World);
 			patched = typeof(World_Patch);
 			Prefix(original, patched, "NaturalRockTypesIn");
+			Prefix(original, patched, "CoastDirectionAt");
 
 			//MemoryThoughtHandler
 			original = typeof(MemoryThoughtHandler);

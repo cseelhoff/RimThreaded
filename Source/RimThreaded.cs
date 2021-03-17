@@ -9,12 +9,24 @@ using System.Collections.Concurrent;
 using System.Threading;
 using Verse.AI;
 using static RimThreaded.PathFinder_Patch;
+using System.Reflection;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     [StaticConstructorOnStartup]
     public class RimThreaded
     {
+        private static readonly MethodInfo methodGetDesiredPlantsCountAt =
+            Method(typeof(WildPlantSpawner), "GetDesiredPlantsCountAt", new Type[] { typeof(IntVec3), typeof(IntVec3), typeof(float) });
+        private static readonly Func<WildPlantSpawner, IntVec3, IntVec3, float, float> funcGetDesiredPlantsCountAt =
+            (Func<WildPlantSpawner, IntVec3, IntVec3, float, float>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, IntVec3, float, float>), methodGetDesiredPlantsCountAt);
+
+        private static readonly MethodInfo methodCanRegrowAt =
+            Method(typeof(WildPlantSpawner), "CanRegrowAt", new Type[] { typeof(IntVec3) });
+        private static readonly Func<WildPlantSpawner, IntVec3, bool> funcCanRegrowAt =
+            (Func<WildPlantSpawner, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, bool>), methodCanRegrowAt);
+
         public static int WorkGiver_GrowerSow_Patch_JobOnCell; //debugging
 
         //TODO clear on new game or load
@@ -213,11 +225,11 @@ namespace RimThreaded
 
         private static void InitializeThread(ThreadInfo threadInfo)
         {
-            PathFinder_Patch.openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
-            PathFinder_Patch.statusOpenValue = 1;
-            PathFinder_Patch.statusClosedValue = 2;
-            PathFinder_Patch.disallowedCornerIndices = new List<int>(4);
-            PathFinder_Patch.regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
+            openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
+            statusOpenValue = 1;
+            statusClosedValue = 2;
+            disallowedCornerIndices = new List<int>(4);
+            regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
             Rand_Patch.tmpRange = new List<int>();
             Projectile_Patch.cellThingsFiltered = new List<Thing>();
             Projectile_Patch.checkedCells = new List<IntVec3>();
@@ -721,19 +733,19 @@ namespace RimThreaded
                         if ((wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) > wildPlantSpawner.WildPlantSpawnerArea)
                         {
                             Interlocked.Add(ref wildPlantSpawner.DesiredPlants2Tmp1000,
-                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(
-                                    wildPlantSpawner.WildPlantSpawnerMap, intVec, intVec,
+                                1000 * (int)funcGetDesiredPlantsCountAt(
+                                    wildPlantSpawner.WildPlantSpawnerInstance, intVec, intVec,
                                     wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
                             if (intVec.GetTerrain(wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerMap).fertility > 0f)
                             {
                                 Interlocked.Increment(ref wildPlantSpawner.FertilityCells2Tmp);
                             }
 
-                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(
-                                wildPlantSpawner.WildPlantSpawnerMap, intVec) ? 130f :
+                            float mtb = WildPlantSpawner_Patch.funcGoodRoofForCavePlant(
+                                wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
                                 wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
                             if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && 
-                                WildPlantSpawner_Patch.CanRegrowAt2(wildPlantSpawner.WildPlantSpawnerMap, intVec))
+                                funcCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))
                             {
                                 wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec,
                                     wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity, wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f);
@@ -742,18 +754,18 @@ namespace RimThreaded
                         else
                         {
                             Interlocked.Add(ref wildPlantSpawner.DesiredPlantsTmp1000,
-                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(
-                                    wildPlantSpawner.WildPlantSpawnerMap, intVec, intVec,
+                                1000 * (int)funcGetDesiredPlantsCountAt(
+                                    wildPlantSpawner.WildPlantSpawnerInstance, intVec, intVec,
                                     wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
                             if (intVec.GetTerrain(wildPlantSpawner.WildPlantSpawnerMap).fertility > 0f)
                             {
                                 Interlocked.Increment(ref wildPlantSpawner.FertilityCellsTmp);
                             }
 
-                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(wildPlantSpawner.WildPlantSpawnerMap, intVec) ? 130f :
+                            float mtb = WildPlantSpawner_Patch.funcGoodRoofForCavePlant(wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
                                 wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && 
-                                WildPlantSpawner_Patch.CanRegrowAt2(wildPlantSpawner.WildPlantSpawnerMap, intVec))
+                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) &&
+                                funcCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))
                             {
                                 wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, 
                                     wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity, wildPlantSpawner.DesiredPlants);

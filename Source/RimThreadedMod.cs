@@ -37,10 +37,10 @@ namespace RimThreaded
             Settings.DoWindowContents(inRect);
             if (Settings.maxThreads != RimThreaded.maxThreads)
             {
-                RimThreaded.maxThreads = RimThreadedMod.Settings.disablelimits ? Math.Max(Settings.maxThreads, 1) : Math.Min(Math.Max(Settings.maxThreads, 1), 128);
+                RimThreaded.maxThreads = Settings.disablelimits ? Math.Max(Settings.maxThreads, 1) : Math.Min(Math.Max(Settings.maxThreads, 1), 128);
                 RimThreaded.RestartAllWorkerThreads();
             }
-            RimThreaded.timeoutMS = RimThreadedMod.Settings.disablelimits ? Math.Max(Settings.timeoutMS, 1) : Math.Min(Math.Max(Settings.timeoutMS, 5000), 100000);
+            RimThreaded.timeoutMS = Settings.disablelimits ? Math.Max(Settings.timeoutMS, 1) : Math.Min(Math.Max(Settings.timeoutMS, 5000), 100000);
             RimThreaded.timeSpeedNormal = Settings.timeSpeedNormal;
             RimThreaded.timeSpeedFast = Settings.timeSpeedFast;
             RimThreaded.timeSpeedSuperfast = Settings.timeSpeedSuperfast;

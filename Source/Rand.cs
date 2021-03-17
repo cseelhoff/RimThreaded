@@ -84,7 +84,7 @@ namespace RimThreaded
             tmpRange.Clear();
             for (int index = from; index <= to; ++index)
                 tmpRange.Add(index);
-            tmpRange.Shuffle<int>();
+            tmpRange.Shuffle();
             int index1 = 0;
             for (int count = tmpRange.Count; index1 < count; ++index1)
             {

@@ -58,7 +58,7 @@ namespace RimThreaded
                 int num1 = Mathf.RoundToInt((float)__instance.lord.ownedPawns.Count * data.desiredBuilderFraction);
                 if (num1 <= 0)
                     num1 = 1;
-                int num2 = __instance.Map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial).Where<Thing>((Func<Thing, bool>)(b => b.def.hasInteractionCell && b.Faction == __instance.lord.faction && b.Position.InHorDistOf(__instance.FlagLoc, data.baseRadius))).Count<Thing>();
+                int num2 = __instance.Map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial).Where((Func<Thing, bool>)(b => b.def.hasInteractionCell && b.Faction == __instance.lord.faction && b.Position.InHorDistOf(__instance.FlagLoc, data.baseRadius))).Count();
                 if (num1 < num2)
                     num1 = num2;
                 int num3 = 0;
@@ -82,7 +82,7 @@ namespace RimThreaded
                 for (int index = 0; index < num4; ++index)
                 {
                     Pawn result;
-                    if (__instance.lord.ownedPawns.Where<Pawn>((Func<Pawn, bool>)(pa => !__instance.rememberedDuties.ContainsKey(pa) && CanBeBuilder(pa))).TryRandomElement<Pawn>(out result))
+                    if (__instance.lord.ownedPawns.Where((Func<Pawn, bool>)(pa => !__instance.rememberedDuties.ContainsKey(pa) && CanBeBuilder(pa))).TryRandomElement(out result))
                     {
                         lock (__instance.rememberedDuties)
                         {

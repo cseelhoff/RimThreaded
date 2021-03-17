@@ -57,13 +57,13 @@ namespace RimThreaded
             }
             if (__instance.Contains(item))
             {
-                Log.Warning("Tried to add " + item.ToStringSafe<Thing>() + " to ThingOwner but this item is already here.", false);
+                Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this item is already here.", false);
                 __result = false;
                 return false;
             }
             if (item.holdingOwner != null)
             {
-                Log.Warning("Tried to add " + item.ToStringSafe<Thing>() + " to ThingOwner but this thing is already in another container. owner=" + __instance.Owner.ToStringSafe<IThingHolder>() + ", current container owner=" + item.holdingOwner.Owner.ToStringSafe<IThingHolder>() + ". Use TryAddOrTransfer, TryTransferToContainer, or remove the item before adding it.", false);
+                Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this thing is already in another container. owner=" + __instance.Owner.ToStringSafe() + ", current container owner=" + item.holdingOwner.Owner.ToStringSafe() + ". Use TryAddOrTransfer, TryTransferToContainer, or remove the item before adding it.", false);
                 __result = false;
                 return false;
             }

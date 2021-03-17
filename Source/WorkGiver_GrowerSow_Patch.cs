@@ -1,10 +1,5 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Verse;
 using Verse.AI;
 using static HarmonyLib.AccessTools;
@@ -105,10 +100,8 @@ namespace RimThreaded
             if (thing2 != null)
             {
                 Plant plant2 = thing2 as Plant;
-                //Interlocked.Add(ref RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell, 100000);
                 if (plant2 != null && pawn.CanReserve(plant2, 1, -1, null, forced) && !plant2.IsForbidden(pawn))
                 {
-                    //Interlocked.Add(ref RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell, 100000);
                     IPlantToGrowSettable plantToGrowSettable = plant2.Position.GetPlantToGrowSettable(plant2.Map);
                     if (plantToGrowSettable == null || plantToGrowSettable.GetPlantDefToGrow() != plant2.def)
                     {
@@ -137,13 +130,11 @@ namespace RimThreaded
                 {
                     continue;
                 }
-                //Interlocked.Add(ref RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell, 1);
                 if (!pawn.CanReserve(thing3, 1, -1, null, forced))
                 {
                     __result = null;
                     return false;
                 }
-                //Interlocked.Add(ref RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell, 1);
                 if (thing3.def.category == ThingCategory.Plant)
                 {
                     if (!thing3.IsForbidden(pawn))

@@ -41,7 +41,7 @@ namespace RimThreaded
                             float squared = (float)intVec3.DistanceToSquared(center);
                             if ((double)Mathf.Abs(squared - num1) > 9.99999974737875E-05)
                             {
-                                if (tmpCells.Any<IntVec3>() && processor(tmpCells))
+                                if (tmpCells.Any() && processor(tmpCells))
                                     return false;
                                 num1 = squared;
                                 tmpCells.Clear();
@@ -49,7 +49,7 @@ namespace RimThreaded
                             tmpCells.Add(intVec3);
                         }
                     }
-                    if (!tmpCells.Any<IntVec3>())
+                    if (!tmpCells.Any())
                         return false;
                     int num3 = processor(tmpCells) ? 1 : 0;
                 }

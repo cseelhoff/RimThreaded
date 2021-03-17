@@ -1,12 +1,8 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
 
 namespace RimThreaded
@@ -14,6 +10,9 @@ namespace RimThreaded
 
     public class WealthWatcher_Patch
 	{
+		[ThreadStatic]
+		static List<Thing> tmpThings;
+
 		public static AccessTools.FieldRef<WealthWatcher, float> wealthItems =
 			AccessTools.FieldRefAccess<WealthWatcher, float>("wealthItems");
 		public static AccessTools.FieldRef<WealthWatcher, float> wealthBuildings =
@@ -35,8 +34,14 @@ namespace RimThreaded
 		private static float CalculateWealthItems(WealthWatcher __instance)
 		{
 			//this.tmpThings.Clear();
-			List<Thing> tmpThings = new List<Thing>();
-			ThingOwnerUtility.GetAllThingsRecursively<Thing>(map(__instance), ThingRequest.ForGroup(ThingRequestGroup.HaulableEver), tmpThings, false, delegate (IThingHolder x)
+			if (tmpThings == null)
+			{
+				tmpThings = new List<Thing>();
+			} else
+            {
+				tmpThings.Clear();
+			}
+			ThingOwnerUtility.GetAllThingsRecursively(map(__instance), ThingRequest.ForGroup(ThingRequestGroup.HaulableEver), tmpThings, false, delegate (IThingHolder x)
 			{
 				if (x is PassingShip || x is MapComponent)
 				{

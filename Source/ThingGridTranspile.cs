@@ -16,7 +16,7 @@ namespace RimThreaded
         {
             LocalBuilder monitorLockObject = iLGenerator.DeclareLocal(typeof(List<Thing>));
             LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
-            List<CodeInstruction> instructionsList = instructions.ToList<CodeInstruction>();
+            List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
             while (i < instructionsList.Count)
             {
@@ -101,7 +101,7 @@ namespace RimThreaded
         {
             LocalBuilder monitorLockObject = iLGenerator.DeclareLocal(typeof(List<Thing>));
             LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
-            List<CodeInstruction> instructionsList = instructions.ToList<CodeInstruction>();
+            List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
             Label labelLeave = iLGenerator.DefineLabel();
             while (i < instructionsList.Count)
@@ -184,7 +184,7 @@ namespace RimThreaded
         {
             LocalBuilder monitorLockObject = iLGenerator.DeclareLocal(typeof(List<Thing>));
             LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
-            List<CodeInstruction> instructionsList = instructions.ToList<CodeInstruction>();
+            List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
             while (i < instructionsList.Count)
             {

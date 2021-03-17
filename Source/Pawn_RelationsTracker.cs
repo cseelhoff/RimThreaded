@@ -174,10 +174,10 @@ namespace RimThreaded
                         familyVisited = new HashSet<Pawn>();
                     familyStack.Add(pawn(__instance));
                     familyVisited.Add(pawn(__instance));
-                    while (familyStack.Any<Pawn>())
+                    while (familyStack.Any())
                     {
                         Pawn p = familyStack[familyStack.Count - 1];
-                        familyStack.RemoveLast<Pawn>();
+                        familyStack.RemoveLast();
                         if (p != pawn(__instance))
                             yield return p;
                         Pawn father = p.GetFather();
@@ -194,10 +194,10 @@ namespace RimThreaded
                         }
                         familyChildrenStack.Clear();
                         familyChildrenStack.Add(p);
-                        while (familyChildrenStack.Any<Pawn>())
+                        while (familyChildrenStack.Any())
                         {
                             Pawn child = familyChildrenStack[familyChildrenStack.Count - 1];
-                            familyChildrenStack.RemoveLast<Pawn>();
+                            familyChildrenStack.RemoveLast();
                             if (child != p && child != pawn(__instance))
                                 yield return child;
                             foreach (Pawn child1 in child.relations.Children)

@@ -52,7 +52,7 @@ namespace RimThreaded
 			//Pawn_InteractionsTracker.workingList.Clear();
 			List<Pawn> workingList = getWorkingList(); //ADDED
 			workingList.AddRange(collection); //REPLACED workingList with local
-			workingList.Shuffle<Pawn>();//REPLACED workingList with local
+			workingList.Shuffle();//REPLACED workingList with local
 			List<InteractionDef> allDefsListForReading = DefDatabase<InteractionDef>.AllDefsListForReading;
 			for (int i = 0; i < workingList.Count; i++)//REPLACED workingList with local
 			{

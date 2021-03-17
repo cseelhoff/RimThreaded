@@ -26,7 +26,7 @@ namespace RimThreaded
                         gatherSpots.Add(position);
                 }
                 if (gatherSpots.Count > 0) {
-                    __result = gatherSpots.RandomElement<IntVec3>();
+                    __result = gatherSpots.RandomElement();
                     return false;
                 }
             }
@@ -35,20 +35,20 @@ namespace RimThreaded
             //WanderUtility.candidateBuildingsInRandomOrder.Clear();
             List<Building> candidateBuildingsInRandomOrder = new List<Building>();
             candidateBuildingsInRandomOrder.AddRange((IEnumerable<Building>)pawn.Map.listerBuildings.allBuildingsColonist);
-            candidateBuildingsInRandomOrder.Shuffle<Building>();
+            candidateBuildingsInRandomOrder.Shuffle();
             int num = 0;
             int index1 = 0;
             while (index1 < candidateBuildingsInRandomOrder.Count)
             {
                 if (num > 80 && candidateCells.Count > 0)
                 {
-                    __result = candidateCells.RandomElement<IntVec3>();
+                    __result = candidateCells.RandomElement();
                     return false;
                 }
                 Building building = candidateBuildingsInRandomOrder[index1];
                 if ((building.def == ThingDefOf.Wall || building.def.building.ai_chillDestination) && (!building.Position.IsForbidden(pawn) && pawn.Map.areaManager.Home[building.Position]))
                 {
-                    IntVec3 c = GenAdjFast.AdjacentCells8Way((LocalTargetInfo)(Thing)building).RandomElement<IntVec3>();
+                    IntVec3 c = GenAdjFast.AdjacentCells8Way((LocalTargetInfo)(Thing)building).RandomElement();
                     if (c.Standable(building.Map) && !c.IsForbidden(pawn) && (pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) && !c.IsInPrisonCell(pawn.Map)))
                     {
                         candidateCells.Add(c);

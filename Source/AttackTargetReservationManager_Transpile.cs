@@ -17,9 +17,9 @@ namespace RimThreaded
             List<CodeInstruction> searchInstructions = new List<CodeInstruction>
             {
                 new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Verse.AI.AttackTargetReservationManager), "reservations")),
+                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(AttackTargetReservationManager), "reservations")),
                 new CodeInstruction(OpCodes.Ldloc_0),
-                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(List<Verse.AI.AttackTargetReservationManager.AttackTargetReservation>), "get_Item")),
+                new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(List<AttackTargetReservation>), "get_Item")),
                 new CodeInstruction(OpCodes.Stloc_1)
             };
             List<CodeInstruction> instructionsList = instructions.ToList();
