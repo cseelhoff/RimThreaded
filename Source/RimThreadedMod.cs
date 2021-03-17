@@ -11,6 +11,7 @@ namespace RimThreaded
     class RimThreadedMod : Mod
     {
         public static RimThreadedSettings Settings;
+        private static string modsText = "";
         public RimThreadedMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<RimThreadedSettings>();
@@ -41,7 +42,7 @@ namespace RimThreaded
         }
         public static string getPotentialModConflicts()
         {
-            string modsText = "";
+            if (modsText.Length != 0) return modsText;
             IEnumerable<MethodBase> originalMethods = Harmony.GetAllPatchedMethods();
 
             foreach (MethodBase originalMethod in originalMethods)
