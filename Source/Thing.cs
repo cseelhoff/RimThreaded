@@ -1,8 +1,4 @@
-﻿using HarmonyLib;
-using RimWorld;
-using RimWorld.Planet;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Verse;
 
 namespace RimThreaded
@@ -19,7 +15,7 @@ namespace RimThreaded
 			{
 				lock (RimThreaded.recipeThingDefs)
 				{
-					Log.Message("RimThreaded is building new recipe caches for: " + thingDef.ToString());
+					//Log.Message("RimThreaded is building new recipe caches for: " + thingDef.ToString());
 					RimThreaded.recipeThingDefs.Add(thingDef);
 					foreach (RecipeDef recipe in DefDatabase<RecipeDef>.AllDefs)
 					{

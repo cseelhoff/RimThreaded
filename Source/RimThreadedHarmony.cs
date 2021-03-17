@@ -3,21 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
 using UnityEngine;
 using Verse.AI;
 using RimWorld;
 using Verse.Sound;
 using RimWorld.Planet;
-using System.Security.Policy;
 using System.Reflection.Emit;
 using System.Threading;
 using Verse.Grammar;
 using Verse.AI.Group;
 using static HarmonyLib.AccessTools;
-using System.Collections;
 
 namespace RimThreaded
 {
@@ -25,8 +21,6 @@ namespace RimThreaded
 	[StaticConstructorOnStartup]
 	public class RimThreadedHarmony
 	{
-
-		public static BindingFlags bf = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 		public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
 		public static Type giddyUpCoreUtilitiesTextureUtility;
 		public static Type giddyUpCoreStorageExtendedDataStorage;
@@ -340,7 +334,7 @@ namespace RimThreaded
 			patched = typeof(ListerThings_Patch);
 			Prefix(original, patched, "ThingsOfDef"); //maybe modify instead: JoyGiver_TakeDrug.BestIngestItem...  List<Thing> list = pawn.Map.listerThings.ThingsOfDef(JoyGiver_TakeDrug.takeableDrugs[k]);
 													  //Prefix(original, patched, "Remove");
-													  Prefix(original, patched, "Add");
+													  //Prefix(original, patched, "Add");
 													  //patched = typeof(ListerThings_Transpile);
 													  //Transpile(original, patched, "Remove");
 													  //Transpile(original, patched, "Add");
@@ -663,12 +657,6 @@ namespace RimThreaded
 			Prefix(original, patched, "MoodOffsetOfGroup");
 			Prefix(original, patched, "TotalMoodOffset");
 			Prefix(original, patched, "OpinionOffsetOfGroup");
-
-			//FireUtility			
-			original = typeof(FireUtility);
-			patched = typeof(FireUtility_Patch);
-			Prefix(original, patched, "ContainsStaticFire");
-			Prefix(original, patched, "ChanceToStartFireIn");
 			
 			//Fire			
 			original = typeof(Fire);
@@ -915,20 +903,20 @@ namespace RimThreaded
 			Prefix(original, patched, "get_AggregateSize");
 
 			//HediffSet
-			patched = typeof(HediffSet_Transpile);
-			original = TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
-			Transpile(original, patched, "MoveNext");
+			//patched = typeof(HediffSet_Transpile);
+			//original = TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
+			//Transpile(original, patched, "MoveNext");
 			original = typeof(HediffSet);
-			Transpile(original, patched, "GetPartHealth");
+			//Transpile(original, patched, "GetPartHealth");
 			//Transpile(original, patched, "AddDirect"); TODO re-add transpile
-			Transpile(original, patched, "CacheMissingPartsCommonAncestors");
+			//Transpile(original, patched, "CacheMissingPartsCommonAncestors");
 			patched = typeof(HediffSet_Patch);
 			Prefix(original, patched, "AddDirect");
-			Prefix(original, patched, "PartIsMissing");
-			Prefix(original, patched, "HasDirectlyAddedPartFor");
-			Prefix(original, patched, "GetFirstHediffOfDef");
-			Prefix(original, patched, "HasTendableHediff");
-			Prefix(original, patched, "HasImmunizableNotImmuneHediff");
+			//Prefix(original, patched, "PartIsMissing");
+			//Prefix(original, patched, "HasDirectlyAddedPartFor");
+			//Prefix(original, patched, "GetFirstHediffOfDef");
+			//Prefix(original, patched, "HasTendableHediff");
+			//Prefix(original, patched, "HasImmunizableNotImmuneHediff");
 			Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
 
 			//LanguageWordInfo

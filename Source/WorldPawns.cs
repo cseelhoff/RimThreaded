@@ -1,52 +1,30 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using RimWorld.Planet;
-using System.Collections.Concurrent;
+using System.Reflection;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class WorldPawns_Patch
     {
-        public static AccessTools.FieldRef<WorldPawns, List<Pawn>> allPawnsAliveResult =
-            AccessTools.FieldRefAccess<WorldPawns, List<Pawn>>("allPawnsAliveResult");
-        public static AccessTools.FieldRef<WorldPawns, HashSet<Pawn>> pawnsAlive =
-            AccessTools.FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsAlive");
-        public static AccessTools.FieldRef<WorldPawns, HashSet<Pawn>> pawnsMothballed =
-            AccessTools.FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsMothballed");
-        //public static AccessTools.FieldRef<WorldPawns, List<Pawn>> tmpPawnsToRemove =
-            //AccessTools.FieldRefAccess<WorldPawns, List<Pawn>>("tmpPawnsToRemove");
-        //public static AccessTools.FieldRef<WorldPawns, List<Pawn>> tmpPawnsToTick =
-            //AccessTools.FieldRefAccess<WorldPawns, List<Pawn>>("tmpPawnsToTick");
-        public static AccessTools.FieldRef<WorldPawns, HashSet<Pawn>> pawnsDead =
-            AccessTools.FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsDead");
+        [ThreadStatic]
+        static List<Pawn> tmpPawnsToRemove;
 
-        private static HediffDef DefPreventingMothball(Pawn p)
-        {
-            List<Hediff> hediffs = p.health.hediffSet.hediffs;
-            Hediff hediff;
-            for (int index = 0; index < hediffs.Count; ++index)
-            {
-                try
-                {
-                    hediff = hediffs[index];
-                } catch (IndexOutOfRangeException) { break; }
-                if (!hediff.def.AlwaysAllowMothball && !hediff.IsPermanent())
-                    return hediff.def;
-            }
-            return null;
-        }
-        private static bool ShouldMothball(Pawn p)
-        {
-            return DefPreventingMothball(p) == null && !p.IsCaravanMember() && !PawnUtility.IsTravelingInTransportPodWorldObject(p);
-        }
+        public static FieldRef<WorldPawns, List<Pawn>> allPawnsAliveResult = FieldRefAccess<WorldPawns, List<Pawn>>("allPawnsAliveResult");
+        public static FieldRef<WorldPawns, HashSet<Pawn>> pawnsAlive = FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsAlive");
+        public static FieldRef<WorldPawns, HashSet<Pawn>> pawnsMothballed = FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsMothballed");
+        public static FieldRef<WorldPawns, HashSet<Pawn>> pawnsDead = FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsDead");
+
+        private static readonly MethodInfo methodShouldMothball =
+            Method(typeof(WorldPawns), "ShouldMothball", new Type[] { typeof(Pawn) });
+        private static readonly Func<WorldPawns, Pawn, bool> funcShouldMothball =
+            (Func<WorldPawns, Pawn, bool>)Delegate.CreateDelegate(typeof(Func<WorldPawns, Pawn, bool>), methodShouldMothball);
+
+
         public static bool get_AllPawnsAlive(WorldPawns __instance, ref List<Pawn> __result)
         {
             lock (allPawnsAliveResult(__instance))
@@ -61,10 +39,6 @@ namespace RimThreaded
 
         private static void DoMothballProcessing(WorldPawns __instance)
         {
-
-            //List<Pawn> tmpPawnsToTick = new List<Pawn>(pawnsMothballed(__instance));
-            //tmpPawnsToTick(__instance).Clear();
-            //tmpPawnsToTick(__instance).AddRange((IEnumerable<Pawn>)pawnsMothballed(__instance));
             Pawn[] pawnArray;
             lock (pawnsMothballed(__instance))
             {
@@ -83,8 +57,6 @@ namespace RimThreaded
                     Log.ErrorOnce("Exception ticking mothballed world pawn. Suppressing further errors. " + (object)ex, p.thingIDNumber ^ 1535437893, false);
                 }
             }
-            //tmpPawnsToTick(__instance).Clear();
-            //tmpPawnsToTick(__instance).AddRange((IEnumerable<Pawn>)pawnsAlive(__instance));
             lock (pawnsAlive(__instance))
             {
                 pawnArray = pawnsAlive(__instance).ToArray();
@@ -92,7 +64,7 @@ namespace RimThreaded
             for (int index = 0; index < pawnArray.Length; index++)
             {
                 p = pawnArray[index];
-                if (ShouldMothball(p))
+                if (funcShouldMothball(__instance, p))
                 {
                     lock (pawnsAlive(__instance))
                     {
@@ -104,46 +76,23 @@ namespace RimThreaded
                     }
                 }
             }
-            //tmpPawnsToTick(__instance).Clear();
         }
 
         public static bool WorldPawnsTick(WorldPawns __instance)
         {
-            //RimThreaded.tmpPawnsToTick.Clear();
-            //RimThreaded.tmpPawnsToTick.AddRange(pawnsAlive(__instance));
-            //RimThreaded.worldPawns = __instance;
-            //RimThreaded.tmpPawnsToTick = new ConcurrentQueue<Pawn>(pawnsAlive(__instance));
-            //RimThreaded.worldPawns = __instance;
             RimThreaded.worldPawnsAlive = pawnsAlive(__instance).ToList();
             RimThreaded.worldPawnsTicks = pawnsAlive(__instance).Count;
-            //RimThreaded.MainThreadWaitLoop();
-            /*
-            for (int index = 0; index < WorldPawns.tmpPawnsToTick.Count; ++index)
-            {
-                try
-                {
-                    WorldPawns.tmpPawnsToTick[index].Tick();
-                }
-                catch (Exception ex)
-                {
-                    Log.ErrorOnce("Exception ticking world pawn " + WorldPawns.tmpPawnsToTick[index].ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, WorldPawns.tmpPawnsToTick[index].thingIDNumber ^ 1148571423, false);
-                }
-                try
-                {
-                    if (this.ShouldAutoTendTo(WorldPawns.tmpPawnsToTick[index]))
-                        TendUtility.DoTend((Pawn)null, WorldPawns.tmpPawnsToTick[index], (Medicine)null);
-                }
-                catch (Exception ex)
-                {
-                    Log.ErrorOnce("Exception tending to a world pawn " + WorldPawns.tmpPawnsToTick[index].ToStringSafe<Pawn>() + ". Suppressing further errors. " + (object)ex, WorldPawns.tmpPawnsToTick[index].thingIDNumber ^ 8765780, false);
-                }
-            }
-            */
-            //WorldPawns.tmpPawnsToTick.Clear();
+
             if (Find.TickManager.TicksGame % 15000 == 0)
                 DoMothballProcessing(__instance);
-            //tmpPawnsToRemove(__instance).Clear();
-            List<Pawn> tmpPawnsToRemove = new List<Pawn>();
+
+            if (tmpPawnsToRemove == null)
+            {
+                tmpPawnsToRemove = new List<Pawn>();
+            } else
+            {
+                tmpPawnsToRemove.Clear();
+            }
             foreach (Pawn pawn in pawnsDead(__instance))
             {
                 if (pawn == null)
@@ -153,13 +102,13 @@ namespace RimThreaded
                 }
                 else if (pawn.Discarded)
                 {
-                    Log.Error("World pawn " + (object)pawn + " has been discarded while still being a world pawn. This should never happen, because discard destroy mode means that the pawn is no longer managed by anything. Pawn should have been removed from the world first.", false);
+                    Log.Error("World pawn " + pawn + " has been discarded while still being a world pawn. This should never happen, because discard destroy mode means that the pawn is no longer managed by anything. Pawn should have been removed from the world first.", false);
                     tmpPawnsToRemove.Add(pawn);
                 }
             }
             foreach (Pawn p in tmpPawnsToRemove)
                 pawnsDead(__instance).Remove(p);
-            //tmpPawnsToRemove(__instance).Clear();
+
             try
             {
                 __instance.gc.WorldPawnGCTick();

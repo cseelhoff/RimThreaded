@@ -88,6 +88,7 @@
     <Compile Include="DubsSkylight_getPatch_Transpile.cs" />
     <Compile Include="FastPriorityQueueKeyValuePairIntFloat.cs" />
     <Compile Include="FilthMaker.cs" />
+    <Compile Include="FilthMonitor2.cs" />
     <Compile Include="GenClamor_Patch.cs" />
     <Compile Include="GeneratePawns_Patch.cs" />
     <Compile Include="GenLeaving.cs" />
@@ -229,7 +230,6 @@
     <Compile Include="RimThreadedHarmony.cs" />
     <Compile Include="RimThreadedMod.cs" />
     <Compile Include="RimThreadedSettings.cs" />
-    <Compile Include="FilthMonitor2.cs" />
     <Compile Include="WorldComponentUtility.cs" />
     <Compile Include="DateNotifier.cs" />
     <Compile Include="TradeShip.cs" />
@@ -288,8 +288,6 @@
     <Compile Include="CellFinder.cs" />
     <Compile Include="ContentFinder.cs" />
     <Compile Include="DynamicDrawManager.cs" />
-    <Compile Include="Explosion.cs" />
-    <Compile Include="FireUtility.cs" />
     <Compile Include="FloodFiller.cs" />
     <Compile Include="GenClosest.cs" />
     <Compile Include="GenGrid.cs" />

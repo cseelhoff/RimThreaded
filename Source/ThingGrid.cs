@@ -25,9 +25,12 @@ namespace RimThreaded
             else
             {
                 int index = cellIndices.CellToIndex(c);
-                List<Thing> thingList = thingGrid(__instance)[index];
-                lock (thingList) {
-                    thingList.Add(t);
+                lock (__instance)
+                {
+                    thingGrid(__instance)[index] = new List<Thing>(thingGrid(__instance)[index])
+                    {
+                        t
+                    }; 
                 }
             }
             return false;
@@ -44,64 +47,45 @@ namespace RimThreaded
             else
             {
                 int index = cellIndices.CellToIndex(c);
-                List<Thing> thingList = thingGrid(__instance)[index];
-                for (int i = 0; i < thingList.Count; i++)
+                List<Thing>[] thingGridInstance = thingGrid(__instance);
+                List<Thing> thingList = thingGridInstance[index];
+                foreach (Thing thing in thingList)
                 {
-                    Thing thing;
-                    try
-                    {
-                        thing = thingList[i];
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        break;
-                    }
                     if (thing == t)
                     {
-                        lock (thingList)
+                        lock (__instance)
                         {
-                            try
+                            List<Thing> thingList2 = thingGridInstance[index];
+                            List<Thing> newThingList = new List<Thing>();
+                            foreach (Thing thing2 in thingList2)
                             {
-                                thing = thingList[i];
-                                if (thing == t)
+                                if (thing2 != t)
                                 {
-                                    thingList.RemoveAt(i);
-                                    break;
+                                    newThingList.Add(thing2);
                                 }
                             }
-                            catch (ArgumentOutOfRangeException) { }
-                            for (int j = 0; j < thingList.Count; j++)
-                            {
-                                if (thingList[j] == t)
-                                {
-                                    thingList.RemoveAt(j);
-                                    break;
-                                }
-                            }
+                            thingGridInstance[index] = newThingList;
                         }
+                        break;
                     }
                 }
             }
             return false;
         }
-        
+
         private static IEnumerable<Thing> ThingsAtEnumerableThing(ThingGrid __instance, IntVec3 c)
         {
-            if (!c.InBounds(map(__instance)))
+            Map mapInstance = map(__instance);
+            if (!c.InBounds(mapInstance))
                 yield break;
             List<Thing> list;
             try
             {
-                list = thingGrid(__instance)[map(__instance).cellIndices.CellToIndex(c)];
-            } catch (IndexOutOfRangeException) { yield break; }
-            Thing thing;
-            for (int i = 0; i < list.Count; i++)
+                list = thingGrid(__instance)[mapInstance.cellIndices.CellToIndex(c)];
+            }
+            catch (IndexOutOfRangeException) { yield break; }
+            foreach (Thing thing in list)
             {
-                try
-                {
-                    thing = list[i];
-                }
-                catch (ArgumentOutOfRangeException) { break; }
                 yield return thing;
             }
         }
@@ -121,14 +105,8 @@ namespace RimThreaded
             }
 
             List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
-            Thing thing;
-            for (int index = 0; index < thingList.Count; index++)
+            foreach (Thing thing in thingList)
             {
-                try
-                {
-                    thing = thingList[index];
-                }
-                catch (ArgumentOutOfRangeException) { break; }
                 if (thing.def.category == cat)
                 {
                     __result = thing;
@@ -148,14 +126,8 @@ namespace RimThreaded
                 return false;
             }
             List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
-            Thing thing;
-            for (int index = 0; index < thingList.Count; index++)
+            foreach (Thing thing in thingList)
             {
-                try
-                {
-                    thing = thingList[index];
-                }
-                catch (ArgumentOutOfRangeException) { break; }
                 if (thing.def == def)
                 {
                     __result = thing;
@@ -166,7 +138,7 @@ namespace RimThreaded
             return false;
         }
 
-        public static bool ThingAt_Building_Door (ThingGrid __instance, ref Building_Door __result, IntVec3 c)
+        public static bool ThingAt_Building_Door(ThingGrid __instance, ref Building_Door __result, IntVec3 c)
         {
             if (!c.InBounds(map(__instance)))
             {
@@ -175,15 +147,9 @@ namespace RimThreaded
             }
 
             List<Thing> thingList = thingGrid(__instance)[map(__instance).cellIndices.CellToIndex(c)];
-            Thing thing;
-            for (int index = 0; index < thingList.Count; index++)
+            foreach (Thing thing in thingList)
             {
-                try
-                {
-                    thing = thingList[index];
-                } catch (ArgumentOutOfRangeException) { break; }
-                Building_Door building_Door = thing as Building_Door;
-                if (building_Door != null)
+                if (thing is Building_Door building_Door)
                 {
                     __result = building_Door;
                     return false;
