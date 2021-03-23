@@ -54,7 +54,7 @@ namespace RimThreaded
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorOnce("Exception ticking mothballed world pawn. Suppressing further errors. " + (object)ex, p.thingIDNumber ^ 1535437893, false);
+                    Log.ErrorOnce("Exception ticking mothballed world pawn. Suppressing further errors. " + ex, p.thingIDNumber ^ 1535437893, false);
                 }
             }
             lock (pawnsAlive(__instance))

@@ -25,7 +25,7 @@ namespace RimThreaded
             if (t.def.drawerType != DrawerType.None)
             {
                 if (drawingNow(__instance))
-                    Log.Warning("Cannot register drawable " + (object)t + " while drawing is in progress. Things shouldn't be spawned in Draw methods.", false);
+                    Log.Warning("Cannot register drawable " + t + " while drawing is in progress. Things shouldn't be spawned in Draw methods.", false);
                 lock (drawThings(__instance))
                 {
                     drawThings(__instance).Add(t);
@@ -39,7 +39,7 @@ namespace RimThreaded
             if (t.def.drawerType != DrawerType.None)
             {
                 if (drawingNow(__instance))
-                    Log.Warning("Cannot deregister drawable " + (object)t + " while drawing is in progress. Things shouldn't be despawned in Draw methods.", false);
+                    Log.Warning("Cannot deregister drawable " + t + " while drawing is in progress. Things shouldn't be despawned in Draw methods.", false);
                 lock (drawThings(__instance))
                 {
                     drawThings(__instance).Remove(t);
@@ -85,7 +85,7 @@ namespace RimThreaded
                 {
                     //drawThing = drawThingsArray[index];
                     IntVec3 position = drawThing.Position;
-                    if ((cellRect.Contains(position) || drawThing.def.drawOffscreen) && (!fogGrid[cellIndices.CellToIndex(position)] || drawThing.def.seeThroughFog) && ((double)drawThing.def.hideAtSnowDepth >= 1.0 || (double)snowGrid.GetDepth(position) <= (double)drawThing.def.hideAtSnowDepth))
+                    if ((cellRect.Contains(position) || drawThing.def.drawOffscreen) && (!fogGrid[cellIndices.CellToIndex(position)] || drawThing.def.seeThroughFog) && (drawThing.def.hideAtSnowDepth >= 1.0 || snowGrid.GetDepth(position) <= (double)drawThing.def.hideAtSnowDepth))
                     {
                         try
                         {
@@ -93,7 +93,7 @@ namespace RimThreaded
                         }
                         catch (Exception ex)
                         {
-                            Log.Error("Exception drawing " + (object)drawThing + ": " + ex.ToString(), false);
+                            Log.Error("Exception drawing " + drawThing + ": " + ex.ToString(), false);
                         }
                     }
                 }
@@ -101,7 +101,7 @@ namespace RimThreaded
             }
             catch (Exception ex)
             {
-                Log.Error("Exception drawing dynamic things: " + (object)ex, false);
+                Log.Error("Exception drawing dynamic things: " + ex, false);
             }
             drawingNow(__instance) = false;
             return false;

@@ -24,7 +24,7 @@ namespace RimThreaded
 		{
 			if (!SeasonalShiftAmplitudeCache.TryGetValue(tile, out __result))
 			{
-				__result = (double)Find.WorldGrid.LongLatOf(tile).y >= 0.0 ?
+				__result = Find.WorldGrid.LongLatOf(tile).y >= 0.0 ?
 					TemperatureTuning.SeasonalTempVariationCurve.Evaluate(Find.WorldGrid.DistanceFromEquatorNormalized(tile)) :
 					-TemperatureTuning.SeasonalTempVariationCurve.Evaluate(Find.WorldGrid.DistanceFromEquatorNormalized(tile));
 				SeasonalShiftAmplitudeCache[tile] = __result;
@@ -86,7 +86,7 @@ namespace RimThreaded
 						neighRoomGroups.Add(roomGroup2);
 				}
 			}
-			float energy1 = energy / (float)neighRoomGroups.Count;
+			float energy1 = energy / neighRoomGroups.Count;
 			for (int index = 0; index < neighRoomGroups.Count; ++index)
 				neighRoomGroups[index].PushHeat(energy1);
 			int num = neighRoomGroups.Count > 0 ? 1 : 0;
@@ -137,7 +137,7 @@ namespace RimThreaded
 			{
 				return false;
 			}
-			float num3 = num2 / (float)num;
+			float num3 = num2 / num;
 			RoomGroup roomGroup3 = b.GetRoomGroup();
 			if (roomGroup3 != null)
 			{
@@ -157,7 +157,7 @@ namespace RimThreaded
 					{
 						float temperature = roomGroupK.Temperature;
 						float num5 = (num3 - temperature) * rate;
-						float num6 = num5 / (float)roomGroupK.CellCount;
+						float num6 = num5 / roomGroupK.CellCount;
 						float num7 = roomGroupK.Temperature + num6;
 						if (num5 > 0f && num7 > num3)
 						{
@@ -167,7 +167,7 @@ namespace RimThreaded
 						{
 							num7 = num3;
 						}
-						float num8 = Mathf.Abs((num7 - temperature) * (float)roomGroupK.CellCount / num5);
+						float num8 = Mathf.Abs((num7 - temperature) * roomGroupK.CellCount / num5);
 						if (num8 < num4)
 						{
 							num4 = num8;
@@ -181,7 +181,7 @@ namespace RimThreaded
 				if (null!= roomGroupL && !roomGroupL.UsesOutdoorTemperature)
 				{
 					float temperature2 = roomGroupL.Temperature;
-					float num9 = (num3 - temperature2) * rate * num4 / (float)roomGroupL.CellCount;
+					float num9 = (num3 - temperature2) * rate * num4 / roomGroupL.CellCount;
 					roomGroupL.Temperature += num9;
 					beqRoomGroups[l] = roomGroupL;
 				}

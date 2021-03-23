@@ -255,7 +255,7 @@ namespace RimThreaded
 			}
 
 			RoomGroup roomGroup = __instance.Group;
-			if (roomGroup !=null && roomGroup.AnyRoomTouchesMapEdge && (float)__instance.OpenRoofCount / (float)__instance.CellCount >= 0.5f)
+			if (roomGroup !=null && roomGroup.AnyRoomTouchesMapEdge && __instance.OpenRoofCount / (float)__instance.CellCount >= 0.5f)
 			{
 				__result = true;
 				return false;

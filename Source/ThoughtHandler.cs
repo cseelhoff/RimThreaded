@@ -36,9 +36,9 @@ namespace RimThreaded
                 num2 *= tmpThought.def.stackedEffectMultiplier;
                     }
             }
-            double num4 = (double)num1 / (double)tmpThoughts.Count;
+            double num4 = num1 / (double)tmpThoughts.Count;
             tmpThoughts.Clear();
-            double num5 = (double)num3;
+            double num5 = num3;
             __result = (float)(num4 * num5);
             return false;
         }
@@ -64,7 +64,7 @@ namespace RimThreaded
             __instance.GetSocialThoughts(otherPawn, group, tmpSocialThoughts);
             for (int index = tmpSocialThoughts.Count - 1; index >= 0; --index)
             {
-                if ((double)tmpSocialThoughts[index].OpinionOffset() == 0.0)
+                if (tmpSocialThoughts[index].OpinionOffset() == 0.0)
                     tmpSocialThoughts.RemoveAt(index);
             }
             if (!tmpSocialThoughts.Any())
@@ -73,8 +73,8 @@ namespace RimThreaded
                 return false;
             }
             ThoughtDef def = ((Thought)group).def;
-            if (def.IsMemory && (double)def.stackedEffectMultiplier != 1.0)
-                tmpSocialThoughts.Sort((Comparison<ISocialThought>)((a, b) => ((Thought_Memory)a).age.CompareTo(((Thought_Memory)b).age)));
+            if (def.IsMemory && def.stackedEffectMultiplier != 1.0)
+                tmpSocialThoughts.Sort((a, b) => ((Thought_Memory)a).age.CompareTo(((Thought_Memory)b).age));
             float f = 0.0f;
             float num = 1f;
             for (int index = 0; index < tmpSocialThoughts.Count; ++index)
@@ -83,12 +83,12 @@ namespace RimThreaded
                 num *= ((Thought)tmpSocialThoughts[index]).def.stackedEffectMultiplier;
             }
             tmpSocialThoughts.Clear();
-            if ((double)f == 0.0)
+            if (f == 0.0)
             {
                 __result = 0;
                 return false;
             }
-            __result = (double)f > 0.0 ? Mathf.Max(Mathf.RoundToInt(f), 1) : Mathf.Min(Mathf.RoundToInt(f), -1);
+            __result = f > 0.0 ? Mathf.Max(Mathf.RoundToInt(f), 1) : Mathf.Min(Mathf.RoundToInt(f), -1);
             return false;
         }
 

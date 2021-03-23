@@ -120,7 +120,7 @@ namespace RimThreaded
 					}
 				}
 			}
-			lastCountTick(__instance) = (float)Find.TickManager.TicksGame;
+			lastCountTick(__instance) = Find.TickManager.TicksGame;
 			return false;
 		}
 

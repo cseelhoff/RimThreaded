@@ -748,25 +748,35 @@ namespace RimThreaded
 			original = typeof(MapPawns);
 			patched = typeof(MapPawns_Patch);
 			Prefix(original, patched, "get_AllPawns");
-			Prefix(original, patched, "LogListedPawns");
-			Prefix(original, patched, "get_AnyPawnBlockingMapRemoval");
-			Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
-			Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
 			Prefix(original, patched, "get_AllPawnsUnspawned");
+			Prefix(original, patched, "get_PrisonersOfColony");
+			Prefix(original, patched, "get_FreeColonistsAndPrisoners");
+			Prefix(original, patched, "get_AnyPawnBlockingMapRemoval");
+			Prefix(original, patched, "get_FreeColonistsAndPrisonersSpawned");
 			Prefix(original, patched, "get_SpawnedPawnsWithAnyHediff");
+			Prefix(original, patched, "get_SpawnedHungryPawns");
+			Prefix(original, patched, "get_SpawnedDownedPawns");
+			Prefix(original, patched, "get_SpawnedPawnsWhoShouldHaveSurgeryDoneNow");
+			Prefix(original, patched, "get_SpawnedPawnsWhoShouldHaveInventoryUnloaded");
+			Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
+			Prefix(original, patched, "EnsureFactionsListsInit");
 			Prefix(original, patched, "PawnsInFaction");
+			Prefix(original, patched, "FreeHumanlikesOfFaction");
+			Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
+			Prefix(original, patched, "RegisterPawn");
+			Prefix(original, patched, "DeRegisterPawn");
 
-			MethodInfo oMethodRegisterPawn = Method(original, "RegisterPawn");
-			MethodInfo pMethodRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "RegisterPawn_FreeHumanlikesSpawnedOfFaction");
-			harmony.Patch(oMethodRegisterPawn, postfix: new HarmonyMethod(pMethodRegisterPawn_FreeHumanlikesSpawnedOfFaction));
+			//MethodInfo oMethodRegisterPawn = Method(original, "RegisterPawn");
+			//MethodInfo pMethodRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "RegisterPawn_FreeHumanlikesSpawnedOfFaction");
+			//harmony.Patch(oMethodRegisterPawn, postfix: new HarmonyMethod(pMethodRegisterPawn_FreeHumanlikesSpawnedOfFaction));
 
-			MethodInfo oMethodDeRegisterPawn = Method(original, "DeRegisterPawn");
-			MethodInfo pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "DeRegisterPawn_FreeHumanlikesSpawnedOfFaction");
-			harmony.Patch(oMethodDeRegisterPawn, postfix: new HarmonyMethod(pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction));
+			//MethodInfo oMethodDeRegisterPawn = Method(original, "DeRegisterPawn");
+			//MethodInfo pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "DeRegisterPawn_FreeHumanlikesSpawnedOfFaction");
+			//harmony.Patch(oMethodDeRegisterPawn, postfix: new HarmonyMethod(pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction));
 
-			patched = typeof(MapPawns_Transpile);
-			Transpile(original, patched, "RegisterPawn");
-			Transpile(original, patched, "DeRegisterPawn");
+			//patched = typeof(MapPawns_Transpile);
+			//Transpile(original, patched, "RegisterPawn");
+			//Transpile(original, patched, "DeRegisterPawn");
 
 			//MapTemperatures
 			original = typeof(MapTemperature);

@@ -64,7 +64,7 @@ namespace RimThreaded
                 __result = false;
                 return false;
             }
-            int num2 = Mathf.Max(Mathf.RoundToInt(Mathf.Sqrt((float)num1)), 5);
+            int num2 = Mathf.Max(Mathf.RoundToInt(Mathf.Sqrt(num1)), 5);
             for (int index = 0; index < num2; ++index)
             {
                 int num3 = Rand.RangeInclusive(from, to);

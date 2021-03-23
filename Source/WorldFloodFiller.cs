@@ -78,9 +78,12 @@ namespace RimThreaded
                 IList<int> list = extraRootTiles as IList<int>;
                 if (list != null)
                 {
-                    int num3 = list[j];
-                    traversalDistance[num3] = 0;
-                    openSet.Enqueue(num3);
+                    for (int k = 0; k < list.Count; k++)
+                    {
+                        int num3 = list[k];
+                        traversalDistance[num3] = 0;
+                        openSet.Enqueue(num3);
+                    }
                 }
                 else
                 {

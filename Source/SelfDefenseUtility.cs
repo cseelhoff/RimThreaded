@@ -39,7 +39,7 @@ namespace RimThreaded
                 __result = false;
                 return false;
             }
-            RegionTraverser.BreadthFirstTraverse(region, (RegionEntryPredicate)((from, reg) => reg.door == null || reg.door.Open), (RegionProcessor)(reg =>
+            RegionTraverser.BreadthFirstTraverse(region, (from, reg) => reg.door == null || reg.door.Open, reg =>
             {
                 List<Thing> thingList2 = reg.ListerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
                 for (int index = 0; index < thingList2.Count; ++index)
@@ -61,7 +61,7 @@ namespace RimThreaded
                 }
 
                 return foundThreat;
-            }), 9, RegionType.Set_Passable);
+            }, 9, RegionType.Set_Passable);
             __result = foundThreat;
             return false;
         }

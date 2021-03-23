@@ -150,7 +150,7 @@ namespace RimThreaded
 				List<Thing> list = map.listerThings.ThingsMatching(request);
 				for (int i = 0; i < list.Count; i++)
 				{
-					Thing val = list[i] as Thing;
+					Thing val = list[i];
 					if (val != null)
 					{
 						outThings.Add(val);

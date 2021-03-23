@@ -37,7 +37,7 @@ namespace RimThreaded
 
             if (!pawnToJob.TryAdd(claimant, job))
             {
-                Log.Warning(claimant.ToString() + " tried to reserve job " + job.ToString() + " on target " + (object)target + ", but it's already reserved by him.", false);
+                Log.Warning(claimant.ToString() + " tried to reserve job " + job.ToString() + " on target " + target + ", but it's already reserved by him.", false);
             } 
             return false;
         }
@@ -67,22 +67,22 @@ namespace RimThreaded
                         }
                         else
                         {
-                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + (object)target + ", but it failed.", false);
+                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but it failed.", false);
                         }
                     }
                     else
                     {
-                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + (object)target + ", but job was different.", false);
+                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.", false);
                     }
                 }
                 else
                 {
-                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + (object)target + ", but claimant was not found.", false);
+                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.", false);
                 }
             }
             else
             {
-                Log.Warning(claimant.ToString() + " tried to release reservation on target " + (object)target + ", but target had no physical reservations.", false);
+                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.", false);
             }
             return false;
         }

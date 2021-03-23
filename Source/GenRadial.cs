@@ -38,8 +38,8 @@ namespace RimThreaded
                         IntVec3 intVec3 = center + GenRadial.RadialPattern[index];
                         if (map == null || intVec3.InBounds(map))
                         {
-                            float squared = (float)intVec3.DistanceToSquared(center);
-                            if ((double)Mathf.Abs(squared - num1) > 9.99999974737875E-05)
+                            float squared = intVec3.DistanceToSquared(center);
+                            if (Mathf.Abs(squared - num1) > 9.99999974737875E-05)
                             {
                                 if (tmpCells.Any() && processor(tmpCells))
                                     return false;

@@ -30,7 +30,7 @@ namespace RimThreaded
                 {
                     if (countedAmount.Key.IsNutritionGivingIngestible && countedAmount.Key.ingestible.HumanEdible)
                     {
-                        num += countedAmount.Key.GetStatValueAbstract(StatDefOf.Nutrition) * (float)countedAmount.Value;
+                        num += countedAmount.Key.GetStatValueAbstract(StatDefOf.Nutrition) * countedAmount.Value;
                     }
                 }
             }

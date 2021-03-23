@@ -97,7 +97,7 @@ namespace RimThreaded
             foreach (Verb v in verbsToAdd)
             {
                 float num = VerbUtility.InitialVerbWeight(v, this_pawn);
-                if ((double)num > (double)highestSelWeight)
+                if (num > (double)highestSelWeight)
                     highestSelWeight = num;
             }
             foreach (Verb verb in verbsToAdd)

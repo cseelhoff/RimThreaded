@@ -312,7 +312,7 @@ namespace RimThreaded
                         Matrix4x4 matrix = new Matrix4x4();
                         matrix.SetTRS(target.ToVector3ShiftedWithAltitude(AltitudeLayer.MetaOverlays), Quaternion.identity, s);
                         Graphics.DrawMesh(MeshPool.plane10, matrix, DestinationMat, 0, Camera.main, 0, properties);
-                        if (Find.Selector.IsSelected((object)destinationReservation.claimant))
+                        if (Find.Selector.IsSelected(destinationReservation.claimant))
                             Graphics.DrawMesh(MeshPool.plane10, matrix, DestinationSelectionMat, 0);
                     }
                 }

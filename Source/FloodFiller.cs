@@ -118,7 +118,7 @@ namespace RimThreaded
                                 }
                                 if (openSet(__instance).Count > area)
                                 {
-                                    Log.Error("Overflow on flood fill (>" + (object)area + " cells). Make sure we're not flooding over the same area after we check it.", false);
+                                    Log.Error("Overflow on flood fill (>" + area + " cells). Make sure we're not flooding over the same area after we check it.", false);
                                     working(__instance) = false;
                                     return false;
                                 }

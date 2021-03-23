@@ -491,7 +491,7 @@ namespace RimThreaded
                             }
                             else
                             {
-                                float capacityLeft3 = capacityLeft - (float)item3.stackCount * item3.GetStatValue(StatDefOf.Mass);
+                                float capacityLeft3 = capacityLeft - item3.stackCount * item3.GetStatValue(StatDefOf.Mass);
                                 opts.Add(FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(CaravanFormingUtility.AppendOverweightInfo("LoadIntoCaravanAll".Translate(item3.Label, item3), capacityLeft3), delegate
                                 {
                                     item3.SetForbidden(value: false, warnOnFail: false);
@@ -507,7 +507,7 @@ namespace RimThreaded
                                 int to3 = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(packTarget, item3), item3.stackCount);
                                 Dialog_Slider window3 = new Dialog_Slider(delegate (int val)
                                 {
-                                    float capacityLeft4 = capacityLeft - (float)val * item3.GetStatValue(StatDefOf.Mass);
+                                    float capacityLeft4 = capacityLeft - val * item3.GetStatValue(StatDefOf.Mass);
                                     return CaravanFormingUtility.AppendOverweightInfo(string.Format("LoadIntoCaravanCount".Translate(item3.LabelNoCount, item3), val), capacityLeft4);
                                 }, 1, to3, delegate (int count)
                                 {

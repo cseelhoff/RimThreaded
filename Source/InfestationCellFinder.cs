@@ -43,7 +43,7 @@ namespace RimThreaded
         }
         public static bool GetScoreAt(ref float __result, IntVec3 cell, Map map)
         {
-            if ((float)(int)distToColonyBuildingField[cell] > 30f)
+            if (distToColonyBuildingField[cell] > 30f)
             {
                 __result = 0f;
                 return false;
@@ -101,7 +101,7 @@ namespace RimThreaded
             }
 
             int num = StraightLineDistToUnroofed(cell, map);
-            float value = regionsDistanceToUnroofedField.TryGetValue(region, out value) ? Mathf.Min(value, (float)num * 4f) : ((float)num * 1.15f);
+            float value = regionsDistanceToUnroofedField.TryGetValue(region, out value) ? Mathf.Min(value, num * 4f) : (num * 1.15f);
             value = Mathf.Pow(value, 1.55f);
             float num2 = Mathf.InverseLerp(0f, 12f, num);
             float num3 = Mathf.Lerp(1f, 0.18f, map.glowGrid.GameGlowAt(cell));
@@ -261,7 +261,7 @@ namespace RimThreaded
                 }
             }
 
-            return num / (float)num2;
+            return num / num2;
         }
 
 

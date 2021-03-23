@@ -149,7 +149,7 @@ namespace RimThreaded
 
             public int uses;
 
-            public float SelectionWeight => rule.BaseSelectionWeight * 100000f / (float)((uses + 1) * 1000);
+            public float SelectionWeight => rule.BaseSelectionWeight * 100000f / ((uses + 1) * 1000);
 
             public float Priority => rule.Priority;
 

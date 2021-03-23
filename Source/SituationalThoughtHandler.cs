@@ -61,7 +61,7 @@ namespace RimThreaded
                 cachedSocialThought.lastQueryTick = Find.TickManager.TicksGame;
                 List<Thought_SituationalSocial> activeThoughts = cachedSocialThought.activeThoughts;
                 for (int index = 0; index < activeThoughts.Count; ++index)
-                    outThoughts.Add((ISocialThought)activeThoughts[index]);
+                    outThoughts.Add(activeThoughts[index]);
             }
             catch (KeyNotFoundException) { }
             return false;
@@ -117,11 +117,11 @@ namespace RimThreaded
           ThoughtDef def,
           Pawn otherPawn)
         {
-            Thought_SituationalSocial situationalSocial = (Thought_SituationalSocial)null;
+            Thought_SituationalSocial situationalSocial = null;
             try
             {
                 if (!ThoughtUtility.CanGetThought_NewTemp(__instance.pawn, def, false) || !def.Worker.CurrentSocialState(__instance.pawn, otherPawn).ActiveFor(def))
-                    return (Thought_SituationalSocial)null;
+                    return null;
                 situationalSocial = (Thought_SituationalSocial)ThoughtMaker.MakeThought(def);
                 situationalSocial.pawn = __instance.pawn;
                 situationalSocial.otherPawn = otherPawn;
@@ -129,7 +129,7 @@ namespace RimThreaded
             }
             catch (Exception ex)
             {
-                Log.Error("Exception while recalculating " + (object)def + " thought state for pawn " + (object)__instance.pawn + ": " + (object)ex, false);
+                Log.Error("Exception while recalculating " + def + " thought state for pawn " + __instance.pawn + ": " + ex, false);
             }
             return situationalSocial;
         }

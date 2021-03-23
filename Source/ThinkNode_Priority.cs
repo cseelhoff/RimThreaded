@@ -37,7 +37,7 @@ namespace RimThreaded
                 }
                 catch (Exception ex)
                 {
-                    Log.Error("Exception in " + (object)__instance.GetType() + " TryIssueJobPackage: " + ex.ToString());
+                    Log.Error("Exception in " + __instance.GetType() + " TryIssueJobPackage: " + ex.ToString());
                 }
             }
             __result = ThinkResult.NoJob;

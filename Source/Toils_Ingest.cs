@@ -23,7 +23,7 @@ namespace RimThreaded
             for (int index = 0; index < 4; ++index)
             {
                 IntVec3 c = root + GenAdj.CardinalDirections[index];
-                if (c.HasEatSurface(pawn.Map) && (!pawn.Map.thingGrid.ThingsAt(c).Where((Func<Thing, bool>)(t => t.def == ingestibleDef)).Any() && !c.IsForbidden(pawn)))
+                if (c.HasEatSurface(pawn.Map) && (!pawn.Map.thingGrid.ThingsAt(c).Where(t => t.def == ingestibleDef).Any() && !c.IsForbidden(pawn)))
                 {
                     placeSpot = c;
                     __result = true;
@@ -46,7 +46,7 @@ namespace RimThreaded
                 for (int index = 0; index < spotSearchList.Count; ++index)
                 {
                     IntVec3 c = root + spotSearchList[index];
-                    if (c.Walkable(pawn.Map) && !c.IsForbidden(pawn) && !pawn.Map.thingGrid.ThingsAt(c).Where((Func<Thing, bool>)(t => t.def == ingestibleDef)).Any())
+                    if (c.Walkable(pawn.Map) && !c.IsForbidden(pawn) && !pawn.Map.thingGrid.ThingsAt(c).Where(t => t.def == ingestibleDef).Any())
                     {
                         placeSpot = c;
                         __result = true;

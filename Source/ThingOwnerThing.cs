@@ -86,7 +86,7 @@ namespace RimThreaded
                             int stackCount = inner.stackCount;
                             inner.TryAbsorbStack(other, true);
                             if (inner.stackCount > stackCount)
-                                NotifyAddedAndMergedWith(__instance, (Thing)inner, inner.stackCount - stackCount);
+                                NotifyAddedAndMergedWith(__instance, inner, inner.stackCount - stackCount);
                             if (item.Destroyed || item.stackCount == 0)
                             {
                                 __result = true;
@@ -101,12 +101,12 @@ namespace RimThreaded
                 __result = false;
                 return false;
             }
-            item.holdingOwner = (ThingOwner)__instance;
+            item.holdingOwner = __instance;
             lock (innerList(__instance))
             {
                 innerList(__instance).Add(obj);
             }
-            NotifyAdded(__instance, (Thing)obj);
+            NotifyAdded(__instance, obj);
             __result = true;
             return false;
 

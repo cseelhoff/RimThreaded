@@ -31,7 +31,7 @@ namespace RimThreaded
 
             if (tmpCellsCandidates.Any())
             {
-                int num = GenMath.RoundRandom(damageDealt * Mathf.Min(0.0166666675f, 1f / ((float)t.MaxHitPoints / 10f)));
+                int num = GenMath.RoundRandom(damageDealt * Mathf.Min(0.0166666675f, 1f / (t.MaxHitPoints / 10f)));
                 for (int i = 0; i < num; i++)
                 {
                     FilthMaker.TryMakeFilth(tmpCellsCandidates.RandomElement(), t.Map, t.def.filthLeaving);

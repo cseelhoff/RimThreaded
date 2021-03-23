@@ -616,7 +616,7 @@ namespace RimThreaded
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 1148571423, false);
+                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 1148571423, false);
                     }
                     try
                     {
@@ -625,7 +625,7 @@ namespace RimThreaded
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
+                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 8765780, false);
                     }
                     index = Interlocked.Decrement(ref worldPawnsTicks);
                 }

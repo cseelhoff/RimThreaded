@@ -87,11 +87,11 @@ namespace RimThreaded
           int inRadiusMark,
           RegionType traversableRegionTypes = RegionType.Set_Passable)
         {
-            BreadthFirstTraverse(root, entryCondition, (RegionProcessor)(r =>
+            BreadthFirstTraverse(root, entryCondition, r =>
             {
                 r.mark = inRadiusMark;
                 return false;
-            }), maxRegions, traversableRegionTypes);
+            }, maxRegions, traversableRegionTypes);
         }
 
         public void RecreateWorkers()
@@ -123,7 +123,7 @@ namespace RimThreaded
           RegionType traversableRegionTypes = RegionType.Set_Passable)
         {
             if (freeWorkers.Count == 0)
-                Log.Error("No free workers for breadth-first traversal. Either BFS recurred deeper than " + (object)NumWorkers + ", or a bug has put this system in an inconsistent state. Resetting.", false);
+                Log.Error("No free workers for breadth-first traversal. Either BFS recurred deeper than " + NumWorkers + ", or a bug has put this system in an inconsistent state. Resetting.", false);
             else if (root == null)
             {
                 Log.Error("BreadthFirstTraverse with null root region.", false);
