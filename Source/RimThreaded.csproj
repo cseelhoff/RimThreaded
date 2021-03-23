@@ -89,7 +89,6 @@
     <Compile Include="FastPriorityQueueKeyValuePairIntFloat.cs" />
     <Compile Include="FilthMaker.cs" />
     <Compile Include="FilthMonitor2.cs" />
-    <Compile Include="GenClamor_Patch.cs" />
     <Compile Include="GeneratePawns_Patch.cs" />
     <Compile Include="GenLeaving.cs" />
     <Compile Include="HaulAIUtility_Patch.cs" />
@@ -182,7 +181,6 @@
     <Compile Include="TextureUtility_Transpile.cs" />
     <Compile Include="ReservationManager_Transpile.cs" />
     <Compile Include="HediffSet_Transpile.cs" />
-    <Compile Include="GridsUtility_Transpile.cs" />
     <Compile Include="FoodUtility_Transpile.cs" />
     <Compile Include="BuildableDef_Transpile.cs" />
     <Compile Include="AttackTargetReservationManager_Transpile.cs" />
@@ -250,7 +248,6 @@
     <Compile Include="Medicine.cs" />
     <Compile Include="ThinkNode_Priority.cs" />
     <Compile Include="WealthWatcher.cs" />
-    <Compile Include="GenRadial.cs" />
     <Compile Include="RegionAndRoomUpdater.cs" />
     <Compile Include="WanderUtility.cs" />
     <Compile Include="TendUtility.cs" />
@@ -290,10 +287,7 @@
     <Compile Include="DynamicDrawManager.cs" />
     <Compile Include="FloodFiller.cs" />
     <Compile Include="GenClosest.cs" />
-    <Compile Include="GenGrid.cs" />
-    <Compile Include="GenSpawn.cs" />
     <Compile Include="GenTemperature.cs" />
-    <Compile Include="GridsUtility.cs" />
     <Compile Include="HediffGiver_Heat.cs" />
     <Compile Include="HediffGiver_Hypothermia.cs" />
     <Compile Include="JobMaker.cs" />

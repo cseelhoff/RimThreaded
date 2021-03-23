@@ -1,22 +1,25 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
 
     public class GenAdjFast_Patch
 	{
+        [ThreadStatic]
+        private static List<IntVec3> resultList;
+
         public static bool AdjacentCells8Way(ref List<IntVec3> __result, IntVec3 root)
         {
             //GenAdjFast.resultList.Clear();
-            List<IntVec3> resultList = new List<IntVec3>();
+            if (resultList == null)
+            {
+                resultList = new List<IntVec3>();
+            } else
+            {
+                resultList.Clear();
+            }
             //GenAdjFast.working = true;
             for (int index = 0; index < 8; ++index)
                 resultList.Add(root + GenAdj.AdjacentCells[index]);
@@ -39,7 +42,14 @@ namespace RimThreaded
             //if (GenAdjFast.working)
             //throw new InvalidOperationException("GenAdjFast is already working.");
             //GenAdjFast.resultList.Clear();
-            List<IntVec3> resultList = new List<IntVec3>();
+            if (resultList == null)
+            {
+                resultList = new List<IntVec3>();
+            }
+            else
+            {
+                resultList.Clear();
+            }
             //GenAdjFast.working = true;
             GenAdj.AdjustForRotation(ref thingCenter, ref thingSize, thingRot);
             int num1 = thingCenter.x - (thingSize.x - 1) / 2 - 1;
@@ -78,9 +88,16 @@ namespace RimThreaded
         public static bool AdjacentCellsCardinal(ref List<IntVec3> __result, IntVec3 root)
         {
             //if (GenAdjFast.working)
-                //throw new InvalidOperationException("GenAdjFast is already working.");
+            //throw new InvalidOperationException("GenAdjFast is already working.");
             //GenAdjFast.resultList.Clear();
-            List<IntVec3> resultList = new List<IntVec3>();
+            if (resultList == null)
+            {
+                resultList = new List<IntVec3>();
+            }
+            else
+            {
+                resultList.Clear();
+            }
             //GenAdjFast.working = true;
             for (int index = 0; index < 4; ++index)
                 resultList.Add(root + GenAdj.CardinalDirections[index]);
@@ -103,7 +120,14 @@ namespace RimThreaded
             //if (GenAdjFast.working)
             //throw new InvalidOperationException("GenAdjFast is already working.");
             //GenAdjFast.resultList.Clear();
-            List<IntVec3> resultList = new List<IntVec3>();
+            if (resultList == null)
+            {
+                resultList = new List<IntVec3>();
+            }
+            else
+            {
+                resultList.Clear();
+            }
             //GenAdjFast.working = true;
             GenAdj.AdjustForRotation(ref thingCenter, ref thingSize, thingRot);
             int newX = thingCenter.x - (thingSize.x - 1) / 2 - 1;

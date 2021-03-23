@@ -1,10 +1,8 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Verse;
 using Verse.AI;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {

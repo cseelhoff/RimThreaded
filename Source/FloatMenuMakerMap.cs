@@ -6,7 +6,6 @@ using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 using Verse.AI.Group;
 using UnityEngine;
 using RimWorld.Planet;
@@ -16,6 +15,9 @@ namespace RimThreaded
 
     public class FloatMenuMakerMap_Patch
 	{
+        [ThreadStatic]
+        private static List<Pawn> tmpPawns;
+
         public static bool AddHumanlikeOrders(Vector3 clickPos, Pawn pawn, List<FloatMenuOption> opts)
         {
             IntVec3 c = IntVec3.FromVector3(clickPos);
@@ -761,6 +763,38 @@ namespace RimThreaded
                 PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.EquippingWeapons, KnowledgeAmount.Total);
             }
             return false;
+        }
+
+        public static bool TryMakeMultiSelectFloatMenu(List<Pawn> pawns)
+        {
+            if(tmpPawns == null)
+            {
+                tmpPawns = new List<Pawn>();
+            } else
+            {
+                tmpPawns.Clear();
+            }
+            tmpPawns.AddRange(pawns);
+            tmpPawns.RemoveAll((Pawn x) => !x.IsColonistPlayerControlled || x.Downed || x.Map != Find.CurrentMap);
+            if (!tmpPawns.Any())
+            {
+                return false;
+            }
+
+            List<FloatMenuOption> list = FloatMenuMakerMap.ChoicesAtForMultiSelect(UI.MouseMapPosition(), tmpPawns);
+            if (!list.Any())
+            {
+                tmpPawns.Clear();
+                return false;
+            }
+
+            FloatMenu window = new FloatMenu(list)
+            {
+                givesColonistOrders = true
+            };
+            Find.WindowStack.Add(window);
+            tmpPawns.Clear();
+            return true;
         }
 
 

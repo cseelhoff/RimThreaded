@@ -1,19 +1,14 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
 
     public class GenText_Patch
 	{
-
+        [ThreadStatic]
+        private static StringBuilder tmpSbForCapitalizedSentences;
         public static bool CapitalizeSentences(ref string __result, string input, bool capitalizeFirstSentence = true)
         {
             if (input.NullOrEmpty())
@@ -38,7 +33,10 @@ namespace RimThreaded
             bool flag2 = false;
             bool flag3 = false;
             bool flag4 = false;
-            StringBuilder tmpSbForCapitalizedSentences = new StringBuilder();
+            if (tmpSbForCapitalizedSentences == null)
+            {
+                tmpSbForCapitalizedSentences = new StringBuilder();
+            }
             tmpSbForCapitalizedSentences.Length = 0;
             for (int i = 0; i < input.Length; i++)
             {

@@ -1,12 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
+﻿using System;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
 
 namespace RimThreaded

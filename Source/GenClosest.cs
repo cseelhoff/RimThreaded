@@ -144,23 +144,10 @@ namespace RimThreaded
                     return false;
                 if (!ignoreEntirelyForbiddenRegions || !r.IsForbiddenEntirely(traverseParams.pawn))
                 {
-                    //Thing[] arrayThingList;
                     List<Thing> thingList = r.ListerThings.ThingsMatching(req);
-                    //lock (thingList)
-                    //{
-                    //arrayThingList = thingList.ToArray();
-                    //}
                     for (int index = 0; index < thingList.Count; ++index)
                     {
-                        Thing thing;
-                        try
-                        {
-                            thing = thingList[index];
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            break;
-                        }
+                        Thing thing = thingList[index];
                         if (ReachabilityWithinRegion.ThingFromRegionListerReachable(thing, r, peMode, traverseParams.pawn))
                         {
                             float num = priorityGetter != null ? priorityGetter(thing) : 0.0f;

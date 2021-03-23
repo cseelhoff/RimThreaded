@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
@@ -11,16 +9,25 @@ namespace RimThreaded
 {
     class GenLeaving_Patch
     {
+        [ThreadStatic]
+        private static List<IntVec3> tmpCellsCandidates;
+
         public static bool DropFilthDueToDamage(Thing t, float damageDealt)
         {
-            List<IntVec3> tmpCellsCandidates = new List<IntVec3>();
             if (!t.def.useHitPoints || !t.Spawned || t.def.filthLeaving == null)
             {
                 return false;
             }
 
             CellRect cellRect = t.OccupiedRect().ExpandedBy(1);
-            tmpCellsCandidates.Clear();
+            if (tmpCellsCandidates == null)
+            {
+                tmpCellsCandidates = new List<IntVec3>();
+            }
+            else
+            {
+                tmpCellsCandidates.Clear();
+            }
             foreach (IntVec3 item in cellRect)
             {
                 if (item.InBounds(t.Map) && item.Walkable(t.Map))

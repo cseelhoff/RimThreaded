@@ -333,8 +333,8 @@ namespace RimThreaded
 			original = typeof(ListerThings);
 			patched = typeof(ListerThings_Patch);
 			Prefix(original, patched, "ThingsOfDef"); //maybe modify instead: JoyGiver_TakeDrug.BestIngestItem...  List<Thing> list = pawn.Map.listerThings.ThingsOfDef(JoyGiver_TakeDrug.takeableDrugs[k]);
-													  //Prefix(original, patched, "Remove");
-													  //Prefix(original, patched, "Add");
+			Prefix(original, patched, "Remove");
+			Prefix(original, patched, "Add");
 													  //patched = typeof(ListerThings_Transpile);
 													  //Transpile(original, patched, "Remove");
 													  //Transpile(original, patched, "Add");
@@ -409,8 +409,8 @@ namespace RimThreaded
 
 			//FloatMenuMakerMap
 			original = typeof(FloatMenuMakerMap);
-			//patched = typeof(FloatMenuMakerMap_Patch);
-			//Prefix(original, patched, "AddHumanlikeOrders");
+			patched = typeof(FloatMenuMakerMap_Patch);
+			Prefix(original, patched, "TryMakeMultiSelectFloatMenu");
 			patched = typeof(FloatMenuMakerMap_Transpile);
 			Transpile(original, patched, "AddHumanlikeOrders");
 
@@ -426,12 +426,6 @@ namespace RimThreaded
 			original = typeof(RCellFinder);
 			patched = typeof(RCellFinder_Patch); //TODO add threadstatics and transpile in
 			Prefix(original, patched, "RandomWanderDestFor");
-
-			//GenSpawn
-			original = typeof(GenSpawn);
-			patched = typeof(GenSpawn_Patch);
-			Prefix(original, patched, "WipeExistingThings");
-			Prefix(original, patched, "CheckMoveItemsAside");
 
 			//PawnDestinationReservationManager
 			original = typeof(PawnDestinationReservationManager);
@@ -671,13 +665,6 @@ namespace RimThreaded
 			Prefix(original, patched, "CheckForFreeInterceptBetween");
 			Prefix(original, patched, "CheckForFreeIntercept");
 
-			//GenGrid_Patch			
-			original = typeof(GenGrid);
-			patched = typeof(GenGrid_Patch);
-			Prefix(original, patched, "InBounds", new Type[] { typeof(IntVec3), typeof(Map) });
-			Prefix(original, patched, "Standable");
-			Prefix(original, patched, "Walkable");
-
 			//AttackTargetReservationManager
 			original = typeof(AttackTargetReservationManager);
 			patched = typeof(AttackTargetReservationManager_Patch);
@@ -692,21 +679,11 @@ namespace RimThreaded
 			//Transpile(original, patched, "IsReservedBy"); changed back to prefix for now TODO
 			//Transpile(original, patched, "Reserve"); changed back to prefix for now TODO
 
-
 			//PawnCollisionTweenerUtility
 			original = typeof(PawnCollisionTweenerUtility);
 			patched = typeof(PawnCollisionTweenerUtility_Patch);
 			Prefix(original, patched, "GetPawnsStandingAtOrAboutToStandAt");
 			Prefix(original, patched, "CanGoDirectlyToNextCell");
-
-			//GridsUtility			
-			original = typeof(GridsUtility);
-			patched = typeof(GridsUtility_Patch);
-			Prefix(original, patched, "GetTerrain");
-			Prefix(original, patched, "IsInPrisonCell");
-			Prefix(original, patched, "GetThingList");
-			patched = typeof(GridsUtility_Transpile);
-			Transpile(original, patched, "GetGas");
 
 			//ReservationManager
 			original = typeof(ReservationManager);
@@ -1118,7 +1095,6 @@ namespace RimThreaded
 			original = typeof(InfestationCellFinder);
 			patched = typeof(InfestationCellFinder_Patch);
 			Prefix(original, patched, "CalculateDistanceToColonyBuildingGrid");
-			Prefix(original, patched, "GetScoreAt");
 
 			//RegionCostCalculator
 			original = typeof(RegionCostCalculator);
@@ -1559,13 +1535,7 @@ namespace RimThreaded
 			patched = typeof(ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch);
 			Prefix(original, patched, "Satisfied");
 
-			//GenClamor+<>c__DisplayClass1_0
-			original = TypeByName("Verse.GenClamor+<>c__DisplayClass1_0");
-			patched = typeof(GenClamor_Patch);
-			oMethod = Method(original, "<DoClamor>b__1");
-			pMethod = Method(patched, "DoClamorb__1");
-			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
-
+		
 			//TODO - should transpile ReplacePotentiallyRelatedPawns instead
 			//FocusStrengthOffset_GraveCorpseRelationship.CanApply
 			original = typeof(FocusStrengthOffset_GraveCorpseRelationship);
@@ -1595,6 +1565,8 @@ namespace RimThreaded
 			original = typeof(WorkGiver_GrowerSow);
 			patched = typeof(WorkGiver_GrowerSow_Patch);
 			Prefix(original, patched, "JobOnCell");
+
+			//threadstatic
 
 			//JoyGiver_Ingest
 			//original = typeof(JoyGiver_Ingest);
