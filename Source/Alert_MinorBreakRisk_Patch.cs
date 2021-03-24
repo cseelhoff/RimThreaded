@@ -1,5 +1,4 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -13,15 +12,7 @@ namespace RimThreaded
             List<Pawn> pawnList = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep;
             for (int i = 0; i < pawnList.Count; i++)
             {
-                Pawn item;
-                try
-                {
-                    item = pawnList[i];
-                } catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
-
+                Pawn item = pawnList[i];
                 if (!item.Downed && item.MentalStateDef == null)
                 {
                     float curMood = item.mindState.mentalBreaker.CurMood;

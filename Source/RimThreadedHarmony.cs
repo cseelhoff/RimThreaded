@@ -431,17 +431,12 @@ namespace RimThreaded
 			original = typeof(PawnDestinationReservationManager);
 			patched = typeof(PawnDestinationReservationManager_Patch);
 			Prefix(original, patched, "GetPawnDestinationSetFor");
-			Prefix(original, patched, "IsReserved", new Type[] { typeof(IntVec3), typeof(Pawn).MakeByRefType() });
 			Prefix(original, patched, "Notify_FactionRemoved");
-			Prefix(original, patched, "DebugDrawReservations");
 			Prefix(original, patched, "Reserve");
 			Prefix(original, patched, "ObsoleteAllClaimedBy");
 			Prefix(original, patched, "ReleaseAllObsoleteClaimedBy");
 			Prefix(original, patched, "ReleaseAllClaimedBy");
 			Prefix(original, patched, "ReleaseClaimedBy");
-			Prefix(original, patched, "CanReserve");
-			Prefix(original, patched, "FirstObsoleteReservationFor");
-			Prefix(original, patched, "MostRecentReservationFor");
 
 			//DynamicDrawManager
 			original = typeof(DynamicDrawManager);
@@ -545,10 +540,41 @@ namespace RimThreaded
 			//PawnsFinder
 			original = typeof(PawnsFinder);
 			patched = typeof(PawnsFinder_Patch);
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
+			//Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
+			//Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
+			//Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
+			//Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
+
+			Prefix(original, patched, "get_AllMapsWorldAndTemporary_AliveOrDead");
 			Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
+			Prefix(original, patched, "get_AllMapsAndWorld_Alive");
+			Prefix(original, patched, "get_AllMaps");
+			Prefix(original, patched, "get_AllMaps_Spawned");
+			Prefix(original, patched, "get_All_AliveOrDead");
+			Prefix(original, patched, "get_Temporary");
+			Prefix(original, patched, "get_Temporary_Alive");
+			Prefix(original, patched, "get_Temporary_Dead");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive");
+			Prefix(original, patched, "get_AllCaravansAndTravelingTransportPods_Alive");
+			Prefix(original, patched, "get_AllCaravansAndTravelingTransportPods_AliveOrDead");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
+			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep");
+			Prefix(original, patched, "get_AllMaps_PrisonersOfColonySpawned");
+			Prefix(original, patched, "get_AllMaps_PrisonersOfColony");
+			Prefix(original, patched, "get_AllMaps_FreeColonists");
+			Prefix(original, patched, "get_AllMaps_FreeColonistsSpawned");
+			Prefix(original, patched, "get_AllMaps_FreeColonistsAndPrisonersSpawned");
+			Prefix(original, patched, "get_AllMaps_FreeColonistsAndPrisoners");
+			Prefix(original, patched, "get_HomeMaps_FreeColonistsSpawned");
+			Prefix(original, patched, "AllMaps_SpawnedPawnsInFaction");
+			Prefix(original, patched, "Clear");
 
 			//PawnDiedOrDownedThoughtsUtility
 			original = typeof(PawnDiedOrDownedThoughtsUtility);
@@ -889,21 +915,9 @@ namespace RimThreaded
 			Prefix(original, patched, "RemoveReporter");
 			Prefix(original, patched, "get_AggregateSize");
 
-			//HediffSet
-			//patched = typeof(HediffSet_Transpile);
-			//original = TypeByName("Verse.HediffSet+<GetNotMissingParts>d__40");
-			//Transpile(original, patched, "MoveNext");
 			original = typeof(HediffSet);
-			//Transpile(original, patched, "GetPartHealth");
-			//Transpile(original, patched, "AddDirect"); TODO re-add transpile
-			//Transpile(original, patched, "CacheMissingPartsCommonAncestors");
 			patched = typeof(HediffSet_Patch);
 			Prefix(original, patched, "AddDirect");
-			//Prefix(original, patched, "PartIsMissing");
-			//Prefix(original, patched, "HasDirectlyAddedPartFor");
-			//Prefix(original, patched, "GetFirstHediffOfDef");
-			//Prefix(original, patched, "HasTendableHediff");
-			//Prefix(original, patched, "HasImmunizableNotImmuneHediff");
 			Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
 
 			//LanguageWordInfo
@@ -1080,11 +1094,6 @@ namespace RimThreaded
 			original = typeof(TimeControls);
 			patched = typeof(TimeControls_Patch);
 			Prefix(original, patched, "DoTimeControlsGUI");
-
-			//PathGrid
-			original = typeof(PathGrid);
-			patched = typeof(PathGrid_Patch);
-			Prefix(original, patched, "CalculatedCostAt");
 
 			//GlobalControlsUtility
 			original = typeof(GlobalControlsUtility);
@@ -1299,8 +1308,8 @@ namespace RimThreaded
 			//JobDriver			
 			original = typeof(JobDriver);
 			patched = typeof(JobDriver_Patch);
-			Prefix(original, patched, "TryActuallyStartNextToil");
-			Prefix(original, patched, "DriverTick");
+			//Prefix(original, patched, "TryActuallyStartNextToil");
+			//Prefix(original, patched, "DriverTick");
 
 			//TemperatureCache			
 			original = typeof(TemperatureCache);
@@ -1463,11 +1472,6 @@ namespace RimThreaded
 			patched = typeof(Alert_MinorBreakRisk_Patch);
 			Prefix(original, patched, "GetReport");
 
-			//FilthMaker
-			original = typeof(FilthMaker);
-			patched = typeof(FilthMaker_Patch);
-			Prefix(original, patched, "TryMakeFilth", new Type[] { typeof(IntVec3), typeof(Map), typeof(ThingDef), typeof(IEnumerable<string>), typeof(bool), typeof(FilthSourceFlags) });
-
 			//SickPawnVisitUtility
 			original = typeof(SickPawnVisitUtility);
 			patched = typeof(SickPawnVisitUtility_Patch);
@@ -1492,8 +1496,8 @@ namespace RimThreaded
 			//MemoryThoughtHandler
 			original = typeof(MemoryThoughtHandler);
 			patched = typeof(MemoryThoughtHandler_Patch);
-			Prefix(original, patched, "MemoryThoughtInterval");
-			Prefix(original, patched, "ExposeData");
+			Prefix(original, patched, "RemoveMemory");
+			Prefix(original, patched, "TryGainMemory", new Type[] { typeof(Thought_Memory), typeof(Pawn) });
 
 			//PortraitRenderer
 			original = typeof(PortraitRenderer);
@@ -1566,7 +1570,6 @@ namespace RimThreaded
 			patched = typeof(WorkGiver_GrowerSow_Patch);
 			Prefix(original, patched, "JobOnCell");
 
-			//threadstatic
 
 			//JoyGiver_Ingest
 			//original = typeof(JoyGiver_Ingest);

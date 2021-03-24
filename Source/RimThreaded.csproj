@@ -87,7 +87,6 @@
     <Compile Include="DrugAIUtility_Patch.cs" />
     <Compile Include="DubsSkylight_getPatch_Transpile.cs" />
     <Compile Include="FastPriorityQueueKeyValuePairIntFloat.cs" />
-    <Compile Include="FilthMaker.cs" />
     <Compile Include="FilthMonitor2.cs" />
     <Compile Include="GeneratePawns_Patch.cs" />
     <Compile Include="GenLeaving.cs" />
@@ -180,7 +179,6 @@
     <Compile Include="GUIStyle.cs" />
     <Compile Include="TextureUtility_Transpile.cs" />
     <Compile Include="ReservationManager_Transpile.cs" />
-    <Compile Include="HediffSet_Transpile.cs" />
     <Compile Include="FoodUtility_Transpile.cs" />
     <Compile Include="BuildableDef_Transpile.cs" />
     <Compile Include="AttackTargetReservationManager_Transpile.cs" />
@@ -200,7 +198,6 @@
     <Compile Include="FloatMenuMakerMap_Transpile.cs" />
     <Compile Include="AudioSourceMaker.cs" />
     <Compile Include="GrammarResolver.cs" />
-    <Compile Include="PathGrid.cs" />
     <Compile Include="FloatMenuMakerMap.cs" />
     <Compile Include="TimeControls.cs" />
     <Compile Include="Graphics.cs" />

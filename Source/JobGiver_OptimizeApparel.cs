@@ -22,15 +22,7 @@ namespace RimThreaded
             //wornApparelScores.Clear();
             for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
             {
-                Apparel apparel;
-                try
-                {
-                    apparel = pawn.apparel.WornApparel[i];
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
+                Apparel apparel = pawn.apparel.WornApparel[i];
                 wornApparelScores.Add(JobGiver_OptimizeApparel.ApparelScoreRaw(pawn, apparel));
             }
             float scoreGain = 0f;

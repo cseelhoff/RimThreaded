@@ -38,7 +38,7 @@ namespace RimThreaded
 
             if (tmpColonyBuildingsLocs == null)
             {
-                List<IntVec3> tmpColonyBuildingsLocs = new List<IntVec3>();
+                tmpColonyBuildingsLocs = new List<IntVec3>();
             }
             else
             {

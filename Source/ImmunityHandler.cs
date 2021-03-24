@@ -37,14 +37,7 @@ namespace RimThreaded
             List<Hediff> hediffs = __instance.pawn.health.hediffSet.hediffs;
             for (int i = 0; i < hediffs.Count; i++)
             {
-                Hediff hediff;
-                try
-                {
-                    hediff = hediffs[i];
-                } catch(ArgumentOutOfRangeException)
-                {
-                    break;
-                }
+                Hediff hediff = hediffs[i];
                 if (hediff != null && hediff.def != null && hediff.def.PossibleToDevelopImmunityNaturally())
                 {
                     //Changed to tmpNeededImmunitiesNow
