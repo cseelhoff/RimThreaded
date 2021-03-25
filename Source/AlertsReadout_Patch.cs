@@ -25,6 +25,13 @@ namespace RimThreaded
         private static readonly Action<AlertsReadout, Alert, bool> actionCheckAddOrRemoveAlert =
             (Action<AlertsReadout, Alert, bool>)Delegate.CreateDelegate(typeof(Action<AlertsReadout, Alert, bool>), methodCheckAddOrRemoveAlert);
 
+        public static void RunDestructivesPatches()
+        {
+            Type original = typeof(AlertsReadout);
+            Type patched = typeof(AlertsReadout_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AlertsReadoutUpdate");
+        }
+
         public static bool AlertsReadoutUpdate(AlertsReadout __instance)
         {
             if (Mathf.Max(Find.TickManager.TicksGame, Find.TutorialState.endTick) < 600)

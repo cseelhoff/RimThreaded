@@ -7,8 +7,24 @@ namespace RimThreaded
 {
     class ReachabilityCache_Patch
     {
-        [ThreadStatic]
-        private static List<CachedEntry2> tmpCachedEntries;
+        [ThreadStatic] public static List<CachedEntry2> tmpCachedEntries;
+
+        public static void InitializeThreadStatics()
+        {
+            tmpCachedEntries = new List<CachedEntry2>();
+        }
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(ReachabilityCache);
+            Type patched = typeof(ReachabilityCache_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "get_Count");
+            RimThreadedHarmony.Prefix(original, patched, "CachedResultFor");
+            RimThreadedHarmony.Prefix(original, patched, "AddCachedResult");
+            RimThreadedHarmony.Prefix(original, patched, "Clear");
+            RimThreadedHarmony.Prefix(original, patched, "ClearFor");
+            RimThreadedHarmony.Prefix(original, patched, "ClearForHostile");
+        }
 
         public struct CachedEntry2 : IEquatable<CachedEntry2>
         {
@@ -151,14 +167,7 @@ namespace RimThreaded
 
         public static bool ClearFor(ReachabilityCache __instance, Pawn p)
         {
-            if (tmpCachedEntries == null)
-            {
-                tmpCachedEntries = new List<CachedEntry2>();
-            }
-            else
-            {
-                tmpCachedEntries.Clear();
-            }
+            tmpCachedEntries.Clear();
             Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
 
             lock (cacheDict)

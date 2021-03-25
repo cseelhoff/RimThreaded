@@ -257,7 +257,7 @@ namespace RimThreaded
 			return finalCodeInstructions;
 		}
 
-		static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>();
+		public static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>();
 
 		public static IEnumerable<CodeInstruction> ReplaceThreadStatics(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
@@ -290,48 +290,288 @@ namespace RimThreaded
 		{
 			Harmony.DEBUG = false;
 			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "  is patching methods...");
+
+			PatchDestructiveFixes();
+			PatchNonDestructiveFixes();
+			PatchModCompatibility();
+
+			Log.Message("RimThreaded patching is complete.");
+		}
+
+        private static void PatchModCompatibility()
+        {
+			Type patched = null;
+
+			giddyUpCoreStorageExtendedPawnData = TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
+			giddyUpCoreJobsGUC_JobDefOf = TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
+			giddyUpCoreUtilitiesTextureUtility = TypeByName("GiddyUpCore.Utilities.TextureUtility");
+			giddyUpCoreStorageExtendedDataStorage = TypeByName("GiddyUpCore.Storage.ExtendedDataStorage");
+			giddyUpCoreJobsJobDriver_Mounted = TypeByName("GiddyUpCore.Jobs.JobDriver_Mounted");
+			giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob = TypeByName("GiddyUpCore.Harmony.Pawn_JobTracker_DetermineNextJob");
+			hospitalityCompUtility = TypeByName("Hospitality.CompUtility");
+			hospitalityCompGuest = TypeByName("Hospitality.CompGuest");
+			awesomeInventoryJobsJobGiver_FindItemByRadius = TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius");
+			awesomeInventoryErrorMessage = TypeByName("AwesomeInventory.ErrorMessage");
+			jobGiver_AwesomeInventory_TakeArm = TypeByName("AwesomeInventory.Jobs.JobGiver_AwesomeInventory_TakeArm");
+			awesomeInventoryJobsJobGiver_FindItemByRadiusSub = TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius+<>c__DisplayClass17_0");
+			pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus = TypeByName("PawnRules.Patch.RimWorld_Pawn_GuestTracker_SetGuestStatus");
+			combatExtendedCE_Utility = TypeByName("CombatExtended.CE_Utility");
+			combatExtendedVerb_LaunchProjectileCE = TypeByName("CombatExtended.Verb_LaunchProjectileCE");
+			combatExtendedVerb_MeleeAttackCE = TypeByName("CombatExtended.Verb_MeleeAttackCE");
+			combatExtended_ProjectileCE = TypeByName("CombatExtended.ProjectileCE");
+			dubsSkylight_Patch_GetRoof = TypeByName("Dubs_Skylight.Patch_GetRoof");
+			jobsOfOpportunityJobsOfOpportunity_Hauling = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
+			jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Patch_TryOpportunisticJob");
+			childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch = TypeByName("Children.ChildrenHarmony+HediffComp_Discoverable_CheckDiscovered_Patch");
+			androidTiers_GeneratePawns_Patch1 = TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch");
+			if (androidTiers_GeneratePawns_Patch1 != null)
+			{
+				androidTiers_GeneratePawns_Patch = androidTiers_GeneratePawns_Patch1.GetNestedType("GeneratePawns_Patch");
+			}
+
+			if (giddyUpCoreUtilitiesTextureUtility != null)
+			{
+				string methodName = "setDrawOffset";
+				Log.Message("RimThreaded is patching " + giddyUpCoreUtilitiesTextureUtility.FullName + " " + methodName);
+				patched = typeof(TextureUtility_Transpile);
+				Transpile(giddyUpCoreUtilitiesTextureUtility, patched, methodName);
+			}
+
+			if (giddyUpCoreStorageExtendedDataStorage != null)
+			{
+				string methodName = "DeleteExtendedDataFor";
+				Log.Message("RimThreaded is patching " + giddyUpCoreStorageExtendedDataStorage.FullName + " " + methodName);
+				patched = typeof(ExtendedDataStorage_Transpile);
+				Transpile(giddyUpCoreStorageExtendedDataStorage, patched, methodName);
+
+				methodName = "GetExtendedDataFor";
+				Log.Message("RimThreaded is patching " + giddyUpCoreStorageExtendedDataStorage.FullName + " " + methodName);
+				Transpile(giddyUpCoreStorageExtendedDataStorage, patched, methodName);
+			}
+
+			if (giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob != null)
+			{
+				string methodName = "Postfix";
+				Log.Message("RimThreaded is patching " + giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob.FullName + " " + methodName);
+				patched = typeof(Pawn_JobTracker_DetermineNextJob_Transpile);
+				Transpile(giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob, patched, methodName);
+			}
+
+			if (giddyUpCoreJobsJobDriver_Mounted != null)
+			{
+				string methodName = "<waitForRider>b__8_0";
+				foreach (MethodInfo methodInfo in ((TypeInfo)giddyUpCoreJobsJobDriver_Mounted).DeclaredMethods)
+				{
+					if (methodInfo.Name.Equals(methodName))
+					{
+						Log.Message("RimThreaded is patching " + giddyUpCoreJobsJobDriver_Mounted.FullName + " " + methodName);
+						patched = typeof(JobDriver_Mounted_Transpile);
+						MethodInfo pMethod2 = patched.GetMethod("WaitForRider");
+						harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod2));
+					}
+				}
+			}
+
+			if (hospitalityCompUtility != null)
+			{
+				string methodName = "CompGuest";
+				Log.Message("RimThreaded is patching " + hospitalityCompUtility.FullName + " " + methodName);
+				patched = typeof(CompUtility_Transpile);
+				Transpile(hospitalityCompUtility, patched, methodName);
+				methodName = "OnPawnRemoved";
+				Log.Message("RimThreaded is patching " + hospitalityCompUtility.FullName + " " + methodName);
+				Transpile(hospitalityCompUtility, patched, methodName);
+			}
+
+			if (awesomeInventoryJobsJobGiver_FindItemByRadius != null)
+			{
+				string methodName = "Reset";
+				Log.Message("RimThreaded is patching " + awesomeInventoryJobsJobGiver_FindItemByRadius.FullName + " " + methodName);
+				patched = typeof(JobGiver_FindItemByRadius_Transpile);
+				Transpile(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
+				methodName = "FindItem";
+				Log.Message("RimThreaded is patching " + awesomeInventoryJobsJobGiver_FindItemByRadius.FullName + " " + methodName);
+				Transpile(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
+			}
+
+			if (pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus != null)
+			{
+				string methodName = "Prefix";
+				Log.Message("RimThreaded is patching " + pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus.FullName + " " + methodName);
+				patched = typeof(RimWorld_Pawn_GuestTracker_SetGuestStatus_Transpile);
+				Transpile(pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus, patched, methodName);
+			}
+
+			if (combatExtendedCE_Utility != null)
+			{
+				string methodName = "BlitCrop";
+				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
+				patched = typeof(CE_Utility_Transpile);
+				Transpile(combatExtendedCE_Utility, patched, methodName);
+				methodName = "GetColorSafe";
+				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
+				Transpile(combatExtendedCE_Utility, patched, methodName);
+			}
+			if (combatExtendedVerb_LaunchProjectileCE != null)
+			{
+				string methodName = "CanHitFromCellIgnoringRange";
+				patched = typeof(Verb_LaunchProjectileCE_Transpile);
+				Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
+				Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
+				methodName = "TryFindCEShootLineFromTo";
+				Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
+				Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
+			}
+			if (combatExtendedVerb_MeleeAttackCE != null)
+			{
+				string methodName = "TryCastShot";
+				patched = typeof(Verb_MeleeAttackCE_Transpile);
+				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
+				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
+			}
+
+			if (dubsSkylight_Patch_GetRoof != null)
+			{
+				string methodName = "Postfix";
+				patched = typeof(DubsSkylight_getPatch_Transpile);
+				Log.Message("RimThreaded is patching " + dubsSkylight_Patch_GetRoof.FullName + " " + methodName);
+				Transpile(dubsSkylight_Patch_GetRoof, patched, methodName);
+			}
+
+			if (jobsOfOpportunityJobsOfOpportunity_Hauling != null)
+			{
+				cachedStoreCell = Field(jobsOfOpportunityJobsOfOpportunity_Hauling, "cachedStoreCell");
+				string methodName = "CanHaul";
+				patched = typeof(Hauling_Transpile);
+				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
+				Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
+			}
+
+			if (jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob != null)
+			{
+				string methodName = "TryOpportunisticJob";
+				patched = typeof(Patch_TryOpportunisticJob_Transpile);
+				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob.FullName + " " + methodName);
+				Transpile(jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob, patched, methodName);
+			}
+
+			if (childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch != null)
+			{
+				string methodName = "CheckDiscovered_Pre";
+				patched = typeof(childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch_Transpile);
+				Log.Message("RimThreaded is patching " + childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch.FullName + " " + methodName);
+				Transpile(childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch, patched, methodName);
+			}
+
+			if (androidTiers_GeneratePawns_Patch != null)
+			{
+				string methodName = "Listener";
+				patched = typeof(GeneratePawns_Patch_Transpile);
+				Log.Message("RimThreaded is patching " + androidTiers_GeneratePawns_Patch.FullName + " " + methodName);
+				Log.Message("Utility_Patch::Listener != null: " + (Method(androidTiers_GeneratePawns_Patch, "Listener") != null));
+				Log.Message("Utility_Patch_Transpile::Listener != null: " + (Method(patched, "Listener") != null));
+				Transpile(androidTiers_GeneratePawns_Patch, patched, methodName);
+			}
+		}
+
+        private static void PatchNonDestructiveFixes()
+        {
 			Type original = null;
 			Type patched = null;
 
-			//PlayDataLoader
-			//original = typeof(PlayDataLoader);
-			//patched = typeof(PlayDataLoader_Patch);
-			//Prefix(original, patched, "DoPlayLoad");
+			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
+			LongEventHandler_Patch.RunNonDestructivePatches();
+			World_Patch.RunNonDestructivePatches();
+			HaulAIUtility_Patch.RunNonDestructivePatches();
 
-			//TickManager			
-			original = typeof(TickManager);
-			patched = typeof(TickManager_Patch);
-			Prefix(original, patched, "DoSingleTick");
-			Prefix(original, patched, "get_TickRateMultiplier");
+			//TODO - should transpile ReplacePotentiallyRelatedPawns instead
+			// Pawn_RelationsTracker.<get_PotentiallyRelatedPawns>d__28'.MoveNext()
+			// // <stack>5__2 = SimplePool<List<Pawn>>.Get();
+			//IL_004c: call!0 class Verse.SimplePool`1<class [mscorlib] System.Collections.Generic.List`1<class Verse.Pawn>>::Get()
+			//-----------
+			//CHANGE TO: new List<Pawn>();
+			//-----------
+			//
+			// AND
+			//		
+			// <visited>5__3 = SimplePool<HashSet<Pawn>>.Get();
+			//IL_0057: call!0 class Verse.SimplePool`1<class [System.Core] System.Collections.Generic.HashSet`1<class Verse.Pawn>>::Get()
+			//--------
+			//CHANGE TO: new HashSet<Pawn>();
+			// ---------
+			// AND
+			// -----------
+			// Pawn_RelationsTracker.<get_PotentiallyRelatedPawns>d__28'.'<>m__Finally1'()
+			/*
+			 * // <>1__state = -1;
+				IL_0000: ldarg.0
+				IL_0001: ldc.i4.m1
+				IL_0002: stfld int32 RimWorld.Pawn_RelationsTracker/'<get_PotentiallyRelatedPawns>d__28'::'<>1__state'
+				// <stack>5__2.Clear();
+				IL_0007: ldarg.0
+				IL_0008: ldfld class [mscorlib]System.Collections.Generic.List`1<class Verse.Pawn> RimWorld.Pawn_RelationsTracker/'<get_PotentiallyRelatedPawns>d__28'::'<stack>5__2'
+				IL_000d: callvirt instance void class [mscorlib]System.Collections.Generic.List`1<class Verse.Pawn>::Clear()
+				// SimplePool<List<Pawn>>.Return(<stack>5__2);
+				IL_0012: ldarg.0
+				IL_0013: ldfld class [mscorlib]System.Collections.Generic.List`1<class Verse.Pawn> RimWorld.Pawn_RelationsTracker/'<get_PotentiallyRelatedPawns>d__28'::'<stack>5__2'
+				IL_0018: call void class Verse.SimplePool`1<class [mscorlib]System.Collections.Generic.List`1<class Verse.Pawn>>::Return(!0)
+				// <visited>5__3.Clear();
+				IL_001d: ldarg.0
+				IL_001e: ldfld class [System.Core]System.Collections.Generic.HashSet`1<class Verse.Pawn> RimWorld.Pawn_RelationsTracker/'<get_PotentiallyRelatedPawns>d__28'::'<visited>5__3'
+				IL_0023: callvirt instance void class [System.Core]System.Collections.Generic.HashSet`1<class Verse.Pawn>::Clear()
+				// SimplePool<HashSet<Pawn>>.Return(<visited>5__3);
+				IL_0028: ldarg.0
+				IL_0029: ldfld class [System.Core]System.Collections.Generic.HashSet`1<class Verse.Pawn> RimWorld.Pawn_RelationsTracker/'<get_PotentiallyRelatedPawns>d__28'::'<visited>5__3'
+				IL_002e: call void class Verse.SimplePool`1<class [System.Core]System.Collections.Generic.HashSet`1<class Verse.Pawn>>::Return(!0)
+				// }
+				IL_0033: ret
+			    ---REMOVE IL_07 through IL_002e---
+			*/
+			// 
+			//FocusStrengthOffset_GraveCorpseRelationship.CanApply
+			original = typeof(FocusStrengthOffset_GraveCorpseRelationship);
+			patched = typeof(Pawn_RelationsTracker_Transpile);
+			MethodInfo pMethod = Method(patched, "ReplacePotentiallyRelatedPawns");
+			harmony.Patch(Method(original, "CanApply"), transpiler: new HarmonyMethod(pMethod));
 
-			//ContentFinderTexture2D			
-			original = typeof(ContentFinder<Texture2D>);
-			patched = typeof(ContentFinder_Texture2D_Patch);
-			Prefix(original, patched, "Get");
+			//PawnDiedOrDownedThoughtsUtility.AppendThoughts_Relations
+			original = typeof(PawnDiedOrDownedThoughtsUtility);
+			harmony.Patch(Method(original, "AppendThoughts_Relations"), transpiler: new HarmonyMethod(pMethod));
 
-			//ContentFinderTexture2D
-			original = typeof(MaterialPool);
-			patched = typeof(MaterialPool_Patch);
-			Prefix(original, patched, "MatFrom", new Type[] { typeof(MaterialRequest) });
+			//Pawn_RelationsTracker.get_RelatedPawns
+			original = TypeByName("RimWorld.Pawn_RelationsTracker+<get_RelatedPawns>d__30");
+			harmony.Patch(Method(original, "MoveNext"), transpiler: new HarmonyMethod(pMethod));
 
-			//TickList			
+			//Pawn_RelationsTracker
+			original = typeof(Pawn_RelationsTracker);
+			//Pawn_RelationsTracker.Notify_PawnKilled
+			harmony.Patch(Method(original, "Notify_PawnKilled"), transpiler: new HarmonyMethod(pMethod));
+			//Pawn_RelationsTracker.Notify_PawnSold
+			harmony.Patch(Method(original, "Notify_PawnSold"), transpiler: new HarmonyMethod(pMethod));
+
+
+			//DamageWorker
+			original = typeof(DamageWorker);
+			patched = typeof(DamageWorker_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "ExplosionAffectCell");
+			TranspileThreadStatics(original, "ExplosionCellsToHit", new Type[] { typeof(IntVec3), typeof(Map), typeof(float), typeof(IntVec3), typeof(IntVec3) });
+
+			//GenLeaving
+			original = typeof(GenLeaving);
+			patched = typeof(GenLeaving_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "DropFilthDueToDamage");
+
+
+			//TickList
 			original = typeof(TickList);
-			patched = typeof(TickList_Patch);
-			Prefix(original, patched, "Tick");
 			patched = typeof(TickList_Transpile);
 			Transpile(original, patched, "RegisterThing");
 			Transpile(original, patched, "DeregisterThing");
 
 			//Rand
 			original = typeof(Rand);
-			//patched = typeof(Rand_Patch);
-			//Prefix(original, patched, "set_Seed");
-			//Prefix(original, patched, "get_Value");
-			//Prefix(original, patched, "EnsureStateStackEmpty");
-			//Prefix(original, patched, "get_Int");
-			//Prefix(original, patched, "PopState");
-			//Prefix(original, patched, "TryRangeInclusiveWhere");
-			//Prefix(original, patched, "PushState", Type.EmptyTypes);
 			patched = typeof(Rand_Transpile);
 			Transpile(original, patched, "PushState", Type.EmptyTypes);
 			Transpile(original, patched, "PopState");
@@ -342,31 +582,6 @@ namespace RimThreaded
 			patched = typeof(ThingOwnerThing_Transpile);
 			Transpile(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
 			Transpile(original, patched, "Remove");
-			//patched = typeof(ThingOwnerThing_Patch);
-			//Prefix(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
-			//Prefix(original, patched, "Remove");
-
-			//RegionListersUpdater
-			original = typeof(RegionListersUpdater);
-			patched = typeof(RegionListersUpdater_Patch);
-			Prefix(original, patched, "DeregisterInRegions");
-			Prefix(original, patched, "RegisterInRegions");
-			Prefix(original, patched, "RegisterAllAt");
-			//patched = typeof(RegionListersUpdater_Transpile);
-			//Transpile(original, patched, "DeregisterInRegions");
-			//Transpile(original, patched, "RegisterInRegions");
-			//Transpile(original, patched, "RegisterAllAt");
-
-
-			//ListerThings
-			original = typeof(ListerThings);
-			patched = typeof(ListerThings_Patch);
-			Prefix(original, patched, "ThingsOfDef"); //maybe modify instead: JoyGiver_TakeDrug.BestIngestItem...  List<Thing> list = pawn.Map.listerThings.ThingsOfDef(JoyGiver_TakeDrug.takeableDrugs[k]);
-			Prefix(original, patched, "Remove");
-			Prefix(original, patched, "Add");
-													  //patched = typeof(ListerThings_Transpile);
-													  //Transpile(original, patched, "Remove");
-													  //Transpile(original, patched, "Add");
 
 			//Thing
 			original = typeof(Thing);
@@ -377,14 +592,8 @@ namespace RimThreaded
 			patched = typeof(Thing_Patch);
 			Postfix(original, patched, "SpawnSetup");
 
-			//JobMaker
-			original = typeof(JobMaker);
-			patched = typeof(JobMaker_Patch);
-			Prefix(original, patched, "MakeJob", new Type[] { });
-			Prefix(original, patched, "ReturnToPool");
-
 			//RegionTraverser
-			original = typeof(RegionTraverser);			
+			original = typeof(RegionTraverser);
 			patched = typeof(RegionTraverser_Transpile);
 			Transpile(original, patched, "BreadthFirstTraverse", new Type[] {
 				typeof(Region),
@@ -393,34 +602,270 @@ namespace RimThreaded
 				typeof(int),
 				typeof(RegionType)
 			});
-			Transpile(original, patched, "RecreateWorkers");		
-			
+			Transpile(original, patched, "RecreateWorkers");
 
+			//Verse.RegionTraverser+BFSWorker
 			original = TypeByName("Verse.RegionTraverser+BFSWorker");
 			patched = typeof(BFSWorker_Transpile);
 			Transpile(original, patched, "QueueNewOpenRegion");
 			Transpile(original, patched, "BreadthFirstTraverseWork");
+
+			//ThinkNode_PrioritySorter
+			original = typeof(ThinkNode_PrioritySorter);
+			patched = typeof(ThinkNode_PrioritySorter_Transpile);
+			Transpile(original, patched, "TryIssueJobPackage");
+
+			//CellFinder
+			original = typeof(CellFinder);
+			patched = typeof(CellFinder_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "TryFindRandomCellNear");
+			TranspileThreadStatics(original, "TryFindRandomCellInRegion");
+			TranspileThreadStatics(original, "TryFindBestPawnStandCell");
+			TranspileThreadStatics(original, "TryFindRandomReachableCellNear");
+			TranspileThreadStatics(original, "TryFindRandomCellInsideWith");
+			TranspileThreadStatics(original, "FindNoWipeSpawnLocNear");
+			TranspileThreadStatics(original, "RandomRegionNear");
+
+			//JobDriver_Wait
+			original = typeof(JobDriver_Wait);
+			patched = typeof(JobDriver_Wait_Transpile);
+			Transpile(original, patched, "CheckForAutoAttack");
+
+			//FloatMenuMakerMap
+			original = typeof(FloatMenuMakerMap);
+			patched = typeof(FloatMenuMakerMap_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "TryMakeMultiSelectFloatMenu");
+			patched = typeof(FloatMenuMakerMap_Transpile);
+			Transpile(original, patched, "AddHumanlikeOrders");
+
+			//AttackTargetsCache
+			original = typeof(AttackTargetsCache);
+			patched = typeof(AttackTargetsCache_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "Notify_FactionHostilityChanged");
+			TranspileThreadStatics(original, "Debug_AssertHostile");
+
+			//PawnsFinder
+			original = typeof(PawnsFinder);
+			threadStaticPatches.Add(original, typeof(PawnsFinder_Patch));
+			TranspileThreadStatics(original, "get_AllMapsWorldAndTemporary_AliveOrDead");
+			TranspileThreadStatics(original, "get_AllMapsWorldAndTemporary_Alive");
+			TranspileThreadStatics(original, "get_AllMapsAndWorld_Alive");
+			TranspileThreadStatics(original, "get_AllMaps");
+			TranspileThreadStatics(original, "get_AllMaps_Spawned");
+			TranspileThreadStatics(original, "get_All_AliveOrDead");
+			TranspileThreadStatics(original, "get_Temporary");
+			TranspileThreadStatics(original, "get_Temporary_Alive");
+			TranspileThreadStatics(original, "get_Temporary_Dead");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive");
+			TranspileThreadStatics(original, "get_AllCaravansAndTravelingTransportPods_Alive");
+			TranspileThreadStatics(original, "get_AllCaravansAndTravelingTransportPods_AliveOrDead");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep");
+			TranspileThreadStatics(original, "get_AllMaps_PrisonersOfColonySpawned");
+			TranspileThreadStatics(original, "get_AllMaps_PrisonersOfColony");
+			TranspileThreadStatics(original, "get_AllMaps_FreeColonists");
+			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsSpawned");
+			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsAndPrisonersSpawned");
+			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsAndPrisoners");
+			TranspileThreadStatics(original, "get_HomeMaps_FreeColonistsSpawned");
+			TranspileThreadStatics(original, "AllMaps_SpawnedPawnsInFaction");
+			TranspileThreadStatics(original, "Clear");
+
+
+			//AttackTargetFinder
+			original = typeof(AttackTargetFinder);
+			patched = typeof(AttackTargetFinder_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "BestAttackTarget");
+			TranspileThreadStatics(original, "GetAvailableShootingTargetsByScore");
+			TranspileThreadStatics(original, "DebugDrawAttackTargetScores_Update");
+			TranspileThreadStatics(original, "CanSee");
+
+			//Fire			
+			original = typeof(Fire);
+			patched = typeof(Fire_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "DoComplexCalcs");
+
+			//Verb
+			original = typeof(Verb);
+			patched = typeof(Verb_Transpile);
+			Transpile(original, patched, "TryFindShootLineFromTo");
+			Transpile(original, patched, "CanHitFromCellIgnoringRange");
+
+			//Pawn_WorkSettings
+			original = typeof(Pawn_WorkSettings);
+			patched = typeof(Pawn_WorkSettings_Transpile);
+			Transpile(original, patched, "CacheWorkGiversInOrder");
+
+			//GenAdjFast
+			original = typeof(GenAdjFast);
+			patched = typeof(GenAdjFast_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "AdjacentCells8Way", new Type[] { typeof(IntVec3) });
+			TranspileThreadStatics(original, "AdjacentCells8Way", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
+			TranspileThreadStatics(original, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3) });
+			TranspileThreadStatics(original, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
+
+			//GenAdj
+			original = typeof(GenAdj);
+			patched = typeof(GenAdj_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "TryFindRandomAdjacentCell8WayWithRoomGroup", new Type[] {
+				typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(Map), typeof(IntVec3).MakeByRefType() });
+
+			//BattleLog
+			original = typeof(BattleLog);
+			patched = typeof(BattleLog_Transpile);
+			Transpile(original, patched, "Add");
+
+
+			//WorkGiver_ConstructDeliverResources
+			original = typeof(WorkGiver_ConstructDeliverResources);
+			patched = typeof(WorkGiver_ConstructDeliverResources_Transpile);
+			Transpile(original, patched, "ResourceDeliverJobFor", new string[] { "CodeOptimist.JobsOfOpportunity" });
+
+			//PawnCapacitiesHandler
+			original = typeof(PawnCapacitiesHandler);
+			patched = typeof(PawnCapacitiesHandler_Transpile);
+			Transpile(original, patched, "GetLevel");
+
+			//PathFinder
+			original = typeof(PathFinder);
+			patched = typeof(PathFinder_Transpile);
+			Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
+
+			//Pawn_InteractionsTracker
+			original = typeof(Pawn_InteractionsTracker);
+			patched = typeof(Pawn_InteractionsTracker_Transpile);
+			Transpile(original, patched, "TryInteractRandomly");
+
+			//GenRadial
+			original = typeof(GenRadial);
+			patched = typeof(GenRadial_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "ProcessEquidistantCells");
+
+			//WorkGiver_DoBill
+			original = typeof(WorkGiver_DoBill);
+			patched = typeof(WorkGiver_DoBill_Transpile);
+			Transpile(original, patched, "TryFindBestBillIngredients");
+			Transpile(original, patched, "AddEveryMedicineToRelevantThings");
+
+			//GenText
+			original = typeof(GenText);
+			patched = typeof(GenText_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "CapitalizeSentences");
+
+
+			//GrammarResolverSimple
+			original = typeof(GrammarResolverSimple);
+			patched = typeof(GrammarResolverSimple_Transpile);
+			Transpile(original, patched, "Formatted");
+
+			//GrammarResolver
+			original = typeof(GrammarResolver);
+			patched = typeof(GrammarResolver_Transpile);
+			Transpile(original, patched, "AddRule");
+			Transpile(original, patched, "RandomPossiblyResolvableEntry");
+			original = TypeByName("Verse.Grammar.GrammarResolver+<>c__DisplayClass17_0");
+			MethodInfo oMethod = Method(original, "<RandomPossiblyResolvableEntry>b__0");
+			pMethod = Method(patched, "RandomPossiblyResolvableEntryb__0");
+			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
+
+			//Pawn_PathFollower
+			original = typeof(Pawn_PathFollower);
+			patched = typeof(Pawn_PathFollower_Transpile);
+			Transpile(original, patched, "StartPath");
+
+			//CompSpawnSubplant
+			original = typeof(CompSpawnSubplant);
+			patched = typeof(CompSpawnSubplant_Transpile);
+			Transpile(original, patched, "DoGrowSubplant");
+
+			//ColoredText
+			original = typeof(ColoredText);
+			patched = typeof(ColoredText_Transpile);
+			Transpile(original, patched, "Resolve");
+
+			//HediffGiver_Hypothermia
+			original = typeof(HediffGiver_Hypothermia);
+			patched = typeof(HediffGiver_Hypothermia_Transpile);
+			Transpile(original, patched, "OnIntervalPassed");
+
+			//Map			
+			original = typeof(Map);
+			patched = typeof(Map_Transpile);
+			Transpile(original, patched, "MapUpdate");
+
+			//GenTemperature			
+			original = typeof(GenTemperature);
+			patched = typeof(GenTemperature_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
+
+		}
+
+        private static void PatchDestructiveFixes()
+        {
+			Type original = null;
+			Type patched = null;
+
+			Alert_MinorBreakRisk_Patch.RunDestructivePatches();
+			AlertsReadout_Patch.RunDestructivesPatches();
+			ContentFinder_Texture2D_Patch.RunDestructivePatches();
+			DrugAIUtility_Patch.RunDestructivePatches();
+			GenTemperature_Patch.RunDestructivePatches();
+			MaterialPool_Patch.RunDestructivePatches();
+			MemoryThoughtHandler_Patch.RunDestructivePatches();
+			Pawn_PlayerSettings_Patch.RunDestructivePatches();
+			PortraitRenderer_Patch.RunDestructivePatches();
+			ReachabilityCache_Patch.RunDestructivePatches();
+			RegionDirtyer_Patch.RunDestructivePatches();
+			TaleManager_Patch.RunDestructivePatches();
+			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
+			TickManager_Patch.RunDestructivePatches();
+			TickList_Patch.RunDestructivePatches();
+
+
+			//RegionListersUpdater
+			original = typeof(RegionListersUpdater);
+			patched = typeof(RegionListersUpdater_Patch);
+			Prefix(original, patched, "DeregisterInRegions");
+			Prefix(original, patched, "RegisterInRegions");
+			Prefix(original, patched, "RegisterAllAt");
+
+			//ListerThings
+			original = typeof(ListerThings);
+			patched = typeof(ListerThings_Patch);
+			Prefix(original, patched, "ThingsOfDef"); //maybe modify instead: JoyGiver_TakeDrug.BestIngestItem...  List<Thing> list = pawn.Map.listerThings.ThingsOfDef(JoyGiver_TakeDrug.takeableDrugs[k]);
+			Prefix(original, patched, "Remove");
+			Prefix(original, patched, "Add");
+
+			//JobMaker
+			original = typeof(JobMaker);
+			patched = typeof(JobMaker_Patch);
+			Prefix(original, patched, "MakeJob", new Type[] { });
+			Prefix(original, patched, "ReturnToPool");
 
 			//ThinkNode_Priority
 			original = typeof(ThinkNode_Priority);
 			patched = typeof(ThinkNode_Priority_Patch);
 			Prefix(original, patched, "TryIssueJobPackage");
 
-			//ThinkNode_PrioritySorter
-			original = typeof(ThinkNode_PrioritySorter);
-			//patched = typeof(ThinkNode_PrioritySorter_Patch);
-			//Prefix(original, patched, "TryIssueJobPackage");
-			patched = typeof(ThinkNode_PrioritySorter_Transpile);
-			Transpile(original, patched, "TryIssueJobPackage");
-
 			//ThingGrid
 			original = typeof(ThingGrid);
-
-			//ThingGrid_Transpile
-			//patched = typeof(ThingGrid_Transpile);
-			//harmony.Patch(Method(original, "ThingAt", new Type[] { typeof(IntVec3) }), transpiler: new HarmonyMethod(Method(patched, "ThingAt")));
-			
-
 			patched = typeof(ThingGrid_Patch);
 			Prefix(original, patched, "RegisterInCell");
 			Prefix(original, patched, "DeregisterInCell");
@@ -435,14 +880,6 @@ namespace RimThreaded
 			MethodInfo patchedBuilding_DoorThingAt = Method(patched2, "ThingAt_Building_Door");
 			HarmonyMethod prefixBuilding_Door = new HarmonyMethod(patchedBuilding_DoorThingAt);
 			harmony.Patch(originalBuilding_DoorThingAtGeneric, prefix: prefixBuilding_Door);
-
-			//FloatMenuMakerMap
-			original = typeof(FloatMenuMakerMap);
-			patched = typeof(FloatMenuMakerMap_Patch);
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "TryMakeMultiSelectFloatMenu");
-			patched = typeof(FloatMenuMakerMap_Transpile);
-			Transpile(original, patched, "AddHumanlikeOrders");
 
 			//RealtimeMoteList			
 			original = typeof(RealtimeMoteList);
@@ -494,11 +931,6 @@ namespace RimThreaded
 			Prefix(original, patched, "ReleaseClaimedBy");
 			Prefix(original, patched, "ReleaseAllClaimedBy");
 
-			//JobDriver_Wait
-			original = typeof(JobDriver_Wait);
-			patched = typeof(JobDriver_Wait_Transpile);
-			Transpile(original, patched, "CheckForAutoAttack");
-
 			//SelfDefenseUtility
 			original = typeof(SelfDefenseUtility);
 			patched = typeof(SelfDefenseUtility_Patch);
@@ -515,18 +947,6 @@ namespace RimThreaded
 			Prefix(original, patched, "PawnBlockingPathAt");
 			Prefix(original, patched, "EnemiesAreNearby");
 			Prefix(original, patched, "ForceWait");
-
-			//CellFinder
-			original = typeof(CellFinder);
-			patched = typeof(CellFinder_Patch);
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "TryFindRandomCellNear");
-			TranspileThreadStatics(original, "TryFindRandomCellInRegion");
-			TranspileThreadStatics(original, "TryFindBestPawnStandCell");
-			TranspileThreadStatics(original, "TryFindRandomReachableCellNear");
-			TranspileThreadStatics(original, "TryFindRandomCellInsideWith");
-			TranspileThreadStatics(original, "FindNoWipeSpawnLocNear");
-			TranspileThreadStatics(original, "RandomRegionNear");
 
 			//ThingOwnerUtility
 			original = typeof(ThingOwnerUtility);
@@ -563,43 +983,6 @@ namespace RimThreaded
 			Prefix(original, patched, "DeregisterTarget");
 			Prefix(original, patched, "TargetsHostileToFaction");
 			Prefix(original, patched, "UpdateTarget");
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "Notify_FactionHostilityChanged");
-			TranspileThreadStatics(original, "Debug_AssertHostile");			
-
-			//PawnsFinder
-			original = typeof(PawnsFinder);
-			threadStaticPatches.Add(original, typeof(PawnsFinder_Patch));
-			TranspileThreadStatics(original, "get_AllMapsWorldAndTemporary_AliveOrDead");
-			TranspileThreadStatics(original, "get_AllMapsWorldAndTemporary_Alive");
-			TranspileThreadStatics(original, "get_AllMapsAndWorld_Alive");
-			TranspileThreadStatics(original, "get_AllMaps");
-			TranspileThreadStatics(original, "get_AllMaps_Spawned");
-			TranspileThreadStatics(original, "get_All_AliveOrDead");
-			TranspileThreadStatics(original, "get_Temporary");
-			TranspileThreadStatics(original, "get_Temporary_Alive");
-			TranspileThreadStatics(original, "get_Temporary_Dead");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive");
-			TranspileThreadStatics(original, "get_AllCaravansAndTravelingTransportPods_Alive");
-			TranspileThreadStatics(original, "get_AllCaravansAndTravelingTransportPods_AliveOrDead");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
-			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep");
-			TranspileThreadStatics(original, "get_AllMaps_PrisonersOfColonySpawned");
-			TranspileThreadStatics(original, "get_AllMaps_PrisonersOfColony");
-			TranspileThreadStatics(original, "get_AllMaps_FreeColonists");
-			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsSpawned");
-			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsAndPrisonersSpawned");
-			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsAndPrisoners");
-			TranspileThreadStatics(original, "get_HomeMaps_FreeColonistsSpawned");
-			TranspileThreadStatics(original, "AllMaps_SpawnedPawnsInFaction");
-			TranspileThreadStatics(original, "Clear");
 
 			//PawnDiedOrDownedThoughtsUtility
 			original = typeof(PawnDiedOrDownedThoughtsUtility);
@@ -607,15 +990,6 @@ namespace RimThreaded
 			Prefix(original, patched, "RemoveLostThoughts");
 			Prefix(original, patched, "RemoveDiedThoughts");
 			Prefix(original, patched, "RemoveResuedRelativeThought");
-
-			//AttackTargetFinder
-			original = typeof(AttackTargetFinder);
-			patched = typeof(AttackTargetFinder_Patch);
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "BestAttackTarget");
-			TranspileThreadStatics(original, "GetAvailableShootingTargetsByScore");
-			TranspileThreadStatics(original, "DebugDrawAttackTargetScores_Update");
-			TranspileThreadStatics(original, "CanSee");
 
 			//ShootLeanUtility
 			original = typeof(ShootLeanUtility);
@@ -627,11 +1001,9 @@ namespace RimThreaded
 			patched = typeof(BuildableDef_Patch);
 			Prefix(original, patched, "get_PlaceWorkers");
 
-
 			//SustainerManager			
 			original = typeof(SustainerManager);
 			patched = typeof(SustainerManager_Patch);
-			//Prefix(original, patched, "get_AllSustainers");
 			Prefix(original, patched, "RegisterSustainer");
 			Prefix(original, patched, "DeregisterSustainer");
 			Prefix(original, patched, "SustainerManagerUpdate");
@@ -657,13 +1029,11 @@ namespace RimThreaded
 			//RecreateMapSustainers
 			original = typeof(AmbientSoundManager);
 			patched = typeof(AmbientSoundManager_Patch);
-			//Prefix(original, patched, "RecreateMapSustainers");
 			Prefix(original, patched, "EnsureWorldAmbientSoundCreated");
 
 			//SubSustainer
 			original = typeof(SubSustainer);
 			patched = typeof(SubSustainer_Patch);
-			//Prefix(original, patched, "StartSample");
 			Prefix(original, patched, "SubSustainerUpdate");
 
 			//SoundStarter
@@ -671,7 +1041,6 @@ namespace RimThreaded
 			patched = typeof(SoundStarter_Patch);
 			Prefix(original, patched, "PlayOneShot");
 			Prefix(original, patched, "PlayOneShotOnCamera");
-			//Prefix(original, patched, "TrySpawnSustainer");
 
 			//Pawn_RelationsTracker			
 			original = typeof(Pawn_RelationsTracker);
@@ -696,12 +1065,6 @@ namespace RimThreaded
 			Prefix(original, patched, "MoodOffsetOfGroup");
 			Prefix(original, patched, "TotalMoodOffset");
 			Prefix(original, patched, "OpinionOffsetOfGroup");
-			
-			//Fire			
-			original = typeof(Fire);
-			patched = typeof(Fire_Patch);
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "DoComplexCalcs");
 
 			//Projectile			
 			original = typeof(Projectile);
@@ -721,8 +1084,6 @@ namespace RimThreaded
 			Prefix(original, patched, "GetReservationsCount");
 			Prefix(original, patched, "Reserve");
 			Prefix(original, patched, "IsReservedBy");
-			//patched = typeof(AttackTargetReservationManager_Transpile);
-			//Transpile(original, patched, "Reserve"); changed back to prefix for now TODO
 
 			//PawnCollisionTweenerUtility
 			original = typeof(PawnCollisionTweenerUtility);
@@ -750,21 +1111,10 @@ namespace RimThreaded
 			Prefix(original, patched, "DebugDrawReservations");
 			Prefix(original, patched, "ExposeData");
 
-			patched = typeof(ReservationManager_Transpile);
-			//Transpile(original, patched, "CanReserve");
-
 			//FloodFiller - inefficient global lock			
 			original = typeof(FloodFiller);
 			patched = typeof(FloodFiller_Patch);
 			Prefix(original, patched, "FloodFill", new Type[] { typeof(IntVec3), typeof(Predicate<IntVec3>), typeof(Func<IntVec3, int, bool>), typeof(int), typeof(bool), typeof(IEnumerable<IntVec3>) });
-
-			//Verb
-			original = typeof(Verb);
-			patched = typeof(Verb_Patch);
-			Prefix(original, patched, "get_DirectOwner");
-			patched = typeof(Verb_Transpile);
-			Transpile(original, patched, "TryFindShootLineFromTo");
-			Transpile(original, patched, "CanHitFromCellIgnoringRange");
 
 			//MapPawns
 			original = typeof(MapPawns);
@@ -788,18 +1138,6 @@ namespace RimThreaded
 			Prefix(original, patched, "RegisterPawn");
 			Prefix(original, patched, "DeRegisterPawn");
 
-			//MethodInfo oMethodRegisterPawn = Method(original, "RegisterPawn");
-			//MethodInfo pMethodRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "RegisterPawn_FreeHumanlikesSpawnedOfFaction");
-			//harmony.Patch(oMethodRegisterPawn, postfix: new HarmonyMethod(pMethodRegisterPawn_FreeHumanlikesSpawnedOfFaction));
-
-			//MethodInfo oMethodDeRegisterPawn = Method(original, "DeRegisterPawn");
-			//MethodInfo pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction = Method(patched, "DeRegisterPawn_FreeHumanlikesSpawnedOfFaction");
-			//harmony.Patch(oMethodDeRegisterPawn, postfix: new HarmonyMethod(pMethodDeRegisterPawn_FreeHumanlikesSpawnedOfFaction));
-
-			//patched = typeof(MapPawns_Transpile);
-			//Transpile(original, patched, "RegisterPawn");
-			//Transpile(original, patched, "DeRegisterPawn");
-
 			//MapTemperatures
 			original = typeof(MapTemperature);
 			patched = typeof(MapTemperature_Patch);
@@ -811,11 +1149,6 @@ namespace RimThreaded
 			Prefix(original, patched, "DangerFor");
 			Prefix(original, patched, "get_AnyCell");
 			Prefix(original, patched, "OverlapWith");
-
-			//Pawn_WorkSettings
-			original = typeof(Pawn_WorkSettings);
-			patched = typeof(Pawn_WorkSettings_Transpile);
-			Transpile(original, patched, "CacheWorkGiversInOrder");
 
 			//Sample
 			original = typeof(Sample);
@@ -850,7 +1183,6 @@ namespace RimThreaded
 			patched = typeof(LongEventHandler_Patch);
 			Prefix(original, patched, "ExecuteToExecuteWhenFinished");
 			Prefix(original, patched, "ExecuteWhenFinished");
-			Prefix(original, patched, "RunEventFromAnotherThread", false);
 
 			//SituationalThoughtHandler
 			original = typeof(SituationalThoughtHandler);
@@ -858,35 +1190,11 @@ namespace RimThreaded
 			Prefix(original, patched, "AppendSocialThoughts");
 			Prefix(original, patched, "Notify_SituationalThoughtsDirty");
 			Prefix(original, patched, "RemoveExpiredThoughtsFromCache");
-			ConstructorInfo constructorMethod3 = original.GetConstructor(new Type[] { typeof(Pawn) });
-			MethodInfo cpMethod3 = patched.GetMethod("Postfix_Constructor");
-			harmony.Patch(constructorMethod3, postfix: new HarmonyMethod(cpMethod3));
-
-			//GenAdjFast
-			original = typeof(GenAdjFast);
-			patched = typeof(GenAdjFast_Patch);
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "AdjacentCells8Way", new Type[] { typeof(IntVec3) });
-			TranspileThreadStatics(original, "AdjacentCells8Way", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
-			TranspileThreadStatics(original, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3) });
-			TranspileThreadStatics(original, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
-
-			//GenAdj
-			original = typeof(GenAdj);
-			patched = typeof(GenAdj_Patch);
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "TryFindRandomAdjacentCell8WayWithRoomGroup", new Type[] {
-				typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(Map), typeof(IntVec3).MakeByRefType() });
 
 			//LordToil_Siege
 			original = typeof(LordToil_Siege);
 			patched = typeof(LordToil_Siege_Patch);
 			Prefix(original, patched, "UpdateAllDuties");
-
-			//BattleLog
-			original = typeof(BattleLog);
-			patched = typeof(BattleLog_Transpile);
-			Transpile(original, patched, "Add");
 
 			//PawnCapacitiesHandler
 			original = typeof(PawnCapacitiesHandler);
@@ -897,13 +1205,6 @@ namespace RimThreaded
 			ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
 			MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
 			harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
-			patched = typeof(PawnCapacitiesHandler_Transpile);
-			Transpile(original, patched, "GetLevel");
-
-			//PathFinder
-			original = typeof(PathFinder);
-			patched = typeof(PathFinder_Transpile);
-			Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
 
 			//PawnPath
 			original = typeof(PawnPath);
@@ -952,12 +1253,6 @@ namespace RimThreaded
 			patched = typeof(JobGiver_ConfigurableHostilityResponse_Patch);
 			Prefix(original, patched, "TryGetFleeJob");
 
-
-			//Pawn_InteractionsTracker
-			original = typeof(Pawn_InteractionsTracker);
-			patched = typeof(Pawn_InteractionsTracker_Transpile);
-			Transpile(original, patched, "TryInteractRandomly");
-
 			//Toils_Ingest
 			original = typeof(Toils_Ingest);
 			patched = typeof(Toils_Ingest_Patch);
@@ -984,11 +1279,6 @@ namespace RimThreaded
 			Prefix(original, patched, "FloodAndSetRoomGroups");
 			Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
 
-			//GenRadial
-			original = typeof(GenRadial);
-			patched = typeof(GenRadial_Transpile);
-			Transpile(original, patched, "ProcessEquidistantCells");
-
 			//WealthWatcher
 			original = typeof(WealthWatcher);
 			patched = typeof(WealthWatcher_Patch);
@@ -999,12 +1289,6 @@ namespace RimThreaded
 			patched = typeof(Medicine_Patch);
 			Prefix(original, patched, "GetMedicineCountToFullyHeal");
 
-			//WorkGiver_DoBill
-			original = typeof(WorkGiver_DoBill);
-			patched = typeof(WorkGiver_DoBill_Transpile);
-			Transpile(original, patched, "TryFindBestBillIngredients");
-			Transpile(original, patched, "AddEveryMedicineToRelevantThings");
-
 			//JobGiver_Work
 			original = typeof(JobGiver_Work);
 			patched = typeof(JobGiver_Work_Patch);
@@ -1014,17 +1298,6 @@ namespace RimThreaded
 			original = typeof(ThingCountUtility);
 			patched = typeof(ThingCountUtility_Patch);
 			Prefix(original, patched, "AddToList");
-
-			//WorkGiver_ConstructDeliverResources
-			original = typeof(WorkGiver_ConstructDeliverResources);
-			//patched = typeof(WorkGiver_ConstructDeliverResources_Patch);
-			patched = typeof(WorkGiver_ConstructDeliverResources_Transpile);
-			Transpile(original, patched, "ResourceDeliverJobFor", new string[] { "CodeOptimist.JobsOfOpportunity" });
-
-			//GenText
-			original = typeof(GenText);
-			patched = typeof(GenText_Patch);
-			Prefix(original, patched, "CapitalizeSentences");
 
 			//BiomeDef
 			original = typeof(BiomeDef);
@@ -1050,8 +1323,6 @@ namespace RimThreaded
 			Prefix(original, patched, "SeasonAcceptableFor");
 			Prefix(original, patched, "OutdoorTemperatureAcceptableFor");
 			Prefix(original, patched, "SeasonAndOutdoorTemperatureAcceptableFor");
-			//patched = typeof(TileTemperaturesComp_Transpile);
-			//Transpile(original, patched, "WorldComponentTick");
 
 			//PawnRelationUtility
 			original = typeof(PawnRelationUtility);
@@ -1068,22 +1339,10 @@ namespace RimThreaded
 			patched = typeof(StoryState_Patch);
 			Prefix(original, patched, "RecordPopulationIncrease");
 
-			//GrammarResolverSimple
-			original = typeof(GrammarResolverSimple);
-			patched = typeof(GrammarResolverSimple_Transpile);
-			Transpile(original, patched, "Formatted");
-
 			//GrammarResolver
 			original = typeof(GrammarResolver);
 			patched = typeof(GrammarResolver_Patch);
 			Prefix(original, patched, "ResolveUnsafe", new Type[] { typeof(string), typeof(GrammarRequest), typeof(bool).MakeByRefType(), typeof(string), typeof(bool), typeof(bool), typeof(List<string>), typeof(List<string>), typeof(bool) });
-			patched = typeof(GrammarResolver_Transpile);
-			Transpile(original, patched, "AddRule");
-			Transpile(original, patched, "RandomPossiblyResolvableEntry");
-			original = TypeByName("Verse.Grammar.GrammarResolver+<>c__DisplayClass17_0");
-			MethodInfo oMethod = Method(original, "<RandomPossiblyResolvableEntry>b__0");
-			MethodInfo pMethod = Method(patched, "RandomPossiblyResolvableEntryb__0");
-			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
 
 			//JobQueue
 			original = typeof(JobQueue);
@@ -1181,31 +1440,6 @@ namespace RimThreaded
 			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument), typeof(NamedArgument) });
 			Prefix(original, patched, "Formatted", new Type[] { typeof(string), typeof(NamedArgument[]) });
 
-			//GenLabel
-			original = typeof(GenLabel);
-			patched = typeof(GenLabel_Transpile);
-			//Transpile(original, patched, "ThingLabel", new Type[] { typeof(BuildableDef), typeof(ThingDef), typeof(int) }); causes Threadlock... JobDriver.TryActuallyStartNextToil? ThingOwnerTryAddOrTransfer? ThingOwner.TryAdd? GrammarResolverSimple.Formatted? GrammarResolverSimpleStringExtentions_Patch.Formatted? 
-			//Transpile(original, patched, "ThingLabel", new Type[] { typeof(Thing), typeof(int), typeof(bool) });
-
-			//Pawn_PathFollower
-			original = typeof(Pawn_PathFollower);
-			patched = typeof(Pawn_PathFollower_Transpile);
-			Transpile(original, patched, "StartPath");
-
-			//CompSpawnSubplant
-			original = typeof(CompSpawnSubplant);
-			patched = typeof(CompSpawnSubplant_Transpile);
-			Transpile(original, patched, "DoGrowSubplant");
-
-			//PawnCapacityUtility
-			//original = typeof(PawnCapacityUtility);
-			//patched = typeof(PawnCapacityUtility_Patch);
-			//Prefix(original, patched, "CalculatePartEfficiency"); //not sure why this was made
-
-			//ColoredText
-			original = typeof(ColoredText);
-			patched = typeof(ColoredText_Transpile);
-			Transpile(original, patched, "Resolve");
 
 			//Pawn_HealthTracker
 			original = typeof(Pawn_HealthTracker);
@@ -1237,13 +1471,6 @@ namespace RimThreaded
 			original = typeof(HediffGiver_Heat);
 			patched = typeof(HediffGiver_Heat_Patch);
 			Prefix(original, patched, "OnIntervalPassed");
-
-			//HediffGiver_Hypothermia
-			original = typeof(HediffGiver_Hypothermia);
-			//patched = typeof(HediffGiver_Hypothermia_Patch);
-			//Prefix(original, patched, "OnIntervalPassed");
-			patched = typeof(HediffGiver_Hypothermia_Transpile);
-			Transpile(original, patched, "OnIntervalPassed");
 
 			//Pawn_MindState - hack for speedup. replaced (GenLocalDate.DayTick((Thing)__instance.pawn) interactions today with always 0
 			original = typeof(Pawn_MindState);
@@ -1291,14 +1518,6 @@ namespace RimThreaded
 			patched = typeof(DateNotifier_Patch);
 			Prefix(original, patched, "FindPlayerHomeWithMinTimezone");
 
-			//GenTemperature			
-			original = typeof(GenTemperature);
-			patched = typeof(GenTemperature_Patch);
-			Prefix(original, patched, "GetTemperatureFromSeasonAtTile");
-			Prefix(original, patched, "SeasonalShiftAmplitudeAt");
-			Prefix(original, patched, "EqualizeTemperaturesThroughBuilding");
-			Prefix(original, patched, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
-
 			//WorldComponentUtility			
 			original = typeof(WorldComponentUtility);
 			patched = typeof(WorldComponentUtility_Patch);
@@ -1309,8 +1528,6 @@ namespace RimThreaded
 			patched = typeof(Map_Patch);
 			//Prefix(original, patched, "MapUpdate");
 			Prefix(original, patched, "get_IsPlayerHome");
-			patched = typeof(Map_Transpile);
-			Transpile(original, patched, "MapUpdate");
 
 			//ThinkNode_SubtreesByTag			
 			original = typeof(ThinkNode_SubtreesByTag);
@@ -1321,12 +1538,6 @@ namespace RimThreaded
 			original = typeof(ThinkNode_QueuedJob);
 			patched = typeof(ThinkNode_QueuedJob_Patch);
 			Prefix(original, patched, "TryIssueJobPackage");
-
-			//JobDriver			
-			original = typeof(JobDriver);
-			patched = typeof(JobDriver_Patch);
-			//Prefix(original, patched, "TryActuallyStartNextToil");
-			//Prefix(original, patched, "DriverTick");
 
 			//TemperatureCache			
 			original = typeof(TemperatureCache);
@@ -1373,13 +1584,7 @@ namespace RimThreaded
 			//RenderTexture (Giddy-Up)
 			original = typeof(RenderTexture);
 			patched = typeof(RenderTexture_Patch);
-			//Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite) });
 			Prefix(original, patched, "GetTemporaryImpl");
-
-			//GetTemporary (CE)
-			//Prefix(original, patched, "GetTemporary", new Type[] { typeof(int), typeof(int), typeof(int), typeof(RenderTextureFormat), typeof(RenderTextureReadWrite), typeof(int) });
-			//Prefix(original, patched, "get_active");
-			//Prefix(original, patched, "set_active");
 
 			//Graphics (Giddy-Up and others)
 			original = typeof(Graphics);
@@ -1390,29 +1595,26 @@ namespace RimThreaded
 			//Graphics (Giddy-Up)
 			original = typeof(Texture2D);
 			patched = typeof(Texture2D_Patch);
-			//Prefix(original, patched, "GetPixel", new Type[] { typeof(int), typeof(int) });
 			Prefix(original, patched, "Internal_Create");
 			Prefix(original, patched, "ReadPixels", new Type[] { typeof(Rect), typeof(int), typeof(int), typeof(bool) });
 			Prefix(original, patched, "Apply", new Type[] { typeof(bool), typeof(bool) });
 
-			//original = typeof(Mesh);
-			//patched = typeof(Mesh_Patch);
-			//ConstructorInfo constructorMethod4 = original.GetConstructor(Type.EmptyTypes);
-			//MethodInfo cpMethod4 = patched.GetMethod("MeshSafe");
-			//harmony.Patch(constructorMethod4, prefix: new HarmonyMethod(cpMethod4));
-
+			//SectionLayer
 			original = typeof(SectionLayer);
 			patched = typeof(SectionLayer_Patch);
 			Prefix(original, patched, "GetSubMesh");
 
+			//GraphicDatabaseHeadRecords
 			original = typeof(GraphicDatabaseHeadRecords);
 			patched = typeof(GraphicDatabaseHeadRecords_Patch);
 			Prefix(original, patched, "BuildDatabaseIfNecessary");
 
+			//MeshMakerPlanes
 			original = typeof(MeshMakerPlanes);
 			patched = typeof(MeshMakerPlanes_Patch);
 			Prefix(original, patched, "NewPlaneMesh", new Type[] { typeof(Vector2), typeof(bool), typeof(bool), typeof(bool) });
 
+			//MeshMakerShadows
 			original = typeof(MeshMakerShadows);
 			patched = typeof(MeshMakerShadows_Patch);
 			Prefix(original, patched, "NewShadowMesh", new Type[] { typeof(float), typeof(float), typeof(float) });
@@ -1445,352 +1647,11 @@ namespace RimThreaded
 			Prefix(original, patched, "LordOf", new Type[] { typeof(Pawn) });
 			Prefix(original, patched, "RemoveLord");
 
-			//DamageWorker
-			original = typeof(DamageWorker);
-			patched = typeof(DamageWorker_Patch);
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "ExplosionAffectCell");
-			TranspileThreadStatics(original, "ExplosionCellsToHit", new Type[] { typeof(IntVec3), typeof(Map), typeof(float), typeof(IntVec3), typeof(IntVec3) });
-
-			//TaleManager_Patch
-			original = typeof(TaleManager);
-			patched = typeof(TaleManager_Patch);
-			Prefix(original, patched, "CheckCullUnusedVolatileTales");
-
-			//Pawn_PlayerSettings
-			original = typeof(Pawn_PlayerSettings);
-			patched = typeof(Pawn_PlayerSettings_Patch);
-			Prefix(original, patched, "set_Master");
-
-			//AlertsReadout
-			original = typeof(AlertsReadout);
-			patched = typeof(AlertsReadout_Patch);
-			Prefix(original, patched, "AlertsReadoutUpdate");
-
-			//ReachabilityCache_Patch
-			original = typeof(ReachabilityCache);
-			patched = typeof(ReachabilityCache_Patch);
-			Prefix(original, patched, "get_Count");
-			Prefix(original, patched, "CachedResultFor");
-			Prefix(original, patched, "AddCachedResult");
-			Prefix(original, patched, "Clear");
-			Prefix(original, patched, "ClearFor");
-			Prefix(original, patched, "ClearForHostile");
-
-			//RecordWorker_TimeGettingJoy
-			original = typeof(RecordWorker_TimeGettingJoy);
-			patched = typeof(RecordWorker_TimeGettingJoy_Patch);
-			Prefix(original, patched, "ShouldMeasureTimeNow");
-
-			//Alert_MinorBreakRisk
-			original = typeof(Alert_MinorBreakRisk);
-			patched = typeof(Alert_MinorBreakRisk_Patch);
-			Prefix(original, patched, "GetReport");
-
-			//SickPawnVisitUtility
-			original = typeof(SickPawnVisitUtility);
-			patched = typeof(SickPawnVisitUtility_Patch);
-			Prefix(original, patched, "FindRandomSickPawn");
-
-			//RoofGrid
-			original = typeof(RoofGrid);
-			patched = typeof(RoofGrid_Patch);
-			Prefix(original, patched, "SetRoof");
-
-			//GenLeaving
-			original = typeof(GenLeaving);
-			patched = typeof(GenLeaving_Patch);
-			Prefix(original, patched, "DropFilthDueToDamage");
-
-			//World
-			original = typeof(World);
-			patched = typeof(World_Patch);
-			Prefix(original, patched, "NaturalRockTypesIn");
-			Prefix(original, patched, "CoastDirectionAt");
-
-			//MemoryThoughtHandler
-			original = typeof(MemoryThoughtHandler);
-			patched = typeof(MemoryThoughtHandler_Patch);
-			Prefix(original, patched, "RemoveMemory");
-			Prefix(original, patched, "TryGainMemory", new Type[] { typeof(Thought_Memory), typeof(Pawn) });
-
-			//PortraitRenderer
-			original = typeof(PortraitRenderer);
-			patched = typeof(PortraitRenderer_Patch);
-			Prefix(original, patched, "RenderPortrait");
-
-			//RegionDirtyer
-			original = typeof(RegionDirtyer);
-			patched = typeof(RegionDirtyer_Patch);
-			Prefix(original, patched, "SetAllClean");
-			Prefix(original, patched, "Notify_WalkabilityChanged");
-			Prefix(original, patched, "Notify_ThingAffectingRegionsSpawned");
-			Prefix(original, patched, "Notify_ThingAffectingRegionsDespawned");
-			Prefix(original, patched, "SetAllDirty");
-			Prefix(original, patched, "SetRegionDirty");
-
-			//HaulAIUtility
-			original = typeof(HaulAIUtility);
-			patched = typeof(HaulAIUtility_Patch);
-			Prefix(original, patched, "TryFindSpotToPlaceHaulableCloseTo");
-
-			//DrugAIUtility
-			original = typeof(DrugAIUtility);
-			patched = typeof(DrugAIUtility_Patch);
-			Prefix(original, patched, "IngestAndTakeToInventoryJob");
-
-			//Verb_MeleeAttack
-			//original = typeof(Verb_MeleeAttack);
-			//patched = typeof(Verb_MeleeAttack_Patch);
-			//Prefix(original, patched, "TryCastShot");
-
-			//Verb_Tracker
-			original = typeof(VerbTracker);
-			patched = typeof(VerbTracker_Patch);
-			Prefix(original, patched, "VerbsTick", false); //TODO loops twice... and removes verblist target == null - could also be transpiled although not ideal
-
-			//ThinkNode_ConditionalAnyColonistTryingToExitMap
-			original = typeof(ThinkNode_ConditionalAnyColonistTryingToExitMap);
-			patched = typeof(ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch);
-			Prefix(original, patched, "Satisfied");
-
-		
-			//TODO - should transpile ReplacePotentiallyRelatedPawns instead
-			//FocusStrengthOffset_GraveCorpseRelationship.CanApply
-			original = typeof(FocusStrengthOffset_GraveCorpseRelationship);
-			patched = typeof(Pawn_RelationsTracker_Transpile);
-			pMethod = Method(patched, "ReplacePotentiallyRelatedPawns");
-			harmony.Patch(Method(original, "CanApply"), transpiler: new HarmonyMethod(pMethod));
-			//PawnDiedOrDownedThoughtsUtility.AppendThoughts_Relations
-			original = typeof(PawnDiedOrDownedThoughtsUtility);
-			harmony.Patch(Method(original, "AppendThoughts_Relations"), transpiler: new HarmonyMethod(pMethod));
-			//Pawn_RelationsTracker.get_RelatedPawns
-			original = TypeByName("RimWorld.Pawn_RelationsTracker+<get_RelatedPawns>d__30");
-			harmony.Patch(Method(original, "MoveNext"), transpiler: new HarmonyMethod(pMethod));
-			original = typeof(Pawn_RelationsTracker);
-			//Pawn_RelationsTracker.Notify_PawnKilled
-			harmony.Patch(Method(original, "Notify_PawnKilled"), transpiler: new HarmonyMethod(pMethod));
-			//Pawn_RelationsTracker.Notify_PawnSold
-			harmony.Patch(Method(original, "Notify_PawnSold"), transpiler: new HarmonyMethod(pMethod));
-
-			original = typeof(JobGiver_Haul);
-			patched = typeof(JobGiver_Haul_Patch);
-			//Prefix(original, patched, "TryGiveJob"); debugging
-
-			original = typeof(WorkGiver_Grower);
-			patched = typeof(WorkGiver_Grower_Patch);
-			//Prefix(original, patched, "WorkGiver_Grower_Patch");
-
-			original = typeof(WorkGiver_GrowerSow);
-			patched = typeof(WorkGiver_GrowerSow_Patch);
-			Prefix(original, patched, "JobOnCell");
-
-			//JoyGiver_Ingest
-			//original = typeof(JoyGiver_Ingest);
-			//patched = typeof(JoyGiver_Ingest_Patch);
-			//Prefix(original, patched, "BestIngestItem");
-
-			// Resources_Patch
-			/* Doesn't work as Load is an external method (without a method body) and can therefor not be prefixed. Transpile would maybe be possible, but I dont think, it's a good idea...
-			 * Changed method call to a rimthreaded specific one instead. See Resources_Patch::Load
-			original = typeof(Resources);
-			patched = typeof(Resources_Patch);
-			Prefix(original, patched, "Load", new Type[] { typeof(string), typeof(Type) });
-			*/
-
-
-
-			//MOD COMPATIBILITY
-
-			giddyUpCoreStorageExtendedPawnData = TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
-			giddyUpCoreJobsGUC_JobDefOf = TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
-			giddyUpCoreUtilitiesTextureUtility = TypeByName("GiddyUpCore.Utilities.TextureUtility");
-			giddyUpCoreStorageExtendedDataStorage = TypeByName("GiddyUpCore.Storage.ExtendedDataStorage");
-			giddyUpCoreJobsJobDriver_Mounted = TypeByName("GiddyUpCore.Jobs.JobDriver_Mounted");
-			giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob = TypeByName("GiddyUpCore.Harmony.Pawn_JobTracker_DetermineNextJob");
-			hospitalityCompUtility = TypeByName("Hospitality.CompUtility");
-			hospitalityCompGuest = TypeByName("Hospitality.CompGuest");
-			awesomeInventoryJobsJobGiver_FindItemByRadius = TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius");
-			awesomeInventoryErrorMessage = TypeByName("AwesomeInventory.ErrorMessage");
-			jobGiver_AwesomeInventory_TakeArm = TypeByName("AwesomeInventory.Jobs.JobGiver_AwesomeInventory_TakeArm");
-			awesomeInventoryJobsJobGiver_FindItemByRadiusSub = TypeByName("AwesomeInventory.Jobs.JobGiver_FindItemByRadius+<>c__DisplayClass17_0");
-			pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus = TypeByName("PawnRules.Patch.RimWorld_Pawn_GuestTracker_SetGuestStatus");
-			combatExtendedCE_Utility = TypeByName("CombatExtended.CE_Utility");
-			combatExtendedVerb_LaunchProjectileCE = TypeByName("CombatExtended.Verb_LaunchProjectileCE");
-			combatExtendedVerb_MeleeAttackCE = TypeByName("CombatExtended.Verb_MeleeAttackCE");
-			combatExtended_ProjectileCE = TypeByName("CombatExtended.ProjectileCE");
-			dubsSkylight_Patch_GetRoof = TypeByName("Dubs_Skylight.Patch_GetRoof");
-			jobsOfOpportunityJobsOfOpportunity_Hauling = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
-			jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Patch_TryOpportunisticJob");
-			childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch = TypeByName("Children.ChildrenHarmony+HediffComp_Discoverable_CheckDiscovered_Patch");
-			androidTiers_GeneratePawns_Patch1 = TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch");
-			if (androidTiers_GeneratePawns_Patch1 != null)
-			{
-				androidTiers_GeneratePawns_Patch = androidTiers_GeneratePawns_Patch1.GetNestedType("GeneratePawns_Patch");
-			}
-
-			if (giddyUpCoreUtilitiesTextureUtility != null)
-			{
-				string methodName = "setDrawOffset";
-				Log.Message("RimThreaded is patching " + giddyUpCoreUtilitiesTextureUtility.FullName + " " + methodName);
-				patched = typeof(TextureUtility_Transpile);
-				Transpile(giddyUpCoreUtilitiesTextureUtility, patched, methodName);
-			}
-
-			if (giddyUpCoreStorageExtendedDataStorage != null)
-			{
-				string methodName = "DeleteExtendedDataFor";
-				Log.Message("RimThreaded is patching " + giddyUpCoreStorageExtendedDataStorage.FullName + " " + methodName);
-				patched = typeof(ExtendedDataStorage_Transpile);
-				Transpile(giddyUpCoreStorageExtendedDataStorage, patched, methodName);
-
-				methodName = "GetExtendedDataFor";
-				Log.Message("RimThreaded is patching " + giddyUpCoreStorageExtendedDataStorage.FullName + " " + methodName);
-				Transpile(giddyUpCoreStorageExtendedDataStorage, patched, methodName);
-			}
-
-			if (giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob != null)
-			{
-				string methodName = "Postfix";
-				Log.Message("RimThreaded is patching " + giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob.FullName + " " + methodName);
-				patched = typeof(Pawn_JobTracker_DetermineNextJob_Transpile);
-				Transpile(giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob, patched, methodName);
-			}
-
-			if (giddyUpCoreJobsJobDriver_Mounted != null)
-			{
-				string methodName = "<waitForRider>b__8_0";
-				foreach (MethodInfo methodInfo in ((TypeInfo)giddyUpCoreJobsJobDriver_Mounted).DeclaredMethods)
-				{
-					if (methodInfo.Name.Equals(methodName))
-					{
-						Log.Message("RimThreaded is patching " + giddyUpCoreJobsJobDriver_Mounted.FullName + " " + methodName);
-						patched = typeof(JobDriver_Mounted_Transpile);
-						MethodInfo pMethod2 = patched.GetMethod("WaitForRider");
-						harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod2));
-					}
-				}
-			}
-
-			if (hospitalityCompUtility != null)
-			{
-				string methodName = "CompGuest";
-				Log.Message("RimThreaded is patching " + hospitalityCompUtility.FullName + " " + methodName);
-				patched = typeof(CompUtility_Transpile);
-				Transpile(hospitalityCompUtility, patched, methodName);
-				methodName = "OnPawnRemoved";
-				Log.Message("RimThreaded is patching " + hospitalityCompUtility.FullName + " " + methodName);
-				Transpile(hospitalityCompUtility, patched, methodName);
-			}
-
-			if (awesomeInventoryJobsJobGiver_FindItemByRadius != null)
-			{
-				string methodName = "Reset";
-				Log.Message("RimThreaded is patching " + awesomeInventoryJobsJobGiver_FindItemByRadius.FullName + " " + methodName);
-				patched = typeof(JobGiver_FindItemByRadius_Transpile);
-				Transpile(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
-				methodName = "FindItem";
-				Log.Message("RimThreaded is patching " + awesomeInventoryJobsJobGiver_FindItemByRadius.FullName + " " + methodName);
-				Transpile(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
-				//Prefix(awesomeInventoryJobsJobGiver_FindItemByRadius, patched, methodName);
-			}
-
-			if (pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus != null)
-			{
-				string methodName = "Prefix";
-				Log.Message("RimThreaded is patching " + pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus.FullName + " " + methodName);
-				patched = typeof(RimWorld_Pawn_GuestTracker_SetGuestStatus_Transpile);
-				Transpile(pawnRulesPatchRimWorld_Pawn_GuestTracker_SetGuestStatus, patched, methodName);
-			}
-
-			if (combatExtendedCE_Utility != null)
-			{
-				string methodName = "BlitCrop";
-				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
-				patched = typeof(CE_Utility_Transpile);
-				Transpile(combatExtendedCE_Utility, patched, methodName);
-				methodName = "GetColorSafe";
-				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
-				Transpile(combatExtendedCE_Utility, patched, methodName);
-			}
-			if (combatExtendedVerb_LaunchProjectileCE != null)
-			{
-				string methodName = "CanHitFromCellIgnoringRange";
-				patched = typeof(Verb_LaunchProjectileCE_Transpile);
-				Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
-				Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
-				methodName = "TryFindCEShootLineFromTo";
-				Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
-				Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
-			}
-			if (combatExtendedVerb_MeleeAttackCE != null)
-			{
-				string methodName = "TryCastShot";
-				patched = typeof(Verb_MeleeAttackCE_Transpile);
-				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
-				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
-			}
-			if (combatExtended_ProjectileCE != null)
-			{
-				//string methodName = "CheckCellForCollision";
-				//patched = typeof(ProjectileCE_Transpile);
-				//Log.Message("RimThreaded is patching " + combatExtended_ProjectileCE.FullName + " " + methodName);
-				//Transpile(combatExtended_ProjectileCE, patched, methodName);
-				//methodName = "CheckForCollisionBetween";
-				//patched = typeof(ProjectileCE_Transpile);
-				//Log.Message("RimThreaded is patching " + combatExtended_ProjectileCE.FullName + " " + methodName);
-				//Transpile(combatExtended_ProjectileCE, patched, methodName);
-			}
-
-			if (dubsSkylight_Patch_GetRoof != null)
-			{
-				string methodName = "Postfix";
-				patched = typeof(DubsSkylight_getPatch_Transpile);
-				Log.Message("RimThreaded is patching " + dubsSkylight_Patch_GetRoof.FullName + " " + methodName);
-				Transpile(dubsSkylight_Patch_GetRoof, patched, methodName);
-			}
-			
-			if (jobsOfOpportunityJobsOfOpportunity_Hauling != null)
-			{
-				cachedStoreCell = Field(jobsOfOpportunityJobsOfOpportunity_Hauling, "cachedStoreCell");
-				string methodName = "CanHaul";
-				patched = typeof(Hauling_Transpile);
-				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Hauling.FullName + " " + methodName);
-				Transpile(jobsOfOpportunityJobsOfOpportunity_Hauling, patched, methodName);
-			}
-
-			if (jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob != null)
-			{
-				string methodName = "TryOpportunisticJob";
-				patched = typeof(Patch_TryOpportunisticJob_Transpile);
-				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob.FullName + " " + methodName);
-				Transpile(jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob, patched, methodName);
-			}
-
-			if (childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch != null)
-			{
-				string methodName = "CheckDiscovered_Pre";
-				patched = typeof(childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch_Transpile);
-				Log.Message("RimThreaded is patching " + childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch.FullName + " " + methodName);
-				Transpile(childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch, patched, methodName);
-			}
-
-			if (androidTiers_GeneratePawns_Patch != null)
-			{
-				string methodName = "Listener";
-				patched = typeof(GeneratePawns_Patch_Transpile);
-				Log.Message("RimThreaded is patching " + androidTiers_GeneratePawns_Patch.FullName + " " + methodName);
-				Log.Message("Utility_Patch::Listener != null: " + (Method(androidTiers_GeneratePawns_Patch, "Listener") != null));
-				Log.Message("Utility_Patch_Transpile::Listener != null: " + (Method(patched, "Listener") != null));
-				Transpile(androidTiers_GeneratePawns_Patch, patched, methodName);
-			}
-
-			Log.Message("RimThreaded patching is complete.");
 		}
 
 		private static readonly HarmonyMethod ThreadStaticsTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceThreadStatics"));
 
-        private static void TranspileThreadStatics(Type original, string methodName, Type[] orig_type = null)
+        public static void TranspileThreadStatics(Type original, string methodName, Type[] orig_type = null)
         {
 			MethodInfo methodInfo;
 			if (orig_type == null)

@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 using static HarmonyLib.AccessTools;
@@ -10,6 +11,14 @@ namespace RimThreaded
 
         private static readonly FieldRef<MemoryThoughtHandler, List<Thought_Memory>> memoriesFieldRef = 
             FieldRefAccess<MemoryThoughtHandler, List<Thought_Memory>>("memories");
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(MemoryThoughtHandler);
+            Type patched = typeof(MemoryThoughtHandler_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RemoveMemory");
+            RimThreadedHarmony.Prefix(original, patched, "TryGainMemory", new Type[] { typeof(Thought_Memory), typeof(Pawn) });
+        }
 
         public static bool RemoveMemory(MemoryThoughtHandler __instance, Thought_Memory th)
         {

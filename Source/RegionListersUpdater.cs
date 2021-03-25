@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using Verse;
 
 namespace RimThreaded
 {
     public class RegionListersUpdater_Patch
     {
-		[ThreadStatic]
-		public static List<Region> tmpRegions = new List<Region>();
+		[ThreadStatic] public static List<Region> tmpRegions;
 
-		//public static Dictionary<int, List<Region>> tmpRegionsLists = new Dictionary<int, List<Region>>();
+		public static void InitializeThreadStatics()
+        {
+			tmpRegions = new List<Region>();
+		}
+
 		public static bool DeregisterInRegions(Thing thing, Map map)
 		{
 			if (!ListerThings.EverListable(thing.def, ListerThingsUse.Region))
 			{
 				return false;
 			}
-			if(tmpRegions == null)
-            {
-				tmpRegions = new List<Region>();
-			} else
-            {
-				tmpRegions.Clear();
-			}		
+			
+			tmpRegions.Clear();		
 			
 			RegionListersUpdater.GetTouchableRegions(thing, map, tmpRegions, true);
 			for (int i = 0; i < tmpRegions.Count; i++)
@@ -46,14 +43,8 @@ namespace RimThreaded
 			{
 				return false;
 			}
-			if (tmpRegions == null)
-			{
-				tmpRegions = new List<Region>();
-			}
-			else
-			{
-				tmpRegions.Clear();
-			}
+			tmpRegions.Clear();
+			
 			RegionListersUpdater.GetTouchableRegions(thing, map, tmpRegions, false);
 			for (int i = 0; i < tmpRegions.Count; i++)
 			{
@@ -74,14 +65,7 @@ namespace RimThreaded
 			int count = thingList.Count;
 			for (int i = 0; i < count; i++)
 			{
-				Thing thing;
-				try
-				{
-					thing = thingList[i];
-				} catch(ArgumentOutOfRangeException)
-                {
-					break;
-                }
+				Thing thing = thingList[i];
 				if (processedThings == null || processedThings.Add(thing))
 				{
 					RegisterInRegions(thing, map);

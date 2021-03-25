@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -6,6 +7,12 @@ namespace RimThreaded
 {
     class Alert_MinorBreakRisk_Patch
     {
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(Alert_MinorBreakRisk);
+            Type patched = typeof(Alert_MinorBreakRisk_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetReport");
+        }
         public static bool GetReport(Alert_MinorBreakRisk __instance, ref AlertReport __result)
         {
             List<Pawn> pawnsAtRiskMinorResult = new List<Pawn>();

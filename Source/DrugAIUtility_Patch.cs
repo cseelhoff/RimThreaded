@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
@@ -10,6 +11,15 @@ namespace RimThreaded
     class DrugAIUtility_Patch
     {
         public static FieldRef<DrugPolicy, List<DrugPolicyEntry>> entriesInt = FieldRefAccess<DrugPolicy, List<DrugPolicyEntry>>("entriesInt");
+        
+        public static void RunDestructivePatches()
+        {
+            //DrugAIUtility - vanilla bug?
+            Type original = typeof(DrugAIUtility);
+            Type patched = typeof(DrugAIUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "IngestAndTakeToInventoryJob");
+        }
+        
         public static bool IngestAndTakeToInventoryJob(ref Job __result, Thing drug, Pawn pawn, int maxNumToCarry = 9999)
         {
             Job job = JobMaker.MakeJob(JobDefOf.Ingest, drug);

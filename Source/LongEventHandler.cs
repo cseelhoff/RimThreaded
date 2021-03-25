@@ -5,7 +5,6 @@ using System.Threading;
 using System.Collections.Concurrent;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using static HarmonyLib.AccessTools;
 using System.Reflection;
 
@@ -97,6 +96,13 @@ namespace RimThreaded
 					return false;
 				}
 			}
+		}
+
+		public static void RunNonDestructivePatches()
+        {
+			Type original = typeof(LongEventHandler);
+			Type patched = typeof(LongEventHandler_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "RunEventFromAnotherThread", false);
 		}
 
 		public static void CopyEventQueue()

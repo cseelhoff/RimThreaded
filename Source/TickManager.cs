@@ -1,15 +1,7 @@
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
-using System.Threading;
-using System.Diagnostics;
+using System;
 
 namespace RimThreaded
 {
@@ -29,6 +21,13 @@ namespace RimThreaded
         public static AccessTools.FieldRef<TickManager, TickList> tickListLong =
             AccessTools.FieldRefAccess<TickManager, TickList>("tickListLong");
 
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(TickManager);
+            Type patched = typeof(TickManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "DoSingleTick");
+            RimThreadedHarmony.Prefix(original, patched, "get_TickRateMultiplier");
+        }
 
         public static bool DoSingleTick(TickManager __instance)
         {

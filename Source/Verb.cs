@@ -1,26 +1,13 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
+﻿using System.Collections.Generic;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class Verb_Patch
     {
-        public static bool get_DirectOwner(Verb __instance, ref IVerbOwner __result)
-        {
-            if (__instance != null && __instance.verbTracker != null) {
-                __result = __instance.verbTracker.directOwner;
-            }
-            return false;
-        }
+
         private static bool CanHitFromCellIgnoringRange2(Verb __instance, IntVec3 sourceCell, LocalTargetInfo targ, out IntVec3 goodDest)
         {
             if (targ.Thing != null)

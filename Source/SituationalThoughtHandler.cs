@@ -1,12 +1,9 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
+using System.Reflection;
 
 namespace RimThreaded
 {
@@ -20,6 +17,16 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<SituationalThoughtHandler, int>("lastMoodThoughtsRecalculationTick");
         public static AccessTools.FieldRef<SituationalThoughtHandler, List<Thought_Situational>> cachedThoughts =
             AccessTools.FieldRefAccess<SituationalThoughtHandler, List<Thought_Situational>>("cachedThoughts");
+
+        static readonly Type original = typeof(SituationalThoughtHandler);
+        static readonly Type patched = typeof(SituationalThoughtHandler_Patch);
+
+        public static void RunNonDestructivePatches()
+        {
+            ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
+            MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
+            RimThreadedHarmony.harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
+        }
 
         public static void Postfix_Constructor(SituationalThoughtHandler __instance, Pawn pawn)
         {

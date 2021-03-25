@@ -242,10 +242,20 @@ namespace RimThreaded
             FloatMenuMakerMap_Patch.InitializeThreadStatics();
             GenAdj_Patch.InitializeThreadStatics();
             GenAdjFast_Patch.InitializeThreadStatics();
+            GenLeaving_Patch.InitializeThreadStatics();
+            GenRadial_Patch.InitializeThreadStatics();
+            GenTemperature_Patch.InitializeThreadStatics();
+            GenText_Patch.InitializedThreadStatics();
+            HaulAIUtility_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             PawnsFinder_Patch.InitializeThreadStatics();
             Rand_Patch.InitializeThreadStatics();
+            ReachabilityCache_Patch.InitializeThreadStatics();
+            RegionDirtyer_Patch.InitializeThreadStatics();
+            RegionListersUpdater_Patch.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();
+            World_Patch.InitializeThreadStatics();
+
         }
 
         private static void ProcessTicks(ThreadInfo threadInfo)
