@@ -257,10 +257,7 @@ namespace RimThreaded
 			return finalCodeInstructions;
 		}
 
-		static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>()
-		{
-			{ typeof(PawnsFinder), typeof(PawnsFinder_Patch) },
-		};
+		static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>();
 
 		public static IEnumerable<CodeInstruction> ReplaceThreadStatics(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
@@ -442,7 +439,8 @@ namespace RimThreaded
 			//FloatMenuMakerMap
 			original = typeof(FloatMenuMakerMap);
 			patched = typeof(FloatMenuMakerMap_Patch);
-			Prefix(original, patched, "TryMakeMultiSelectFloatMenu");
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "TryMakeMultiSelectFloatMenu");
 			patched = typeof(FloatMenuMakerMap_Transpile);
 			Transpile(original, patched, "AddHumanlikeOrders");
 
@@ -523,15 +521,14 @@ namespace RimThreaded
 			//CellFinder
 			original = typeof(CellFinder);
 			patched = typeof(CellFinder_Patch);
-			Prefix(original, patched, "TryFindRandomCellInRegion");
-			Prefix(original, patched, "TryFindRandomReachableCellNear");
-			Prefix(original, patched, "TryFindBestPawnStandCell");
-			Prefix(original, patched, "TryFindRandomCellNear");
-			Prefix(original, patched, "TryFindRandomCellInsideWith");
-			Prefix(original, patched, "TryFindRandomEdgeCellWith", new Type[] { typeof(Predicate<IntVec3>), typeof(Map), typeof(float), typeof(IntVec3).MakeByRefType() });
-			Prefix(original, patched, "TryFindRandomEdgeCellWith", new Type[] { typeof(Predicate<IntVec3>), typeof(Map), typeof(Rot4), typeof(float), typeof(IntVec3).MakeByRefType() });
-			Prefix(original, patched, "FindNoWipeSpawnLocNear");
-			Prefix(original, patched, "RandomRegionNear");
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "TryFindRandomCellNear");
+			TranspileThreadStatics(original, "TryFindRandomCellInRegion");
+			TranspileThreadStatics(original, "TryFindBestPawnStandCell");
+			TranspileThreadStatics(original, "TryFindRandomReachableCellNear");
+			TranspileThreadStatics(original, "TryFindRandomCellInsideWith");
+			TranspileThreadStatics(original, "FindNoWipeSpawnLocNear");
+			TranspileThreadStatics(original, "RandomRegionNear");
 
 			//ThingOwnerUtility
 			original = typeof(ThingOwnerUtility);
@@ -566,12 +563,14 @@ namespace RimThreaded
 			Prefix(original, patched, "GetPotentialTargetsFor");
 			Prefix(original, patched, "RegisterTarget");
 			Prefix(original, patched, "DeregisterTarget");
-			Prefix(original, patched, "Notify_FactionHostilityChanged");
 			Prefix(original, patched, "TargetsHostileToFaction");
 			Prefix(original, patched, "UpdateTarget");
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "Notify_FactionHostilityChanged");
 
 			//PawnsFinder
 			original = typeof(PawnsFinder);
+			threadStaticPatches.Add(original, typeof(PawnsFinder_Patch));
 			TranspileThreadStatics(original, "get_AllMapsWorldAndTemporary_AliveOrDead");
 			TranspileThreadStatics(original, "get_AllMapsWorldAndTemporary_Alive");
 			TranspileThreadStatics(original, "get_AllMapsAndWorld_Alive");
@@ -881,7 +880,8 @@ namespace RimThreaded
 			//GenAdj
 			original = typeof(GenAdj);
 			patched = typeof(GenAdj_Patch);
-			Prefix(original, patched, "TryFindRandomAdjacentCell8WayWithRoomGroup", new Type[] {
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "TryFindRandomAdjacentCell8WayWithRoomGroup", new Type[] {
 				typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(Map), typeof(IntVec3).MakeByRefType() });
 
 			//LordToil_Siege
@@ -1372,7 +1372,9 @@ namespace RimThreaded
 
 			//CompCauseGameCondition	
 			original = typeof(CompCauseGameCondition);
-			patched = typeof(CompCauseGameCondition_Patch); //TODO causedConditions is not thread-safe
+			patched = typeof(CompCauseGameCondition_Patch);
+			Prefix(original, patched, "GetConditionInstance");
+			Prefix(original, patched, "CreateConditionOn");
 			Prefix(original, patched, "CompTick");
 
 			//MapGenerator (Z-levels)
@@ -1458,8 +1460,9 @@ namespace RimThreaded
 			//DamageWorker
 			original = typeof(DamageWorker);
 			patched = typeof(DamageWorker_Patch);
-			Prefix(original, patched, "ExplosionAffectCell");
-			Prefix(original, patched, "ExplosionCellsToHit", new Type[] { typeof(IntVec3), typeof(Map), typeof(float), typeof(IntVec3), typeof(IntVec3) });
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "ExplosionAffectCell");
+			TranspileThreadStatics(original, "ExplosionCellsToHit", new Type[] { typeof(IntVec3), typeof(Map), typeof(float), typeof(IntVec3), typeof(IntVec3) });
 
 			//TaleManager_Patch
 			original = typeof(TaleManager);
@@ -1805,9 +1808,17 @@ namespace RimThreaded
 
 		private static readonly HarmonyMethod ThreadStaticsTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceThreadStatics"));
 
-        private static void TranspileThreadStatics(Type original, string methodName)
+        private static void TranspileThreadStatics(Type original, string methodName, Type[] orig_type = null)
         {
-			harmony.Patch(Method(original, methodName), transpiler: ThreadStaticsTranspiler);
+			MethodInfo methodInfo;
+			if (orig_type == null)
+			{
+				methodInfo = Method(original, methodName);
+			} else
+            {
+				methodInfo = Method(original, methodName, orig_type);
+			}
+			harmony.Patch(methodInfo, transpiler: ThreadStaticsTranspiler);
 		}
 
 		public static void Prefix(Type original, Type patched, string methodName, Type[] orig_type)

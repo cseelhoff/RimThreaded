@@ -1,23 +1,20 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
 
 namespace RimThreaded
 {
     public class BFSWorker_Patch
     {
-        [ThreadStatic]
-        public static Dictionary<Region, uint[]> regionClosedIndex;
+        [ThreadStatic] public static Dictionary<Region, uint[]> regionClosedIndex;
+
+        public static void InitializeThreadStatics()
+        {
+            regionClosedIndex = new Dictionary<Region, uint[]>();
+        }
 
         public static uint[] getRegionClosedIndex(Region region)
         {
-            if(regionClosedIndex == null)
-                regionClosedIndex = new Dictionary<Region, uint[]>();
             if (!regionClosedIndex.TryGetValue(region, out uint[] closedIndex)) { 
                     closedIndex = new uint[8];
                     regionClosedIndex[region] = closedIndex;
@@ -39,7 +36,7 @@ namespace RimThreaded
 
         public void Clear()
         {
-            this.open.Clear();
+            open.Clear();
         }
 
         private void QueueNewOpenRegion(Region region)
@@ -64,13 +61,13 @@ namespace RimThreaded
         {
             if ((root.type & traversableRegionTypes) == RegionType.None)
                 return;
-            ++this.closedIndex;
-            this.open.Clear();
-            this.numRegionsProcessed = 0;
-            this.QueueNewOpenRegion(root);
-            while (this.open.Count > 0)
+            ++closedIndex;
+            open.Clear();
+            numRegionsProcessed = 0;
+            QueueNewOpenRegion(root);
+            while (open.Count > 0)
             {
-                Region region1 = this.open.Dequeue();
+                Region region1 = open.Dequeue();
                 if (DebugViewSettings.drawRegionTraversal)
                     region1.Debug_Notify_Traversed();
                 if (regionProcessor != null)
@@ -80,15 +77,15 @@ namespace RimThreaded
                     catch (NullReferenceException) { }
                     if (rpflag)
                     {
-                        this.FinalizeSearch();
+                        FinalizeSearch();
                         return;
                     }
                 }
                 if (!region1.IsDoorway)
-                    ++this.numRegionsProcessed;
-                if (this.numRegionsProcessed >= maxRegions)
+                    ++numRegionsProcessed;
+                if (numRegionsProcessed >= maxRegions)
                 {
-                    this.FinalizeSearch();
+                    FinalizeSearch();
                     return;
                 }
                 for (int index1 = 0; index1 < region1.links.Count; ++index1)
@@ -101,12 +98,12 @@ namespace RimThreaded
                         {
                             regionTraverser.regionClosedIndex.Add(region2, new uint[8]);
                         }
-                        if (region2 != null && (int)regionTraverser.regionClosedIndex[region2][this.closedArrayPos] != (int)this.closedIndex && (region2.type & traversableRegionTypes) != RegionType.None && (entryCondition == null || entryCondition(region1, region2)))
-                            this.QueueNewOpenRegion(region2);
+                        if (region2 != null && (int)regionTraverser.regionClosedIndex[region2][closedArrayPos] != (int)closedIndex && (region2.type & traversableRegionTypes) != RegionType.None && (entryCondition == null || entryCondition(region1, region2)))
+                            QueueNewOpenRegion(region2);
                     }
                 }
             }
-            this.FinalizeSearch();
+            FinalizeSearch();
         }
     }
 }

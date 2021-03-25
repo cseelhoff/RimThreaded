@@ -13,8 +13,7 @@ namespace RimThreaded
 
     public class AttackTargetsCache_Patch
     {
-		[ThreadStatic]
-		public static List<IAttackTarget> tmpTargets;
+		[ThreadStatic] public static List<IAttackTarget> tmpTargets;
 
 		public static FieldRef<AttackTargetsCache, Dictionary<Faction, HashSet<IAttackTarget>>> targetsHostileToFaction =
             FieldRefAccess<AttackTargetsCache, Dictionary<Faction, HashSet<IAttackTarget>>>("targetsHostileToFaction");
@@ -32,8 +31,6 @@ namespace RimThreaded
 
 		private static readonly MethodInfo methodTargetsHostileToFaction =
 			Method(typeof(AttackTargetsCache), "TargetsHostileToFaction", new Type[] { typeof(Faction) });
-		private static readonly Func<AttackTargetsCache, Faction, HashSet<IAttackTarget>> funcTargetsHostileToFaction =
-			(Func<AttackTargetsCache, Faction, HashSet<IAttackTarget>>)Delegate.CreateDelegate(typeof(Func<AttackTargetsCache, Faction, HashSet<IAttackTarget>>), methodTargetsHostileToFaction);
 
 		private static readonly Dictionary<AttackTargetsCache, Dictionary<Faction, List<IAttackTarget>>> targetsHostileToFactionDict =
 			new Dictionary<AttackTargetsCache, Dictionary<Faction, List<IAttackTarget>>>();
@@ -43,6 +40,11 @@ namespace RimThreaded
 			new Dictionary<AttackTargetsCache, List<Pawn>>();
 		private static readonly Dictionary<AttackTargetsCache, List<IAttackTarget>> allTargetsListDict =
 			new Dictionary<AttackTargetsCache, List<IAttackTarget>>();
+
+		public static void InitializeThreadStatics()
+        {
+			tmpTargets = new List<IAttackTarget>();
+		}
 
 		public static bool DeregisterTarget(AttackTargetsCache __instance, IAttackTarget target)
 		{
@@ -202,33 +204,7 @@ namespace RimThreaded
             return false;
 
 		}
-		public static bool Notify_FactionHostilityChanged(AttackTargetsCache __instance, Faction f1, Faction f2)
-		{
-			if (tmpTargets == null)
-			{
-				tmpTargets = new List<IAttackTarget>();
-			}
-			else
-			{
-				tmpTargets.Clear();
-			}
-            List<IAttackTarget> snapshotAllTargets = getAllTargets(__instance);
-			foreach (IAttackTarget allTarget in snapshotAllTargets)
-			{
-				Thing thing = allTarget.Thing;
-				Pawn pawn = thing as Pawn;
-				if (thing.Faction == f1 || thing.Faction == f2 || (pawn != null && pawn.HostFaction == f1) || (pawn != null && pawn.HostFaction == f2))
-				{
-					tmpTargets.Add(allTarget);
-				}
-			}
 
-			for (int i = 0; i < tmpTargets.Count; i++)
-			{
-				__instance.UpdateTarget(tmpTargets[i]);
-			}
-			return false;
-		}
 		public static bool UpdateTarget(AttackTargetsCache __instance, IAttackTarget t)
 		{
 			if (getAllTargets(__instance).Contains(t))

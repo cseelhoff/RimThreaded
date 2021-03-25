@@ -7,7 +7,6 @@ using Verse.Sound;
 using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
-using Verse.AI;
 using System.Reflection;
 using static HarmonyLib.AccessTools;
 
@@ -231,6 +230,15 @@ namespace RimThreaded
 
         public static void InitializeAllThreadStatics()
         {
+            AttackTargetsCache_Patch.InitializeThreadStatics();
+            BeautyUtility_Patch.InitializeThreadStatics();
+            BFSWorker_Patch.InitializeThreadStatics();
+            CellFinder_Patch.InitializeThreadStatics();
+            CompCauseGameCondition_Patch.InitializeThreadStatics();
+            DamageWorker_Patch.InitializeThreadStatics();
+            DijkstraInt.InitializeThreadStatics();
+            FloatMenuMakerMap_Patch.InitializeThreadStatics();
+            GenAdj_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             PawnsFinder_Patch.InitializeThreadStatics();
             Rand_Patch.InitializeThreadStatics();
