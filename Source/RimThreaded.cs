@@ -8,7 +8,6 @@ using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
 using Verse.AI;
-using static RimThreaded.PathFinder_Patch;
 using System.Reflection;
 using static HarmonyLib.AccessTools;
 
@@ -182,6 +181,7 @@ namespace RimThreaded
 
         static RimThreaded()
         {
+            InitializeAllThreadStatics();
             CreateWorkerThreads();
             monitorThread = new Thread(() => MonitorThreads());
             monitorThread.Start();
@@ -225,15 +225,16 @@ namespace RimThreaded
 
         private static void InitializeThread(ThreadInfo threadInfo)
         {
-            openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
-            statusOpenValue = 1;
-            statusClosedValue = 2;
-            disallowedCornerIndices = new List<int>(4);
-            regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
-            Rand_Patch.tmpRange = new List<int>();
-            Projectile_Patch.cellThingsFiltered = new List<Thing>();
-            Projectile_Patch.checkedCells = new List<IntVec3>();
+            InitializeAllThreadStatics();
             ProcessTicks(threadInfo);
+        }
+
+        public static void InitializeAllThreadStatics()
+        {
+            PathFinder_Patch.InitializeThreadStatics();
+            PawnsFinder_Patch.InitializeThreadStatics();
+            Rand_Patch.InitializeThreadStatics();
+            Projectile_Patch.InitializeThreadStatics();
         }
 
         private static void ProcessTicks(ThreadInfo threadInfo)

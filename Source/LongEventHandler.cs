@@ -1,12 +1,6 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using System.Threading;
 using System.Collections.Concurrent;
 using System.Collections;
@@ -169,7 +163,11 @@ namespace RimThreaded
 			return true;
 		}
 
-
+		public static bool RunEventFromAnotherThread(Action action)
+		{
+			RimThreaded.InitializeAllThreadStatics();
+			return true;
+		}
 	}
 
 

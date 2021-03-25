@@ -29,34 +29,34 @@ namespace RimThreaded
         }
         public static bool Reserve(PawnDestinationReservationManager __instance, Pawn p, Job job, IntVec3 loc)
         {
-            lock (__instance)
+            if (p.Faction != null)
             {
-                if (p.Faction != null)
-                {
-                    if (p.Drafted && 
-                        p.Faction == Faction.OfPlayer &&
-                        __instance.IsReserved(loc, out Pawn claimant) && 
-                        claimant != p && 
-                        !claimant.HostileTo(p) && 
-                        claimant.Faction != p.Faction && 
+                if (p.Drafted && 
+                    p.Faction == Faction.OfPlayer &&
+                    __instance.IsReserved(loc, out Pawn claimant) && 
+                    claimant != p && 
+                    !claimant.HostileTo(p) && 
+                    claimant.Faction != p.Faction && 
+                    (
+                        claimant.mindState == null || 
+                        claimant.mindState.mentalStateHandler == null || 
+                        !claimant.mindState.mentalStateHandler.InMentalState || 
                         (
-                            claimant.mindState == null || 
-                            claimant.mindState.mentalStateHandler == null || 
-                            !claimant.mindState.mentalStateHandler.InMentalState || 
-                            (
-                                claimant.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Aggro && 
-                                claimant.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Malicious)))
-                    {
-                        claimant.jobs.EndCurrentJob(JobCondition.InterruptForced);
-                    }
+                            claimant.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Aggro && 
+                            claimant.mindState.mentalStateHandler.CurStateDef.category != MentalStateCategory.Malicious)))
+                {
+                    claimant.jobs.EndCurrentJob(JobCondition.InterruptForced);
+                }
 
-                    __instance.ObsoleteAllClaimedBy(p);
-                        __instance.GetPawnDestinationSetFor(p.Faction).list.Add(new PawnDestinationReservation
-                        {
-                            target = loc,
-                            claimant = p,
-                            job = job
-                        });
+                __instance.ObsoleteAllClaimedBy(p);
+                lock (__instance)
+                {
+                    __instance.GetPawnDestinationSetFor(p.Faction).list.Add(new PawnDestinationReservation
+                    {
+                        target = loc,
+                        claimant = p,
+                        job = job
+                    });
                 }
             }
             return false;

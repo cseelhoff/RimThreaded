@@ -1,6 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -11,7 +9,7 @@ using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
-
+	[StaticConstructorOnStartup]
 	public class ReservationManager_Patch
 	{
 		private static FieldRef<ReservationManager, List<Reservation>> reservations = FieldRefAccess<ReservationManager, List<Reservation>>("reservations");

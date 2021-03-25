@@ -257,6 +257,38 @@ namespace RimThreaded
 			return finalCodeInstructions;
 		}
 
+		static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>()
+		{
+			{ typeof(PawnsFinder), typeof(PawnsFinder_Patch) },
+		};
+
+		public static IEnumerable<CodeInstruction> ReplaceThreadStatics(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			List<CodeInstruction> instructionsList = instructions.ToList();
+			int i = 0;
+			while (i < instructionsList.Count)
+			{
+				if (instructionsList[i].operand != null) {
+					if(instructionsList[i].operand is FieldInfo fieldInfo) { 
+						if (threadStaticPatches.TryGetValue(fieldInfo.DeclaringType, out Type patchedType)) {
+							FieldInfo[] fields = patchedType.GetFields();
+							foreach (FieldInfo field in fields)
+							{
+								if (fieldInfo.Name.Equals(field.Name) && fieldInfo.FieldType == field.FieldType)
+                                {
+									Log.Message("RimThreaded is replacing field: " + fieldInfo.DeclaringType.ToString() + "." + fieldInfo.Name + " with field: " + field.DeclaringType.ToString() + "." + field.Name);
+									instructionsList[i].operand = field;
+									break;
+								}
+							}
+						}
+					}
+				}
+				yield return instructionsList[i++];
+			}
+		}
+
+
 		static RimThreadedHarmony()
 		{
 			Harmony.DEBUG = false;
@@ -437,6 +469,7 @@ namespace RimThreaded
 			Prefix(original, patched, "ReleaseAllObsoleteClaimedBy");
 			Prefix(original, patched, "ReleaseAllClaimedBy");
 			Prefix(original, patched, "ReleaseClaimedBy");
+			//Prefix(original, patched, "FirstObsoleteReservationFor"); //needed? excessive lock? Pawn destination reservation manager failed to clean up properly;
 
 			//DynamicDrawManager
 			original = typeof(DynamicDrawManager);
@@ -539,42 +572,36 @@ namespace RimThreaded
 
 			//PawnsFinder
 			original = typeof(PawnsFinder);
-			patched = typeof(PawnsFinder_Patch);
-			//Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
-			//Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
-			//Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
-			//Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
-
-			Prefix(original, patched, "get_AllMapsWorldAndTemporary_AliveOrDead");
-			Prefix(original, patched, "get_AllMapsWorldAndTemporary_Alive");
-			Prefix(original, patched, "get_AllMapsAndWorld_Alive");
-			Prefix(original, patched, "get_AllMaps");
-			Prefix(original, patched, "get_AllMaps_Spawned");
-			Prefix(original, patched, "get_All_AliveOrDead");
-			Prefix(original, patched, "get_Temporary");
-			Prefix(original, patched, "get_Temporary_Alive");
-			Prefix(original, patched, "get_Temporary_Dead");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive");
-			Prefix(original, patched, "get_AllCaravansAndTravelingTransportPods_Alive");
-			Prefix(original, patched, "get_AllCaravansAndTravelingTransportPods_AliveOrDead");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
-			Prefix(original, patched, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep");
-			Prefix(original, patched, "get_AllMaps_PrisonersOfColonySpawned");
-			Prefix(original, patched, "get_AllMaps_PrisonersOfColony");
-			Prefix(original, patched, "get_AllMaps_FreeColonists");
-			Prefix(original, patched, "get_AllMaps_FreeColonistsSpawned");
-			Prefix(original, patched, "get_AllMaps_FreeColonistsAndPrisonersSpawned");
-			Prefix(original, patched, "get_AllMaps_FreeColonistsAndPrisoners");
-			Prefix(original, patched, "get_HomeMaps_FreeColonistsSpawned");
-			Prefix(original, patched, "AllMaps_SpawnedPawnsInFaction");
-			Prefix(original, patched, "Clear");
+			TranspileThreadStatics(original, "get_AllMapsWorldAndTemporary_AliveOrDead");
+			TranspileThreadStatics(original, "get_AllMapsWorldAndTemporary_Alive");
+			TranspileThreadStatics(original, "get_AllMapsAndWorld_Alive");
+			TranspileThreadStatics(original, "get_AllMaps");
+			TranspileThreadStatics(original, "get_AllMaps_Spawned");
+			TranspileThreadStatics(original, "get_All_AliveOrDead");
+			TranspileThreadStatics(original, "get_Temporary");
+			TranspileThreadStatics(original, "get_Temporary_Alive");
+			TranspileThreadStatics(original, "get_Temporary_Dead");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive");
+			TranspileThreadStatics(original, "get_AllCaravansAndTravelingTransportPods_Alive");
+			TranspileThreadStatics(original, "get_AllCaravansAndTravelingTransportPods_AliveOrDead");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
+			TranspileThreadStatics(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep");
+			TranspileThreadStatics(original, "get_AllMaps_PrisonersOfColonySpawned");
+			TranspileThreadStatics(original, "get_AllMaps_PrisonersOfColony");
+			TranspileThreadStatics(original, "get_AllMaps_FreeColonists");
+			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsSpawned");
+			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsAndPrisonersSpawned");
+			TranspileThreadStatics(original, "get_AllMaps_FreeColonistsAndPrisoners");
+			TranspileThreadStatics(original, "get_HomeMaps_FreeColonistsSpawned");
+			TranspileThreadStatics(original, "AllMaps_SpawnedPawnsInFaction");
+			TranspileThreadStatics(original, "Clear");
 
 			//PawnDiedOrDownedThoughtsUtility
 			original = typeof(PawnDiedOrDownedThoughtsUtility);
@@ -831,6 +858,7 @@ namespace RimThreaded
 			patched = typeof(LongEventHandler_Patch);
 			Prefix(original, patched, "ExecuteToExecuteWhenFinished");
 			Prefix(original, patched, "ExecuteWhenFinished");
+			Prefix(original, patched, "RunEventFromAnotherThread", false);
 
 			//SituationalThoughtHandler
 			original = typeof(SituationalThoughtHandler);
@@ -1202,6 +1230,7 @@ namespace RimThreaded
 			original = typeof(Pawn);
 			patched = typeof(Pawn_Patch);
 			Prefix(original, patched, "Destroy"); //causes strange crash to desktop without error log
+			Prefix(original, patched, "VerifyReservations");
 
 			//Pawn_JobTracker_Patch
 			original = typeof(Pawn_JobTracker);
@@ -1772,6 +1801,13 @@ namespace RimThreaded
 			}
 
 			Log.Message("RimThreaded patching is complete.");
+		}
+
+		private static readonly HarmonyMethod ThreadStaticsTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceThreadStatics"));
+
+        private static void TranspileThreadStatics(Type original, string methodName)
+        {
+			harmony.Patch(Method(original, methodName), transpiler: ThreadStaticsTranspiler);
 		}
 
 		public static void Prefix(Type original, Type patched, string methodName, Type[] orig_type)

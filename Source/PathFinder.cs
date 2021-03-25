@@ -12,18 +12,12 @@ namespace RimThreaded
 
     public class PathFinder_Patch
     {
-        [ThreadStatic]
-        public static List<int> disallowedCornerIndices;
-        [ThreadStatic]
-        static PathFinderNodeFast2[] calcGrid;
-        [ThreadStatic]
-        public static FastPriorityQueue<CostNode2> openList;
-        [ThreadStatic]
-        public static ushort statusOpenValue;
-        [ThreadStatic]
-        public static ushort statusClosedValue;
-        [ThreadStatic]
-        public static Dictionary<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorDict;
+        [ThreadStatic] public static List<int> disallowedCornerIndices;
+        [ThreadStatic] static PathFinderNodeFast2[] calcGrid;
+        [ThreadStatic] public static FastPriorityQueue<CostNode2> openList;
+        [ThreadStatic] public static ushort statusOpenValue;
+        [ThreadStatic] public static ushort statusClosedValue;
+        [ThreadStatic] public static Dictionary<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorDict;
 
         static readonly FieldRef<PathFinder, Map> mapField =
             FieldRefAccess<PathFinder, Map>("map");
@@ -80,6 +74,15 @@ namespace RimThreaded
 
         private static readonly SimpleCurve RegionHeuristicWeightByNodesOpened =
             StaticFieldRefAccess<SimpleCurve>(typeof(PathFinder), "RegionHeuristicWeightByNodesOpened");
+
+        public static void InitializeThreadStatics()
+        {
+            openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
+            statusOpenValue = 1;
+            statusClosedValue = 2;
+            disallowedCornerIndices = new List<int>(4);
+            regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
+        }
 
         public class CostNodeComparer2 : IComparer<CostNode2>
         {

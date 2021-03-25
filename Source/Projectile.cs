@@ -1,11 +1,7 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
 using System.Reflection;
@@ -16,10 +12,8 @@ namespace RimThreaded
 
 	public abstract class Projectile_Patch 
 	{
-		[ThreadStatic]
-		public static List<Thing> cellThingsFiltered = new List<Thing>();
-		[ThreadStatic]
-		public static List<IntVec3> checkedCells = new List<IntVec3>();
+		[ThreadStatic] public static List<Thing> cellThingsFiltered;
+		[ThreadStatic] public static List<IntVec3> checkedCells;
 
 		public static FieldRef<Projectile, Vector3> originField = FieldRefAccess<Projectile, Vector3>("origin");
 		public static FieldRef<Projectile, Vector3> destinationField = FieldRefAccess<Projectile, Vector3>("destination");
@@ -51,6 +45,12 @@ namespace RimThreaded
 			Method(typeof(Projectile), "CheckForFreeIntercept");
 		private static readonly Func<Projectile, IntVec3, bool> funcCheckForFreeIntercept =
 			(Func<Projectile, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<Projectile, IntVec3, bool>), methodCheckForFreeIntercept);
+
+		public static void InitializeThreadStatics()
+		{
+			cellThingsFiltered = new List<Thing>();
+			checkedCells = new List<IntVec3>();
+		}
 
 		public static bool CanHit(Projectile __instance, ref bool __result, Thing thing)
 		{

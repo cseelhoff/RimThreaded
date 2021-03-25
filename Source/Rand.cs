@@ -1,8 +1,4 @@
-﻿using HarmonyLib;
-using System.Linq;
-using Verse;
-using System.Collections.Concurrent;
-using System.Reflection;
+﻿using Verse;
 using System;
 using UnityEngine;
 using System.Collections.Generic;
@@ -14,20 +10,19 @@ namespace RimThreaded
 
     public static class Rand_Patch
     {
-        //private static readonly Stack<ulong> stateStack2 = new Stack<ulong>();
-        //public static PropertyInfo stateCompressed = AccessTools.DeclaredProperty(typeof(Rand), "StateCompressed");
-        //public static uint seed = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "seed");
-        //public static uint iterations = AccessTools.StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
-        //public static uint iterations2 = 0;
-        //public static uint seed2 = (uint)DateTime.Now.GetHashCode();
-        [ThreadStatic]
-        public static List<int> tmpRange;
+        [ThreadStatic] public static List<int> tmpRange;
 
         public static uint seed = StaticFieldRefAccess<uint>(typeof(Rand), "seed");
         public static uint iterations = StaticFieldRefAccess<uint>(typeof(Rand), "iterations");
         public static Stack<ulong> stateStack = StaticFieldRefAccess<Stack<ulong>>(typeof(Rand), "stateStack");
 
         public static Dictionary<int, List<int>> tmpRanges = new Dictionary<int, List<int>>();
+
+        public static void InitializeThreadStatics()
+        {
+            tmpRange = new List<int>();
+        }
+
         public static List<int> getTmpRange()
         {
             int tID = Thread.CurrentThread.ManagedThreadId;
