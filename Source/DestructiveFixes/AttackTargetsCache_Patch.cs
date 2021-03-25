@@ -1,12 +1,9 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using RimWorld;
 using Verse;
 using Verse.AI;
 using static HarmonyLib.AccessTools;
-using System.Reflection;
 
 namespace RimThreaded
 {
@@ -14,6 +11,7 @@ namespace RimThreaded
     public class AttackTargetsCache_Patch
     {
 		[ThreadStatic] public static List<IAttackTarget> tmpTargets;
+		[ThreadStatic] public static List<IAttackTarget> tmpToUpdate;
 
 		public static FieldRef<AttackTargetsCache, Dictionary<Faction, HashSet<IAttackTarget>>> targetsHostileToFaction =
             FieldRefAccess<AttackTargetsCache, Dictionary<Faction, HashSet<IAttackTarget>>>("targetsHostileToFaction");
@@ -29,9 +27,6 @@ namespace RimThreaded
 		private static readonly List<IAttackTarget> emptyList = new List<IAttackTarget>();
 		private static readonly HashSet<IAttackTarget> emptySet = new HashSet<IAttackTarget>();
 
-		private static readonly MethodInfo methodTargetsHostileToFaction =
-			Method(typeof(AttackTargetsCache), "TargetsHostileToFaction", new Type[] { typeof(Faction) });
-
 		private static readonly Dictionary<AttackTargetsCache, Dictionary<Faction, List<IAttackTarget>>> targetsHostileToFactionDict =
 			new Dictionary<AttackTargetsCache, Dictionary<Faction, List<IAttackTarget>>>();
 		private static readonly Dictionary<AttackTargetsCache, List<Pawn>> pawnsInAggroMentalStateDict =
@@ -44,6 +39,7 @@ namespace RimThreaded
 		public static void InitializeThreadStatics()
         {
 			tmpTargets = new List<IAttackTarget>();
+			tmpToUpdate = new List<IAttackTarget>();
 		}
 
 		public static bool DeregisterTarget(AttackTargetsCache __instance, IAttackTarget target)

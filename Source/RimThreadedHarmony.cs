@@ -508,8 +508,6 @@ namespace RimThreaded
 			original = typeof(GenClosest);
 			patched = typeof(GenClosest_Patch);
 			Prefix(original, patched, "RegionwiseBFSWorker");
-			//Prefix(original, patched, "ClosestThingReachable"); //Debugging
-			//Prefix(original, patched, "ClosestThing_Global"); //Debugging
 
 			//PawnUtility
 			original = typeof(PawnUtility);
@@ -567,6 +565,7 @@ namespace RimThreaded
 			Prefix(original, patched, "UpdateTarget");
 			threadStaticPatches.Add(original, patched);
 			TranspileThreadStatics(original, "Notify_FactionHostilityChanged");
+			TranspileThreadStatics(original, "Debug_AssertHostile");			
 
 			//PawnsFinder
 			original = typeof(PawnsFinder);
@@ -611,14 +610,12 @@ namespace RimThreaded
 
 			//AttackTargetFinder
 			original = typeof(AttackTargetFinder);
-			patched = typeof(AttackTargetFinder_Transpile);
-			Transpile(original, patched, "BestAttackTarget");
-			Transpile(original, patched, "CanSee");
-
-			//patched = typeof(AttackTargetFinder_Patch);
-			//Prefix(original, patched, "GetRandomShootingTargetByScore");
-			//Prefix(original, patched, "BestAttackTarget");
-			//Prefix(original, patched, "CanSee");
+			patched = typeof(AttackTargetFinder_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "BestAttackTarget");
+			TranspileThreadStatics(original, "GetAvailableShootingTargetsByScore");
+			TranspileThreadStatics(original, "DebugDrawAttackTargetScores_Update");
+			TranspileThreadStatics(original, "CanSee");
 
 			//ShootLeanUtility
 			original = typeof(ShootLeanUtility);
@@ -627,8 +624,6 @@ namespace RimThreaded
 
 			//BuildableDef
 			original = typeof(BuildableDef);
-			patched = typeof(BuildableDef_Transpile);
-			Transpile(original, patched, "ForceAllowPlaceOver");
 			patched = typeof(BuildableDef_Patch);
 			Prefix(original, patched, "get_PlaceWorkers");
 
@@ -693,8 +688,6 @@ namespace RimThreaded
 			original = typeof(Building_Door);
 			patched = typeof(Building_Door_Patch);
 			Prefix(original, patched, "get_DoorPowerOn");
-			patched = typeof(Building_Door_Transpile);
-			Transpile(original, patched, "get_BlockedOpenMomentary");
 
 			//ThoughtHandler						
 			original = typeof(ThoughtHandler);
@@ -706,8 +699,9 @@ namespace RimThreaded
 			
 			//Fire			
 			original = typeof(Fire);
-			patched = typeof(Fire_Transpile);
-			Transpile(original, patched, "DoComplexCalcs");
+			patched = typeof(Fire_Patch);
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "DoComplexCalcs");
 
 			//Projectile			
 			original = typeof(Projectile);
@@ -728,7 +722,6 @@ namespace RimThreaded
 			Prefix(original, patched, "Reserve");
 			Prefix(original, patched, "IsReservedBy");
 			//patched = typeof(AttackTargetReservationManager_Transpile);
-			//Transpile(original, patched, "IsReservedBy"); changed back to prefix for now TODO
 			//Transpile(original, patched, "Reserve"); changed back to prefix for now TODO
 
 			//PawnCollisionTweenerUtility
@@ -872,10 +865,11 @@ namespace RimThreaded
 			//GenAdjFast
 			original = typeof(GenAdjFast);
 			patched = typeof(GenAdjFast_Patch);
-			Prefix(original, patched, "AdjacentCells8Way", new Type[] { typeof(IntVec3) });
-			Prefix(original, patched, "AdjacentCells8Way", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
-			Prefix(original, patched, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3) });
-			Prefix(original, patched, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
+			threadStaticPatches.Add(original, patched);
+			TranspileThreadStatics(original, "AdjacentCells8Way", new Type[] { typeof(IntVec3) });
+			TranspileThreadStatics(original, "AdjacentCells8Way", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
+			TranspileThreadStatics(original, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3) });
+			TranspileThreadStatics(original, "AdjacentCellsCardinal", new Type[] { typeof(IntVec3), typeof(Rot4), typeof(IntVec2) });
 
 			//GenAdj
 			original = typeof(GenAdj);
@@ -974,11 +968,6 @@ namespace RimThreaded
 			patched = typeof(BeautyUtility_Patch);
 			Prefix(original, patched, "AverageBeautyPerceptible");
 
-			//FoodUtility
-			original = typeof(FoodUtility);
-			patched = typeof(FoodUtility_Transpile);
-			Transpile(original, patched, "FoodOptimality");
-
 			//TendUtility
 			original = typeof(TendUtility);
 			patched = typeof(TendUtility_Patch);
@@ -1041,7 +1030,6 @@ namespace RimThreaded
 			original = typeof(BiomeDef);
 			patched = typeof(BiomeDef_Patch);
 			Prefix(original, patched, "CachePlantCommonalitiesIfShould");
-			Prefix(original, patched, "get_LowestWildAndCavePlantOrder");
 
 			//WildPlantSpawner
 			original = typeof(WildPlantSpawner);
@@ -1494,11 +1482,6 @@ namespace RimThreaded
 			patched = typeof(RecordWorker_TimeGettingJoy_Patch);
 			Prefix(original, patched, "ShouldMeasureTimeNow");
 
-			//Building_Trap
-			original = typeof(Building_Trap);
-			patched = typeof(Building_Trap_Transpile);
-			Transpile(original, patched, "Tick");
-
 			//Alert_MinorBreakRisk
 			original = typeof(Alert_MinorBreakRisk);
 			patched = typeof(Alert_MinorBreakRisk_Patch);
@@ -1601,7 +1584,6 @@ namespace RimThreaded
 			original = typeof(WorkGiver_GrowerSow);
 			patched = typeof(WorkGiver_GrowerSow_Patch);
 			Prefix(original, patched, "JobOnCell");
-
 
 			//JoyGiver_Ingest
 			//original = typeof(JoyGiver_Ingest);

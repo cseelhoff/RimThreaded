@@ -230,6 +230,7 @@ namespace RimThreaded
 
         public static void InitializeAllThreadStatics()
         {
+            AttackTargetFinder_Patch.InitializeThreadStatics();
             AttackTargetsCache_Patch.InitializeThreadStatics();
             BeautyUtility_Patch.InitializeThreadStatics();
             BFSWorker_Patch.InitializeThreadStatics();
@@ -237,8 +238,10 @@ namespace RimThreaded
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             DamageWorker_Patch.InitializeThreadStatics();
             DijkstraInt.InitializeThreadStatics();
+            Fire_Patch.InitializeThreadStatics();
             FloatMenuMakerMap_Patch.InitializeThreadStatics();
             GenAdj_Patch.InitializeThreadStatics();
+            GenAdjFast_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             PawnsFinder_Patch.InitializeThreadStatics();
             Rand_Patch.InitializeThreadStatics();
