@@ -106,18 +106,18 @@ namespace RimThreaded
                 WrongLoadOrder = true;
                 ModConflictsMessage = NewLine + "Critical incompatibility:" + "\n" + NewLine + "RimThreaded is NOT last in your mod load order, fix immediately." + "\n";
             }
-            ModConflictsMessage = ModConflictsMessage + NewLine + "Highly incompatible:" + "\n" + NewLine;
+            ModConflictsMessage += NewLine + "Highly incompatible:" + "\n" + NewLine;
             for (int i = 0; i < LoadOrder.Count; i++)
             {
                 if (IncompatibleMods.Contains(LoadOrder[i].PackageId))
                 {
-                    ModConflictsMessage = ModConflictsMessage + LoadOrder[i].Name + "\n";
+                    ModConflictsMessage += LoadOrder[i].Name + "\n";
                     Conflictingmods = true;
                 }
             }
-            if (!Conflictingmods) ModConflictsMessage = ModConflictsMessage + "No Conflicts detected :D" + "\n";
+            if (!Conflictingmods) ModConflictsMessage +=  "No Conflicts detected :D" + "\n";
 
-            ModConflictsMessage = ModConflictsMessage + NewLine + "Other (potential) incompatibilities:" + "\n" + NewLine + "Check out the wiki on github for more information" + "\n" + "_______________________";
+            ModConflictsMessage += NewLine + "Other (potential) incompatibilities:" + "\n" + NewLine + "Check out the wiki on github for more information" + "\n" + "_______________________";
             Dialog_MessageBox window2 = new Dialog_MessageBox(ModConflictsMessage, "Ill take my chances", null, "Disable this alert in settings", null, "RimThreaded Mod Conflicts detected:", true);
             if (WrongLoadOrder || Conflictingmods) Find.WindowStack.Add(window2);
         }
