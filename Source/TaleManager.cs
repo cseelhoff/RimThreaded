@@ -1,10 +1,7 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
 using static HarmonyLib.AccessTools;
 
@@ -24,7 +21,8 @@ namespace RimThreaded
         {
             Type original = typeof(TaleManager);
             Type patched = typeof(TaleManager_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "CheckCullUnusedVolatileTales");
+            RimThreadedHarmony.Prefix(original, patched, "Add");
+            RimThreadedHarmony.Prefix(original, patched, "RemoveTale");
         }
 
         public static bool Add(TaleManager __instance, Tale tale)

@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Alert_MinorBreakRisk_Patch.cs" />
     <Compile Include="AmbientSoundManager_Patch.cs" />
+    <Compile Include="FoodUtility_Patch.cs" />
     <Compile Include="GenRadial_Patch.cs" />
     <Compile Include="Fire_Patch.cs" />
     <Compile Include="AttackTargetFinder_Patch.cs" />
@@ -233,7 +234,6 @@
     <Compile Include="WorkGiver_DoBill.cs" />
     <Compile Include="MapTemperature.cs" />
     <Compile Include="Medicine.cs" />
-    <Compile Include="ThinkNode_Priority.cs" />
     <Compile Include="WealthWatcher.cs" />
     <Compile Include="RegionAndRoomUpdater.cs" />
     <Compile Include="WanderUtility.cs" />

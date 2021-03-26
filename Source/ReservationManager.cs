@@ -467,10 +467,10 @@ namespace RimThreaded
 
 		public static bool Release(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
 		{
-			/*if (target.ThingDestroyed)
+			if (target.ThingDestroyed)
 			{
 				Log.Warning("Releasing destroyed thing " + target + " for " + claimant);
-			}*/
+			}
 			Reservation reservation1 = null;
 			List<Reservation> reservationTargetListUnsafe = getReservationTargetList(__instance, target);
 			foreach (Reservation reservation2 in reservationTargetListUnsafe) 
@@ -482,7 +482,7 @@ namespace RimThreaded
 				}
 			}
 			if (reservation1 == null && !target.ThingDestroyed)
-				Log.Error("Tried to release " + target + " that wasn't reserved by " + claimant + ".", false);
+				Log.Warning("Tried to release " + target + " that wasn't reserved by " + claimant + ".", false);
 			else
 			{
 				lock (__instance)

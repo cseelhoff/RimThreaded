@@ -1,10 +1,5 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using Verse;
 
 namespace RimThreaded
@@ -12,22 +7,27 @@ namespace RimThreaded
     
     public class RealtimeMoteList_Patch
     {
-        public static ConcurrentDictionary<Mote, Mote> allMotes = new ConcurrentDictionary<Mote, Mote>();
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(RealtimeMoteList);
+            Type patched = typeof(RealtimeMoteList_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Clear");
+            RimThreadedHarmony.Prefix(original, patched, "MoteSpawned");
+            RimThreadedHarmony.Prefix(original, patched, "MoteDespawned");
+        }
 
         public static bool Clear(RealtimeMoteList __instance)
         {
-            //allMotes.Clear();
-            lock(__instance.allMotes)
+            lock(__instance)
             {
-                __instance.allMotes.Clear();
+                __instance.allMotes = new List<Mote>();
             }
             return false;
         }
 
         public static bool MoteSpawned(RealtimeMoteList __instance, Mote newMote)
         {
-            //allMotes.TryAdd(newMote, newMote);
-            lock (__instance.allMotes)
+            lock (__instance)
             {
                 __instance.allMotes.Add(newMote);
             }
@@ -36,21 +36,15 @@ namespace RimThreaded
 
         public static bool MoteDespawned(RealtimeMoteList __instance, Mote oldMote)
         {
-            lock (__instance.allMotes)
+            lock (__instance)
             {
-                __instance.allMotes.Remove(oldMote);
+                List<Mote> newMotes = new List<Mote>(__instance.allMotes);
+                newMotes.Remove(oldMote);
+                __instance.allMotes = newMotes;
             }
             return false;
         }
 
-        public static bool MoteListUpdate(RealtimeMoteList __instance)
-        {
-            for (int num = allMotes.Count - 1; num >= 0; num--)
-            {
-                __instance.allMotes[num].RealtimeUpdate();
-            }
-            return false;
-        }
 
     }
 

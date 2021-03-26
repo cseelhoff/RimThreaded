@@ -1,8 +1,6 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
-using UnityEngine;
 
 namespace RimThreaded
 {
@@ -10,23 +8,31 @@ namespace RimThreaded
 	public class GenTemperature_Patch
     {
 		[ThreadStatic] public static List<RoomGroup> neighRoomGroups;
+		[ThreadStatic] public static RoomGroup[] beqRoomGroups;
 
 		public static Dictionary<int, float> SeasonalShiftAmplitudeCache = new Dictionary<int, float>();
 		public static Dictionary<int, float> tileTemperature = new Dictionary<int, float>();
 		public static Dictionary<int, float> absTickOffset = new Dictionary<int, float>();
 		public static Dictionary<int, Dictionary<int, float>> tileAbsTickTemperature = new Dictionary<int, Dictionary<int, float>>();
 
-		public static RoomGroup[] beqRoomGroups = AccessTools.StaticFieldRefAccess<RoomGroup[]>(typeof(GenTemperature), "beqRoomGroups");
-		
+		static readonly Type original = typeof(GenTemperature);
+		static readonly Type patched = typeof(GenTemperature_Patch);
+
 		public static void InitializeThreadStatics()
         {
 			neighRoomGroups = new List<RoomGroup>();
+			beqRoomGroups = new RoomGroup[4];
+		}
+
+		public static void RunNonDestructivePatches()
+        {
+			RimThreadedHarmony.threadStaticPatches.Add(original, patched);
+			RimThreadedHarmony.TranspileThreadStatics(original, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
+			RimThreadedHarmony.TranspileThreadStatics(original, "EqualizeTemperaturesThroughBuilding");
 		}
 
 		public static void RunDestructivePatches()
         {
-			Type original = typeof(GenTemperature);
-			Type patched = typeof(GenTemperature_Patch);
 			RimThreadedHarmony.Prefix(original, patched, "GetTemperatureFromSeasonAtTile");
 			RimThreadedHarmony.Prefix(original, patched, "SeasonalShiftAmplitudeAt");
 		}

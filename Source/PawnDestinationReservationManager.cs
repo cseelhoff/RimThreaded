@@ -4,6 +4,7 @@ using Verse;
 using Verse.AI;
 using static Verse.PawnDestinationReservationManager;
 using static HarmonyLib.AccessTools;
+using System;
 
 namespace RimThreaded
 {
@@ -12,6 +13,20 @@ namespace RimThreaded
     {
         private static readonly FieldRef<PawnDestinationReservationManager, Dictionary<Faction, PawnDestinationSet>> reservedDestinationsFieldRef = 
             FieldRefAccess<PawnDestinationReservationManager, Dictionary<Faction, PawnDestinationSet>>("reservedDestinations");
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(PawnDestinationReservationManager);
+            Type patched = typeof(PawnDestinationReservationManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetPawnDestinationSetFor");
+            RimThreadedHarmony.Prefix(original, patched, "Notify_FactionRemoved");
+            RimThreadedHarmony.Prefix(original, patched, "Reserve");
+            RimThreadedHarmony.Prefix(original, patched, "ObsoleteAllClaimedBy");
+            RimThreadedHarmony.Prefix(original, patched, "ReleaseAllObsoleteClaimedBy");
+            RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
+            RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
+            //Prefix(original, patched, "FirstObsoleteReservationFor"); //needed? excessive lock? Pawn destination reservation manager failed to clean up properly;
+        }
 
         public static bool GetPawnDestinationSetFor(PawnDestinationReservationManager __instance, ref PawnDestinationSet __result, Faction faction)
         {

@@ -253,7 +253,6 @@ namespace RimThreaded
 			leaveLoopEnd.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
 			finalCodeInstructions.Add(leaveLoopEnd);
 			instructionsList[currentInstructionIndex].labels.Add(handlerEnd);
-			//finalCodeInstructions.Add(instructionsList[currentInstructionIndex]);
 			return finalCodeInstructions;
 		}
 
@@ -273,7 +272,7 @@ namespace RimThreaded
 							{
 								if (fieldInfo.Name.Equals(field.Name) && fieldInfo.FieldType == field.FieldType)
                                 {
-									Log.Message("RimThreaded is replacing field: " + fieldInfo.DeclaringType.ToString() + "." + fieldInfo.Name + " with field: " + field.DeclaringType.ToString() + "." + field.Name);
+									//Log.Message("RimThreaded is replacing field: " + fieldInfo.DeclaringType.ToString() + "." + fieldInfo.Name + " with field: " + field.DeclaringType.ToString() + "." + field.Name);
 									instructionsList[i].operand = field;
 									break;
 								}
@@ -479,10 +478,15 @@ namespace RimThreaded
 			Type original = null;
 			Type patched = null;
 
-			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
-			LongEventHandler_Patch.RunNonDestructivePatches();
-			World_Patch.RunNonDestructivePatches();
+			GenTemperature_Patch.RunNonDestructivePatches();
 			HaulAIUtility_Patch.RunNonDestructivePatches();
+			InfestationCellFinder_Patch.RunNonDestructivePatches();
+			LongEventHandler_Patch.RunNonDestructivePatches();
+			RCellFinder_Patch.RunNonDestructivePatches();
+			RegionListersUpdater_Patch.RunNonDestructivePatches();
+			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
+			World_Patch.RunNonDestructivePatches();
+			FoodUtility_Patch.RunNonDestructivePatches();
 
 			//TODO - should transpile ReplacePotentiallyRelatedPawns instead
 			// Pawn_RelationsTracker.<get_PotentiallyRelatedPawns>d__28'.MoveNext()
@@ -733,7 +737,7 @@ namespace RimThreaded
 			//WorkGiver_ConstructDeliverResources
 			original = typeof(WorkGiver_ConstructDeliverResources);
 			patched = typeof(WorkGiver_ConstructDeliverResources_Transpile);
-			Transpile(original, patched, "ResourceDeliverJobFor", new string[] { "CodeOptimist.JobsOfOpportunity" });
+			Transpile(original, patched, "ResourceDeliverJobFor", null, new string[] { "CodeOptimist.JobsOfOpportunity" });
 
 			//PawnCapacitiesHandler
 			original = typeof(PawnCapacitiesHandler);
@@ -809,12 +813,6 @@ namespace RimThreaded
 			patched = typeof(Map_Transpile);
 			Transpile(original, patched, "MapUpdate");
 
-			//GenTemperature			
-			original = typeof(GenTemperature);
-			patched = typeof(GenTemperature_Patch);
-			threadStaticPatches.Add(original, patched);
-			TranspileThreadStatics(original, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
-
 		}
 
         private static void PatchDestructiveFixes()
@@ -826,93 +824,24 @@ namespace RimThreaded
 			AlertsReadout_Patch.RunDestructivesPatches();
 			ContentFinder_Texture2D_Patch.RunDestructivePatches();
 			DrugAIUtility_Patch.RunDestructivePatches();
+			DynamicDrawManager_Patch.RunDestructivePatches();
 			GenTemperature_Patch.RunDestructivePatches();
+			ListerThings_Patch.RunDestructivePatches();
+			JobMaker_Patch.RunDestructivePatches();
 			MaterialPool_Patch.RunDestructivePatches();
 			MemoryThoughtHandler_Patch.RunDestructivePatches();
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
+			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			PortraitRenderer_Patch.RunDestructivePatches();
 			ReachabilityCache_Patch.RunDestructivePatches();
+			RealtimeMoteList_Patch.RunDestructivePatches();
 			RegionDirtyer_Patch.RunDestructivePatches();
 			TaleManager_Patch.RunDestructivePatches();
-			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
-			TickManager_Patch.RunDestructivePatches();
+			ThingGrid_Patch.RunDestructivePatches();
 			TickList_Patch.RunDestructivePatches();
+			TickManager_Patch.RunDestructivePatches();
+			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 
-
-			//RegionListersUpdater
-			original = typeof(RegionListersUpdater);
-			patched = typeof(RegionListersUpdater_Patch);
-			Prefix(original, patched, "DeregisterInRegions");
-			Prefix(original, patched, "RegisterInRegions");
-			Prefix(original, patched, "RegisterAllAt");
-
-			//ListerThings
-			original = typeof(ListerThings);
-			patched = typeof(ListerThings_Patch);
-			Prefix(original, patched, "ThingsOfDef"); //maybe modify instead: JoyGiver_TakeDrug.BestIngestItem...  List<Thing> list = pawn.Map.listerThings.ThingsOfDef(JoyGiver_TakeDrug.takeableDrugs[k]);
-			Prefix(original, patched, "Remove");
-			Prefix(original, patched, "Add");
-
-			//JobMaker
-			original = typeof(JobMaker);
-			patched = typeof(JobMaker_Patch);
-			Prefix(original, patched, "MakeJob", new Type[] { });
-			Prefix(original, patched, "ReturnToPool");
-
-			//ThinkNode_Priority
-			original = typeof(ThinkNode_Priority);
-			patched = typeof(ThinkNode_Priority_Patch);
-			Prefix(original, patched, "TryIssueJobPackage");
-
-			//ThingGrid
-			original = typeof(ThingGrid);
-			patched = typeof(ThingGrid_Patch);
-			Prefix(original, patched, "RegisterInCell");
-			Prefix(original, patched, "DeregisterInCell");
-			Prefix(original, patched, "ThingsAt");
-			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingCategory) });
-			Prefix(original, patched, "ThingAt", new Type[] { typeof(IntVec3), typeof(ThingDef) });
-
-			Type original2 = typeof(ThingGrid);
-			Type patched2 = typeof(ThingGrid_Patch);
-			MethodInfo originalBuilding_DoorThingAt = Method(original2, "ThingAt", new Type[] { typeof(IntVec3) }, null);
-			MethodInfo originalBuilding_DoorThingAtGeneric = originalBuilding_DoorThingAt.MakeGenericMethod(typeof(Building_Door));
-			MethodInfo patchedBuilding_DoorThingAt = Method(patched2, "ThingAt_Building_Door");
-			HarmonyMethod prefixBuilding_Door = new HarmonyMethod(patchedBuilding_DoorThingAt);
-			harmony.Patch(originalBuilding_DoorThingAtGeneric, prefix: prefixBuilding_Door);
-
-			//RealtimeMoteList			
-			original = typeof(RealtimeMoteList);
-			patched = typeof(RealtimeMoteList_Patch);
-			Prefix(original, patched, "Clear");
-			Prefix(original, patched, "MoteSpawned");
-			Prefix(original, patched, "MoteDespawned");
-			Prefix(original, patched, "MoteListUpdate");
-
-			//RCellFinder			
-			original = typeof(RCellFinder);
-			patched = typeof(RCellFinder_Patch); //TODO add threadstatics and transpile in
-			Prefix(original, patched, "RandomWanderDestFor");
-
-			//PawnDestinationReservationManager
-			original = typeof(PawnDestinationReservationManager);
-			patched = typeof(PawnDestinationReservationManager_Patch);
-			Prefix(original, patched, "GetPawnDestinationSetFor");
-			Prefix(original, patched, "Notify_FactionRemoved");
-			Prefix(original, patched, "Reserve");
-			Prefix(original, patched, "ObsoleteAllClaimedBy");
-			Prefix(original, patched, "ReleaseAllObsoleteClaimedBy");
-			Prefix(original, patched, "ReleaseAllClaimedBy");
-			Prefix(original, patched, "ReleaseClaimedBy");
-			//Prefix(original, patched, "FirstObsoleteReservationFor"); //needed? excessive lock? Pawn destination reservation manager failed to clean up properly;
-
-			//DynamicDrawManager
-			original = typeof(DynamicDrawManager);
-			patched = typeof(Verse_DynamicDrawManager_Patch);
-			Prefix(original, patched, "RegisterDrawable");
-			Prefix(original, patched, "DeRegisterDrawable");
-			Prefix(original, patched, "DrawDynamicThings");
-			Prefix(original, patched, "LogDynamicDrawThings");
 
 			//Reachability
 			original = typeof(Reachability);
@@ -1375,11 +1304,6 @@ namespace RimThreaded
 			patched = typeof(GlobalControlsUtility_Patch);
 			Postfix(original, patched, "DoTimespeedControls");
 
-			//InfestationCellFinder
-			original = typeof(InfestationCellFinder);
-			patched = typeof(InfestationCellFinder_Patch);
-			Prefix(original, patched, "CalculateDistanceToColonyBuildingGrid");
-
 			//RegionCostCalculator
 			original = typeof(RegionCostCalculator);
 			patched = typeof(RegionCostCalculator_Patch);
@@ -1664,146 +1588,50 @@ namespace RimThreaded
 			harmony.Patch(methodInfo, transpiler: ThreadStaticsTranspiler);
 		}
 
-		public static void Prefix(Type original, Type patched, string methodName, Type[] orig_type)
+		public static void Prefix(Type original, Type patched, string methodName, Type[] orig_type = null, bool destructive = true)
 		{
 			MethodInfo oMethod = Method(original, methodName, orig_type);
-			Type[] patch_type = new Type[orig_type.Length];
-			Array.Copy(orig_type, patch_type, orig_type.Length);
+			Type[] patch_type = null;
+			if (orig_type != null)
+			{
+				patch_type = new Type[orig_type.Length];
+				Array.Copy(orig_type, patch_type, orig_type.Length);
 
-			if (!oMethod.ReturnType.Name.Equals("Void"))
-			{
-				Type[] temp_type = patch_type;
-				patch_type = new Type[temp_type.Length + 1];
-				patch_type[0] = oMethod.ReturnType.MakeByRefType();
-				Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
+				if (!oMethod.ReturnType.Name.Equals("Void"))
+				{
+					Type[] temp_type = patch_type;
+					patch_type = new Type[temp_type.Length + 1];
+					patch_type[0] = oMethod.ReturnType.MakeByRefType();
+					Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
+				}
+				if (!oMethod.IsStatic)
+				{
+					Type[] temp_type = patch_type;
+					patch_type = new Type[temp_type.Length + 1];
+					patch_type[0] = original;
+					Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
+				}
 			}
-			if (!oMethod.IsStatic)
-			{
-				Type[] temp_type = patch_type;
-				patch_type = new Type[temp_type.Length + 1];
-				patch_type[0] = original;
-				Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
-			}
-
-			MethodInfo pMethod = patched.GetMethod(methodName, patch_type);
-			if (null == oMethod)
-			{
-				Log.Message(original.ToString() + "." + methodName + "(" + string.Join(",", orig_type.Select(x => x.ToString()).ToArray()) + ") not found");
-			}
-			if (null == pMethod)
-			{
-				Log.Message(patched.ToString() + "." + methodName + "(" + string.Join(",", patch_type.Select(x => x.ToString()).ToArray()) + ") not found");
-			}
-			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod));
-		}
-		public static void Prefix(Type original, Type patched, string methodName, bool destructive = true)
-		{
-			MethodInfo oMethod = Method(original, methodName);
-			MethodInfo pMethod = Method(patched, methodName);
-			if (null == oMethod)
-			{
-				Log.Message(original.ToString() + "." + methodName + " not found");
-			}
-			if (null == pMethod)
-			{
-				Log.Message(patched.ToString() + "." + methodName + " not found");
-			}
+			MethodInfo pMethod = Method(patched, methodName, patch_type);
 			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod));
 			if (!destructive)
 			{
 				nonDestructivePrefixes.Add(pMethod);
 			}
 		}
-		public static void Prefix(Type original, Type patched, string originalMethodName, string patchedMethodName, bool destructive = true)
+
+		public static void Postfix(Type original, Type patched, string originalMethodName, string patchedMethodName = null)
 		{
 			MethodInfo oMethod = Method(original, originalMethodName);
+			if (patchedMethodName == null)
+				patchedMethodName = originalMethodName;
 			MethodInfo pMethod = Method(patched, patchedMethodName);
-			if (null == oMethod)
-			{
-				Log.Message(original.ToString() + "." + originalMethodName + " not found");
-			}
-			if (null == pMethod)
-			{
-				Log.Message(patched.ToString() + "." + patchedMethodName + " not found");
-			}
-			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod));
-			if (!destructive)
-			{
-				nonDestructivePrefixes.Add(pMethod);
-			}
-		}
-		public static void Postfix(Type original, Type patched, string methodName)
-		{
-			MethodInfo oMethod = Method(original, methodName);
-			MethodInfo pMethod = Method(patched, methodName);
-			if (null == oMethod)
-			{
-				Log.Message(original.ToString() + "." + methodName + " not found");
-			}
-			if (null == pMethod)
-			{
-				Log.Message(patched.ToString() + "." + methodName + " not found");
-			}
-			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
-		}
-		public static void Postfix(Type original, Type patched, string originalMethodName, string patchedMethodName)
-		{
-			MethodInfo oMethod = Method(original, originalMethodName);
-			MethodInfo pMethod = Method(patched, patchedMethodName);
-			if (null == oMethod)
-			{
-				Log.Message(original.ToString() + "." + originalMethodName + " not found");
-			}
-			if (null == pMethod)
-			{
-				Log.Message(patched.ToString() + "." + patchedMethodName + " not found");
-			}
 			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
 		}
 
-		public static void Transpile(Type original, Type patched, string methodName)
-		{
-			MethodInfo oMethod = Method(original, methodName);
-			MethodInfo pMethod = Method(patched, methodName);
-			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
-		}
-
-		public static void Transpile(Type original, Type patched, string methodName, Type[] orig_type)
+		public static void Transpile(Type original, Type patched, string methodName, Type[] orig_type = null, string[] harmonyAfter = null)
 		{
 			MethodInfo oMethod = Method(original, methodName, orig_type);
-			Type[] patch_type = new Type[orig_type.Length];
-			Array.Copy(orig_type, patch_type, orig_type.Length);
-
-			if (!oMethod.ReturnType.Name.Equals("Void"))
-			{
-				Type[] temp_type = patch_type;
-				patch_type = new Type[temp_type.Length + 1];
-				patch_type[0] = oMethod.ReturnType.MakeByRefType();
-				Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
-			}
-			if (!oMethod.IsStatic)
-			{
-				Type[] temp_type = patch_type;
-				patch_type = new Type[temp_type.Length + 1];
-				patch_type[0] = original;
-				Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
-			}
-
-			MethodInfo pMethod = Method(patched, methodName);
-			if (null == oMethod)
-			{
-				Log.Message(original.ToString() + "." + methodName + "(" + string.Join(",", orig_type.Select(x => x.ToString()).ToArray()) + ") not found");
-			}
-			if (null == pMethod)
-			{
-				Log.Message(patched.ToString() + "." + methodName + "(" + string.Join(",", patch_type.Select(x => x.ToString()).ToArray()) + ") not found");
-			}
-			harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
-		}
-
-		public static void Transpile(Type original, Type patched, string methodName, string[] harmonyAfter)
-		{
-			MethodInfo oMethod = Method(original, methodName);
 			MethodInfo pMethod = Method(patched, methodName);
 			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod)
 			{
@@ -1811,6 +1639,7 @@ namespace RimThreaded
 			};
 			harmony.Patch(oMethod, transpiler: transpilerMethod);
 		}
+
 	}
 
 }

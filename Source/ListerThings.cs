@@ -1,5 +1,5 @@
-﻿using HarmonyLib;
-using RimWorld;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 using static HarmonyLib.AccessTools;
@@ -13,15 +13,14 @@ namespace RimThreaded
 		public static FieldRef<ListerThings, List<Thing>[]> listsByGroup =
 					FieldRefAccess<ListerThings, List<Thing>[]>("listsByGroup");
 
-		private static readonly List<Thing> EmptyList = new List<Thing>();
-
-		public static bool ThingsOfDef(ListerThings __instance, ref List<Thing> __result, ThingDef def)
+		public static void RunDestructivePatches()
 		{
-			__result = EmptyList;
-			if(def != null)
-				__result = __instance.ThingsMatching(ThingRequest.ForDef(def));
-			return false;
+			Type original = typeof(ListerThings);
+			Type patched = typeof(ListerThings_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "Remove");
+			RimThreadedHarmony.Prefix(original, patched, "Add");
 		}
+
 
 		public static bool Add(ListerThings __instance, Thing t)		
 		{
@@ -31,49 +30,30 @@ namespace RimThreaded
 				return false;
 			}
 
-			List<Thing> newValue;
 			lock (__instance)
 			{
 				if (!listsByDef(__instance).TryGetValue(thingDef, out List<Thing> value))
 				{
-					newValue = new List<Thing>()
-					{
-						t
-					};
-				}
-				else
-				{
-					newValue = new List<Thing>(value)
-					{
-						t
-					};
-				}
-                Dictionary<ThingDef, List<Thing>> newListsByDef = new Dictionary<ThingDef, List<Thing>>(listsByDef(__instance))
-                {
-                    [thingDef] = newValue
-                };
-                listsByDef(__instance) = newListsByDef;
+					value = new List<Thing>();
+					listsByDef(__instance).Add(t.def, value);
+				} 
+				value.Add(t);
 			}
 
-			
 			ThingRequestGroup[] allGroups = ThingListGroupHelper.AllGroups;
 			foreach (ThingRequestGroup thingRequestGroup in allGroups)
 			{
 				if ((__instance.use != ListerThingsUse.Region || thingRequestGroup.StoreInRegion()) && thingRequestGroup.Includes(thingDef))
 				{
-					List<Thing> newThingList;
 					lock (__instance)
 					{
 						List<Thing> list = listsByGroup(__instance)[(uint)thingRequestGroup];
 						if (list == null)
 						{
-							newThingList = new List<Thing>() { t };
+							list = new List<Thing>();
+							listsByGroup(__instance)[(uint)thingRequestGroup] = list;
 						}
-						else
-						{
-							newThingList = new List<Thing>(list) { t };
-						}
-						listsByGroup(__instance)[(uint)thingRequestGroup] = newThingList;
+						list.Add(t);
 					}
 				}
 			}

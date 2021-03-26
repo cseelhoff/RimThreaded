@@ -102,7 +102,7 @@ namespace RimThreaded
         {
 			Type original = typeof(LongEventHandler);
 			Type patched = typeof(LongEventHandler_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "RunEventFromAnotherThread", false);
+			RimThreadedHarmony.Prefix(original, patched, "RunEventFromAnotherThread", null, false);
 		}
 
 		public static void CopyEventQueue()

@@ -240,6 +240,7 @@ namespace RimThreaded
             DijkstraInt.InitializeThreadStatics();
             Fire_Patch.InitializeThreadStatics();
             FloatMenuMakerMap_Patch.InitializeThreadStatics();
+            FoodUtility_Patch.InitializeThreadStatics();
             GenAdj_Patch.InitializeThreadStatics();
             GenAdjFast_Patch.InitializeThreadStatics();
             GenLeaving_Patch.InitializeThreadStatics();
@@ -247,9 +248,11 @@ namespace RimThreaded
             GenTemperature_Patch.InitializeThreadStatics();
             GenText_Patch.InitializedThreadStatics();
             HaulAIUtility_Patch.InitializeThreadStatics();
+            InfestationCellFinder_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             PawnsFinder_Patch.InitializeThreadStatics();
             Rand_Patch.InitializeThreadStatics();
+            RCellFinder_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
