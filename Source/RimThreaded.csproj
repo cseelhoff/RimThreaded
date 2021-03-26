@@ -300,7 +300,6 @@
     <Compile Include="ReservationManager.cs" />
     <Compile Include="RimThreaded.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SelfDefenseUtility.cs" />
     <Compile Include="ShootLeanUtility.cs" />
     <Compile Include="SubSustainer.cs" />
     <Compile Include="SustainerManager.cs" />

@@ -253,6 +253,7 @@ namespace RimThreaded
             PawnsFinder_Patch.InitializeThreadStatics();
             Rand_Patch.InitializeThreadStatics();
             RCellFinder_Patch.InitializeThreadStatics();
+            Reachability_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();

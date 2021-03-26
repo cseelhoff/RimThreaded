@@ -833,6 +833,8 @@ namespace RimThreaded
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
 			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			PortraitRenderer_Patch.RunDestructivePatches();
+			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrentdictionary
+			Reachability_Patch.RunDestructivePatches();
 			ReachabilityCache_Patch.RunDestructivePatches();
 			RealtimeMoteList_Patch.RunDestructivePatches();
 			RegionDirtyer_Patch.RunDestructivePatches();
@@ -843,28 +845,6 @@ namespace RimThreaded
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 
 
-			//Reachability
-			original = typeof(Reachability);
-			patched = typeof(Reachability_Patch);
-			Prefix(original, patched, "CanReach", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
-
-			//PhysicalInteractionReservationManager
-			original = typeof(PhysicalInteractionReservationManager);
-			patched = typeof(PhysicalInteractionReservationManager_Patch);
-			Prefix(original, patched, "IsReservedBy");
-			Prefix(original, patched, "Reserve");
-			Prefix(original, patched, "Release");
-			Prefix(original, patched, "FirstReserverOf");
-			Prefix(original, patched, "FirstReservationFor");
-			Prefix(original, patched, "ReleaseAllForTarget");
-			Prefix(original, patched, "ReleaseClaimedBy");
-			Prefix(original, patched, "ReleaseAllClaimedBy");
-
-			//SelfDefenseUtility
-			original = typeof(SelfDefenseUtility);
-			patched = typeof(SelfDefenseUtility_Patch);
-			Prefix(original, patched, "ShouldStartFleeing");
-
 			//GenClosest
 			original = typeof(GenClosest);
 			patched = typeof(GenClosest_Patch);
@@ -873,9 +853,7 @@ namespace RimThreaded
 			//PawnUtility
 			original = typeof(PawnUtility);
 			patched = typeof(PawnUtility_Patch);
-			Prefix(original, patched, "PawnBlockingPathAt");
-			Prefix(original, patched, "EnemiesAreNearby");
-			Prefix(original, patched, "ForceWait");
+			Prefix(original, patched, "IsInvisible");
 
 			//ThingOwnerUtility
 			original = typeof(ThingOwnerUtility);
