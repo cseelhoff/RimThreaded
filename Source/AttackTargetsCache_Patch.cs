@@ -53,6 +53,14 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, "UpdateTarget");
 		}
 
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(AttackTargetsCache);
+			Type patched = typeof(AttackTargetsCache_Patch);
+			RimThreadedHarmony.AddAllMatchingFields(original, patched);
+			RimThreadedHarmony.TranspileFieldReplacements(original, "Notify_FactionHostilityChanged");
+			RimThreadedHarmony.TranspileFieldReplacements(original, "Debug_AssertHostile");
+		}
 		public static bool DeregisterTarget(AttackTargetsCache __instance, IAttackTarget target)
 		{
 			if (allTargetsListDict.TryGetValue(__instance, out List<IAttackTarget> snapshotAllTargets))
@@ -336,13 +344,5 @@ namespace RimThreaded
 			return emptyList;
 		}
 
-        internal static void RunNonDestructivePatches()
-		{
-			Type original = typeof(AttackTargetsCache);
-			Type patched = typeof(AttackTargetsCache_Patch);
-			RimThreadedHarmony.AddAllMatchingFields(original, patched);
-			RimThreadedHarmony.TranspileFieldReplacements(original, "Notify_FactionHostilityChanged");
-			RimThreadedHarmony.TranspileFieldReplacements(original, "Debug_AssertHostile");
-		}
     }
 }

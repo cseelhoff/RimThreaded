@@ -10,7 +10,14 @@ using Verse;
 namespace RimThreaded
 {
     public class BattleLog_Transpile
-    {
+	{
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(BattleLog);
+			Type patched = typeof(BattleLog_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "Add");
+		}
+
 		public static object addLogEntryLock = new object();
 		public static IEnumerable<CodeInstruction> Add(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
@@ -41,11 +48,5 @@ namespace RimThreaded
 			}			
 		}
 
-        internal static void RunNonDestructivePatches()
-		{
-			Type original = typeof(BattleLog);
-			Type patched = typeof(BattleLog_Transpile);
-			RimThreadedHarmony.Transpile(original, patched, "Add");
-		}
     }
 }

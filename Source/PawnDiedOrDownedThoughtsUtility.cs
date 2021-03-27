@@ -23,7 +23,8 @@ namespace RimThreaded
 			Type original = typeof(PawnDiedOrDownedThoughtsUtility);
 			Type patched = typeof(PawnDiedOrDownedThoughtsUtility_Patch);
 			RimThreadedHarmony.AddAllMatchingFields(original, patched);
-			RimThreadedHarmony.TranspileFieldReplacements(original, "TryGiveThoughts");
+			RimThreadedHarmony.TranspileFieldReplacements(original, "TryGiveThoughts",
+				new Type[] { typeof(Pawn), typeof(DamageInfo), typeof(PawnDiedOrDownedThoughtsKind) });
 			RimThreadedHarmony.TranspileFieldReplacements(original, "BuildMoodThoughtsListString",
 				new Type[] { typeof(Pawn), typeof(DamageInfo), typeof(PawnDiedOrDownedThoughtsKind), typeof(StringBuilder), typeof(string), typeof(string) });
 			RimThreadedHarmony.TranspileFieldReplacements(original, "BuildMoodThoughtsListString",

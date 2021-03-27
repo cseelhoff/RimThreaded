@@ -77,12 +77,13 @@
   <ItemGroup>
     <Compile Include="Alert_MinorBreakRisk_Patch.cs" />
     <Compile Include="AmbientSoundManager_Patch.cs" />
+    <Compile Include="BFSWorker_Patch.cs" />
+    <Compile Include="BFSWorker_Transpile.cs" />
     <Compile Include="FoodUtility_Patch.cs" />
     <Compile Include="GenRadial_Patch.cs" />
     <Compile Include="Fire_Patch.cs" />
     <Compile Include="AttackTargetFinder_Patch.cs" />
     <Compile Include="AudioSource_Patch.cs" />
-    <Compile Include="BFSWorker_Transpile.cs" />
     <Compile Include="AlertsReadout_Patch.cs" />
     <Compile Include="Camera_Patch.cs" />
     <Compile Include="childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch_Transpile.cs" />
@@ -109,11 +110,12 @@
     <Compile Include="ReachabilityCache.cs" />
     <Compile Include="RegionDirtyer_Patch.cs" />
     <Compile Include="RegionListersUpdater_Transpile.cs" />
+    <Compile Include="RegionTraverser.cs" />
     <Compile Include="RegionTraverser_Transpile.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="StatWorker.cs" />
     <Compile Include="ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch.cs" />
-    <Compile Include="ThinkNode_PrioritySorter_Transpile.cs" />
+    <Compile Include="ThinkNode_PrioritySorter_Patch.cs" />
     <Compile Include="thinkTree.cs" />
     <Compile Include="TickList_Transpile.cs" />
     <Compile Include="Verb_MeleeAttack_Patch.cs" />
@@ -128,13 +130,11 @@
     <Compile Include="Pawn_PlayerSettings.cs" />
     <Compile Include="QuestUtility.cs" />
     <Compile Include="RegionCostCalculatorWrapper.cs" />
-    <Compile Include="ColoredText_Transpile.cs" />
     <Compile Include="CompSpawnSubplant_Transpile.cs" />
     <Compile Include="GrammarResolverSimpleStringExtensions.cs" />
     <Compile Include="Pawn.cs" />
     <Compile Include="PawnCapacityUtility.cs" />
     <Compile Include="Pawn_HealthTracker.cs" />
-    <Compile Include="Pawn_PathFollower_Transpile.cs" />
     <Compile Include="Pawn_JobTracker_DetermineNextJob_Transpile.cs" />
     <Compile Include="GenLabel_Transpile.cs" />
     <Compile Include="Pawn_RotationTracker.cs" />
@@ -143,7 +143,6 @@
     <Compile Include="RecipeWorkerCounter.cs" />
     <Compile Include="RestUtility.cs" />
     <Compile Include="TaleManager.cs" />
-    <Compile Include="Thing_Transpile.cs" />
     <Compile Include="UniqueIDsManager.cs" />
     <Compile Include="HediffSet.cs" />
     <Compile Include="GrammarResolver_Transpile.cs" />
@@ -182,13 +181,13 @@
     <Compile Include="InfestationCellFinder.cs" />
     <Compile Include="GlobalControlsUtility.cs" />
     <Compile Include="JobDriver.cs" />
-    <Compile Include="Pawn_WorkSettings_Transpile.cs" />
+    <Compile Include="Pawn_WorkSettings_Patch.cs" />
     <Compile Include="Map_Transpile.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="ResourceCounter.cs" />
     <Compile Include="ThinkNode_QueuedJob.cs" />
     <Compile Include="ThinkNode_SubtreesByTag.cs" />
-    <Compile Include="Verb_Transpile.cs" />
+    <Compile Include="Verb_Patch.cs" />
     <Compile Include="FloatMenuMakerMap_Transpile.cs" />
     <Compile Include="AudioSourceMaker.cs" />
     <Compile Include="GrammarResolver.cs" />
@@ -209,8 +208,6 @@
     <Compile Include="GrammarResolverSimple.cs" />
     <Compile Include="PawnRelationUtility.cs" />
     <Compile Include="Map.cs" />
-    <Compile Include="JobDriver_Wait_Transpile.cs" />
-    <Compile Include="ThingOwnerThing.cs" />
     <Compile Include="ThingOwnerThing_Transpile.cs" />
     <Compile Include="TileTemperaturesComp.cs" />
     <Compile Include="RimThreadedHarmony.cs" />
@@ -230,7 +227,6 @@
     <Compile Include="ThingCountUtility.cs" />
     <Compile Include="JobGiver_Work.cs" />
     <Compile Include="WorldObjectsHolder.cs" />
-    <Compile Include="Rand_Transpile.cs" />
     <Compile Include="WorkGiver_DoBill.cs" />
     <Compile Include="MapTemperature.cs" />
     <Compile Include="Medicine.cs" />
@@ -260,14 +256,12 @@
     <Compile Include="SoundStarter_Patch.cs" />
     <Compile Include="Sustainer.cs" />
     <Compile Include="Sample.cs" />
-    <Compile Include="Pawn_WorkSettings.cs" />
     <Compile Include="Region.cs" />
     <Compile Include="MapPawns.cs" />
     <Compile Include="AttackTargetReservationManager_Patch.cs" />
     <Compile Include="AttackTargetsCache_Patch.cs" />
     <Compile Include="TemperatureCache.cs" />
     <Compile Include="Battle.cs" />
-    <Compile Include="BFSWorker.cs" />
     <Compile Include="Building_Door.cs" />
     <Compile Include="CellFinder.cs" />
     <Compile Include="ContentFinder.cs" />
@@ -290,12 +284,11 @@
     <Compile Include="Pawn_RelationsTracker.cs" />
     <Compile Include="PhysicalInteractionReservationManager.cs" />
     <Compile Include="Projectile.cs" />
-    <Compile Include="Rand.cs" />
+    <Compile Include="Rand_Patch.cs" />
     <Compile Include="RCellFinder.cs" />
     <Compile Include="Reachability.cs" />
     <Compile Include="RealtimeMoteList.cs" />
     <Compile Include="RegionListersUpdater.cs" />
-    <Compile Include="RegionTraverser.cs" />
     <Compile Include="RegionTraverser2.cs" />
     <Compile Include="ReservationManager.cs" />
     <Compile Include="RimThreaded.cs" />
@@ -303,15 +296,13 @@
     <Compile Include="ShootLeanUtility.cs" />
     <Compile Include="SubSustainer.cs" />
     <Compile Include="SustainerManager.cs" />
-    <Compile Include="Thing.cs" />
+    <Compile Include="Thing_Patch.cs" />
     <Compile Include="ThingGridTranspile.cs" />
     <Compile Include="ThingGrid.cs" />
     <Compile Include="ThingOwnerUtility.cs" />
-    <Compile Include="ThinkNode_PrioritySorter.cs" />
     <Compile Include="ThoughtHandler.cs" />
     <Compile Include="TickList.cs" />
     <Compile Include="TickManager.cs" />
-    <Compile Include="Verb.cs" />
     <Compile Include="World_Patch.cs" />
   </ItemGroup>
   <ItemGroup>

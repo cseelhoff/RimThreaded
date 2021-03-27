@@ -1,10 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using Verse;
-using System.Reflection;
-using RimWorld;
-using RimWorld.Planet;
-using UnityEngine;
 using System.Reflection.Emit;
 using System.Linq;
 using System;
@@ -14,6 +10,13 @@ namespace RimThreaded
 {
     public class ThingOwnerThing_Transpile
     {
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(ThingOwner<Thing>);
+            Type patched = typeof(ThingOwnerThing_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
+            RimThreadedHarmony.Transpile(original, patched, "Remove");
+        }
         public static IEnumerable<CodeInstruction> TryAdd(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             /* Original bool ThingOwner<T>.TryAdd
@@ -306,12 +309,5 @@ namespace RimThreaded
             yield return new CodeInstruction(OpCodes.Ret);
         }
 
-        internal static void RunNonDestructivePatches()
-        {
-            Type original = typeof(ThingOwner<Thing>);
-            Type patched = typeof(ThingOwnerThing_Transpile);
-            RimThreadedHarmony.Transpile(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
-            RimThreadedHarmony.Transpile(original, patched, "Remove");
-        }
     }
 }

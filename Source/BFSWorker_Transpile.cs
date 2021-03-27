@@ -8,7 +8,7 @@ using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
-    class BFSWorker_Transpile
+	class BFSWorker_Transpile
 	{
 		public static IEnumerable<CodeInstruction> QueueNewOpenRegion(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{

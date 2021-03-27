@@ -13,7 +13,15 @@ using static HarmonyLib.AccessTools;
 namespace RimThreaded
 {
     class WorkGiver_DoBill_Transpile
-    {
+	{
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(WorkGiver_DoBill);
+			Type patched = typeof(WorkGiver_DoBill_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "TryFindBestBillIngredients");
+			RimThreadedHarmony.Transpile(original, patched, "AddEveryMedicineToRelevantThings");
+		}
+
 		public static IEnumerable<CodeInstruction> TryFindBestBillIngredients(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			int[] matchesFound = new int[8]; //EDIT
@@ -202,12 +210,5 @@ namespace RimThreaded
 			}
 		}
 
-        internal static void RunNonDestructivePatches()
-		{
-			Type original = typeof(WorkGiver_DoBill);
-			Type patched = typeof(WorkGiver_DoBill_Transpile);
-			RimThreadedHarmony.Transpile(original, patched, "TryFindBestBillIngredients");
-			RimThreadedHarmony.Transpile(original, patched, "AddEveryMedicineToRelevantThings");
-		}
     }
 }

@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using Verse;
 using System.Reflection;
-using RimWorld;
-using RimWorld.Planet;
-using UnityEngine;
 using System.Reflection.Emit;
 using System.Linq;
 using System;
-using System.Threading;
-using Verse.AI;
 
 namespace RimThreaded
 {
 	public class GrammarResolverSimple_Transpile
 	{
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(GrammarResolverSimple);
+			Type patched = typeof(GrammarResolverSimple_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "Formatted");
+		}
 		public static IEnumerable<CodeInstruction> Formatted(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			List<CodeInstruction> instructionsList = instructions.ToList();
@@ -105,11 +106,5 @@ namespace RimThreaded
 			}
 		}
 
-        internal static void RunNonDestructivePatches()
-		{
-			Type original = typeof(GrammarResolverSimple);
-			Type patched = typeof(GrammarResolverSimple_Transpile);
-			RimThreadedHarmony.Transpile(original, patched, "Formatted");
-		}
     }
 }

@@ -15,9 +15,10 @@ namespace RimThreaded
 
         public static uint[] getRegionClosedIndex(Region region)
         {
-            if (!regionClosedIndex.TryGetValue(region, out uint[] closedIndex)) { 
-                    closedIndex = new uint[8];
-                    regionClosedIndex[region] = closedIndex;
+            if (!regionClosedIndex.TryGetValue(region, out uint[] closedIndex))
+            {
+                closedIndex = new uint[8];
+                regionClosedIndex[region] = closedIndex;
             }
             return closedIndex;
         }

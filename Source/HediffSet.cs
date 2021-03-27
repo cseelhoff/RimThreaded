@@ -1,26 +1,13 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
-using System.Threading;
-using UnityEngine;
 
 namespace RimThreaded
 {
 
     public class HediffSet_Patch
     {
-
-        public static AccessTools.FieldRef<HediffSet, List<Hediff_MissingPart>> cachedMissingPartsCommonAncestors =
-            AccessTools.FieldRefAccess<HediffSet, List<Hediff_MissingPart>>("cachedMissingPartsCommonAncestors");
-        public static AccessTools.FieldRef<HediffSet, Queue<BodyPartRecord>> missingPartsCommonAncestorsQueue =
-            AccessTools.FieldRefAccess<HediffSet, Queue<BodyPartRecord>>("missingPartsCommonAncestorsQueue");
-
 
         public static bool AddDirect(HediffSet __instance, Hediff hediff, DamageInfo? dinfo = null, DamageWorker.DamageResult damageResult = null)
         {
@@ -51,9 +38,9 @@ namespace RimThreaded
             {
                 lock (__instance)
                 {
-                    List<Hediff> newHediffs = new List<Hediff>(__instance.hediffs) { hediff };
-                    __instance.hediffs = newHediffs;
-                    //__instance.hediffs.Add(hediff);
+                    //List<Hediff> newHediffs = new List<Hediff>(__instance.hediffs) { hediff };
+                    //__instance.hediffs = newHediffs;
+                    __instance.hediffs.Add(hediff);
                 }
                 hediff.PostAdd(dinfo);
                 if (__instance.pawn.needs != null && __instance.pawn.needs.mood != null)

@@ -15,7 +15,13 @@ namespace RimThreaded
 {
     public class WorkGiver_ConstructDeliverResources_Transpile
 	{
-        public static IEnumerable<CodeInstruction> ResourceDeliverJobFor(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(WorkGiver_ConstructDeliverResources);
+			Type patched = typeof(WorkGiver_ConstructDeliverResources_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "ResourceDeliverJobFor", null, new string[] { "CodeOptimist.JobsOfOpportunity" });
+		}
+		public static IEnumerable<CodeInstruction> ResourceDeliverJobFor(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
 			
 			LocalBuilder list2 = iLGenerator.DeclareLocal(typeof(List<Thing>));
@@ -295,11 +301,5 @@ namespace RimThreaded
             }
 		}
 
-        internal static void RunNonDestructivePatches()
-		{
-			Type original = typeof(WorkGiver_ConstructDeliverResources);
-			Type patched = typeof(WorkGiver_ConstructDeliverResources_Transpile);
-			RimThreadedHarmony.Transpile(original, patched, "ResourceDeliverJobFor", null, new string[] { "CodeOptimist.JobsOfOpportunity" });
-		}
     }
 }

@@ -258,6 +258,29 @@ namespace RimThreaded
 			return finalCodeInstructions;
 		}
 
+		public static IEnumerable<CodeInstruction> WrapMethodInInstanceLock(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			List<CodeInstruction> instructionsList = instructions.ToList();
+			int i = 0;
+			List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
+			{
+				new CodeInstruction(OpCodes.Ldarg_0)
+			};
+			LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
+			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+			foreach (CodeInstruction ci in EnterLock(
+				lockObject, lockTaken, loadLockObjectInstructions, instructionsList, ref i))
+				yield return ci;
+			while (i < instructionsList.Count - 1)
+			{
+				yield return instructionsList[i++];
+			}
+			foreach (CodeInstruction ci in ExitLock(
+				iLGenerator, lockObject, lockTaken, instructionsList, ref i))
+				yield return ci;
+			yield return instructionsList[i++];
+		}
+
 		//public static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>();
 		public static readonly Dictionary<FieldInfo, FieldInfo> replaceFields = new Dictionary<FieldInfo, FieldInfo>();
 
@@ -320,12 +343,14 @@ namespace RimThreaded
 			Log.Message("RimThreaded patching is complete.");
 		}
 
-		public static readonly HarmonyMethod ReplaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
+		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
+		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
+		
 
 		public static void TranspileFieldReplacements(Type original, string methodName, Type[] orig_type = null)
 		{
 			//Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.Name + "." + methodName);
-			harmony.Patch(Method(original, methodName, orig_type), transpiler: ReplaceFieldsHarmonyTranspiler);
+			harmony.Patch(Method(original, methodName, orig_type), transpiler: replaceFieldsHarmonyTranspiler);
 		}
 
 		public static void Prefix(Type original, Type patched, string methodName, Type[] orig_type = null, bool destructive = true)
@@ -379,43 +404,88 @@ namespace RimThreaded
 			};
 			harmony.Patch(oMethod, transpiler: transpilerMethod);
 		}
+		public static void TranspileMethodLock(Type original, string methodName, Type[] orig_type = null, string[] harmonyAfter = null)
+		{
+			MethodInfo oMethod = Method(original, methodName, orig_type);
+			harmony.Patch(oMethod, transpiler: methodLockTranspiler);
+		}
+
 
 		private static void PatchNonDestructiveFixes()
 		{
-			BuildableDef_Patch.RunNonDestructivePatches();
+			ThingOwnerThing_Transpile.RunNonDestructivePatches(); //REMOVEAT WILL CAUSE RANGE ERROR. ADD transpile needs new style. 
+			Thing_Patch.RunNonDestructivePatches(); //REMOVEAT WILL CAUSE RANGE ERROR. ADD transpile needs new style. 
+			//BFSWorker_Patch.RunNonDestructivePatches(); //needs rework with RegionTraversers
+
+			//Simple
+			AttackTargetFinder_Patch.RunNonDestructivePatches();
+			BuildableDef_Patch.RunNonDestructivePatches(); 
 			CellFinder_Patch.RunNonDestructivePatches();
+			DamageWorker_Patch.RunNonDestructivePatches();
+			Fire_Patch.RunNonDestructivePatches();
+			FloatMenuMakerMap_Patch.RunNonDestructivePatches();
 			FoodUtility_Patch.RunNonDestructivePatches();
-			GenTemperature_Patch.RunNonDestructivePatches();
+			GenAdj_Patch.RunNonDestructivePatches();
+			GenAdjFast_Patch.RunNonDestructivePatches();
+			GenLeaving_Patch.RunNonDestructivePatches();
+			GenRadial_Patch.RunNonDestructivePatches();
+			GenText_Patch.RunNonDestructivePatches();
 			HaulAIUtility_Patch.RunNonDestructivePatches();
-			HediffSet_Patch.RunNonDestructivePatches();
-			InfestationCellFinder_Patch.RunNonDestructivePatches();
-			LongEventHandler_Patch.RunNonDestructivePatches();
+			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
 			Pawn_MeleeVerbs_Patch.RunNonDestructivePatches();
+			Pawn_WorkSettings_Patch.RunNonDestructivePatches();
+			PawnsFinder_Patch.RunNonDestructivePatches();
 			PawnDiedOrDownedThoughtsUtility_Patch.RunNonDestructivePatches();
 			RCellFinder_Patch.RunNonDestructivePatches();
 			RegionListersUpdater_Patch.RunNonDestructivePatches();
-			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
-			WealthWatcher_Patch.RunNonDestructivePatches();
+			RegionTraverser_Transpile.RunNonDestructivePatches();
+			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
+			TickList_Transpile.RunNonDestructivePatches();
+			Verb_Patch.RunNonDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
 
-			Pawn_RelationsTracker_Transpile.RunNonDestructivePatches();	//TODO - should transpile ReplacePotentiallyRelatedPawns instead
-			// Pawn_RelationsTracker.<get_PotentiallyRelatedPawns>d__28'.MoveNext()
-			// // <stack>5__2 = SimplePool<List<Pawn>>.Get();
-			//IL_004c: call!0 class Verse.SimplePool`1<class [mscorlib] System.Collections.Generic.List`1<class Verse.Pawn>>::Get()
-			//-----------
-			//CHANGE TO: new List<Pawn>();
-			//-----------
-			//
-			// AND
-			//		
-			// <visited>5__3 = SimplePool<HashSet<Pawn>>.Get();
-			//IL_0057: call!0 class Verse.SimplePool`1<class [System.Core] System.Collections.Generic.HashSet`1<class Verse.Pawn>>::Get()
-			//--------
-			//CHANGE TO: new HashSet<Pawn>();
-			// ---------
-			// AND
-			// -----------
-			// Pawn_RelationsTracker.<get_PotentiallyRelatedPawns>d__28'.'<>m__Finally1'()
+
+			//Complex
+			AttackTargetsCache_Patch.RunNonDestructivePatches();
+			BattleLog_Transpile.RunNonDestructivePatches();
+			CompSpawnSubplant_Transpile.RunNonDestructivePatches();//uses old transpile for lock
+			GenTemperature_Patch.RunNonDestructivePatches();
+			GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
+			GrammarResolverSimple_Transpile.RunNonDestructivePatches();//reexamine complexity
+			HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches();
+			HediffSet_Patch.RunNonDestructivePatches();
+			InfestationCellFinder_Patch.RunNonDestructivePatches(); //fix public struct
+			LongEventHandler_Patch.RunNonDestructivePatches();
+			Map_Transpile.RunNonDestructivePatches();
+			PathFinder_Transpile.RunNonDestructivePatches(); //large method
+			PawnCapacitiesHandler_Transpile.RunNonDestructivePatches(); //reexamine complexity?
+			Rand_Patch.RunNonDestructivePatches(); //uses old transpile for lock
+			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
+			WealthWatcher_Patch.RunNonDestructivePatches();
+			WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
+			WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
+
+
+
+
+			Pawn_RelationsTracker_Transpile.RunNonDestructivePatches(); //TODO - should transpile ReplacePotentiallyRelatedPawns instead
+																		// Pawn_RelationsTracker.<get_PotentiallyRelatedPawns>d__28'.MoveNext()
+																		// // <stack>5__2 = SimplePool<List<Pawn>>.Get();
+																		//IL_004c: call!0 class Verse.SimplePool`1<class [mscorlib] System.Collections.Generic.List`1<class Verse.Pawn>>::Get()
+																		//-----------
+																		//CHANGE TO: new List<Pawn>();
+																		//-----------
+																		//
+																		// AND
+																		//		
+																		// <visited>5__3 = SimplePool<HashSet<Pawn>>.Get();
+																		//IL_0057: call!0 class Verse.SimplePool`1<class [System.Core] System.Collections.Generic.HashSet`1<class Verse.Pawn>>::Get()
+																		//--------
+																		//CHANGE TO: new HashSet<Pawn>();
+																		// ---------
+																		// AND
+																		// -----------
+																		// Pawn_RelationsTracker.<get_PotentiallyRelatedPawns>d__28'.'<>m__Finally1'()
 			/*
 			 * // <>1__state = -1;
 				IL_0000: ldarg.0
@@ -443,41 +513,6 @@ namespace RimThreaded
 			*/
 			// 
 			//FocusStrengthOffset_GraveCorpseRelationship.CanApply
-
-
-			DamageWorker_Patch.RunNonDestructivePatches();
-			GenLeaving_Patch.RunNonDestructivePatches();
-			TickList_Transpile.RunNonDestructivePatches();
-			Rand_Transpile.RunNonDestructivePatches();
-			ThingOwnerThing_Transpile.RunNonDestructivePatches();
-			Thing_Transpile.RunNonDestructivePatches();
-			RegionTraverser_Transpile.RunNonDestructivePatches();
-			ThinkNode_PrioritySorter_Transpile.RunNonDestructivePatches();
-			JobDriver_Wait_Transpile.RunNonDestructivePatches();
-			FloatMenuMakerMap_Patch.RunNonDestructivePatches();
-			AttackTargetsCache_Patch.RunNonDestructivePatches();
-			PawnsFinder_Patch.RunNonDestructivePatches();
-			AttackTargetFinder_Patch.RunNonDestructivePatches();
-			Fire_Patch.RunNonDestructivePatches();
-			Verb_Transpile.RunNonDestructivePatches();
-			Pawn_WorkSettings_Transpile.RunNonDestructivePatches();
-			GenAdjFast_Patch.RunNonDestructivePatches();
-			GenAdj_Patch.RunNonDestructivePatches();
-			BattleLog_Transpile.RunNonDestructivePatches();
-			WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches();
-			PawnCapacitiesHandler_Transpile.RunNonDestructivePatches();
-			PathFinder_Transpile.RunNonDestructivePatches();
-			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
-			GenRadial_Patch.RunNonDestructivePatches();
-			WorkGiver_DoBill_Transpile.RunNonDestructivePatches();
-			GenText_Patch.RunNonDestructivePatches();
-			GrammarResolverSimple_Transpile.RunNonDestructivePatches();
-			GrammarResolver_Transpile.RunNonDestructivePatches();
-			Pawn_PathFollower_Transpile.RunNonDestructivePatches();
-			CompSpawnSubplant_Transpile.RunNonDestructivePatches();
-			ColoredText_Transpile.RunNonDestructivePatches();
-			HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches();
-			Map_Transpile.RunNonDestructivePatches();
 
 		}
 

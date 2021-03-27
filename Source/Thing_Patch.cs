@@ -1,6 +1,6 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Verse;
+using HarmonyLib;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Linq;
@@ -10,8 +10,17 @@ using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
-	public class Thing_Transpile
+    
+    public class Thing_Patch
 	{
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(Thing);
+			Type patched = typeof(Thing_Patch);
+			RimThreadedHarmony.Postfix(original, patched, "SpawnSetup", "SpawnSetupPostFix");
+			RimThreadedHarmony.Transpile(original, patched, "SpawnSetup");
+			RimThreadedHarmony.Transpile(original, patched, "DeSpawn");
+		}
 		public static IEnumerable<CodeInstruction> SpawnSetup(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			//---START EDIT---
@@ -145,52 +154,46 @@ namespace RimThreaded
 			}
 		}
 
-		public static IEnumerable<CodeInstruction> get_FlammableNow(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-		{
-			int[] matchesFound = new int[2];
-			List<CodeInstruction> instructionsList = instructions.ToList();
-			int i = 0;
-			Label breakDestinationLabel = iLGenerator.DefineLabel();
-			while (i < instructionsList.Count)
+
+
+#pragma warning disable IDE0060 // Remove unused parameter
+		public static void SpawnSetupPostFix(Thing __instance, Map map, bool respawningAfterLoad)
+#pragma warning restore IDE0060 // Remove unused parameter
+        {
+			ThingDef thingDef = __instance.def;
+			if (!RimThreaded.recipeThingDefs.Contains(thingDef))
 			{
-				int matchIndex = 0;
-				if (
-					i + 2 < instructionsList.Count &&
-					instructionsList[i + 2].opcode == OpCodes.Callvirt &&
-					(MethodInfo)instructionsList[i + 2].operand == Method(typeof(List<Thing>), "get_Item")
-				)
+				lock (RimThreaded.recipeThingDefs)
 				{
-					StartTryAndAddBreakDestinationLabel(instructionsList, ref i, breakDestinationLabel);
-					matchesFound[matchIndex]++;
+					//Log.Message("RimThreaded is building new recipe caches for: " + thingDef.ToString());
+					RimThreaded.recipeThingDefs.Add(thingDef);
+					foreach (RecipeDef recipe in DefDatabase<RecipeDef>.AllDefs)
+					{
+						if (!RimThreaded.sortedRecipeValues.TryGetValue(recipe, out List<float> valuesPerUnitOf))
+						{
+							valuesPerUnitOf = new List<float>();
+							RimThreaded.sortedRecipeValues[recipe] = valuesPerUnitOf;
+						}
+						if (!RimThreaded.recipeThingDefValues.TryGetValue(recipe, out Dictionary<float, List<ThingDef>> thingDefValues))
+						{
+							thingDefValues = new Dictionary<float, List<ThingDef>>();
+							RimThreaded.recipeThingDefValues[recipe] = thingDefValues;
+						}
+						float valuePerUnitOf = recipe.IngredientValueGetter.ValuePerUnitOf(thingDef);
+						if (!thingDefValues.TryGetValue(valuePerUnitOf, out List<ThingDef> thingDefs))
+						{
+							thingDefs = new List<ThingDef>();
+							thingDefValues[valuePerUnitOf] = thingDefs;
+							valuesPerUnitOf.Add(valuePerUnitOf);
+							valuesPerUnitOf.Sort();
+						}
+						thingDefs.Add(thingDef);
+					}
 				}
-				matchIndex++;
-				if (
-					i - 2 > 0 &&
-					instructionsList[i - 1].opcode == OpCodes.Callvirt &&
-					(MethodInfo)instructionsList[i - 1].operand == Method(typeof(List<Thing>), "get_Item")
-				)
-				{
-					EndTryStartCatchArgumentExceptionOutOfRange(instructionsList, ref i, iLGenerator, breakDestinationLabel);
-					matchesFound[matchIndex]++;
-				}
-				yield return instructionsList[i++];
-			}
-			for (int mIndex = 0; mIndex < matchesFound.Length; mIndex++)
-			{
-				if (matchesFound[mIndex] < 1)
-					Log.Error("IL code instruction set " + mIndex + " not found");
 			}
 		}
 
-        internal static void RunNonDestructivePatches()
-		{
-			Type original = typeof(Thing);
-			Type patched = typeof(Thing_Transpile);
-			RimThreadedHarmony.Transpile(original, patched, "SpawnSetup");
-			RimThreadedHarmony.Transpile(original, patched, "DeSpawn");
-			RimThreadedHarmony.Transpile(original, patched, "get_FlammableNow");
-			patched = typeof(Thing_Patch);
-			RimThreadedHarmony.Postfix(original, patched, "SpawnSetup");
-		}
-    }
+	}
+
+
 }

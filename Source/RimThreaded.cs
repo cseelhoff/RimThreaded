@@ -233,7 +233,7 @@ namespace RimThreaded
             AttackTargetFinder_Patch.InitializeThreadStatics();
             AttackTargetsCache_Patch.InitializeThreadStatics();
             BeautyUtility_Patch.InitializeThreadStatics();
-            BFSWorker_Patch.InitializeThreadStatics();
+            //BFSWorker_Patch.InitializeThreadStatics();
             CellFinder_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             DamageWorker_Patch.InitializeThreadStatics();
@@ -250,7 +250,9 @@ namespace RimThreaded
             HaulAIUtility_Patch.InitializeThreadStatics();
             InfestationCellFinder_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
+            Pawn_InteractionsTracker_Transpile.InitializeThreadStatics();
             Pawn_MeleeVerbs_Patch.InitializeThreadStatics();
+            Pawn_WorkSettings_Patch.InitializeThreadStatics();
             PawnDiedOrDownedThoughtsUtility_Patch.InitializeThreadStatics();
             PawnsFinder_Patch.InitializeThreadStatics();
             Rand_Patch.InitializeThreadStatics();
@@ -260,6 +262,8 @@ namespace RimThreaded
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();
+            ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
+            Verb_Patch.InitializeThreadStatics();
             WealthWatcher_Patch.InitializeThreads();
             World_Patch.InitializeThreadStatics();
 
