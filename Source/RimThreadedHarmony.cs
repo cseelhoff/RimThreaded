@@ -462,6 +462,8 @@ namespace RimThreaded
 			WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
 
 			//RegionTraverser
+			RegionTraverser_Transpile.RunNonDestructivePatches();
+			/*
 			Type original = typeof(RegionTraverser);
 			Type patched = typeof(RegionTraverser_Transpile);
 			Transpile(original, patched, "BreadthFirstTraverse", new Type[] {
@@ -472,7 +474,7 @@ namespace RimThreaded
 				typeof(RegionType)
 			});
 			Transpile(original, patched, "RecreateWorkers");
-
+			*/
 
 
 			Pawn_RelationsTracker_Transpile.RunNonDestructivePatches(); //TODO - should transpile ReplacePotentiallyRelatedPawns instead

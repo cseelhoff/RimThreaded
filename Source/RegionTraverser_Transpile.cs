@@ -15,7 +15,43 @@ namespace RimThreaded
 	{
 		[ThreadStatic] public static Queue<object> freeWorkers;
 		[ThreadStatic] public static int NumWorkers;
+		public static void RunNonDestructivePatches()
+		{
+			Type original = TypeByName("Verse.RegionTraverser+BFSWorker");
+			RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), Method(typeof(BFSWorker_Patch2), "getRegionClosedIndex"));
+			RimThreadedHarmony.TranspileFieldReplacements(original, "QueueNewOpenRegion");
+			RimThreadedHarmony.TranspileFieldReplacements(original, "BreadthFirstTraverseWork");
 
+			original = typeof(RegionTraverser);
+			Type patched = typeof(RegionTraverser_Transpile);
+			//RimThreadedHarmony.AddAllMatchingFields(original, patched);
+			RimThreadedHarmony.replaceFields.Add(Field(original, "NumWorkers"), Field(patched, "NumWorkers"));
+			RimThreadedHarmony.replaceFields.Add(Field(original, "freeWorkers"), Field(patched, "freeWorkers"));
+			/*
+				RimThreadedHarmony.TranspileFieldReplacements(original, "BreadthFirstTraverse", new Type[] {
+                typeof(Region),
+                typeof(RegionEntryPredicate),
+                typeof(RegionProcessor),
+                typeof(int),
+                typeof(RegionType)
+            });
+			*/
+			//RimThreadedHarmony.TranspileFieldReplacements(original, "RecreateWorkers");
+			//ConstructorInfo constructorInfo = Constructor(original); // not sure why this doesn't work
+			ConstructorInfo constructorInfo = ((ConstructorInfo[])((TypeInfo)original).DeclaredConstructors)[0];
+			Log.Message(constructorInfo.ToString());
+			//RimThreadedHarmony.harmony.Patch(constructorInfo, transpiler: RimThreadedHarmony.replaceFieldsHarmonyTranspiler);
+			RimThreadedHarmony.Transpile(original, patched, "BreadthFirstTraverse", new Type[] {
+				typeof(Region),
+				typeof(RegionEntryPredicate),
+				typeof(RegionProcessor),
+				typeof(int),
+				typeof(RegionType)
+			});
+			RimThreadedHarmony.Transpile(original, patched, "RecreateWorkers");
+
+
+		}
 		public static IEnumerable<CodeInstruction> BreadthFirstTraverse(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			int[] matchesFound = new int[2];

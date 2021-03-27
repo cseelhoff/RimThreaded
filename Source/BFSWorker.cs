@@ -15,10 +15,7 @@ namespace RimThreaded
         }
         public static void RunNonDestructivePatches()
         {
-            Type original = TypeByName("Verse.RegionTraverser+BFSWorker");
-            RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), Method(typeof(BFSWorker_Patch2), "getRegionClosedIndex"));
-            RimThreadedHarmony.TranspileFieldReplacements(original, "QueueNewOpenRegion");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "BreadthFirstTraverseWork");
+
         }
         public static uint[] getRegionClosedIndex(Region region)
         {
@@ -33,12 +30,10 @@ namespace RimThreaded
         private int numRegionsProcessed;
         private int closedArrayPos;
         private const int skippableRegionSize = 4;
-        private RegionTraverser2 regionTraverser;
 
-        public BFSWorker_Patch2(int closedArrayPos, RegionTraverser2 regionTraverser)
+        public BFSWorker_Patch2(int closedArrayPos)
         {
             this.closedArrayPos = closedArrayPos;
-            this.regionTraverser = regionTraverser;
         }
 
         public void Clear()
@@ -101,11 +96,7 @@ namespace RimThreaded
                     for (int index2 = 0; index2 < 2; ++index2)
                     {
                         Region region2 = link.regions[index2];
-                        if (null != region2 && regionTraverser.regionClosedIndex.ContainsKey(region2) == false)
-                        {
-                            regionTraverser.regionClosedIndex.Add(region2, new uint[8]);
-                        }
-                        if (region2 != null && (int)regionTraverser.regionClosedIndex[region2][closedArrayPos] != (int)closedIndex && (region2.type & traversableRegionTypes) != RegionType.None && (entryCondition == null || entryCondition(region1, region2)))
+                        if (region2 != null && getRegionClosedIndex(region2)[closedArrayPos] != (int)closedIndex && (region2.type & traversableRegionTypes) != RegionType.None && (entryCondition == null || entryCondition(region1, region2)))
                             QueueNewOpenRegion(region2);
                     }
                 }

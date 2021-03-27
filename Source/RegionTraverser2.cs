@@ -98,7 +98,7 @@ namespace RimThreaded
         {
             freeWorkers.Clear();
             for (int closedArrayPos = 0; closedArrayPos < NumWorkers; ++closedArrayPos)
-                freeWorkers.Enqueue(new BFSWorker_Patch2(closedArrayPos, this));
+                freeWorkers.Enqueue(new BFSWorker_Patch2(closedArrayPos));
         }
 
         public void BreadthFirstTraverse(
