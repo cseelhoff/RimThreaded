@@ -285,7 +285,7 @@ namespace RimThreaded
 		}
 
 		//public static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>();
-		public static readonly Dictionary<FieldInfo, FieldInfo> replaceFields = new Dictionary<FieldInfo, FieldInfo>();
+		public static readonly Dictionary<FieldInfo, object> replaceFields = new Dictionary<FieldInfo, object>();
 
 		public static void AddAllMatchingFields(Type original, Type patched, bool matchStaticFieldsOnly = true)
 		{
@@ -322,9 +322,13 @@ namespace RimThreaded
 				{
 					if (codeInstruction.operand is FieldInfo fieldInfo)
 					{
-						if (replaceFields.TryGetValue(fieldInfo, out FieldInfo newFieldInfo))
+						if (replaceFields.TryGetValue(fieldInfo, out object newFieldInfo))
 						{
 							//Log.Message("RimThreaded is replacing field: " + fieldInfo.DeclaringType.ToString() + "." + fieldInfo.Name + " with field: " + newFieldInfo.DeclaringType.ToString() + "." + newFieldInfo.Name);
+							if(newFieldInfo is MethodInfo)
+                            {
+								codeInstruction.opcode = OpCodes.Call;
+							}
 							codeInstruction.operand = newFieldInfo;
 						}
 					}
@@ -409,7 +413,7 @@ namespace RimThreaded
 			
 			//Simple
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
-			BFSWorker_Patch.RunNonDestructivePatches();
+			//BFSWorker_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches(); 
 			CellFinder_Patch.RunNonDestructivePatches();
 			DamageWorker_Patch.RunNonDestructivePatches();
@@ -429,7 +433,7 @@ namespace RimThreaded
 			PawnDiedOrDownedThoughtsUtility_Patch.RunNonDestructivePatches();
 			RCellFinder_Patch.RunNonDestructivePatches();
 			RegionListersUpdater_Patch.RunNonDestructivePatches();
-			RegionTraverser_Patch.RunNonDestructivePatches();
+			//RegionTraverser_Patch.RunNonDestructivePatches();
 			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
 			TickList_Transpile.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
@@ -439,6 +443,7 @@ namespace RimThreaded
 			//Complex
 			AttackTargetsCache_Patch.RunNonDestructivePatches();
 			BattleLog_Transpile.RunNonDestructivePatches();
+			BFSWorker_Transpile.RunNonDestructivePatches();
 			CompSpawnSubplant_Transpile.RunNonDestructivePatches();//uses old transpile for lock
 			GenTemperature_Patch.RunNonDestructivePatches();
 			GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
@@ -456,6 +461,17 @@ namespace RimThreaded
 			WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
 			WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
 
+			//RegionTraverser
+			Type original = typeof(RegionTraverser);
+			Type patched = typeof(RegionTraverser_Transpile);
+			Transpile(original, patched, "BreadthFirstTraverse", new Type[] {
+				typeof(Region),
+				typeof(RegionEntryPredicate),
+				typeof(RegionProcessor),
+				typeof(int),
+				typeof(RegionType)
+			});
+			Transpile(original, patched, "RecreateWorkers");
 
 
 
