@@ -13,20 +13,23 @@ namespace RimThreaded
 {
     class RegionTraverser_Transpile
 	{
+		[ThreadStatic] public static Queue<object> freeWorkers;
+		[ThreadStatic] public static int NumWorkers;
+
 		public static IEnumerable<CodeInstruction> BreadthFirstTraverse(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			int[] matchesFound = new int[2];
 			List<CodeInstruction> instructionsList = instructions.ToList();
 			int i = 0;
-			yield return new CodeInstruction(OpCodes.Ldsfld, Field(typeof(RegionTraverser_Patch2), "freeWorkers"));
+			yield return new CodeInstruction(OpCodes.Ldsfld, Field(typeof(RegionTraverser_Transpile), "freeWorkers"));
 			yield return new CodeInstruction(OpCodes.Ldnull);
 			yield return new CodeInstruction(OpCodes.Ceq);
 			Label freeWorkersNullLabel = iLGenerator.DefineLabel();
 			yield return new CodeInstruction(OpCodes.Brfalse_S, freeWorkersNullLabel);
 			yield return new CodeInstruction(OpCodes.Newobj, Constructor(typeof(Queue<object>)));
-			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Patch2), "freeWorkers"));
+			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Transpile), "freeWorkers"));
 			yield return new CodeInstruction(OpCodes.Ldc_I4_8);
-			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Patch2), "NumWorkers"));
+			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Transpile), "NumWorkers"));
 			yield return new CodeInstruction(OpCodes.Call, Method(typeof(RegionTraverser), "RecreateWorkers"));
 			instructionsList[i].labels.Add(freeWorkersNullLabel);
 			while (i < instructionsList.Count)
@@ -37,7 +40,7 @@ namespace RimThreaded
 					(FieldInfo)instructionsList[i].operand == Field(typeof(RegionTraverser), "freeWorkers")
 				)
 				{
-					instructionsList[i].operand = Field(typeof(RegionTraverser_Patch2), "freeWorkers");
+					instructionsList[i].operand = Field(typeof(RegionTraverser_Transpile), "freeWorkers");
 					matchesFound[matchIndex]++;
 				}
 				matchIndex++;
@@ -46,7 +49,7 @@ namespace RimThreaded
 					(FieldInfo)instructionsList[i].operand == Field(typeof(RegionTraverser), "NumWorkers")
 				)
 				{
-					instructionsList[i].operand = Field(typeof(RegionTraverser_Patch2), "NumWorkers");
+					instructionsList[i].operand = Field(typeof(RegionTraverser_Transpile), "NumWorkers");
 					matchesFound[matchIndex]++;
 				}
 				yield return instructionsList[i++];
@@ -62,15 +65,15 @@ namespace RimThreaded
 			int[] matchesFound = new int[2];
 			List<CodeInstruction> instructionsList = instructions.ToList();
 			int i = 0;
-			yield return new CodeInstruction(OpCodes.Ldsfld, Field(typeof(RegionTraverser_Patch2), "freeWorkers"));
+			yield return new CodeInstruction(OpCodes.Ldsfld, Field(typeof(RegionTraverser_Transpile), "freeWorkers"));
 			yield return new CodeInstruction(OpCodes.Ldnull);
 			yield return new CodeInstruction(OpCodes.Ceq);
 			Label freeWorkersNullLabel = iLGenerator.DefineLabel();
 			yield return new CodeInstruction(OpCodes.Brfalse_S, freeWorkersNullLabel);
 			yield return new CodeInstruction(OpCodes.Newobj, Constructor(typeof(Queue<object>)));
-			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Patch2), "freeWorkers"));
+			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Transpile), "freeWorkers"));
 			yield return new CodeInstruction(OpCodes.Ldc_I4_8);
-			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Patch2), "NumWorkers"));
+			yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(RegionTraverser_Transpile), "NumWorkers"));
 			instructionsList[i].labels.Add(freeWorkersNullLabel);
 			while (i < instructionsList.Count)
 			{
@@ -80,7 +83,7 @@ namespace RimThreaded
 					(FieldInfo)instructionsList[i].operand == Field(typeof(RegionTraverser), "freeWorkers")
 				)
 				{
-					instructionsList[i].operand = Field(typeof(RegionTraverser_Patch2), "freeWorkers");
+					instructionsList[i].operand = Field(typeof(RegionTraverser_Transpile), "freeWorkers");
 					matchesFound[matchIndex]++;
 				}
 				matchIndex++;
@@ -89,7 +92,7 @@ namespace RimThreaded
 					(FieldInfo)instructionsList[i].operand == Field(typeof(RegionTraverser), "NumWorkers")
 				)
 				{
-					instructionsList[i].operand = Field(typeof(RegionTraverser_Patch2), "NumWorkers");
+					instructionsList[i].operand = Field(typeof(RegionTraverser_Transpile), "NumWorkers");
 					matchesFound[matchIndex]++;
 				}
 				yield return instructionsList[i++];

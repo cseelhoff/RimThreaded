@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Verse;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -12,7 +13,13 @@ namespace RimThreaded
         {
             regionClosedIndex = new Dictionary<Region, uint[]>();
         }
-
+        public static void RunNonDestructivePatches()
+        {
+            Type original = TypeByName("Verse.RegionTraverser+BFSWorker");
+            RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), Method(typeof(BFSWorker_Patch2), "getRegionClosedIndex"));
+            RimThreadedHarmony.TranspileFieldReplacements(original, "QueueNewOpenRegion");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "BreadthFirstTraverseWork");
+        }
         public static uint[] getRegionClosedIndex(Region region)
         {
             if (!regionClosedIndex.TryGetValue(region, out uint[] closedIndex)) { 

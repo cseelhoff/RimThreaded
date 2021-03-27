@@ -443,7 +443,7 @@ namespace RimThreaded
 			//Complex
 			AttackTargetsCache_Patch.RunNonDestructivePatches();
 			BattleLog_Transpile.RunNonDestructivePatches();
-			BFSWorker_Transpile.RunNonDestructivePatches();
+			BFSWorker_Patch2.RunNonDestructivePatches();
 			CompSpawnSubplant_Transpile.RunNonDestructivePatches();//uses old transpile for lock
 			GenTemperature_Patch.RunNonDestructivePatches();
 			GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
