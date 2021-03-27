@@ -21,8 +21,8 @@ namespace RimThreaded
 		{
 			Type original = TypeByName("Verse.RegionTraverser+BFSWorker");
 			Type patched = typeof(BFSWorker_Patch);
-			RimThreadedHarmony.Transpile(original, patched, "QueueNewOpenRegion");
-			RimThreadedHarmony.Transpile(original, patched, "BreadthFirstTraverseWork");
+			//RimThreadedHarmony.Transpile(original, patched, "QueueNewOpenRegion");
+			//RimThreadedHarmony.Transpile(original, patched, "BreadthFirstTraverseWork");
 		}
 
 		public static uint[] getRegionClosedIndex(Region region)
