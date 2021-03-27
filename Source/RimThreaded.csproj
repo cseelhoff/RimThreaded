@@ -77,8 +77,6 @@
   <ItemGroup>
     <Compile Include="Alert_MinorBreakRisk_Patch.cs" />
     <Compile Include="AmbientSoundManager_Patch.cs" />
-    <Compile Include="BFSWorker_Patch.cs" />
-    <Compile Include="BFSWorker_Transpile.cs" />
     <Compile Include="FoodUtility_Patch.cs" />
     <Compile Include="GenRadial_Patch.cs" />
     <Compile Include="Fire_Patch.cs" />
@@ -111,7 +109,6 @@
     <Compile Include="RegionDirtyer_Patch.cs" />
     <Compile Include="RegionListersUpdater_Transpile.cs" />
     <Compile Include="RegionTraverser.cs" />
-    <Compile Include="RegionTraverser_Transpile.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="StatWorker.cs" />
     <Compile Include="ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch.cs" />
@@ -289,7 +286,6 @@
     <Compile Include="Reachability.cs" />
     <Compile Include="RealtimeMoteList.cs" />
     <Compile Include="RegionListersUpdater.cs" />
-    <Compile Include="RegionTraverser2.cs" />
     <Compile Include="ReservationManager.cs" />
     <Compile Include="RimThreaded.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
