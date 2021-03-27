@@ -261,7 +261,7 @@ namespace RimThreaded
             ReachabilityCache_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
-            //RegionTraverser_Patch.InitializeThreadStatics();
+            RegionTraverser_Transpile.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();
             ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
             Verb_Patch.InitializeThreadStatics();
