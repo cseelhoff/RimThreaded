@@ -69,5 +69,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(TendUtility);
+            Type patched = typeof(TendUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetOptimalHediffsToTendWithSingleTreatment");
+        }
     }
 }

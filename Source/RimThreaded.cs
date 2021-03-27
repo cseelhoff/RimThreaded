@@ -250,6 +250,8 @@ namespace RimThreaded
             HaulAIUtility_Patch.InitializeThreadStatics();
             InfestationCellFinder_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
+            Pawn_MeleeVerbs_Patch.InitializeThreadStatics();
+            PawnDiedOrDownedThoughtsUtility_Patch.InitializeThreadStatics();
             PawnsFinder_Patch.InitializeThreadStatics();
             Rand_Patch.InitializeThreadStatics();
             RCellFinder_Patch.InitializeThreadStatics();
@@ -258,6 +260,7 @@ namespace RimThreaded
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();
+            WealthWatcher_Patch.InitializeThreads();
             World_Patch.InitializeThreadStatics();
 
         }

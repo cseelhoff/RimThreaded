@@ -197,5 +197,13 @@ namespace RimThreaded
                 i++;
             }
         }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Verb);
+            Type patched = typeof(Verb_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "TryFindShootLineFromTo");
+            RimThreadedHarmony.Transpile(original, patched, "CanHitFromCellIgnoringRange");
+        }
     }
 }

@@ -142,5 +142,13 @@ namespace RimThreaded
             visited(__instance).Clear();
             openSet(__instance).Clear();
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(FloodFiller);
+            Type patched = typeof(FloodFiller_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FloodFill", new Type[] { typeof(IntVec3), typeof(Predicate<IntVec3>), typeof(Func<IntVec3, int, bool>), typeof(int), typeof(bool), typeof(IEnumerable<IntVec3>) });
+
+        }
     }
 }

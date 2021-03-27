@@ -23,9 +23,9 @@ namespace RimThreaded
         {
             Type original = typeof(World);
             Type patched = typeof(World_Patch);
-            RimThreadedHarmony.threadStaticPatches.Add(original, patched);
-            RimThreadedHarmony.TranspileThreadStatics(original, "NaturalRockTypesIn");
-            RimThreadedHarmony.TranspileThreadStatics(original, "CoastDirectionAt");
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "NaturalRockTypesIn");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CoastDirectionAt");
         }
 
     }

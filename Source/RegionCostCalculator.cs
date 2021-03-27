@@ -227,5 +227,15 @@ namespace RimThreaded
             __result = tmpPathableNeighborIndices;
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RegionCostCalculator);
+            Type patched = typeof(RegionCostCalculator_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetPreciseRegionLinkDistances");
+            RimThreadedHarmony.Prefix(original, patched, "PathableNeighborIndices");
+            //RimThreadedHarmony.Prefix(original, patched, "GetRegionDistance");
+            //RimThreadedHarmony.Prefix(original, patched, "Init");
+        }
     }
 }

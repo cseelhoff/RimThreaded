@@ -1,6 +1,7 @@
 ﻿using System;
 using Verse;
 using UnityEngine;
+using RimWorld;
 
 namespace RimThreaded
 {
@@ -25,5 +26,11 @@ namespace RimThreaded
             curBaseY -= 26f;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(GlobalControlsUtility);
+            Type patched = typeof(GlobalControlsUtility_Patch);
+            RimThreadedHarmony.Postfix(original, patched, "DoTimespeedControls");
+        }
+    }
 }

@@ -96,5 +96,12 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(ImmunityHandler);
+            Type patched = typeof(ImmunityHandler_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ImmunityHandlerTick");
+            RimThreadedHarmony.Prefix(original, patched, "NeededImmunitiesNow");
+        }
     }
 }

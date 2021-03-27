@@ -100,5 +100,25 @@ namespace RimThreaded
 					Log.Error("IL code instruction set " + mIndex + " not found");
 			}
 		}
-	}
+
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(RegionTraverser);
+			Type patched = typeof(RegionTraverser_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "BreadthFirstTraverse", new Type[] {
+				typeof(Region),
+				typeof(RegionEntryPredicate),
+				typeof(RegionProcessor),
+				typeof(int),
+				typeof(RegionType)
+			});
+			RimThreadedHarmony.Transpile(original, patched, "RecreateWorkers");
+
+			//Verse.RegionTraverser+BFSWorker
+			original = TypeByName("Verse.RegionTraverser+BFSWorker");
+			patched = typeof(BFSWorker_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "QueueNewOpenRegion");
+			RimThreadedHarmony.Transpile(original, patched, "BreadthFirstTraverseWork");
+		}
+    }
 }

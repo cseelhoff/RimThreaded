@@ -129,5 +129,11 @@ namespace RimThreaded
             return false;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WanderUtility);
+            Type patched = typeof(WanderUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetColonyWanderRoot");
+        }
+    }
 }

@@ -49,5 +49,12 @@ namespace RimThreaded
 			}
 
 		}
-	}
+
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(Pawn_InteractionsTracker);
+			Type patched = typeof(Pawn_InteractionsTracker_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "TryInteractRandomly");
+		}
+    }
 }

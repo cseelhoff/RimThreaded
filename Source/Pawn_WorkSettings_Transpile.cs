@@ -105,5 +105,12 @@ namespace RimThreaded
                 i++;
             }            
         }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Pawn_WorkSettings);
+            Type patched = typeof(Pawn_WorkSettings_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "CacheWorkGiversInOrder");
+        }
     }
 }

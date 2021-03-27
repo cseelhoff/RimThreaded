@@ -42,5 +42,12 @@ namespace RimThreaded
             __result = num;
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RecipeWorkerCounter);
+            Type patched = typeof(RecipeWorkerCounter_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetCarriedCount");
+        }
     }
 }

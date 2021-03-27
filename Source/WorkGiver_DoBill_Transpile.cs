@@ -202,5 +202,12 @@ namespace RimThreaded
 			}
 		}
 
-	}
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(WorkGiver_DoBill);
+			Type patched = typeof(WorkGiver_DoBill_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "TryFindBestBillIngredients");
+			RimThreadedHarmony.Transpile(original, patched, "AddEveryMedicineToRelevantThings");
+		}
+    }
 }

@@ -174,7 +174,15 @@ namespace RimThreaded
 			RimThreaded.InitializeAllThreadStatics();
 			return true;
 		}
-	}
+
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(LongEventHandler);
+			Type patched = typeof(LongEventHandler_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "ExecuteToExecuteWhenFinished");
+			RimThreadedHarmony.Prefix(original, patched, "ExecuteWhenFinished");
+		}
+    }
 
 
 

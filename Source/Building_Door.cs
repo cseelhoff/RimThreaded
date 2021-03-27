@@ -42,7 +42,12 @@ namespace RimThreaded
 			__result = poweron;
 			return false;
 		}
-		
 
-	}
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(Building_Door);
+			Type patched = typeof(Building_Door_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "get_DoorPowerOn");
+		}
+    }
 }

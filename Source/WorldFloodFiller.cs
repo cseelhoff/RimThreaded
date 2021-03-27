@@ -143,5 +143,12 @@ namespace RimThreaded
             }
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WorldFloodFiller);
+            Type patched = typeof(WorldFloodFiller_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FloodFill", new Type[] { typeof(int), typeof(Predicate<int>), typeof(Func<int, int, bool>), typeof(int), typeof(IEnumerable<int>) });
+
+        }
     }
 }

@@ -628,5 +628,29 @@ namespace RimThreaded
             
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(MapPawns);
+            Type patched = typeof(MapPawns_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "get_AllPawns");
+            RimThreadedHarmony.Prefix(original, patched, "get_AllPawnsUnspawned");
+            RimThreadedHarmony.Prefix(original, patched, "get_PrisonersOfColony");
+            RimThreadedHarmony.Prefix(original, patched, "get_FreeColonistsAndPrisoners");
+            RimThreadedHarmony.Prefix(original, patched, "get_AnyPawnBlockingMapRemoval");
+            RimThreadedHarmony.Prefix(original, patched, "get_FreeColonistsAndPrisonersSpawned");
+            RimThreadedHarmony.Prefix(original, patched, "get_SpawnedPawnsWithAnyHediff");
+            RimThreadedHarmony.Prefix(original, patched, "get_SpawnedHungryPawns");
+            RimThreadedHarmony.Prefix(original, patched, "get_SpawnedDownedPawns");
+            RimThreadedHarmony.Prefix(original, patched, "get_SpawnedPawnsWhoShouldHaveSurgeryDoneNow");
+            RimThreadedHarmony.Prefix(original, patched, "get_SpawnedPawnsWhoShouldHaveInventoryUnloaded");
+            RimThreadedHarmony.Prefix(original, patched, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
+            RimThreadedHarmony.Prefix(original, patched, "EnsureFactionsListsInit");
+            RimThreadedHarmony.Prefix(original, patched, "PawnsInFaction");
+            RimThreadedHarmony.Prefix(original, patched, "FreeHumanlikesOfFaction");
+            RimThreadedHarmony.Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
+            RimThreadedHarmony.Prefix(original, patched, "RegisterPawn");
+            RimThreadedHarmony.Prefix(original, patched, "DeRegisterPawn");
+        }
     }
 }

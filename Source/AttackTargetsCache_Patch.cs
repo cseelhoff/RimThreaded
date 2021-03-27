@@ -42,6 +42,17 @@ namespace RimThreaded
 			tmpToUpdate = new List<IAttackTarget>();
 		}
 
+		public static void RunDestructivesPatches()
+		{
+			Type original = typeof(AttackTargetsCache);
+			Type patched = typeof(AttackTargetsCache_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "GetPotentialTargetsFor");
+			RimThreadedHarmony.Prefix(original, patched, "RegisterTarget");
+			RimThreadedHarmony.Prefix(original, patched, "DeregisterTarget");
+			RimThreadedHarmony.Prefix(original, patched, "TargetsHostileToFaction");
+			RimThreadedHarmony.Prefix(original, patched, "UpdateTarget");
+		}
+
 		public static bool DeregisterTarget(AttackTargetsCache __instance, IAttackTarget target)
 		{
 			if (allTargetsListDict.TryGetValue(__instance, out List<IAttackTarget> snapshotAllTargets))
@@ -325,5 +336,13 @@ namespace RimThreaded
 			return emptyList;
 		}
 
-	}
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(AttackTargetsCache);
+			Type patched = typeof(AttackTargetsCache_Patch);
+			RimThreadedHarmony.AddAllMatchingFields(original, patched);
+			RimThreadedHarmony.TranspileFieldReplacements(original, "Notify_FactionHostilityChanged");
+			RimThreadedHarmony.TranspileFieldReplacements(original, "Debug_AssertHostile");
+		}
+    }
 }

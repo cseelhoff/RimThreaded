@@ -120,5 +120,13 @@ namespace RimThreaded
             
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WorldPawns);
+            Type patched = typeof(WorldPawns_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "WorldPawnsTick");
+            RimThreadedHarmony.Prefix(original, patched, "get_AllPawnsAlive");
+        }
     }
 }

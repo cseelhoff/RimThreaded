@@ -264,5 +264,17 @@ namespace RimThreaded
 			return false;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(Room);
+			Type patched = typeof(Room_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "OpenRoofCountStopAt");
+			RimThreadedHarmony.Prefix(original, patched, "get_PsychologicallyOutdoors");
+			RimThreadedHarmony.Prefix(original, patched, "RemoveRegion");
+			RimThreadedHarmony.Prefix(original, patched, "Notify_RoofChanged");
+			RimThreadedHarmony.Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
+			RimThreadedHarmony.Prefix(original, patched, "get_ContainedAndAdjacentThings");
+			RimThreadedHarmony.Prefix(original, patched, "get_Neighbors");
+		}
+    }
 }

@@ -193,5 +193,12 @@ namespace RimThreaded
                 return 0.0f;
             return temperature < 10.0 ? (float)(temperature * (double)temperature * 0.00579999992623925 * 0.100000001490116) : temperature * 0.0058f;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SteadyEnvironmentEffects);
+            Type patched = typeof(SteadyEnvironmentEffects_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "SteadyEnvironmentEffectsTick");
+        }
     }
 }

@@ -26,15 +26,15 @@ namespace RimThreaded
         public static void RunNonDestructivePatches() {
             Type original = typeof(RCellFinder);
             Type patched = typeof(RCellFinder_Patch);
-            RimThreadedHarmony.threadStaticPatches.Add(original, patched);
-            RimThreadedHarmony.TranspileThreadStatics(original, "RandomWanderDestFor");
-            RimThreadedHarmony.TranspileThreadStatics(original, "TryFindRandomSpotJustOutsideColony", new Type[] {
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "RandomWanderDestFor");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindRandomSpotJustOutsideColony", new Type[] {
                 typeof(IntVec3), typeof(Map), typeof(Pawn), typeof(IntVec3).MakeByRefType(), typeof(Predicate<IntVec3>)});
-            RimThreadedHarmony.TranspileThreadStatics(original, "TryFindGatheringSpot_NewTemp");
-            RimThreadedHarmony.TranspileThreadStatics(original, "TryFindEdgeCellWithPathToPositionAvoidingColony");
-            RimThreadedHarmony.TranspileThreadStatics(original, "FindBestAngleAvoidingSpots");
-            RimThreadedHarmony.TranspileThreadStatics(original, "TryFindRandomSpotNearAvoidingHostilePawns");
-            RimThreadedHarmony.TranspileThreadStatics(original, "TryFindEdgeCellFromTargetAvoidingColony");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindGatheringSpot_NewTemp");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindEdgeCellWithPathToPositionAvoidingColony");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "FindBestAngleAvoidingSpots");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindRandomSpotNearAvoidingHostilePawns");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindEdgeCellFromTargetAvoidingColony");
         }
 
     }

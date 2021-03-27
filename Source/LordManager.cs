@@ -67,5 +67,13 @@ namespace RimThreaded
             oldLord.Cleanup();
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(LordManager);
+            Type patched = typeof(LordManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "LordOf", new Type[] { typeof(Pawn) });
+            RimThreadedHarmony.Prefix(original, patched, "RemoveLord");
+        }
     }
 }

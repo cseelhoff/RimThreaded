@@ -294,5 +294,12 @@ namespace RimThreaded
                 i++;
             }
 		}
+
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(WorkGiver_ConstructDeliverResources);
+			Type patched = typeof(WorkGiver_ConstructDeliverResources_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "ResourceDeliverJobFor", null, new string[] { "CodeOptimist.JobsOfOpportunity" });
+		}
     }
 }

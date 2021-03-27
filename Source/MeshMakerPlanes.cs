@@ -25,5 +25,12 @@ namespace RimThreaded
             }
             return true;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(MeshMakerPlanes);
+            Type patched = typeof(MeshMakerPlanes_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "NewPlaneMesh", new Type[] { typeof(Vector2), typeof(bool), typeof(bool), typeof(bool) });
+        }
     }
 }

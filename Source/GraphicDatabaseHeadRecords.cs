@@ -31,5 +31,11 @@ namespace RimThreaded
             return true;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(GraphicDatabaseHeadRecords);
+            Type patched = typeof(GraphicDatabaseHeadRecords_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "BuildDatabaseIfNecessary");
+        }
     }
 }

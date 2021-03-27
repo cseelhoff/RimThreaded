@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.Sound;
@@ -10,8 +11,13 @@ namespace RimThreaded
     {
         //private static readonly PropertyInfo AltitudeWindSoundCreated = Property(typeof(AmbientSoundManager), "AltitudeWindSoundCreated");
         private static List<Sustainer> biomeAmbientSustainers = StaticFieldRefAccess<List<Sustainer>>(typeof(AmbientSoundManager), "biomeAmbientSustainers");
-        
 
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(AmbientSoundManager);
+            Type patched = typeof(AmbientSoundManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "EnsureWorldAmbientSoundCreated");
+        }
         public static bool RecreateMapSustainers()
         {
             if (!Find.SoundRoot.sustainerManager.SustainerExists(SoundDefOf.Ambient_AltitudeWind))
@@ -69,5 +75,7 @@ namespace RimThreaded
             }
             return false;
         }
+
+
     }
 }

@@ -44,5 +44,12 @@ namespace RimThreaded
                 i++;
             }            
         }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Map);
+            Type patched = typeof(Map_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "MapUpdate");
+        }
     }
 }

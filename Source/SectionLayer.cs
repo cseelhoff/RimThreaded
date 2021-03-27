@@ -24,5 +24,11 @@ namespace RimThreaded
             return true;
         }
 
-	}
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SectionLayer);
+            Type patched = typeof(SectionLayer_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetSubMesh");
+        }
+    }
 }

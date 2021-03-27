@@ -117,6 +117,11 @@ namespace RimThreaded
 			return false;
 		}
 
-
-	}
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(SubSustainer);
+			Type patched = typeof(SubSustainer_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "SubSustainerUpdate");
+		}
+    }
 }

@@ -17,9 +17,9 @@ namespace RimThreaded
         {
 			Type original = typeof(RegionListersUpdater);
 			Type patched = typeof(RegionListersUpdater_Patch);
-			RimThreadedHarmony.threadStaticPatches.Add(original, patched);
-			RimThreadedHarmony.TranspileThreadStatics(original, "RegisterInRegions");
-			RimThreadedHarmony.TranspileThreadStatics(original, "DeregisterInRegions");
+			RimThreadedHarmony.AddAllMatchingFields(original, patched);
+			RimThreadedHarmony.TranspileFieldReplacements(original, "RegisterInRegions");
+			RimThreadedHarmony.TranspileFieldReplacements(original, "DeregisterInRegions");
 		}
 	}
 }

@@ -27,5 +27,12 @@ namespace RimThreaded
             }
             return true;        
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(MeshMakerShadows);
+            Type patched = typeof(MeshMakerShadows_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "NewShadowMesh", new Type[] { typeof(float), typeof(float), typeof(float) });
+        }
     }
 }

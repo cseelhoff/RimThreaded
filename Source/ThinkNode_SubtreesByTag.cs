@@ -43,5 +43,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(ThinkNode_SubtreesByTag);
+            Type patched = typeof(ThinkNode_SubtreesByTag_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TryIssueJobPackage");
+        }
     }
 }

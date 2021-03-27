@@ -5,6 +5,7 @@ using Verse;
 using System.Reflection.Emit;
 using System.Reflection;
 using Verse.Grammar;
+using System;
 
 namespace RimThreaded
 {
@@ -90,6 +91,18 @@ namespace RimThreaded
                 yield return instructionsList[currentInstructionIndex];
                 currentInstructionIndex++;                
             }
+        }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(GrammarResolver);
+            Type patched = typeof(GrammarResolver_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "AddRule");
+            RimThreadedHarmony.Transpile(original, patched, "RandomPossiblyResolvableEntry");
+            original = AccessTools.TypeByName("Verse.Grammar.GrammarResolver+<>c__DisplayClass17_0");
+            MethodInfo oMethod = AccessTools.Method(original, "<RandomPossiblyResolvableEntry>b__0");
+            MethodInfo pMethod = AccessTools.Method(patched, "RandomPossiblyResolvableEntryb__0");
+            RimThreadedHarmony.harmony.Patch(oMethod, transpiler: new HarmonyMethod(pMethod));
         }
     }
 }

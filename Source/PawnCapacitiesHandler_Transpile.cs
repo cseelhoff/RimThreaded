@@ -49,5 +49,12 @@ namespace RimThreaded
 					Log.Error("IL code instruction set " + mIndex + " not found");
 			}
 		}
-	}
+
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(PawnCapacitiesHandler);
+			Type patched = typeof(PawnCapacitiesHandler_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "GetLevel");
+		}
+    }
 }

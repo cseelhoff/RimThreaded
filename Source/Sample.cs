@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using System;
+using Verse;
 using Verse.Sound;
 
 namespace RimThreaded
@@ -33,5 +34,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Sample);
+            Type patched = typeof(Sample_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Update");
+        }
     }
 }

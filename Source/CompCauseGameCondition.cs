@@ -97,10 +97,14 @@ namespace RimThreaded
             }
             return false;
         }
-    
 
-
-
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(CompCauseGameCondition);
+            Type patched = typeof(CompCauseGameCondition_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetConditionInstance");
+            RimThreadedHarmony.Prefix(original, patched, "CreateConditionOn");
+            RimThreadedHarmony.Prefix(original, patched, "CompTick");
+        }
     }
 }

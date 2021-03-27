@@ -61,6 +61,11 @@ namespace RimThreaded
             return false;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WindManager);
+            Type patched = typeof(WindManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "WindManagerTick");
+        }
     }
 }

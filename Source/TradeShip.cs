@@ -29,5 +29,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(TradeShip);
+            Type patched = typeof(TradeShip_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "PassingShipTick");
+        }
     }
 }

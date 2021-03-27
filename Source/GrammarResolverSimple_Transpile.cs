@@ -104,5 +104,12 @@ namespace RimThreaded
 				Log.Error("IL code instructions not found");
 			}
 		}
-	}
+
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(GrammarResolverSimple);
+			Type patched = typeof(GrammarResolverSimple_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "Formatted");
+		}
+    }
 }

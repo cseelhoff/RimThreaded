@@ -6,6 +6,7 @@ using static HarmonyLib.AccessTools;
 using System.Reflection;
 using RimWorld;
 using Verse;
+using System;
 
 namespace RimThreaded
 {
@@ -35,5 +36,26 @@ namespace RimThreaded
 					Log.Error("IL code instruction set " + mIndex + " not found");
 			}
 		}
-	}
+
+        internal static void RunNonDestructivePatches()
+        {
+			Type original = typeof(FocusStrengthOffset_GraveCorpseRelationship);
+			Type patched = typeof(Pawn_RelationsTracker_Transpile);
+			MethodInfo pMethod = Method(patched, "ReplacePotentiallyRelatedPawns");
+			RimThreadedHarmony.harmony.Patch(Method(original, "CanApply"), transpiler: new HarmonyMethod(pMethod));
+			//Pawn_RelationsTracker.get_RelatedPawns
+			original = TypeByName("RimWorld.Pawn_RelationsTracker+<get_RelatedPawns>d__30");
+			RimThreadedHarmony.harmony.Patch(Method(original, "MoveNext"), transpiler: new HarmonyMethod(pMethod));
+			//Pawn_RelationsTracker
+			original = typeof(Pawn_RelationsTracker);
+			//Pawn_RelationsTracker.Notify_PawnKilled
+			RimThreadedHarmony.harmony.Patch(Method(original, "Notify_PawnKilled"), transpiler: new HarmonyMethod(pMethod));
+			//Pawn_RelationsTracker.Notify_PawnSold
+			RimThreadedHarmony.harmony.Patch(Method(original, "Notify_PawnSold"), transpiler: new HarmonyMethod(pMethod));
+			//PawnDiedOrDownedThoughtsUtility.AppendThoughts_Relations
+			original = typeof(PawnDiedOrDownedThoughtsUtility);
+			pMethod = Method(patched, "ReplacePotentiallyRelatedPawns");
+			RimThreadedHarmony.harmony.Patch(Method(original, "AppendThoughts_Relations"), transpiler: new HarmonyMethod(pMethod));
+		}
+    }
 }

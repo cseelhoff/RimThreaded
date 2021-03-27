@@ -4,6 +4,7 @@ using System.Linq;
 using Verse;
 using System.Reflection.Emit;
 using System.Reflection;
+using System;
 
 namespace RimThreaded
 {
@@ -36,5 +37,11 @@ namespace RimThreaded
 			}
 		}
 
-	}
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(ColoredText);
+			Type patched = typeof(ColoredText_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "Resolve");
+		}
+    }
 }

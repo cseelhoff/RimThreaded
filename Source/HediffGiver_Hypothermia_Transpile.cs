@@ -60,5 +60,12 @@ namespace RimThreaded
 			}
 
 		}
-	}
+
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(HediffGiver_Hypothermia);
+			Type patched = typeof(HediffGiver_Hypothermia_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "OnIntervalPassed");
+		}
+    }
 }

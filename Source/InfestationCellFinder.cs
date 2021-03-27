@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using HarmonyLib;
 using RimWorld;
 using Verse;
 
@@ -43,13 +44,16 @@ namespace RimThreaded
         {
             Type original = typeof(InfestationCellFinder);
             Type patched = typeof(InfestationCellFinder_Patch);
-            RimThreadedHarmony.threadStaticPatches.Add(original, patched);
-            RimThreadedHarmony.TranspileThreadStatics(original, "GetScoreAt");
-            RimThreadedHarmony.TranspileThreadStatics(original, "DebugDraw");
-            RimThreadedHarmony.TranspileThreadStatics(original, "CalculateLocationCandidates");
-            RimThreadedHarmony.TranspileThreadStatics(original, "CalculateTraversalDistancesToUnroofed");
-            RimThreadedHarmony.TranspileThreadStatics(original, "CalculateClosedAreaSizeGrid");
-            RimThreadedHarmony.TranspileThreadStatics(original, "CalculateDistanceToColonyBuildingGrid");
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "GetScoreAt");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "DebugDraw");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CalculateLocationCandidates");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CalculateTraversalDistancesToUnroofed");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CalculateClosedAreaSizeGrid");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CalculateDistanceToColonyBuildingGrid");
+            RimThreadedHarmony.TranspileFieldReplacements(
+                AccessTools.TypeByName("RimWorld.InfestationCellFinder+<>c__DisplayClass25_1"),
+                "<CalculateClosedAreaSizeGrid>b__3");
         }
 
     }

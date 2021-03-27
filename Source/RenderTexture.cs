@@ -56,7 +56,13 @@ namespace RimThreaded
                 return false;
             }
             return true;
-        }        
+        }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RenderTexture);
+            Type patched = typeof(RenderTexture_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetTemporaryImpl");
+        }
     }
 }

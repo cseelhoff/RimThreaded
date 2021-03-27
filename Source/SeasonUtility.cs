@@ -40,7 +40,11 @@ namespace RimThreaded
             return false;
         }
 
-
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SeasonUtility);
+            Type patched = typeof(SeasonUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetReportedSeason");
+        }
     }
 }

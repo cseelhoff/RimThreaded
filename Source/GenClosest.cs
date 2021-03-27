@@ -9,6 +9,12 @@ namespace RimThreaded
 
     public class GenClosest_Patch
     {
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(GenClosest);
+            Type patched = typeof(GenClosest_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RegionwiseBFSWorker");
+        }
 
         private static bool EarlyOutSearch(
           IntVec3 start,

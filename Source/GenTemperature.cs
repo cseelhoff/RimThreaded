@@ -26,9 +26,9 @@ namespace RimThreaded
 
 		public static void RunNonDestructivePatches()
         {
-			RimThreadedHarmony.threadStaticPatches.Add(original, patched);
-			RimThreadedHarmony.TranspileThreadStatics(original, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
-			RimThreadedHarmony.TranspileThreadStatics(original, "EqualizeTemperaturesThroughBuilding");
+			RimThreadedHarmony.AddAllMatchingFields(original, patched);
+			RimThreadedHarmony.TranspileFieldReplacements(original, "PushHeat", new Type[] { typeof(IntVec3), typeof(Map), typeof(float) });
+			RimThreadedHarmony.TranspileFieldReplacements(original, "EqualizeTemperaturesThroughBuilding");
 		}
 
 		public static void RunDestructivePatches()

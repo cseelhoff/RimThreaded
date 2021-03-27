@@ -51,5 +51,13 @@ namespace RimThreaded
             __result = text;
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Job);
+            Type patched = typeof(Job_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "MakeDriver");
+            RimThreadedHarmony.Prefix(original, patched, "ToString", Type.EmptyTypes);
+        }
     }
 }

@@ -181,5 +181,16 @@ namespace RimThreaded
 					Log.Error("IL code instruction set " + mIndex + " not found");
 			}
 		}
-	}
+
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(Thing);
+			Type patched = typeof(Thing_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "SpawnSetup");
+			RimThreadedHarmony.Transpile(original, patched, "DeSpawn");
+			RimThreadedHarmony.Transpile(original, patched, "get_FlammableNow");
+			patched = typeof(Thing_Patch);
+			RimThreadedHarmony.Postfix(original, patched, "SpawnSetup");
+		}
+    }
 }

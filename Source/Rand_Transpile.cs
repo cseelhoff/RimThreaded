@@ -124,6 +124,14 @@ namespace RimThreaded
             }
         }
 
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Rand);
+            Type patched = typeof(Rand_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "PushState", Type.EmptyTypes);
+            RimThreadedHarmony.Transpile(original, patched, "PopState");
+            RimThreadedHarmony.Transpile(original, patched, "TryRangeInclusiveWhere");
+        }
     }
 
 }

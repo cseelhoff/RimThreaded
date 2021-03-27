@@ -82,5 +82,12 @@ namespace RimThreaded
 			return true;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(SoundStarter);
+			Type patched = typeof(SoundStarter_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "PlayOneShot");
+			RimThreadedHarmony.Prefix(original, patched, "PlayOneShotOnCamera");
+		}
+    }
 }

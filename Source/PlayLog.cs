@@ -1,12 +1,6 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -25,5 +19,11 @@ namespace RimThreaded
 			return false;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+		{
+			Type original = typeof(PlayLog);
+			Type patched = typeof(PlayLog_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "RemoveEntry");
+		}
+    }
 }

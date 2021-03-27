@@ -7,6 +7,7 @@ using Verse.Grammar;
 using static HarmonyLib.AccessTools;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using System;
 
 namespace RimThreaded
 {
@@ -472,9 +473,12 @@ namespace RimThreaded
             return list.RandomElementByWeightWithFallback((RuleEntry rule) => (rule.knownUnresolvable || !rule.ValidateConstantConstraints(constants) || !rule.ValidateRequiredTag(extraTags, resolvedTags) || rule.Priority != maxPriority) ? 0f : rule.SelectionWeight);
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(GrammarResolver);
+            Type patched = typeof(GrammarResolver_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ResolveUnsafe", new Type[] { typeof(string), typeof(GrammarRequest), typeof(bool).MakeByRefType(), typeof(string), typeof(bool), typeof(bool), typeof(List<string>), typeof(List<string>), typeof(bool) });
 
-
-
-
+        }
     }
 }

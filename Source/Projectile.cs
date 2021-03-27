@@ -401,8 +401,14 @@ namespace RimThreaded
 			return false;
 		}
 
-
-
-
-	}
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(Projectile);
+			Type patched = typeof(Projectile_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "ImpactSomething");
+			RimThreadedHarmony.Prefix(original, patched, "CanHit");
+			RimThreadedHarmony.Prefix(original, patched, "CheckForFreeInterceptBetween");
+			RimThreadedHarmony.Prefix(original, patched, "CheckForFreeIntercept");
+		}
+    }
 }

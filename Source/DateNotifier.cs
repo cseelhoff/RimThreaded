@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RimWorld;
 using Verse;
 
@@ -35,7 +36,11 @@ namespace RimThreaded
             return false;
         }
 
-
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(DateNotifier);
+            Type patched = typeof(DateNotifier_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FindPlayerHomeWithMinTimezone");
+        }
     }
 }

@@ -175,5 +175,13 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SituationalThoughtHandler);
+            Type patched = typeof(SituationalThoughtHandler_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AppendSocialThoughts");
+            RimThreadedHarmony.Prefix(original, patched, "Notify_SituationalThoughtsDirty");
+            RimThreadedHarmony.Prefix(original, patched, "RemoveExpiredThoughtsFromCache");
+        }
     }
 }

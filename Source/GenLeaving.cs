@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -13,5 +14,12 @@ namespace RimThreaded
             tmpCellsCandidates = new List<IntVec3>();
         }
 
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(GenLeaving);
+            Type patched = typeof(GenLeaving_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "DropFilthDueToDamage");
+        }
     }
 }

@@ -23,12 +23,12 @@ namespace RimThreaded
         {
             Type original = typeof(FoodUtility);
             Type patched = typeof(FoodUtility_Patch);
-            RimThreadedHarmony.threadStaticPatches.Add(original, patched);
-            RimThreadedHarmony.TranspileThreadStatics(original, "BestFoodSourceOnMap");
-            RimThreadedHarmony.TranspileThreadStatics(original, "BestPawnToHuntForPredator");
-            RimThreadedHarmony.TranspileThreadStatics(original, "ThoughtsFromIngesting");
-            RimThreadedHarmony.TranspileThreadStatics(original, "AddIngestThoughtsFromIngredient");
-            RimThreadedHarmony.TranspileThreadStatics(typeof(WorkGiver_InteractAnimal), "TakeFoodForAnimalInteractJob");
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "BestFoodSourceOnMap");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "BestPawnToHuntForPredator");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "ThoughtsFromIngesting");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "AddIngestThoughtsFromIngredient");
+            RimThreadedHarmony.TranspileFieldReplacements(typeof(WorkGiver_InteractAnimal), "TakeFoodForAnimalInteractJob");
         }
     }
 }

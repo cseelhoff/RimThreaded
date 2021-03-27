@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
+using System;
 
 namespace RimThreaded
 {
@@ -62,7 +63,11 @@ namespace RimThreaded
             return false;
         }
 
-
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(BiomeDef);
+            Type patched = typeof(BiomeDef_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "CachePlantCommonalitiesIfShould");
+        }
     }
 }

@@ -14,5 +14,12 @@ namespace RimThreaded
             tmpSbForCapitalizedSentences = new StringBuilder();
         }
 
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(GenText);
+            Type patched = typeof(GenText_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CapitalizeSentences");
+        }
     }
 }

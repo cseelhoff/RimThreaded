@@ -104,5 +104,12 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Map);
+            Type patched = typeof(Map_Patch);
+            //RimThreadedHarmony.Prefix(original, patched, "MapUpdate");
+            RimThreadedHarmony.Prefix(original, patched, "get_IsPlayerHome");
+        }
     }
 }

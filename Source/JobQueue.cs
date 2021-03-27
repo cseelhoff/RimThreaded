@@ -103,6 +103,16 @@ namespace RimThreaded
             return false;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(JobQueue);
+            Type patched = typeof(JobQueue_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AnyCanBeginNow");
+            RimThreadedHarmony.Prefix(original, patched, "EnqueueFirst");
+            RimThreadedHarmony.Prefix(original, patched, "EnqueueLast");
+            RimThreadedHarmony.Prefix(original, patched, "Contains");
+            RimThreadedHarmony.Prefix(original, patched, "Extract");
+            RimThreadedHarmony.Prefix(original, patched, "Dequeue");
+        }
     }
 }

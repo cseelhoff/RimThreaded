@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using System;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreadedHarmony;
+using Verse;
 
 namespace RimThreaded
 {
@@ -38,6 +39,13 @@ namespace RimThreaded
 			{
 				yield return instructionsList[i++];
 			}			
+		}
+
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(BattleLog);
+			Type patched = typeof(BattleLog_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "Add");
 		}
     }
 }

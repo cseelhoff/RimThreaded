@@ -18,8 +18,8 @@ namespace RimThreaded
         {
             Type original = typeof(HaulAIUtility);
             Type patched = typeof(HaulAIUtility_Patch);
-            RimThreadedHarmony.threadStaticPatches.Add(original, patched);
-            RimThreadedHarmony.TranspileThreadStatics(original, "TryFindSpotToPlaceHaulableCloseTo");
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindSpotToPlaceHaulableCloseTo");
         }
     }
 }

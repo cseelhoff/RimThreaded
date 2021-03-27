@@ -165,5 +165,13 @@ namespace RimThreaded
             return false;
         }
 
-	}
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Region);
+            Type patched = typeof(Region_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "DangerFor");
+            RimThreadedHarmony.Prefix(original, patched, "get_AnyCell");
+            RimThreadedHarmony.Prefix(original, patched, "OverlapWith");
+        }
+    }
 }

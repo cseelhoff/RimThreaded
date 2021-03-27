@@ -319,6 +319,11 @@ namespace RimThreaded
 			return false;
 		}
 
-
-	}
+        internal static void RunDestructivePatches()
+		{
+			Type original = typeof(JobGiver_Work);
+			Type patched = typeof(JobGiver_Work_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "TryIssueJobPackage");
+		}
+    }
 }

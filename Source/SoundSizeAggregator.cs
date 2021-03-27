@@ -55,5 +55,14 @@ namespace RimThreaded
 			__result = num;
 			return false;
 		}
-	}
+
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(SoundSizeAggregator);
+			Type patched = typeof(SoundSizeAggregator_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "RegisterReporter");
+			RimThreadedHarmony.Prefix(original, patched, "RemoveReporter");
+			RimThreadedHarmony.Prefix(original, patched, "get_AggregateSize");
+		}
+    }
 }

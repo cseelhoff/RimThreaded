@@ -22,6 +22,17 @@ namespace RimThreaded
             tempDestList = new List<IntVec3>();
             tempSourceList = new List<IntVec3>();
         }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(AttackTargetFinder);
+            Type patched = typeof(AttackTargetFinder_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "BestAttackTarget");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "GetAvailableShootingTargetsByScore");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "DebugDrawAttackTargetScores_Update");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CanSee");
+        }
     }
     
 

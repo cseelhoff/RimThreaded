@@ -1,7 +1,9 @@
 ﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using Verse;
 using static RimThreaded.RimThreadedHarmony;
 
 namespace RimThreaded
@@ -51,6 +53,14 @@ namespace RimThreaded
                 iLGenerator, lockObject, lockTaken, instructionsList, ref i))
                 yield return ci;
             yield return instructionsList[i++];
+        }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(TickList);
+            Type patched = typeof(TickList_Transpile);
+            Transpile(original, patched, "RegisterThing");
+            Transpile(original, patched, "DeregisterThing");
         }
     }
 }

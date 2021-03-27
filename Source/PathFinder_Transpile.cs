@@ -250,6 +250,11 @@ namespace RimThreaded
 			}
 		}
 
-		
-	}
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(PathFinder);
+			Type patched = typeof(PathFinder_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
+		}
+    }
 }

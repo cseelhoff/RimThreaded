@@ -59,5 +59,11 @@ namespace RimThreaded
 			}
 		}
 
-	}
+        internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(CompSpawnSubplant);
+			Type patched = typeof(CompSpawnSubplant_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "DoGrowSubplant");
+		}
+    }
 }

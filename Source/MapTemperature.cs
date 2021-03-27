@@ -39,5 +39,12 @@ namespace RimThreaded
 
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(MapTemperature);
+            Type patched = typeof(MapTemperature_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "MapTemperatureTick");
+        }
     }
 }

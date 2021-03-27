@@ -1,4 +1,5 @@
 ﻿using RimWorld.Planet;
+using System;
 
 namespace RimThreaded
 {
@@ -12,7 +13,11 @@ namespace RimThreaded
             return false;
         }
 
-
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WorldComponentUtility);
+            Type patched = typeof(WorldComponentUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "WorldComponentTick");
+        }
     }
 }

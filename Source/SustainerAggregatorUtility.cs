@@ -51,5 +51,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SustainerAggregatorUtility);
+            Type patched = typeof(SustainerAggregatorUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AggregateOrSpawnSustainerFor");
+        }
     }
 }

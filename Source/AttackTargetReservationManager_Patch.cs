@@ -4,6 +4,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using static Verse.AI.AttackTargetReservationManager;
+using System;
 
 namespace RimThreaded
 {
@@ -146,5 +147,18 @@ namespace RimThreaded
 			__result = num;
 			return false;
 		}
-	}
+
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(AttackTargetReservationManager);
+			Type patched = typeof(AttackTargetReservationManager_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "FirstReservationFor");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllForTarget");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
+			RimThreadedHarmony.Prefix(original, patched, "GetReservationsCount");
+			RimThreadedHarmony.Prefix(original, patched, "Reserve");
+			RimThreadedHarmony.Prefix(original, patched, "IsReservedBy");
+		}
+    }
 }

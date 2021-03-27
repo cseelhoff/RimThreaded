@@ -1,6 +1,6 @@
 ﻿using System;
-using Verse.Sound;
 using UnityEngine;
+using Verse.Sound;
 using static RimThreaded.RimThreaded;
 using static System.Threading.Thread;
 
@@ -15,6 +15,13 @@ namespace RimThreaded
                 (SubSustainer)parameters[0], 
                 (AudioClip)parameters[1], 
                 (float)parameters[2]);
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(SampleSustainer);
+            Type patched = typeof(SampleSustainer_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TryMakeAndPlay");
+        }
 
         public static bool TryMakeAndPlay(ref SampleSustainer __result, SubSustainer subSus, AudioClip clip, float scheduledEndTime)
         {

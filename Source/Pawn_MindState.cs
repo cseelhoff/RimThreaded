@@ -39,5 +39,12 @@ namespace RimThreaded
 			__instance.interactionsToday = 0;
 			return false;
 		}
-	}
+
+        internal static void RunDestructivePatches()
+		{
+			Type original = typeof(Pawn_MindState);
+			Type patched = typeof(Pawn_MindState_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "MindStateTick");
+		}
+    }
 }

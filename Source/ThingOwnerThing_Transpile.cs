@@ -305,5 +305,13 @@ namespace RimThreaded
             yield return returnCode;
             yield return new CodeInstruction(OpCodes.Ret);
         }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(ThingOwner<Thing>);
+            Type patched = typeof(ThingOwnerThing_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
+            RimThreadedHarmony.Transpile(original, patched, "Remove");
+        }
     }
 }

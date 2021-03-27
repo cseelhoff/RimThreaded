@@ -42,8 +42,11 @@ namespace RimThreaded
             return false;
         }
 
-
-
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(FactionManager);
+            Type patched = typeof(FactionManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FactionManagerTick");
+        }
     }
 }

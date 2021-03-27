@@ -62,6 +62,12 @@ namespace RimThreaded
             return false;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Lord);
+            Type patched = typeof(Lord_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AddPawn");
+            RimThreadedHarmony.Prefix(original, patched, "RemovePawn");
+        }
     }
 }

@@ -107,5 +107,17 @@ namespace RimThreaded
             }
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(HediffSet);
+            Type patched = typeof(HediffSet_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AddDirect");
+        }
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(HediffSet);
+            Type patched = typeof(HediffSet_Patch);
+            RimThreadedHarmony.Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
+        }
     }
 }

@@ -40,6 +40,13 @@ namespace RimThreaded
             {
                 Log.Error("IL code instructions not found");
             }
-        }      
+        }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Pawn_PathFollower);
+            Type patched = typeof(Pawn_PathFollower_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "StartPath");
+        }
     }
 }

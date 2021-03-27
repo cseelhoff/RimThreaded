@@ -9,6 +9,7 @@ using System.Reflection.Emit;
 using System.Linq;
 using System;
 using System.Threading;
+using Verse.AI;
 
 namespace RimThreaded
 {
@@ -126,6 +127,13 @@ namespace RimThreaded
                 }
                 i++;
             }
-        }        
+        }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(JobDriver_Wait);
+            Type patched = typeof(JobDriver_Wait_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "CheckForAutoAttack");
+        }
     }
 }

@@ -107,7 +107,16 @@ namespace RimThreaded
             __result = num;
             return false;
         }
-        
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(ThoughtHandler);
+            Type patched = typeof(ThoughtHandler_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TotalOpinionOffset");
+            RimThreadedHarmony.Prefix(original, patched, "MoodOffsetOfGroup");
+            RimThreadedHarmony.Prefix(original, patched, "TotalMoodOffset");
+            RimThreadedHarmony.Prefix(original, patched, "OpinionOffsetOfGroup");
+        }
     }
 
 }

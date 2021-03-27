@@ -14,5 +14,13 @@ namespace RimThreaded
             tmpCells = new List<IntVec3>();
             working = false;
         }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(GenRadial);
+            Type patched = typeof(GenRadial_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "ProcessEquidistantCells");
+        }
     }
 }

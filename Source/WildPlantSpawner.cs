@@ -291,10 +291,12 @@ namespace RimThreaded
             return numPlantsLowerOrder / num2 >= 0.57f;
         }
 
-
-
-
-
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WildPlantSpawner);
+            Type patched = typeof(WildPlantSpawner_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "CheckSpawnWildPlantAt");
+            RimThreadedHarmony.Prefix(original, patched, "WildPlantSpawnerTickInternal");
+        }
     }
 }

@@ -36,6 +36,11 @@ namespace RimThreaded
             return false;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(TemperatureCache);
+            Type patched = typeof(TemperatureCache_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TryCacheRegionTempInfo");
+        }
     }
 }

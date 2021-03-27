@@ -6,6 +6,7 @@ using static Verse.AI.ReservationManager;
 using UnityEngine;
 using System.Text;
 using static HarmonyLib.AccessTools;
+using System;
 
 namespace RimThreaded
 {
@@ -800,5 +801,27 @@ namespace RimThreaded
 				}
 			}
 		}
-	}
+
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(ReservationManager);
+			Type patched = typeof(ReservationManager_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "CanReserve");
+			RimThreadedHarmony.Prefix(original, patched, "CanReserveStack");
+			RimThreadedHarmony.Prefix(original, patched, "Reserve");
+			RimThreadedHarmony.Prefix(original, patched, "Release");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllForTarget");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
+			RimThreadedHarmony.Prefix(original, patched, "FirstReservationFor");
+			RimThreadedHarmony.Prefix(original, patched, "IsReservedByAnyoneOf");
+			RimThreadedHarmony.Prefix(original, patched, "FirstRespectedReserver");
+			RimThreadedHarmony.Prefix(original, patched, "ReservedBy", new Type[] { typeof(LocalTargetInfo), typeof(Pawn), typeof(Job) });
+			//RimThreadedHarmony.Prefix(original, patched, "ReservedByJobDriver_TakeToBed"); //TODO FIX!
+			RimThreadedHarmony.Prefix(original, patched, "AllReservedThings");
+			RimThreadedHarmony.Prefix(original, patched, "DebugString");
+			RimThreadedHarmony.Prefix(original, patched, "DebugDrawReservations");
+			RimThreadedHarmony.Prefix(original, patched, "ExposeData");
+		}
+    }
 }

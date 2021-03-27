@@ -114,5 +114,12 @@ namespace RimThreaded
         {
             return !p.WorkTypeIsDisabled(WorkTypeDefOf.Construction) && !p.WorkTypeIsDisabled(WorkTypeDefOf.Firefighter);
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(LordToil_Siege);
+            Type patched = typeof(LordToil_Siege_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "UpdateAllDuties");
+        }
     }
 }

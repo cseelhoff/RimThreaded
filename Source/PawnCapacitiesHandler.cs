@@ -7,6 +7,7 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
+using System.Reflection;
 
 namespace RimThreaded
 {
@@ -123,6 +124,18 @@ namespace RimThreaded
                 }
             }
             return defMap[capacity];
+        }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(PawnCapacitiesHandler);
+            Type patched = typeof(PawnCapacitiesHandler_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Notify_CapacityLevelsDirty");
+            RimThreadedHarmony.Prefix(original, patched, "Clear");
+            RimThreadedHarmony.Prefix(original, patched, "CapableOf");
+            ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
+            MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
+            RimThreadedHarmony.harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
         }
     }
 }

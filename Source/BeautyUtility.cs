@@ -92,6 +92,11 @@ namespace RimThreaded
             return tmpBeautyRelevantCells;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(BeautyUtility);
+            Type patched = typeof(BeautyUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AverageBeautyPerceptible");
+        }
     }
 }

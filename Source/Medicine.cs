@@ -59,5 +59,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Medicine);
+            Type patched = typeof(Medicine_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetMedicineCountToFullyHeal");
+        }
     }
 }

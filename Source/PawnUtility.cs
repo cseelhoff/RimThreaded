@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 
@@ -7,6 +8,13 @@ namespace RimThreaded
 	public static class PawnUtility_Patch
 	{
         public static Dictionary<Pawn, bool> isPawnInvisible = new Dictionary<Pawn, bool>();
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(PawnUtility);
+            Type patched = typeof(PawnUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "IsInvisible");
+        }
 
         public static bool IsInvisible(ref bool __result, Pawn pawn)
         {

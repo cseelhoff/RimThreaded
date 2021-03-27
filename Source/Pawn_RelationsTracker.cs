@@ -228,5 +228,11 @@ namespace RimThreaded
             }
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Pawn_RelationsTracker);
+            Type patched = typeof(Pawn_RelationsTracker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "get_FamilyByBlood");
+        }
     }
 }
