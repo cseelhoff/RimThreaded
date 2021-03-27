@@ -4,15 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Verse;
-using UnityEngine;
-using Verse.AI;
-using RimWorld;
-using Verse.Sound;
-using RimWorld.Planet;
 using System.Reflection.Emit;
 using System.Threading;
-using Verse.Grammar;
-using Verse.AI.Group;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -48,9 +41,19 @@ namespace RimThreaded
 		public static FieldInfo cachedStoreCell;
 		public static HashSet<MethodInfo> nonDestructivePrefixes = new HashSet<MethodInfo>();
 
+		static RimThreadedHarmony()
+		{
+			Harmony.DEBUG = true;
+			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "  is patching methods...");
 
+			PatchDestructiveFixes();
+			PatchNonDestructiveFixes();
+			PatchModCompatibility();
 
-        public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
+			Log.Message("RimThreaded patching is complete.");
+		}
+
+		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
 		{
 			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
 			loadLockObjectInstructions[0].labels = instructionsList[currentInstructionIndex].labels;
@@ -331,18 +334,6 @@ namespace RimThreaded
 		}
 
 
-		static RimThreadedHarmony()
-		{
-			Harmony.DEBUG = false;
-			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "  is patching methods...");
-
-			PatchDestructiveFixes();
-			PatchNonDestructiveFixes();
-			PatchModCompatibility();
-
-			Log.Message("RimThreaded patching is complete.");
-		}
-
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
 		
@@ -415,10 +406,10 @@ namespace RimThreaded
 		{
 			ThingOwnerThing_Transpile.RunNonDestructivePatches(); //REMOVEAT WILL CAUSE RANGE ERROR. ADD transpile needs new style. 
 			Thing_Patch.RunNonDestructivePatches(); //REMOVEAT WILL CAUSE RANGE ERROR. ADD transpile needs new style. 
-			//BFSWorker_Patch.RunNonDestructivePatches(); //needs rework with RegionTraversers
-
+			
 			//Simple
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
+			BFSWorker_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches(); 
 			CellFinder_Patch.RunNonDestructivePatches();
 			DamageWorker_Patch.RunNonDestructivePatches();
@@ -438,7 +429,7 @@ namespace RimThreaded
 			PawnDiedOrDownedThoughtsUtility_Patch.RunNonDestructivePatches();
 			RCellFinder_Patch.RunNonDestructivePatches();
 			RegionListersUpdater_Patch.RunNonDestructivePatches();
-			RegionTraverser_Transpile.RunNonDestructivePatches();
+			RegionTraverser_Patch.RunNonDestructivePatches();
 			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
 			TickList_Transpile.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
@@ -520,6 +511,7 @@ namespace RimThreaded
 		{
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches();
 			AlertsReadout_Patch.RunDestructivesPatches();
+			AmbientSoundManager_Patch.RunDestructivePatches();
 			AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			AudioSource_Patch.RunDestructivePatches();
 			AudioSourceMaker_Patch.RunDestructivePatches();
@@ -543,6 +535,7 @@ namespace RimThreaded
 			RegionDirtyer_Patch.RunDestructivePatches();
 			SampleSustainer_Patch.RunDestructivePatches();
 			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
+			SubSustainer_Patch.RunDestructivePatches();
 			SustainerManager_Patch.RunDestructivePatches();
 			TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
@@ -552,8 +545,6 @@ namespace RimThreaded
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 
 			//check methods for unneccessary try catches
-			AmbientSoundManager_Patch.RunDestructivePatches();
-			SubSustainer_Patch.RunDestructivePatches();
 			SoundStarter_Patch.RunDestructivePatches();
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			Battle_Patch.RunDestructivePatches();

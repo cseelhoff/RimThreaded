@@ -1,14 +1,9 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
-using System.Threading;
 
 namespace RimThreaded
 {
@@ -19,9 +14,19 @@ namespace RimThreaded
 
 		public static AccessTools.FieldRef<SubSustainer, List<SampleSustainer>> samples =
 			AccessTools.FieldRefAccess<SubSustainer, List<SampleSustainer>>("samples");
+
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(SubSustainer);
+			Type patched = typeof(SubSustainer_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "SubSustainerUpdate");
+		}
+
 		private static void EndSample2(SubSustainer __instance, SampleSustainer samp)
 		{
-			samples(__instance).Remove(samp);
+			List<SampleSustainer> newSamples = new List<SampleSustainer>(samples(__instance));
+			newSamples.Remove(samp);
+			samples(__instance) = newSamples;
 			samp.SampleCleanup();
 		}
 
@@ -103,25 +108,13 @@ namespace RimThreaded
 				{
 					sampleSustainer.resolvedSkipAttack = true;
 				}
-				samples(__instance).Add(sampleSustainer);
+				lock (__instance)
+				{
+					samples(__instance).Add(sampleSustainer);
+				}
 			}
-			/*
-			int tID = Thread.CurrentThread.ManagedThreadId;
-			if (RimThreaded.mainRequestWaits.TryGetValue(tID, out EventWaitHandle eventWaitStart))
-			{
-				RimThreaded.tryMakeAndPlayRequests.TryAdd(tID, new object[] { __instance, ((ResolvedGrain_Clip)resolvedGrain).clip, num2 });
-				RimThreaded.mainThreadWaitHandle.Set();
-				eventWaitStart.WaitOne();
-			}
-			*/
 			return false;
 		}
 
-        internal static void RunDestructivePatches()
-        {
-			Type original = typeof(SubSustainer);
-			Type patched = typeof(SubSustainer_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "SubSustainerUpdate");
-		}
     }
 }

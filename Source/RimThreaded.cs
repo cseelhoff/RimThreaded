@@ -233,7 +233,7 @@ namespace RimThreaded
             AttackTargetFinder_Patch.InitializeThreadStatics();
             AttackTargetsCache_Patch.InitializeThreadStatics();
             BeautyUtility_Patch.InitializeThreadStatics();
-            //BFSWorker_Patch.InitializeThreadStatics();
+            BFSWorker_Patch.InitializeThreadStatics();
             CellFinder_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             DamageWorker_Patch.InitializeThreadStatics();
@@ -261,6 +261,7 @@ namespace RimThreaded
             ReachabilityCache_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
+            RegionTraverser_Patch.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();
             ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
             Verb_Patch.InitializeThreadStatics();
