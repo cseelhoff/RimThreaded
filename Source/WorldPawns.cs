@@ -66,9 +66,11 @@ namespace RimThreaded
                 p = pawnArray[index];
                 if (funcShouldMothball(__instance, p))
                 {
-                    lock (pawnsAlive(__instance))
+                    lock (__instance)
                     {
-                        pawnsAlive(__instance).Remove(p);
+                        HashSet<Pawn> newSet = new HashSet<Pawn>(pawnsAlive(__instance));
+                        newSet.Remove(p);
+                        pawnsAlive(__instance) = newSet;
                     }
                     lock (pawnsMothballed(__instance))
                     {
@@ -106,9 +108,13 @@ namespace RimThreaded
                     tmpPawnsToRemove.Add(pawn);
                 }
             }
-            foreach (Pawn p in tmpPawnsToRemove)
-                pawnsDead(__instance).Remove(p);
-
+            lock (__instance)
+            {
+                HashSet<Pawn> newSet = new HashSet<Pawn>(pawnsDead(__instance));
+                foreach (Pawn p in tmpPawnsToRemove)
+                    newSet.Remove(p);
+                pawnsDead(__instance) = newSet;
+            }
             try
             {
                 __instance.gc.WorldPawnGCTick();

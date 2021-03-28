@@ -31,13 +31,17 @@ namespace RimThreaded
 
             RimThreaded.allFactions = allFactions(__instance);
             RimThreaded.allFactionsTicks = allFactions(__instance).Count;
-
-            for (int num = toRemove(__instance).Count - 1; num >= 0; num--)
+            lock (__instance)
             {
-                Faction faction = toRemove(__instance)[num];
-                toRemove(__instance).Remove(faction);
-                actionRemove(__instance, faction);
-                Find.QuestManager.Notify_FactionRemoved(faction);
+                List<Faction> newList = toRemove(__instance);
+                for (int num = newList.Count - 1; num >= 0; num--)
+                {
+                    Faction faction = newList[num];
+                    newList.Remove(faction);
+                    toRemove(__instance) = newList;
+                    actionRemove(__instance, faction);
+                    Find.QuestManager.Notify_FactionRemoved(faction);
+                }
             }
             return false;
         }

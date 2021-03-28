@@ -590,6 +590,7 @@ namespace RimThreaded
 			GenRadial_Patch.RunNonDestructivePatches();
 			GenText_Patch.RunNonDestructivePatches();
 			HaulAIUtility_Patch.RunNonDestructivePatches();
+			MapTemperature_Patch.RunNonDestructivePatches();
 			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
 			Pawn_MeleeVerbs_Patch.RunNonDestructivePatches();
 			Pawn_WorkSettings_Patch.RunNonDestructivePatches();
@@ -722,9 +723,8 @@ namespace RimThreaded
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
 			ReservationManager_Patch.RunDestructivePatches();
-			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock
+			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
 			MapPawns_Patch.RunDestructivePatches();
-			MapTemperature_Patch.RunDestructivePatches();
 			Region_Patch.RunDestructivePatches();
 			Sample_Patch.RunDestructivePatches();
 			Sustainer_Patch.RunDestructivePatches();

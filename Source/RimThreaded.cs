@@ -248,6 +248,7 @@ namespace RimThreaded
             GenText_Patch.InitializedThreadStatics();
             HaulAIUtility_Patch.InitializeThreadStatics();
             InfestationCellFinder_Patch.InitializeThreadStatics();
+            MapTemperature_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             Pawn_InteractionsTracker_Transpile.InitializeThreadStatics();
             Pawn_MeleeVerbs_Patch.InitializeThreadStatics();

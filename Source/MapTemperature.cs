@@ -8,43 +8,20 @@ namespace RimThreaded
 
     public class MapTemperature_Patch
     {
-        public static AccessTools.FieldRef<MapTemperature, Map> map =
-            AccessTools.FieldRefAccess<MapTemperature, Map>("map");
-        
-        public static bool MapTemperatureTick(MapTemperature __instance)
+        [ThreadStatic] public static HashSet<RoomGroup> fastProcessedRoomGroups;
+
+        public static void InitializeThreadStatics()
         {
-            if (Find.TickManager.TicksGame % 120 != 7 && !DebugSettings.fastEcology)
-                return false;
-
-            HashSet<RoomGroup> fastProcessedRoomGroups = new HashSet<RoomGroup>();
-            List<Room> allRooms = map(__instance).regionGrid.allRooms;
-            RoomGroup group;
-            for (int index = 0; index < allRooms.Count; ++index)
-            {
-                try {
-                    group = allRooms[index].Group;
-                } catch(ArgumentOutOfRangeException) { break; }
-                if (!fastProcessedRoomGroups.Contains(group))
-                {
-                    if (null != group)
-                    {
-                        if (null != group.TempTracker)
-                        {
-                            group.TempTracker.EqualizeTemperature();
-                            fastProcessedRoomGroups.Add(group);
-                        }
-                    }
-                }
-            }
-
-            return false;
+            fastProcessedRoomGroups = new HashSet<RoomGroup>();
         }
 
-        internal static void RunDestructivePatches()
+        public static void RunNonDestructivePatches()
         {
             Type original = typeof(MapTemperature);
             Type patched = typeof(MapTemperature_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "MapTemperatureTick");
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "MapTemperatureTick");
         }
+
     }
 }
