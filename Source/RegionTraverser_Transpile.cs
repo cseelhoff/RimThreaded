@@ -1,9 +1,5 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using Verse;
 using static HarmonyLib.AccessTools;
 
@@ -20,7 +16,6 @@ namespace RimThreaded
 			regionClosedIndex = new Dictionary<Region, uint[]>();
 			freeWorkers = new Queue<object>();
 			NumWorkers = 8;
-			//RegionTraverser.PassAll = ((Region from, Region to) => true);
 			RegionTraverser.RecreateWorkers();
 		}
 

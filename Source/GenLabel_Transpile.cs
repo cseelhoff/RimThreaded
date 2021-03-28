@@ -38,7 +38,7 @@ namespace RimThreaded
 					LocalBuilder lockObject = iLGenerator.DeclareLocal(dictionary_LabelRequest_String); //EDIT
 					LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
 					foreach (CodeInstruction ci in EnterLock(
-						lockObject, lockTaken, loadLockObjectInstructions, instructionsList, ref i))
+						lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
 						yield return ci;
 
 					while (i < instructionsList.Count)
@@ -51,7 +51,7 @@ namespace RimThreaded
 						yield return instructionsList[i++];
 					}
 					foreach (CodeInstruction ci in ExitLock(
-						iLGenerator, lockObject, lockTaken, instructionsList, ref i))
+						iLGenerator, lockObject, lockTaken, instructionsList[i]))
 						yield return ci;
 					matchesFound[matchIndex]++;
 					continue;

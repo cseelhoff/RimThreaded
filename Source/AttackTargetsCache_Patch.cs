@@ -158,7 +158,7 @@ namespace RimThreaded
 						Log.Warning("Tried to register the same target twice " + target.ToStringSafe() + " in " + __instance.GetType());
 						return false;
 					}
-					allTargetsListDict[__instance] = new List<IAttackTarget>(snapshotAllTargets) { target };
+					snapshotAllTargets.Add(target);
 				} else
                 {
 					allTargetsListDict[__instance] = new List<IAttackTarget>() { target };

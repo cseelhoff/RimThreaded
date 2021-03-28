@@ -53,15 +53,15 @@ namespace RimThreaded
 			Log.Message("RimThreaded patching is complete.");
 		}
 
-		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
+		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, CodeInstruction currentInstruction)
 		{
 			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
-			loadLockObjectInstructions[0].labels = instructionsList[currentInstructionIndex].labels;
+			loadLockObjectInstructions[0].labels = currentInstruction.labels;
 			for (int i = 0; i < loadLockObjectInstructions.Count; i++)
 			{
 				codeInstructions.Add(loadLockObjectInstructions[i]);
 			}
-			instructionsList[currentInstructionIndex].labels = new List<Label>();
+			currentInstruction.labels = new List<Label>();
 			codeInstructions.Add(new CodeInstruction(OpCodes.Stloc, lockObject.LocalIndex));
 			codeInstructions.Add(new CodeInstruction(OpCodes.Ldc_I4_0));
 			codeInstructions.Add(new CodeInstruction(OpCodes.Stloc, lockTaken.LocalIndex));
@@ -73,7 +73,7 @@ namespace RimThreaded
 				new Type[] { typeof(object), typeof(bool).MakeByRefType() })));
 			return codeInstructions;
 		}
-		public static List<CodeInstruction> ExitLock(ILGenerator iLGenerator, LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> instructionsList, ref int currentInstructionIndex)
+		public static List<CodeInstruction> ExitLock(ILGenerator iLGenerator, LocalBuilder lockObject, LocalBuilder lockTaken, CodeInstruction currentInstruction)
 		{
 			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
 			Label endHandlerDestination = iLGenerator.DefineLabel();
@@ -89,7 +89,7 @@ namespace RimThreaded
 			codeInstruction.labels.Add(endFinallyDestination);
 			codeInstruction.blocks.Add(new ExceptionBlock(ExceptionBlockType.EndExceptionBlock));
 			codeInstructions.Add(codeInstruction);
-			instructionsList[currentInstructionIndex].labels.Add(endHandlerDestination);
+			currentInstruction.labels.Add(endHandlerDestination);
 			return codeInstructions;
 		}
 
@@ -271,15 +271,13 @@ namespace RimThreaded
 			};
 			LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
 			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
-			foreach (CodeInstruction ci in EnterLock(
-				lockObject, lockTaken, loadLockObjectInstructions, instructionsList, ref i))
+			foreach (CodeInstruction ci in EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
 				yield return ci;
 			while (i < instructionsList.Count - 1)
 			{
 				yield return instructionsList[i++];
 			}
-			foreach (CodeInstruction ci in ExitLock(
-				iLGenerator, lockObject, lockTaken, instructionsList, ref i))
+			foreach (CodeInstruction ci in ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
 				yield return ci;
 			yield return instructionsList[i++];
 		}
@@ -337,15 +335,184 @@ namespace RimThreaded
 			}
 		}
 
+		public static IEnumerable<CodeInstruction> Add3Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			List<CodeInstruction> instructionsList = instructions.ToList();
+			int i = 0;
+			while (i < instructionsList.Count)
+			{
+				if (i + 3 < instructionsList.Count && instructionsList[i + 3].opcode == OpCodes.Callvirt)
+				{
+					if (instructionsList[i + 3].operand is MethodInfo methodInfo)
+					{
+						if (methodInfo.Name.Equals("Add") && methodInfo.DeclaringType.FullName.Contains("System.Collections"))
+						{
+							LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
+							LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+							List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>()
+							{
+								new CodeInstruction(OpCodes.Ldarg_0)
+							};
+							foreach (CodeInstruction lockInstruction in EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
+							{
+								yield return lockInstruction;
+							}
+							yield return instructionsList[i++];
+							yield return instructionsList[i++];
+							yield return instructionsList[i++];
+							yield return instructionsList[i++];
+							foreach (CodeInstruction lockInstruction in ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
+							{
+								yield return lockInstruction;
+							}
+							continue;
+						}
+					}
+				}
+				yield return instructionsList[i++];
+			}
+
+		}
+
+		/*
+		public static IEnumerable<CodeInstruction> ModifyRemoveTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			List<CodeInstruction> instructionsList = instructions.ToList();
+			int i = 0;
+			int removeInstructionIndex = -1;
+			while (i < instructionsList.Count)
+			{
+				if (instructionsList[i].opcode == OpCodes.Callvirt)
+				{
+					if (instructionsList[i].operand is MethodInfo methodInfo)
+					{
+						if (methodInfo.Name.Contains("Remove") && methodInfo.DeclaringType.Name.Contains("System.Collections"))
+						{
+							removeInstructionIndex = i;
+							int j = i;
+							while (j > 0)
+                            {
+								OpCode oc = instructionsList[j].opcode;
+								if (oc == OpCodes.Call) { }
+								else if (oc == OpCodes.Add) { }
+								else if (oc == OpCodes.Add_Ovf) { }
+								else if (oc == OpCodes.Add_Ovf_Un) { }
+								else if (oc == OpCodes.And) { }
+								else if (oc == OpCodes.Arglist) { }
+								else if (oc == OpCodes.Beq) { }
+								else if (oc == OpCodes.Beq_S) { }
+								else if (oc == OpCodes.Bge) { }
+								else if (oc == OpCodes.Bge_S) { }
+								else if (oc == OpCodes.Bge_Un) { }
+								else if (oc == OpCodes.Bge_Un_S) { }
+								else if (oc == OpCodes.Bgt) { }
+								else if (oc == OpCodes.Bgt_S) { }
+								else if (oc == OpCodes.Bgt_Un) { }
+								else if (oc == OpCodes.Bgt_Un_S) { }
+								else if (oc == OpCodes.Ble) { }
+								else if (oc == OpCodes.Ble_S) { }
+								else if (oc == OpCodes.Ble_Un) { }
+								else if (oc == OpCodes.Ble_Un_S) { }
+								else if (oc == OpCodes.Blt) { }
+								else if (oc == OpCodes.Blt_S) { }
+								else if (oc == OpCodes.Blt_Un) { }
+								else if (oc == OpCodes.Blt_Un_S) { }
+								else if (oc == OpCodes.Bne_Un) { }
+								else if (oc == OpCodes.Bne_Un_S) { }
+								else if (oc == OpCodes.Box) { }
+								else if (oc == OpCodes.Br) { }
+
+							}
+						}
+					}
+				}
+			}
+			i = 0;
+			List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
+			{
+				new CodeInstruction(OpCodes.Ldarg_0)
+			};
+			LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
+			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+			foreach (CodeInstruction ci in EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
+				yield return ci;
+			while (i < instructionsList.Count - 1)
+			{
+				if (instructionsList[i].opcode == OpCodes.Ldfld && i + 2 < instructionsList.Count - 1 && instructionsList[i+2].opcode == OpCodes.Callvirt)
+				{
+					if (instructionsList[i].operand is FieldInfo fieldInfo && instructionsList[i+2].operand is MethodInfo methodInfo)
+					{
+						if (methodInfo.Name.Contains("Remove") && methodInfo.DeclaringType.Name.Contains("System.Collections"))
+						{
+							Type collectionType = fieldInfo.FieldType;
+							LocalBuilder collectionCopy = iLGenerator.DeclareLocal(collectionType);
+							ConstructorInfo constructorInfo = collectionType.GetConstructor(new Type[] { collectionType });
+							yield return new CodeInstruction(OpCodes.Newobj, constructorInfo);
+							yield return new CodeInstruction(OpCodes.Stloc, collectionCopy.LocalIndex);
+							yield return new CodeInstruction(OpCodes.Ldloc, collectionCopy.LocalIndex);
+							yield return instructionsList[i++];//load item to remove
+							yield return instructionsList[i++];//remove method
+						}
+					}
+				}
+				yield return instructionsList[i++];
+			}
+			foreach (CodeInstruction ci in ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
+				yield return ci;
+			yield return instructionsList[i++];
+		}
+		
+		public static IEnumerable<CodeInstruction> LockAddTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			List<CodeInstruction> instructionsList = instructions.ToList();
+			int i = 0;
+			while (i < instructionsList.Count)
+			{
+				if (instructionsList[i].opcode == OpCodes.Callvirt)
+				{
+					if (instructionsList[i].operand is MethodInfo methodInfo)
+					{
+						if (methodInfo.Name.Equals("Add") && methodInfo.DeclaringType.Name.Contains("System.Collections"))
+						{
+							LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
+							LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+							List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>()
+							{
+								new CodeInstruction(OpCodes.Ldarg_0)
+							};
+							foreach (CodeInstruction lockInstruction in EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
+							{
+								yield return lockInstruction;
+							}
+							yield return instructionsList[i++];
+							foreach (CodeInstruction lockInstruction in ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
+							{
+								yield return lockInstruction;
+							}
+							continue;
+						}
+					}
+				}
+				yield return instructionsList[i++];
+				
+			}
+		}
+		*/
 
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
-		
+		public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
+
 
 		public static void TranspileFieldReplacements(Type original, string methodName, Type[] orig_type = null)
 		{
 			//Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.Name + "." + methodName);
 			harmony.Patch(Method(original, methodName, orig_type), transpiler: replaceFieldsHarmonyTranspiler);
+		}
+
+		public static void TranspileLockAdd3(Type original, string methodName, Type[] orig_type = null)
+		{
+			harmony.Patch(Method(original, methodName, orig_type), transpiler: add3Transpiler);
 		}
 
 		public static void Prefix(Type original, Type patched, string methodName, Type[] orig_type = null, bool destructive = true)
@@ -408,7 +575,6 @@ namespace RimThreaded
 
 		private static void PatchNonDestructiveFixes()
 		{
-			ThingOwnerThing_Transpile.RunNonDestructivePatches(); //REMOVEAT WILL CAUSE RANGE ERROR. ADD transpile needs new style. 
 			Thing_Patch.RunNonDestructivePatches(); //REMOVEAT WILL CAUSE RANGE ERROR. ADD transpile needs new style. 
 			
 			//Simple
@@ -455,25 +621,12 @@ namespace RimThreaded
 			PathFinder_Transpile.RunNonDestructivePatches(); //large method
 			PawnCapacitiesHandler_Transpile.RunNonDestructivePatches(); //reexamine complexity?
 			Rand_Patch.RunNonDestructivePatches(); //uses old transpile for lock
+			RegionTraverser_Transpile.RunNonDestructivePatches(); 
 			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
+			ThingOwnerThing_Transpile.RunNonDestructivePatches();
 			WealthWatcher_Patch.RunNonDestructivePatches();
 			WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
 			WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
-
-			//RegionTraverser
-			RegionTraverser_Transpile.RunNonDestructivePatches();
-			/*
-			Type original = typeof(RegionTraverser);
-			Type patched = typeof(RegionTraverser_Transpile);
-			Transpile(original, patched, "BreadthFirstTraverse", new Type[] {
-				typeof(Region),
-				typeof(RegionEntryPredicate),
-				typeof(RegionProcessor),
-				typeof(int),
-				typeof(RegionType)
-			});
-			Transpile(original, patched, "RecreateWorkers");
-			*/
 
 
 			Pawn_RelationsTracker_Transpile.RunNonDestructivePatches(); //TODO - should transpile ReplacePotentiallyRelatedPawns instead

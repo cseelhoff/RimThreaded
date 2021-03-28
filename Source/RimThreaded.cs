@@ -233,7 +233,6 @@ namespace RimThreaded
             AttackTargetFinder_Patch.InitializeThreadStatics();
             AttackTargetsCache_Patch.InitializeThreadStatics();
             BeautyUtility_Patch.InitializeThreadStatics();
-            BFSWorker_Patch2.InitializeThreadStatics();
             CellFinder_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             DamageWorker_Patch.InitializeThreadStatics();
