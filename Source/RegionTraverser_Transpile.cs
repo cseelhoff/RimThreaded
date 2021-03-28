@@ -30,7 +30,7 @@ namespace RimThreaded
 			Type patched = typeof(RegionTraverser_Transpile);
 			RimThreadedHarmony.replaceFields.Add(Field(original, "NumWorkers"), Field(patched, "NumWorkers"));
 			RimThreadedHarmony.replaceFields.Add(Field(original, "freeWorkers"), Field(patched, "freeWorkers"));
-
+			
 			RimThreadedHarmony.TranspileFieldReplacements(original, "BreadthFirstTraverse", new Type[] {
 				typeof(Region),
 				typeof(RegionEntryPredicate),
@@ -39,6 +39,7 @@ namespace RimThreaded
 				typeof(RegionType)
 			});
 			RimThreadedHarmony.TranspileFieldReplacements(original, "RecreateWorkers");
+			
 		}
 		public static uint[] getRegionClosedIndex(Region region)
 		{

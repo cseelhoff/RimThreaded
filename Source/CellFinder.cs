@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Verse;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -39,7 +40,9 @@ namespace RimThreaded
             Type patched = typeof(CellFinder_Patch);
             RimThreadedHarmony.AddAllMatchingFields(original, patched);
             RimThreadedHarmony.TranspileFieldReplacements(original, "RandomRegionNear");
+            RimThreadedHarmony.TranspileFieldReplacements(TypeByName("Verse.CellFinder+<>c"), "<RandomRegionNear>b__15_1");
             RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindRandomReachableCellNear");
+            RimThreadedHarmony.TranspileFieldReplacements(TypeByName("Verse.CellFinder+<>c"), "<TryFindRandomReachableCellNear>b__17_1");
             RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindRandomCellInRegion");
             RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindRandomCellNear");
             RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindRandomEdgeCellWith", new Type[] {
@@ -48,7 +51,9 @@ namespace RimThreaded
                 typeof(Predicate<IntVec3>), typeof(Map), typeof(Rot4), typeof(float), typeof(IntVec3).MakeByRefType() });
             RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindBestPawnStandCell");
             RimThreadedHarmony.TranspileFieldReplacements(original, "FindNoWipeSpawnLocNear");
+
         }
+
 
     }
 }

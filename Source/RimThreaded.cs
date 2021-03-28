@@ -263,6 +263,7 @@ namespace RimThreaded
             RegionTraverser_Transpile.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();
             ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
+            ThoughtHandler_Patch.InitializeThreadStatics();
             Verb_Patch.InitializeThreadStatics();
             WealthWatcher_Patch.InitializeThreads();
             World_Patch.InitializeThreadStatics();

@@ -31,6 +31,13 @@ namespace RimThreaded
         public static AccessTools.FieldRef<Pawn_RelationsTracker, List<DirectPawnRelation>> directRelations =
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, List<DirectPawnRelation>>("directRelations");
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Pawn_RelationsTracker);
+            Type patched = typeof(Pawn_RelationsTracker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "get_FamilyByBlood");
+        }
+
         public static IEnumerable<Pawn> get_PotentiallyRelatedPawns2(Pawn_RelationsTracker __instance)
         {
             if (!__instance.RelatedToAnyoneOrAnyoneRelatedToMe)
@@ -228,11 +235,5 @@ namespace RimThreaded
             }
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(Pawn_RelationsTracker);
-            Type patched = typeof(Pawn_RelationsTracker_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "get_FamilyByBlood");
-        }
     }
 }

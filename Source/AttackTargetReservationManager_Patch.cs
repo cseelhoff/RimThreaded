@@ -16,6 +16,19 @@ namespace RimThreaded
 		public static AccessTools.FieldRef<AttackTargetReservationManager, Map> map =
 			AccessTools.FieldRefAccess<AttackTargetReservationManager, Map>("map");
 
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(AttackTargetReservationManager);
+			Type patched = typeof(AttackTargetReservationManager_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "FirstReservationFor");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllForTarget");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
+			RimThreadedHarmony.Prefix(original, patched, "GetReservationsCount");
+			RimThreadedHarmony.Prefix(original, patched, "Reserve");
+			RimThreadedHarmony.Prefix(original, patched, "IsReservedBy");
+		}
+
 		public static bool ReleaseAllForTarget(AttackTargetReservationManager __instance, IAttackTarget target)
 		{
 			lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
@@ -148,17 +161,5 @@ namespace RimThreaded
 			return false;
 		}
 
-        internal static void RunDestructivePatches()
-        {
-			Type original = typeof(AttackTargetReservationManager);
-			Type patched = typeof(AttackTargetReservationManager_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "FirstReservationFor");
-			RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
-			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllForTarget");
-			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
-			RimThreadedHarmony.Prefix(original, patched, "GetReservationsCount");
-			RimThreadedHarmony.Prefix(original, patched, "Reserve");
-			RimThreadedHarmony.Prefix(original, patched, "IsReservedBy");
-		}
     }
 }

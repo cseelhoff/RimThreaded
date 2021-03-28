@@ -43,7 +43,7 @@ namespace RimThreaded
 
 		static RimThreadedHarmony()
 		{
-			Harmony.DEBUG = true;
+			Harmony.DEBUG = false;
 			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "  is patching methods...");
 
 			PatchDestructiveFixes();
@@ -575,11 +575,9 @@ namespace RimThreaded
 
 		private static void PatchNonDestructiveFixes()
 		{
-			Thing_Patch.RunNonDestructivePatches(); //REMOVEAT WILL CAUSE RANGE ERROR. ADD transpile needs new style. 
 			
 			//Simple
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
-			//BFSWorker_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches(); 
 			CellFinder_Patch.RunNonDestructivePatches();
 			DamageWorker_Patch.RunNonDestructivePatches();
@@ -597,11 +595,12 @@ namespace RimThreaded
 			Pawn_WorkSettings_Patch.RunNonDestructivePatches();
 			PawnsFinder_Patch.RunNonDestructivePatches();
 			PawnDiedOrDownedThoughtsUtility_Patch.RunNonDestructivePatches();
+			Projectile_Patch.RunNonDestructivePatches();
 			RCellFinder_Patch.RunNonDestructivePatches();
 			RegionListersUpdater_Patch.RunNonDestructivePatches();
-			//RegionTraverser_Patch.RunNonDestructivePatches();
 			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
 			TickList_Transpile.RunNonDestructivePatches();
+			ThoughtHandler_Patch.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
 
@@ -623,6 +622,7 @@ namespace RimThreaded
 			Rand_Patch.RunNonDestructivePatches(); //uses old transpile for lock
 			RegionTraverser_Transpile.RunNonDestructivePatches(); 
 			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
+			Thing_Patch.RunNonDestructivePatches();
 			ThingOwnerThing_Transpile.RunNonDestructivePatches();
 			WealthWatcher_Patch.RunNonDestructivePatches();
 			WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
@@ -705,6 +705,7 @@ namespace RimThreaded
 			RegionDirtyer_Patch.RunDestructivePatches();
 			SampleSustainer_Patch.RunDestructivePatches();
 			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
+			SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
 			SubSustainer_Patch.RunDestructivePatches();
 			SustainerManager_Patch.RunDestructivePatches();
 			TaleManager_Patch.RunDestructivePatches();
@@ -715,12 +716,9 @@ namespace RimThreaded
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 
 			//check methods for unneccessary try catches
-			SoundStarter_Patch.RunDestructivePatches();
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			Battle_Patch.RunDestructivePatches();
 			Building_Door_Patch.RunDestructivePatches();
-			ThoughtHandler_Patch.RunDestructivePatches();
-			Projectile_Patch.RunDestructivePatches();
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
 			ReservationManager_Patch.RunDestructivePatches();
