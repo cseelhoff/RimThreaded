@@ -34,7 +34,7 @@ namespace RimThreaded
                 totalCostInt(__instance) = 0f;
                 usedRegionHeuristics(__instance) = false;
                 lock (nodes(__instance)) {
-                    nodes(__instance).Clear();
+                    nodes(__instance) = new List<IntVec3>();
                 }
                 __instance.inUse = false;
             }

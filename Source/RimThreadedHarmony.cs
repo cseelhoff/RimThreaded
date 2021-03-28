@@ -590,6 +590,7 @@ namespace RimThreaded
 			GenRadial_Patch.RunNonDestructivePatches();
 			GenText_Patch.RunNonDestructivePatches();
 			HaulAIUtility_Patch.RunNonDestructivePatches();
+			ImmunityHandler_Patch.RunNonDestructivePatches();
 			MapTemperature_Patch.RunNonDestructivePatches();
 			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
 			Pawn_MeleeVerbs_Patch.RunNonDestructivePatches();
@@ -704,10 +705,13 @@ namespace RimThreaded
 			ReachabilityCache_Patch.RunDestructivePatches();
 			RealtimeMoteList_Patch.RunDestructivePatches();
 			RegionDirtyer_Patch.RunDestructivePatches();
-			SampleSustainer_Patch.RunDestructivePatches();
+			Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			SampleSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
+			SoundSizeAggregator_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
 			SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
-			SubSustainer_Patch.RunDestructivePatches();
+			SubSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			Sustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			SustainerManager_Patch.RunDestructivePatches();
 			TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
@@ -726,8 +730,6 @@ namespace RimThreaded
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
 			MapPawns_Patch.RunDestructivePatches();
 			Region_Patch.RunDestructivePatches();
-			Sample_Patch.RunDestructivePatches();
-			Sustainer_Patch.RunDestructivePatches();
 			ImmunityHandler_Patch.RunDestructivePatches();
 			Room_Patch.RunDestructivePatches();
 			LongEventHandler_Patch.RunDestructivePatches();
@@ -736,7 +738,6 @@ namespace RimThreaded
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
 			GenCollection_Patch.RunDestructivePatches();
-			SoundSizeAggregator_Patch.RunDestructivePatches();
 			HediffSet_Patch.RunDestructivePatches();
 			LanguageWordInfo_Patch.RunDestructivePatches();
 			JobGiver_ConfigurableHostilityResponse_Patch.RunDestructivePatches();

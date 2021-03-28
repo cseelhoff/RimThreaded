@@ -247,6 +247,7 @@ namespace RimThreaded
             GenTemperature_Patch.InitializeThreadStatics();
             GenText_Patch.InitializedThreadStatics();
             HaulAIUtility_Patch.InitializeThreadStatics();
+            ImmunityHandler_Patch.InitializeThreadStatics();
             InfestationCellFinder_Patch.InitializeThreadStatics();
             MapTemperature_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();

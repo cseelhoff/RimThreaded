@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using static Verse.ImmunityHandler;
@@ -11,9 +10,7 @@ namespace RimThreaded
 
     public class ImmunityHandler_Patch
     {
-        [ThreadStatic]
-        public static List<ImmunityInfo> tmpNeededImmunitiesNow;
-        //public static Dictionary<int, List<ImmunityInfo>> immunityInfoLists = new Dictionary<int, List<ImmunityInfo>>();
+        [ThreadStatic] public static List<ImmunityInfo> tmpNeededImmunitiesNow;
 
         public static FieldRef<ImmunityHandler, List<ImmunityRecord>> immunityList =
             FieldRefAccess<ImmunityHandler, List<ImmunityRecord>>("immunityList");
@@ -24,40 +21,35 @@ namespace RimThreaded
             (Action<ImmunityHandler, HediffDef, HediffDef>)Delegate.CreateDelegate(
                 typeof(Action<ImmunityHandler, HediffDef, HediffDef>), methodTryAddImmunityRecord);
 
-        public static bool NeededImmunitiesNow(ImmunityHandler __instance, ref List<ImmunityInfo> __result)
+        private static readonly MethodInfo methodNeededImmunitiesNow =
+            Method(typeof(ImmunityHandler), "NeededImmunitiesNow", new Type[] { });
+        private static readonly Func<ImmunityHandler, List<ImmunityInfo>> funcNeededImmunitiesNow =
+            (Func<ImmunityHandler, List<ImmunityInfo>>)Delegate.CreateDelegate(typeof(Func<ImmunityHandler, List<ImmunityInfo>>), methodNeededImmunitiesNow);
+
+        public static void InitializeThreadStatics()
         {
-            if (tmpNeededImmunitiesNow == null)
-            {
-                tmpNeededImmunitiesNow = new List<ImmunityInfo>();
-            }
-            else
-            {
-                tmpNeededImmunitiesNow.Clear(); //Changed to tmpNeededImmunitiesNow
-            }
-            List<Hediff> hediffs = __instance.pawn.health.hediffSet.hediffs;
-            for (int i = 0; i < hediffs.Count; i++)
-            {
-                Hediff hediff = hediffs[i];
-                if (hediff != null && hediff.def != null && hediff.def.PossibleToDevelopImmunityNaturally())
-                {
-                    //Changed to tmpNeededImmunitiesNow
-                    tmpNeededImmunitiesNow.Add(new ImmunityInfo
-                    {
-                        immunity = hediff.def,
-                        source = hediff.def
-                    });
-                }
-            }
-            //Changed to tmpNeededImmunitiesNow
-            __result = tmpNeededImmunitiesNow;
-            return false;
+            tmpNeededImmunitiesNow = new List<ImmunityInfo>(); ;
+        }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(ImmunityHandler);
+            Type patched = typeof(ImmunityHandler_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ImmunityHandlerTick");
+        }
+
+        public static void RunNonDestructivePatches()
+        {
+            Type original = typeof(ImmunityHandler);
+            Type patched = typeof(ImmunityHandler_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "NeededImmunitiesNow");
         }
 
 
         public static bool ImmunityHandlerTick(ImmunityHandler __instance)
         {
-            List<ImmunityInfo> list = null;
-            NeededImmunitiesNow(__instance, ref list);
+            List<ImmunityInfo> list = funcNeededImmunitiesNow(__instance);
             for (int i = 0; i < list.Count; i++)
             {
                 actionTryAddImmunityRecord(__instance, list[i].immunity, list[i].source);
@@ -96,12 +88,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(ImmunityHandler);
-            Type patched = typeof(ImmunityHandler_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "ImmunityHandlerTick");
-            RimThreadedHarmony.Prefix(original, patched, "NeededImmunitiesNow");
-        }
     }
 }
