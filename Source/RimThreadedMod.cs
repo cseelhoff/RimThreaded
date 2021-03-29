@@ -40,7 +40,7 @@ namespace RimThreaded
                 RimThreaded.maxThreads = Settings.disablelimits ? Math.Max(Settings.maxThreads, 1) : Math.Min(Math.Max(Settings.maxThreads, 1), 128);
                 RimThreaded.RestartAllWorkerThreads();
             }
-            RimThreaded.timeoutMS = Settings.disablelimits ? Math.Max(Settings.timeoutMS, 1) : Math.Min(Math.Max(Settings.timeoutMS, 5000), 100000);
+            RimThreaded.timeoutMS = Settings.disablelimits ? Math.Max(Settings.timeoutMS, 1) : Math.Min(Math.Max(Settings.timeoutMS, 5000), 20000);
             RimThreaded.timeSpeedNormal = Settings.timeSpeedNormal;
             RimThreaded.timeSpeedFast = Settings.timeSpeedFast;
             RimThreaded.timeSpeedSuperfast = Settings.timeSpeedSuperfast;
