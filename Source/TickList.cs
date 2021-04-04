@@ -1,8 +1,6 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading;
 using Verse;
 using static HarmonyLib.AccessTools;
 
@@ -24,6 +22,13 @@ namespace RimThreaded
             Method(typeof(TickList), "get_TickInterval");
         private static readonly Func<TickList, int> funcGetTickInterval =
             (Func<TickList, int>)Delegate.CreateDelegate(typeof(Func<TickList, int>), methodGetTickInterval);
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(TickList);
+            Type patched = typeof(TickList_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Tick");
+        }
 
         public static bool DeregisterThing(TickList __instance, Thing t)
         {

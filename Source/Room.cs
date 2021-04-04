@@ -9,6 +9,11 @@ namespace RimThreaded
 
     public class Room_Patch
 	{
+		[ThreadStatic]
+		private static HashSet<Thing> uniqueContainedThingsSet;
+		[ThreadStatic]
+		private static HashSet<Room> uniqueNeighborsSet;
+
 		public static AccessTools.FieldRef<Room, int> cachedOpenRoofCount =
 			AccessTools.FieldRefAccess<Room, int>("cachedOpenRoofCount");
 		public static AccessTools.FieldRef<Room, int> cachedCellCount =
@@ -26,7 +31,13 @@ namespace RimThreaded
 
 		public static bool get_ContainedAndAdjacentThings(Room __instance, ref List<Thing> __result)
 		{
-			HashSet<Thing> uniqueContainedThingsSet = new HashSet<Thing>();
+			if(uniqueContainedThingsSet == null)
+            {
+				uniqueContainedThingsSet = new HashSet<Thing>();
+			} else
+            {
+				uniqueContainedThingsSet.Clear();
+			}
 			List<Thing> uniqueContainedThings = new List<Thing>();
 			for (int i = 0; i < regions(__instance).Count; i++)
 			{
@@ -47,6 +58,31 @@ namespace RimThreaded
 			}
 
 			__result = uniqueContainedThings;
+			return false;
+			
+		}
+		public static bool get_Neighbors(Room __instance, ref List<Room> __result)
+		{
+			if(uniqueNeighborsSet == null)
+            {
+				uniqueNeighborsSet = new HashSet<Room>();
+			} else
+            {
+				uniqueNeighborsSet.Clear();
+			}
+			List<Room> uniqueNeighbors = new List<Room>();            
+            List<Region> regionsList = regions(__instance);
+			for (int i = 0; i < regionsList.Count; i++)
+			{
+				foreach (Region neighbor in regionsList[i].Neighbors)
+				{
+					if (uniqueNeighborsSet.Add(neighbor.Room) && neighbor.Room != __instance)
+					{
+						uniqueNeighbors.Add(neighbor.Room);
+					}
+				}
+			}
+			__result = uniqueNeighbors;
 			return false;
 			
 		}
@@ -219,7 +255,7 @@ namespace RimThreaded
 			}
 
 			RoomGroup roomGroup = __instance.Group;
-			if (roomGroup !=null && roomGroup.AnyRoomTouchesMapEdge && (float)__instance.OpenRoofCount / (float)__instance.CellCount >= 0.5f)
+			if (roomGroup !=null && roomGroup.AnyRoomTouchesMapEdge && __instance.OpenRoofCount / (float)__instance.CellCount >= 0.5f)
 			{
 				__result = true;
 				return false;
@@ -228,5 +264,17 @@ namespace RimThreaded
 			return false;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(Room);
+			Type patched = typeof(Room_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "OpenRoofCountStopAt");
+			RimThreadedHarmony.Prefix(original, patched, "get_PsychologicallyOutdoors");
+			RimThreadedHarmony.Prefix(original, patched, "RemoveRegion");
+			RimThreadedHarmony.Prefix(original, patched, "Notify_RoofChanged");
+			RimThreadedHarmony.Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
+			RimThreadedHarmony.Prefix(original, patched, "get_ContainedAndAdjacentThings");
+			RimThreadedHarmony.Prefix(original, patched, "get_Neighbors");
+		}
+    }
 }

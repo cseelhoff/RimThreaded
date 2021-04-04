@@ -86,7 +86,13 @@ namespace RimThreaded
             return true;
         }
 
-
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Texture2D);
+            Type patched = typeof(Texture2D_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Internal_Create");
+            RimThreadedHarmony.Prefix(original, patched, "ReadPixels", new Type[] { typeof(Rect), typeof(int), typeof(int), typeof(bool) });
+            RimThreadedHarmony.Prefix(original, patched, "Apply", new Type[] { typeof(bool), typeof(bool) });
+        }
     }
 }

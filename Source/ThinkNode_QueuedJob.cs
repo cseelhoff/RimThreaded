@@ -51,6 +51,13 @@ namespace RimThreaded
             __result = ThinkResult.NoJob;
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(ThinkNode_QueuedJob);
+            Type patched = typeof(ThinkNode_QueuedJob_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TryIssueJobPackage");
+        }
     }
     
 }

@@ -22,8 +22,17 @@ namespace RimThreaded
 			int tID = Thread.CurrentThread.ManagedThreadId;
 			if (!workingLists.TryGetValue(tID, out List<Pawn> workingList))
 			{
-				workingList = new List<Pawn>();
-				workingLists[tID] = workingList;
+				lock (workingLists)
+				{
+					if (!workingLists.TryGetValue(tID, out List<Pawn> workingList2))
+					{
+						workingList = new List<Pawn>();
+						workingLists[tID] = workingList;
+					} else
+                    {
+						workingList = workingList2;
+					}
+				}
 			}
 			return workingList;
 		}
@@ -43,7 +52,7 @@ namespace RimThreaded
 			//Pawn_InteractionsTracker.workingList.Clear();
 			List<Pawn> workingList = getWorkingList(); //ADDED
 			workingList.AddRange(collection); //REPLACED workingList with local
-			workingList.Shuffle<Pawn>();//REPLACED workingList with local
+			workingList.Shuffle();//REPLACED workingList with local
 			List<InteractionDef> allDefsListForReading = DefDatabase<InteractionDef>.AllDefsListForReading;
 			for (int i = 0; i < workingList.Count; i++)//REPLACED workingList with local
 			{

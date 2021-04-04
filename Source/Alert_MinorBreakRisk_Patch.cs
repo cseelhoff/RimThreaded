@@ -1,30 +1,25 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
 
 namespace RimThreaded
 {
     class Alert_MinorBreakRisk_Patch
     {
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(Alert_MinorBreakRisk);
+            Type patched = typeof(Alert_MinorBreakRisk_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetReport");
+        }
         public static bool GetReport(Alert_MinorBreakRisk __instance, ref AlertReport __result)
         {
             List<Pawn> pawnsAtRiskMinorResult = new List<Pawn>();
             List<Pawn> pawnList = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep;
             for (int i = 0; i < pawnList.Count; i++)
             {
-                Pawn item;
-                try
-                {
-                    item = pawnList[i];
-                } catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
-
+                Pawn item = pawnList[i];
                 if (!item.Downed && item.MentalStateDef == null)
                 {
                     float curMood = item.mindState.mentalBreaker.CurMood;

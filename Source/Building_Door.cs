@@ -6,7 +6,6 @@ using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 using System.Reflection;
 using static HarmonyLib.AccessTools;
 
@@ -44,69 +43,11 @@ namespace RimThreaded
 			return false;
 		}
 
-		public static bool get_FreePassage(Building_Door __instance, out bool __result)
-		{
-            bool r = false;
-            get_WillCloseSoon(__instance, ref r);
-			__result = openInt(__instance) && (holdOpenInt(__instance) || !r);
-			return false;
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(Building_Door);
+			Type patched = typeof(Building_Door_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "get_DoorPowerOn");
 		}
-
-		public static bool get_WillCloseSoon(Building_Door __instance, ref bool __result)
-		{
-			if (!__instance.Spawned)
-			{
-				__result = true;
-				return false;
-			}
-			if (!openInt(__instance))
-			{
-				__result = true;
-				return false;
-			}
-			if (holdOpenInt(__instance))
-			{
-				__result = false;
-				return false;
-			}
-			if (ticksUntilClose(__instance) > 0 && ticksUntilClose(__instance) <= 111 && !__instance.BlockedOpenMomentary)
-			{
-				__result = true;
-				return false;
-
-			}
-			if ((bool)canTryCloseAutomatically.GetValue(__instance, null) && !__instance.BlockedOpenMomentary)
-			{
-				__result = true;
-				return false;
-			}
-			for (int i = 0; i < 5; i++)
-			{
-                IntVec3 position = (__instance).Position;
-                IntVec3 c = position + GenAdj.CardinalDirectionsAndInside[i];
-				Map map = (__instance).Map;
-				if (c.InBounds(map))
-				{
-					List<Thing> thingList = c.GetThingList(map);
-					for (int j = 0; j < thingList.Count; j++)
-					{
-                        if (thingList[j] is Pawn pawn)
-                        {
-                            Pawn_PathFollower pather1 = pawn.pather;
-                            if (null != pather1)
-                            {
-                                if (pawn != null && !pawn.HostileTo(__instance) && !pawn.Downed && (pawn.Position == position || (pather1.Moving && pather1.nextCell == position)))
-                                {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-				}
-			}
-			return false;
-		}
-		
-
-	}
+    }
 }

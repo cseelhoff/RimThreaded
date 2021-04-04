@@ -36,13 +36,7 @@ namespace RimThreaded
             
             entries(__instance) = (from e in entries(__instance)
                             orderby e.Age
-                            select e).ToList<LogEntry>();
-            /*
-            foreach(var e in entries(__instance))
-            {
-
-            }
-            */
+                            select e).ToList();
             entries(battle).Clear();
             concerns(battle).Clear();
             absorbedBy(battle) = __instance;
@@ -52,15 +46,15 @@ namespace RimThreaded
 
         public static bool ExposeData(Battle __instance)
         {
-            Scribe_Values.Look<int>(ref loadID(__instance), "loadID", 0, false);
-            Scribe_Values.Look<int>(ref creationTimestamp(__instance), "creationTimestamp", 0, false);
-            Scribe_Collections.Look<LogEntry>(ref entries(__instance), "entries", LookMode.Deep, (new object[] { }));
-            Scribe_References.Look<Battle>(ref absorbedBy(__instance), "absorbedBy", false);
-            Scribe_Values.Look<string>(ref battleName(__instance), "battleName", (string)null, false);
+            Scribe_Values.Look(ref loadID(__instance), "loadID", 0, false);
+            Scribe_Values.Look(ref creationTimestamp(__instance), "creationTimestamp", 0, false);
+            Scribe_Collections.Look(ref entries(__instance), "entries", LookMode.Deep, (new object[] { }));
+            Scribe_References.Look(ref absorbedBy(__instance), "absorbedBy", false);
+            Scribe_Values.Look(ref battleName(__instance), "battleName", null, false);
             if (Scribe.mode != LoadSaveMode.PostLoadInit)
                 return false;
             concerns(__instance).Clear();
-            //foreach (Pawn pawn in entries(__instance).SelectMany<LogEntry, Thing>(e => e.GetConcerns()).OfType<Pawn>())
+
             foreach (LogEntry logEntry in entries(__instance))
             {
                 if (null != logEntry)
@@ -78,5 +72,12 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Battle);
+            Type patched = typeof(Battle_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ExposeData");
+            RimThreadedHarmony.Prefix(original, patched, "Absorb");
+        }
     }
 }

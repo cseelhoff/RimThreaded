@@ -26,6 +26,13 @@ namespace RimThreaded
                 }
             }
             return false;
-        } 
+        }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(StoryState);
+            Type patched = typeof(StoryState_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RecordPopulationIncrease");
+        }
     }
 }

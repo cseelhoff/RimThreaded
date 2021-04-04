@@ -1,21 +1,62 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using static HarmonyLib.AccessTools;
+using System.Reflection;
 
 namespace RimThreaded
 {
 
     public class CompCauseGameCondition_Patch
     {
-        public static FieldRef<CompCauseGameCondition, Dictionary<Map, GameCondition>> causedConditions = 
+        [ThreadStatic] public static List<Map> tmpDeadConditionMaps;
+
+        public static FieldRef<CompCauseGameCondition, Dictionary<Map, GameCondition>> causedConditionsFieldRef = 
             FieldRefAccess<CompCauseGameCondition, Dictionary<Map, GameCondition>>("causedConditions");
+
+        private static readonly MethodInfo methodEnforceConditionOn =
+            Method(typeof(CompCauseGameCondition), "EnforceConditionOn", new Type[] { typeof(Map) });
+        private static readonly Func<CompCauseGameCondition, Map, GameCondition> funcEnforceConditionOn =
+            (Func<CompCauseGameCondition, Map, GameCondition>)Delegate.CreateDelegate(typeof(Func<CompCauseGameCondition, Map, GameCondition>), methodEnforceConditionOn);
+
+        public static void InitializeThreadStatics()
+        {
+            tmpDeadConditionMaps = new List<Map>();
+        }
+
+        public static bool GetConditionInstance(CompCauseGameCondition __instance, ref GameCondition __result, Map map)
+        {
+            if (!causedConditionsFieldRef(__instance).TryGetValue(map, out GameCondition value) && __instance.Props.preventConditionStacking)
+            {
+                value = map.GameConditionManager.GetActiveCondition(__instance.Props.conditionDef);
+                if (value != null)
+                {
+                    lock (__instance)
+                    {
+                        causedConditionsFieldRef(__instance).Add(map, value);
+                    }
+                    value.suppressEndMessage = true;
+                }
+            }
+
+            __result = value;
+            return false;
+        }
+        public static bool CreateConditionOn(CompCauseGameCondition __instance, ref GameCondition __result, Map map)
+        {
+            GameCondition gameCondition = GameConditionMaker.MakeCondition(__instance.ConditionDef);
+            gameCondition.Duration = gameCondition.TransitionTicks;
+            gameCondition.conditionCauser = __instance.parent;
+            map.gameConditionManager.RegisterCondition(gameCondition);
+            lock (__instance)
+            {
+                causedConditionsFieldRef(__instance).Add(map, gameCondition);
+            }
+            gameCondition.suppressEndMessage = true;
+            __result = gameCondition;
+            return false;
+        }
 
         public static bool CompTick(CompCauseGameCondition __instance)
 		{
@@ -25,13 +66,13 @@ namespace RimThreaded
                 {
                     if (__instance.InAoE(map.Tile))
                     {
-                        EnforceConditionOn2(__instance, map);
+                        funcEnforceConditionOn(__instance, map);
                     }
                 }
             }
+            tmpDeadConditionMaps.Clear();
 
-            List<Map> tmpDeadConditionMaps = new List<Map>();
-            foreach (KeyValuePair<Map, GameCondition> causedCondition in causedConditions(__instance))
+            foreach (KeyValuePair<Map, GameCondition> causedCondition in causedConditionsFieldRef(__instance))
             {
                 if (causedCondition.Value.Expired || !causedCondition.Key.GameConditionManager.ConditionIsActive(causedCondition.Value.def))
                 {
@@ -41,55 +82,29 @@ namespace RimThreaded
 
             foreach (Map tmpDeadConditionMap in tmpDeadConditionMaps)
             {
-                causedConditions(__instance).Remove(tmpDeadConditionMap);
+                if (causedConditionsFieldRef(__instance).ContainsKey(tmpDeadConditionMap))
+                {
+                    lock (__instance)
+                    {
+                        if (causedConditionsFieldRef(__instance).ContainsKey(tmpDeadConditionMap))
+                        {
+                            Dictionary<Map, GameCondition> newCausedConditions = new Dictionary<Map, GameCondition>(causedConditionsFieldRef(__instance));
+                            newCausedConditions.Remove(tmpDeadConditionMap);
+                            causedConditionsFieldRef(__instance) = newCausedConditions;
+                        }
+                    }
+                }
             }
             return false;
         }
-        public static GameCondition EnforceConditionOn2(CompCauseGameCondition __instance, Map map)
+
+        internal static void RunDestructivePatches()
         {
-            GameCondition gameCondition = GetConditionInstance2(__instance, map);
-            if (gameCondition == null)
-            {
-                gameCondition = CreateConditionOn2(__instance, map);
-            }
-            else
-            {
-                gameCondition.TicksLeft = gameCondition.TransitionTicks;
-            }
-
-            return gameCondition;
+            Type original = typeof(CompCauseGameCondition);
+            Type patched = typeof(CompCauseGameCondition_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetConditionInstance");
+            RimThreadedHarmony.Prefix(original, patched, "CreateConditionOn");
+            RimThreadedHarmony.Prefix(original, patched, "CompTick");
         }
-        public static GameCondition GetConditionInstance2(CompCauseGameCondition __instance, Map map)
-        {
-            if (!causedConditions(__instance).TryGetValue(map, out GameCondition value) && __instance.Props.preventConditionStacking)
-            {
-                value = map.GameConditionManager.GetActiveCondition(__instance.Props.conditionDef);
-                if (value != null)
-                {
-                    causedConditions(__instance).Add(map, value);
-                    SetupCondition2(value, map);
-                }
-            }
-
-            return value;
-        }
-        public static GameCondition CreateConditionOn2(CompCauseGameCondition __instance, Map map)
-        {
-            GameCondition gameCondition = GameConditionMaker.MakeCondition(__instance.ConditionDef);
-            gameCondition.Duration = gameCondition.TransitionTicks;
-            gameCondition.conditionCauser = __instance.parent;
-            map.gameConditionManager.RegisterCondition(gameCondition);
-            causedConditions(__instance).Add(map, gameCondition);
-            SetupCondition2(gameCondition, map);
-            return gameCondition;
-        }
-        public static void SetupCondition2(GameCondition condition, Map map)
-        {
-            condition.suppressEndMessage = true;
-        }
-
-
-
-
     }
 }

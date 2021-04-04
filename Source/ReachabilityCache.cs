@@ -1,16 +1,31 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Verse;
 
 namespace RimThreaded
 {
     class ReachabilityCache_Patch
     {
+        [ThreadStatic] public static List<CachedEntry2> tmpCachedEntries;
+
+        public static void InitializeThreadStatics()
+        {
+            tmpCachedEntries = new List<CachedEntry2>();
+        }
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(ReachabilityCache);
+            Type patched = typeof(ReachabilityCache_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "get_Count");
+            RimThreadedHarmony.Prefix(original, patched, "CachedResultFor");
+            RimThreadedHarmony.Prefix(original, patched, "AddCachedResult");
+            RimThreadedHarmony.Prefix(original, patched, "Clear");
+            RimThreadedHarmony.Prefix(original, patched, "ClearFor");
+            RimThreadedHarmony.Prefix(original, patched, "ClearForHostile");
+        }
+
         public struct CachedEntry2 : IEquatable<CachedEntry2>
         {
             public int FirstRoomID
@@ -85,54 +100,40 @@ namespace RimThreaded
         }
         public static Dictionary<ReachabilityCache, Dictionary<CachedEntry2, bool>> cacheDictDict = new Dictionary<ReachabilityCache, Dictionary<CachedEntry2, bool>>();
 
-        public static Dictionary<int, List<CachedEntry2>> tmpCachedEntries2 = new Dictionary<int, List<CachedEntry2>>();
-
         public static bool get_Count(ReachabilityCache __instance, ref int __result)
         {
             __result = getCacheDict(__instance).Count;
             return false;
         }
-        public static List<CachedEntry2> getTmpCachedEntries()
-        {
-            int tID = Thread.CurrentThread.ManagedThreadId;
-            if (!tmpCachedEntries2.TryGetValue(tID, out List<CachedEntry2> tmpCachedEntries))
-            {
-                tmpCachedEntries = new List<CachedEntry2>(new List<CachedEntry2>());
-                lock (tmpCachedEntries2)
-                {
-                    tmpCachedEntries2[tID] = tmpCachedEntries;
-                }
-            }
-            return tmpCachedEntries;
-        }
 
         public static Dictionary<CachedEntry2, bool> getCacheDict(ReachabilityCache __instance)
         {
-            if(!cacheDictDict.TryGetValue(__instance, out Dictionary<CachedEntry2, bool> cacheDict)) {
-                lock (cacheDictDict)
-                {
-                    if (!cacheDictDict.TryGetValue(__instance, out Dictionary<CachedEntry2, bool> cacheDict2))
-                    {
-                        cacheDict = new Dictionary<CachedEntry2, bool>();
-                        cacheDictDict[__instance] = cacheDict;
-                    }
+            Dictionary<CachedEntry2, bool> cacheDict;
+            lock (cacheDictDict)
+            {
+                if (!cacheDictDict.TryGetValue(__instance, out cacheDict)) {
+                    cacheDict = new Dictionary<CachedEntry2, bool>();
+                    cacheDictDict[__instance] = cacheDict;
                 }
-            }
+            }            
             return cacheDict;
         }
 
         public static bool CachedResultFor(ReachabilityCache __instance, ref BoolUnknown __result, Room A, Room B, TraverseParms traverseParams)
         {
             Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
-            if (cacheDict.TryGetValue(new CachedEntry2(A.ID, B.ID, traverseParams), out bool value))
+            lock (cacheDict)
             {
-                if (!value)
+                if (cacheDict.TryGetValue(new CachedEntry2(A.ID, B.ID, traverseParams), out bool value))
                 {
-                    __result = BoolUnknown.False;
+                    if (!value)
+                    {
+                        __result = BoolUnknown.False;
+                        return false;
+                    }
+                    __result = BoolUnknown.True;
                     return false;
                 }
-                __result = BoolUnknown.True;
-                return false;
             }
             __result = BoolUnknown.Unknown;
             return false;
@@ -166,20 +167,20 @@ namespace RimThreaded
 
         public static bool ClearFor(ReachabilityCache __instance, Pawn p)
         {
-            List<CachedEntry2> tmpCachedEntries = getTmpCachedEntries();
             tmpCachedEntries.Clear();
             Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
-            foreach (KeyValuePair<CachedEntry2, bool> item in cacheDict)
-            {
-                if (item.Key.TraverseParms.pawn == p)
-                {
-                    tmpCachedEntries.Add(item.Key);
-                }
-            }
 
-            for (int i = 0; i < tmpCachedEntries.Count; i++)
+            lock (cacheDict)
             {
-                lock (cacheDict)
+                foreach (KeyValuePair<CachedEntry2, bool> item in cacheDict)
+                {
+                    if (item.Key.TraverseParms.pawn == p)
+                    {
+                        tmpCachedEntries.Add(item.Key);
+                    }
+                }
+
+                for (int i = 0; i < tmpCachedEntries.Count; i++)
                 {
                     cacheDict.Remove(tmpCachedEntries[i]);
                 }
@@ -190,8 +191,14 @@ namespace RimThreaded
         }
         public static bool ClearForHostile(ReachabilityCache __instance, Thing hostileTo)
         {
-            List<CachedEntry2> tmpCachedEntries = getTmpCachedEntries();
-            tmpCachedEntries.Clear();
+            if (tmpCachedEntries == null)
+            {
+                tmpCachedEntries = new List<CachedEntry2>();
+            }
+            else
+            {
+                tmpCachedEntries.Clear();
+            }
             Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
             lock (cacheDict)
             {
@@ -203,10 +210,7 @@ namespace RimThreaded
                         tmpCachedEntries.Add(item.Key);
                     }
                 }
-            }
-            for (int i = 0; i < tmpCachedEntries.Count; i++)
-            {
-                lock (cacheDict)
+                for (int i = 0; i < tmpCachedEntries.Count; i++)
                 {
                     cacheDict.Remove(tmpCachedEntries[i]);
                 }

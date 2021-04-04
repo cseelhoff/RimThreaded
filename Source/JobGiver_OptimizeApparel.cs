@@ -22,15 +22,7 @@ namespace RimThreaded
             //wornApparelScores.Clear();
             for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
             {
-                Apparel apparel;
-                try
-                {
-                    apparel = pawn.apparel.WornApparel[i];
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
+                Apparel apparel = pawn.apparel.WornApparel[i];
                 wornApparelScores.Add(JobGiver_OptimizeApparel.ApparelScoreRaw(pawn, apparel));
             }
             float scoreGain = 0f;
@@ -190,6 +182,13 @@ namespace RimThreaded
             pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range(6000, 9000);
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(JobGiver_OptimizeApparel);
+            Type patched = typeof(JobGiver_OptimizeApparel_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ApparelScoreGain");
+            RimThreadedHarmony.Prefix(original, patched, "ApparelScoreGain_NewTmp");
+            RimThreadedHarmony.Prefix(original, patched, "TryGiveJob");
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using System;
+using Verse;
 using Verse.AI;
 
 namespace RimThreaded
@@ -13,21 +14,23 @@ namespace RimThreaded
 				__result = false;
 				return false;
 			}
-			Map map = p.Map;
-			ReservationManager reservationManager = map.reservationManager;
 			__result = false;
-			if (reservationManager != null)
-			{
-				__result = reservationManager.CanReserve(
+			__result = ReservationManager_Patch.CanReserve(p.Map.reservationManager, ref __result,
 					p,
 					target,
 					maxPawns,
 					stackCount,
 					layer,
 					ignoreOtherReservations);
-			}
+			
 			return false;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+		{
+			Type original = typeof(ReservationUtility);
+			Type patched = typeof(ReservationUtility_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "CanReserve");
+		}
+    }
 }

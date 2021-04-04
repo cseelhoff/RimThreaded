@@ -24,7 +24,7 @@ namespace RimThreaded
             List<Hediff> tmpHediffs = new List<Hediff>();
             if (tendableHediffsInTendPriorityOrder != null)
             {
-                tmpHediffs.AddRange((IEnumerable<Hediff>)tendableHediffsInTendPriorityOrder);
+                tmpHediffs.AddRange(tendableHediffsInTendPriorityOrder);
             }
             else
             {
@@ -36,7 +36,7 @@ namespace RimThreaded
                 }
                 TendUtility.SortByTendPriority(tmpHediffs);
             }
-            if (!tmpHediffs.Any<Hediff>())
+            if (!tmpHediffs.Any())
                 return false;
             Hediff tmpHediff1 = tmpHediffs[0];
             outHediffsToTend.Add(tmpHediff1);
@@ -57,10 +57,10 @@ namespace RimThreaded
                     if (tmpHediffs[index] != tmpHediff1 && tmpHediffs[index] is Hediff_Injury tmpHediff2)
                     {
                         float severity2 = tmpHediff2.Severity;
-                        if ((double)severity1 + (double)severity2 <= 20.0)
+                        if (severity1 + (double)severity2 <= 20.0)
                         {
                             severity1 += severity2;
-                            outHediffsToTend.Add((Hediff)tmpHediff2);
+                            outHediffsToTend.Add(tmpHediff2);
                         }
                     }
                 }
@@ -69,5 +69,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(TendUtility);
+            Type patched = typeof(TendUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetOptimalHediffsToTendWithSingleTreatment");
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace RimThreaded
                 {
                     if (countedAmount.Key.IsNutritionGivingIngestible && countedAmount.Key.ingestible.HumanEdible)
                     {
-                        num += countedAmount.Key.GetStatValueAbstract(StatDefOf.Nutrition) * (float)countedAmount.Value;
+                        num += countedAmount.Key.GetStatValueAbstract(StatDefOf.Nutrition) * countedAmount.Value;
                     }
                 }
             }
@@ -130,5 +130,16 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(ResourceCounter);
+            Type patched = typeof(ResourceCounter_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "get_TotalHumanEdibleNutrition");
+            RimThreadedHarmony.Prefix(original, patched, "ResetDefs");
+            RimThreadedHarmony.Prefix(original, patched, "ResetResourceCounts");
+            RimThreadedHarmony.Prefix(original, patched, "GetCount");
+            RimThreadedHarmony.Prefix(original, patched, "GetCountIn", new Type[] { typeof(ThingRequestGroup) });
+            RimThreadedHarmony.Prefix(original, patched, "UpdateResourceCounts");
+        }
     }
 }

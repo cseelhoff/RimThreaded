@@ -1,8 +1,5 @@
 ﻿using RimWorld;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 using Verse;
 using Verse.AI.Group;
@@ -52,5 +49,12 @@ namespace RimThreaded
 
 			return false;
 		}
-	}
+
+        internal static void RunDestructivePatches()
+		{
+			Type original = typeof(HediffGiver_Heat);
+			Type patched = typeof(HediffGiver_Heat_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "OnIntervalPassed");
+		}
+    }
 }

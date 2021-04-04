@@ -1,12 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
@@ -118,7 +113,7 @@ namespace RimThreaded
                                 }
                                 if (openSet(__instance).Count > area)
                                 {
-                                    Log.Error("Overflow on flood fill (>" + (object)area + " cells). Make sure we're not flooding over the same area after we check it.", false);
+                                    Log.Error("Overflow on flood fill (>" + area + " cells). Make sure we're not flooding over the same area after we check it.", false);
                                     working(__instance) = false;
                                     return false;
                                 }
@@ -146,6 +141,14 @@ namespace RimThreaded
             }
             visited(__instance).Clear();
             openSet(__instance).Clear();
+        }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(FloodFiller);
+            Type patched = typeof(FloodFiller_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FloodFill", new Type[] { typeof(IntVec3), typeof(Predicate<IntVec3>), typeof(Func<IntVec3, int, bool>), typeof(int), typeof(bool), typeof(IEnumerable<IntVec3>) });
+
         }
     }
 }

@@ -34,5 +34,12 @@ namespace RimThreaded
             __result = null;
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(QuestUtility);
+            Type patched = typeof(QuestUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetExtraFaction");
+        }
     }
 }

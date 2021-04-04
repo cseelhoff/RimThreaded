@@ -1,133 +1,110 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
+using System;
 
 namespace RimThreaded
 {
 
-	public class PawnsFinder_Patch
-	{
+    public class PawnsFinder_Patch
+    {
+        [ThreadStatic] public static List<Pawn> allMapsWorldAndTemporary_AliveOrDead_Result;
+        [ThreadStatic] public static List<Pawn> allMapsWorldAndTemporary_Alive_Result;
+        [ThreadStatic] public static List<Pawn> allMapsAndWorld_Alive_Result;
+        [ThreadStatic] public static List<Pawn> allMaps_Result;
+        [ThreadStatic] public static List<Pawn> allMaps_Spawned_Result;
+        [ThreadStatic] public static List<Pawn> all_AliveOrDead_Result;
+        [ThreadStatic] public static List<Pawn> temporary_Result;
+        [ThreadStatic] public static List<Pawn> temporary_Alive_Result;
+        [ThreadStatic] public static List<Pawn> temporary_Dead_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_Result;
+        [ThreadStatic] public static List<Pawn> allCaravansAndTravelingTransportPods_Alive_Result;
+        [ThreadStatic] public static List<Pawn> allCaravansAndTravelingTransportPods_AliveOrDead_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result;
+        [ThreadStatic] public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep_Result;
+        [ThreadStatic] public static List<Pawn> allMaps_PrisonersOfColonySpawned_Result;
+        [ThreadStatic] public static List<Pawn> allMaps_PrisonersOfColony_Result;
+        [ThreadStatic] public static List<Pawn> allMaps_FreeColonists_Result;
+        [ThreadStatic] public static List<Pawn> allMaps_FreeColonistsSpawned_Result;
+        [ThreadStatic] public static List<Pawn> allMaps_FreeColonistsAndPrisonersSpawned_Result;
+        [ThreadStatic] public static List<Pawn> allMaps_FreeColonistsAndPrisoners_Result;
+        [ThreadStatic] public static Dictionary<Faction, List<Pawn>> allMaps_SpawnedPawnsInFaction_Result;
+        [ThreadStatic] public static List<Pawn> homeMaps_FreeColonistsSpawned_Result;
 
+        public static void InitializeThreadStatics()
+        {
+            allMapsWorldAndTemporary_AliveOrDead_Result = new List<Pawn>();
+            allMapsWorldAndTemporary_Alive_Result = new List<Pawn>();
+            allMapsAndWorld_Alive_Result = new List<Pawn>();
+            allMaps_Result = new List<Pawn>();
+            allMaps_Spawned_Result = new List<Pawn>();
+            all_AliveOrDead_Result = new List<Pawn>();
+            temporary_Result = new List<Pawn>();
+            temporary_Alive_Result = new List<Pawn>();
+            temporary_Dead_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_Result = new List<Pawn>();
+            allCaravansAndTravelingTransportPods_Alive_Result = new List<Pawn>();
+            allCaravansAndTravelingTransportPods_AliveOrDead_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result = new List<Pawn>();
+            allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep_Result = new List<Pawn>();
+            allMaps_PrisonersOfColonySpawned_Result = new List<Pawn>();
+            allMaps_PrisonersOfColony_Result = new List<Pawn>();
+            allMaps_FreeColonists_Result = new List<Pawn>();
+            allMaps_FreeColonistsSpawned_Result = new List<Pawn>();
+            allMaps_FreeColonistsAndPrisonersSpawned_Result = new List<Pawn>();
+            allMaps_FreeColonistsAndPrisoners_Result = new List<Pawn>();
+            allMaps_SpawnedPawnsInFaction_Result = new Dictionary<Faction, List<Pawn>>();
+            homeMaps_FreeColonistsSpawned_Result = new List<Pawn>();
+        }
 
-		public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result =
-			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result");
-		public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_Result =
-			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_Result");
-		public static List<Pawn> allMapsWorldAndTemporary_Alive_Result =
-			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsWorldAndTemporary_Alive_Result");
-		public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result =
-			AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result");
-		public static List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result =
-					AccessTools.StaticFieldRefAccess<List<Pawn>>(typeof(PawnsFinder), "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result");
-
-		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive(ref List<Pawn> __result)
-		{
-			List<Pawn> allMaps = PawnsFinder.AllMaps;
-			List<Pawn> allCaravansAndTravelingTransportPods_Alive = PawnsFinder.AllCaravansAndTravelingTransportPods_Alive;
-			lock (allMapsCaravansAndTravelingTransportPods_Alive_Result)
-			{
-				if (allCaravansAndTravelingTransportPods_Alive.Count == 0)
-				{
-					__result = allMaps;
-					return false;
-				}
-
-				allMapsCaravansAndTravelingTransportPods_Alive_Result.Clear();
-				allMapsCaravansAndTravelingTransportPods_Alive_Result.AddRange(allMaps);
-				allMapsCaravansAndTravelingTransportPods_Alive_Result.AddRange(allCaravansAndTravelingTransportPods_Alive);
-			}
-			__result = allMapsCaravansAndTravelingTransportPods_Alive_Result;
-			return false;
-
-		}
-		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists(ref List<Pawn> __result)
-		{
-			lock (allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result)
-			{
-				allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result.Clear();
-			}
-			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive;
-			for (int i = 0; i < allMapsCaravansAndTravelingTransportPods_Alive.Count; i++)
-			{
-				Pawn mapsCaravansAndTravelingTransportPods_Alive;
-				try
-				{
-					mapsCaravansAndTravelingTransportPods_Alive = allMapsCaravansAndTravelingTransportPods_Alive[i];
-				}
-				catch (ArgumentOutOfRangeException) { break; }
-				if (mapsCaravansAndTravelingTransportPods_Alive.IsFreeColonist)
-				{
-					lock (allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result)
-					{
-						allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result.Add(mapsCaravansAndTravelingTransportPods_Alive);
-					}
-				}
-			}
-
-			__result = allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result;
-			return false;
-		}
-		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists(ref List<Pawn> __result)
-		{
-			lock (allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result)
-			{
-				allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result.Clear();
-				List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive;
-				for (int i = 0; i < allMapsCaravansAndTravelingTransportPods_Alive.Count; i++)
-				{
-					Pawn p = allMapsCaravansAndTravelingTransportPods_Alive[i];
-					if (null != p)
-					{
-						if (p.IsColonist)
-						{
-							allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result.Add(allMapsCaravansAndTravelingTransportPods_Alive[i]);
-						}
-					}
-				}
-			}
-			__result = allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result;
-			return false;
-		}
-		public static bool get_AllMapsWorldAndTemporary_Alive(ref List<Pawn> __result)
-		{
-			lock (allMapsWorldAndTemporary_Alive_Result)
-			{
-				allMapsWorldAndTemporary_Alive_Result.Clear();
-				allMapsWorldAndTemporary_Alive_Result.AddRange(PawnsFinder.AllMaps);
-				if (Find.World != null)
-				{
-					allMapsWorldAndTemporary_Alive_Result.AddRange(Find.WorldPawns.AllPawnsAlive);
-				}
-				allMapsWorldAndTemporary_Alive_Result.AddRange(PawnsFinder.Temporary_Alive);
-			}
-			__result = allMapsWorldAndTemporary_Alive_Result;
-			return false;
-		}
-		public static bool get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners(ref List<Pawn> __result)
-		{
-			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists = null;
-			get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists(ref allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists);
-
-			List<Pawn> allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony;
-			if (allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony.Count == 0)
-			{
-				__result = allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists;
-				return false;
-			}
-			lock (allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result)
-			{
-				allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result.Clear();
-				allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result.AddRange(allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists);
-				allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result.AddRange(allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony);
-			}
-			__result = allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result;
-			return false;
-		}
-	}
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(PawnsFinder);
+            RimThreadedHarmony.AddAllMatchingFields(original, typeof(PawnsFinder_Patch));
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsWorldAndTemporary_AliveOrDead");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsWorldAndTemporary_Alive");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsAndWorld_Alive");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMaps");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMaps_Spawned");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_All_AliveOrDead");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_Temporary");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_Temporary_Alive");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_Temporary_Dead");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllCaravansAndTravelingTransportPods_Alive");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllCaravansAndTravelingTransportPods_AliveOrDead");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_Colonists");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMaps_PrisonersOfColonySpawned");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMaps_PrisonersOfColony");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMaps_FreeColonists");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMaps_FreeColonistsSpawned");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMaps_FreeColonistsAndPrisonersSpawned");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllMaps_FreeColonistsAndPrisoners");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_HomeMaps_FreeColonistsSpawned");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "AllMaps_SpawnedPawnsInFaction");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "Clear");
+        }
+    }
 }

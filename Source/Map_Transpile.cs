@@ -12,9 +12,15 @@ namespace RimThreaded
     public class Map_Transpile
     {
 
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Map);
+            Type patched = typeof(Map_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "MapUpdate");
+        }
         public static IEnumerable<CodeInstruction> MapUpdate(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            List<CodeInstruction> instructionsList = instructions.ToList<CodeInstruction>();
+            List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
             while (i < instructionsList.Count)
             {
@@ -44,5 +50,6 @@ namespace RimThreaded
                 i++;
             }            
         }
+
     }
 }

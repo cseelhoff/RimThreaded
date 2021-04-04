@@ -1,55 +1,79 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
 
     public class WanderUtility_Patch
 	{
-		public static bool GetColonyWanderRoot(ref IntVec3 __result, Pawn pawn)
-    {
+        [ThreadStatic]
+        static List<IntVec3> gatherSpots;
+
+        [ThreadStatic]
+        static List<IntVec3> candidateCells;
+
+        [ThreadStatic]
+        static List<Building> candidateBuildingsInRandomOrder;
+
+        public static bool GetColonyWanderRoot(ref IntVec3 __result, Pawn pawn)
+        {
             if (pawn.RaceProps.Humanlike)
             {
-                //WanderUtility.gatherSpots.Clear();
-                List<IntVec3> gatherSpots = new List<IntVec3>();
+                
+                if(gatherSpots == null)
+                {
+                    gatherSpots = new List<IntVec3>();
+                } else
+                {
+                    gatherSpots.Clear();
+                }
+                
                 for (int index = 0; index < pawn.Map.gatherSpotLister.activeSpots.Count; ++index)
                 {
                     IntVec3 position = pawn.Map.gatherSpotLister.activeSpots[index].parent.Position;
-                    if (!position.IsForbidden(pawn) && pawn.CanReach((LocalTargetInfo)position, PathEndMode.Touch, Danger.None, false, TraverseMode.ByPawn))
+                    if (!position.IsForbidden(pawn) && pawn.CanReach(position, PathEndMode.Touch, Danger.None, false, TraverseMode.ByPawn))
                         gatherSpots.Add(position);
                 }
                 if (gatherSpots.Count > 0) {
-                    __result = gatherSpots.RandomElement<IntVec3>();
+                    __result = gatherSpots.RandomElement();
                     return false;
                 }
             }
             //WanderUtility.candidateCells.Clear();
-            List<IntVec3> candidateCells = new List<IntVec3>();
+            if (candidateCells == null)
+            {
+                candidateCells = new List<IntVec3>();
+            } else
+            {
+                candidateCells.Clear();
+            }
             //WanderUtility.candidateBuildingsInRandomOrder.Clear();
-            List<Building> candidateBuildingsInRandomOrder = new List<Building>();
-            candidateBuildingsInRandomOrder.AddRange((IEnumerable<Building>)pawn.Map.listerBuildings.allBuildingsColonist);
-            candidateBuildingsInRandomOrder.Shuffle<Building>();
+            if (candidateBuildingsInRandomOrder == null)
+            {
+                candidateBuildingsInRandomOrder = new List<Building>();
+            } else
+            {
+                candidateBuildingsInRandomOrder.Clear();
+            }
+            candidateBuildingsInRandomOrder.AddRange(pawn.Map.listerBuildings.allBuildingsColonist);
+            candidateBuildingsInRandomOrder.Shuffle();
             int num = 0;
             int index1 = 0;
             while (index1 < candidateBuildingsInRandomOrder.Count)
             {
                 if (num > 80 && candidateCells.Count > 0)
                 {
-                    __result = candidateCells.RandomElement<IntVec3>();
+                    __result = candidateCells.RandomElement();
                     return false;
                 }
                 Building building = candidateBuildingsInRandomOrder[index1];
                 if ((building.def == ThingDefOf.Wall || building.def.building.ai_chillDestination) && (!building.Position.IsForbidden(pawn) && pawn.Map.areaManager.Home[building.Position]))
                 {
-                    IntVec3 c = GenAdjFast.AdjacentCells8Way((LocalTargetInfo)(Thing)building).RandomElement<IntVec3>();
-                    if (c.Standable(building.Map) && !c.IsForbidden(pawn) && (pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) && !c.IsInPrisonCell(pawn.Map)))
+                    IntVec3 c = GenAdjFast.AdjacentCells8Way(building).RandomElement();
+                    if (c.Standable(building.Map) && !c.IsForbidden(pawn) && (pawn.CanReach(c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) && !c.IsInPrisonCell(pawn.Map)))
                     {
                         candidateCells.Add(c);
                         if ((pawn.Position - building.Position).LengthHorizontalSquared <= 1225)
@@ -105,5 +129,11 @@ namespace RimThreaded
             return false;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WanderUtility);
+            Type patched = typeof(WanderUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetColonyWanderRoot");
+        }
+    }
 }

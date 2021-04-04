@@ -11,6 +11,12 @@ namespace RimThreaded
 
     public class CompSpawnSubplant_Transpile
 	{
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(CompSpawnSubplant);
+			Type patched = typeof(CompSpawnSubplant_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "DoGrowSubplant");
+		}
 		public static IEnumerable<CodeInstruction> DoGrowSubplant(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			List<CodeInstruction> instructionsList = instructions.ToList();
@@ -59,5 +65,5 @@ namespace RimThreaded
 			}
 		}
 
-	}
+    }
 }

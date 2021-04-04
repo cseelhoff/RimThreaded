@@ -1,5 +1,5 @@
 ﻿using RimWorld;
-using System.Threading;
+using System;
 using UnityEngine;
 using Verse;
 using static HarmonyLib.AccessTools;
@@ -12,6 +12,13 @@ namespace RimThreaded
     public class PortraitRenderer_Patch
     {
         public static FieldRef<PortraitRenderer, Pawn> pawnFR = FieldRefAccess<PortraitRenderer, Pawn>("pawn");
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(PortraitRenderer);
+            Type patched = typeof(PortraitRenderer_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RenderPortrait");
+        }
         public static bool RenderPortrait(PortraitRenderer __instance, Pawn pawn, RenderTexture renderTexture, Vector3 cameraOffset, float cameraZoom)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))

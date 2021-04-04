@@ -302,6 +302,12 @@ namespace RimThreaded
             return false;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RegionAndRoomUpdater);
+            Type patched = typeof(RegionAndRoomUpdater_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FloodAndSetRoomGroups");
+            RimThreadedHarmony.Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
+        }
     }
 }

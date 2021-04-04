@@ -14,6 +14,13 @@ namespace RimThreaded
         static readonly Action<AudioSource> actionAudioSourceStop =
             (Action<AudioSource>)Delegate.CreateDelegate(typeof(Action<AudioSource>), methodAudioSourceStop);
 
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(AudioSource);
+            Type patched = typeof(AudioSource_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Stop", Type.EmptyTypes);
+        }
+
         public static bool Stop(AudioSource __instance)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))

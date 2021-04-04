@@ -30,7 +30,9 @@ namespace RimThreaded
 		{
 			lock (reporters(__instance))
 			{
-				reporters(__instance).Remove(oldRep);
+				List<ISizeReporter> newReporters = new List<ISizeReporter>(reporters(__instance));
+				newReporters.Remove(oldRep);
+				reporters(__instance) = newReporters;
 			}
 			return false;
 		}
@@ -55,5 +57,14 @@ namespace RimThreaded
 			__result = num;
 			return false;
 		}
-	}
+
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(SoundSizeAggregator);
+			Type patched = typeof(SoundSizeAggregator_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "RegisterReporter");
+			RimThreadedHarmony.Prefix(original, patched, "RemoveReporter");
+			RimThreadedHarmony.Prefix(original, patched, "get_AggregateSize");
+		}
+    }
 }

@@ -33,6 +33,12 @@ namespace RimThreaded
             }
             return true;
         }
-        
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(MapGenerator);
+            Type patched = typeof(MapGenerator_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GenerateMap");
+        }
     }
 }

@@ -59,7 +59,7 @@ namespace RimThreaded
                 return false;
             }
             ThinkTreeDef thinkTree;
-            lock (determineNextJobLock)
+            lock (determineNextJobLock) //TODO change to ReservationManager.reservations?
             {
                 ThinkResult result = DetermineNextJob2(__instance, out thinkTree);
                 if (result.IsValid)
@@ -98,6 +98,12 @@ namespace RimThreaded
             return result2;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Pawn_JobTracker);
+            Type patched = typeof(Pawn_JobTracker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TryFindAndStartJob");
+            //RimThreadedHarmony.Prefix(original, patched, "StartJob"); conflict with giddyupcore calling MakeDriver
+        }
     }
 }

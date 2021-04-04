@@ -1,15 +1,7 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using RimWorld.Planet;
-using static HarmonyLib.AccessTools;
-using System.Reflection;
 
 namespace RimThreaded
 {
@@ -86,11 +78,20 @@ namespace RimThreaded
                 IList<int> list = extraRootTiles as IList<int>;
                 if (list != null)
                 {
-                    loop1(list);
+                    for (int k = 0; k < list.Count; k++)
+                    {
+                        int num3 = list[k];
+                        traversalDistance[num3] = 0;
+                        openSet.Enqueue(num3);
+                    }
                 }
                 else
                 {
-                    loop2(extraRootTiles);
+                    foreach (int extraRootTile in extraRootTiles)
+                    {
+                        traversalDistance[extraRootTile] = 0;
+                        openSet.Enqueue(extraRootTile);
+                    }
                 }
             }
 
@@ -142,23 +143,12 @@ namespace RimThreaded
             }
         }
 
-        private static void loop2(IEnumerable<int> extraRootTiles)
+        internal static void RunDestructivePatches()
         {
-            foreach (int extraRootTile in extraRootTiles)
-            {
-                traversalDistance[extraRootTile] = 0;
-                openSet.Enqueue(extraRootTile);
-            }
-        }
+            Type original = typeof(WorldFloodFiller);
+            Type patched = typeof(WorldFloodFiller_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FloodFill", new Type[] { typeof(int), typeof(Predicate<int>), typeof(Func<int, int, bool>), typeof(int), typeof(IEnumerable<int>) });
 
-        private static void loop1(IList<int> list)
-        {
-            for (int j = 0; j < list.Count; j++)
-            {
-                int num3 = list[j];
-                traversalDistance[num3] = 0;
-                openSet.Enqueue(num3);
-            }
         }
     }
 }

@@ -37,5 +37,13 @@ namespace RimThreaded
             }
             return true;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Graphics);
+            Type patched = typeof(Graphics_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Blit", new Type[] { typeof(Texture), typeof(RenderTexture) });
+            RimThreadedHarmony.Prefix(original, patched, "DrawMesh", new Type[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(int) });
+        }
     }
 }

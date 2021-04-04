@@ -140,5 +140,13 @@ namespace RimThreaded
 
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(MeditationFocusTypeAvailabilityCache);
+            Type patched = typeof(MeditationFocusTypeAvailabilityCache_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "PawnCanUse");
+            RimThreadedHarmony.Prefix(original, patched, "ClearFor");
+        }
     }
 }

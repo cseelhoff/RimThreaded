@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -7,19 +7,36 @@ using Verse.Sound;
 using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
-using Verse.AI;
-using static RimThreaded.PathFinder_Patch;
+using System.Reflection;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     [StaticConstructorOnStartup]
     public class RimThreaded
     {
+        private static readonly MethodInfo methodGetDesiredPlantsCountAt =
+            Method(typeof(WildPlantSpawner), "GetDesiredPlantsCountAt", new Type[] { typeof(IntVec3), typeof(IntVec3), typeof(float) });
+        private static readonly Func<WildPlantSpawner, IntVec3, IntVec3, float, float> funcGetDesiredPlantsCountAt =
+            (Func<WildPlantSpawner, IntVec3, IntVec3, float, float>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, IntVec3, float, float>), methodGetDesiredPlantsCountAt);
+
+        private static readonly MethodInfo methodCanRegrowAt =
+            Method(typeof(WildPlantSpawner), "CanRegrowAt", new Type[] { typeof(IntVec3) });
+        private static readonly Func<WildPlantSpawner, IntVec3, bool> funcCanRegrowAt =
+            (Func<WildPlantSpawner, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, bool>), methodCanRegrowAt);
+
+        public static int WorkGiver_GrowerSow_Patch_JobOnCell; //debugging
+
+        //TODO clear on new game or load
+        public static HashSet<ThingDef> recipeThingDefs = new HashSet<ThingDef>();
+        public static Dictionary<RecipeDef, List<float>> sortedRecipeValues = new Dictionary<RecipeDef, List<float>>();
+        public static Dictionary<RecipeDef, Dictionary<float, List<ThingDef>>> recipeThingDefValues = new Dictionary<RecipeDef, Dictionary<float, List<ThingDef>>>();
+        public static Dictionary<Bill_Production, List<Pawn>> billFreeColonistsSpawned = new Dictionary<Bill_Production, List<Pawn>>();
+
         public static DateTime lastClosestThingGlobal = DateTime.Now;
 
-        public static int maxThreads = Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1);
-        public static int timeoutMS = Math.Max(int.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 5000);
-        public static bool suppressTexture2dError = RimThreadedMod.Settings.suppressTexture2dError;
+        public static int maxThreads = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1), 128);
+        public static int timeoutMS = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 5000), 100000);
         public static float timeSpeedNormal = float.Parse(RimThreadedMod.Settings.timeSpeedNormalBuffer);
         public static float timeSpeedFast = float.Parse(RimThreadedMod.Settings.timeSpeedFastBuffer);
         public static float timeSpeedSuperfast = float.Parse(RimThreadedMod.Settings.timeSpeedSuperfastBuffer);
@@ -145,6 +162,11 @@ namespace RimThreaded
 
         public static Dictionary<Thread, ThreadInfo> allThreads2 = new Dictionary<Thread, ThreadInfo>();
 
+        public static object allSustainersLock = new object();
+        public static object biomeAmbientSustainersLock = new object();
+        public static object map_AttackTargetReservationManager_reservations_Lock = new object();
+
+
         public class ThreadInfo
         {
             public EventWaitHandle mainRequestWait = new AutoResetEvent(false);
@@ -158,6 +180,7 @@ namespace RimThreaded
 
         static RimThreaded()
         {
+            InitializeAllThreadStatics();
             CreateWorkerThreads();
             monitorThread = new Thread(() => MonitorThreads());
             monitorThread.Start();
@@ -201,15 +224,52 @@ namespace RimThreaded
 
         private static void InitializeThread(ThreadInfo threadInfo)
         {
-            PathFinder_Patch.openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
-            PathFinder_Patch.statusOpenValue = 1;
-            PathFinder_Patch.statusClosedValue = 2;
-            PathFinder_Patch.disallowedCornerIndices = new List<int>(4);
-            PathFinder_Patch.regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
-            Rand_Patch.tmpRange = new List<int>();
-            Projectile_Patch.cellThingsFiltered = new List<Thing>();
-            Projectile_Patch.checkedCells = new List<IntVec3>();
+            InitializeAllThreadStatics();
             ProcessTicks(threadInfo);
+        }
+
+        public static void InitializeAllThreadStatics()
+        {
+            AttackTargetFinder_Patch.InitializeThreadStatics();
+            AttackTargetsCache_Patch.InitializeThreadStatics();
+            BeautyUtility_Patch.InitializeThreadStatics();
+            CellFinder_Patch.InitializeThreadStatics();
+            CompCauseGameCondition_Patch.InitializeThreadStatics();
+            DamageWorker_Patch.InitializeThreadStatics();
+            DijkstraInt.InitializeThreadStatics();
+            Fire_Patch.InitializeThreadStatics();
+            FloatMenuMakerMap_Patch.InitializeThreadStatics();
+            FoodUtility_Patch.InitializeThreadStatics();
+            GenAdj_Patch.InitializeThreadStatics();
+            GenAdjFast_Patch.InitializeThreadStatics();
+            GenLeaving_Patch.InitializeThreadStatics();
+            GenRadial_Patch.InitializeThreadStatics();
+            GenTemperature_Patch.InitializeThreadStatics();
+            GenText_Patch.InitializedThreadStatics();
+            HaulAIUtility_Patch.InitializeThreadStatics();
+            ImmunityHandler_Patch.InitializeThreadStatics();
+            InfestationCellFinder_Patch.InitializeThreadStatics();
+            MapTemperature_Patch.InitializeThreadStatics();
+            PathFinder_Patch.InitializeThreadStatics();
+            Pawn_InteractionsTracker_Transpile.InitializeThreadStatics();
+            Pawn_MeleeVerbs_Patch.InitializeThreadStatics();
+            Pawn_WorkSettings_Patch.InitializeThreadStatics();
+            PawnDiedOrDownedThoughtsUtility_Patch.InitializeThreadStatics();
+            PawnsFinder_Patch.InitializeThreadStatics();
+            Rand_Patch.InitializeThreadStatics();
+            RCellFinder_Patch.InitializeThreadStatics();
+            Reachability_Patch.InitializeThreadStatics();
+            ReachabilityCache_Patch.InitializeThreadStatics();
+            RegionDirtyer_Patch.InitializeThreadStatics();
+            RegionListersUpdater_Patch.InitializeThreadStatics();
+            RegionTraverser_Transpile.InitializeThreadStatics();
+            Projectile_Patch.InitializeThreadStatics();
+            ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
+            ThoughtHandler_Patch.InitializeThreadStatics();
+            Verb_Patch.InitializeThreadStatics();
+            WealthWatcher_Patch.InitializeThreads();
+            World_Patch.InitializeThreadStatics();
+
         }
 
         private static void ProcessTicks(ThreadInfo threadInfo)
@@ -592,7 +652,7 @@ namespace RimThreaded
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 1148571423, false);
+                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 1148571423, false);
                     }
                     try
                     {
@@ -601,7 +661,7 @@ namespace RimThreaded
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
+                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 8765780, false);
                     }
                     index = Interlocked.Decrement(ref worldPawnsTicks);
                 }
@@ -709,19 +769,19 @@ namespace RimThreaded
                         if ((wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) > wildPlantSpawner.WildPlantSpawnerArea)
                         {
                             Interlocked.Add(ref wildPlantSpawner.DesiredPlants2Tmp1000,
-                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(
-                                    wildPlantSpawner.WildPlantSpawnerMap, intVec, intVec,
+                                1000 * (int)funcGetDesiredPlantsCountAt(
+                                    wildPlantSpawner.WildPlantSpawnerInstance, intVec, intVec,
                                     wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
                             if (intVec.GetTerrain(wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerMap).fertility > 0f)
                             {
                                 Interlocked.Increment(ref wildPlantSpawner.FertilityCells2Tmp);
                             }
 
-                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(
-                                wildPlantSpawner.WildPlantSpawnerMap, intVec) ? 130f :
+                            float mtb = WildPlantSpawner_Patch.funcGoodRoofForCavePlant(
+                                wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
                                 wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
                             if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && 
-                                WildPlantSpawner_Patch.CanRegrowAt2(wildPlantSpawner.WildPlantSpawnerMap, intVec))
+                                funcCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))
                             {
                                 wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec,
                                     wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity, wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f);
@@ -730,18 +790,18 @@ namespace RimThreaded
                         else
                         {
                             Interlocked.Add(ref wildPlantSpawner.DesiredPlantsTmp1000,
-                                1000 * (int)WildPlantSpawner_Patch.GetDesiredPlantsCountAt2(
-                                    wildPlantSpawner.WildPlantSpawnerMap, intVec, intVec,
+                                1000 * (int)funcGetDesiredPlantsCountAt(
+                                    wildPlantSpawner.WildPlantSpawnerInstance, intVec, intVec,
                                     wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
                             if (intVec.GetTerrain(wildPlantSpawner.WildPlantSpawnerMap).fertility > 0f)
                             {
                                 Interlocked.Increment(ref wildPlantSpawner.FertilityCellsTmp);
                             }
 
-                            float mtb = WildPlantSpawner_Patch.GoodRoofForCavePlant2(wildPlantSpawner.WildPlantSpawnerMap, intVec) ? 130f :
+                            float mtb = WildPlantSpawner_Patch.funcGoodRoofForCavePlant(wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
                                 wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && 
-                                WildPlantSpawner_Patch.CanRegrowAt2(wildPlantSpawner.WildPlantSpawnerMap, intVec))
+                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) &&
+                                funcCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))
                             {
                                 wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, 
                                     wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity, wildPlantSpawner.DesiredPlants);

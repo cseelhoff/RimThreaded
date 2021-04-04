@@ -2,38 +2,86 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
 using System.Threading;
+using System.Reflection;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class WildPlantSpawner_Patch
     {
-        public static AccessTools.FieldRef<WildPlantSpawner, Map> map =
-            AccessTools.FieldRefAccess<WildPlantSpawner, Map>("map");
-        public static AccessTools.FieldRef<WildPlantSpawner, bool> hasWholeMapNumDesiredPlantsCalculated =
-            AccessTools.FieldRefAccess<WildPlantSpawner, bool>("hasWholeMapNumDesiredPlantsCalculated");
-        public static AccessTools.FieldRef<WildPlantSpawner, float> calculatedWholeMapNumDesiredPlants =
-            AccessTools.FieldRefAccess<WildPlantSpawner, float>("calculatedWholeMapNumDesiredPlants");
-        public static AccessTools.FieldRef<WildPlantSpawner, float> calculatedWholeMapNumDesiredPlantsTmp =
-            AccessTools.FieldRefAccess<WildPlantSpawner, float>("calculatedWholeMapNumDesiredPlantsTmp");
-        public static AccessTools.FieldRef<WildPlantSpawner, int> calculatedWholeMapNumNonZeroFertilityCells =
-            AccessTools.FieldRefAccess<WildPlantSpawner, int>("calculatedWholeMapNumNonZeroFertilityCells");
-        public static AccessTools.FieldRef<WildPlantSpawner, int> calculatedWholeMapNumNonZeroFertilityCellsTmp =
-            AccessTools.FieldRefAccess<WildPlantSpawner, int>("calculatedWholeMapNumNonZeroFertilityCellsTmp");
-        public static AccessTools.FieldRef<WildPlantSpawner, int> cycleIndex =
-            AccessTools.FieldRefAccess<WildPlantSpawner, int>("cycleIndex");
+        [ThreadStatic]
+        static Dictionary<ThingDef, List<float>> nearbyClusters;
+
+        [ThreadStatic]
+        static List<KeyValuePair<ThingDef, List<float>>> nearbyClustersList;
+
+        [ThreadStatic]
+        static Dictionary<ThingDef, float> distanceSqToNearbyClusters;
+
+        [ThreadStatic]
+        static List<ThingDef> tmpPlantDefsLowerOrder;
+
+        [ThreadStatic]
+        static List<KeyValuePair<ThingDef, float>> tmpPossiblePlantsWithWeight;
+
+        [ThreadStatic]
+        static List<ThingDef> tmpPossiblePlants;
+
+        public static FieldRef<WildPlantSpawner, Map> map = FieldRefAccess<WildPlantSpawner, Map>("map");
+        public static FieldRef<WildPlantSpawner, bool> hasWholeMapNumDesiredPlantsCalculated =
+            FieldRefAccess<WildPlantSpawner, bool>("hasWholeMapNumDesiredPlantsCalculated");
+        public static FieldRef<WildPlantSpawner, float> calculatedWholeMapNumDesiredPlants =
+            FieldRefAccess<WildPlantSpawner, float>("calculatedWholeMapNumDesiredPlants");
+        public static FieldRef<WildPlantSpawner, float> calculatedWholeMapNumDesiredPlantsTmp =
+            FieldRefAccess<WildPlantSpawner, float>("calculatedWholeMapNumDesiredPlantsTmp");
+        public static FieldRef<WildPlantSpawner, int> calculatedWholeMapNumNonZeroFertilityCells =
+            FieldRefAccess<WildPlantSpawner, int>("calculatedWholeMapNumNonZeroFertilityCells");
+        public static FieldRef<WildPlantSpawner, int> calculatedWholeMapNumNonZeroFertilityCellsTmp =
+            FieldRefAccess<WildPlantSpawner, int>("calculatedWholeMapNumNonZeroFertilityCellsTmp");
+        public static FieldRef<WildPlantSpawner, int> cycleIndex =
+            FieldRefAccess<WildPlantSpawner, int>("cycleIndex");
 
         public static List<ThingDef> allCavePlants =
-            AccessTools.StaticFieldRefAccess<List<ThingDef>>(typeof(WildPlantSpawner), "allCavePlants");
+            StaticFieldRefAccess<List<ThingDef>>(typeof(WildPlantSpawner), "allCavePlants");
         public static SimpleCurve GlobalPctSelectionWeightBias =
-            AccessTools.StaticFieldRefAccess<SimpleCurve>(typeof(WildPlantSpawner), "GlobalPctSelectionWeightBias");
+            StaticFieldRefAccess<SimpleCurve>(typeof(WildPlantSpawner), "GlobalPctSelectionWeightBias");
+
+        private static readonly MethodInfo methodGoodRoofForCavePlant =
+            Method(typeof(WildPlantSpawner), "GoodRoofForCavePlant", new Type[] { typeof(IntVec3) });
+        public static readonly Func<WildPlantSpawner, IntVec3, bool> funcGoodRoofForCavePlant =
+            (Func<WildPlantSpawner, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, bool>), methodGoodRoofForCavePlant);
+
+        private static readonly MethodInfo methodGetDesiredPlantsCountIn =
+            Method(typeof(WildPlantSpawner), "GetDesiredPlantsCountIn", new Type[] { typeof(Region), typeof(IntVec3), typeof(float) });
+        private static readonly Func<WildPlantSpawner, Region, IntVec3, float, float> funcGetDesiredPlantsCountIn =
+            (Func<WildPlantSpawner, Region, IntVec3, float, float>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, Region, IntVec3, float, float>), methodGetDesiredPlantsCountIn);
+
+        private static readonly MethodInfo methodGetCommonalityPctOfPlant =
+            Method(typeof(WildPlantSpawner), "GetCommonalityPctOfPlant", new Type[] { typeof(ThingDef) });
+        private static readonly Func<WildPlantSpawner, ThingDef, float> funcGetCommonalityPctOfPlant =
+            (Func<WildPlantSpawner, ThingDef, float>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, ThingDef, float>), methodGetCommonalityPctOfPlant);
+
+        private static readonly MethodInfo methodPlantChoiceWeight =
+            Method(typeof(WildPlantSpawner), "PlantChoiceWeight", new Type[] { typeof(ThingDef), typeof(IntVec3), typeof(Dictionary<ThingDef, float>), typeof(float), typeof(float) });
+        private static readonly Func<WildPlantSpawner, ThingDef, IntVec3, Dictionary<ThingDef, float>, float, float, float> funcPlantChoiceWeight =
+            (Func<WildPlantSpawner, ThingDef, IntVec3, Dictionary<ThingDef, float>, float, float, float>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, ThingDef, IntVec3, Dictionary<ThingDef, float>, float, float, float>), methodPlantChoiceWeight);
+
+        private static readonly MethodInfo methodSaturatedAt =
+            Method(typeof(WildPlantSpawner), "SaturatedAt", new Type[] { typeof(IntVec3), typeof(float), typeof(bool), typeof(float) });
+        private static readonly Func<WildPlantSpawner, IntVec3, float, bool, float, bool> funcSaturatedAt =
+            (Func<WildPlantSpawner, IntVec3, float, bool, float, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, float, bool, float, bool>), methodSaturatedAt);
+
+        private static readonly MethodInfo methodCalculatePlantsWhichCanGrowAt =
+            Method(typeof(WildPlantSpawner), "CalculatePlantsWhichCanGrowAt", new Type[] { typeof(IntVec3), typeof(List<ThingDef>), typeof(bool), typeof(float) });
+        private static readonly Action<WildPlantSpawner, IntVec3, List<ThingDef>, bool, float> actionCalculatePlantsWhichCanGrowAt =
+            (Action<WildPlantSpawner, IntVec3, List<ThingDef>, bool, float>)Delegate.CreateDelegate(typeof(Action<WildPlantSpawner, IntVec3, List<ThingDef>, bool, float>), methodCalculatePlantsWhichCanGrowAt);
+
+
 
         public static bool WildPlantSpawnerTickInternal(WildPlantSpawner __instance)
         {
@@ -68,45 +116,26 @@ namespace RimThreaded
             cycleIndex(__instance) = (cycleIndex(__instance) + num) % area;
             return false;
         }
-        public static bool GoodRoofForCavePlant2(Map map2, IntVec3 c)
-        {
-            return c.GetRoof(map2)?.isNatural ?? false;
-        }
-        public static bool CanRegrowAt2(Map map2, IntVec3 c)
-        {
-            if (c.GetTemperature(map2) > 0f)
-            {
-                if (c.Roofed(map2))
-                {
-                    return GoodRoofForCavePlant2(map2, c);
-                }
 
-                return true;
-            }
 
-            return false;
-        }
-        public static float GetDesiredPlantsCountAt2(Map map2, IntVec3 c, IntVec3 forCell, float plantDensity)
-        {
-            return Mathf.Min(GetBaseDesiredPlantsCountAt2(map2, c) * plantDensity * forCell.GetTerrain(map2).fertility, 1f);
-        }
-        public static float GetBaseDesiredPlantsCountAt2(Map map2, IntVec3 c)
-        {
-            float num = c.GetTerrain(map2).fertility;
-            if (GoodRoofForCavePlant2(map2, c))
-            {
-                num *= 0.5f;
-            }
-
-            return num;
-        }
-        public static Dictionary<ThingDef, float> CalculateDistancesToNearbyClusters2(WildPlantSpawner __instance, IntVec3 c)
+        private static Dictionary<ThingDef, float> CalculateDistancesToNearbyClusters2(WildPlantSpawner __instance, IntVec3 c)
         {
             Map map2 = map(__instance);
-            //nearbyClusters.Clear();
-            //nearbyClustersList.Clear();
-            Dictionary<ThingDef, List<float>> nearbyClusters = new Dictionary<ThingDef, List<float>>();
-            List<KeyValuePair<ThingDef, List<float>>> nearbyClustersList = new List<KeyValuePair<ThingDef, List<float>>>();
+            if (nearbyClusters == null)
+            {
+                nearbyClusters = new Dictionary<ThingDef, List<float>>();
+            } else
+            {
+                nearbyClusters.Clear();
+            }
+            if (nearbyClustersList == null)
+            {
+                nearbyClustersList = new List<KeyValuePair<ThingDef, List<float>>>();
+            }
+            else
+            {
+                nearbyClustersList = new List<KeyValuePair<ThingDef, List<float>>>();
+            }
 
             int num = GenRadial.NumCellsInRadius(map2.Biome.MaxWildAndCavePlantsClusterRadius * 2);
             for (int i = 0; i < num; i++)
@@ -126,7 +155,7 @@ namespace RimThreaded
                         float item = intVec.DistanceToSquared(c);
                         if (!nearbyClusters.TryGetValue(thing.def, out List<float> value))
                         {
-                            value = new List<float>(); //SimplePool<List<float>>.Get();
+                            value = new List<float>();
                             nearbyClusters.Add(thing.def, value);
                             nearbyClustersList.Add(new KeyValuePair<ThingDef, List<float>>(thing.def, value));
                         }
@@ -136,15 +165,19 @@ namespace RimThreaded
                 }
             }
 
-            //distanceSqToNearbyClusters.Clear();
-            Dictionary<ThingDef, float> distanceSqToNearbyClusters = new Dictionary<ThingDef, float>();
+            if (distanceSqToNearbyClusters == null)
+            {
+                distanceSqToNearbyClusters = new Dictionary<ThingDef, float>();
+            }
+            else
+            {
+                distanceSqToNearbyClusters.Clear();
+            }
             for (int k = 0; k < nearbyClustersList.Count; k++)
             {
                 List<float> value2 = nearbyClustersList[k].Value;
                 value2.Sort();
                 distanceSqToNearbyClusters.Add(nearbyClustersList[k].Key, value2[value2.Count / 2]);
-                value2.Clear();
-                SimplePool<List<float>>.Return(value2);
             }
             return distanceSqToNearbyClusters;
         }
@@ -157,14 +190,20 @@ namespace RimThreaded
                 return false;
             }
 
-            bool cavePlants = GoodRoofForCavePlant2(map2, c);
-            if (SaturatedAt2(map2, c, plantDensity, cavePlants, wholeMapNumDesiredPlants))
+            bool cavePlants = funcGoodRoofForCavePlant(__instance, c);
+            if (funcSaturatedAt(__instance, c, plantDensity, cavePlants, wholeMapNumDesiredPlants))
             {
                 __result = false;
                 return false;
             }
-            List<ThingDef> tmpPossiblePlants = new List<ThingDef>();
-            CalculatePlantsWhichCanGrowAt2(__instance, c, tmpPossiblePlants, cavePlants, plantDensity);
+            if (tmpPossiblePlants == null)
+            {
+                tmpPossiblePlants = new List<ThingDef>();
+            } else
+            {
+                tmpPossiblePlants.Clear();
+            }
+            actionCalculatePlantsWhichCanGrowAt(__instance, c, tmpPossiblePlants, cavePlants, plantDensity);
             if (!tmpPossiblePlants.Any())
             {
                 __result = false;
@@ -172,11 +211,17 @@ namespace RimThreaded
             }
 
             Dictionary<ThingDef, float> distanceSqToNearbyClusters = CalculateDistancesToNearbyClusters2(__instance, c);
-            List<KeyValuePair<ThingDef, float>> tmpPossiblePlantsWithWeight = new List<KeyValuePair<ThingDef, float>>();
-            tmpPossiblePlantsWithWeight.Clear();
+            if (tmpPossiblePlantsWithWeight == null)
+            {
+                tmpPossiblePlantsWithWeight = new List<KeyValuePair<ThingDef, float>>();
+            }
+            else
+            {
+                tmpPossiblePlantsWithWeight.Clear();
+            }
             for (int i = 0; i < tmpPossiblePlants.Count; i++)
             {
-                float value = PlantChoiceWeight2(__instance, tmpPossiblePlants[i], c, distanceSqToNearbyClusters, wholeMapNumDesiredPlants, plantDensity);
+                float value = funcPlantChoiceWeight(__instance, tmpPossiblePlants[i], c, distanceSqToNearbyClusters, wholeMapNumDesiredPlants, plantDensity);
                 tmpPossiblePlantsWithWeight.Add(new KeyValuePair<ThingDef, float>(tmpPossiblePlants[i], value));
             }
 
@@ -200,169 +245,17 @@ namespace RimThreaded
             __result = true;
             return false;
         }
-        private static float PlantChoiceWeight2(WildPlantSpawner __instance, ThingDef plantDef, IntVec3 c, Dictionary<ThingDef, float> distanceSqToNearbyClusters, float wholeMapNumDesiredPlants, float plantDensity)
-        {
-            float commonalityOfPlant = GetCommonalityOfPlant2(map(__instance), plantDef);
-            float commonalityPctOfPlant = GetCommonalityPctOfPlant2(__instance, plantDef);
-            float num = commonalityOfPlant;
-            if (num <= 0f)
-            {
-                return num;
-            }
 
-            float num2 = 0.5f;
-            if ((float)map(__instance).listerThings.ThingsInGroup(ThingRequestGroup.Plant).Count > wholeMapNumDesiredPlants / 2f && !plantDef.plant.cavePlant)
-            {
-                num2 = (float)map(__instance).listerThings.ThingsOfDef(plantDef).Count / (float)map(__instance).listerThings.ThingsInGroup(ThingRequestGroup.Plant).Count / commonalityPctOfPlant;
-                num *= GlobalPctSelectionWeightBias.Evaluate(num2);
-            }
-
-            if (plantDef.plant.GrowsInClusters && num2 < 1.1f)
-            {
-                float num3 = plantDef.plant.cavePlant ? __instance.CavePlantsCommonalitiesSum : map(__instance).Biome.PlantCommonalitiesSum;
-                float x = commonalityOfPlant * plantDef.plant.wildClusterWeight / (num3 - commonalityOfPlant + commonalityOfPlant * plantDef.plant.wildClusterWeight);
-                float outTo = 1f / ((float)Math.PI * (float)plantDef.plant.wildClusterRadius * (float)plantDef.plant.wildClusterRadius);
-                outTo = GenMath.LerpDoubleClamped(commonalityPctOfPlant, 1f, 1f, outTo, x);
-                if (distanceSqToNearbyClusters.TryGetValue(plantDef, out float value))
-                {
-                    float x2 = Mathf.Sqrt(value);
-                    num *= GenMath.LerpDoubleClamped((float)plantDef.plant.wildClusterRadius * 0.9f, (float)plantDef.plant.wildClusterRadius * 1.1f, plantDef.plant.wildClusterWeight, outTo, x2);
-                }
-                else
-                {
-                    num *= outTo;
-                }
-            }
-
-            if (plantDef.plant.wildEqualLocalDistribution)
-            {
-                float f = wholeMapNumDesiredPlants * commonalityPctOfPlant;
-                float a = (float)Mathf.Max(map(__instance).Size.x, map(__instance).Size.z) / Mathf.Sqrt(f) * 2f;
-                if (plantDef.plant.GrowsInClusters)
-                {
-                    a = Mathf.Max(a, (float)plantDef.plant.wildClusterRadius * 1.6f);
-                }
-
-                a = Mathf.Max(a, 7f);
-                if (a <= 25f)
-                {
-                    num *= LocalPlantProportionsWeightFactor2(__instance, c, commonalityPctOfPlant, plantDensity, a, plantDef);
-                }
-            }
-
-            return num;
-        }
-        private static float LocalPlantProportionsWeightFactor2(WildPlantSpawner __instance, IntVec3 c, float commonalityPct, float plantDensity, float radiusToScan, ThingDef plantDef)
-        {
-            float numDesiredPlantsLocally = 0f;
-            int numPlants = 0;
-            int numPlantsThisDef = 0;
-            RegionTraverser.BreadthFirstTraverse(c, map(__instance), (Region from, Region to) => c.InHorDistOf(to.extentsClose.ClosestCellTo(c), radiusToScan), delegate (Region reg)
-            {
-                numDesiredPlantsLocally += GetDesiredPlantsCountIn2(map(__instance), reg, c, plantDensity);
-                numPlants += reg.ListerThings.ThingsInGroup(ThingRequestGroup.Plant).Count;
-                numPlantsThisDef += reg.ListerThings.ThingsOfDef(plantDef).Count;
-                return false;
-            });
-            if (numDesiredPlantsLocally * commonalityPct < 2f)
-            {
-                return 1f;
-            }
-
-            if ((float)numPlants <= numDesiredPlantsLocally * 0.5f)
-            {
-                return 1f;
-            }
-
-            float t = (float)numPlantsThisDef / (float)numPlants / commonalityPct;
-            return Mathf.Lerp(7f, 1f, t);
-        }
-
-
-        private static float GetCommonalityOfPlant2(Map map2, ThingDef plant)
-        {
-            if (!plant.plant.cavePlant)
-            {
-                return map2.Biome.CommonalityOfPlant(plant);
-            }
-
-            return plant.plant.cavePlantWeight;
-        }
-
-
-        private static bool SaturatedAt2(Map map2, IntVec3 c, float plantDensity, bool cavePlants, float wholeMapNumDesiredPlants)
-        {
-            int num = GenRadial.NumCellsInRadius(20f);
-            if (wholeMapNumDesiredPlants * ((float)num / (float)map2.Area) <= 4f || !map2.Biome.wildPlantsCareAboutLocalFertility)
-            {
-                return (float)map2.listerThings.ThingsInGroup(ThingRequestGroup.Plant).Count >= wholeMapNumDesiredPlants;
-            }
-
-            float numDesiredPlantsLocally = 0f;
-            int numPlants = 0;
-            RegionTraverser.BreadthFirstTraverse(c, map2, (Region from, Region to) => c.InHorDistOf(to.extentsClose.ClosestCellTo(c), 20f), delegate (Region reg)
-            {
-                numDesiredPlantsLocally += GetDesiredPlantsCountIn2(map2, reg, c, plantDensity);
-                numPlants += reg.ListerThings.ThingsInGroup(ThingRequestGroup.Plant).Count;
-                return false;
-            });
-            return (float)numPlants >= numDesiredPlantsLocally;
-        }
-        public static float GetDesiredPlantsCountIn2(Map map2, Region reg, IntVec3 forCell, float plantDensity)
-        {
-            return Mathf.Min(reg.GetBaseDesiredPlantsCount() * plantDensity * forCell.GetTerrain(map2).fertility, reg.CellCount);
-        }
-        private static void CalculatePlantsWhichCanGrowAt2(WildPlantSpawner __instance, IntVec3 c, List<ThingDef> outPlants, bool cavePlants, float plantDensity)
-        {
-            outPlants.Clear();
-            if (cavePlants)
-            {
-                for (int i = 0; i < allCavePlants.Count; i++)
-                {
-                    if (allCavePlants[i].CanEverPlantAt_NewTemp(c, map(__instance)))
-                    {
-                        outPlants.Add(allCavePlants[i]);
-                    }
-                }
-
-                return;
-            }
-
-            List<ThingDef> allWildPlants = map(__instance).Biome.AllWildPlants;
-            for (int j = 0; j < allWildPlants.Count; j++)
-            {
-                ThingDef thingDef = allWildPlants[j];
-                if (thingDef == null)
-                {
-                    continue;
-                }
-                if (!thingDef.CanEverPlantAt_NewTemp(c, map(__instance)))
-                {
-                    continue;
-                }
-
-                if (thingDef.plant.wildOrder != map(__instance).Biome.LowestWildAndCavePlantOrder)
-                {
-                    float num = 7f;
-                    if (thingDef.plant.GrowsInClusters)
-                    {
-                        num = Math.Max(num, (float)thingDef.plant.wildClusterRadius * 1.5f);
-                    }
-
-                    if (!EnoughLowerOrderPlantsNearby2(__instance, c, plantDensity, num, thingDef))
-                    {
-                        continue;
-                    }
-                }
-
-                outPlants.Add(thingDef);
-            }
-        }
-        private static bool EnoughLowerOrderPlantsNearby2(WildPlantSpawner __instance, IntVec3 c, float plantDensity, float radiusToScan, ThingDef plantDef)
+        public static bool EnoughLowerOrderPlantsNearby(WildPlantSpawner __instance, IntVec3 c, float plantDensity, float radiusToScan, ThingDef plantDef)
         {
             float num = 0f;
-            //tmpPlantDefsLowerOrder.Clear();
-            List<ThingDef> tmpPlantDefsLowerOrder = new List<ThingDef>();
+            if (tmpPlantDefsLowerOrder == null)
+            {
+                tmpPlantDefsLowerOrder = new List<ThingDef>();
+            } else
+            {
+                tmpPlantDefsLowerOrder.Clear();
+            }
             List<ThingDef> allWildPlants = map(__instance).Biome.AllWildPlants;
             for (int i = 0; i < allWildPlants.Count; i++)
             {
@@ -371,7 +264,7 @@ namespace RimThreaded
                 {
                     if (wildPlant.plant.wildOrder < plantDef.plant.wildOrder)
                     {
-                        num += GetCommonalityPctOfPlant2(__instance, wildPlant);
+                        num += funcGetCommonalityPctOfPlant(__instance, wildPlant);
                         tmpPlantDefsLowerOrder.Add(wildPlant);
                     }
                 }
@@ -381,7 +274,7 @@ namespace RimThreaded
             int numPlantsLowerOrder = 0;
             RegionTraverser.BreadthFirstTraverse(c, map(__instance), (Region from, Region to) => c.InHorDistOf(to.extentsClose.ClosestCellTo(c), radiusToScan), delegate (Region reg)
             {
-                numDesiredPlantsLocally += GetDesiredPlantsCountIn2(map(__instance), reg, c, plantDensity);
+                numDesiredPlantsLocally += funcGetDesiredPlantsCountIn(__instance, reg, c, plantDensity);
                 for (int j = 0; j < tmpPlantDefsLowerOrder.Count; j++)
                 {
                     numPlantsLowerOrder += reg.ListerThings.ThingsOfDef(tmpPlantDefsLowerOrder[j]).Count;
@@ -395,32 +288,15 @@ namespace RimThreaded
                 return true;
             }
 
-            return (float)numPlantsLowerOrder / num2 >= 0.57f;
+            return numPlantsLowerOrder / num2 >= 0.57f;
         }
 
-        private static float GetCommonalityPctOfPlant2(WildPlantSpawner __instance, ThingDef plant)
+        internal static void RunDestructivePatches()
         {
-            if (!plant.plant.cavePlant)
-            {
-                return map(__instance).Biome.CommonalityPctOfPlant(plant);
-            }
-
-            return GetCommonalityOfPlant2(__instance, plant) / __instance.CavePlantsCommonalitiesSum;
+            Type original = typeof(WildPlantSpawner);
+            Type patched = typeof(WildPlantSpawner_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "CheckSpawnWildPlantAt");
+            RimThreadedHarmony.Prefix(original, patched, "WildPlantSpawnerTickInternal");
         }
-        private static float GetCommonalityOfPlant2(WildPlantSpawner __instance, ThingDef plant)
-        {
-            if (!plant.plant.cavePlant)
-            {
-                return map(__instance).Biome.CommonalityOfPlant(plant);
-            }
-
-            return plant.plant.cavePlantWeight;
-        }
-
-
-
-
-
-
     }
 }

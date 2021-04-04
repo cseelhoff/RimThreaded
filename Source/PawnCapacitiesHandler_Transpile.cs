@@ -2,11 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HarmonyLib;
 using static HarmonyLib.AccessTools;
-using static RimThreaded.RimThreadedHarmony;
 using System.Reflection;
 using System.Reflection.Emit;
 using static RimThreaded.PawnCapacitiesHandler_Patch;
@@ -15,7 +12,14 @@ using Verse;
 namespace RimThreaded
 {
     class PawnCapacitiesHandler_Transpile
-    {
+	{
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(PawnCapacitiesHandler);
+			Type patched = typeof(PawnCapacitiesHandler_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "GetLevel");
+		}
+
 		public static IEnumerable<CodeInstruction> GetLevel(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			int[] matchesFound = new int[1]; //EDIT
@@ -49,5 +53,6 @@ namespace RimThreaded
 					Log.Error("IL code instruction set " + mIndex + " not found");
 			}
 		}
-	}
+
+    }
 }

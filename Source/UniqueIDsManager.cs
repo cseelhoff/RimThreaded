@@ -33,5 +33,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(UniqueIDsManager);
+            Type patched = typeof(UniqueIDsManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetNextID");
+        }
     }
 }

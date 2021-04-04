@@ -46,5 +46,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RestUtility);
+            Type patched = typeof(RestUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetBedSleepingSlotPosFor");
+        }
     }
 }

@@ -91,5 +91,11 @@ namespace RimThreaded
             return firesCount;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(JobGiver_AnimalFlee);
+            Type patched = typeof(JobGiver_AnimalFlee_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FleeLargeFireJob");
+        }
     }
 }

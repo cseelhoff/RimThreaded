@@ -12,6 +12,13 @@ namespace RimThreaded
         static readonly Func<object[], object> safeFunction = parameters =>
             AudioSourceMaker.NewAudioSourceOn((GameObject)parameters[0]);
 
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(AudioSourceMaker);
+            Type patched = typeof(AudioSourceMaker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "NewAudioSourceOn");
+        }
+
         public static bool NewAudioSourceOn(ref AudioSource __result, GameObject go)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))

@@ -16,10 +16,13 @@ namespace RimThreaded
 
     public class RegionCostCalculator_Patch
     {
-        //public static FieldRef<RegionCostCalculator, Dictionary<int, RegionLink>> regionMinLinkFR = FieldRefAccess<RegionCostCalculator, Dictionary<int, RegionLink>>("regionMinLink");
-        //public static FieldRef<RegionCostCalculator, Dictionary<RegionLink, int>> distancesFR = FieldRefAccess<RegionCostCalculator, Dictionary<RegionLink, int>>("regionMinLink");
-        //public static FieldRef<RegionCostCalculator, FastPriorityQueue<RegionLinkQueueEntry2>> queue = FieldRefAccess<RegionCostCalculator, FastPriorityQueue<RegionLinkQueueEntry2>>("queue");
-        
+        [ThreadStatic]
+        private static List<int> tmpPathableNeighborIndices;
+        [ThreadStatic]
+        private static Dictionary<int, float> tmpDistances;
+        [ThreadStatic]
+        private static List<int> tmpCellIndices;
+
         public static FieldRef<RegionCostCalculator, IntVec3> destinationCell =
             FieldRefAccess<RegionCostCalculator, IntVec3>("destinationCell");
         public static FieldRef<RegionCostCalculator, Dictionary<int, RegionLink>> regionMinLink =
@@ -90,228 +93,32 @@ namespace RimThreaded
             }
         }
 
+        public class FastPriorityQueueRegionLinkQueueEntry2
+        {
+            protected List<RegionLinkQueueEntry2> innerList = new List<RegionLinkQueueEntry2>();
+            protected IComparer<RegionLinkQueueEntry2> comparer;
+        }
+
         public static Dictionary<RegionCostCalculator, FastPriorityQueueRegionLinkQueueEntry2> queueDict =
             new Dictionary<RegionCostCalculator, FastPriorityQueueRegionLinkQueueEntry2>();
-
-        static MethodInfo methodOctileDistance =
-            Method(typeof(RegionCostCalculator), "OctileDistance", new Type[] { typeof(int), typeof(int) });
-        static Func<RegionCostCalculator, int, int, int> funcOctileDistance =
-            (Func<RegionCostCalculator, int, int, int>)Delegate.CreateDelegate(typeof(Func<RegionCostCalculator, int, int, int>), methodOctileDistance);
-
-        static MethodInfo methodMinimumRegionLinkDistance =
-            Method(typeof(RegionCostCalculator), "MinimumRegionLinkDistance", new Type[] { typeof(IntVec3), typeof(RegionLink) });
-        static Func<RegionCostCalculator, IntVec3, RegionLink, int> funcMinimumRegionLinkDistance =
-            (Func<RegionCostCalculator, IntVec3, RegionLink, int>)Delegate.CreateDelegate(typeof(Func<RegionCostCalculator, IntVec3, RegionLink, int>), methodMinimumRegionLinkDistance);
-
-        static MethodInfo methodRegionLinkDistanceRRI =
-            Method(typeof(RegionCostCalculator), "RegionLinkDistance", new Type[] { typeof(RegionLink), typeof(RegionLink), typeof(int) });
-        static Func<RegionCostCalculator, RegionLink, RegionLink, int, int> funcRegionLinkDistanceRRI =
-            (Func<RegionCostCalculator, RegionLink, RegionLink, int, int>)Delegate.CreateDelegate(typeof(Func<RegionCostCalculator, RegionLink, RegionLink, int, int>), methodRegionLinkDistanceRRI);
-
-        static MethodInfo methodRegionLinkDistanceIRI =
-            Method(typeof(RegionCostCalculator), "RegionLinkDistance", new Type[] { typeof(IntVec3), typeof(RegionLink), typeof(int) });
-        static Func<RegionCostCalculator, IntVec3, RegionLink, int, int> funcRegionLinkDistanceIRI =
-            (Func<RegionCostCalculator, IntVec3, RegionLink, int, int>)Delegate.CreateDelegate(typeof(Func<RegionCostCalculator, IntVec3, RegionLink, int, int>), methodRegionLinkDistanceIRI);
-
-        static MethodInfo methodGetLinkTargetCell =
-            Method(typeof(RegionCostCalculator), "GetLinkTargetCell", new Type[] { typeof(IntVec3), typeof(RegionLink) });
-        static Func<RegionCostCalculator, IntVec3, RegionLink, IntVec3> funcGetLinkTargetCell =
-            (Func<RegionCostCalculator, IntVec3, RegionLink, IntVec3>)Delegate.CreateDelegate(typeof(Func<RegionCostCalculator, IntVec3, RegionLink, IntVec3>), methodGetLinkTargetCell);
 
         static MethodInfo methodPreciseRegionLinkDistancesNeighborsGetter =
             Method(typeof(RegionCostCalculator), "PreciseRegionLinkDistancesNeighborsGetter", new Type[] { typeof(int), typeof(Region) });
         static Func<RegionCostCalculator, int, Region, IEnumerable<int>> funcPreciseRegionLinkDistancesNeighborsGetter =
             (Func<RegionCostCalculator, int, Region, IEnumerable<int>>)Delegate.CreateDelegate(typeof(Func<RegionCostCalculator, int, Region, IEnumerable<int>>), methodPreciseRegionLinkDistancesNeighborsGetter);
 
-        public static bool GetRegionDistance(RegionCostCalculator __instance, ref int __result, Region region, out RegionLink minLink)
-        {
-            if (regionMinLink(__instance).TryGetValue(region.id, out minLink))
-            {
-                __result = distances(__instance)[minLink];
-                return false;
-            }
-            FastPriorityQueueRegionLinkQueueEntry2 queue;
-            if (!queueDict.TryGetValue(__instance, out queue))
-            {
-                queue = new FastPriorityQueueRegionLinkQueueEntry2(new DistanceComparer2());
-            }
-            while (queue.Count != 0)
-            {
-                RegionLinkQueueEntry2 regionLinkQueueEntry = queue.Pop();
-                int num = distances(__instance)[regionLinkQueueEntry.Link];
-                if (regionLinkQueueEntry.Cost != num)
-                {
-                    continue;
-                }
-
-                Region otherRegion = regionLinkQueueEntry.Link.GetOtherRegion(regionLinkQueueEntry.From);
-                if (otherRegion == null || !otherRegion.valid)
-                {
-                    continue;
-                }
-
-                int num2 = 0;
-                if (otherRegion.door != null)
-                {
-                    num2 = PathFinder.GetBuildingCost(otherRegion.door, traverseParms(__instance), traverseParms(__instance).pawn);
-                    if (num2 == int.MaxValue)
-                    {
-                        continue;
-                    }
-                    //num2 += OctileDistance(1, 0);
-                    num2 += funcOctileDistance(__instance, 1, 0);
-                }
-
-                int minPathCost = __instance.RegionMedianPathCost(otherRegion);
-                for (int i = 0; i < otherRegion.links.Count; i++)
-                {
-                    RegionLink regionLink = otherRegion.links[i];
-                    if (regionLink == null || regionLink.GetOtherRegion(otherRegion) == null || regionLink == regionLinkQueueEntry.Link || !regionLink.GetOtherRegion(otherRegion).type.Passable())
-                    {
-                        continue;
-                    }
-
-                    //int val = (otherRegion.door != null) ? num2 : RegionLinkDistance(regionLinkQueueEntry.Link, regionLink, minPathCost);
-                    int val = (otherRegion.door != null) ? num2 : funcRegionLinkDistanceRRI(__instance, regionLinkQueueEntry.Link, regionLink, minPathCost);
-                    val = Math.Max(val, 1);
-                    int num3 = num + val;
-                    //int estimatedPathCost = MinimumRegionLinkDistance(destinationCell, regionLink) + num3;
-                    int estimatedPathCost = funcMinimumRegionLinkDistance(__instance, destinationCell(__instance), regionLink) + num3;
-                    if (distances(__instance).TryGetValue(regionLink, out int value))
-                    {
-                        if (num3 < value)
-                        {
-                            distances(__instance)[regionLink] = num3;
-                            if (!queueDict.TryGetValue(__instance, out queue))
-                            {
-                                queue = new FastPriorityQueueRegionLinkQueueEntry2(new DistanceComparer2());
-                            }
-                            queue.Push(new RegionLinkQueueEntry2(otherRegion, regionLink, num3, estimatedPathCost));
-                        }
-                    }
-                    else
-                    {
-                        if (!queueDict.TryGetValue(__instance, out queue))
-                        {
-                            queue = new FastPriorityQueueRegionLinkQueueEntry2(new DistanceComparer2());
-                        }
-                        distances(__instance).Add(regionLink, num3);
-                        queue.Push(new RegionLinkQueueEntry2(otherRegion, regionLink, num3, estimatedPathCost));
-                    }
-                }
-
-                if (!regionMinLink(__instance).ContainsKey(otherRegion.id))
-                {
-                    regionMinLink(__instance).Add(otherRegion.id, regionLinkQueueEntry.Link);
-                    if (otherRegion == region)
-                    {
-                        minLink = regionLinkQueueEntry.Link;
-                        __result = regionLinkQueueEntry.Cost;
-                        return false;
-                    }
-                }
-            }
-
-            __result = 10000;
-            return false;
-        }
-
-        public static IntVec3 LinkClosestCell(IntVec3 cell, RegionLink link)
-        {
-            EdgeSpan span = link.span;
-            int num = 0;
-            int num2 = 0;
-            if (span.dir == SpanDirection.North)
-            {
-                num2 = span.length - 1;
-            }
-            else
-            {
-                num = span.length - 1;
-            }
-
-            IntVec3 root = span.root;
-            return new IntVec3(Mathf.Clamp(cell.x, root.x, root.x + num), 0, Mathf.Clamp(cell.z, root.z, root.z + num2));
-        }
-
-        public static bool Init(RegionCostCalculator __instance, CellRect destination, HashSet<Region> destRegions, TraverseParms parms, int moveTicksCardinal, int moveTicksDiagonal, ByteGrid avoidGrid, Area allowedArea, bool drafted)
-        {
-            regionGridField(__instance) = map(__instance).regionGrid.DirectGrid;
-            traverseParmsField(__instance) = parms;
-            destinationCellField(__instance) = destination.CenterCell;
-            moveTicksCardinalField(__instance) = moveTicksCardinal;
-            moveTicksDiagonalField(__instance) = moveTicksDiagonal;
-            avoidGridField(__instance) = avoidGrid;
-            allowedAreaField(__instance) = allowedArea;
-            draftedField(__instance) = drafted;
-
-            //temps?
-            regionMinLink(__instance).Clear();
-            distances(__instance).Clear();
-            linkTargetCells(__instance).Clear();            
-            minPathCosts(__instance).Clear();
-            if (!queueDict.TryGetValue(__instance, out FastPriorityQueueRegionLinkQueueEntry2 queue))
-            {
-                queue = new FastPriorityQueueRegionLinkQueueEntry2(new DistanceComparer2());
-            }
-
-            foreach (Region destRegion in destRegions)
-            {
-                int minPathCost = __instance.RegionMedianPathCost(destRegion);
-                for (int i = 0; i < destRegion.links.Count; i++)
-                {
-                    RegionLink regionLink = destRegion.links[i];
-                    if (!regionLink.GetOtherRegion(destRegion).Allows(traverseParmsField(__instance), isDestination: false))
-                    {
-                        continue;
-                    }
-
-                    int num = funcRegionLinkDistanceIRI(__instance, destinationCellField(__instance), regionLink, minPathCost);
-                    if (distances(__instance).TryGetValue(regionLink, out int value))
-                    {
-                        if (num < value)
-                        {
-                            linkTargetCells(__instance)[regionLink] = funcGetLinkTargetCell(__instance, destinationCellField(__instance), regionLink);
-                        }
-
-                        num = Math.Min(value, num);
-                    }
-                    else
-                    {
-                        linkTargetCells(__instance)[regionLink] = funcGetLinkTargetCell(__instance, destinationCellField(__instance), regionLink);
-                    }
-
-                    distances(__instance)[regionLink] = num;
-                }
-
-                GetPreciseRegionLinkDistances(__instance, destRegion, destination, preciseRegionLinkDistances(__instance));
-                for (int j = 0; j < preciseRegionLinkDistances(__instance).Count; j++)
-                {
-                    Pair<RegionLink, int> pair = preciseRegionLinkDistances(__instance)[j];
-                    RegionLink first = pair.First;
-                    int num2 = distances(__instance)[first];
-                    int num3;
-                    if (pair.Second > num2)
-                    {
-                        distances(__instance)[first] = pair.Second;
-                        num3 = pair.Second;
-                    }
-                    else
-                    {
-                        num3 = num2;
-                    }
-
-                    queue.Push(new RegionLinkQueueEntry2(destRegion, first, num3, num3));
-                }
-            }
-            return false;
-        }
-
 
         public static bool GetPreciseRegionLinkDistances(RegionCostCalculator __instance, Region region, CellRect destination, List<Pair<RegionLink, int>> outDistances)
         {
             outDistances.Clear();            
-            List<int> tmpCellIndices = new List<int>();// Replaces tmpCellIndices.Clear();
+            if(tmpCellIndices == null)
+            {
+                tmpCellIndices = new List<int>();
+            }
+            else
+            {
+                tmpCellIndices.Clear();
+            }
             if (destination.Width == 1 && destination.Height == 1)
             {
                 tmpCellIndices.Add(map(__instance).cellIndices.CellToIndex(destination.CenterCell));// Replaces tmpCellIndices
@@ -326,9 +133,13 @@ namespace RimThreaded
                     }
                 }
             }
-            Dictionary<int, float> tmpDistances = new Dictionary<int, float>(); //Replaces tmpDistances
-            //Dijkstra<int>.Run(tmpCellIndices, (int x) => PreciseRegionLinkDistancesNeighborsGetter2(__instance, x, region),
-            //preciseRegionLinkDistancesDistanceGetter(__instance), tmpDistances); // Replaces tmpCellIndices
+            if(tmpDistances == null)
+            {
+                tmpDistances = new Dictionary<int, float>();
+            } else
+            {
+                tmpDistances.Clear();
+            }
 
             DijkstraInt.Run(tmpCellIndices, (int x) => funcPreciseRegionLinkDistancesNeighborsGetter(__instance, x, region),
                             preciseRegionLinkDistancesDistanceGetter(__instance), tmpDistances); // Replaces tmpCellIndices
@@ -351,8 +162,14 @@ namespace RimThreaded
         }
         public static bool PathableNeighborIndices(RegionCostCalculator __instance, ref List<int> __result, int index)
         {
-            //tmpPathableNeighborIndices.Clear();
-            List<int> tmpPathableNeighborIndices = new List<int>();
+            if (tmpPathableNeighborIndices == null)
+            {
+                tmpPathableNeighborIndices = new List<int>();
+            }
+            else
+            {
+                tmpPathableNeighborIndices.Clear();
+            }
             PathGrid pathGrid = map(__instance).pathGrid;
             int x = map(__instance).Size.x;
             bool num = index % x > 0;
@@ -409,6 +226,16 @@ namespace RimThreaded
 
             __result = tmpPathableNeighborIndices;
             return false;
+        }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RegionCostCalculator);
+            Type patched = typeof(RegionCostCalculator_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetPreciseRegionLinkDistances");
+            RimThreadedHarmony.Prefix(original, patched, "PathableNeighborIndices");
+            //RimThreadedHarmony.Prefix(original, patched, "GetRegionDistance");
+            //RimThreadedHarmony.Prefix(original, patched, "Init");
         }
     }
 }

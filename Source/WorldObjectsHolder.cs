@@ -1,23 +1,13 @@
 ﻿using HarmonyLib;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
-using Verse;
-using Verse.AI;
-using Verse.Sound;
 using RimWorld.Planet;
-using System.Collections.Concurrent;
+using System;
 
 namespace RimThreaded
 {
 
     public class WorldObjectsHolder_Patch
 	{
-        public static List<WorldObject> tmpWorldObjects =
-            AccessTools.StaticFieldRefAccess<List<WorldObject>>(typeof(WorldObjectsHolder), "tmpWorldObjects");
-
         public static AccessTools.FieldRef<WorldObjectsHolder, List<WorldObject>> worldObjects =
             AccessTools.FieldRefAccess<WorldObjectsHolder, List<WorldObject>>("worldObjects");
         public static bool WorldObjectsHolderTick(WorldObjectsHolder __instance)
@@ -27,5 +17,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WorldObjectsHolder);
+            Type patched = typeof(WorldObjectsHolder_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "WorldObjectsHolderTick");
+        }
     }
 }

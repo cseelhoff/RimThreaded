@@ -9,6 +9,14 @@ namespace RimThreaded
 {
 	class SoundStarter_Patch
 	{
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(SoundStarter);
+			Type patched = typeof(SoundStarter_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "PlayOneShot");
+			RimThreadedHarmony.Prefix(original, patched, "PlayOneShotOnCamera");
+		}
+
 		public static bool PlayOneShot(SoundDef soundDef, SoundInfo info)
 		{
 			if (UnityData.IsInMainThread)
@@ -63,24 +71,5 @@ namespace RimThreaded
 			return false;
 		}
 
-
-		static readonly Func<object[], object> safeFunction = parameters =>
-			SoundStarter.TrySpawnSustainer(
-				(SoundDef)parameters[0], 
-				(SoundInfo)parameters[1]);
-
-		public static bool TrySpawnSustainer(ref Sustainer __result, SoundDef soundDef, SoundInfo info)
-		{
-			if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-			{
-				threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { soundDef, info } };
-				mainThreadWaitHandle.Set();
-				threadInfo.eventWaitStart.WaitOne();
-				__result = (Sustainer)threadInfo.safeFunctionResult;
-				return false;
-			}
-			return true;
-		}
-
-	}
+    }
 }

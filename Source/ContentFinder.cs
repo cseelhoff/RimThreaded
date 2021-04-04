@@ -13,6 +13,12 @@ namespace RimThreaded
              (string)parameters[0], 
              (bool)parameters[1]);
 
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(ContentFinder<Texture2D>);
+            Type patched = typeof(ContentFinder_Texture2D_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Get");
+        }
         public static bool Get(ref Texture2D __result, string itemPath, bool reportFailure = true)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
