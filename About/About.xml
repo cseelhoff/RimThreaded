@@ -10,16 +10,8 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 1.3.2 - The Child of the Force
-    -Fixed bug in FireUtility.ChanceToStartFireIn
-    -Fixed bug in GenClamor.DoClamor
-    -Transpiled HediffSet.GetPartHealth
-    -Fixed bug in TryOpportunisticJob
-    -Fixed bug in PathFinder.InitStatusesAndPushStartNode
-    -Transpiled Pawn_HealthTracker.RemoveHediff
-    -Fixed bug in Rand_Transpile.TryRangeInclusiveWhere
-    -Set minimum thread timeout to 5000ms
-    -Fixed bug in Children.HediffComp_Discoverable_CheckDiscovered.CheckDiscovered_Pre
+    Version 2.0 - The Child of the Force
+    - no changelog yet.
 
     JOIN OUR COMMUNITY ON DISCORD:
     https://discord.gg/3JJuWK8
