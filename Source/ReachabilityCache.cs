@@ -8,6 +8,7 @@ namespace RimThreaded
     class ReachabilityCache_Patch
     {
         [ThreadStatic] public static List<CachedEntry2> tmpCachedEntries;
+        [ThreadStatic] public static Dictionary<CachedEntry2, bool> cacheDict;
 
         public static void InitializeThreadStatics()
         {
@@ -108,22 +109,20 @@ namespace RimThreaded
 
         public static Dictionary<CachedEntry2, bool> getCacheDict(ReachabilityCache __instance)
         {
-            Dictionary<CachedEntry2, bool> cacheDict;
-            lock (cacheDictDict)
-            {
+            
+      
                 if (!cacheDictDict.TryGetValue(__instance, out cacheDict)) {
                     cacheDict = new Dictionary<CachedEntry2, bool>();
                     cacheDictDict[__instance] = cacheDict;
                 }
-            }            
+                     
             return cacheDict;
         }
 
         public static bool CachedResultFor(ReachabilityCache __instance, ref BoolUnknown __result, Room A, Room B, TraverseParms traverseParams)
         {
-            Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
-            lock (cacheDict)
-            {
+            cacheDict = getCacheDict(__instance);
+
                 if (cacheDict.TryGetValue(new CachedEntry2(A.ID, B.ID, traverseParams), out bool value))
                 {
                     if (!value)
@@ -134,18 +133,19 @@ namespace RimThreaded
                     __result = BoolUnknown.True;
                     return false;
                 }
-            }
             __result = BoolUnknown.Unknown;
             return false;
         }
         public static bool AddCachedResult(ReachabilityCache __instance, Room A, Room B, TraverseParms traverseParams, bool reachable)
         {
-            CachedEntry2 key = new CachedEntry2(A.ID, B.ID, traverseParams);
-            Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
-            if (!cacheDict.ContainsKey(key))
+            lock (__instance)
             {
-                lock (cacheDict)
+                CachedEntry2 key = new CachedEntry2(A.ID, B.ID, traverseParams);
+                cacheDict = getCacheDict(__instance);
+
+                if (cacheDict.ContainsKey(key) == false)
                 {
+
                     if (!cacheDict.ContainsKey(key))
                     {
                         cacheDict.Add(key, reachable);
@@ -157,21 +157,17 @@ namespace RimThreaded
 
         public static bool Clear(ReachabilityCache __instance)
         {
-            Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
-            lock (cacheDict)
-            {
-                cacheDict.Clear();
-            }
+            cacheDict = getCacheDict(__instance); 
+            cacheDict.Clear();
             return false;
         }
 
         public static bool ClearFor(ReachabilityCache __instance, Pawn p)
         {
             tmpCachedEntries.Clear();
-            Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
+            cacheDict = getCacheDict(__instance);
 
-            lock (cacheDict)
-            {
+
                 foreach (KeyValuePair<CachedEntry2, bool> item in cacheDict)
                 {
                     if (item.Key.TraverseParms.pawn == p)
@@ -184,24 +180,25 @@ namespace RimThreaded
                 {
                     cacheDict.Remove(tmpCachedEntries[i]);
                 }
-            }
+            
 
             //tmpCachedEntries.Clear();
             return false;
         }
         public static bool ClearForHostile(ReachabilityCache __instance, Thing hostileTo)
         {
-            if (tmpCachedEntries == null)
+            lock (__instance)
             {
-                tmpCachedEntries = new List<CachedEntry2>();
-            }
-            else
-            {
-                tmpCachedEntries.Clear();
-            }
-            Dictionary<CachedEntry2, bool> cacheDict = getCacheDict(__instance);
-            lock (cacheDict)
-            {
+                if (tmpCachedEntries == null)
+                {
+                    tmpCachedEntries = new List<CachedEntry2>();
+                }
+                else
+                {
+                    tmpCachedEntries.Clear();
+                }
+                cacheDict = getCacheDict(__instance);
+
                 foreach (KeyValuePair<CachedEntry2, bool> item in cacheDict)
                 {
                     Pawn pawn = item.Key.TraverseParms.pawn;

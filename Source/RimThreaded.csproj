@@ -16,18 +16,19 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>..\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>
     </DocumentationFile>
+    <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Assemblies\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -35,10 +36,10 @@
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.0.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Assemblies\0Harmony.dll</HintPath>
+      <HintPath>..\..\RimThreaded\Assemblies\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\RimThreaded\Assemblies\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -51,33 +52,36 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\RimThreaded\Assemblies\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>..\..\RimThreaded\Assemblies\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>..\..\RimThreaded\Assemblies\UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\RimThreaded\Assemblies\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\..\RimThreaded\Assemblies\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\..\RimThreaded\Assemblies\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alert_ColonistLeftUnburied_Patch.cs" />
     <Compile Include="Alert_MinorBreakRisk_Patch.cs" />
     <Compile Include="AmbientSoundManager_Patch.cs" />
+    <Compile Include="FilthMaker_Patch.cs" />
     <Compile Include="FoodUtility_Patch.cs" />
+    <Compile Include="GenHostility_Patch.cs" />
     <Compile Include="GenRadial_Patch.cs" />
     <Compile Include="Fire_Patch.cs" />
     <Compile Include="AttackTargetFinder_Patch.cs" />
@@ -92,10 +96,15 @@
     <Compile Include="FilthMonitor2.cs" />
     <Compile Include="GeneratePawns_Patch.cs" />
     <Compile Include="GenLeaving.cs" />
+    <Compile Include="GenSpawn_Patch.cs" />
     <Compile Include="HaulAIUtility_Patch.cs" />
     <Compile Include="Hauling_Transpile.cs" />
+    <Compile Include="JobGiver_GetJoy_Patch.cs" />
     <Compile Include="JobGiver_Haul_Patch.cs" />
     <Compile Include="JoyGiver_Ingest_Patch.cs" />
+    <Compile Include="JoyGiver_InteractBuildingSitAdjacent_Patch.cs" />
+    <Compile Include="JoyGiver_InteractBuilding_Patch.cs" />
+    <Compile Include="JoyGiver_TakeDrug_Patch.cs" />
     <Compile Include="MemoryThoughtHandler_Patch.cs" />
     <Compile Include="Patch_TryOpportunisticJob.cs" />
     <Compile Include="Patch_TryOpportunisticJob_Transpile.cs" />
@@ -108,6 +117,7 @@
     <Compile Include="ReachabilityCache.cs" />
     <Compile Include="RegionDirtyer_Patch.cs" />
     <Compile Include="RegionListersUpdater_Transpile.cs" />
+    <Compile Include="RegionTraverser_Patch.cs" />
     <Compile Include="RegionTraverser_Transpile.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="StatWorker.cs" />
@@ -115,6 +125,7 @@
     <Compile Include="ThinkNode_PrioritySorter_Patch.cs" />
     <Compile Include="thinkTree.cs" />
     <Compile Include="TickList_Transpile.cs" />
+    <Compile Include="Toils_Haul_Patch.cs" />
     <Compile Include="Verb_MeleeAttack_Patch.cs" />
     <Compile Include="WorkGiver_DoBill_Transpile.cs" />
     <Compile Include="CompCauseGameCondition.cs" />
@@ -153,6 +164,7 @@
     <Compile Include="Verb_MeleeAttackCE_Transpile.cs" />
     <Compile Include="WorkGiver_GrowerSow_Patch.cs" />
     <Compile Include="WorkGiver_Grower_Patch.cs" />
+    <Compile Include="WorkGiver_CleanFilth_Patch.cs" />
     <Compile Include="WorldFloodFiller.cs" />
     <Compile Include="ReservationUtility.cs" />
     <Compile Include="PlayLog.cs" />

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Verse;
 using System;
+using RimWorld;
 
 namespace RimThreaded
 {
@@ -13,6 +14,39 @@ namespace RimThreaded
 			Type patched = typeof(Thing_Patch);
 			RimThreadedHarmony.Postfix(original, patched, "SpawnSetup", "SpawnSetupPostFix");
 		}
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Thing);
+            Type patched = typeof(Thing_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "get_FlammableNow");
+        }
+
+		[ThreadStatic] public static List<Thing> thingList;
+		public static bool get_FlammableNow(Thing __instance, ref bool __result)
+        { 
+            if (__instance.GetStatValue(StatDefOf.Flammability, true) < 0.01f)
+            {
+                __result = false;
+                return false;
+            }
+            if (__instance.Spawned && !__instance.FireBulwark)
+            {
+                thingList = __instance.Position.GetThingList(__instance.Map);
+                if (thingList != null)
+                {
+                    for (int i = 0; i < thingList.Count; i++)
+                    {
+                        if (thingList[i].FireBulwark)
+                        {
+                            __result = false;
+                            return false;
+                        }
+                    }
+                }
+            }
+            __result = true;
+            return false;
+        }
 
 #pragma warning disable IDE0060 // Remove unused parameter
 		public static void SpawnSetupPostFix(Thing __instance, Map map, bool respawningAfterLoad)

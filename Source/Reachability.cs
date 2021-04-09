@@ -257,11 +257,13 @@ namespace RimThreaded
 
                         if (destRegionsParam.Contains(region2))
                         {
-                            for (int k = 0; k < startingRegionsParam.Count; k++)
+                            lock (startingRegionsParam)
                             {
-                                cache.AddCachedResult(startingRegionsParam[k].Room, region2.Room, traverseParams, reachable: true);
+                                for (int k = 0; k < startingRegionsParam.Count; k++)
+                                {
+                                    cache.AddCachedResult(startingRegionsParam[k].Room, region2.Room, traverseParams, reachable: true);
+                                }
                             }
-
                             return true;
                         }
                         QueueNewOpenRegion(region2, openQueueParam, regionsReached);

@@ -29,8 +29,10 @@ namespace RimThreaded
         [ThreadStatic]
         static List<KeyValuePair<ThingDef, float>> tmpPossiblePlantsWithWeight;
 
-        [ThreadStatic]
+        [ThreadStatic] 
         static List<ThingDef> tmpPossiblePlants;
+
+        [ThreadStatic] static List<ThingDef> allWildPlants;
 
         public static FieldRef<WildPlantSpawner, Map> map = FieldRefAccess<WildPlantSpawner, Map>("map");
         public static FieldRef<WildPlantSpawner, bool> hasWholeMapNumDesiredPlantsCalculated =
@@ -256,7 +258,7 @@ namespace RimThreaded
             {
                 tmpPlantDefsLowerOrder.Clear();
             }
-            List<ThingDef> allWildPlants = map(__instance).Biome.AllWildPlants;
+            allWildPlants = map(__instance).Biome.AllWildPlants;
             for (int i = 0; i < allWildPlants.Count; i++)
             {
                 ThingDef wildPlant = allWildPlants[i];
@@ -272,7 +274,7 @@ namespace RimThreaded
 
             float numDesiredPlantsLocally = 0f;
             int numPlantsLowerOrder = 0;
-            RegionTraverser.BreadthFirstTraverse(c, map(__instance), (Region from, Region to) => c.InHorDistOf(to.extentsClose.ClosestCellTo(c), radiusToScan), delegate (Region reg)
+            BreadthFirstTraverse(c, map(__instance), (Region from, Region to) => c.InHorDistOf(to.extentsClose.ClosestCellTo(c), radiusToScan), delegate (Region reg)
             {
                 numDesiredPlantsLocally += funcGetDesiredPlantsCountIn(__instance, reg, c, plantDensity);
                 for (int j = 0; j < tmpPlantDefsLowerOrder.Count; j++)
@@ -291,12 +293,28 @@ namespace RimThreaded
             return numPlantsLowerOrder / num2 >= 0.57f;
         }
 
+        public static void BreadthFirstTraverse(IntVec3 start, Map map2, RegionEntryPredicate entryCondition, RegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
+        {
+            Region region = start.GetRegion(map2, traversableRegionTypes);
+            if (region == null)
+            {
+                return;
+            }
+
+            lock (region)
+            {
+                RegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
+            }
+
+        }
+
         internal static void RunDestructivePatches()
         {
             Type original = typeof(WildPlantSpawner);
             Type patched = typeof(WildPlantSpawner_Patch);
             RimThreadedHarmony.Prefix(original, patched, "CheckSpawnWildPlantAt");
             RimThreadedHarmony.Prefix(original, patched, "WildPlantSpawnerTickInternal");
+            RimThreadedHarmony.Prefix(original, patched, "EnoughLowerOrderPlantsNearby");
         }
     }
 }

@@ -13,11 +13,15 @@ namespace RimThreaded
 {
     public class WorkGiver_DoBill_RegionProcessor
     {
-		public List<Thing> newRelevantThings = new List<Thing>();
-		public List<IngredientCount> ingredientsOrdered = new List<IngredientCount>();
-		public List<Thing> relevantThings = new List<Thing>();
-		public HashSet<Thing> processedThings = new HashSet<Thing>();
-		public Bill bill;
+        [ThreadStatic] public static List<Thing> newRelevantThings;
+        [ThreadStatic] public static List<Thing> relevantThings;
+        [ThreadStatic] public static HashSet<Thing> processedThings;
+        [ThreadStatic] public static List<IngredientCount> ingredientsOrdered;
+
+		[ThreadStatic] public static Dictionary<float, List<ThingDef>> thingDefValues;
+        [ThreadStatic] public static List<Thing> thingList;
+
+        public Bill bill;
 		public Pawn pawn;
 		public Predicate<Thing> baseValidator;
 		public bool billGiverIsPawn;
@@ -27,43 +31,56 @@ namespace RimThreaded
 		public int regionsProcessed = 0;
 		public bool foundAll = false;
 
-        public WorkGiver_DoBill_RegionProcessor()
+        public static void InitializeThreadStatics()
+        {
+			newRelevantThings = new List<Thing>();
+            relevantThings = new List<Thing>();
+            processedThings = new HashSet<Thing>();
+            ingredientsOrdered = new List<IngredientCount>();
+            thingList = new List<Thing>();
+            thingDefValues = new Dictionary<float, List<ThingDef>>();
+		}
+
+		public WorkGiver_DoBill_RegionProcessor()
         {
         }
 
         public bool Get_RegionProcessor(Region r)
         {
+
+
 			RecipeDef recipe = bill.recipe;
-            Dictionary<float, List<ThingDef>> thingDefValues = RimThreaded.recipeThingDefValues[recipe];
-			foreach (float value in RimThreaded.sortedRecipeValues[recipe])
-			{
-				foreach (ThingDef thingDef in thingDefValues[value])
-				{
-					List<Thing> thingList = r.ListerThings.ThingsOfDef(thingDef);
-					for (int index = 0; index < thingList.Count; ++index)
-					{
-						Thing thing = thingList[index];
-						if (!processedThings.Contains(thing) && ReachabilityWithinRegion.ThingFromRegionListerReachable(
-							thing, r, PathEndMode.ClosestTouch, pawn) && (baseValidator(thing) && !(thing.def.IsMedicine & billGiverIsPawn)))
-						{
-							newRelevantThings.Add(thing);
-							processedThings.Add(thing);
-						}
-					}
-				}
-			}
-			++regionsProcessed;
-			if (newRelevantThings.Count > 0 && regionsProcessed > adjacentRegionsAvailable)
-			{
-				relevantThings.AddRange(newRelevantThings);
-				newRelevantThings.Clear();
-				if (WorkGiver_DoBill_Patch.TryFindBestBillIngredientsInSet2(relevantThings, bill, chosen, rootCell, billGiverIsPawn, ingredientsOrdered))
-				{
-					foundAll = true;
-					return true;
-				}
-			}
-			return false;
+            thingDefValues = RimThreaded.recipeThingDefValues[recipe];
+            foreach (float value in RimThreaded.sortedRecipeValues[recipe])
+            {
+                foreach (ThingDef thingDef in thingDefValues[value])
+                {
+                    thingList = r.ListerThings.ThingsOfDef(thingDef);
+                    for (int index = 0; index < thingList.Count; ++index)
+                    {
+                        Thing thing = thingList[index];
+                        if (!processedThings.Contains(thing) && ReachabilityWithinRegion.ThingFromRegionListerReachable(
+                            thing, r, PathEndMode.ClosestTouch, pawn) && (baseValidator(thing) && !(thing.def.IsMedicine & billGiverIsPawn)))
+                        {
+                            newRelevantThings.Add(thing);
+                            processedThings.Add(thing);
+                        }
+                    }
+                }
+            }
+            ++regionsProcessed;
+            if (newRelevantThings.Count > 0 && regionsProcessed > adjacentRegionsAvailable)
+            {
+                relevantThings.AddRange(newRelevantThings);
+                newRelevantThings.Clear();
+                if (WorkGiver_DoBill_Patch.TryFindBestBillIngredientsInSet2(relevantThings, bill, chosen, rootCell, billGiverIsPawn, ingredientsOrdered))
+                {
+                    foundAll = true;
+                    return true;
+                }
+            }
+            
+            return false;
 		}
     }
     public class WorkGiver_DoBill_Patch
@@ -198,12 +215,12 @@ namespace RimThreaded
 		  Map map)
 		{
 			MedicalCareCategory medicalCareCategory = GetMedicalCareCategory(billGiver);
-			List<Thing> thingList = map.listerThings.ThingsInGroup(ThingRequestGroup.Medicine);
+            WorkGiver_DoBill_RegionProcessor.thingList = map.listerThings.ThingsInGroup(ThingRequestGroup.Medicine);
 			//WorkGiver_DoBill.tmpMedicine.Clear();
 			List<Thing> tmpMedicine = new List<Thing>();
-			for (int index = 0; index < thingList.Count; ++index)
+			for (int index = 0; index < WorkGiver_DoBill_RegionProcessor.thingList.Count; ++index)
 			{
-				Thing thing = thingList[index];
+				Thing thing = WorkGiver_DoBill_RegionProcessor.thingList[index];
 				if (medicalCareCategory.AllowsMedicine(thing.def) && baseValidator(thing) && pawn.CanReach(thing, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
 					tmpMedicine.Add(thing);
 			}
@@ -218,9 +235,16 @@ namespace RimThreaded
 		  Thing billGiver,
 		  List<ThingCount> chosen)
 		{
-			WorkGiver_DoBill_RegionProcessor workGiver_DoBill_RegionProcessor = new WorkGiver_DoBill_RegionProcessor(); //ADD
+            WorkGiver_DoBill_RegionProcessor workGiver_DoBill_RegionProcessor = new WorkGiver_DoBill_RegionProcessor(); //ADD
 			chosen.Clear(); //COULD REMOVE?
-			//newRelevantThings.Clear(); //REMOVE
+							//newRelevantThings.Clear(); //REMOVE
+							/*
+			if (pawn?.Map == null || bill?.recipe?.ingredients == null || billGiver?.Position == null)
+			{
+				__result = false;
+				return false;
+			}*/
+
 			if (bill.recipe.ingredients.Count == 0)
 			{
 				__result = true;
@@ -235,7 +259,7 @@ namespace RimThreaded
 				return false;
 			}
 
-			MakeIngredientsListInProcessingOrder(workGiver_DoBill_RegionProcessor.ingredientsOrdered, bill); //CHANGE
+			MakeIngredientsListInProcessingOrder(WorkGiver_DoBill_RegionProcessor.ingredientsOrdered, bill); //CHANGE
 			//WorkGiver_DoBill.relevantThings.Clear(); REMOVE
 			//WorkGiver_DoBill.processedThings.Clear(); REMOVE
 			//bool foundAll = false; REMOVE
@@ -246,11 +270,11 @@ namespace RimThreaded
 			bool billGiverIsPawn = billGiver is Pawn;
 			if (billGiverIsPawn)
 			{
-				AddEveryMedicineToRelevantThings2(pawn, billGiver, workGiver_DoBill_RegionProcessor.relevantThings, baseValidator, pawn.Map); //CHANGE
-				if (TryFindBestBillIngredientsInSet2(workGiver_DoBill_RegionProcessor.relevantThings, bill, chosen, rootCell, billGiverIsPawn, workGiver_DoBill_RegionProcessor.ingredientsOrdered)) //CHANGE x2
+				AddEveryMedicineToRelevantThings2(pawn, billGiver, WorkGiver_DoBill_RegionProcessor.relevantThings, baseValidator, pawn.Map); //CHANGE
+				if (TryFindBestBillIngredientsInSet2(WorkGiver_DoBill_RegionProcessor.relevantThings, bill, chosen, rootCell, billGiverIsPawn, WorkGiver_DoBill_RegionProcessor.ingredientsOrdered)) //CHANGE x2
 				{
-					workGiver_DoBill_RegionProcessor.relevantThings.Clear(); //CHANGE
-					workGiver_DoBill_RegionProcessor.ingredientsOrdered.Clear(); //CHANGE
+                    WorkGiver_DoBill_RegionProcessor.relevantThings.Clear(); //CHANGE
+                    WorkGiver_DoBill_RegionProcessor.ingredientsOrdered.Clear(); //CHANGE
 					{
 						__result = true;
 						return false;
@@ -280,7 +304,7 @@ namespace RimThreaded
 
 			int adjacentRegionsAvailable = rootReg.Neighbors.Count((Region region) => entryCondition(rootReg, region));
 			//int regionsProcessed = 0; REMOVE
-			workGiver_DoBill_RegionProcessor.processedThings.AddRange(workGiver_DoBill_RegionProcessor.relevantThings); //CHANGE x2
+            WorkGiver_DoBill_RegionProcessor.processedThings.AddRange(WorkGiver_DoBill_RegionProcessor.relevantThings); //CHANGE x2
 																														//processedThings, pawn, baseValidator, billGiverIsPawn, newRelevantThings, adjacentRegionsAvailable, relevantThings, bill, chosen, rootCell, ingredientsOrdered
 
 			workGiver_DoBill_RegionProcessor.bill = bill;//ADD

@@ -42,12 +42,29 @@ namespace RimThreaded
 			__result = poweron;
 			return false;
 		}
+        public static bool get_BlockedOpenMomentary(Building_Door __instance, ref bool __result)
+        { 
+            List<Thing> thingList = __instance.Position.GetThingList(__instance.Map); 
+            for (int i = 0; i < thingList.Count; i++)
+            {
+                Thing thing = thingList[i];
+                if (thing?.def?.category == ThingCategory.Item || thing?.def?.category == ThingCategory.Pawn)
+                {
+                    __result = true;
+                } else
+                {
+                    __result = false;
+				}
+            }
+            return false;
+        }
 
-        internal static void RunDestructivePatches()
+		internal static void RunDestructivePatches()
         {
 			Type original = typeof(Building_Door);
 			Type patched = typeof(Building_Door_Patch);
 			RimThreadedHarmony.Prefix(original, patched, "get_DoorPowerOn");
-		}
-    }
+            RimThreadedHarmony.Prefix(original, patched, "get_BlockedOpenMomentary");
+        }
+	}
 }

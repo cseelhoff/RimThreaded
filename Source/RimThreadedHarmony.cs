@@ -575,9 +575,13 @@ namespace RimThreaded
 
 		private static void PatchNonDestructiveFixes()
 		{
-			
+
 			//Simple
-			AttackTargetFinder_Patch.RunNonDestructivePatches();
+            JoyGiver_TakeDrug_Patch.RunNonDestructivePatches(); //mpm
+            JoyGiver_InteractBuildingSitAdjacent_Patch.RunNonDestructivePatches(); //mpm
+            JoyGiver_InteractBuilding_Patch.RunNonDestructivePatches(); //mpm
+            Alert_ColonistLeftUnburied_Patch.RunNonDestructivePatches(); //mpm
+            AttackTargetFinder_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches(); 
 			CellFinder_Patch.RunNonDestructivePatches();
 			DamageWorker_Patch.RunNonDestructivePatches();
@@ -607,7 +611,7 @@ namespace RimThreaded
 			World_Patch.RunNonDestructivePatches();
 
 
-			//Complex
+            //Complex
 			AttackTargetsCache_Patch.RunNonDestructivePatches();
 			BattleLog_Transpile.RunNonDestructivePatches();
 			CompSpawnSubplant_Transpile.RunNonDestructivePatches();//uses old transpile for lock
@@ -622,7 +626,7 @@ namespace RimThreaded
 			PathFinder_Transpile.RunNonDestructivePatches(); //large method
 			PawnCapacitiesHandler_Transpile.RunNonDestructivePatches(); //reexamine complexity?
 			Rand_Patch.RunNonDestructivePatches(); //uses old transpile for lock
-			RegionTraverser_Transpile.RunNonDestructivePatches(); 
+			RegionTraverser_Transpile.RunNonDestructivePatches(); //this
 			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
 			Thing_Patch.RunNonDestructivePatches();
 			ThingOwnerThing_Transpile.RunNonDestructivePatches();
@@ -681,6 +685,15 @@ namespace RimThreaded
 
 		private static void PatchDestructiveFixes()
 		{
+            Thing_Patch.RunDestructivePatches(); //mpm
+            WorkGiver_CleanFilth_Patch.RunDestructivePatches(); //mpm //not working yet, only random error left.
+            Pawn_JobTracker_Patch.RunDestructivePatches(); //mpm
+			GenHostility_Patch.RunDestructivePatches(); //mpm
+			GenSpawn_Patch.RunDestructivePatches(); //mpm 
+            Toils_Haul_Patch.RunDestructivePatches(); //mpm // stackcount 0 jobspam temp solve.
+			JobGiver_GetJoy_Patch.RunDestructivePatches(); //mpm // can be removed, maybe.
+            FilthMaker_Patch.RunDestructivePatches(); //from 1.3.2
+            RegionTraverser_Patch.RunDestructivePatches(); //mpm // i dont know how to do this.
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches();
 			AlertsReadout_Patch.RunDestructivesPatches();
 			AmbientSoundManager_Patch.RunDestructivePatches();
@@ -726,7 +739,7 @@ namespace RimThreaded
 			Building_Door_Patch.RunDestructivePatches();
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
-			ReservationManager_Patch.RunDestructivePatches();
+			ReservationManager_Patch.RunDestructivePatches(); //mpm // reverted to 1.3.2 version. TODO: //new reservation directory not working yet. 2+ pawns trying to do the same thing at the same time failing both loop.
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
 			MapPawns_Patch.RunDestructivePatches();
 			Region_Patch.RunDestructivePatches();
@@ -772,7 +785,7 @@ namespace RimThreaded
 			GrammarResolverSimpleStringExtensions_Patch.RunDestructivePatches();
 			Pawn_HealthTracker_Patch.RunDestructivePatches();
 			Pawn_Patch.RunDestructivePatches();
-			Pawn_JobTracker_Patch.RunDestructivePatches();
+			//Pawn_JobTracker_Patch.RunDestructivePatches();
 			JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches();
 			Pawn_MindState_Patch.RunDestructivePatches();
@@ -808,7 +821,7 @@ namespace RimThreaded
 			Lord_Patch.RunDestructivePatches();
 			LordManager_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches();
-		}
+        }
 
 		private static void PatchModCompatibility()
 		{

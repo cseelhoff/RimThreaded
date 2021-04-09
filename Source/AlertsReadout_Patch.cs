@@ -24,6 +24,7 @@ namespace RimThreaded
             Method(typeof(AlertsReadout), "CheckAddOrRemoveAlert", new Type[] { typeof(Alert), typeof(bool) });
         private static readonly Action<AlertsReadout, Alert, bool> actionCheckAddOrRemoveAlert =
             (Action<AlertsReadout, Alert, bool>)Delegate.CreateDelegate(typeof(Action<AlertsReadout, Alert, bool>), methodCheckAddOrRemoveAlert);
+        private static bool runonce = true;
 
         public static void RunDestructivesPatches()
         {
@@ -31,9 +32,13 @@ namespace RimThreaded
             Type patched = typeof(AlertsReadout_Patch);
             RimThreadedHarmony.Prefix(original, patched, "AlertsReadoutUpdate");
         }
-
         public static bool AlertsReadoutUpdate(AlertsReadout __instance)
         {
+            if (runonce && RimThreadedMod.Settings.showModConflictsAlert)
+            {
+                RimThreadedMod.getPotentialModConflicts_2(); //Not sure where to put this, making it run on the main menu without black screen will have been perfect.
+                runonce = false;
+            }
             if (Mathf.Max(Find.TickManager.TicksGame, Find.TutorialState.endTick) < 600)
             {
                 return false;

@@ -90,6 +90,8 @@ namespace RimThreaded
             return thing;
         }
 
+        [ThreadStatic] public static Region region;
+
         public static bool RegionwiseBFSWorker(ref Thing __result,
           IntVec3 root,
           Map map,
@@ -124,7 +126,7 @@ namespace RimThreaded
                 __result = null;
                 return false;
             }
-            Region region = root.GetRegion(map, traversableRegionTypes);
+            region = root.GetRegion(map, traversableRegionTypes);
             if (region == null)
             {
                 __result = null;
@@ -137,41 +139,46 @@ namespace RimThreaded
                     return false;
                 return maxDistance > 5000.0 || to.extentsClose.ClosestDistSquaredTo(root) < (double)maxDistSquared;
             };
+
             Thing closestThing = null;
             float closestDistSquared = 9999999f;
             float bestPrio = float.MinValue;
             int regionsSeenScan = 0;
-            RegionProcessor regionProcessor = r =>
+
+            bool RegionProcessor(Region r)
             {
-                if (RegionTraverser.ShouldCountRegion(r))
-                    regionsSeenScan++;
-                if (!r.IsDoorway && !r.Allows(traverseParams, true))
-                    return false;
+                if (RegionTraverser.ShouldCountRegion(r)) regionsSeenScan++;
+                if (!r.IsDoorway && !r.Allows(traverseParams, true)) return false;
                 if (!ignoreEntirelyForbiddenRegions || !r.IsForbiddenEntirely(traverseParams.pawn))
                 {
-                    List<Thing> thingList = r.ListerThings.ThingsMatching(req);
-                    for (int index = 0; index < thingList.Count; ++index)
+                    lock (r)
                     {
-                        Thing thing = thingList[index];
-                        if (ReachabilityWithinRegion.ThingFromRegionListerReachable(thing, r, peMode, traverseParams.pawn))
+                        List<Thing> thingList = r.ListerThings.ThingsMatching(req);
+                        for (int index = 0; index < thingList.Count; ++index)
                         {
-                            float num = priorityGetter != null ? priorityGetter(thing) : 0.0f;
-                            if (num >= (double)bestPrio)
+                            Thing thing = thingList[index];
+                            if (ReachabilityWithinRegion.ThingFromRegionListerReachable(thing, r, peMode, traverseParams.pawn))
                             {
-                                float horizontalSquared = (thing.Position - root).LengthHorizontalSquared;
-                                if ((num > (double)bestPrio || horizontalSquared < (double)closestDistSquared) && horizontalSquared < (double)maxDistSquared && (validator == null || validator(thing)))
+                                float num = priorityGetter?.Invoke(thing) ?? 0.0f;
+                                if (num >= (double) bestPrio)
                                 {
-                                    closestThing = thing;
-                                    closestDistSquared = horizontalSquared;
-                                    bestPrio = num;
+                                    float horizontalSquared = (thing.Position - root).LengthHorizontalSquared;
+                                    if ((num > (double) bestPrio || horizontalSquared < (double) closestDistSquared) && horizontalSquared < (double) maxDistSquared && (validator == null || validator(thing)))
+                                    {
+                                        closestThing = thing;
+                                        closestDistSquared = horizontalSquared;
+                                        bestPrio = num;
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
                 return regionsSeenScan >= minRegions && closestThing != null;
-            };
-            RegionTraverser.BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
+            }
+
+            RegionTraverser.BreadthFirstTraverse(region, entryCondition, RegionProcessor, maxRegions, traversableRegionTypes);
             regionsSeen = regionsSeenScan;
             __result = closestThing;
             return false;

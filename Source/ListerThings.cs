@@ -6,12 +6,11 @@ using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {    
-    public class ListerThings_Patch
-    {
-		public static FieldRef<ListerThings, Dictionary<ThingDef, List<Thing>>> listsByDef =
-			FieldRefAccess<ListerThings, Dictionary<ThingDef, List<Thing>>>("listsByDef");
-		public static FieldRef<ListerThings, List<Thing>[]> listsByGroup =
-					FieldRefAccess<ListerThings, List<Thing>[]>("listsByGroup");
+	public class ListerThings_Patch
+	{
+		public static FieldRef<ListerThings, Dictionary<ThingDef, List<Thing>>> listsByDef = FieldRefAccess<ListerThings, Dictionary<ThingDef, List<Thing>>>("listsByDef");
+		public static FieldRef<ListerThings, List<Thing>[]> listsByGroup = FieldRefAccess<ListerThings, List<Thing>[]>("listsByGroup");
+        private static readonly List<Thing> EmptyList = new List<Thing>();
 
 		public static void RunDestructivePatches()
 		{
@@ -19,8 +18,42 @@ namespace RimThreaded
 			Type patched = typeof(ListerThings_Patch);
 			RimThreadedHarmony.Prefix(original, patched, "Remove");
 			RimThreadedHarmony.Prefix(original, patched, "Add");
+			RimThreadedHarmony.Prefix(original, patched, "ThingsOfDef");	
+        }
+
+		public static bool ThingsOfDef(ListerThings __instance, ref List<Thing> __result, ThingDef def)
+		{
+			__result = EmptyList;
+			if (def != null)
+				__result = ThingsMatching(__instance, ThingRequest.ForDef(def));
+			return false;
 		}
 
+        public static List<Thing> ThingsMatching(ListerThings __instance, ThingRequest req)
+        {
+            if (req.singleDef != null)
+            {
+                List<Thing> result;
+                if (!listsByDef(__instance).TryGetValue(req.singleDef, out result))
+                {
+                    return EmptyList;
+                }
+                return result;
+            }
+            else
+            {
+                if (req.group == ThingRequestGroup.Undefined)
+                {
+                    throw new InvalidOperationException("Invalid ThingRequest " + req);
+                }
+                if (__instance.use == ListerThingsUse.Region && !req.group.StoreInRegion())
+                {
+                    Log.ErrorOnce("Tried to get things in group " + req.group + " in a region, but this group is never stored in regions. Most likely a global query should have been used.", 1968735132, false);
+                    return EmptyList;
+                }
+                return listsByGroup(__instance)[(int)req.group] ?? EmptyList;
+            }
+        }
 
 		public static bool Add(ListerThings __instance, Thing t)		
 		{
@@ -68,8 +101,8 @@ namespace RimThreaded
 				return false;
 			}
 			lock(__instance)
-            {
-                List<Thing> newListsByDef = new List<Thing>(listsByDef(__instance)[thingDef]);
+			{
+				List<Thing> newListsByDef = new List<Thing>(listsByDef(__instance)[thingDef]);
 				newListsByDef.Remove(t);
 				listsByDef(__instance)[thingDef] = newListsByDef;
 			}
@@ -82,7 +115,7 @@ namespace RimThreaded
 				{
 					lock (__instance)
 					{
-                        List<Thing> newListsByGroup = new List<Thing>(listsByGroup(__instance)[i]);
+						List<Thing> newListsByGroup = new List<Thing>(listsByGroup(__instance)[i]);
 						newListsByGroup.Remove(t);
 						listsByGroup(__instance)[i] = newListsByGroup;
 					}
@@ -91,6 +124,6 @@ namespace RimThreaded
 			return false;
 		}
 
-    }
-    
+	}
+	
 }

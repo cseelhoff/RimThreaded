@@ -45,7 +45,7 @@ namespace RimThreaded
 
             if (!pawnToJob.TryAdd(claimant, job))
             {
-                Log.Warning(claimant.ToString() + " tried to reserve job " + job.ToString() + " on target " + target + ", but it's already reserved by him.", false);
+                //Log.Warning(claimant.ToString() + " tried to reserve job " + job.ToString() + " on target " + target + ", but it's already reserved by him.", false); //uncomment
             } 
             return false;
         }

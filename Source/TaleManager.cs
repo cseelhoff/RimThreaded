@@ -23,6 +23,22 @@ namespace RimThreaded
             Type patched = typeof(TaleManager_Patch);
             RimThreadedHarmony.Prefix(original, patched, "Add");
             RimThreadedHarmony.Prefix(original, patched, "RemoveTale");
+            RimThreadedHarmony.Prefix(original, patched, "RemoveExpiredTales");
+        }
+
+        public static bool RemoveExpiredTales(TaleManager __instance)
+        {
+            lock (__instance)
+            {
+                for (int i = tales(__instance).Count - 1; i >= 0; i--)
+                {
+                    if (tales(__instance)[i].Expired)
+                    {
+                        RemoveTale(__instance, tales(__instance)[i]);
+                    }
+                }
+            }
+            return false;
         }
 
         public static bool Add(TaleManager __instance, Tale tale)

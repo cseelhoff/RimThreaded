@@ -27,7 +27,7 @@ namespace RimThreaded
                 {
                     break;
                 }
-                Thing carriedThing = item.carryTracker.CarriedThing;
+                Thing carriedThing = item?.carryTracker?.CarriedThing;
                 if (carriedThing != null)
                 {
                     int stackCount = carriedThing.stackCount;

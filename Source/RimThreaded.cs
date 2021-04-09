@@ -262,13 +262,18 @@ namespace RimThreaded
             ReachabilityCache_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
-            RegionTraverser_Transpile.InitializeThreadStatics();
+            RegionTraverser_Transpile.InitializeThreadStatics(); //this
             Projectile_Patch.InitializeThreadStatics();
             ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
             ThoughtHandler_Patch.InitializeThreadStatics();
             Verb_Patch.InitializeThreadStatics();
             WealthWatcher_Patch.InitializeThreads();
             World_Patch.InitializeThreadStatics();
+            JoyGiver_InteractBuilding_Patch.InitializeThreadStatics(); //mpm
+            JoyGiver_InteractBuildingSitAdjacent_Patch.InitializeThreadStatics(); //mpm
+            JoyGiver_TakeDrug_Patch.InitializeThreadStatics(); //mpm
+            WorkGiver_DoBill_RegionProcessor.InitializeThreadStatics(); //mpm
+
 
         }
 

@@ -93,6 +93,7 @@ namespace RimThreaded
 			}
 			return null;
 		}
+        [ThreadStatic] public static WorkGiver_Scanner scanner;
 		public static bool TryIssueJobPackage(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
 		{
 			if (__instance.emergency && pawn.mindState.priorityWork.IsPrioritized)
@@ -118,7 +119,7 @@ namespace RimThreaded
 			int num = -999;
 			TargetInfo bestTargetOfLastPriority = TargetInfo.Invalid;
 			WorkGiver_Scanner scannerWhoProvidedTarget = null;
-			WorkGiver_Scanner scanner;
+			//WorkGiver_Scanner scanner;
 			IntVec3 pawnPosition;
 			float closestDistSquared;
 			float bestPriority;
@@ -150,7 +151,7 @@ namespace RimThreaded
 					{
 						if (scanner.def.scanThings)
 						{
-							Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t);
+							Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t); //WorkGiver_CleanFilth_Patch.HasJobOnThing
 							IEnumerable<Thing> enumerable = scanner.PotentialWorkThingsGlobal(pawn);
 							Thing thing;
 							if (scanner.Prioritized)
