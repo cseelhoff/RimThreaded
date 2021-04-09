@@ -9,6 +9,7 @@ namespace RimThreaded
     {
         [ThreadStatic] public static List<CachedEntry2> tmpCachedEntries;
         [ThreadStatic] public static Dictionary<CachedEntry2, bool> cacheDict;
+        [ThreadStatic] public static Pawn pawn;
 
         public static void InitializeThreadStatics()
         {
@@ -187,8 +188,7 @@ namespace RimThreaded
         }
         public static bool ClearForHostile(ReachabilityCache __instance, Thing hostileTo)
         {
-            lock (__instance)
-            {
+            
                 if (tmpCachedEntries == null)
                 {
                     tmpCachedEntries = new List<CachedEntry2>();
@@ -201,7 +201,7 @@ namespace RimThreaded
 
                 foreach (KeyValuePair<CachedEntry2, bool> item in cacheDict)
                 {
-                    Pawn pawn = item.Key.TraverseParms.pawn;
+                    pawn = item.Key.TraverseParms.pawn;
                     if (pawn != null && pawn.HostileTo(hostileTo))
                     {
                         tmpCachedEntries.Add(item.Key);
@@ -211,8 +211,7 @@ namespace RimThreaded
                 {
                     cacheDict.Remove(tmpCachedEntries[i]);
                 }
-            }
-
+                
             //tmpCachedEntries.Clear();
             return false;
         }

@@ -36,8 +36,8 @@ namespace RimThreaded
                     haulThing,
                     " which had stackcount 0. (removing...)"
                 }), false);
-                pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-                haulThing.Discard(true);
+                pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, false);
+                haulThing.Destroy();
                 return true;
             }
             if (pawn.jobs.curJob.count <= 0)

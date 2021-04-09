@@ -11,7 +11,7 @@ namespace RimThreaded
         {
             Type original = typeof(GenHostility);
             Type patched = typeof(GenHostility_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "HostileTo", new Type[] {typeof(Thing), typeof(Thing)}); // i dont know how to do this.
+            RimThreadedHarmony.Prefix(original, patched, "HostileTo", new Type[] {typeof(Thing), typeof(Thing)});
         }
 		public static bool HostileTo(ref bool __result, Thing a, Thing b)
         {

@@ -588,6 +588,7 @@ namespace RimThreaded
 			Fire_Patch.RunNonDestructivePatches();
 			FloatMenuMakerMap_Patch.RunNonDestructivePatches();
 			FoodUtility_Patch.RunNonDestructivePatches();
+            FloodFiller_Patch.RunNonDestructivePatches();
 			GenAdj_Patch.RunNonDestructivePatches();
 			GenAdjFast_Patch.RunNonDestructivePatches();
 			GenLeaving_Patch.RunNonDestructivePatches();
@@ -626,7 +627,7 @@ namespace RimThreaded
 			PathFinder_Transpile.RunNonDestructivePatches(); //large method
 			PawnCapacitiesHandler_Transpile.RunNonDestructivePatches(); //reexamine complexity?
 			Rand_Patch.RunNonDestructivePatches(); //uses old transpile for lock
-			RegionTraverser_Transpile.RunNonDestructivePatches(); //this
+			RegionTraverser_Transpile.RunNonDestructivePatches();
 			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
 			Thing_Patch.RunNonDestructivePatches();
 			ThingOwnerThing_Transpile.RunNonDestructivePatches();
@@ -720,7 +721,7 @@ namespace RimThreaded
 			RegionDirtyer_Patch.RunDestructivePatches();
 			Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			SampleSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
+			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks (not anymore), therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
 			SoundSizeAggregator_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
 			SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
 			SubSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
@@ -740,7 +741,6 @@ namespace RimThreaded
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
 			ReservationManager_Patch.RunDestructivePatches(); //mpm // reverted to 1.3.2 version. TODO: //new reservation directory not working yet. 2+ pawns trying to do the same thing at the same time failing both loop.
-			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
 			MapPawns_Patch.RunDestructivePatches();
 			Region_Patch.RunDestructivePatches();
 			ImmunityHandler_Patch.RunDestructivePatches();
@@ -785,7 +785,6 @@ namespace RimThreaded
 			GrammarResolverSimpleStringExtensions_Patch.RunDestructivePatches();
 			Pawn_HealthTracker_Patch.RunDestructivePatches();
 			Pawn_Patch.RunDestructivePatches();
-			//Pawn_JobTracker_Patch.RunDestructivePatches();
 			JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches();
 			Pawn_MindState_Patch.RunDestructivePatches();

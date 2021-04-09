@@ -240,6 +240,7 @@ namespace RimThreaded
             Fire_Patch.InitializeThreadStatics();
             FloatMenuMakerMap_Patch.InitializeThreadStatics();
             FoodUtility_Patch.InitializeThreadStatics();
+            FloodFiller_Patch.InitializeThreadStatics();
             GenAdj_Patch.InitializeThreadStatics();
             GenAdjFast_Patch.InitializeThreadStatics();
             GenLeaving_Patch.InitializeThreadStatics();

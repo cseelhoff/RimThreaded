@@ -15,20 +15,17 @@ namespace RimThreaded
         }
         public static bool WipeExistingThings(IntVec3 thingPos, Rot4 thingRot, BuildableDef thingDef, Map map, DestroyMode mode)
         {
-            lock (map) //not needed i think.
+            if(thingDef?.Size != null)
             {
-                if(thingDef?.Size != null)
+                foreach (IntVec3 c in GenAdj.CellsOccupiedBy(thingPos, thingRot, thingDef.Size))
                 {
-                    foreach (IntVec3 c in GenAdj.CellsOccupiedBy(thingPos, thingRot, thingDef.Size))
+                    foreach (Thing thing in map.thingGrid.ThingsAt(c).ToList<Thing>())
                     {
-                        foreach (Thing thing in map.thingGrid.ThingsAt(c).ToList<Thing>())
+                        if (thing?.def?.destroyable != null)
                         {
-                            if (thing?.def?.destroyable != null)
+                            if (GenSpawn.SpawningWipes(thingDef, thing.def))
                             {
-                                if (GenSpawn.SpawningWipes(thingDef, thing.def))
-                                {
-                                    thing.Destroy(mode);
-                                }
+                                thing.Destroy(mode);
                             }
                         }
                     }
