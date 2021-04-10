@@ -606,6 +606,7 @@ namespace RimThreaded
 			SustainerManager_Patch.RunDestructivePatches();
 			TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
+			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			TickManager_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
 			WealthWatcher_Patch.RunDestructivePatches();
@@ -684,7 +685,6 @@ namespace RimThreaded
 			DateNotifier_Patch.RunDestructivePatches();
 			WorldComponentUtility_Patch.RunDestructivePatches();
 			Map_Patch.RunDestructivePatches();
-			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
 		}
 

@@ -21,7 +21,7 @@ namespace RimThreaded
 
         private static int CellToIndexCustom(IntVec3 c, int mapSizeX, int cellSize)
         {
-            return (c.z * mapSizeX + c.x) / cellSize;
+            return (mapSizeX * c.z + c.x) / cellSize;
         }
         private static int NumGridCellsCustom(int mapSizeX, int mapSizeZ, int cellSize)
         {
@@ -129,13 +129,14 @@ namespace RimThreaded
                                 i++;
                             } while (power2 < mapSizeX || power2 < mapSizeZ);
                         }
-
                     }
                 }
             }
 
             return false;
         }
+
+
 
     }
 

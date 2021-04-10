@@ -294,6 +294,10 @@ namespace RimThreaded
                 //WaitingForAllThreadsToComplete.WaitOne();
             }
         }
+        public static IEnumerable<Thing> GetClosestThings(ThingRequest thingRequest)
+        {
+            return null;
+        }
 
         private static void CompletePostWorkLists()
         {

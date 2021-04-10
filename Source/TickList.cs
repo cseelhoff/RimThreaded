@@ -52,7 +52,6 @@ namespace RimThreaded
                     RimThreaded.thingListLongTicks = RimThreaded.thingListLong.Count;
                     break;
             }
-            Log.Message("test");
         }
 
         public static IEnumerable<CodeInstruction> Tick(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)

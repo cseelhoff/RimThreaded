@@ -51,7 +51,7 @@ namespace RimThreaded
                 List<ThingDef> tempResources = resources;
                 for (int i = 0; i < tempResources.Count; i++)
                 {
-                    __instance.AllCountedAmounts.Add(tempResources[i], 0);
+                    newCountedAmounts.Add(tempResources[i], 0);
                 }
                 countedAmountsFieldRef(__instance) = newCountedAmounts;
             }
