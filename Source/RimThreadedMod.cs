@@ -103,7 +103,9 @@ namespace RimThreaded
             bool WrongLoadOrder = false;
             bool Conflictingmods = false;
             string ModConflictsMessage = "";
-            string[] IncompatibleMods = { "biomesteam.biomesislands", "mlie.bestmix", "rwmt.Multiplayer", "pyrce.terrain.movement.modkit" }; //Add/Remove mods here.
+            //Add/Remove mods here.
+            string[] IncompatibleMods = { "biomesteam.biomesislands", "mlie.bestmix", "rwmt.Multiplayer", "pyrce.terrain.movement.modkit", "sarg.smartspeed", "Dingo.NoForcedSlowdown", "balistafreak.StandaloneHotSpring", "tickspersecond.sparr.rw" };
+            //
             string NewLine = "_______________________" + "\n" + "\n";
             var LoadOrder = LoadedModManager.RunningModsListForReading;
             int RTpos = LoadOrder.FindIndex(i => i.PackageId == "majorhoff.rimthreaded");

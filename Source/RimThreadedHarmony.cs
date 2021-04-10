@@ -577,10 +577,11 @@ namespace RimThreaded
 		{
 
 			//Simple
-            JoyGiver_TakeDrug_Patch.RunNonDestructivePatches(); //mpm
-            JoyGiver_InteractBuildingSitAdjacent_Patch.RunNonDestructivePatches(); //mpm
-            JoyGiver_InteractBuilding_Patch.RunNonDestructivePatches(); //mpm
-            Alert_ColonistLeftUnburied_Patch.RunNonDestructivePatches(); //mpm
+            Battle_Patch.RunNonDestructivePatches();
+            JoyGiver_TakeDrug_Patch.RunNonDestructivePatches();
+            JoyGiver_InteractBuildingSitAdjacent_Patch.RunNonDestructivePatches();
+            JoyGiver_InteractBuilding_Patch.RunNonDestructivePatches();
+            Alert_ColonistLeftUnburied_Patch.RunNonDestructivePatches();
             AttackTargetFinder_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches(); 
 			CellFinder_Patch.RunNonDestructivePatches();
@@ -736,7 +737,6 @@ namespace RimThreaded
 
 			//check methods for unneccessary try catches
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
-			Battle_Patch.RunDestructivePatches();
 			Building_Door_Patch.RunDestructivePatches();
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			PawnCollisionTweenerUtility_Patch.RunDestructivePatches();

@@ -270,11 +270,12 @@ namespace RimThreaded
             Verb_Patch.InitializeThreadStatics();
             WealthWatcher_Patch.InitializeThreads();
             World_Patch.InitializeThreadStatics();
-            JoyGiver_InteractBuilding_Patch.InitializeThreadStatics(); //mpm
-            JoyGiver_InteractBuildingSitAdjacent_Patch.InitializeThreadStatics(); //mpm
-            JoyGiver_TakeDrug_Patch.InitializeThreadStatics(); //mpm
-            WorkGiver_DoBill_RegionProcessor.InitializeThreadStatics(); //mpm
-
+            JoyGiver_InteractBuilding_Patch.InitializeThreadStatics();
+            JoyGiver_InteractBuildingSitAdjacent_Patch.InitializeThreadStatics();
+            JoyGiver_TakeDrug_Patch.InitializeThreadStatics();
+            WorkGiver_DoBill_RegionProcessor.InitializeThreadStatics();
+            Pawn_RelationsTracker_Patch.InitializeThreadStatics();
+            Battle_Patch.InitializeThreadStatics();
 
         }
 

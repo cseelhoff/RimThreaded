@@ -1,12 +1,8 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using System.Collections.Concurrent;
 
 namespace RimThreaded
@@ -24,12 +20,21 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, HashSet<Pawn>>("cachedFamilyByBlood");
         public static AccessTools.FieldRef<Pawn_RelationsTracker, HashSet<Pawn>> pawnsWithDirectRelationsWithMe =
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, HashSet<Pawn>>("pawnsWithDirectRelationsWithMe");
-
-        public static ConcurrentStack<HashSet<Pawn>> pawnHashsetStack = new ConcurrentStack<HashSet<Pawn>>();
-        public static ConcurrentStack<List<Pawn>> pawnListStack = new ConcurrentStack<List<Pawn>>();
-
         public static AccessTools.FieldRef<Pawn_RelationsTracker, List<DirectPawnRelation>> directRelations =
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, List<DirectPawnRelation>>("directRelations");
+
+
+        [ThreadStatic] public static List<Pawn> familyStack;
+        [ThreadStatic] public static List<Pawn> familyChildrenStack;
+        [ThreadStatic] public static ConcurrentStack<HashSet<Pawn>> pawnHashsetStack;
+        [ThreadStatic] public static ConcurrentStack<List<Pawn>> pawnListStack;
+        [ThreadStatic] public static HashSet<Pawn> familyVisited;
+
+        public static void InitializeThreadStatics()
+        {
+            pawnHashsetStack = new ConcurrentStack<HashSet<Pawn>>();
+            pawnListStack = new ConcurrentStack<List<Pawn>>();
+        }
 
         internal static void RunDestructivePatches()
         {
@@ -152,8 +157,8 @@ namespace RimThreaded
             if (!familyByBloodIsCached(__instance))
             {
                 cachedFamilyByBlood(__instance).Clear();
-                foreach (Pawn pawn in FamilyByBlood_Internal(__instance))
-                    cachedFamilyByBlood(__instance).Add(pawn);
+                foreach (Pawn pawnx in FamilyByBlood_Internal(__instance))
+                    cachedFamilyByBlood(__instance).Add(pawnx);
                 familyByBloodIsCached(__instance) = true;
             }
             __result = cachedFamilyByBlood(__instance);
@@ -165,9 +170,9 @@ namespace RimThreaded
         {
             if (__instance.RelatedToAnyoneOrAnyoneRelatedToMe)
             {
-                List<Pawn> familyStack = null;
-                List<Pawn> familyChildrenStack = null;
-                HashSet<Pawn> familyVisited = null;
+                familyStack = null;
+                familyChildrenStack = null;
+                familyVisited = null;
                 try
                 {
                     //familyStack = SimplePool<List<Pawn>>.Get();

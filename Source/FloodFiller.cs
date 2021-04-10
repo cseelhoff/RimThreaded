@@ -9,21 +9,17 @@ namespace RimThreaded
     public class FloodFiller_Patch
     {
 
-        [ThreadStatic] public static AccessTools.FieldRef<FloodFiller, bool> working;
-        [ThreadStatic] public static AccessTools.FieldRef<FloodFiller, List<int>> visited;
-        [ThreadStatic] public static AccessTools.FieldRef<FloodFiller, CellGrid> parentGrid;
-        [ThreadStatic] public static AccessTools.FieldRef<FloodFiller, Map> map;
-        [ThreadStatic] public static AccessTools.FieldRef<FloodFiller, Queue<IntVec3>> openSet;
-        [ThreadStatic] public static AccessTools.FieldRef<FloodFiller, IntGrid> traversalDistance;
+        [ThreadStatic] public static bool working;
+        [ThreadStatic] public static List<int> visited;
+        [ThreadStatic] public static CellGrid parentGrid;
+        [ThreadStatic] public static Map map;
+        [ThreadStatic] public static Queue<IntVec3> openSet;
+        [ThreadStatic] public static IntGrid traversalDistance;
 
         public static void InitializeThreadStatics()
         {
-            working = AccessTools.FieldRefAccess<FloodFiller, bool>("working");
-            visited = AccessTools.FieldRefAccess<FloodFiller, List<int>>("visited"); 
-            parentGrid = AccessTools.FieldRefAccess<FloodFiller, CellGrid>("parentGrid");
-            map = AccessTools.FieldRefAccess<FloodFiller, Map>("map");
-            openSet = AccessTools.FieldRefAccess<FloodFiller, Queue<IntVec3>>("openSet");
-            traversalDistance = AccessTools.FieldRefAccess<FloodFiller, IntGrid>("traversalDistance");
+            visited = new List<int>();
+            openSet = new Queue<IntVec3>();
         }
 
         internal static void RunNonDestructivePatches()
