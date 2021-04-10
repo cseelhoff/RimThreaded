@@ -187,9 +187,6 @@ namespace RimThreaded
 									workGiver.def.defName.Equals("FillFermentingBarrel") ||
 									//workGiver.def.defName.Equals("HaulGeneral") ||
 									workGiver.def.defName.Equals("HandlingFeedPatientAnimals") ||
-									workGiver.def.defName.Equals("DoBillsButcherFlesh") ||
-									workGiver.def.defName.Equals("DoBillsCook") ||
-									workGiver.def.defName.Equals("DoBillsMakeApparel") ||
 									workGiver.def.defName.Equals("Train") ||
 									workGiver.def.defName.Equals("VisitSickPawn")
 								)
@@ -203,6 +200,24 @@ namespace RimThreaded
 									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
 									{
 										Log.Warning("ClosestThingReachable2 Took over 200ms for workGiver: " + workGiver.def.defName);
+									}
+								}
+								else if(
+										workGiver.def.defName.Equals("DoBillsButcherFlesh") ||
+										workGiver.def.defName.Equals("DoBillsCook") ||
+										workGiver.def.defName.Equals("DoBillsMakeApparel")) 
+								{
+									thing = null;
+									//ThingGrid_Patch
+									int mapSizeX = pawn.Map.Size.x;
+									int mapSizeZ = pawn.Map.Size.z;
+									int index = pawn.Map.cellIndices.CellToIndex(pawn.Position);
+									//Dictionary<Bill, float> billPointsDict = ThingGrid_Patch.thingBillPoints[t.def];
+									Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>> ingredientDict = ThingGrid_Patch.mapIngredientDict[pawn.Map];
+									ThingRequest thingReq = scanner.PotentialWorkThingRequest;
+									if(!ingredientDict.TryGetValue(scanner, out Dictionary<float, List<HashSet<Thing>[]>> scoreToJumboCellsList)) {
+										scoreToJumboCellsList = new Dictionary<float, List<HashSet<Thing>[]>>();
+										List<Thing> thingsMatchingRequest = pawn.Map.listerThings.ThingsMatching(thingReq);
 									}
 								}
 								else

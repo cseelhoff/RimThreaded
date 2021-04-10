@@ -1,8 +1,7 @@
-﻿using HarmonyLib;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+using UnityEngine;
 using Verse;
 using static HarmonyLib.AccessTools;
 
@@ -12,6 +11,9 @@ namespace RimThreaded
     {
         public static FieldRef<ThingGrid, Map> map = FieldRefAccess<ThingGrid, Map>("map");
         public static FieldRef<ThingGrid, List<Thing>[]> thingGrid = FieldRefAccess<ThingGrid, List<Thing>[]>("thingGrid");
+        public static Dictionary<Map, Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>> mapIngredientDict = new Dictionary<Map, Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>>();
+        public static Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>> thingBillPoints = new Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>>();
+        public static int[] power2array = new int[] { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 }; // a 16000x16000 map is probably too big
 
         public static void RunDestructivePatches()
         {
@@ -20,10 +22,18 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, "RegisterInCell");
             RimThreadedHarmony.Prefix(original, patched, "DeregisterInCell");
         }
-
+        public static int CellToIndexCustom(IntVec3 c, int mapSizeX, int cellSize)
+        {
+            return (c.z * mapSizeX + c.x) / cellSize;
+        }
+        public static int NumGridCellsCustom(int mapSizeX, int mapSizeZ, int cellSize)
+        {
+            return Mathf.CeilToInt((mapSizeX * mapSizeZ) / (float)cellSize);
+        }
         public static bool RegisterInCell(ThingGrid __instance, Thing t, IntVec3 c)
         {
             Map this_map = map(__instance);
+            int i;
             if (!c.InBounds(this_map))
             {
                 Log.Warning(t.ToString() + " tried to register out of bounds at " + c + ". Destroying.", false);
@@ -31,10 +41,44 @@ namespace RimThreaded
             }
             else
             {
+                int mapSizeX = this_map.Size.x;
+                int mapSizeZ = this_map.Size.z;
+
                 int index = this_map.cellIndices.CellToIndex(c);
+                Dictionary<WorkGiver_Scanner, float> billPointsDict = thingBillPoints[t.def];
+                Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>> ingredientDict = mapIngredientDict[this_map];
+                /*        
+                    if (!uniqueBillDict.Value.TryGetValue(points, out List<HashSet<Thing>[]> jumboCellsList))
+                    {
+                        jumboCellsList = new List<HashSet<Thing>[]>();
+                        i = 0;
+                        while (true)
+                        {
+                            int power2 = power2array[i];
+                            jumboCellsList.Add(new HashSet<Thing>[NumGridCellsCustom(mapSizeX, mapSizeZ, power2)]);
+                            if (power2 >= this_map.Size.x && power2 >= this_map.Size.z)
+                            {
+                                break;
+                            }
+                        }
+                        uniqueBillDict.Value.Add(points, jumboCellsList);
+                    }
+                    ingredientDict[billPoints.Key][billPoints.Value];
+                */
                 lock (__instance)
                 {
                     thingGrid(__instance)[index].Add(t);
+                    foreach (KeyValuePair<WorkGiver_Scanner, float> billPoints in billPointsDict)
+                    {
+                        i = 0;
+                        int power2;
+                        do
+                        {
+                            power2 = power2array[i];
+                            ingredientDict[billPoints.Key][billPoints.Value][i][CellToIndexCustom(c, mapSizeX, power2)].Add(t);
+                            i++;
+                        } while (power2 < mapSizeX || power2 < mapSizeZ);
+                    }                   
                 }
             }
             return false;

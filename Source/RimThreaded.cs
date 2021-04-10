@@ -249,13 +249,17 @@ namespace RimThreaded
             HaulAIUtility_Patch.InitializeThreadStatics();
             ImmunityHandler_Patch.InitializeThreadStatics();
             InfestationCellFinder_Patch.InitializeThreadStatics();
+            JobGiver_AnimalFlee_Patch.InitializeThreadStatics();
+            MapPawns_Patch.InitializeThreadStatics();
             MapTemperature_Patch.InitializeThreadStatics();
+            Medicine_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             Pawn_InteractionsTracker_Transpile.InitializeThreadStatics();
             Pawn_MeleeVerbs_Patch.InitializeThreadStatics();
             Pawn_WorkSettings_Patch.InitializeThreadStatics();
             PawnDiedOrDownedThoughtsUtility_Patch.InitializeThreadStatics();
             PawnsFinder_Patch.InitializeThreadStatics();
+            QuestUtility_Patch.InitializeThreadStatics();
             Rand_Patch.InitializeThreadStatics();
             RCellFinder_Patch.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
@@ -263,10 +267,12 @@ namespace RimThreaded
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
             RegionTraverser_Transpile.InitializeThreadStatics();
+            Room_Patch.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();
             ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
             ThoughtHandler_Patch.InitializeThreadStatics();
             Verb_Patch.InitializeThreadStatics();
+            WanderUtility_Patch.InitializeThreadStatics();
             WealthWatcher_Patch.InitializeThreads();
             World_Patch.InitializeThreadStatics();
 

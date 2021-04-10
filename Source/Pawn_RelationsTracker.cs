@@ -5,8 +5,6 @@ using System.Linq;
 using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using System.Collections.Concurrent;
 
 namespace RimThreaded
@@ -20,7 +18,7 @@ namespace RimThreaded
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, bool>("canCacheFamilyByBlood");
         public static AccessTools.FieldRef<Pawn_RelationsTracker, bool> familyByBloodIsCached =
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, bool>("familyByBloodIsCached");
-        public static AccessTools.FieldRef<Pawn_RelationsTracker, HashSet<Pawn>> cachedFamilyByBlood =
+        public static AccessTools.FieldRef<Pawn_RelationsTracker, HashSet<Pawn>> cachedFamilyByBloodFieldRef =
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, HashSet<Pawn>>("cachedFamilyByBlood");
         public static AccessTools.FieldRef<Pawn_RelationsTracker, HashSet<Pawn>> pawnsWithDirectRelationsWithMe =
             AccessTools.FieldRefAccess<Pawn_RelationsTracker, HashSet<Pawn>>("pawnsWithDirectRelationsWithMe");
@@ -36,6 +34,7 @@ namespace RimThreaded
             Type original = typeof(Pawn_RelationsTracker);
             Type patched = typeof(Pawn_RelationsTracker_Patch);
             RimThreadedHarmony.Prefix(original, patched, "get_FamilyByBlood");
+            RimThreadedHarmony.Prefix(original, patched, "get_RelatedPawns");
         }
 
         public static IEnumerable<Pawn> get_PotentiallyRelatedPawns2(Pawn_RelationsTracker __instance)
@@ -148,17 +147,47 @@ namespace RimThreaded
             {
                 __result = FamilyByBlood_Internal(__instance);
                 return false;
-            }
+            }            
             if (!familyByBloodIsCached(__instance))
             {
-                cachedFamilyByBlood(__instance).Clear();
+                HashSet<Pawn> cachedFamilyByBlood = new HashSet<Pawn>();
                 foreach (Pawn pawn in FamilyByBlood_Internal(__instance))
-                    cachedFamilyByBlood(__instance).Add(pawn);
+                    cachedFamilyByBlood.Add(pawn);
                 familyByBloodIsCached(__instance) = true;
-            }
-            __result = cachedFamilyByBlood(__instance);
+                cachedFamilyByBloodFieldRef(__instance) = cachedFamilyByBlood;
+            }            
+            __result = cachedFamilyByBloodFieldRef(__instance);
             return false;
             
+        }
+
+        public static bool get_RelatedPawns(Pawn_RelationsTracker __instance, ref IEnumerable<Pawn> __result)
+        {
+            __result = RelatedPawns2(__instance);
+            return false;
+        }
+
+        private static IEnumerable<Pawn> RelatedPawns2(Pawn_RelationsTracker __instance)
+        {
+            canCacheFamilyByBlood(__instance) = true;
+            familyByBloodIsCached(__instance) = false;
+            cachedFamilyByBloodFieldRef(__instance) = new HashSet<Pawn>();
+            try
+            {
+                foreach (Pawn potentiallyRelatedPawn in __instance.PotentiallyRelatedPawns)
+                {
+                    if ((familyByBloodIsCached(__instance) && cachedFamilyByBloodFieldRef(__instance).Contains(potentiallyRelatedPawn)) || pawn(__instance).GetRelations(potentiallyRelatedPawn).Any())
+                    {
+                        yield return potentiallyRelatedPawn;
+                    }
+                }
+            }
+            finally
+            {
+                canCacheFamilyByBlood(__instance) = false;
+                familyByBloodIsCached(__instance) = false;
+                cachedFamilyByBloodFieldRef(__instance) = new HashSet<Pawn>();
+            }
         }
 
         private static IEnumerable<Pawn> FamilyByBlood_Internal(Pawn_RelationsTracker __instance)

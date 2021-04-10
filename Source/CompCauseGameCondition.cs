@@ -20,6 +20,15 @@ namespace RimThreaded
         private static readonly Func<CompCauseGameCondition, Map, GameCondition> funcEnforceConditionOn =
             (Func<CompCauseGameCondition, Map, GameCondition>)Delegate.CreateDelegate(typeof(Func<CompCauseGameCondition, Map, GameCondition>), methodEnforceConditionOn);
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(CompCauseGameCondition);
+            Type patched = typeof(CompCauseGameCondition_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetConditionInstance");
+            RimThreadedHarmony.Prefix(original, patched, "CreateConditionOn");
+            RimThreadedHarmony.Prefix(original, patched, "CompTick");
+        }
+
         public static void InitializeThreadStatics()
         {
             tmpDeadConditionMaps = new List<Map>();
@@ -98,13 +107,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(CompCauseGameCondition);
-            Type patched = typeof(CompCauseGameCondition_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetConditionInstance");
-            RimThreadedHarmony.Prefix(original, patched, "CreateConditionOn");
-            RimThreadedHarmony.Prefix(original, patched, "CompTick");
-        }
     }
 }

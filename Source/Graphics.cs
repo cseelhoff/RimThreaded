@@ -11,6 +11,13 @@ namespace RimThreaded
         static readonly Action<object[]> safeFunction = p =>
             Graphics.Blit((Texture)p[0], (RenderTexture)p[1]);
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Graphics);
+            Type patched = typeof(Graphics_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Blit", new Type[] { typeof(Texture), typeof(RenderTexture) });
+            RimThreadedHarmony.Prefix(original, patched, "DrawMesh", new Type[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(int) });
+        }
         public static bool Blit(Texture source, RenderTexture dest)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
@@ -38,12 +45,5 @@ namespace RimThreaded
             return true;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(Graphics);
-            Type patched = typeof(Graphics_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "Blit", new Type[] { typeof(Texture), typeof(RenderTexture) });
-            RimThreadedHarmony.Prefix(original, patched, "DrawMesh", new Type[] { typeof(Mesh), typeof(Vector3), typeof(Quaternion), typeof(Material), typeof(int) });
-        }
     }
 }

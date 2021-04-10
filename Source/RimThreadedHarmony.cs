@@ -43,7 +43,7 @@ namespace RimThreaded
 
 		static RimThreadedHarmony()
 		{
-			Harmony.DEBUG = false;
+			Harmony.DEBUG = true;
 			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "  is patching methods...");
 
 			PatchDestructiveFixes();
@@ -371,133 +371,8 @@ namespace RimThreaded
 				}
 				yield return instructionsList[i++];
 			}
-
 		}
 
-		/*
-		public static IEnumerable<CodeInstruction> ModifyRemoveTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-		{
-			List<CodeInstruction> instructionsList = instructions.ToList();
-			int i = 0;
-			int removeInstructionIndex = -1;
-			while (i < instructionsList.Count)
-			{
-				if (instructionsList[i].opcode == OpCodes.Callvirt)
-				{
-					if (instructionsList[i].operand is MethodInfo methodInfo)
-					{
-						if (methodInfo.Name.Contains("Remove") && methodInfo.DeclaringType.Name.Contains("System.Collections"))
-						{
-							removeInstructionIndex = i;
-							int j = i;
-							while (j > 0)
-                            {
-								OpCode oc = instructionsList[j].opcode;
-								if (oc == OpCodes.Call) { }
-								else if (oc == OpCodes.Add) { }
-								else if (oc == OpCodes.Add_Ovf) { }
-								else if (oc == OpCodes.Add_Ovf_Un) { }
-								else if (oc == OpCodes.And) { }
-								else if (oc == OpCodes.Arglist) { }
-								else if (oc == OpCodes.Beq) { }
-								else if (oc == OpCodes.Beq_S) { }
-								else if (oc == OpCodes.Bge) { }
-								else if (oc == OpCodes.Bge_S) { }
-								else if (oc == OpCodes.Bge_Un) { }
-								else if (oc == OpCodes.Bge_Un_S) { }
-								else if (oc == OpCodes.Bgt) { }
-								else if (oc == OpCodes.Bgt_S) { }
-								else if (oc == OpCodes.Bgt_Un) { }
-								else if (oc == OpCodes.Bgt_Un_S) { }
-								else if (oc == OpCodes.Ble) { }
-								else if (oc == OpCodes.Ble_S) { }
-								else if (oc == OpCodes.Ble_Un) { }
-								else if (oc == OpCodes.Ble_Un_S) { }
-								else if (oc == OpCodes.Blt) { }
-								else if (oc == OpCodes.Blt_S) { }
-								else if (oc == OpCodes.Blt_Un) { }
-								else if (oc == OpCodes.Blt_Un_S) { }
-								else if (oc == OpCodes.Bne_Un) { }
-								else if (oc == OpCodes.Bne_Un_S) { }
-								else if (oc == OpCodes.Box) { }
-								else if (oc == OpCodes.Br) { }
-
-							}
-						}
-					}
-				}
-			}
-			i = 0;
-			List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
-			{
-				new CodeInstruction(OpCodes.Ldarg_0)
-			};
-			LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
-			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
-			foreach (CodeInstruction ci in EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
-				yield return ci;
-			while (i < instructionsList.Count - 1)
-			{
-				if (instructionsList[i].opcode == OpCodes.Ldfld && i + 2 < instructionsList.Count - 1 && instructionsList[i+2].opcode == OpCodes.Callvirt)
-				{
-					if (instructionsList[i].operand is FieldInfo fieldInfo && instructionsList[i+2].operand is MethodInfo methodInfo)
-					{
-						if (methodInfo.Name.Contains("Remove") && methodInfo.DeclaringType.Name.Contains("System.Collections"))
-						{
-							Type collectionType = fieldInfo.FieldType;
-							LocalBuilder collectionCopy = iLGenerator.DeclareLocal(collectionType);
-							ConstructorInfo constructorInfo = collectionType.GetConstructor(new Type[] { collectionType });
-							yield return new CodeInstruction(OpCodes.Newobj, constructorInfo);
-							yield return new CodeInstruction(OpCodes.Stloc, collectionCopy.LocalIndex);
-							yield return new CodeInstruction(OpCodes.Ldloc, collectionCopy.LocalIndex);
-							yield return instructionsList[i++];//load item to remove
-							yield return instructionsList[i++];//remove method
-						}
-					}
-				}
-				yield return instructionsList[i++];
-			}
-			foreach (CodeInstruction ci in ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
-				yield return ci;
-			yield return instructionsList[i++];
-		}
-		
-		public static IEnumerable<CodeInstruction> LockAddTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-		{
-			List<CodeInstruction> instructionsList = instructions.ToList();
-			int i = 0;
-			while (i < instructionsList.Count)
-			{
-				if (instructionsList[i].opcode == OpCodes.Callvirt)
-				{
-					if (instructionsList[i].operand is MethodInfo methodInfo)
-					{
-						if (methodInfo.Name.Equals("Add") && methodInfo.DeclaringType.Name.Contains("System.Collections"))
-						{
-							LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
-							LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
-							List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>()
-							{
-								new CodeInstruction(OpCodes.Ldarg_0)
-							};
-							foreach (CodeInstruction lockInstruction in EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
-							{
-								yield return lockInstruction;
-							}
-							yield return instructionsList[i++];
-							foreach (CodeInstruction lockInstruction in ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
-							{
-								yield return lockInstruction;
-							}
-							continue;
-						}
-					}
-				}
-				yield return instructionsList[i++];
-				
-			}
-		}
-		*/
 
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
@@ -564,7 +439,13 @@ namespace RimThreaded
 			{
 				after = harmonyAfter
 			};
-			harmony.Patch(oMethod, transpiler: transpilerMethod);
+			try
+			{
+				harmony.Patch(oMethod, transpiler: transpilerMethod);
+			} catch (Exception e)
+            {
+				Log.Error("Exception Transpiling: " + oMethod.ToString() + " " + transpilerMethod.ToString() + " " + e.ToString());
+            }
 		}
 		public static void TranspileMethodLock(Type original, string methodName, Type[] orig_type = null, string[] harmonyAfter = null)
 		{
@@ -591,7 +472,9 @@ namespace RimThreaded
 			GenText_Patch.RunNonDestructivePatches();
 			HaulAIUtility_Patch.RunNonDestructivePatches();
 			ImmunityHandler_Patch.RunNonDestructivePatches();
+			JobGiver_AnimalFlee_Patch.RunNonDestructivePatches(); //may need changes to FleeLargeFireJob
 			MapTemperature_Patch.RunNonDestructivePatches();
+			Medicine_Patch.RunNonDestructivePatches();
 			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
 			Pawn_MeleeVerbs_Patch.RunNonDestructivePatches();
 			Pawn_WorkSettings_Patch.RunNonDestructivePatches();
@@ -601,9 +484,9 @@ namespace RimThreaded
 			RCellFinder_Patch.RunNonDestructivePatches();
 			RegionListersUpdater_Patch.RunNonDestructivePatches();
 			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
-			TickList_Transpile.RunNonDestructivePatches();
 			ThoughtHandler_Patch.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
+			WanderUtility_Patch.RunNoneDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
 
 
@@ -626,9 +509,11 @@ namespace RimThreaded
 			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
 			Thing_Patch.RunNonDestructivePatches();
 			ThingOwnerThing_Transpile.RunNonDestructivePatches();
+			TickList_Patch.RunNonDestructivePatches();
 			WealthWatcher_Patch.RunNonDestructivePatches();
 			WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
 			WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
+			QuestUtility_Patch.RunNonDestructivePatches();
 
 
 			Pawn_RelationsTracker_Transpile.RunNonDestructivePatches(); //TODO - should transpile ReplacePotentiallyRelatedPawns instead
@@ -687,6 +572,7 @@ namespace RimThreaded
 			AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			AudioSource_Patch.RunDestructivePatches();
 			AudioSourceMaker_Patch.RunDestructivePatches();
+			CompCauseGameCondition_Patch.RunDestructivePatches();
 			ContentFinder_Texture2D_Patch.RunDestructivePatches();
 			DrugAIUtility_Patch.RunDestructivePatches();
 			DynamicDrawManager_Patch.RunDestructivePatches();
@@ -694,17 +580,22 @@ namespace RimThreaded
 			GenTemperature_Patch.RunDestructivePatches();
 			ListerThings_Patch.RunDestructivePatches();
 			JobMaker_Patch.RunDestructivePatches();
+			Lord_Patch.RunDestructivePatches();
+			LordManager_Patch.RunDestructivePatches();
 			MaterialPool_Patch.RunDestructivePatches();
 			MemoryThoughtHandler_Patch.RunDestructivePatches();
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
+			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			PawnUtility_Patch.RunDestructivePatches();
 			PawnDestinationReservationManager_Patch.RunDestructivePatches();
+			PlayLog_Patch.RunDestructivePatches();
 			PortraitRenderer_Patch.RunDestructivePatches();
 			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrentdictionary
 			Reachability_Patch.RunDestructivePatches();
 			ReachabilityCache_Patch.RunDestructivePatches();
 			RealtimeMoteList_Patch.RunDestructivePatches();
 			RegionDirtyer_Patch.RunDestructivePatches();
+			ResourceCounter_Patch.RunDestructivePatches();
 			Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			SampleSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
@@ -715,13 +606,22 @@ namespace RimThreaded
 			SustainerManager_Patch.RunDestructivePatches();
 			TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
-			TickList_Patch.RunDestructivePatches();
 			TickManager_Patch.RunDestructivePatches();
+			UniqueIDsManager_Patch.RunDestructivePatches();
 			WealthWatcher_Patch.RunDestructivePatches();
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 
+			//main-thread-only
+			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
+			Graphics_Patch.RunDestructivePatches();//Graphics (Giddy-Up and others)
+			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
+			MeshMakerPlanes_Patch.RunDestructivePatches();
+			MeshMakerShadows_Patch.RunDestructivePatches();
+			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
+			SectionLayer_Patch.RunDestructivePatches();
+			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
+
 			//check methods for unneccessary try catches
-			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			Battle_Patch.RunDestructivePatches();
 			Building_Door_Patch.RunDestructivePatches();
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
@@ -744,9 +644,7 @@ namespace RimThreaded
 			Toils_Ingest_Patch.RunDestructivePatches();
 			BeautyUtility_Patch.RunDestructivePatches();
 			TendUtility_Patch.RunDestructivePatches();
-			WanderUtility_Patch.RunDestructivePatches();
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
-			Medicine_Patch.RunDestructivePatches();
 			JobGiver_Work_Patch.RunDestructivePatches();
 			ThingCountUtility_Patch.RunDestructivePatches();
 			BiomeDef_Patch.RunDestructivePatches();
@@ -787,27 +685,7 @@ namespace RimThreaded
 			WorldComponentUtility_Patch.RunDestructivePatches();
 			Map_Patch.RunDestructivePatches();
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
-			ThinkNode_QueuedJob_Patch.RunDestructivePatches();
-			TemperatureCache_Patch.RunDestructivePatches();
-			JobGiver_AnimalFlee_Patch.RunDestructivePatches();
-			PlayLog_Patch.RunDestructivePatches();
-			ResourceCounter_Patch.RunDestructivePatches();
-			UniqueIDsManager_Patch.RunDestructivePatches();
-			CompCauseGameCondition_Patch.RunDestructivePatches();
-			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
-			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
-			Graphics_Patch.RunDestructivePatches();//Graphics (Giddy-Up and others)
-			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
-			SectionLayer_Patch.RunDestructivePatches();
-			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
-			MeshMakerPlanes_Patch.RunDestructivePatches();
-			MeshMakerShadows_Patch.RunDestructivePatches();
-			QuestUtility_Patch.RunDestructivePatches();
-			Job_Patch.RunDestructivePatches();
-			RestUtility_Patch.RunDestructivePatches();
-			Lord_Patch.RunDestructivePatches();
-			LordManager_Patch.RunDestructivePatches();
-			ThingOwnerUtility_Patch.RunDestructivePatches();
+			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
 		}
 
 		private static void PatchModCompatibility()

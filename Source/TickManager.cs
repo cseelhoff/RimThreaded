@@ -45,12 +45,13 @@ namespace RimThreaded
 
             RimThreaded.MainThreadWaitLoop();
 
-            UnityEngine.Debug.developerConsoleVisible = false;
             if (DebugViewSettings.logHourlyScreenshot && Find.TickManager.TicksGame >= lastAutoScreenshot(__instance) + 2500)
             {
                 ScreenshotTaker.QueueSilentScreenshot();
                 lastAutoScreenshot(__instance) = Find.TickManager.TicksGame / 2500 * 2500;
             }
+
+            Debug.developerConsoleVisible = false;
             return false;
         }
 

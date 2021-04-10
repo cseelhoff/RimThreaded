@@ -10,20 +10,43 @@ namespace RimThreaded
     {
 		public static FieldRef<PlayLog, List<LogEntry>> entries = 
 			FieldRefAccess<PlayLog, List<LogEntry>>("entries");
+
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(PlayLog);
+			Type patched = typeof(PlayLog_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "Add");
+			RimThreadedHarmony.Prefix(original, patched, "RemoveEntry");
+		}
+
+		public static bool Add(PlayLog __instance, LogEntry entry)
+		{
+			lock (__instance)
+			{
+				entries(__instance).Insert(0, entry);
+				ReduceToCapacity(__instance);
+			}
+			return false;
+		}
+		private static void ReduceToCapacity(PlayLog __instance)
+		{
+            List<LogEntry> snapshotEntries = entries(__instance);
+			while (snapshotEntries.Count > 150)
+			{
+				RemoveEntry(__instance, snapshotEntries[snapshotEntries.Count - 1]);
+			}
+		}
+
 		public static bool RemoveEntry(PlayLog __instance, LogEntry entry)
 		{
-			lock (entries(__instance))
+			lock (__instance)
 			{
-				entries(__instance).Remove(entry);
+                List<LogEntry> newEntries = new List<LogEntry>(entries(__instance));
+				newEntries.Remove(entry);
+				entries(__instance) = newEntries;
 			}
 			return false;
 		}
 
-        internal static void RunDestructivePatches()
-		{
-			Type original = typeof(PlayLog);
-			Type patched = typeof(PlayLog_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "RemoveEntry");
-		}
-    }
+	}
 }

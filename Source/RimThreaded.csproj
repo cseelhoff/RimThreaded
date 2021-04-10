@@ -114,12 +114,10 @@
     <Compile Include="ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch.cs" />
     <Compile Include="ThinkNode_PrioritySorter_Patch.cs" />
     <Compile Include="thinkTree.cs" />
-    <Compile Include="TickList_Transpile.cs" />
     <Compile Include="Verb_MeleeAttack_Patch.cs" />
     <Compile Include="WorkGiver_DoBill_Transpile.cs" />
     <Compile Include="CompCauseGameCondition.cs" />
     <Compile Include="DamageWorker.cs" />
-    <Compile Include="Job.cs" />
     <Compile Include="JobGiver_OptimizeApparel.cs" />
     <Compile Include="Lord.cs" />
     <Compile Include="LordManager.cs" />
@@ -138,7 +136,6 @@
     <Compile Include="GenAdj.cs" />
     <Compile Include="MapPawns_Transpile.cs" />
     <Compile Include="RecipeWorkerCounter.cs" />
-    <Compile Include="RestUtility.cs" />
     <Compile Include="TaleManager.cs" />
     <Compile Include="UniqueIDsManager.cs" />
     <Compile Include="HediffSet.cs" />
@@ -182,7 +179,6 @@
     <Compile Include="Map_Transpile.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="ResourceCounter.cs" />
-    <Compile Include="ThinkNode_QueuedJob.cs" />
     <Compile Include="ThinkNode_SubtreesByTag.cs" />
     <Compile Include="Verb_Patch.cs" />
     <Compile Include="FloatMenuMakerMap_Transpile.cs" />
@@ -257,7 +253,6 @@
     <Compile Include="MapPawns.cs" />
     <Compile Include="AttackTargetReservationManager_Patch.cs" />
     <Compile Include="AttackTargetsCache_Patch.cs" />
-    <Compile Include="TemperatureCache.cs" />
     <Compile Include="Battle.cs" />
     <Compile Include="Building_Door.cs" />
     <Compile Include="CellFinder.cs" />
