@@ -580,12 +580,14 @@ namespace RimThreaded
 			FactionManager_Patch.RunDestructivePatches();
 			GenClosest_Patch.RunDestructivePatches();
 			GenTemperature_Patch.RunDestructivePatches();
+			HediffGiver_Heat_Patch.RunDestructivePatches();
 			ListerThings_Patch.RunDestructivePatches();
 			JobMaker_Patch.RunDestructivePatches();
 			Lord_Patch.RunDestructivePatches();
 			LordManager_Patch.RunDestructivePatches();
 			MaterialPool_Patch.RunDestructivePatches();
-			MemoryThoughtHandler_Patch.RunDestructivePatches(); 
+			MemoryThoughtHandler_Patch.RunDestructivePatches();
+			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO re-add transpile
 			Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
@@ -679,11 +681,9 @@ namespace RimThreaded
 			RecipeWorkerCounter_Patch.RunDestructivePatches();
 			Pawn_RotationTracker_Patch.RunDestructivePatches();
 			GrammarResolverSimpleStringExtensions_Patch.RunDestructivePatches();
-			Pawn_HealthTracker_Patch.RunDestructivePatches();
 			Pawn_Patch.RunDestructivePatches();
 			Pawn_JobTracker_Patch.RunDestructivePatches();
 			JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
-			HediffGiver_Heat_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
 		}
 

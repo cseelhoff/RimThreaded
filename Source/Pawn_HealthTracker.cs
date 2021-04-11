@@ -7,6 +7,14 @@ namespace RimThreaded
 
     public class Pawn_HealthTracker_Patch
     {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Pawn_HealthTracker);
+            Type patched = typeof(Pawn_HealthTracker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RemoveHediff");
+            //Type patched = typeof(Pawn_HealthTracker_Transpile);			
+            //Transpile(original, patched, "RemoveHediff"); TODO re-add transpile
+        }
 
         public static bool RemoveHediff(Pawn_HealthTracker __instance, Hediff hediff)
         {
@@ -25,13 +33,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(Pawn_HealthTracker);
-            Type patched = typeof(Pawn_HealthTracker_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "RemoveHediff");
-            //Type patched = typeof(Pawn_HealthTracker_Transpile);			
-            //Transpile(original, patched, "RemoveHediff"); TODO re-add transpile
-        }
     }
 }
