@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using RimWorld.Planet;
+using System;
 
 namespace RimThreaded
 {
@@ -9,6 +10,14 @@ namespace RimThreaded
 	{
         public static AccessTools.FieldRef<WorldObjectsHolder, List<WorldObject>> worldObjects =
             AccessTools.FieldRefAccess<WorldObjectsHolder, List<WorldObject>>("worldObjects");
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WorldObjectsHolder);
+            Type patched = typeof(WorldObjectsHolder_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "WorldObjectsHolderTick");
+        }
+
         public static bool WorldObjectsHolderTick(WorldObjectsHolder __instance)
         {
             RimThreaded.worldObjects = worldObjects(__instance);

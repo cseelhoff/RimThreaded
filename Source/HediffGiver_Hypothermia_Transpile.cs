@@ -15,7 +15,13 @@ namespace RimThreaded
 {
     public class HediffGiver_Hypothermia_Transpile
 	{
-        public static IEnumerable<CodeInstruction> OnIntervalPassed(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(HediffGiver_Hypothermia);
+			Type patched = typeof(HediffGiver_Hypothermia_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "OnIntervalPassed");
+		}
+		public static IEnumerable<CodeInstruction> OnIntervalPassed(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
 			LocalBuilder comfortableTemperatureMin = iLGenerator.DeclareLocal(typeof(float));
 			LocalBuilder minTemp = iLGenerator.DeclareLocal(typeof(float));
@@ -60,5 +66,6 @@ namespace RimThreaded
 			}
 
 		}
-	}
+
+    }
 }

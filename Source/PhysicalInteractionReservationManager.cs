@@ -1,12 +1,7 @@
-﻿using HarmonyLib;
-using RimWorld;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
 using Verse;
 using Verse.AI;
 
@@ -16,6 +11,19 @@ namespace RimThreaded
     {
         public static ConcurrentDictionary<PhysicalInteractionReservationManager, ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>> instanceTargetToPawnToJob = new ConcurrentDictionary<PhysicalInteractionReservationManager, ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>>();
 
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(PhysicalInteractionReservationManager);
+            Type patched = typeof(PhysicalInteractionReservationManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "IsReservedBy");
+            RimThreadedHarmony.Prefix(original, patched, "Reserve");
+            RimThreadedHarmony.Prefix(original, patched, "Release");
+            RimThreadedHarmony.Prefix(original, patched, "FirstReserverOf");
+            RimThreadedHarmony.Prefix(original, patched, "FirstReservationFor");
+            RimThreadedHarmony.Prefix(original, patched, "ReleaseAllForTarget");
+            RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
+            RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
+        }
 
         public static bool IsReservedBy(PhysicalInteractionReservationManager __instance, ref bool __result, Pawn claimant, LocalTargetInfo target)
         {
@@ -37,7 +45,7 @@ namespace RimThreaded
 
             if (!pawnToJob.TryAdd(claimant, job))
             {
-                Log.Warning(claimant.ToString() + " tried to reserve job " + job.ToString() + " on target " + (object)target + ", but it's already reserved by him.", false);
+                Log.Warning(claimant.ToString() + " tried to reserve job " + job.ToString() + " on target " + target + ", but it's already reserved by him.", false);
             } 
             return false;
         }
@@ -67,22 +75,22 @@ namespace RimThreaded
                         }
                         else
                         {
-                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + (object)target + ", but it failed.", false);
+                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but it failed.", false);
                         }
                     }
                     else
                     {
-                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + (object)target + ", but job was different.", false);
+                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.", false);
                     }
                 }
                 else
                 {
-                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + (object)target + ", but claimant was not found.", false);
+                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.", false);
                 }
             }
             else
             {
-                Log.Warning(claimant.ToString() + " tried to release reservation on target " + (object)target + ", but target had no physical reservations.", false);
+                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.", false);
             }
             return false;
         }

@@ -2,11 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
@@ -92,5 +90,11 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(JobGiver_ConfigurableHostilityResponse);
+            Type patched = typeof(JobGiver_ConfigurableHostilityResponse_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TryGetFleeJob");
+        }
     }
 }

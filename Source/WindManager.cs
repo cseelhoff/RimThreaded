@@ -26,6 +26,13 @@ namespace RimThreaded
         private static readonly Func<WindManager, int, float> funcBaseWindSpeedAt =
             (Func<WindManager, int, float>)Delegate.CreateDelegate(typeof(Func<WindManager, int, float>), methodBaseWindSpeedAt);
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WindManager);
+            Type patched = typeof(WindManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "WindManagerTick");
+        }
+
         public static bool WindManagerTick(WindManager __instance)
         {
             cachedWindSpeed(__instance) = funcBaseWindSpeedAt(__instance, Find.TickManager.TicksAbs) * map(__instance).weatherManager.CurWindSpeedFactor;
@@ -60,7 +67,6 @@ namespace RimThreaded
             }
             return false;
         }
-
 
     }
 }

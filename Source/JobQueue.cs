@@ -1,12 +1,7 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -108,6 +103,16 @@ namespace RimThreaded
             return false;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(JobQueue);
+            Type patched = typeof(JobQueue_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AnyCanBeginNow");
+            RimThreadedHarmony.Prefix(original, patched, "EnqueueFirst");
+            RimThreadedHarmony.Prefix(original, patched, "EnqueueLast");
+            RimThreadedHarmony.Prefix(original, patched, "Contains");
+            RimThreadedHarmony.Prefix(original, patched, "Extract");
+            RimThreadedHarmony.Prefix(original, patched, "Dequeue");
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using System;
+using Verse;
 using Verse.AI;
 
 namespace RimThreaded
@@ -25,5 +26,11 @@ namespace RimThreaded
 			return false;
 		}
 
-	}
+        internal static void RunDestructivePatches()
+		{
+			Type original = typeof(ReservationUtility);
+			Type patched = typeof(ReservationUtility_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "CanReserve");
+		}
+    }
 }

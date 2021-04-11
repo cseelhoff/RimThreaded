@@ -1,152 +1,116 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 using RimWorld.Planet;
+using static HarmonyLib.AccessTools;
+using System.Reflection;
 
 namespace RimThreaded
 {
 
     public class MapPawns_Patch
     {
-        public static AccessTools.FieldRef<MapPawns, List<Pawn>> pawnsSpawned =
-            AccessTools.FieldRefAccess<MapPawns, List<Pawn>>("pawnsSpawned");
-        public static AccessTools.FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> pawnsInFactionResult =
-            AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("pawnsInFactionResult");
-        public static AccessTools.FieldRef<MapPawns, Map> map =
-            AccessTools.FieldRefAccess<MapPawns, Map>("map");
-        public static AccessTools.FieldRef<MapPawns, List<Pawn>> prisonersOfColonySpawned =
-            AccessTools.FieldRefAccess<MapPawns, List<Pawn>>("prisonersOfColonySpawned");
-        public static AccessTools.FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> pawnsInFactionSpawned =
-            AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("pawnsInFactionSpawned");
-        public static AccessTools.FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesSpawnedOfFactionResult =
-            AccessTools.FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("freeHumanlikesSpawnedOfFactionResult");
+        [ThreadStatic] public static List<Pawn> allPawnsResult;
+        [ThreadStatic] public static List<Pawn> allPawnsUnspawnedResult;
+        [ThreadStatic] public static List<Pawn> prisonersOfColonyResult;
+        [ThreadStatic] public static List<Pawn> freeColonistsAndPrisonersResult;
+        [ThreadStatic] public static List<Thing> tmpThings;
+        [ThreadStatic] public static List<Pawn> freeColonistsAndPrisonersSpawnedResult;
+        [ThreadStatic] public static List<Pawn> spawnedPawnsWithAnyHediffResult;
+        [ThreadStatic] public static List<Pawn> spawnedHungryPawnsResult;
+        [ThreadStatic] public static List<Pawn> spawnedDownedPawnsResult;
+        [ThreadStatic] public static List<Pawn> spawnedPawnsWhoShouldHaveSurgeryDoneNowResult;
+        [ThreadStatic] public static List<Pawn> spawnedPawnsWhoShouldHaveInventoryUnloadedResult;
 
-        public static bool get_AllPawnsUnspawned(MapPawns __instance, ref List<Pawn> __result)
+        public static FieldRef<MapPawns, List<Pawn>> pawnsSpawnedFieldRef =
+            FieldRefAccess<MapPawns, List<Pawn>>("pawnsSpawned");
+        public static FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> pawnsInFactionResult =
+            FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("pawnsInFactionResult");
+        public static FieldRef<MapPawns, Map> mapFieldRef =
+            FieldRefAccess<MapPawns, Map>("map");
+        public static FieldRef<MapPawns, List<Pawn>> prisonersOfColonySpawned =
+            FieldRefAccess<MapPawns, List<Pawn>>("prisonersOfColonySpawned");
+        public static FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> pawnsInFactionSpawned =
+            FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("pawnsInFactionSpawned");
+        public static FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesOfFactionResult =
+            FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("freeHumanlikesOfFactionResult");
+        public static FieldRef<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesSpawnedOfFactionResult =
+            FieldRefAccess<MapPawns, Dictionary<Faction, List<Pawn>>>("freeHumanlikesSpawnedOfFactionResult");
+
+        private static readonly MethodInfo methodDoListChangedNotifications =
+            Method(typeof(MapPawns), "DoListChangedNotifications", new Type[] { });
+        private static readonly Action<MapPawns> actionDoListChangedNotifications =
+            (Action<MapPawns>)Delegate.CreateDelegate(typeof(Action<MapPawns>), methodDoListChangedNotifications);
+
+        public static Dictionary<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesSpawnedOfFactionDict = 
+            new Dictionary<MapPawns, Dictionary<Faction, List<Pawn>>>();
+
+        public static void InitializeThreadStatics()
         {
-            List<Pawn> outThings = new List<Pawn>();
-            List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
-            map(__instance).GetChildHolders(tmpMapChildHolders);
-            Stack<IThingHolder> tmpStack = new Stack<IThingHolder>();
-            List<IThingHolder> tmpHolders = new List<IThingHolder>();
-            for (int j = 0; j < tmpMapChildHolders.Count; j++)
-            {
-                GetAllHeldPawns(tmpMapChildHolders[j], outThings, tmpStack, tmpHolders);
-            }
-            __result = outThings;
-            return false;
-
+            allPawnsResult = new List<Pawn>();
+            allPawnsUnspawnedResult = new List<Pawn>();
+            prisonersOfColonyResult = new List<Pawn>();
+            freeColonistsAndPrisonersResult = new List<Pawn>();
+            tmpThings = new List<Thing>();
+            freeColonistsAndPrisonersSpawnedResult = new List<Pawn>();
+            spawnedPawnsWithAnyHediffResult = new List<Pawn>();
+            spawnedHungryPawnsResult = new List<Pawn>();
+            spawnedDownedPawnsResult = new List<Pawn>();
+            spawnedPawnsWhoShouldHaveSurgeryDoneNowResult = new List<Pawn>();
+            spawnedPawnsWhoShouldHaveInventoryUnloadedResult = new List<Pawn>();
         }
 
-        private static bool GetAllHeldPawns(IThingHolder holder, List<Pawn> outThings, Stack<IThingHolder> tmpStack, List<IThingHolder> tmpHolders)
+        internal static void RunDestructivePatches()
         {
-            tmpStack.Clear();            
-            tmpStack.Push(holder);
-            while (tmpStack.Count != 0)
-            {
-                IThingHolder thingHolder = tmpStack.Pop();
-
-                ThingOwner directlyHeldThings = thingHolder.GetDirectlyHeldThings();
-                if (directlyHeldThings != null)
-                {
-                    for(int i = 0; i < directlyHeldThings.Count; i++)
-                    {
-                        Pawn pawn = directlyHeldThings[i] as Pawn;
-                        if (pawn != null && ThingRequest.ForGroup(ThingRequestGroup.Pawn).Accepts(pawn) && !pawn.Dead)
-                        {
-                            outThings.Add(pawn);
-                        }
-                    }
-                }
-
-                tmpHolders.Clear();
-                thingHolder.GetChildHolders(tmpHolders);
-                for (int i = 0; i < tmpHolders.Count; i++)
-                {
-                    tmpStack.Push(tmpHolders[i]);
-                }
-            }
-            return false;
-
+            Type original = typeof(MapPawns);
+            Type patched = typeof(MapPawns_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched, false);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllPawns");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllPawnsUnspawned");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_PrisonersOfColony");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_FreeColonistsAndPrisoners");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AnyPawnBlockingMapRemoval");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_FreeColonistsAndPrisonersSpawned");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedPawnsWithAnyHediff");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedHungryPawns");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedDownedPawns");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedPawnsWhoShouldHaveSurgeryDoneNow");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedPawnsWhoShouldHaveInventoryUnloaded");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
+            RimThreadedHarmony.Prefix(original, patched, "EnsureFactionsListsInit");
+            RimThreadedHarmony.Prefix(original, patched, "PawnsInFaction");
+            RimThreadedHarmony.Prefix(original, patched, "FreeHumanlikesOfFaction");
+            RimThreadedHarmony.Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
+            RimThreadedHarmony.Prefix(original, patched, "RegisterPawn");
+            RimThreadedHarmony.Prefix(original, patched, "DeRegisterPawn");
         }
 
-        public static bool get_SpawnedPawnsWithAnyHediff(MapPawns __instance, ref List<Pawn> __result)
-        {
-            //this.spawnedPawnsWithAnyHediffResult.Clear();
-            List<Pawn> spawnedPawnsWithAnyHediffResult = new List<Pawn>();
-            List<Pawn> allPawnsSpawned = __instance.AllPawnsSpawned;
-            for (int index = 0; index < allPawnsSpawned.Count; ++index)
-            {
-                if (allPawnsSpawned[index].health.hediffSet.hediffs.Count != 0)
-                    spawnedPawnsWithAnyHediffResult.Add(allPawnsSpawned[index]);
-            }
-            __result = spawnedPawnsWithAnyHediffResult;
-            return false;
-        }
 
-        public static Dictionary<MapPawns, Dictionary<Faction, List<Pawn>>> freeHumanlikesSpawnedOfFactionDict = new Dictionary<MapPawns, Dictionary<Faction, List<Pawn>>>();
-        
 
-        public static void RegisterPawn_FreeHumanlikesSpawnedOfFaction(MapPawns __instance, Pawn p)
-        {
-            Faction faction = p.Faction;
-            if (faction != null && p.HostFaction == null && p.RaceProps.Humanlike)
-            {
-                List<Pawn> pawnList = getFreeHumanlikesSpawnedOfFaction(__instance, faction);
-                if (!pawnList.Contains(p))
-                {
-                    pawnList.Add(p);
-                    if (faction == Faction.OfPlayer)
-                    {
-                        pawnList.InsertionSort(delegate (Pawn a, Pawn b)
-                        {
-                            int num = (a.playerSettings != null) ? a.playerSettings.joinTick : 0;
-                            int value = (b.playerSettings != null) ? b.playerSettings.joinTick : 0;
-                            return num.CompareTo(value);
-                        });
-                    }
-                }                
-            }
-        }
-
-        public static void DeRegisterPawn_FreeHumanlikesSpawnedOfFaction(MapPawns __instance, Pawn p)
+        public static bool EnsureFactionsListsInit(MapPawns __instance)
         {
             List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
             for (int i = 0; i < allFactionsListForReading.Count; i++)
             {
-                Faction faction = allFactionsListForReading[i];
-                if (faction != null)
+                if (!pawnsInFactionSpawned(__instance).ContainsKey(allFactionsListForReading[i]))
                 {
-                    getFreeHumanlikesSpawnedOfFaction(__instance, faction).Remove(p);
+                    lock (__instance) {
+                        if (!pawnsInFactionSpawned(__instance).ContainsKey(allFactionsListForReading[i])) {
+                            Dictionary<Faction, List<Pawn>> newPawnsInFactionSpawned =
+                                new Dictionary<Faction, List<Pawn>>(pawnsInFactionSpawned(__instance))
+                                {
+                                    { allFactionsListForReading[i], new List<Pawn>() }
+                                };
+                            pawnsInFactionSpawned(__instance) = newPawnsInFactionSpawned;
+                        }
+                    }
                 }
             }
-        }
-
-        public static bool FreeHumanlikesSpawnedOfFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
-        {
-            __result = getFreeHumanlikesSpawnedOfFaction(__instance, faction); ;
             return false;
         }
 
-        private static List<Pawn> getFreeHumanlikesSpawnedOfFaction(MapPawns __instance, Faction faction)
-        {
-            if (!freeHumanlikesSpawnedOfFactionDict.TryGetValue(__instance, out Dictionary<Faction, List<Pawn>> thisFreeHumanlikesSpawnedOfFactionDict))
-            {
-                thisFreeHumanlikesSpawnedOfFactionDict = new Dictionary<Faction, List<Pawn>>();
-                freeHumanlikesSpawnedOfFactionDict[__instance] = thisFreeHumanlikesSpawnedOfFactionDict;
-            }
-            if (!thisFreeHumanlikesSpawnedOfFactionDict.TryGetValue(faction, out List<Pawn> pawnList))
-            {
-                pawnList = new List<Pawn>();
-                thisFreeHumanlikesSpawnedOfFactionDict[faction] = pawnList;
-            }
-            return pawnList;
-        }
 
         public static bool PawnsInFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
         {
@@ -157,279 +121,195 @@ namespace RimThreaded
                 return false;
             }
 
-            //if (!pawnsInFactionResult.TryGetValue(faction, out List<Pawn> value))
-            //{
-            //pawnsInFactionResult.Add(faction, value);                
-            //}
-
-            //value.Clear();
-            List<Pawn> value = new List<Pawn>();
+            List<Pawn> value = new List<Pawn>(); 
             List<Pawn> allPawns = __instance.AllPawns;
-            Pawn pawn;
             for (int i = 0; i < allPawns.Count; i++)
             {
-                try
+                if (allPawns[i].Faction == faction)
                 {
-                    pawn = allPawns[i];
-                }
-                catch (ArgumentOutOfRangeException) { break; }
-                if (pawn.Faction == faction)
-                {
-                    value.Add(pawn);
+                    value.Add(allPawns[i]);
                 }
             }
 
+            lock (__instance)
+            {
+                Dictionary<Faction, List<Pawn>> newPawnsInFactionResult =
+                    new Dictionary<Faction, List<Pawn>>(pawnsInFactionResult(__instance))
+                    {
+                        [faction] = value
+                    };
+                pawnsInFactionResult(__instance) = newPawnsInFactionResult;                
+            }
             __result = value;
             return false;
         }
 
-        public static bool get_AllPawns(MapPawns __instance, ref List<Pawn> __result)
+        public static bool FreeHumanlikesOfFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
         {
-            List<Pawn> allPawnsUnspawned = __instance.AllPawnsUnspawned;
-            if (allPawnsUnspawned.Count == 0)
+            if (faction == null)
             {
-                __result = pawnsSpawned(__instance);
+                Log.Error("Called FreeHumanlikesOfFaction with null faction.");
+                __result = new List<Pawn>();
                 return false;
             }
-            List<Pawn> allPawnsResult = new List<Pawn>();
-            lock (pawnsSpawned(__instance))
+
+            List<Pawn> value = new List<Pawn>();
+            List<Pawn> allPawns = __instance.AllPawns;
+            for (int i = 0; i < allPawns.Count; i++)
             {
-                allPawnsResult.AddRange((IEnumerable<Pawn>)pawnsSpawned(__instance));
-            }
-            allPawnsResult.AddRange((IEnumerable<Pawn>)allPawnsUnspawned);
-            __result = allPawnsResult;
-            return false;
-        }
-        public static bool LogListedPawns(MapPawns __instance)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("MapPawns:");
-            stringBuilder.AppendLine("pawnsSpawned");
-            //lock (pawnsSpawned(__instance))
-            //{
-            //foreach (Pawn pawn in pawnsSpawned(__instance))
-            for (int i = 0; i < pawnsSpawned(__instance).Count; i++)
-            {
-                Pawn pawn;
-                try
+                if (allPawns[i].Faction == faction && allPawns[i].HostFaction == null && allPawns[i].RaceProps.Humanlike)
                 {
-                    pawn = pawnsSpawned(__instance)[i];
-                } catch(ArgumentOutOfRangeException)
-                {
-                    break;
-                }
-                stringBuilder.AppendLine("    " + pawn.ToString());
-            }
-            //}
-            stringBuilder.AppendLine("AllPawnsUnspawned");
-            foreach (Pawn pawn in __instance.AllPawnsUnspawned)
-                stringBuilder.AppendLine("    " + pawn.ToString());
-            lock (pawnsInFactionSpawned(__instance))
-            {
-                foreach (KeyValuePair<Faction, List<Pawn>> keyValuePair in pawnsInFactionSpawned(__instance))
-                {
-                    stringBuilder.AppendLine("pawnsInFactionSpawned[" + keyValuePair.Key.ToString() + "]");
-                    foreach (Pawn pawn in keyValuePair.Value)
-                        stringBuilder.AppendLine("    " + pawn.ToString());
+                    value.Add(allPawns[i]);
                 }
             }
-            stringBuilder.AppendLine("prisonersOfColonySpawned");
-            //lock (prisonersOfColonySpawned(__instance))
-            //{
-            //foreach (Pawn pawn in prisonersOfColonySpawned(__instance))
-            for (int i = 0; i < prisonersOfColonySpawned(__instance).Count; i++)
+
+            lock (__instance)
             {
-                Pawn pawn;
-                try
-                {
-                    pawn = prisonersOfColonySpawned(__instance)[i];
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
-                stringBuilder.AppendLine("    " + pawn.ToString());
-            }
-            //}
-            Log.Message(stringBuilder.ToString(), false);
-            return false;
-        }
-        public static void RegisterPawn1(MapPawns __instance, Pawn p)
-        {
-            lock (pawnsSpawned(__instance))
-            {
-                if (!pawnsSpawned(__instance).Contains(p))
-                    pawnsSpawned(__instance).Add(p);
-            }
-        }
-        public static void RegisterPawn2(MapPawns __instance, Pawn p)
-        {
-            lock (pawnsInFactionSpawned(__instance))
-            {
-                if (p.Faction != null && !pawnsInFactionSpawned(__instance)[p.Faction].Contains(p))
-                {
-                    pawnsInFactionSpawned(__instance)[p.Faction].Add(p);
-                    if (p.Faction == Faction.OfPlayer)
+                Dictionary<Faction, List<Pawn>> newFreeHumanlikesSpawnedOfFactionResult =
+                    new Dictionary<Faction, List<Pawn>>(freeHumanlikesSpawnedOfFactionResult(__instance))
                     {
-                        pawnsInFactionSpawned(__instance)[Faction.OfPlayer].InsertionSort(delegate (Pawn a, Pawn b)
-                        {
-                            int num = (a.playerSettings != null) ? a.playerSettings.joinTick : 0;
-                            int value = (b.playerSettings != null) ? b.playerSettings.joinTick : 0;
-                            return num.CompareTo(value);
-                        });
-                    }
+                        [faction] = value
+                    };
+                freeHumanlikesSpawnedOfFactionResult(__instance) = newFreeHumanlikesSpawnedOfFactionResult;
+            }
+            __result = value;
+            return false;
+        }
+        public static bool FreeHumanlikesSpawnedOfFaction(MapPawns __instance, ref List<Pawn> __result, Faction faction)
+        {
+            if (faction == null)
+            {
+                Log.Error("Called FreeHumanlikesSpawnedOfFaction with null faction.");
+                __result = new List<Pawn>();
+                return false;
+            }
+
+            List<Pawn> value = new List<Pawn>();
+            List<Pawn> list = __instance.SpawnedPawnsInFaction(faction);
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].HostFaction == null && list[i].RaceProps.Humanlike)
+                {
+                    value.Add(list[i]);
                 }
             }
-        }
-        public static void RegisterPawn3(MapPawns __instance, Pawn p)
-        {
-            lock (prisonersOfColonySpawned(__instance))
+
+            lock (__instance)
             {
-                if (p.IsPrisonerOfColony && !prisonersOfColonySpawned(__instance).Contains(p))
-                    prisonersOfColonySpawned(__instance).Add(p);
+                Dictionary<Faction, List<Pawn>> newFreeHumanlikesSpawnedOfFactionResult =
+                    new Dictionary<Faction, List<Pawn>>(freeHumanlikesSpawnedOfFactionResult(__instance))
+                    {
+                        [faction] = value
+                    };
+                freeHumanlikesSpawnedOfFactionResult(__instance) = newFreeHumanlikesSpawnedOfFactionResult;
             }
+            __result = value;
+            return false;
         }
         public static bool RegisterPawn(MapPawns __instance, Pawn p)
         {
             if (p.Dead)
-                Log.Warning("Tried to register dead pawn " + (object)p + " in " + (object)__instance.GetType() + ".", false);
-            else if (!p.Spawned)
-                Log.Warning("Tried to register despawned pawn " + (object)p + " in " + (object)__instance.GetType() + ".", false);
-            else if (p.Map != map(__instance))
             {
-                Log.Warning("Tried to register pawn " + (object)p + " but his Map is not this one.", false);
+                Log.Warning(string.Concat("Tried to register dead pawn ", p, " in ", __instance.GetType(), "."));
+            }
+            else if (!p.Spawned)
+            {
+                Log.Warning(string.Concat("Tried to register despawned pawn ", p, " in ", __instance.GetType(), "."));
+            }
+            else if (p.Map != mapFieldRef(__instance))
+            {
+                Log.Warning(string.Concat("Tried to register pawn ", p, " but his Map is not this one."));
             }
             else
             {
                 if (!p.mindState.Active)
+                {
                     return false;
+                }
+
                 EnsureFactionsListsInit(__instance);
-                RegisterPawn1(__instance, p);
-                RegisterPawn2(__instance, p);
-                RegisterPawn3(__instance, p);
-                DoListChangedNotifications(__instance);
-            }
-            return false;
-        }
-
-        public static bool get_AnyPawnBlockingMapRemoval(MapPawns __instance, ref bool __result)
-        {
-            Faction ofPlayer = Faction.OfPlayer;
-            lock(pawnsSpawned(__instance)) {
-                for (int index = 0; index < pawnsSpawned(__instance).Count; ++index)
+                if (!pawnsSpawnedFieldRef(__instance).Contains(p))
                 {
-                    if (!pawnsSpawned(__instance)[index].Downed && pawnsSpawned(__instance)[index].IsColonist || pawnsSpawned(__instance)[index].relations != null && pawnsSpawned(__instance)[index].relations.relativeInvolvedInRescueQuest != null)
+                    lock(__instance)
                     {
-                        __result = true;
-                        return false;
-                    }
-                    if (pawnsSpawned(__instance)[index].Faction == ofPlayer || pawnsSpawned(__instance)[index].HostFaction == ofPlayer)
-                    {
-                        Job curJob = pawnsSpawned(__instance)[index].CurJob;
-                        if (curJob != null && curJob.exitMapOnArrival)
+                        if (!pawnsSpawnedFieldRef(__instance).Contains(p))
                         {
-                            __result = true;
-                            return false;
+                            List<Pawn> newPawnsSpawned = new List<Pawn>(pawnsSpawnedFieldRef(__instance))
+                            {
+                                p
+                            };
+                            pawnsSpawnedFieldRef(__instance) = newPawnsSpawned;
                         }
                     }
-                    if (CaravanExitMapUtility.FindCaravanToJoinFor(pawnsSpawned(__instance)[index]) != null && !pawnsSpawned(__instance)[index].Downed)
-                    {
-                        __result = true;
-                        return false;
-                    }
+                    
                 }
-            }
-            List<Thing> thingList = map(__instance).listerThings.ThingsInGroup(ThingRequestGroup.ThingHolder);
-            for (int index1 = 0; index1 < thingList.Count; ++index1)
-            {
-                if (thingList[index1] is IActiveDropPod || thingList[index1] is PawnFlyer || thingList[index1].TryGetComp<CompTransporter>() != null)
+                if (p.Faction != null && !pawnsInFactionSpawned(__instance)[p.Faction].Contains(p))
                 {
-                    IThingHolder holder = (IThingHolder)thingList[index1].TryGetComp<CompTransporter>() ?? (IThingHolder)thingList[index1];
-                    List<Thing> tmpThings = new List<Thing>();
-                    ThingOwnerUtility.GetAllThingsRecursively(holder, tmpThings, true, (Predicate<IThingHolder>)null);
-                    for (int index2 = 0; index2 < tmpThings.Count; ++index2)
+                    lock (__instance)
                     {
-                        if (tmpThings[index2] is Pawn tmpThing && !tmpThing.Dead && (!tmpThing.Downed && tmpThing.IsColonist))
+                        if (!pawnsInFactionSpawned(__instance)[p.Faction].Contains(p))
                         {
-                            __result = true;
-                            return false;
+                            List<Pawn> newPawnList = new List<Pawn>
+                            {
+                                p
+                            };
+                            if (p.Faction == Faction.OfPlayer)
+                            {
+                                newPawnList.InsertionSort(delegate (Pawn a, Pawn b)
+                                {
+                                    int num = (a.playerSettings != null) ? a.playerSettings.joinTick : 0;
+                                    int value = (b.playerSettings != null) ? b.playerSettings.joinTick : 0;
+                                    return num.CompareTo(value);
+                                });
+                            }
+                            pawnsInFactionSpawned(__instance)[p.Faction] = newPawnList;
                         }
                     }
                 }
-            }
-            __result = false;
-            return false;
-            
-        }
 
-        public static bool get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount(MapPawns __instance, ref int __result)
-        {            
-            int num = 0;
-            lock (pawnsSpawned(__instance))
-            {
-                for (int index = 0; index < pawnsSpawned(__instance).Count; ++index)
+                if (p.IsPrisonerOfColony && !prisonersOfColonySpawned(__instance).Contains(p))
                 {
-                    if (pawnsSpawned(__instance)[index].IsFreeColonist)
-                        ++num;
-                }
-            }
-            List<Thing> thingList = map(__instance).listerThings.ThingsInGroup(ThingRequestGroup.ThingHolder);
-            for (int index1 = 0; index1 < thingList.Count; ++index1)
-            {
-                if (thingList[index1] is Building_CryptosleepCasket cryptosleepCasket && cryptosleepCasket.def.building.isPlayerEjectable || (thingList[index1] is IActiveDropPod || thingList[index1] is PawnFlyer) || thingList[index1].TryGetComp<CompTransporter>() != null)
-                {
-                    IThingHolder holder = (IThingHolder)thingList[index1].TryGetComp<CompTransporter>() ?? (IThingHolder)thingList[index1];
-                    List<Thing> tmpThings = new List<Thing>();
-                    ThingOwnerUtility.GetAllThingsRecursively(holder, tmpThings, true, (Predicate<IThingHolder>)null);
-                    for (int index2 = 0; index2 < tmpThings.Count; ++index2)
+                    lock (__instance)
                     {
-                        if (tmpThings[index2] is Pawn tmpThing && !tmpThing.Dead && tmpThing.IsFreeColonist)
-                            ++num;
+                        if (p.IsPrisonerOfColony && !prisonersOfColonySpawned(__instance).Contains(p))
+                        {
+                            List<Pawn> newPrisonersOfColonySpawned = new List<Pawn>
+                            {
+                                p
+                            };
+                            prisonersOfColonySpawned(__instance) = newPrisonersOfColonySpawned;
+                        }
                     }
                 }
+
+                actionDoListChangedNotifications(__instance);
             }
-            __result = num;
             return false;
         }
-        private static void EnsureFactionsListsInit(MapPawns __instance)
-        {
-            List<Faction> factionsListForReading = Find.FactionManager.AllFactionsListForReading;
-            for (int index = 0; index < factionsListForReading.Count; ++index)
-            {
-                //lock (pawnsInFactionSpawned(__instance))
-                //{
-                    if (!pawnsInFactionSpawned(__instance).ContainsKey(factionsListForReading[index]))
-                        pawnsInFactionSpawned(__instance).Add(factionsListForReading[index], new List<Pawn>());
-                //}
-            }
-        }
-        private static void DoListChangedNotifications(MapPawns __instance)
-        {
-            MainTabWindowUtility.NotifyAllPawnTables_PawnsChanged();
-            if (Find.ColonistBar == null)
-                return;
-            Find.ColonistBar.MarkColonistsDirty();
-        }
-
         public static bool DeRegisterPawn(MapPawns __instance, Pawn p)
         {
             EnsureFactionsListsInit(__instance);
-            lock (pawnsSpawned(__instance)) {
-                pawnsSpawned(__instance).Remove(p);
-            }
-            List<Faction> factionsListForReading = Find.FactionManager.AllFactionsListForReading;
-            for (int index = 0; index < factionsListForReading.Count; ++index)
+            lock (__instance)
             {
-                lock (pawnsInFactionSpawned(__instance))
+                List<Pawn> newPawnsSpawned = new List<Pawn>(pawnsSpawnedFieldRef(__instance));
+                newPawnsSpawned.Remove(p);
+                pawnsSpawnedFieldRef(__instance) = newPawnsSpawned;
+
+                List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
+                Dictionary<Faction, List<Pawn>> newPawnsInFactionSpawned =
+                    new Dictionary<Faction, List<Pawn>>(pawnsInFactionSpawned(__instance));
+                for (int i = 0; i < allFactionsListForReading.Count; i++)
                 {
-                    pawnsInFactionSpawned(__instance)[factionsListForReading[index]].Remove(p);
+                    Faction key = allFactionsListForReading[i];
+                    newPawnsInFactionSpawned[key].Remove(p);
                 }
+                pawnsInFactionSpawned(__instance) = newPawnsInFactionSpawned;
+                List<Pawn> newPrisonersOfColonySpawned = new List<Pawn>(prisonersOfColonySpawned(__instance));
+                newPrisonersOfColonySpawned.Remove(p);
+                prisonersOfColonySpawned(__instance) = newPrisonersOfColonySpawned;
             }
-            lock (prisonersOfColonySpawned(__instance))
-            {
-                prisonersOfColonySpawned(__instance).Remove(p);
-            }
-            DoListChangedNotifications(__instance);
+            actionDoListChangedNotifications(__instance);
+            
             return false;
         }
 

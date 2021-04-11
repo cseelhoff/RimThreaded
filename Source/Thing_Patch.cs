@@ -1,13 +1,21 @@
 ﻿using System.Collections.Generic;
 using Verse;
+using System;
 
 namespace RimThreaded
 {
     
     public class Thing_Patch
 	{
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(Thing);
+			Type patched = typeof(Thing_Patch);
+			RimThreadedHarmony.Postfix(original, patched, "SpawnSetup", "SpawnSetupPostFix");
+		}
+
 #pragma warning disable IDE0060 // Remove unused parameter
-        public static void SpawnSetup(Thing __instance, Map map, bool respawningAfterLoad)
+		public static void SpawnSetupPostFix(Thing __instance, Map map, bool respawningAfterLoad)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
 			ThingDef thingDef = __instance.def;

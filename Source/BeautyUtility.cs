@@ -1,13 +1,7 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
-using static HarmonyLib.AccessTools;
 
 
 namespace RimThreaded
@@ -15,12 +9,16 @@ namespace RimThreaded
 
     public class BeautyUtility_Patch
     {
-        [ThreadStatic]
-        static List<Thing> tempCountedThings;
-        [ThreadStatic]
-        static List<IntVec3> tmpBeautyRelevantCells;
-        [ThreadStatic]
-        static List<Room> tmpVisibleRooms;
+        [ThreadStatic] static List<Thing> tempCountedThings;
+        [ThreadStatic] static List<IntVec3> tmpBeautyRelevantCells;
+        [ThreadStatic] static List<Room> tmpVisibleRooms;
+
+        public static void InitializeThreadStatics()
+        {
+            tempCountedThings = new List<Thing>();
+            tmpBeautyRelevantCells = new List<IntVec3>();
+            tmpVisibleRooms = new List<Room>();
+        }
 
         public static bool AverageBeautyPerceptible(ref float __result, IntVec3 root, Map map)
         {
@@ -29,13 +27,7 @@ namespace RimThreaded
                 __result = 0.0f;
                 return false;
             }
-            if (tempCountedThings == null)
-            {
-                tempCountedThings = new List<Thing>();
-            } else
-            {
-                tempCountedThings.Clear();
-            }
+            tempCountedThings.Clear();
             float num = 0.0f;
             int num2 = 0;
             List<IntVec3> beautyRelevantCells = FillBeautyRelevantCells(root, map);
@@ -49,27 +41,13 @@ namespace RimThreaded
         }
         public static List<IntVec3> FillBeautyRelevantCells(IntVec3 root, Map map)
         {
-            if (tmpBeautyRelevantCells == null)
-            {
-                tmpBeautyRelevantCells = new List<IntVec3>();
-            }
-            else
-            {
-                tmpBeautyRelevantCells.Clear();
-            }
+            tmpBeautyRelevantCells.Clear();            
             Room room = root.GetRoom(map);
             if (room == null)
             {
                 return tmpBeautyRelevantCells;
             }
-            if (tmpVisibleRooms == null)
-            {
-                tmpVisibleRooms = new List<Room>();
-            }
-            else
-            {
-                tmpVisibleRooms.Clear();
-            }
+            tmpVisibleRooms.Clear();
             tmpVisibleRooms.Add(room);
             if (room.Regions.Count == 1 && room.Regions[0].type == RegionType.Portal)
             {
@@ -114,6 +92,11 @@ namespace RimThreaded
             return tmpBeautyRelevantCells;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(BeautyUtility);
+            Type patched = typeof(BeautyUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AverageBeautyPerceptible");
+        }
     }
 }

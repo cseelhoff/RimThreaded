@@ -7,8 +7,6 @@ using Verse.Sound;
 using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
-using Verse.AI;
-using static RimThreaded.PathFinder_Patch;
 using System.Reflection;
 using static HarmonyLib.AccessTools;
 
@@ -73,6 +71,12 @@ namespace RimThreaded
             public int steadyEnvironmentEffectsCycleIndex;
             public int steadyEnvironmentEffectsCycleIndexOffset;
         }
+
+        internal static IEnumerable<IntVec3> GetClosestPlantGrowerCells(IntVec3 position)
+        {
+            throw new NotImplementedException();
+        }
+
         public static int totalSteadyEnvironmentEffectsTicks = 0;
         public static int steadyEnvironmentEffectsTicksCompleted = 0;
         public static int steadyEnvironmentEffectsCount = 0;
@@ -182,6 +186,7 @@ namespace RimThreaded
 
         static RimThreaded()
         {
+            InitializeAllThreadStatics();
             CreateWorkerThreads();
             monitorThread = new Thread(() => MonitorThreads());
             monitorThread.Start();
@@ -225,15 +230,58 @@ namespace RimThreaded
 
         private static void InitializeThread(ThreadInfo threadInfo)
         {
-            openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
-            statusOpenValue = 1;
-            statusClosedValue = 2;
-            disallowedCornerIndices = new List<int>(4);
-            regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
-            Rand_Patch.tmpRange = new List<int>();
-            Projectile_Patch.cellThingsFiltered = new List<Thing>();
-            Projectile_Patch.checkedCells = new List<IntVec3>();
+            InitializeAllThreadStatics();
             ProcessTicks(threadInfo);
+        }
+
+        public static void InitializeAllThreadStatics()
+        {
+            AttackTargetFinder_Patch.InitializeThreadStatics();
+            AttackTargetsCache_Patch.InitializeThreadStatics();
+            BeautyUtility_Patch.InitializeThreadStatics();
+            CellFinder_Patch.InitializeThreadStatics();
+            CompCauseGameCondition_Patch.InitializeThreadStatics();
+            DamageWorker_Patch.InitializeThreadStatics();
+            DijkstraInt.InitializeThreadStatics();
+            Fire_Patch.InitializeThreadStatics();
+            FloatMenuMakerMap_Patch.InitializeThreadStatics();
+            FoodUtility_Patch.InitializeThreadStatics();
+            GenAdj_Patch.InitializeThreadStatics();
+            GenAdjFast_Patch.InitializeThreadStatics();
+            GenLeaving_Patch.InitializeThreadStatics();
+            GenRadial_Patch.InitializeThreadStatics();
+            GenTemperature_Patch.InitializeThreadStatics();
+            GenText_Patch.InitializedThreadStatics();
+            HaulAIUtility_Patch.InitializeThreadStatics();
+            ImmunityHandler_Patch.InitializeThreadStatics();
+            InfestationCellFinder_Patch.InitializeThreadStatics();
+            JobGiver_AnimalFlee_Patch.InitializeThreadStatics();
+            MapPawns_Patch.InitializeThreadStatics();
+            MapTemperature_Patch.InitializeThreadStatics();
+            Medicine_Patch.InitializeThreadStatics();
+            PathFinder_Patch.InitializeThreadStatics();
+            Pawn_InteractionsTracker_Transpile.InitializeThreadStatics();
+            Pawn_MeleeVerbs_Patch.InitializeThreadStatics();
+            Pawn_WorkSettings_Patch.InitializeThreadStatics();
+            PawnDiedOrDownedThoughtsUtility_Patch.InitializeThreadStatics();
+            PawnsFinder_Patch.InitializeThreadStatics();
+            QuestUtility_Patch.InitializeThreadStatics();
+            Rand_Patch.InitializeThreadStatics();
+            RCellFinder_Patch.InitializeThreadStatics();
+            Reachability_Patch.InitializeThreadStatics();
+            ReachabilityCache_Patch.InitializeThreadStatics();
+            RegionDirtyer_Patch.InitializeThreadStatics();
+            RegionListersUpdater_Patch.InitializeThreadStatics();
+            RegionTraverser_Transpile.InitializeThreadStatics();
+            Room_Patch.InitializeThreadStatics();
+            Projectile_Patch.InitializeThreadStatics();
+            ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
+            ThoughtHandler_Patch.InitializeThreadStatics();
+            Verb_Patch.InitializeThreadStatics();
+            WanderUtility_Patch.InitializeThreadStatics();
+            WealthWatcher_Patch.InitializeThreads();
+            World_Patch.InitializeThreadStatics();
+            WorldPawns_Patch.InitializeThreadStatics();
         }
 
         private static void ProcessTicks(ThreadInfo threadInfo)
@@ -251,6 +299,10 @@ namespace RimThreaded
                 threadInfo.eventWaitDone.Set();
                 //WaitingForAllThreadsToComplete.WaitOne();
             }
+        }
+        public static IEnumerable<Thing> GetClosestThings(ThingRequest thingRequest)
+        {
+            return null;
         }
 
         private static void CompletePostWorkLists()
@@ -485,6 +537,13 @@ namespace RimThreaded
 
         }
 
+        private static readonly MethodInfo methodDoCellSteadyEffects =
+            Method(typeof(SteadyEnvironmentEffects), "DoCellSteadyEffects", new Type[] { typeof(IntVec3) });
+        private static readonly Action<SteadyEnvironmentEffects, IntVec3> actionDoCellSteadyEffects =
+            (Action<SteadyEnvironmentEffects, IntVec3>)Delegate.CreateDelegate(
+                typeof(Action<SteadyEnvironmentEffects, IntVec3>), methodDoCellSteadyEffects);
+
+
         private static void ExecuteTicks()
         {
             if (mapPreTickComplete && plantMaterialsCount > 0)
@@ -616,7 +675,7 @@ namespace RimThreaded
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 1148571423, false);
+                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 1148571423, false);
                     }
                     try
                     {
@@ -625,7 +684,7 @@ namespace RimThreaded
                     }
                     catch (Exception ex)
                     {
-                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + (object)ex, pawn.thingIDNumber ^ 8765780, false);
+                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 8765780, false);
                     }
                     index = Interlocked.Decrement(ref worldPawnsTicks);
                 }
@@ -694,7 +753,7 @@ namespace RimThreaded
                     IntVec3 c = steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
                     try
                     {
-                        SteadyEnvironmentEffects_Patch.DoCellSteadyEffects(
+                        actionDoCellSteadyEffects(
                             steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffects, c);
                     } catch (Exception ex)
                     {

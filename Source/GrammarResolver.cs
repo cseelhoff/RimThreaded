@@ -1,16 +1,13 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using Verse.Grammar;
 using static HarmonyLib.AccessTools;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using System;
 
 namespace RimThreaded
 {
@@ -149,7 +146,7 @@ namespace RimThreaded
 
             public int uses;
 
-            public float SelectionWeight => rule.BaseSelectionWeight * 100000f / (float)((uses + 1) * 1000);
+            public float SelectionWeight => rule.BaseSelectionWeight * 100000f / ((uses + 1) * 1000);
 
             public float Priority => rule.Priority;
 
@@ -476,9 +473,12 @@ namespace RimThreaded
             return list.RandomElementByWeightWithFallback((RuleEntry rule) => (rule.knownUnresolvable || !rule.ValidateConstantConstraints(constants) || !rule.ValidateRequiredTag(extraTags, resolvedTags) || rule.Priority != maxPriority) ? 0f : rule.SelectionWeight);
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(GrammarResolver);
+            Type patched = typeof(GrammarResolver_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ResolveUnsafe", new Type[] { typeof(string), typeof(GrammarRequest), typeof(bool).MakeByRefType(), typeof(string), typeof(bool), typeof(bool), typeof(List<string>), typeof(List<string>), typeof(bool) });
 
-
-
-
+        }
     }
 }

@@ -231,6 +231,21 @@ namespace RimThreaded
             return false;
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(TileTemperaturesComp);
+            Type patched = typeof(TileTemperaturesComp_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "WorldComponentTick");
+            RimThreadedHarmony.Prefix(original, patched, "ClearCaches");
+            RimThreadedHarmony.Prefix(original, patched, "GetOutdoorTemp");
+            RimThreadedHarmony.Prefix(original, patched, "GetSeasonalTemp");
+            RimThreadedHarmony.Prefix(original, patched, "OutdoorTemperatureAt");
+            RimThreadedHarmony.Prefix(original, patched, "OffsetFromDailyRandomVariation");
+            RimThreadedHarmony.Prefix(original, patched, "AverageTemperatureForTwelfth");
+            RimThreadedHarmony.Prefix(original, patched, "SeasonAcceptableFor");
+            RimThreadedHarmony.Prefix(original, patched, "OutdoorTemperatureAcceptableFor");
+            RimThreadedHarmony.Prefix(original, patched, "SeasonAndOutdoorTemperatureAcceptableFor");
+        }
     }
 
 

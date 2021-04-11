@@ -1,9 +1,6 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Verse;
 using Verse.Sound;
 
@@ -16,10 +13,21 @@ namespace RimThreaded
 
         public static AccessTools.FieldRef<SustainerManager, List<Sustainer>> allSustainers =
             AccessTools.FieldRefAccess< SustainerManager, List<Sustainer>>("allSustainers");
-        //public static ConcurrentDictionary<Sustainer, Sustainer> allSustainers = new ConcurrentDictionary<Sustainer, Sustainer>();
 
         [ThreadStatic]
         public static Dictionary<SoundDef, List<Sustainer>> playingPerDef;
+
+        public static void RunDestructivePatches()
+        {	
+            Type original = typeof(SustainerManager);
+            Type patched = typeof(SustainerManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RegisterSustainer");
+            RimThreadedHarmony.Prefix(original, patched, "DeregisterSustainer");
+            RimThreadedHarmony.Prefix(original, patched, "SustainerManagerUpdate");
+            RimThreadedHarmony.Prefix(original, patched, "UpdateAllSustainerScopes");
+            RimThreadedHarmony.Prefix(original, patched, "SustainerExists");
+            RimThreadedHarmony.Prefix(original, patched, "EndAllInMap");
+        }
 
         public static bool RegisterSustainer(SustainerManager __instance, Sustainer newSustainer)
         {

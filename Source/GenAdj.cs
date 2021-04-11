@@ -1,34 +1,26 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
 
     public class GenAdj_Patch
     {
-        public static bool TryFindRandomAdjacentCell8WayWithRoomGroup(ref bool __result, IntVec3 center, Rot4 rot, IntVec2 size, Map map, out IntVec3 result)
+        [ThreadStatic] public static List<IntVec3> validCells;
+
+        public static void InitializeThreadStatics()
         {
-            GenAdj.AdjustForRotation(ref center, ref size, rot);
-            //validCells.Clear();
-            List<IntVec3> validCells = new List<IntVec3>();
-            foreach (IntVec3 item in GenAdj.CellsAdjacent8Way(center, rot, size))
-            {
-                if (item.InBounds(map) && item.GetRoomGroup(map) != null)
-                {
-                    validCells.Add(item);
-                }
-            }
-            
-            __result = validCells.TryRandomElement(out result);
-            return false;
+            validCells = new List<IntVec3>();
         }
 
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(GenAdj);
+            Type patched = typeof(GenAdj_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindRandomAdjacentCell8WayWithRoomGroup", new Type[] {
+                typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(Map), typeof(IntVec3).MakeByRefType() });
+        }
     }
 }

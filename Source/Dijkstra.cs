@@ -1,12 +1,5 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
-using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
 
 namespace RimThreaded
@@ -14,12 +7,16 @@ namespace RimThreaded
 
     public class DijkstraInt
     {
-        [ThreadStatic]
-        private static Dictionary<int, float> distances;
-        [ThreadStatic]
-        private static FastPriorityQueueKeyValuePairIntFloat queue;
-        [ThreadStatic]
-        private static List<KeyValuePair<int, float>> tmpResult;
+        [ThreadStatic] public static Dictionary<int, float> distances;
+        [ThreadStatic] public static FastPriorityQueueKeyValuePairIntFloat queue;
+        [ThreadStatic] public static List<KeyValuePair<int, float>> tmpResult;
+
+        public static void InitializeThreadStatics()
+        {
+            distances = new Dictionary<int, float>();
+            queue = new FastPriorityQueueKeyValuePairIntFloat(new DistanceComparer());
+            tmpResult = new List<KeyValuePair<int, float>>();
+        }
 
         private class DistanceComparer : IComparer<KeyValuePair<int, float>>
         {

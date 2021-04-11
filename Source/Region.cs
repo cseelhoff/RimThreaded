@@ -1,14 +1,8 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
-using System.Text.RegularExpressions;
 
 namespace RimThreaded
 {
@@ -26,96 +20,35 @@ namespace RimThreaded
         public static int cachedSafeTemperatureRangesForFrame =
             AccessTools.StaticFieldRefAccess<int>(typeof(Region), "cachedSafeTemperatureRangesForFrame");
 
-        public static bool OverlapWith(Region __instance, ref AreaOverlap __result, Area a)
+        internal static void RunDestructivePatches()
         {
-            
-            if (a.TrueCount == 0)
-            {
-                __result = AreaOverlap.None;
-                return false;
-            }
-
-            if (__instance.Map != a.Map)
-            {
-                __result = AreaOverlap.None;
-                return false;
-            }
-
-            if (cachedAreaOverlaps(__instance) == null)
-            {
-                cachedAreaOverlaps(__instance) = new Dictionary<Area, AreaOverlap>();
-            }
-            Dictionary<Area, AreaOverlap> cao = cachedAreaOverlaps(__instance);
-            AreaOverlap value;
-            lock (cao)
-            {
-                bool valueExists = cao.TryGetValue(a, out value);
-                if (!valueExists)
-                {
-                    int num = 0;
-                    int num2 = 0;
-                    foreach (IntVec3 cell in __instance.Cells)
-                    {
-                        num2++;
-                        if (a[cell])
-                        {
-                            num++;
-                        }
-                    }
-
-                    value = ((num != 0) ? ((num == num2) ? AreaOverlap.Entire : AreaOverlap.Partial) : AreaOverlap.None);
-
-                    cao.Add(a, value);
-                }
-            }
-
-            __result = value;
-            return false;
+            Type original = typeof(Region);
+            Type patched = typeof(Region_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "DangerFor");
         }
 
 
-
-        public static bool get_AnyCell(Region __instance, ref IntVec3 __result)
-        {
-            Map map = Find.Maps[__instance.mapIndex];
-            CellIndices cellIndices = map.cellIndices;
-            Region[] directGrid = map.regionGrid.DirectGrid;
-            foreach (IntVec3 item in __instance.extentsClose)
-            {
-                if (directGrid[cellIndices.CellToIndex(item)] == __instance)
-                {
-                    __result = item;
-                    return false;
-                }
-            }
-
-            Log.Warning("Couldn't find any cell in region " + __instance.ToString());
-            __result = __instance.extentsClose.RandomCell;
-            return false;
-
-        }
         public static bool DangerFor(Region __instance, ref Danger __result, Pawn p)
 		{
             if (Current.ProgramState == ProgramState.Playing)
             {
                 if (cachedDangersForFrame(__instance) != Time.frameCount)
                 {
-                    lock (cachedDangers(__instance))
+                    lock (__instance)
                     {
-                        cachedDangers(__instance).Clear();
+                        cachedDangers(__instance) = new List<KeyValuePair<Pawn, Danger>>();
                     }
                     cachedDangersForFrame(__instance) = Time.frameCount;
                 }
                 else
                 {
-                    lock (cachedDangers(__instance)) { 
-                        for (int index = 0; index < cachedDangers(__instance).Count; ++index)
+                    List<KeyValuePair<Pawn, Danger>> localCachedDangers = cachedDangers(__instance);
+                    for (int index = 0; index < localCachedDangers.Count; ++index)
+                    {
+                        if (localCachedDangers[index].Key == p)
                         {
-                            if (cachedDangers(__instance)[index].Key == p)
-                            {
-                                __result = cachedDangers(__instance)[index].Value;
-                                return false;
-                            }
+                            __result = localCachedDangers[index].Value;
+                            return false;
                         }
                     }
                 }
@@ -137,15 +70,15 @@ namespace RimThreaded
                     {
                         lock (cachedSafeTemperatureRanges)
                         {
-                            cachedSafeTemperatureRanges.Clear();
+                            cachedSafeTemperatureRanges = new Dictionary<Pawn, FloatRange>();
                         }
                         cachedSafeTemperatureRangesForFrame = Time.frameCount;
                     }
-                    lock (cachedSafeTemperatureRanges)
+                    if (!cachedSafeTemperatureRanges.TryGetValue(p, out floatRange))
                     {
-                        if (!cachedSafeTemperatureRanges.TryGetValue(p, out floatRange))
+                        floatRange = p.SafeTemperatureRange();
+                        lock (cachedSafeTemperatureRanges)
                         {
-                            floatRange = p.SafeTemperatureRange();
                             cachedSafeTemperatureRanges.Add(p, floatRange);
                         }
                     }
@@ -165,5 +98,5 @@ namespace RimThreaded
             return false;
         }
 
-	}
+    }
 }

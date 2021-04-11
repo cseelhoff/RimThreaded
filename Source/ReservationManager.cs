@@ -1,6 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -8,10 +6,11 @@ using static Verse.AI.ReservationManager;
 using UnityEngine;
 using System.Text;
 using static HarmonyLib.AccessTools;
+using System;
 
 namespace RimThreaded
 {
-
+	[StaticConstructorOnStartup]
 	public class ReservationManager_Patch
 	{
 		private static FieldRef<ReservationManager, List<Reservation>> reservations = FieldRefAccess<ReservationManager, List<Reservation>>("reservations");
@@ -22,6 +21,28 @@ namespace RimThreaded
 			new Dictionary<ReservationManager, Dictionary<LocalTargetInfo, List<Reservation>>>();
 		private static readonly Dictionary<ReservationManager, Dictionary<Pawn, List<Reservation>>> reservationClaimantDicts =
 			new Dictionary<ReservationManager, Dictionary<Pawn, List<Reservation>>>();
+
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(ReservationManager);
+			Type patched = typeof(ReservationManager_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "CanReserve");
+			RimThreadedHarmony.Prefix(original, patched, "CanReserveStack");
+			RimThreadedHarmony.Prefix(original, patched, "Reserve");
+			RimThreadedHarmony.Prefix(original, patched, "Release");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllForTarget");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
+			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
+			RimThreadedHarmony.Prefix(original, patched, "FirstReservationFor");
+			RimThreadedHarmony.Prefix(original, patched, "IsReservedByAnyoneOf");
+			RimThreadedHarmony.Prefix(original, patched, "FirstRespectedReserver");
+			RimThreadedHarmony.Prefix(original, patched, "ReservedBy", new Type[] { typeof(LocalTargetInfo), typeof(Pawn), typeof(Job) });
+			//RimThreadedHarmony.Prefix(original, patched, "ReservedByJobDriver_TakeToBed"); //TODO FIX!
+			RimThreadedHarmony.Prefix(original, patched, "AllReservedThings");
+			RimThreadedHarmony.Prefix(original, patched, "DebugString");
+			RimThreadedHarmony.Prefix(original, patched, "DebugDrawReservations");
+			RimThreadedHarmony.Prefix(original, patched, "ExposeData");
+		}
 
 		public static bool ExposeData(ReservationManager __instance)
 		{
@@ -469,10 +490,10 @@ namespace RimThreaded
 
 		public static bool Release(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
 		{
-			/*if (target.ThingDestroyed)
+			if (target.ThingDestroyed)
 			{
 				Log.Warning("Releasing destroyed thing " + target + " for " + claimant);
-			}*/
+			}
 			Reservation reservation1 = null;
 			List<Reservation> reservationTargetListUnsafe = getReservationTargetList(__instance, target);
 			foreach (Reservation reservation2 in reservationTargetListUnsafe) 
@@ -484,7 +505,7 @@ namespace RimThreaded
 				}
 			}
 			if (reservation1 == null && !target.ThingDestroyed)
-				Log.Error("Tried to release " + target + " that wasn't reserved by " + claimant + ".", false);
+				Log.Warning("Tried to release " + target + " that wasn't reserved by " + claimant + ".", false);
 			else
 			{
 				lock (__instance)
@@ -802,5 +823,6 @@ namespace RimThreaded
 				}
 			}
 		}
-	}
+
+    }
 }

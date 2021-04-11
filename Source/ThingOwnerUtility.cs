@@ -1,13 +1,8 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
+using System.Reflection;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
-using System.Threading;
 
 namespace RimThreaded
 {
@@ -15,6 +10,28 @@ namespace RimThreaded
     public class ThingOwnerUtility_Patch
     {
 		//public static Dictionary<int, List<IThingHolder>> tmpHoldersDict = new Dictionary<int, List<IThingHolder>>();
+
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(ThingOwnerUtility);
+			Type patched = typeof(ThingOwnerUtility_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "AppendThingHoldersFromThings");
+			RimThreadedHarmony.Prefix(original, patched, "GetAllThingsRecursively", new Type[] { typeof(IThingHolder), typeof(List<Thing>), typeof(bool), typeof(Predicate<IThingHolder>) });
+			MethodInfo[] methods = original.GetMethods();
+			//MethodInfo originalPawnGetAllThings = original.GetMethod("GetAllThingsRecursively", bf, null, new Type[] { 
+			//	typeof(Map), typeof(ThingRequest), typeof(List<Pawn>), typeof(bool), typeof(Predicate<IThingHolder>), typeof(bool) }, null);
+			MethodInfo originalPawnGetAllThings = methods[17];
+			MethodInfo originalPawnGetAllThingsGeneric = originalPawnGetAllThings.MakeGenericMethod(new Type[] { typeof(Pawn) });
+			MethodInfo patchedPawnGetAllThings = patched.GetMethod("GetAllThingsRecursively_Pawn");
+			HarmonyMethod prefixPawnGetAllThings = new HarmonyMethod(patchedPawnGetAllThings);
+			RimThreadedHarmony.harmony.Patch(originalPawnGetAllThingsGeneric, prefix: prefixPawnGetAllThings);
+
+			MethodInfo originalThingGetAllThings = methods[17];
+			MethodInfo originalThingGetAllThingsGeneric = originalThingGetAllThings.MakeGenericMethod(new Type[] { typeof(Thing) });
+			MethodInfo patchedThingGetAllThings = patched.GetMethod("GetAllThingsRecursively_Thing");
+			HarmonyMethod prefixThingGetAllThings = new HarmonyMethod(patchedThingGetAllThings);
+			RimThreadedHarmony.harmony.Patch(originalThingGetAllThingsGeneric, prefix: prefixThingGetAllThings);
+		}
 
 		public static bool AppendThingHoldersFromThings(List<IThingHolder> outThingsHolders, IList<Thing> container)
 		{
@@ -150,7 +167,7 @@ namespace RimThreaded
 				List<Thing> list = map.listerThings.ThingsMatching(request);
 				for (int i = 0; i < list.Count; i++)
 				{
-					Thing val = list[i] as Thing;
+					Thing val = list[i];
 					if (val != null)
 					{
 						outThings.Add(val);
@@ -177,7 +194,5 @@ namespace RimThreaded
 			//tmpMapChildHolders.Clear();
 			return false;
 		}
-
-
-	}
+    }
 }

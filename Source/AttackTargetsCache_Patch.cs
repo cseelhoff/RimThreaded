@@ -1,20 +1,17 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using RimWorld;
 using Verse;
 using Verse.AI;
 using static HarmonyLib.AccessTools;
-using System.Reflection;
 
 namespace RimThreaded
 {
 
     public class AttackTargetsCache_Patch
     {
-		[ThreadStatic]
-		public static List<IAttackTarget> tmpTargets;
+		[ThreadStatic] public static List<IAttackTarget> tmpTargets;
+		[ThreadStatic] public static List<IAttackTarget> tmpToUpdate;
 
 		public static FieldRef<AttackTargetsCache, Dictionary<Faction, HashSet<IAttackTarget>>> targetsHostileToFaction =
             FieldRefAccess<AttackTargetsCache, Dictionary<Faction, HashSet<IAttackTarget>>>("targetsHostileToFaction");
@@ -30,11 +27,6 @@ namespace RimThreaded
 		private static readonly List<IAttackTarget> emptyList = new List<IAttackTarget>();
 		private static readonly HashSet<IAttackTarget> emptySet = new HashSet<IAttackTarget>();
 
-		private static readonly MethodInfo methodTargetsHostileToFaction =
-			Method(typeof(AttackTargetsCache), "TargetsHostileToFaction", new Type[] { typeof(Faction) });
-		private static readonly Func<AttackTargetsCache, Faction, HashSet<IAttackTarget>> funcTargetsHostileToFaction =
-			(Func<AttackTargetsCache, Faction, HashSet<IAttackTarget>>)Delegate.CreateDelegate(typeof(Func<AttackTargetsCache, Faction, HashSet<IAttackTarget>>), methodTargetsHostileToFaction);
-
 		private static readonly Dictionary<AttackTargetsCache, Dictionary<Faction, List<IAttackTarget>>> targetsHostileToFactionDict =
 			new Dictionary<AttackTargetsCache, Dictionary<Faction, List<IAttackTarget>>>();
 		private static readonly Dictionary<AttackTargetsCache, List<Pawn>> pawnsInAggroMentalStateDict =
@@ -44,6 +36,31 @@ namespace RimThreaded
 		private static readonly Dictionary<AttackTargetsCache, List<IAttackTarget>> allTargetsListDict =
 			new Dictionary<AttackTargetsCache, List<IAttackTarget>>();
 
+		public static void InitializeThreadStatics()
+        {
+			tmpTargets = new List<IAttackTarget>();
+			tmpToUpdate = new List<IAttackTarget>();
+		}
+
+		public static void RunDestructivesPatches()
+		{
+			Type original = typeof(AttackTargetsCache);
+			Type patched = typeof(AttackTargetsCache_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "GetPotentialTargetsFor");
+			RimThreadedHarmony.Prefix(original, patched, "RegisterTarget");
+			RimThreadedHarmony.Prefix(original, patched, "DeregisterTarget");
+			RimThreadedHarmony.Prefix(original, patched, "TargetsHostileToFaction");
+			RimThreadedHarmony.Prefix(original, patched, "UpdateTarget");
+		}
+
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(AttackTargetsCache);
+			Type patched = typeof(AttackTargetsCache_Patch);
+			RimThreadedHarmony.AddAllMatchingFields(original, patched);
+			RimThreadedHarmony.TranspileFieldReplacements(original, "Notify_FactionHostilityChanged");
+			RimThreadedHarmony.TranspileFieldReplacements(original, "Debug_AssertHostile");
+		}
 		public static bool DeregisterTarget(AttackTargetsCache __instance, IAttackTarget target)
 		{
 			if (allTargetsListDict.TryGetValue(__instance, out List<IAttackTarget> snapshotAllTargets))
@@ -141,7 +158,7 @@ namespace RimThreaded
 						Log.Warning("Tried to register the same target twice " + target.ToStringSafe() + " in " + __instance.GetType());
 						return false;
 					}
-					allTargetsListDict[__instance] = new List<IAttackTarget>(snapshotAllTargets) { target };
+					snapshotAllTargets.Add(target);
 				} else
                 {
 					allTargetsListDict[__instance] = new List<IAttackTarget>() { target };
@@ -202,33 +219,7 @@ namespace RimThreaded
             return false;
 
 		}
-		public static bool Notify_FactionHostilityChanged(AttackTargetsCache __instance, Faction f1, Faction f2)
-		{
-			if (tmpTargets == null)
-			{
-				tmpTargets = new List<IAttackTarget>();
-			}
-			else
-			{
-				tmpTargets.Clear();
-			}
-            List<IAttackTarget> snapshotAllTargets = getAllTargets(__instance);
-			foreach (IAttackTarget allTarget in snapshotAllTargets)
-			{
-				Thing thing = allTarget.Thing;
-				Pawn pawn = thing as Pawn;
-				if (thing.Faction == f1 || thing.Faction == f2 || (pawn != null && pawn.HostFaction == f1) || (pawn != null && pawn.HostFaction == f2))
-				{
-					tmpTargets.Add(allTarget);
-				}
-			}
 
-			for (int i = 0; i < tmpTargets.Count; i++)
-			{
-				__instance.UpdateTarget(tmpTargets[i]);
-			}
-			return false;
-		}
 		public static bool UpdateTarget(AttackTargetsCache __instance, IAttackTarget t)
 		{
 			if (getAllTargets(__instance).Contains(t))
@@ -353,5 +344,5 @@ namespace RimThreaded
 			return emptyList;
 		}
 
-	}
+    }
 }

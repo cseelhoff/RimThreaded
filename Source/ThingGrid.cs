@@ -1,22 +1,43 @@
-﻿using HarmonyLib;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using UnityEngine;
 using Verse;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     public class ThingGrid_Patch
     {
-        public static readonly List<Thing> EmptyThingList = new List<Thing>();
-        public static AccessTools.FieldRef<ThingGrid, Map> map = AccessTools.FieldRefAccess<ThingGrid, Map>("map");
-        public static AccessTools.FieldRef<ThingGrid, List<Thing>[]> thingGrid = AccessTools.FieldRefAccess<ThingGrid, List<Thing>[]>("thingGrid");
+        public static FieldRef<ThingGrid, Map> map = FieldRefAccess<ThingGrid, Map>("map");
+        public static FieldRef<ThingGrid, List<Thing>[]> thingGrid = FieldRefAccess<ThingGrid, List<Thing>[]>("thingGrid");
+        public static Dictionary<Map, Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>> mapIngredientDict =
+            new Dictionary<Map, Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>>();
+        // Map, Scanner, points, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
+        public static Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>> thingBillPoints = new Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>>();
+        // loop through all WorkGiver_Scanners on map and add ThingDefs on map points
+        public static int[] power2array = new int[] { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 }; // a 16384x16384 map is probably too big
+
+        private static int CellToIndexCustom(IntVec3 c, int mapSizeX, int cellSize)
+        {
+            return (mapSizeX * c.z + c.x) / cellSize;
+        }
+        private static int NumGridCellsCustom(int mapSizeX, int mapSizeZ, int cellSize)
+        {
+            return Mathf.CeilToInt((mapSizeX * mapSizeZ) / (float)cellSize);
+        }
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(ThingGrid);
+            Type patched = typeof(ThingGrid_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RegisterInCell");
+            RimThreadedHarmony.Prefix(original, patched, "DeregisterInCell");
+        }
 
         public static bool RegisterInCell(ThingGrid __instance, Thing t, IntVec3 c)
         {
             Map this_map = map(__instance);
-            CellIndices cellIndices = this_map.cellIndices;
             if (!c.InBounds(this_map))
             {
                 Log.Warning(t.ToString() + " tried to register out of bounds at " + c + ". Destroying.", false);
@@ -24,13 +45,35 @@ namespace RimThreaded
             }
             else
             {
-                int index = cellIndices.CellToIndex(c);
+                int index = this_map.cellIndices.CellToIndex(c);
+
+                int mapSizeX = this_map.Size.x;
+                int mapSizeZ = this_map.Size.z;
+
                 lock (__instance)
                 {
-                    thingGrid(__instance)[index] = new List<Thing>(thingGrid(__instance)[index])
+                    thingGrid(__instance)[index].Add(t);
+                    if (!thingBillPoints.TryGetValue(t.def, out Dictionary<WorkGiver_Scanner, float> billPointsDict))
                     {
-                        t
-                    }; 
+                        billPointsDict = new Dictionary<WorkGiver_Scanner, float>();
+                        thingBillPoints[t.def] = billPointsDict;
+                    }
+                    if (!mapIngredientDict.TryGetValue(this_map, out Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>> ingredientDict))
+                    {
+                        ingredientDict = new Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>();
+                        mapIngredientDict[this_map] = ingredientDict;
+                    }
+                    foreach (KeyValuePair<WorkGiver_Scanner, float> billPoints in billPointsDict)
+                    {
+                        int i = 0;
+                        int power2;
+                        do
+                        {
+                            power2 = power2array[i];
+                            ingredientDict[billPoints.Key][billPoints.Value][i][CellToIndexCustom(c, mapSizeX, power2)].Add(t);
+                            i++;
+                        } while (power2 < mapSizeX || power2 < mapSizeZ);
+                    }
                 }
             }
             return false;
@@ -39,125 +82,61 @@ namespace RimThreaded
         public static bool DeregisterInCell(ThingGrid __instance, Thing t, IntVec3 c)
         {
             Map this_map = map(__instance);
-            CellIndices cellIndices = this_map.cellIndices;
             if (!c.InBounds(this_map))
             {
                 Log.Error(t.ToString() + " tried to de-register out of bounds at " + c, false);
+                return false;
             }
-            else
+
+            int index = this_map.cellIndices.CellToIndex(c);
+            List<Thing>[] thingGridInstance = thingGrid(__instance);
+            List<Thing> thingList = thingGridInstance[index];
+            if (thingList.Contains(t))
             {
-                int index = cellIndices.CellToIndex(c);
-                List<Thing>[] thingGridInstance = thingGrid(__instance);
-                List<Thing> thingList = thingGridInstance[index];
-                foreach (Thing thing in thingList)
+                lock (__instance)
                 {
-                    if (thing == t)
+                    thingList = thingGridInstance[index];
+                    if (thingList.Contains(t))
                     {
-                        lock (__instance)
+                        List<Thing> newThingList = new List<Thing>(thingList);
+                        newThingList.Remove(t);
+                        thingGridInstance[index] = newThingList;
+
+                        int mapSizeX = this_map.Size.x;
+                        int mapSizeZ = this_map.Size.z;
+
+                        if (!thingBillPoints.TryGetValue(t.def, out Dictionary<WorkGiver_Scanner, float> billPointsDict))
                         {
-                            List<Thing> thingList2 = thingGridInstance[index];
-                            List<Thing> newThingList = new List<Thing>();
-                            foreach (Thing thing2 in thingList2)
-                            {
-                                if (thing2 != t)
-                                {
-                                    newThingList.Add(thing2);
-                                }
-                            }
-                            thingGridInstance[index] = newThingList;
+                            billPointsDict = new Dictionary<WorkGiver_Scanner, float>();
+                            thingBillPoints[t.def] = billPointsDict;
                         }
-                        break;
+                        if (!mapIngredientDict.TryGetValue(this_map, out Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>> ingredientDict))
+                        {
+                            ingredientDict = new Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>();
+                            mapIngredientDict[this_map] = ingredientDict;
+                        }
+                        foreach (KeyValuePair<WorkGiver_Scanner, float> billPoints in billPointsDict)
+                        {
+                            int i = 0;
+                            int power2;
+                            do
+                            {
+                                power2 = power2array[i];
+                                HashSet<Thing> newHashSet = new HashSet<Thing>(ingredientDict[billPoints.Key][billPoints.Value][i][CellToIndexCustom(c, mapSizeX, power2)]);
+                                newHashSet.Remove(t);
+                                ingredientDict[billPoints.Key][billPoints.Value][i][CellToIndexCustom(c, mapSizeX, power2)] = newHashSet;
+                                i++;
+                            } while (power2 < mapSizeX || power2 < mapSizeZ);
+                        }
                     }
                 }
             }
+
             return false;
         }
 
-        private static IEnumerable<Thing> ThingsAtEnumerableThing(ThingGrid __instance, IntVec3 c)
-        {
-            Map mapInstance = map(__instance);
-            if (!c.InBounds(mapInstance))
-                yield break;
-            List<Thing> list;
-            try
-            {
-                list = thingGrid(__instance)[mapInstance.cellIndices.CellToIndex(c)];
-            }
-            catch (IndexOutOfRangeException) { yield break; }
-            foreach (Thing thing in list)
-            {
-                yield return thing;
-            }
-        }
-        public static bool ThingsAt(ThingGrid __instance, ref IEnumerable<Thing> __result, IntVec3 c)
-        {
-            __result = ThingsAtEnumerableThing(__instance, c);
-            return false;
-        }
-        public static bool ThingAt(ThingGrid __instance, ref Thing __result, IntVec3 c, ThingCategory cat)
-        {
-            Map this_map = map(__instance);
-            CellIndices cellIndices = this_map.cellIndices;
-            if (!c.InBounds(this_map))
-            {
-                __result = null;
-                return false;
-            }
 
-            List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
-            foreach (Thing thing in thingList)
-            {
-                if (thing.def.category == cat)
-                {
-                    __result = thing;
-                    return false;
-                }
-            }
-            __result = null;
-            return false;
-        }
-        public static bool ThingAt(ThingGrid __instance, ref Thing __result, IntVec3 c, ThingDef def)
-        {
-            Map this_map = map(__instance);
-            CellIndices cellIndices = this_map.cellIndices;
-            if (!c.InBounds(this_map))
-            {
-                __result = null;
-                return false;
-            }
-            List<Thing> thingList = thingGrid(__instance)[cellIndices.CellToIndex(c)];
-            foreach (Thing thing in thingList)
-            {
-                if (thing.def == def)
-                {
-                    __result = thing;
-                    return false;
-                }
-            }
-            __result = null;
-            return false;
-        }
 
-        public static bool ThingAt_Building_Door(ThingGrid __instance, ref Building_Door __result, IntVec3 c)
-        {
-            if (!c.InBounds(map(__instance)))
-            {
-                __result = null;
-                return false;
-            }
-
-            List<Thing> thingList = thingGrid(__instance)[map(__instance).cellIndices.CellToIndex(c)];
-            foreach (Thing thing in thingList)
-            {
-                if (thing is Building_Door building_Door)
-                {
-                    __result = building_Door;
-                    return false;
-                }
-            }
-            __result = null;
-            return false;
-        }
     }
 
 }

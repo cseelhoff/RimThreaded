@@ -34,11 +34,19 @@ namespace RimThreaded
                 totalCostInt(__instance) = 0f;
                 usedRegionHeuristics(__instance) = false;
                 lock (nodes(__instance)) {
-                    nodes(__instance).Clear();
+                    nodes(__instance) = new List<IntVec3>();
                 }
                 __instance.inUse = false;
             }
             return false;
+        }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(PawnPath);
+            Type patched = typeof(PawnPath_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AddNode");
+            RimThreadedHarmony.Prefix(original, patched, "ReleaseToPool");
         }
     }
 }

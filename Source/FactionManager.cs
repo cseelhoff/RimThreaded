@@ -13,12 +13,13 @@ namespace RimThreaded
     {
         public static FieldRef<FactionManager, List<Faction>> allFactions = FieldRefAccess<FactionManager, List<Faction>>("allFactions");
         public static FieldRef<FactionManager, List<Faction>> toRemove = FieldRefAccess<FactionManager, List<Faction>>("toRemove");
-        public static FieldRef<FactionManager, Faction> ofPlayer = FieldRefAccess<FactionManager, Faction>("ofPlayer");
-        public static FieldRef<FactionManager, Faction> ofInsects = FieldRefAccess<FactionManager, Faction>("ofInsects");
-        public static FieldRef<FactionManager, Faction> ofAncients = FieldRefAccess<FactionManager, Faction>("ofAncients");
-        public static FieldRef<FactionManager, Faction> ofMechanoids = FieldRefAccess<FactionManager, Faction>("ofMechanoids");
-        public static FieldRef<FactionManager, Faction> ofAncientsHostile = FieldRefAccess<FactionManager, Faction>("ofAncientsHostile");
-        public static FieldRef<FactionManager, Faction> empire = FieldRefAccess<FactionManager, Faction>("empire");
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(FactionManager);
+            Type patched = typeof(FactionManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FactionManagerTick");
+        }
 
         private static readonly MethodInfo methodRemove =
             Method(typeof(FactionManager), "Remove", new Type[] { typeof(Faction) });
@@ -31,19 +32,20 @@ namespace RimThreaded
 
             RimThreaded.allFactions = allFactions(__instance);
             RimThreaded.allFactionsTicks = allFactions(__instance).Count;
-
-            for (int num = toRemove(__instance).Count - 1; num >= 0; num--)
+            lock (__instance)
             {
-                Faction faction = toRemove(__instance)[num];
-                toRemove(__instance).Remove(faction);
-                actionRemove(__instance, faction);
-                Find.QuestManager.Notify_FactionRemoved(faction);
+                List<Faction> newList = toRemove(__instance);
+                for (int num = newList.Count - 1; num >= 0; num--)
+                {
+                    Faction faction = newList[num];
+                    newList.Remove(faction);
+                    toRemove(__instance) = newList;
+                    actionRemove(__instance, faction);
+                    Find.QuestManager.Notify_FactionRemoved(faction);
+                }
             }
             return false;
         }
-
-
-
 
     }
 }

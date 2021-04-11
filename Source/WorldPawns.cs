@@ -23,17 +23,29 @@ namespace RimThreaded
             Method(typeof(WorldPawns), "ShouldMothball", new Type[] { typeof(Pawn) });
         private static readonly Func<WorldPawns, Pawn, bool> funcShouldMothball =
             (Func<WorldPawns, Pawn, bool>)Delegate.CreateDelegate(typeof(Func<WorldPawns, Pawn, bool>), methodShouldMothball);
+        public static void InitializeThreadStatics()
+        {
+            tmpPawnsToRemove = new List<Pawn>();
+        }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WorldPawns);
+            Type patched = typeof(WorldPawns_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "WorldPawnsTick");
+            RimThreadedHarmony.Prefix(original, patched, "get_AllPawnsAlive");
+        }
 
         public static bool get_AllPawnsAlive(WorldPawns __instance, ref List<Pawn> __result)
         {
-            lock (allPawnsAliveResult(__instance))
+            List<Pawn> newAllPawnsAliveResult;
+            lock (__instance)
             {
-                allPawnsAliveResult(__instance).Clear();
-                allPawnsAliveResult(__instance).AddRange(pawnsAlive(__instance));
-                allPawnsAliveResult(__instance).AddRange(pawnsMothballed(__instance));
+                newAllPawnsAliveResult = new List<Pawn>(pawnsAlive(__instance));
+                newAllPawnsAliveResult.AddRange(pawnsMothballed(__instance));
+                allPawnsAliveResult(__instance) = newAllPawnsAliveResult;
             }
-            __result = allPawnsAliveResult(__instance);
+            __result = newAllPawnsAliveResult;
             return false;
         }
 
@@ -54,7 +66,7 @@ namespace RimThreaded
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorOnce("Exception ticking mothballed world pawn. Suppressing further errors. " + (object)ex, p.thingIDNumber ^ 1535437893, false);
+                    Log.ErrorOnce("Exception ticking mothballed world pawn. Suppressing further errors. " + ex, p.thingIDNumber ^ 1535437893, false);
                 }
             }
             lock (pawnsAlive(__instance))
@@ -66,9 +78,11 @@ namespace RimThreaded
                 p = pawnArray[index];
                 if (funcShouldMothball(__instance, p))
                 {
-                    lock (pawnsAlive(__instance))
+                    lock (__instance)
                     {
-                        pawnsAlive(__instance).Remove(p);
+                        HashSet<Pawn> newSet = new HashSet<Pawn>(pawnsAlive(__instance));
+                        newSet.Remove(p);
+                        pawnsAlive(__instance) = newSet;
                     }
                     lock (pawnsMothballed(__instance))
                     {
@@ -86,13 +100,7 @@ namespace RimThreaded
             if (Find.TickManager.TicksGame % 15000 == 0)
                 DoMothballProcessing(__instance);
 
-            if (tmpPawnsToRemove == null)
-            {
-                tmpPawnsToRemove = new List<Pawn>();
-            } else
-            {
-                tmpPawnsToRemove.Clear();
-            }
+            tmpPawnsToRemove.Clear();
             foreach (Pawn pawn in pawnsDead(__instance))
             {
                 if (pawn == null)
@@ -106,9 +114,13 @@ namespace RimThreaded
                     tmpPawnsToRemove.Add(pawn);
                 }
             }
-            foreach (Pawn p in tmpPawnsToRemove)
-                pawnsDead(__instance).Remove(p);
-
+            lock (__instance)
+            {
+                HashSet<Pawn> newSet = new HashSet<Pawn>(pawnsDead(__instance));
+                foreach (Pawn p in tmpPawnsToRemove)
+                    newSet.Remove(p);
+                pawnsDead(__instance) = newSet;
+            }
             try
             {
                 __instance.gc.WorldPawnGCTick();
@@ -120,5 +132,6 @@ namespace RimThreaded
             
             return false;
         }
+
     }
 }

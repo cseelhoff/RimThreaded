@@ -1,8 +1,9 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using System.Threading;
+using System.Reflection.Emit;
 using Verse;
 using static HarmonyLib.AccessTools;
 
@@ -12,10 +13,6 @@ namespace RimThreaded
     {
         public static FieldRef<TickList, List<List<Thing>>> thingLists =
             FieldRefAccess<TickList, List<List<Thing>>>("thingLists");
-        public static FieldRef<TickList, List<Thing>> thingsToRegister =
-            FieldRefAccess<TickList, List<Thing>>("thingsToRegister");
-        public static FieldRef<TickList, List<Thing>> thingsToDeregister =
-            FieldRefAccess<TickList, List<Thing>>("thingsToDeregister");
         public static FieldRef<TickList, TickerType> tickType =
             FieldRefAccess<TickList, TickerType>("tickType");
 
@@ -25,80 +22,21 @@ namespace RimThreaded
         private static readonly Func<TickList, int> funcGetTickInterval =
             (Func<TickList, int>)Delegate.CreateDelegate(typeof(Func<TickList, int>), methodGetTickInterval);
 
-        public static bool DeregisterThing(TickList __instance, Thing t)
+        public static void RunNonDestructivePatches()
         {
-            lock (thingsToDeregister(__instance))
-            {
-                thingsToDeregister(__instance).Add(t);
-            }
-            return false;
-        }
-        public static bool RegisterThing(TickList __instance, Thing t)
-        {
-            lock (thingsToRegister(__instance))
-            {
-                thingsToRegister(__instance).Add(t);
-            }
-            return false;
+            Type original = typeof(TickList);
+            Type patched = typeof(TickList_Patch);
+            RimThreadedHarmony.TranspileMethodLock(original, "RegisterThing");
+            RimThreadedHarmony.TranspileMethodLock(original, "DeregisterThing");
+            RimThreadedHarmony.Transpile(original, patched, "Tick");
+            RimThreadedHarmony.Postfix(original, patched, "Tick", "TickPostfix");
         }
 
-        private static List<Thing> BucketOf2(TickList __instance, Thing t, int currentTickInterval)
+
+        public static void TickPostfix(TickList __instance)
         {
-            int hashCode = t.GetHashCode();
-            if (hashCode < 0)
-                hashCode *= -1;
-            return thingLists(__instance)[hashCode % currentTickInterval];
-        }
-        public static bool Tick(TickList __instance)
-        {
-            TickerType currentTickType = tickType(__instance);
             int currentTickInterval = funcGetTickInterval(__instance);
-
-            Thing i;
-            List<Thing> tr = thingsToRegister(__instance);
-            for (int index = 0; index < tr.Count; ++index)
-            {
-                try
-                {
-                    i = tr[index];
-                } catch (ArgumentOutOfRangeException) { break; }
-                List<Thing> b = BucketOf2(__instance, i, currentTickInterval);
-                b.Add(i);
-            }
-            lock (tr)
-            {
-                tr.Clear();
-            }
-
-            List<Thing> td = thingsToDeregister(__instance);
-            for (int index = 0; index < td.Count; ++index)
-            {
-                try
-                {
-                    i = td[index];
-                } catch (ArgumentOutOfRangeException) { break; }
-                List<Thing> b = BucketOf2(__instance, i, currentTickInterval);
-                b.Remove(i);
-            }
-            lock (td)
-            {
-                td.Clear();
-            }
-
-            if (DebugSettings.fastEcology)
-            {
-                Find.World.tileTemperatures.ClearCaches();
-                for (int index1 = 0; index1 < thingLists(__instance).Count; ++index1)
-                {
-                    List<Thing> thingList = thingLists(__instance)[index1];
-                    for (int index2 = 0; index2 < thingList.Count; ++index2)
-                    {
-                        if (thingList[index2].def.category == ThingCategory.Plant)
-                            thingList[index2].TickLong();
-                    }
-                }
-            }
-            
+            TickerType currentTickType = tickType(__instance);
             switch (currentTickType)
             {
                 case TickerType.Normal:
@@ -114,8 +52,40 @@ namespace RimThreaded
                     RimThreaded.thingListLongTicks = RimThreaded.thingListLong.Count;
                     break;
             }
+        }
 
-            return false;            
+        public static IEnumerable<CodeInstruction> Tick(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            int i = 0;
+            while (i < instructionsList.Count)
+            {
+                if (i + 2 < instructionsList.Count && instructionsList[i + 2].opcode == OpCodes.Call)
+                {
+                    if (instructionsList[i + 2].operand is MethodInfo methodInfo)
+                    {
+                        if (methodInfo == Method(typeof(Find), "get_TickManager"))
+                        {
+                            List<Label> labels = instructionsList[i].labels;
+                            while (i < instructionsList.Count)
+                            {
+                                if (instructionsList[i].opcode == OpCodes.Blt)
+                                {
+                                    i++;
+                                    foreach (Label label in labels)
+                                    {
+                                        instructionsList[i].labels.Add(label);
+                                    }
+                                    break;
+                                }
+                                i++;
+                            }
+
+                        }
+                    }
+                }
+                yield return instructionsList[i++];
+            }
         }
 
     }

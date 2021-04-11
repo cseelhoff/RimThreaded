@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using Verse;
 using Verse.AI;
 
@@ -8,6 +9,14 @@ namespace RimThreaded
     public static class JobMaker_Patch
     {
         public static ConcurrentStack<Job> jobStack = new ConcurrentStack<Job>();
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(JobMaker);
+            Type patched = typeof(JobMaker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "MakeJob", new Type[] { });
+            RimThreadedHarmony.Prefix(original, patched, "ReturnToPool");
+        }
 
         public static bool MakeJob(ref Job __result)
         {

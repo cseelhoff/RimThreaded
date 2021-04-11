@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using Verse;
 using UnityEngine;
 using static System.Threading.Thread;
@@ -10,6 +9,13 @@ namespace RimThreaded
 
     public class SectionLayer_Patch
     {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SectionLayer);
+            Type patched = typeof(SectionLayer_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetSubMesh");
+        }
+
         public static bool GetSubMesh(SectionLayer __instance, ref LayerSubMesh __result, Material material)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
@@ -24,5 +30,5 @@ namespace RimThreaded
             return true;
         }
 
-	}
+    }
 }

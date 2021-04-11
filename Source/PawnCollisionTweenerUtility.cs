@@ -95,5 +95,13 @@ namespace RimThreaded
 			__result = true;
 			return false;
 		}
-	}
+
+        internal static void RunDestructivePatches()
+        {
+			Type original = typeof(PawnCollisionTweenerUtility);
+			Type patched = typeof(PawnCollisionTweenerUtility_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "GetPawnsStandingAtOrAboutToStandAt");
+			RimThreadedHarmony.Prefix(original, patched, "CanGoDirectlyToNextCell");
+		}
+    }
 }

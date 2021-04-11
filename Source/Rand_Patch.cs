@@ -1,21 +1,38 @@
-﻿using HarmonyLib;
+﻿using Verse;
 using System;
+using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Threading;
-using Verse;
 using static HarmonyLib.AccessTools;
+using HarmonyLib;
+using System.Reflection.Emit;
+using System.Linq;
 
 namespace RimThreaded
 {
-    public class Rand_Transpile
+
+    public static class Rand_Patch
     {
+        [ThreadStatic] public static List<int> tmpRange;
+
+
+        public static void InitializeThreadStatics()
+        {
+            tmpRange = new List<int>();
+        }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Rand);
+            Type patched = typeof(Rand_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryRangeInclusiveWhere");
+            RimThreadedHarmony.Transpile(original, patched, "PushState", Type.EmptyTypes);
+            RimThreadedHarmony.Transpile(original, patched, "PopState");
+        }
 
         public static IEnumerable<CodeInstruction> PushState(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            Type typeDictionaryIntData = typeof(Stack<UInt64>);
+            Type typeDictionaryIntData = typeof(Stack<ulong>);
             List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
             {
                 new CodeInstruction(OpCodes.Ldsfld, Field(typeof(Rand), "stateStack")),
@@ -52,7 +69,7 @@ namespace RimThreaded
         }
         public static IEnumerable<CodeInstruction> PopState(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            Type typeDictionaryIntData = typeof(Stack<UInt64>);
+            Type typeDictionaryIntData = typeof(Stack<ulong>);
             List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
             {
                 new CodeInstruction(OpCodes.Ldsfld, Field(typeof(Rand), "stateStack")),
@@ -85,42 +102,6 @@ namespace RimThreaded
             if (!matchFound)
             {
                 Log.Error("IL code instructions not found");
-            }
-        }
-
-
-        public static IEnumerable<CodeInstruction> TryRangeInclusiveWhere(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
-            int[] matchesFound = new int[1];
-            List<CodeInstruction> instructionsList = instructions.ToList();
-            int i = 0;
-            
-            yield return new CodeInstruction(OpCodes.Ldsfld, Field(typeof(Rand_Patch), "tmpRange"));
-            yield return new CodeInstruction(OpCodes.Ldnull);
-            yield return new CodeInstruction(OpCodes.Ceq);
-            Label tmpRangeNullLabel = iLGenerator.DefineLabel();
-            yield return new CodeInstruction(OpCodes.Brfalse_S, tmpRangeNullLabel);
-            yield return new CodeInstruction(OpCodes.Newobj, Constructor(typeof(List<int>)));
-            yield return new CodeInstruction(OpCodes.Stsfld, Field(typeof(Rand_Patch), "tmpRange"));
-            instructionsList[i].labels.Add(tmpRangeNullLabel);
-            
-            while (i < instructionsList.Count)
-            {
-                int matchIndex = 0;
-                if (
-                    instructionsList[i].opcode == OpCodes.Ldsfld &&
-                    (FieldInfo)instructionsList[i].operand == Field(typeof(Rand), "tmpRange")
-                )
-                {
-                    instructionsList[i].operand = Field(typeof(Rand_Patch), "tmpRange");
-                    matchesFound[matchIndex]++;
-                }
-                yield return instructionsList[i++];
-            }
-            for (int mIndex = 0; mIndex < matchesFound.Length; mIndex++)
-            {
-                if (matchesFound[mIndex] < 1)
-                    Log.Error("IL code instruction set " + mIndex + " not found");
             }
         }
 

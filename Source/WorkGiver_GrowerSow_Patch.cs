@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
@@ -11,6 +12,15 @@ namespace RimThreaded
         public static ThingDef wantedPlantDef = StaticFieldRefAccess<ThingDef>(typeof(WorkGiver_Grower), "wantedPlantDef");
         public static string CantSowCavePlantBecauseOfLightTrans = StaticFieldRefAccess<string>(typeof(WorkGiver_GrowerSow), "CantSowCavePlantBecauseOfLightTrans");
         public static string CantSowCavePlantBecauseUnroofedTrans = StaticFieldRefAccess<string>(typeof(WorkGiver_GrowerSow), "CantSowCavePlantBecauseUnroofedTrans");
+        
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(WorkGiver_GrowerSow);
+            Type patched = typeof(WorkGiver_GrowerSow_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "JobOnCell"); //WorkGiver_Grower.wantedPlantDef replaced with local var for thread overwrite
+        }
+
+
         public static bool JobOnCell(WorkGiver_GrowerSow __instance, ref Job __result, Pawn pawn, IntVec3 c, bool forced = false)
         {
             Map map = pawn.Map;

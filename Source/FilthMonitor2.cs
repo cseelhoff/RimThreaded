@@ -1,12 +1,6 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
@@ -34,7 +28,7 @@ namespace RimThreaded
                 int num = PawnsFinder.AllMaps_Spawned.Count((Pawn pawn) => pawn.Faction == Faction.OfPlayer);
                 int num2 = PawnsFinder.AllMaps_Spawned.Count((Pawn pawn) => pawn.Faction == Faction.OfPlayer && pawn.RaceProps.Humanlike);
                 int num3 = PawnsFinder.AllMaps_Spawned.Count((Pawn pawn) => pawn.Faction == Faction.OfPlayer && !pawn.RaceProps.Humanlike);
-                Log.Message($"Filth data, per day:\n  {(float)filthSpawned / (float)num / 2500f * 60000f} filth spawned per pawn\n  {(float)filthHumanGenerated / (float)num2 / 2500f * 60000f} filth human-generated per human\n  {(float)filthAnimalGenerated / (float)num3 / 2500f * 60000f} filth animal-generated per animal\n  {(float)filthAccumulated / (float)num / 2500f * 60000f} filth accumulated per pawn\n  {(float)filthDropped / (float)num / 2500f * 60000f} filth dropped per pawn");
+                Log.Message($"Filth data, per day:\n  {filthSpawned / (float)num / 2500f * 60000f} filth spawned per pawn\n  {filthHumanGenerated / (float)num2 / 2500f * 60000f} filth human-generated per human\n  {filthAnimalGenerated / (float)num3 / 2500f * 60000f} filth animal-generated per animal\n  {filthAccumulated / (float)num / 2500f * 60000f} filth accumulated per pawn\n  {filthDropped / (float)num / 2500f * 60000f} filth dropped per pawn");
                 filthSpawned = 0;
                 filthAnimalGenerated = 0;
                 filthHumanGenerated = 0;

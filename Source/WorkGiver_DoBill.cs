@@ -124,8 +124,15 @@ namespace RimThreaded
 			{
 				if (counts[index] == 0f)
 				{
-					counts.RemoveAt(index);
-					defs.RemoveAt(index);
+					lock (this)
+					{
+                        List<float> newCounts = new List<float>(counts);
+						newCounts.RemoveAt(index);
+						counts = newCounts;
+                        List<ThingDef> newDefs = new List<ThingDef>(defs);
+						newDefs.RemoveAt(index);
+						defs = newDefs;
+					}
 				}
 			}
 

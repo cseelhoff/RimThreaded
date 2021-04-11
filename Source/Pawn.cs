@@ -1,12 +1,8 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 using RimWorld.Planet;
 using Verse.AI.Group;
 using static HarmonyLib.AccessTools;
@@ -216,6 +212,55 @@ namespace RimThreaded
                 maps[i].designationManager.RemoveAllDesignationsOn(__instance);
             }
         }
+        public static bool VerifyReservations(Pawn __instance)
+        {
+            if (__instance.jobs == null || __instance.CurJob != null || __instance.jobs.jobQueue.Count > 0 || __instance.jobs.startingNewJob)
+            {
+                return false;
+            }
+            bool flag = false;
+            List<Map> maps = Find.Maps;
+            for (int i = 0; i < maps.Count; i++)
+            {
+                LocalTargetInfo obj = maps[i].reservationManager.FirstReservationFor(__instance);
+                if (obj.IsValid)
+                {
+                    Log.ErrorOnce($"Reservation manager failed to clean up properly; {__instance.ToStringSafe()} still reserving {obj.ToStringSafe()}", 0x5D3DFA5 ^ __instance.thingIDNumber);
+                    flag = true;
+                }
+                LocalTargetInfo obj2 = maps[i].physicalInteractionReservationManager.FirstReservationFor(__instance);
+                if (obj2.IsValid)
+                {
+                    Log.ErrorOnce($"Physical interaction reservation manager failed to clean up properly; {__instance.ToStringSafe()} still reserving {obj2.ToStringSafe()}", 0x12ADECD ^ __instance.thingIDNumber);
+                    flag = true;
+                }
+                IAttackTarget attackTarget = maps[i].attackTargetReservationManager.FirstReservationFor(__instance);
+                if (attackTarget != null)
+                {
+                    Log.ErrorOnce($"Attack target reservation manager failed to clean up properly; {__instance.ToStringSafe()} still reserving {attackTarget.ToStringSafe()}", 0x5FD7206 ^ __instance.thingIDNumber);
+                    flag = true;
+                }
+                IntVec3 obj3 = maps[i].pawnDestinationReservationManager.FirstObsoleteReservationFor(__instance);
+                if (obj3.IsValid)
+                {
+                    Job job = maps[i].pawnDestinationReservationManager.FirstObsoleteReservationJobFor(__instance);
+                    Log.Warning($"Pawn destination reservation manager failed to clean up properly; {__instance.ToStringSafe()}/{job.ToStringSafe()}/{job.def.ToStringSafe()} still reserving {obj3.ToStringSafe()}");
+                    flag = true;
+                }
+            }
+            if (flag)
+            {
+                __instance.ClearAllReservations();
+            }
+            return false;
+        }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Pawn);
+            Type patched = typeof(Pawn_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Destroy"); //causes strange crash to desktop without error log
+            RimThreadedHarmony.Prefix(original, patched, "VerifyReservations");
+        }
     }
 }

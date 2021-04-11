@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using System.Collections;
 
 namespace RimThreaded
 {
 
     public class GenClosest_Patch
     {
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(GenClosest);
+            Type patched = typeof(GenClosest_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RegionwiseBFSWorker");
+        }
 
         private static bool EarlyOutSearch(
           IntVec3 start,
@@ -139,28 +144,15 @@ namespace RimThreaded
             RegionProcessor regionProcessor = r =>
             {
                 if (RegionTraverser.ShouldCountRegion(r))
-                    ++regionsSeenScan;
+                    regionsSeenScan++;
                 if (!r.IsDoorway && !r.Allows(traverseParams, true))
                     return false;
                 if (!ignoreEntirelyForbiddenRegions || !r.IsForbiddenEntirely(traverseParams.pawn))
                 {
-                    //Thing[] arrayThingList;
                     List<Thing> thingList = r.ListerThings.ThingsMatching(req);
-                    //lock (thingList)
-                    //{
-                    //arrayThingList = thingList.ToArray();
-                    //}
                     for (int index = 0; index < thingList.Count; ++index)
                     {
-                        Thing thing;
-                        try
-                        {
-                            thing = thingList[index];
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            break;
-                        }
+                        Thing thing = thingList[index];
                         if (ReachabilityWithinRegion.ThingFromRegionListerReachable(thing, r, peMode, traverseParams.pawn))
                         {
                             float num = priorityGetter != null ? priorityGetter(thing) : 0.0f;
@@ -183,64 +175,6 @@ namespace RimThreaded
             regionsSeen = regionsSeenScan;
             __result = closestThing;
             return false;
-        }
-        public static bool ClosestThing_Global(ref Thing __result,
-          IntVec3 center,
-          IEnumerable searchSet,
-          float maxDistance = 99999f,
-          Predicate<Thing> validator = null,
-          Func<Thing, float> priorityGetter = null)
-        {
-            if (searchSet == null)
-            {
-                __result = null;
-                return false;
-            }
-            float closestDistSquared = int.MaxValue;
-            Thing chosen = null;
-            float bestPrio = float.MinValue;
-            float maxDistanceSquared = maxDistance * maxDistance;
-
-            RimThreaded.lastClosestThingGlobal = DateTime.Now;
-            if (searchSet is IList<Thing> thingList)
-            {
-                for (int index = 0; index < thingList.Count; ++index)
-                {
-                    Process2(thingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
-                }
-            }
-            else if (searchSet is IList<Pawn> pawnList)
-            {
-                for (int index = 0; index < pawnList.Count; ++index)
-                {
-                    Process2(pawnList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
-                }
-            }
-            else if (searchSet is IList<Building> buildingList)
-            {
-                for (int index = 0; index < buildingList.Count; ++index)
-                {
-                    Process2(buildingList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
-                }
-            }
-            else if (searchSet is IList<IAttackTarget> attackTargetList)
-            {
-                for (int index = 0; index < attackTargetList.Count; ++index)
-                {
-                    Process2((Thing)attackTargetList[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
-                }
-            }
-            else
-            {
-                List<Thing> listThings = new List<Thing>((IEnumerable<Thing>)searchSet);
-                for (int index = 0; index < listThings.Count; ++index)
-                {
-                    Process2(listThings[index], center, maxDistanceSquared, priorityGetter, ref bestPrio, ref closestDistSquared, ref chosen, validator);
-                }
-            }
-            __result = chosen;
-            return false;
-
         }
 
         public static void Process2(Thing t, IntVec3 center, float maxDistanceSquared,

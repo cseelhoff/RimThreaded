@@ -93,8 +93,12 @@ namespace RimThreaded
                 }
             }
         }
-      
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Pawn_RotationTracker);
+            Type patched = typeof(Pawn_RotationTracker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "UpdateRotation");
+        }
     }
 }

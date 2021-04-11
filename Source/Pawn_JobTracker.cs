@@ -98,6 +98,12 @@ namespace RimThreaded
             return result2;
         }
 
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Pawn_JobTracker);
+            Type patched = typeof(Pawn_JobTracker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TryFindAndStartJob");
+            //RimThreadedHarmony.Prefix(original, patched, "StartJob"); conflict with giddyupcore calling MakeDriver
+        }
     }
 }

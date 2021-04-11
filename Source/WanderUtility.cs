@@ -1,109 +1,32 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
 
     public class WanderUtility_Patch
 	{
-		public static bool GetColonyWanderRoot(ref IntVec3 __result, Pawn pawn)
-    {
-            if (pawn.RaceProps.Humanlike)
-            {
-                //WanderUtility.gatherSpots.Clear();
-                List<IntVec3> gatherSpots = new List<IntVec3>();
-                for (int index = 0; index < pawn.Map.gatherSpotLister.activeSpots.Count; ++index)
-                {
-                    IntVec3 position = pawn.Map.gatherSpotLister.activeSpots[index].parent.Position;
-                    if (!position.IsForbidden(pawn) && pawn.CanReach((LocalTargetInfo)position, PathEndMode.Touch, Danger.None, false, TraverseMode.ByPawn))
-                        gatherSpots.Add(position);
-                }
-                if (gatherSpots.Count > 0) {
-                    __result = gatherSpots.RandomElement();
-                    return false;
-                }
-            }
-            //WanderUtility.candidateCells.Clear();
-            List<IntVec3> candidateCells = new List<IntVec3>();
-            //WanderUtility.candidateBuildingsInRandomOrder.Clear();
-            List<Building> candidateBuildingsInRandomOrder = new List<Building>();
-            candidateBuildingsInRandomOrder.AddRange((IEnumerable<Building>)pawn.Map.listerBuildings.allBuildingsColonist);
-            candidateBuildingsInRandomOrder.Shuffle();
-            int num = 0;
-            int index1 = 0;
-            while (index1 < candidateBuildingsInRandomOrder.Count)
-            {
-                if (num > 80 && candidateCells.Count > 0)
-                {
-                    __result = candidateCells.RandomElement();
-                    return false;
-                }
-                Building building = candidateBuildingsInRandomOrder[index1];
-                if ((building.def == ThingDefOf.Wall || building.def.building.ai_chillDestination) && (!building.Position.IsForbidden(pawn) && pawn.Map.areaManager.Home[building.Position]))
-                {
-                    IntVec3 c = GenAdjFast.AdjacentCells8Way((LocalTargetInfo)(Thing)building).RandomElement();
-                    if (c.Standable(building.Map) && !c.IsForbidden(pawn) && (pawn.CanReach((LocalTargetInfo)c, PathEndMode.OnCell, Danger.None, false, TraverseMode.ByPawn) && !c.IsInPrisonCell(pawn.Map)))
-                    {
-                        candidateCells.Add(c);
-                        if ((pawn.Position - building.Position).LengthHorizontalSquared <= 1225)
-                        {
-                            __result = c;
-                            return false;
-                        }
-                    }
-                }
-                ++index1;
-                ++num;
-            }
-            Pawn result;
-            Map map = pawn.Map;
-            MapPawns mapPawns = map.mapPawns;
-            List<Pawn> freeColonistsSpawned = mapPawns.FreeColonistsSpawned;
+        [ThreadStatic] public static List<IntVec3> gatherSpots;
+        [ThreadStatic] public static List<IntVec3> candidateCells;
+        [ThreadStatic] public static List<Building> candidateBuildingsInRandomOrder;
 
-            List<Pawn> pawnList = new List<Pawn>(freeColonistsSpawned.Count);
-            for (int i = 0; i < freeColonistsSpawned.Count; i++)
-            {
-                Pawn p;
-                try
-                {
-                    p = freeColonistsSpawned[i];
-                } catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
-                if (p != null)
-                {
-                    IntVec3 position = p.Position;
-                    if (position != null)
-                    {
-                        if (!p.Position.IsForbidden(pawn))
-                        {
-                            bool canReach = pawn.CanReach(
-                                p.Position,
-                                PathEndMode.Touch,
-                                Danger.None,
-                                false,
-                                TraverseMode.ByPawn);
-                            if (canReach)
-                            {
-                                pawnList.Add(p);
-                            }
-                        }
-                    }
-                }
-            }
-            __result = pawnList.TryRandomElement(out result) ?
-                result.Position :
-                pawn.Position;
-            return false;
-		}
+        public static void InitializeThreadStatics()
+        {
+            gatherSpots = new List<IntVec3>();
+            candidateCells = new List<IntVec3>();
+            candidateBuildingsInRandomOrder = new List<Building>();
+        }
 
-	}
+        internal static void RunNoneDestructivePatches()
+        {
+            Type original = typeof(WanderUtility);
+            Type patched = typeof(WanderUtility_Patch);
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "GetColonyWanderRoot");
+        }
+
+    }
 }

@@ -87,5 +87,15 @@ namespace RimThreaded
             __result = fromTile;
             return false;
         }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(WorldGrid);
+            Type patched = typeof(WorldGrid_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "IsNeighbor");
+            RimThreadedHarmony.Prefix(original, patched, "GetNeighborId");
+            RimThreadedHarmony.Prefix(original, patched, "GetTileNeighbor");
+            RimThreadedHarmony.Prefix(original, patched, "FindMostReasonableAdjacentTileForDisplayedPathCost");
+        }
     }
 }

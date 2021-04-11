@@ -2,18 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class ThinkNode_SubtreesByTag_Patch
-	{
+    {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(ThinkNode_SubtreesByTag);
+            Type patched = typeof(ThinkNode_SubtreesByTag_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "TryIssueJobPackage");
+        }
 
         public static bool TryIssueJobPackage(ThinkNode_SubtreesByTag __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
         {

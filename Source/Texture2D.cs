@@ -14,6 +14,15 @@ namespace RimThreaded
     public class Texture2D_Patch
 	{
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Texture2D);
+            Type patched = typeof(Texture2D_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Internal_Create");
+            RimThreadedHarmony.Prefix(original, patched, "ReadPixels", new Type[] { typeof(Rect), typeof(int), typeof(int), typeof(bool) });
+            RimThreadedHarmony.Prefix(original, patched, "Apply", new Type[] { typeof(bool), typeof(bool) });
+        }
+
         public static bool GetPixel(Texture2D __instance, ref Color __result, int x, int y)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
@@ -85,8 +94,5 @@ namespace RimThreaded
             }
             return true;
         }
-
-
-
     }
 }
