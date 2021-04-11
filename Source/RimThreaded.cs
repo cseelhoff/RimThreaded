@@ -272,18 +272,21 @@ namespace RimThreaded
             RCellFinder_Patch.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
+            RegionAndRoomUpdater_Patch.InitializeThreadStatics();
             RegionCostCalculator_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
             RegionTraverser_Transpile.InitializeThreadStatics();
             Room_Patch.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();
+            TendUtility_Patch.InitializeThreadStatics();
             ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
             ThoughtHandler_Patch.InitializeThreadStatics();
             Toils_Ingest_Patch.InitializeThreadStatics();
             Verb_Patch.InitializeThreadStatics();
             WanderUtility_Patch.InitializeThreadStatics();
-            WealthWatcher_Patch.InitializeThreads();
+            WealthWatcher_Patch.InitializeThreadStatics();
+            WildPlantSpawner_Patch.InitializeThreadStatics();
             World_Patch.InitializeThreadStatics();
             WorldFloodFiller_Patch.InitializeThreads();
             WorldGrid_Patch.InitializeThreads();
@@ -548,6 +551,10 @@ namespace RimThreaded
         private static readonly Action<SteadyEnvironmentEffects, IntVec3> actionDoCellSteadyEffects =
             (Action<SteadyEnvironmentEffects, IntVec3>)Delegate.CreateDelegate(
                 typeof(Action<SteadyEnvironmentEffects, IntVec3>), methodDoCellSteadyEffects);
+        private static readonly MethodInfo methodGoodRoofForCavePlant =
+            Method(typeof(WildPlantSpawner), "GoodRoofForCavePlant", new Type[] { typeof(IntVec3) });
+        private static readonly Func<WildPlantSpawner, IntVec3, bool> funcGoodRoofForCavePlant =
+            (Func<WildPlantSpawner, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, bool>), methodGoodRoofForCavePlant);
 
 
         private static void ExecuteTicks()
@@ -806,7 +813,7 @@ namespace RimThreaded
                                 Interlocked.Increment(ref wildPlantSpawner.FertilityCells2Tmp);
                             }
 
-                            float mtb = WildPlantSpawner_Patch.funcGoodRoofForCavePlant(
+                            float mtb = funcGoodRoofForCavePlant(
                                 wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
                                 wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
                             if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && 
@@ -827,7 +834,7 @@ namespace RimThreaded
                                 Interlocked.Increment(ref wildPlantSpawner.FertilityCellsTmp);
                             }
 
-                            float mtb = WildPlantSpawner_Patch.funcGoodRoofForCavePlant(wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
+                            float mtb = funcGoodRoofForCavePlant(wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
                                 wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
                             if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) &&
                                 funcCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))

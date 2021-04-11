@@ -485,13 +485,16 @@ namespace RimThreaded
 			PawnDiedOrDownedThoughtsUtility_Patch.RunNonDestructivePatches();
 			Projectile_Patch.RunNonDestructivePatches();
 			RCellFinder_Patch.RunNonDestructivePatches();
+			RegionAndRoomUpdater_Patch.RunNonDestructivePatches();
 			RegionCostCalculator_Patch.RunNonDestructivePatches();
 			RegionListersUpdater_Patch.RunNonDestructivePatches();
+			TendUtility_Patch.RunNonDestructivePatches();
 			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
 			ThoughtHandler_Patch.RunNonDestructivePatches();
 			Toils_Ingest_Patch.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
 			WanderUtility_Patch.RunNoneDestructivePatches();
+			WildPlantSpawner_Patch.RunNonDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
 			WorldGrid_Patch.RunNonDestructivePatches();
 
@@ -593,6 +596,7 @@ namespace RimThreaded
 			HediffSet_Patch.RunDestructivePatches();
 			ImmunityHandler_Patch.RunDestructivePatches();
 			ListerThings_Patch.RunDestructivePatches();
+			JobGiver_Work_Patch.RunDestructivePatches();
 			JobMaker_Patch.RunDestructivePatches();
 			LongEventHandler_Patch.RunDestructivePatches();
 			Lord_Patch.RunDestructivePatches();
@@ -614,6 +618,7 @@ namespace RimThreaded
 			ReachabilityCache_Patch.RunDestructivePatches();
 			RealtimeMoteList_Patch.RunDestructivePatches();
 			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
+			RegionAndRoomUpdater_Patch.RunDestructivePatches();
 			RegionDirtyer_Patch.RunDestructivePatches();
 			ResourceCounter_Patch.RunDestructivePatches();
 			Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
@@ -635,6 +640,7 @@ namespace RimThreaded
 			TradeShip_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
 			WealthWatcher_Patch.RunDestructivePatches();
+			WildPlantSpawner_Patch.RunDestructivePatches();
 			WindManager_Patch.RunDestructivePatches();
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 			WorldComponentUtility_Patch.RunDestructivePatches();
@@ -654,22 +660,16 @@ namespace RimThreaded
 
 			//check methods for unneccessary try catches
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
+			BiomeDef_Patch.RunDestructivePatches();
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
 			MapPawns_Patch.RunDestructivePatches();
+			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			Region_Patch.RunDestructivePatches();
 			ReservationManager_Patch.RunDestructivePatches();
 			Room_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches();
 
 
-			PawnCapacitiesHandler_Patch.RunDestructivePatches();
-			TendUtility_Patch.RunDestructivePatches();
-			RegionAndRoomUpdater_Patch.RunDestructivePatches();
-			JobGiver_Work_Patch.RunDestructivePatches();
-			ThingCountUtility_Patch.RunDestructivePatches();
-			BiomeDef_Patch.RunDestructivePatches();
-			WildPlantSpawner_Patch.RunDestructivePatches();
-			PawnRelationUtility_Patch.RunDestructivePatches();
 			SustainerAggregatorUtility_Patch.RunDestructivePatches();
 			StoryState_Patch.RunDestructivePatches();
 			GrammarResolver_Patch.RunDestructivePatches();

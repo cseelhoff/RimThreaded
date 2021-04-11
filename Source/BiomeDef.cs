@@ -17,9 +17,15 @@ namespace RimThreaded
         public static AccessTools.FieldRef<BiomeDef, float> cachedPlantCommonalitiesSum =
             AccessTools.FieldRefAccess<BiomeDef, float>("cachedPlantCommonalitiesSum");
         //public static AccessTools.FieldRef<BiomeDef, float?> cachedLowestWildPlantOrder =
-            //AccessTools.FieldRefAccess<BiomeDef, float?>("cachedLowestWildPlantOrder");
+        //AccessTools.FieldRefAccess<BiomeDef, float?>("cachedLowestWildPlantOrder");
 
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(BiomeDef);
+            Type patched = typeof(BiomeDef_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "CachePlantCommonalitiesIfShould");
+        }
         public static bool CachePlantCommonalitiesIfShould(BiomeDef __instance)
         {
             if (cachedPlantCommonalities(__instance) != null)
@@ -63,11 +69,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(BiomeDef);
-            Type patched = typeof(BiomeDef_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "CachePlantCommonalitiesIfShould");
-        }
     }
 }

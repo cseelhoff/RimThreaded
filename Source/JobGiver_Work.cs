@@ -1,105 +1,36 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class JobGiver_Work_Patch
 	{
-		private static bool WorkGiversRelated(WorkGiverDef current, WorkGiverDef next)
+		internal static void RunDestructivePatches()
 		{
-			if (next == WorkGiverDefOf.Repair)
-			{
-				return current == WorkGiverDefOf.Repair;
-			}
-			return true;
+			Type original = typeof(JobGiver_Work);
+			Type patched = typeof(JobGiver_Work_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "TryIssueJobPackage");
 		}
-		private static bool PawnCanUseWorkGiver(Pawn pawn, WorkGiver giver)
-		{
-			if (!giver.def.nonColonistsCanDo && !pawn.IsColonist)
-			{
-				return false;
-			}
-			if (pawn.WorkTagIsDisabled(giver.def.workTags))
-			{
-				return false;
-			}
-			if (giver.ShouldSkip(pawn))
-			{
-				return false;
-			}
-			if (giver.MissingRequiredCapacity(pawn) != null)
-			{
-				return false;
-			}
-			return true;
-		}
+		private static readonly MethodInfo methodWorkGiversRelated =
+			Method(typeof(JobGiver_Work), "WorkGiversRelated", new Type[] { typeof(WorkGiverDef), typeof(WorkGiverDef) });
+		private static readonly Func<JobGiver_Work, WorkGiverDef, WorkGiverDef, bool> funcWorkGiversRelated =
+			(Func<JobGiver_Work, WorkGiverDef, WorkGiverDef, bool>)Delegate.CreateDelegate(
+				typeof(Func<JobGiver_Work, WorkGiverDef, WorkGiverDef, bool>), methodWorkGiversRelated);
 
-		private static Job GiverTryGiveJobPrioritized(Pawn pawn, WorkGiver giver, IntVec3 cell)
-		{
-			if (!PawnCanUseWorkGiver(pawn, giver))
-			{
-				return null;
-			}
-			try
-			{
-				Job job = giver.NonScanJob(pawn);
-				if (job != null)
-				{
-					return job;
-				}
-				WorkGiver_Scanner scanner = giver as WorkGiver_Scanner;
-				if (scanner != null)
-				{
-					if (giver.def.scanThings)
-					{
-						Predicate<Thing> predicate;
-						if (scanner is WorkGiver_DoBill workGiver_DoBill)
-						{
-							predicate = (Thing t) => !t.IsForbidden(pawn) && WorkGiver_Scanner_Patch.HasJobOnThing(workGiver_DoBill, pawn, t);
-						} else {
-							predicate = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t);
-						}
-						
-						List<Thing> thingList = cell.GetThingList(pawn.Map);
-						for (int i = 0; i < thingList.Count; i++)
-						{
-							Thing thing = thingList[i];
-							if (scanner.PotentialWorkThingRequest.Accepts(thing) && predicate(thing))
-							{
-								Job job2 = scanner.JobOnThing(pawn, thing);
-								if (job2 != null)
-								{
-									job2.workGiverDef = giver.def;
-								}
-								return job2;
-							}
-						}
-					}
-					if (giver.def.scanCells && !cell.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, cell))
-					{
-						Job job3 = scanner.JobOnCell(pawn, cell);
-						if (job3 != null)
-						{
-							job3.workGiverDef = giver.def;
-						}
-						return job3;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Error(string.Concat(pawn, " threw exception in GiverTryGiveJobTargeted on WorkGiver ", giver.def.defName, ": ", ex.ToString()));
-			}
-			return null;
-		}
+		private static readonly MethodInfo methodPawnCanUseWorkGiver =
+			Method(typeof(JobGiver_Work), "PawnCanUseWorkGiver", new Type[] { typeof(Pawn), typeof(WorkGiver) });
+		private static readonly Func<JobGiver_Work, Pawn, WorkGiver, bool> funcPawnCanUseWorkGiver =
+			(Func<JobGiver_Work, Pawn, WorkGiver, bool>)Delegate.CreateDelegate(
+				typeof(Func<JobGiver_Work, Pawn, WorkGiver, bool>), methodPawnCanUseWorkGiver);
+
+
 		public static bool TryIssueJobPackage(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
 		{
 			if (__instance.emergency && pawn.mindState.priorityWork.IsPrioritized)
@@ -108,9 +39,9 @@ namespace RimThreaded
 				for (int i = 0; i < workGiversByPriority.Count; i++)
 				{
 					WorkGiver worker = workGiversByPriority[i].Worker;
-					if (WorkGiversRelated(pawn.mindState.priorityWork.WorkGiver, worker.def))
+					if (funcWorkGiversRelated(__instance, pawn.mindState.priorityWork.WorkGiver, worker.def))
 					{
-						Job job = GiverTryGiveJobPrioritized(pawn, worker, pawn.mindState.priorityWork.Cell);
+						Job job = GiverTryGiveJobPrioritized(__instance, pawn, worker, pawn.mindState.priorityWork.Cell);
 						if (job != null)
 						{
 							job.playerForced = true;
@@ -139,7 +70,7 @@ namespace RimThreaded
 				{
 					break;
 				}
-				if (!PawnCanUseWorkGiver(pawn, workGiver))
+				if (!funcPawnCanUseWorkGiver(__instance, pawn, workGiver))
 				{
 					continue;
 				}
@@ -357,11 +288,65 @@ namespace RimThreaded
 			return false;
 		}
 
-        internal static void RunDestructivePatches()
+		private static Job GiverTryGiveJobPrioritized(JobGiver_Work __instance, Pawn pawn, WorkGiver giver, IntVec3 cell)
 		{
-			Type original = typeof(JobGiver_Work);
-			Type patched = typeof(JobGiver_Work_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "TryIssueJobPackage");
+			if (!funcPawnCanUseWorkGiver(__instance, pawn, giver))
+			{
+				return null;
+			}
+			try
+			{
+				Job job = giver.NonScanJob(pawn);
+				if (job != null)
+				{
+					return job;
+				}
+				WorkGiver_Scanner scanner = giver as WorkGiver_Scanner;
+				if (scanner != null)
+				{
+					if (giver.def.scanThings)
+					{
+						Predicate<Thing> predicate;
+						if (scanner is WorkGiver_DoBill workGiver_DoBill)
+						{
+							predicate = (Thing t) => !t.IsForbidden(pawn) && WorkGiver_Scanner_Patch.HasJobOnThing(workGiver_DoBill, pawn, t);
+						}
+						else
+						{
+							predicate = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t);
+						}
+
+						List<Thing> thingList = cell.GetThingList(pawn.Map);
+						for (int i = 0; i < thingList.Count; i++)
+						{
+							Thing thing = thingList[i];
+							if (scanner.PotentialWorkThingRequest.Accepts(thing) && predicate(thing))
+							{
+								Job job2 = scanner.JobOnThing(pawn, thing);
+								if (job2 != null)
+								{
+									job2.workGiverDef = giver.def;
+								}
+								return job2;
+							}
+						}
+					}
+					if (giver.def.scanCells && !cell.IsForbidden(pawn) && scanner.HasJobOnCell(pawn, cell))
+					{
+						Job job3 = scanner.JobOnCell(pawn, cell);
+						if (job3 != null)
+						{
+							job3.workGiverDef = giver.def;
+						}
+						return job3;
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.Error(string.Concat(pawn, " threw exception in GiverTryGiveJobTargeted on WorkGiver ", giver.def.defName, ": ", ex.ToString()));
+			}
+			return null;
 		}
-    }
+	}
 }

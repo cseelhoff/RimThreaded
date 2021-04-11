@@ -18,7 +18,7 @@ namespace RimThreaded
 		static Type original = typeof(WealthWatcher);
 		static Type patched = typeof(WealthWatcher_Patch);
 
-		public static void InitializeThreads()
+		public static void InitializeThreadStatics()
         {
 			tmpThings = new List<Thing>();
 		}

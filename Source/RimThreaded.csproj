@@ -198,7 +198,6 @@
     <Compile Include="PathFinder_Transpile.cs" />
     <Compile Include="SustainerAggregatorUtility.cs" />
     <Compile Include="GrammarResolverSimple.cs" />
-    <Compile Include="PawnRelationUtility.cs" />
     <Compile Include="ThingOwnerThing_Transpile.cs" />
     <Compile Include="TileTemperaturesComp.cs" />
     <Compile Include="RimThreadedHarmony.cs" />
@@ -215,7 +214,6 @@
     <Compile Include="SteadyEnvironmentEffects.cs" />
     <Compile Include="GenText.cs" />
     <Compile Include="WorkGiver_ConstructDeliverResources.cs" />
-    <Compile Include="ThingCountUtility.cs" />
     <Compile Include="JobGiver_Work.cs" />
     <Compile Include="WorldObjectsHolder.cs" />
     <Compile Include="WorkGiver_DoBill.cs" />

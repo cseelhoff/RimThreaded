@@ -13,12 +13,9 @@ namespace RimThreaded
 
     public class RegionAndRoomUpdater_Patch
     {
-        [ThreadStatic]
-        static Stack<Room> tmpRoomStack;
-        [ThreadStatic]
-        static HashSet<Room> tmpVisitedRooms;
-        [ThreadStatic]
-        static bool working;
+        [ThreadStatic] public static Stack<Room> tmpRoomStack;
+        [ThreadStatic] public static HashSet<Room> tmpVisitedRooms;
+        [ThreadStatic] public static bool working;
 
         public static FieldRef<RegionAndRoomUpdater, Map> map =
             FieldRefAccess<RegionAndRoomUpdater, Map>("map");
@@ -66,6 +63,25 @@ namespace RimThreaded
         static readonly Action<RegionAndRoomUpdater> actionNotifyAffectedRoomsAndRoomGroupsAndUpdateTemperature =
             (Action<RegionAndRoomUpdater>)Delegate.CreateDelegate(typeof(Action<RegionAndRoomUpdater>), methodNotifyAffectedRoomsAndRoomGroupsAndUpdateTemperature);
 
+        static readonly Type original = typeof(RegionAndRoomUpdater);
+        static readonly Type patched = typeof(RegionAndRoomUpdater_Patch);
+
+        internal static void InitializeThreadStatics()
+        {
+            tmpRoomStack = new Stack<Room>();
+            tmpVisitedRooms = new HashSet<Room>();
+        }
+
+        internal static void RunNonDestructivePatches()
+        {
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "FloodAndSetRoomGroups");
+        }
+
+        internal static void RunDestructivePatches()
+        {
+            RimThreadedHarmony.Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
+        }
 
         public static bool TryRebuildDirtyRegionsAndRooms(RegionAndRoomUpdater __instance)
         {
@@ -268,46 +284,6 @@ namespace RimThreaded
         }
 
 
-        public static bool FloodAndSetRoomGroups(RegionAndRoomUpdater __instance, Room start, RoomGroup roomGroup)
-        {
-            if (tmpRoomStack == null)
-            {
-                tmpRoomStack = new Stack<Room>();
-            } else
-            {
-                tmpRoomStack.Clear();
-            }
-            tmpRoomStack.Push(start);
-            if (tmpVisitedRooms == null)
-            {
-                tmpVisitedRooms = new HashSet<Room>();
-            } else
-            {
-                tmpVisitedRooms.Clear();
-            }
-            tmpVisitedRooms.Add(start);
-            while (tmpRoomStack.Count != 0)
-            {
-                Room room = tmpRoomStack.Pop();
-                room.Group = roomGroup;
-                foreach (Room neighbor in room.Neighbors)
-                {
-                    if (!tmpVisitedRooms.Contains(neighbor) && funcShouldBeInTheSameRoomGroup(__instance, room, neighbor))
-                    {
-                        tmpRoomStack.Push(neighbor);
-                        tmpVisitedRooms.Add(neighbor);
-                    }
-                }
-            }
-            return false;
-        }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(RegionAndRoomUpdater);
-            Type patched = typeof(RegionAndRoomUpdater_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "FloodAndSetRoomGroups");
-            RimThreadedHarmony.Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
-        }
     }
 }
