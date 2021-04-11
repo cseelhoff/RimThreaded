@@ -618,6 +618,7 @@ namespace RimThreaded
 			WindManager_Patch.RunDestructivePatches();
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 			WorldComponentUtility_Patch.RunDestructivePatches();
+			WorldPawns_Patch.RunDestructivePatches(); //todo examine GC optimization
 
 			//main-thread-only
 			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
@@ -683,7 +684,6 @@ namespace RimThreaded
 			HediffGiver_Heat_Patch.RunDestructivePatches();
 			Pawn_MindState_Patch.RunDestructivePatches();
 			WorldObjectsHolder_Patch.RunDestructivePatches();
-			WorldPawns_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
 		}
 

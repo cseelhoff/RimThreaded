@@ -275,7 +275,7 @@ namespace RimThreaded
             WanderUtility_Patch.InitializeThreadStatics();
             WealthWatcher_Patch.InitializeThreads();
             World_Patch.InitializeThreadStatics();
-
+            WorldPawns_Patch.InitializeThreadStatics();
         }
 
         private static void ProcessTicks(ThreadInfo threadInfo)

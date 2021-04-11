@@ -12,13 +12,10 @@ namespace RimThreaded
     {
 
         public static List<ThingDef> resources = StaticFieldRefAccess<List<ThingDef>>(typeof(ResourceCounter), "resources");
-        private static readonly FieldRef<ResourceCounter, Dictionary<ThingDef, int>> countedAmountsFieldRef = FieldRefAccess<ResourceCounter, Dictionary<ThingDef, int>>("countedAmounts");
-
-
+        private static readonly FieldRef<ResourceCounter, Dictionary<ThingDef, int>> countedAmountsFieldRef = 
+            FieldRefAccess<ResourceCounter, Dictionary<ThingDef, int>>("countedAmounts");
         public static FieldRef<ResourceCounter, Map> map =
             FieldRefAccess<ResourceCounter, Map>("map");
-        public static FieldRef<ResourceCounter, Dictionary<ThingDef, int>> countedAmounts =
-            FieldRefAccess<ResourceCounter, Dictionary<ThingDef, int>>("countedAmounts");
 
         public static object lockObject = new object();
 
@@ -29,6 +26,26 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, "ResetDefs");
             RimThreadedHarmony.Prefix(original, patched, "ResetResourceCounts");
             RimThreadedHarmony.Prefix(original, patched, "GetCount"); //maybe not needed
+            RimThreadedHarmony.Prefix(original, patched, "get_TotalHumanEdibleNutrition"); //maybe not needed
+        }
+
+        public static bool get_TotalHumanEdibleNutrition(ResourceCounter __instance, ref float __result)
+        {
+            float num = 0f;
+            lock (lockObject)
+            {
+                Dictionary<ThingDef, int> snapshotCountedAmounts = countedAmountsFieldRef(__instance);
+                foreach (KeyValuePair<ThingDef, int> countedAmount in snapshotCountedAmounts)
+                {
+                    if (countedAmount.Key.IsNutritionGivingIngestible && countedAmount.Key.ingestible.HumanEdible)
+                    {
+                        num += countedAmount.Key.GetStatValueAbstract(StatDefOf.Nutrition) * (float)countedAmount.Value;
+                    }
+                }
+            }
+
+            __result = num;
+            return false;
         }
 
         public static bool ResetDefs()
