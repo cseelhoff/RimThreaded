@@ -124,7 +124,6 @@
     <Compile Include="Pawn_JobTracker.cs" />
     <Compile Include="Pawn_PlayerSettings.cs" />
     <Compile Include="QuestUtility.cs" />
-    <Compile Include="RegionCostCalculatorWrapper.cs" />
     <Compile Include="CompSpawnSubplant_Transpile.cs" />
     <Compile Include="GrammarResolverSimpleStringExtensions.cs" />
     <Compile Include="Pawn.cs" />
@@ -152,7 +151,6 @@
     <Compile Include="WorkGiver_Grower_Patch.cs" />
     <Compile Include="WorkGiver_Scanner_Patch.cs" />
     <Compile Include="WorldFloodFiller.cs" />
-    <Compile Include="ReservationUtility.cs" />
     <Compile Include="PlayLog.cs" />
     <Compile Include="SectionLayer.cs" />
     <Compile Include="Mesh.cs" />

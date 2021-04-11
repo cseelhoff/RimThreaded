@@ -16,12 +16,9 @@ namespace RimThreaded
 
     public class RegionCostCalculator_Patch
     {
-        [ThreadStatic]
-        private static List<int> tmpPathableNeighborIndices;
-        [ThreadStatic]
-        private static Dictionary<int, float> tmpDistances;
-        [ThreadStatic]
-        private static List<int> tmpCellIndices;
+        [ThreadStatic] public static List<int> tmpPathableNeighborIndices;
+        [ThreadStatic] public static Dictionary<int, float> tmpDistances;
+        [ThreadStatic] public static List<int> tmpCellIndices;
 
         public static FieldRef<RegionCostCalculator, IntVec3> destinationCell =
             FieldRefAccess<RegionCostCalculator, IntVec3>("destinationCell");
@@ -57,6 +54,21 @@ namespace RimThreaded
             FieldRefAccess<RegionCostCalculator, Map>("map");
         public static FieldRef<RegionCostCalculator, Func<int, int, float>> preciseRegionLinkDistancesDistanceGetter =
             FieldRefAccess<RegionCostCalculator, Func<int, int, float>>("preciseRegionLinkDistancesDistanceGetter");
+
+        internal static void InitializeThreadStatics()
+        {
+            tmpPathableNeighborIndices = new List<int>();
+            tmpDistances = new Dictionary<int, float>();
+            tmpCellIndices = new List<int>();
+        }
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RegionCostCalculator);
+            Type patched = typeof(RegionCostCalculator_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetPreciseRegionLinkDistances");
+            RimThreadedHarmony.Prefix(original, patched, "PathableNeighborIndices");
+        }
 
         public struct RegionLinkQueueEntry2
         {
@@ -111,14 +123,7 @@ namespace RimThreaded
         public static bool GetPreciseRegionLinkDistances(RegionCostCalculator __instance, Region region, CellRect destination, List<Pair<RegionLink, int>> outDistances)
         {
             outDistances.Clear();            
-            if(tmpCellIndices == null)
-            {
-                tmpCellIndices = new List<int>();
-            }
-            else
-            {
-                tmpCellIndices.Clear();
-            }
+            tmpCellIndices.Clear();
             if (destination.Width == 1 && destination.Height == 1)
             {
                 tmpCellIndices.Add(map(__instance).cellIndices.CellToIndex(destination.CenterCell));// Replaces tmpCellIndices
@@ -133,13 +138,7 @@ namespace RimThreaded
                     }
                 }
             }
-            if(tmpDistances == null)
-            {
-                tmpDistances = new Dictionary<int, float>();
-            } else
-            {
-                tmpDistances.Clear();
-            }
+            tmpDistances.Clear();
 
             DijkstraInt.Run(tmpCellIndices, (int x) => funcPreciseRegionLinkDistancesNeighborsGetter(__instance, x, region),
                             preciseRegionLinkDistancesDistanceGetter(__instance), tmpDistances); // Replaces tmpCellIndices
@@ -162,14 +161,7 @@ namespace RimThreaded
         }
         public static bool PathableNeighborIndices(RegionCostCalculator __instance, ref List<int> __result, int index)
         {
-            if (tmpPathableNeighborIndices == null)
-            {
-                tmpPathableNeighborIndices = new List<int>();
-            }
-            else
-            {
-                tmpPathableNeighborIndices.Clear();
-            }
+            tmpPathableNeighborIndices.Clear();
             PathGrid pathGrid = map(__instance).pathGrid;
             int x = map(__instance).Size.x;
             bool num = index % x > 0;
@@ -228,14 +220,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(RegionCostCalculator);
-            Type patched = typeof(RegionCostCalculator_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetPreciseRegionLinkDistances");
-            RimThreadedHarmony.Prefix(original, patched, "PathableNeighborIndices");
-            //RimThreadedHarmony.Prefix(original, patched, "GetRegionDistance");
-            //RimThreadedHarmony.Prefix(original, patched, "Init");
-        }
     }
 }

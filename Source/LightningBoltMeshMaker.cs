@@ -12,6 +12,13 @@ namespace RimThreaded
         static readonly Func<object[], object> safeFunction = parameters =>
             LightningBoltMeshMaker.NewBoltMesh();
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(LightningBoltMeshMaker);
+            Type patched = typeof(LightningBoltMeshMaker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "NewBoltMesh");
+        }
+
         public static bool NewBoltMesh(ref Mesh __result)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
@@ -25,11 +32,5 @@ namespace RimThreaded
             return true;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(LightningBoltMeshMaker);
-            Type patched = typeof(LightningBoltMeshMaker_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "NewBoltMesh");
-        }
     }
 }

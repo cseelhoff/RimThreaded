@@ -7,6 +7,13 @@ namespace RimThreaded
 {
     public class RecipeWorkerCounter_Patch
     {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RecipeWorkerCounter);
+            Type patched = typeof(RecipeWorkerCounter_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetCarriedCount");
+        }
+
         public static bool GetCarriedCount(RecipeWorkerCounter __instance, ref int __result, Bill_Production bill, ThingDef prodDef)
         {
             int num = 0;
@@ -18,15 +25,7 @@ namespace RimThreaded
             }
             for (int i = 0; i < freeColonistsSpawned.Count; i++)
             {
-                Pawn item;
-                try
-                {
-                    item = freeColonistsSpawned[i];
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    break;
-                }
+                Pawn item = freeColonistsSpawned[i];
                 Thing carriedThing = item.carryTracker.CarriedThing;
                 if (carriedThing != null)
                 {
@@ -43,11 +42,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(RecipeWorkerCounter);
-            Type patched = typeof(RecipeWorkerCounter_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetCarriedCount");
-        }
     }
 }

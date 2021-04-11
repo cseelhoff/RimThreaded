@@ -488,6 +488,7 @@ namespace RimThreaded
 			Verb_Patch.RunNonDestructivePatches();
 			WanderUtility_Patch.RunNoneDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
+			WorldGrid_Patch.RunNonDestructivePatches();
 
 
 			//Complex
@@ -511,6 +512,7 @@ namespace RimThreaded
 			ThingOwnerThing_Transpile.RunNonDestructivePatches();
 			TickList_Patch.RunNonDestructivePatches();
 			WealthWatcher_Patch.RunNonDestructivePatches();
+			WorldFloodFiller_Patch.RunNonDestructivePatches();
 			WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
 			WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
 			QuestUtility_Patch.RunNonDestructivePatches();
@@ -599,6 +601,7 @@ namespace RimThreaded
 			Reachability_Patch.RunDestructivePatches();
 			ReachabilityCache_Patch.RunDestructivePatches();
 			RealtimeMoteList_Patch.RunDestructivePatches();
+			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
 			RegionDirtyer_Patch.RunDestructivePatches();
 			ResourceCounter_Patch.RunDestructivePatches();
 			Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
@@ -627,6 +630,7 @@ namespace RimThreaded
 			//main-thread-only
 			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
 			Graphics_Patch.RunDestructivePatches();//Graphics (Giddy-Up and others)
+			LightningBoltMeshMaker_Patch.RunDestructivePatches();
 			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
 			MeshMakerPlanes_Patch.RunDestructivePatches();
 			MeshMakerShadows_Patch.RunDestructivePatches();
@@ -669,16 +673,10 @@ namespace RimThreaded
 			GrammarResolver_Patch.RunDestructivePatches();
 			JobQueue_Patch.RunDestructivePatches();
 			MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
-			LightningBoltMeshMaker_Patch.RunDestructivePatches();
 			TimeControls_Patch.RunDestructivePatches();
 			GlobalControlsUtility_Patch.RunDestructivePatches();
 			RegionCostCalculator_Patch.RunDestructivePatches();
-			RegionCostCalculatorWrapper_Patch.RunDestructivePatches();
 			GUIStyle_Patch.RunDestructivePatches();
-			WorldGrid_Patch.RunDestructivePatches();
-			ReservationUtility_Patch.RunDestructivePatches();
-			WorldFloodFiller_Patch.RunDestructivePatches();
-			RecipeWorkerCounter_Patch.RunDestructivePatches();
 			Pawn_RotationTracker_Patch.RunDestructivePatches();
 			GrammarResolverSimpleStringExtensions_Patch.RunDestructivePatches();
 			Pawn_Patch.RunDestructivePatches();

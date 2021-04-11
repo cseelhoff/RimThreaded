@@ -270,6 +270,7 @@ namespace RimThreaded
             RCellFinder_Patch.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
+            RegionCostCalculator_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
             RegionTraverser_Transpile.InitializeThreadStatics();
@@ -281,6 +282,8 @@ namespace RimThreaded
             WanderUtility_Patch.InitializeThreadStatics();
             WealthWatcher_Patch.InitializeThreads();
             World_Patch.InitializeThreadStatics();
+            WorldFloodFiller_Patch.InitializeThreads();
+            WorldGrid_Patch.InitializeThreads();
             WorldPawns_Patch.InitializeThreadStatics();
         }
 
