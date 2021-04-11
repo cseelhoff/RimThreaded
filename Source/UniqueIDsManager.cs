@@ -1,19 +1,19 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using System.Threading;
 
 namespace RimThreaded
 {
 
     public class UniqueIDsManager_Patch
-	{
+    {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(UniqueIDsManager);
+            Type patched = typeof(UniqueIDsManager_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetNextID");
+        }
         public static bool GetNextID(ref int __result, ref int nextID)
         {
             if (Scribe.mode == LoadSaveMode.Saving || Scribe.mode == LoadSaveMode.LoadingVars)
@@ -33,11 +33,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(UniqueIDsManager);
-            Type patched = typeof(UniqueIDsManager_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetNextID");
-        }
     }
 }

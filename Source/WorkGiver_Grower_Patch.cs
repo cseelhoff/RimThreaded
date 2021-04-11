@@ -67,7 +67,7 @@ namespace RimThreaded
 			for (int j = 0; j < bList.Count; j++)
 			{
 				Building_PlantGrower building_PlantGrower = bList[j] as Building_PlantGrower;
-				if (building_PlantGrower == null || !funcExtraRequirements(__instance, building_PlantGrower, pawn) || building_PlantGrower.IsForbidden(pawn) ||	building_PlantGrower.IsBurning())
+				if (building_PlantGrower == null || !funcExtraRequirements(__instance, building_PlantGrower, pawn) || building_PlantGrower.IsForbidden(pawn) || building_PlantGrower.IsBurning())
 				{
 					continue;
 				}
@@ -88,13 +88,44 @@ namespace RimThreaded
 				{
 					Log.ErrorOnce("Grow zone has 0 cells: " + growZone, -563487);
 				}
-				else if (funcExtraRequirements(__instance, growZone, pawn) && !growZone.ContainsStaticFire &&
-					pawn.CanReach(growZone.Cells[0], PathEndMode.OnCell, maxDanger))
+				else if (funcExtraRequirements(__instance, growZone, pawn) && !growZone.ContainsStaticFire)
 				{
 					for (int k = 0; k < growZone.cells.Count; k++)
 					{
 						yield return growZone.cells[k];
 					}
+				}
+			}
+		}
+		public static IEnumerable<IntVec3> ClosestPotentialWorkCellsGlobalWithoutCanReach(WorkGiver_Grower __instance, Pawn pawn)
+		{
+			Danger maxDanger = pawn.NormalMaxDanger();
+			foreach (IntVec3 cell in RimThreaded.GetClosestPlantGrowerCells(pawn.Position))
+			{
+				List<Thing> thingsAtCell = pawn.Map.thingGrid.ThingsListAtFast(cell);
+				foreach (Thing thingAtCell in thingsAtCell)
+				{
+                    if (!(thingAtCell is Building_PlantGrower building_PlantGrower) || 
+						!funcExtraRequirements(__instance, building_PlantGrower, pawn) || 
+						building_PlantGrower.IsForbidden(pawn) || 
+						building_PlantGrower.IsBurning())
+                    {
+                        continue;
+                    }
+					yield return cell;
+					break;
+				}
+                if (!(pawn.Map.zoneManager.ZoneAt(cell) is Zone_Growing growZone))
+                {
+                    continue;
+                }
+                if (growZone.cells.Count == 0)
+				{
+					Log.ErrorOnce("Grow zone has 0 cells: " + growZone, -563487);
+				}
+				else if (funcExtraRequirements(__instance, growZone, pawn) && !growZone.ContainsStaticFire)
+				{
+					yield return cell;
 				}
 			}
 		}

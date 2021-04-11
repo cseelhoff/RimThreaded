@@ -1,8 +1,6 @@
 ﻿using HarmonyLib;
 using System;
-using Verse;
 using UnityEngine;
-using System.Threading;
 using System.Reflection;
 using UnityEngine.Experimental.Rendering;
 using static RimThreaded.RimThreaded;
@@ -29,6 +27,13 @@ namespace RimThreaded
                 (RenderTextureMemoryless)parameters[5], 
                 (VRTextureUsage)parameters[6], 
                 (bool)parameters[7]);
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(RenderTexture);
+            Type patched = typeof(RenderTexture_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetTemporaryImpl");
+        }
 
         public static bool GetTemporaryImpl(ref RenderTexture __result, int width, int height, int depthBuffer, GraphicsFormat format, int antiAliasing = 1, RenderTextureMemoryless memorylessMode = RenderTextureMemoryless.None, VRTextureUsage vrUsage = VRTextureUsage.None, bool useDynamicScale = false)
         {
@@ -58,11 +63,5 @@ namespace RimThreaded
             return true;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(RenderTexture);
-            Type patched = typeof(RenderTexture_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetTemporaryImpl");
-        }
     }
 }

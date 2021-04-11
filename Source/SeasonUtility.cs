@@ -1,18 +1,20 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
 
     public class SeasonUtility_Patch
     {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SeasonUtility);
+            Type patched = typeof(SeasonUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "GetReportedSeason");
+        }
+
         public static Dictionary<int, Dictionary<float, Season>> yearLatitudeSeason = new Dictionary<int, Dictionary<float, Season>>();
         public static bool GetReportedSeason(ref Season __result, float yearPct, float latitude)
         {
@@ -33,18 +35,15 @@ namespace RimThreaded
                 {
                     season = Season.PermanentWinter;
                 }
-                season = GenMath.MaxBy(Season.Spring, spring, Season.Summer, summer, Season.Fall, fall, Season.Winter, winter);
+                if (permanentSummer != 1f && permanentWinter != 1f)
+                {
+                    season = GenMath.MaxBy(Season.Spring, spring, Season.Summer, summer, Season.Fall, fall, Season.Winter, winter);
+                }
                 latitudeSeason.Add(latitude, season);
             }
             __result = season;
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(SeasonUtility);
-            Type patched = typeof(SeasonUtility_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetReportedSeason");
-        }
     }
 }

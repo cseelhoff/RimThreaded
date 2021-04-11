@@ -26,9 +26,11 @@ namespace RimThreaded
         public float scrollViewHeight;
         public Vector2 scrollPosition;
         public string modsText = "";
+        public string modsText2 = "";
         private string Threads;
 
         public Vector2 scrollPos = new Vector2(0, 0);
+        public Vector2 scrollPos2 = new Vector2(0, 0);
         public override void ExposeData()
         {
 
@@ -79,6 +81,7 @@ namespace RimThreaded
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Show alert when conflicting mods are detected:", ref showModConflictsAlert);
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Show console warning when thread took over 200ms:", ref show200mswarning);
             Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText, ref scrollPos);
+            Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText2, ref scrollPos2);
             listing_Standard.EndScrollView(ref viewRect);
             scrollViewHeight = viewRect.height;
         }
