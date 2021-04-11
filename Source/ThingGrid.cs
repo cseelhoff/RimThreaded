@@ -15,7 +15,6 @@ namespace RimThreaded
             new Dictionary<Map, Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>>();
         // Map, Scanner, points, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
         public static Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>> thingBillPoints = new Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>>();
-        // where is the list of WorkGiver_Scanners?
         // loop through all WorkGiver_Scanners on map and add ThingDefs on map points
         public static int[] power2array = new int[] { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 }; // a 16384x16384 map is probably too big
 

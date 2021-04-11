@@ -71,6 +71,12 @@ namespace RimThreaded
             public int steadyEnvironmentEffectsCycleIndex;
             public int steadyEnvironmentEffectsCycleIndexOffset;
         }
+
+        internal static IEnumerable<IntVec3> GetClosestPlantGrowerCells(IntVec3 position)
+        {
+            throw new NotImplementedException();
+        }
+
         public static int totalSteadyEnvironmentEffectsTicks = 0;
         public static int steadyEnvironmentEffectsTicksCompleted = 0;
         public static int steadyEnvironmentEffectsCount = 0;
