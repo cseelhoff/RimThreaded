@@ -574,8 +574,10 @@ namespace RimThreaded
 			AudioSourceMaker_Patch.RunDestructivePatches();
 			CompCauseGameCondition_Patch.RunDestructivePatches();
 			ContentFinder_Texture2D_Patch.RunDestructivePatches();
+			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
 			DrugAIUtility_Patch.RunDestructivePatches();
 			DynamicDrawManager_Patch.RunDestructivePatches();
+			FactionManager_Patch.RunDestructivePatches();
 			GenClosest_Patch.RunDestructivePatches();
 			GenTemperature_Patch.RunDestructivePatches();
 			ListerThings_Patch.RunDestructivePatches();
@@ -598,6 +600,7 @@ namespace RimThreaded
 			ResourceCounter_Patch.RunDestructivePatches();
 			Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			SampleSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
 			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
 			SoundSizeAggregator_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
 			SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
@@ -608,9 +611,11 @@ namespace RimThreaded
 			ThingGrid_Patch.RunDestructivePatches();
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			TickManager_Patch.RunDestructivePatches();
+			TradeShip_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
 			WealthWatcher_Patch.RunDestructivePatches();
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
+			WorldComponentUtility_Patch.RunDestructivePatches();
 
 			//main-thread-only
 			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
@@ -679,12 +684,6 @@ namespace RimThreaded
 			WorldPawns_Patch.RunDestructivePatches();
 			SteadyEnvironmentEffects_Patch.RunDestructivePatches();
 			WindManager_Patch.RunDestructivePatches();
-			FactionManager_Patch.RunDestructivePatches();
-			SeasonUtility_Patch.RunDestructivePatches();
-			TradeShip_Patch.RunDestructivePatches();
-			DateNotifier_Patch.RunDestructivePatches();
-			WorldComponentUtility_Patch.RunDestructivePatches();
-			Map_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
 		}
 

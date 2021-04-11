@@ -23,18 +23,15 @@ namespace RimThreaded
 		{
 			lock (__instance)
 			{
-				entries(__instance).Insert(0, entry);
-				ReduceToCapacity(__instance);
+				List<LogEntry> newEntries = new List<LogEntry>(entries(__instance));
+				newEntries.Insert(0, entry);
+				while (newEntries.Count > 150)
+				{
+					RemoveEntry(__instance, newEntries[newEntries.Count - 1]);
+				}
+				entries(__instance) = newEntries;
 			}
 			return false;
-		}
-		private static void ReduceToCapacity(PlayLog __instance)
-		{
-            List<LogEntry> snapshotEntries = entries(__instance);
-			while (snapshotEntries.Count > 150)
-			{
-				RemoveEntry(__instance, snapshotEntries[snapshotEntries.Count - 1]);
-			}
 		}
 
 		public static bool RemoveEntry(PlayLog __instance, LogEntry entry)

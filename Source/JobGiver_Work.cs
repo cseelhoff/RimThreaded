@@ -60,7 +60,14 @@ namespace RimThreaded
 				{
 					if (giver.def.scanThings)
 					{
-						Predicate<Thing> predicate = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t);
+						Predicate<Thing> predicate;
+						if (scanner is WorkGiver_DoBill workGiver_DoBill)
+						{
+							predicate = (Thing t) => !t.IsForbidden(pawn) && WorkGiver_Scanner_Patch.HasJobOnThing(workGiver_DoBill, pawn, t);
+						} else {
+							predicate = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t);
+						}
+						
 						List<Thing> thingList = cell.GetThingList(pawn.Map);
 						for (int i = 0; i < thingList.Count; i++)
 						{
@@ -150,7 +157,15 @@ namespace RimThreaded
 					{
 						if (scanner.def.scanThings)
 						{
-							Predicate<Thing> validator = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t);
+							Predicate<Thing> validator;
+							if (scanner is WorkGiver_DoBill workGiver_DoBill)
+							{
+								validator = (Thing t) => !t.IsForbidden(pawn) && WorkGiver_Scanner_Patch.HasJobOnThing(workGiver_DoBill, pawn, t);
+							}
+							else
+							{
+								validator = (Thing t) => !t.IsForbidden(pawn) && scanner.HasJobOnThing(pawn, t);
+							}
 							IEnumerable<Thing> enumerable = scanner.PotentialWorkThingsGlobal(pawn);
 							Thing thing;
 							if (scanner.Prioritized)
