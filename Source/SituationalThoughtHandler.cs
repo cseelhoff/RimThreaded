@@ -28,6 +28,15 @@ namespace RimThreaded
             RimThreadedHarmony.harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
         }
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SituationalThoughtHandler);
+            Type patched = typeof(SituationalThoughtHandler_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AppendSocialThoughts");
+            RimThreadedHarmony.Prefix(original, patched, "Notify_SituationalThoughtsDirty");
+            RimThreadedHarmony.Prefix(original, patched, "RemoveExpiredThoughtsFromCache");
+        }
+
         public static void Postfix_Constructor(SituationalThoughtHandler __instance, Pawn pawn)
         {
             this_cachedSocialThoughts[__instance] = new Dictionary<Pawn, CachedSocialThoughts>();
@@ -175,13 +184,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(SituationalThoughtHandler);
-            Type patched = typeof(SituationalThoughtHandler_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "AppendSocialThoughts");
-            RimThreadedHarmony.Prefix(original, patched, "Notify_SituationalThoughtsDirty");
-            RimThreadedHarmony.Prefix(original, patched, "RemoveExpiredThoughtsFromCache");
-        }
     }
 }

@@ -474,6 +474,8 @@ namespace RimThreaded
 			HaulAIUtility_Patch.RunNonDestructivePatches();
 			ImmunityHandler_Patch.RunNonDestructivePatches();
 			JobGiver_AnimalFlee_Patch.RunNonDestructivePatches(); //may need changes to FleeLargeFireJob
+			JobGiver_ConfigurableHostilityResponse_Patch.RunNonDestructivePatches();
+			LanguageWordInfo_Patch.RunNonDestructivePatches();
 			MapTemperature_Patch.RunNonDestructivePatches();
 			Medicine_Patch.RunNonDestructivePatches();
 			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
@@ -577,6 +579,7 @@ namespace RimThreaded
 			AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			AudioSource_Patch.RunDestructivePatches();
 			AudioSourceMaker_Patch.RunDestructivePatches();
+			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			CompCauseGameCondition_Patch.RunDestructivePatches();
 			ContentFinder_Texture2D_Patch.RunDestructivePatches();
 			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
@@ -584,10 +587,14 @@ namespace RimThreaded
 			DynamicDrawManager_Patch.RunDestructivePatches();
 			FactionManager_Patch.RunDestructivePatches();
 			GenClosest_Patch.RunDestructivePatches();
+			GenCollection_Patch.RunDestructivePatches();
 			GenTemperature_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches();
+			HediffSet_Patch.RunDestructivePatches();
+			ImmunityHandler_Patch.RunDestructivePatches();
 			ListerThings_Patch.RunDestructivePatches();
 			JobMaker_Patch.RunDestructivePatches();
+			LongEventHandler_Patch.RunDestructivePatches();
 			Lord_Patch.RunDestructivePatches();
 			LordManager_Patch.RunDestructivePatches();
 			LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. TRANSPILE
@@ -597,6 +604,7 @@ namespace RimThreaded
 			Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
+			PawnPath_Patch.RunDestructivePatches();
 			PawnUtility_Patch.RunDestructivePatches();
 			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			PlayLog_Patch.RunDestructivePatches();
@@ -622,6 +630,7 @@ namespace RimThreaded
 			ThingGrid_Patch.RunDestructivePatches();
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			TickManager_Patch.RunDestructivePatches();
+			TileTemperaturesComp_Patch.RunDestructivePatches(); //TODO - good simple transpile candidate
 			TimeControls_Patch.RunDestructivePatches(); //TODO TRANSPILE - should releave needing TexButton2 class
 			TradeShip_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
@@ -644,31 +653,22 @@ namespace RimThreaded
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 
 			//check methods for unneccessary try catches
-			//Battle_Patch.RunDestructivePatches();
-			Building_Door_Patch.RunDestructivePatches();
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
-			//PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
-			ReservationManager_Patch.RunDestructivePatches();
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
 			MapPawns_Patch.RunDestructivePatches();
 			Region_Patch.RunDestructivePatches();
-			ImmunityHandler_Patch.RunDestructivePatches();
+			ReservationManager_Patch.RunDestructivePatches();
 			Room_Patch.RunDestructivePatches();
-			LongEventHandler_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches();
+
+
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
-			PawnPath_Patch.RunDestructivePatches();
-			GenCollection_Patch.RunDestructivePatches();
-			HediffSet_Patch.RunDestructivePatches();
-			LanguageWordInfo_Patch.RunDestructivePatches();
-			JobGiver_ConfigurableHostilityResponse_Patch.RunDestructivePatches();
 			TendUtility_Patch.RunDestructivePatches();
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
 			JobGiver_Work_Patch.RunDestructivePatches();
 			ThingCountUtility_Patch.RunDestructivePatches();
 			BiomeDef_Patch.RunDestructivePatches();
 			WildPlantSpawner_Patch.RunDestructivePatches();
-			TileTemperaturesComp_Patch.RunDestructivePatches();
 			PawnRelationUtility_Patch.RunDestructivePatches();
 			SustainerAggregatorUtility_Patch.RunDestructivePatches();
 			StoryState_Patch.RunDestructivePatches();
@@ -683,6 +683,8 @@ namespace RimThreaded
 			Pawn_JobTracker_Patch.RunDestructivePatches();
 			JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
+			//Battle_Patch.RunDestructivePatches();
+			//PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
 		}
 
 		private static void PatchModCompatibility()

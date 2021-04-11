@@ -21,6 +21,13 @@ namespace RimThreaded
         public static AccessTools.FieldRef<FloodFiller, IntGrid> traversalDistance =
             AccessTools.FieldRefAccess<FloodFiller, IntGrid>("traversalDistance");
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(FloodFiller);
+            Type patched = typeof(FloodFiller_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "FloodFill", new Type[] { typeof(IntVec3), typeof(Predicate<IntVec3>), typeof(Func<IntVec3, int, bool>), typeof(int), typeof(bool), typeof(IEnumerable<IntVec3>) });
+        }
+
         public static bool FloodFill(FloodFiller __instance,
               IntVec3 root,
               Predicate<IntVec3> passCheck,
@@ -143,12 +150,5 @@ namespace RimThreaded
             openSet(__instance).Clear();
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(FloodFiller);
-            Type patched = typeof(FloodFiller_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "FloodFill", new Type[] { typeof(IntVec3), typeof(Predicate<IntVec3>), typeof(Func<IntVec3, int, bool>), typeof(int), typeof(bool), typeof(IEnumerable<IntVec3>) });
-
-        }
     }
 }

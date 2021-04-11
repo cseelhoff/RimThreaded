@@ -9,6 +9,19 @@ namespace RimThreaded
     public class HediffSet_Patch
     {
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(HediffSet);
+            Type patched = typeof(HediffSet_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AddDirect");
+        }
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(HediffSet);
+            Type patched = typeof(HediffSet_Patch);
+            RimThreadedHarmony.Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
+        }
+
         public static bool AddDirect(HediffSet __instance, Hediff hediff, DamageInfo? dinfo = null, DamageWorker.DamageResult damageResult = null)
         {
             if (hediff.def == null)
@@ -94,17 +107,5 @@ namespace RimThreaded
             }
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(HediffSet);
-            Type patched = typeof(HediffSet_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "AddDirect");
-        }
-        internal static void RunNonDestructivePatches()
-        {
-            Type original = typeof(HediffSet);
-            Type patched = typeof(HediffSet_Patch);
-            RimThreadedHarmony.Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
-        }
     }
 }

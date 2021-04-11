@@ -26,6 +26,13 @@ namespace RimThreaded
 
 		public static FieldRef<CompPowerTrader, bool> powerOnIntFieldRef = FieldRefAccess<CompPowerTrader, bool>("powerOnInt");
 
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(Building_Door);
+			Type patched = typeof(Building_Door_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "get_DoorPowerOn");
+		}
+
 		public static bool get_DoorPowerOn(Building_Door __instance, ref bool __result)
 		{
 			CompPowerTrader pc = __instance.powerComp;
@@ -43,11 +50,5 @@ namespace RimThreaded
 			return false;
 		}
 
-        internal static void RunDestructivePatches()
-        {
-			Type original = typeof(Building_Door);
-			Type patched = typeof(Building_Door_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "get_DoorPowerOn");
-		}
     }
 }

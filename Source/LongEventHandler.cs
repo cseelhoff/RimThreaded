@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections;
 using UnityEngine;
 using static HarmonyLib.AccessTools;
-using System.Reflection;
 
 namespace RimThreaded
 {
@@ -98,37 +97,18 @@ namespace RimThreaded
 			}
 		}
 
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(LongEventHandler);
+			Type patched = typeof(LongEventHandler_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "ExecuteToExecuteWhenFinished");
+			RimThreadedHarmony.Prefix(original, patched, "ExecuteWhenFinished");
+		}
 		public static void RunNonDestructivePatches()
         {
 			Type original = typeof(LongEventHandler);
 			Type patched = typeof(LongEventHandler_Patch);
 			RimThreadedHarmony.Prefix(original, patched, "RunEventFromAnotherThread", null, false);
-		}
-
-		public static void CopyEventQueue()
-		{
-			while (eventQueue1.Count > 0)
-			{
-				object obj = eventQueue1.Dequeue();
-				FieldInfo action = obj.GetType().GetField("eventAction", BindingFlags.Public | BindingFlags.Instance);
-				FieldInfo textKeyField = obj.GetType().GetField("eventTextKey", BindingFlags.Public | BindingFlags.Instance);
-				FieldInfo doAsynchronouslyField = obj.GetType().GetField("doAsynchronously", BindingFlags.Public | BindingFlags.Instance);
-				FieldInfo exceptionHandlerField = obj.GetType().GetField("exceptionHandler", BindingFlags.Public | BindingFlags.Instance);
-				FieldInfo canEverUseStandardWindowField = obj.GetType().GetField("canEverUseStandardWindow", BindingFlags.Public | BindingFlags.Instance);
-				FieldInfo showExtraUIInfoField = obj.GetType().GetField("showExtraUIInfo", BindingFlags.Public | BindingFlags.Instance);
-
-				QueuedLongEvent2 queuedLongEvent = new QueuedLongEvent2
-				{
-					eventAction = (Action)(action.GetValue(obj)),
-					eventTextKey = (string)textKeyField.GetValue(obj),
-					doAsynchronously = (bool)doAsynchronouslyField.GetValue(obj),
-					exceptionHandler = (Action<Exception>)exceptionHandlerField.GetValue(obj),
-					canEverUseStandardWindow = (bool)canEverUseStandardWindowField.GetValue(obj),
-					showExtraUIInfo = (bool)showExtraUIInfoField.GetValue(obj)
-				};
-				eventQueue.Enqueue(queuedLongEvent);
-			}
-			initCopyComplete = true;
 		}
 
 		public static bool ExecuteToExecuteWhenFinished()
@@ -137,25 +117,24 @@ namespace RimThreaded
 			{
 				DeepProfiler.Start("ExecuteToExecuteWhenFinished()");
 			}
-			Action action;
-			while (toExecuteWhenFinished2.TryDequeue(out action))
-			{
-				DeepProfiler.Start(action.Method.DeclaringType.ToString() + " -> " + action.Method.ToString());
-				try
-				{
-					action();
-				}
-				catch (Exception arg)
-				{
-					Log.Error("Could not execute post-long-event action. Exception: " + arg);
-				}
-				finally
-				{
-					DeepProfiler.End();
-				}
-			}
+            while (toExecuteWhenFinished2.TryDequeue(out Action action))
+            {
+                DeepProfiler.Start(action.Method.DeclaringType.ToString() + " -> " + action.Method.ToString());
+                try
+                {
+                    action();
+                }
+                catch (Exception arg)
+                {
+                    Log.Error("Could not execute post-long-event action. Exception: " + arg);
+                }
+                finally
+                {
+                    DeepProfiler.End();
+                }
+            }
 
-			if (toExecuteWhenFinished2.Count > 0)
+            if (toExecuteWhenFinished2.Count > 0)
 			{
 				DeepProfiler.End();
 			}
@@ -175,13 +154,6 @@ namespace RimThreaded
 			return true;
 		}
 
-        internal static void RunDestructivePatches()
-        {
-			Type original = typeof(LongEventHandler);
-			Type patched = typeof(LongEventHandler_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "ExecuteToExecuteWhenFinished");
-			RimThreadedHarmony.Prefix(original, patched, "ExecuteWhenFinished");
-		}
     }
 
 
