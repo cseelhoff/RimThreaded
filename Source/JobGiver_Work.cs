@@ -203,7 +203,10 @@ namespace RimThreaded
 									//workGiver.def.defName.Equals("HaulGeneral") ||
 									workGiver.def.defName.Equals("HandlingFeedPatientAnimals") ||
 									workGiver.def.defName.Equals("Train") ||
-									workGiver.def.defName.Equals("VisitSickPawn")
+									workGiver.def.defName.Equals("VisitSickPawn") ||
+									workGiver.def.defName.Equals("DoBillsButcherFlesh") ||
+									workGiver.def.defName.Equals("DoBillsCook") ||
+									workGiver.def.defName.Equals("DoBillsMakeApparel")
 								)
 								{
 									//ClosestThingReachable2 checks validator before CanReach
@@ -217,11 +220,13 @@ namespace RimThreaded
 										Log.Warning("ClosestThingReachable2 Took over 200ms for workGiver: " + workGiver.def.defName);
 									}
 								}
+								/*
 								else if(
 										workGiver.def.defName.Equals("DoBillsButcherFlesh") ||
 										workGiver.def.defName.Equals("DoBillsCook") ||
 										workGiver.def.defName.Equals("DoBillsMakeApparel")) 
 								{
+									
 									thing = null;
 									//ThingGrid_Patch
 									int mapSizeX = pawn.Map.Size.x;
@@ -234,7 +239,9 @@ namespace RimThreaded
 										scoreToJumboCellsList = new Dictionary<float, List<HashSet<Thing>[]>>();
 										List<Thing> thingsMatchingRequest = pawn.Map.listerThings.ThingsMatching(thingReq);
 									}
+									
 								}
+								*/
 								else
                                 {
 									DateTime startTime = DateTime.Now;

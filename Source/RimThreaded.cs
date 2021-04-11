@@ -278,6 +278,7 @@ namespace RimThreaded
             Projectile_Patch.InitializeThreadStatics();
             ThinkNode_PrioritySorter_Patch.InitializeThreadStatics();
             ThoughtHandler_Patch.InitializeThreadStatics();
+            Toils_Ingest_Patch.InitializeThreadStatics();
             Verb_Patch.InitializeThreadStatics();
             WanderUtility_Patch.InitializeThreadStatics();
             WealthWatcher_Patch.InitializeThreads();

@@ -7,7 +7,7 @@ namespace RimThreaded
 {
     public class RegionDirtyer_Patch
     {
-        [ThreadStatic] static List<Region> regionsToDirty;
+        [ThreadStatic] public static List<Region> regionsToDirty;
         public static Dictionary<RegionDirtyer, List<IntVec3>> dirtyCellsDict = new Dictionary<RegionDirtyer, List<IntVec3>>();
 
         public static FieldRef<RegionDirtyer, Map> map = FieldRefAccess<RegionDirtyer, Map>("map");

@@ -1,8 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -15,6 +11,14 @@ namespace RimThreaded
     {
 		public static MethodInfo willBeFasterOnNextCell =
 			typeof(PawnCollisionTweenerUtility).GetMethod("WillBeFasterOnNextCell", BindingFlags.Static | BindingFlags.NonPublic);
+
+		internal static void RunDestructivePatches()
+		{
+			Type original = typeof(PawnCollisionTweenerUtility);
+			Type patched = typeof(PawnCollisionTweenerUtility_Patch);
+			RimThreadedHarmony.Prefix(original, patched, "GetPawnsStandingAtOrAboutToStandAt");
+			RimThreadedHarmony.Prefix(original, patched, "CanGoDirectlyToNextCell");
+		}
 
 		public static bool GetPawnsStandingAtOrAboutToStandAt(
 		  IntVec3 at,
@@ -96,12 +100,5 @@ namespace RimThreaded
 			return false;
 		}
 
-        internal static void RunDestructivePatches()
-        {
-			Type original = typeof(PawnCollisionTweenerUtility);
-			Type patched = typeof(PawnCollisionTweenerUtility_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "GetPawnsStandingAtOrAboutToStandAt");
-			RimThreadedHarmony.Prefix(original, patched, "CanGoDirectlyToNextCell");
-		}
     }
 }

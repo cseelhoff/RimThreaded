@@ -53,6 +53,7 @@ namespace RimThreaded
                 lock (__instance)
                 {
                     thingGrid(__instance)[index].Add(t);
+                    /*
                     if (!thingBillPoints.TryGetValue(t.def, out Dictionary<WorkGiver_Scanner, float> billPointsDict))
                     {
                         billPointsDict = new Dictionary<WorkGiver_Scanner, float>();
@@ -74,6 +75,7 @@ namespace RimThreaded
                             i++;
                         } while (power2 < mapSizeX || power2 < mapSizeZ);
                     }
+                    */
                 }
             }
             return false;
@@ -101,7 +103,7 @@ namespace RimThreaded
                         List<Thing> newThingList = new List<Thing>(thingList);
                         newThingList.Remove(t);
                         thingGridInstance[index] = newThingList;
-
+                        /*
                         int mapSizeX = this_map.Size.x;
                         int mapSizeZ = this_map.Size.z;
 
@@ -128,6 +130,7 @@ namespace RimThreaded
                                 i++;
                             } while (power2 < mapSizeX || power2 < mapSizeZ);
                         }
+                        */
                     }
                 }
             }

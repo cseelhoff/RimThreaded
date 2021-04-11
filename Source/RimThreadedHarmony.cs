@@ -459,6 +459,7 @@ namespace RimThreaded
 			
 			//Simple
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
+			BeautyUtility_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches(); 
 			CellFinder_Patch.RunNonDestructivePatches();
 			DamageWorker_Patch.RunNonDestructivePatches();
@@ -482,9 +483,11 @@ namespace RimThreaded
 			PawnDiedOrDownedThoughtsUtility_Patch.RunNonDestructivePatches();
 			Projectile_Patch.RunNonDestructivePatches();
 			RCellFinder_Patch.RunNonDestructivePatches();
+			RegionCostCalculator_Patch.RunNonDestructivePatches();
 			RegionListersUpdater_Patch.RunNonDestructivePatches();
 			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
 			ThoughtHandler_Patch.RunNonDestructivePatches();
+			Toils_Ingest_Patch.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
 			WanderUtility_Patch.RunNoneDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
@@ -587,6 +590,7 @@ namespace RimThreaded
 			JobMaker_Patch.RunDestructivePatches();
 			Lord_Patch.RunDestructivePatches();
 			LordManager_Patch.RunDestructivePatches();
+			LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. TRANSPILE
 			MaterialPool_Patch.RunDestructivePatches();
 			MemoryThoughtHandler_Patch.RunDestructivePatches();
 			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO re-add transpile
@@ -618,6 +622,7 @@ namespace RimThreaded
 			ThingGrid_Patch.RunDestructivePatches();
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			TickManager_Patch.RunDestructivePatches();
+			TimeControls_Patch.RunDestructivePatches(); //TODO TRANSPILE - should releave needing TexButton2 class
 			TradeShip_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
 			WealthWatcher_Patch.RunDestructivePatches();
@@ -639,10 +644,10 @@ namespace RimThreaded
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 
 			//check methods for unneccessary try catches
-			Battle_Patch.RunDestructivePatches();
+			//Battle_Patch.RunDestructivePatches();
 			Building_Door_Patch.RunDestructivePatches();
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
-			PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
+			//PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
 			ReservationManager_Patch.RunDestructivePatches();
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
 			MapPawns_Patch.RunDestructivePatches();
@@ -651,15 +656,12 @@ namespace RimThreaded
 			Room_Patch.RunDestructivePatches();
 			LongEventHandler_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches();
-			LordToil_Siege_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
 			GenCollection_Patch.RunDestructivePatches();
 			HediffSet_Patch.RunDestructivePatches();
 			LanguageWordInfo_Patch.RunDestructivePatches();
 			JobGiver_ConfigurableHostilityResponse_Patch.RunDestructivePatches();
-			Toils_Ingest_Patch.RunDestructivePatches();
-			BeautyUtility_Patch.RunDestructivePatches();
 			TendUtility_Patch.RunDestructivePatches();
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
 			JobGiver_Work_Patch.RunDestructivePatches();
@@ -673,9 +675,7 @@ namespace RimThreaded
 			GrammarResolver_Patch.RunDestructivePatches();
 			JobQueue_Patch.RunDestructivePatches();
 			MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
-			TimeControls_Patch.RunDestructivePatches();
 			GlobalControlsUtility_Patch.RunDestructivePatches();
-			RegionCostCalculator_Patch.RunDestructivePatches();
 			GUIStyle_Patch.RunDestructivePatches();
 			Pawn_RotationTracker_Patch.RunDestructivePatches();
 			GrammarResolverSimpleStringExtensions_Patch.RunDestructivePatches();

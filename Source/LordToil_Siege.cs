@@ -1,12 +1,9 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 using Verse.AI.Group;
 using UnityEngine;
 
@@ -14,7 +11,14 @@ namespace RimThreaded
 {
 
     public class LordToil_Siege_Patch
-	{
+    {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(LordToil_Siege);
+            Type patched = typeof(LordToil_Siege_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "UpdateAllDuties");
+        }
+
         private static void SetAsDefender(LordToilData_Siege data, Pawn p)
         {
             //LordToilData_Siege data = __instance.Data;
@@ -51,9 +55,9 @@ namespace RimThreaded
             }
             else
             {
-                lock (__instance.rememberedDuties)
+                lock (__instance)
                 {
-                    __instance.rememberedDuties.Clear();
+                    __instance.rememberedDuties = new Dictionary<Pawn, DutyDef>();
                 }
                 int num1 = Mathf.RoundToInt(__instance.lord.ownedPawns.Count * data.desiredBuilderFraction);
                 if (num1 <= 0)
@@ -67,7 +71,7 @@ namespace RimThreaded
                     Pawn ownedPawn = __instance.lord.ownedPawns[index];
                     if (ownedPawn.mindState.duty.def == DutyDefOf.Build)
                     {
-                        lock (__instance.rememberedDuties)
+                        lock (__instance)
                         {
                             if (__instance.rememberedDuties.ContainsKey(ownedPawn))
                             {
@@ -84,7 +88,7 @@ namespace RimThreaded
                     Pawn result;
                     if (__instance.lord.ownedPawns.Where(pa => !__instance.rememberedDuties.ContainsKey(pa) && CanBeBuilder(pa)).TryRandomElement(out result))
                     {
-                        lock (__instance.rememberedDuties)
+                        lock (__instance)
                         {
                             __instance.rememberedDuties.Add(result, DutyDefOf.Build);
                         }
@@ -98,7 +102,7 @@ namespace RimThreaded
                     if (!__instance.rememberedDuties.ContainsKey(ownedPawn))
                     {
                         SetAsDefender(data, ownedPawn);
-                        lock (__instance.rememberedDuties)
+                        lock (__instance)
                         {
                             __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Defend);
                         }
@@ -115,11 +119,5 @@ namespace RimThreaded
             return !p.WorkTypeIsDisabled(WorkTypeDefOf.Construction) && !p.WorkTypeIsDisabled(WorkTypeDefOf.Firefighter);
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(LordToil_Siege);
-            Type patched = typeof(LordToil_Siege_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "UpdateAllDuties");
-        }
     }
 }

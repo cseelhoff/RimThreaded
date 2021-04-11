@@ -1,13 +1,10 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
+﻿using RimWorld;
 using Verse;
-using Verse.AI;
 using Verse.Sound;
 using UnityEngine;
+using System;
+using System.Reflection;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -161,38 +158,25 @@ namespace RimThreaded
     }
     public class TimeControls_Patch
     {
-        public static AccessTools.FieldRef<TimeSlower, int> forceNormalSpeedUntil = AccessTools.FieldRefAccess<TimeSlower, int>("forceNormalSpeedUntil");
-        public static TimeSpeed[] CachedTimeSpeedValues = AccessTools.StaticFieldRefAccess<TimeSpeed[]>(typeof(TimeControls), "CachedTimeSpeedValues");
+        public static FieldRef<TimeSlower, int> forceNormalSpeedUntil = FieldRefAccess<TimeSlower, int>("forceNormalSpeedUntil");
+        public static TimeSpeed[] CachedTimeSpeedValues = StaticFieldRefAccess<TimeSpeed[]>(typeof(TimeControls), "CachedTimeSpeedValues");
 
         public static bool lastTickForcedSlow = false;
         public static bool overrideForcedSlow = false;
 
-        private static void PlaySoundOf(TimeSpeed speed)
+        private static readonly MethodInfo methodPlaySoundOf =
+            Method(typeof(TimeControls), "PlaySoundOf", new Type[] { typeof(TimeSpeed) });
+        private static readonly Action<TimeSpeed> actionPlaySoundOf =
+            (Action<TimeSpeed>)Delegate.CreateDelegate(
+                typeof(Action<TimeSpeed>), methodPlaySoundOf);
+
+
+        internal static void RunDestructivePatches()
         {
-            SoundDef soundDef = null;
-            switch (speed)
-            {
-                case TimeSpeed.Paused:
-                    soundDef = SoundDefOf.Clock_Stop;
-                    break;
-                case TimeSpeed.Normal:
-                    soundDef = SoundDefOf.Clock_Normal;
-                    break;
-                case TimeSpeed.Fast:
-                    soundDef = SoundDefOf.Clock_Fast;
-                    break;
-                case TimeSpeed.Superfast:
-                    soundDef = SoundDefOf.Clock_Superfast;
-                    break;
-                case TimeSpeed.Ultrafast:
-                    soundDef = SoundDefOf.Clock_Superfast;
-                    break;
-            }
-
-            soundDef?.PlayOneShotOnCamera();
+            Type original = typeof(TimeControls);
+            Type patched = typeof(TimeControls_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "DoTimeControlsGUI");
         }
-
-
 
         public static bool DoTimeControlsGUI(Rect timerRect)
         {
@@ -220,7 +204,7 @@ namespace RimThreaded
                         PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     }
 
-                    PlaySoundOf(tickManager.CurTimeSpeed);
+                    actionPlaySoundOf(tickManager.CurTimeSpeed);
                 }
 
                 if (tickManager.CurTimeSpeed == timeSpeed)
@@ -247,7 +231,7 @@ namespace RimThreaded
             if (KeyBindingDefOf.TogglePause.KeyDownEvent)
             {
                 Find.TickManager.TogglePaused();
-                PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
                 PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Pause, KnowledgeAmount.SpecificInteraction);
                 Event.current.Use();
             }
@@ -257,7 +241,7 @@ namespace RimThreaded
                 if (KeyBindingDefOf.TimeSpeed_Normal.KeyDownEvent)
                 {
                     Find.TickManager.CurTimeSpeed = TimeSpeed.Normal;
-                    PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -270,7 +254,7 @@ namespace RimThreaded
                         overrideForcedSlow = true;
                     }
                     //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
-                    PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -283,7 +267,7 @@ namespace RimThreaded
                         overrideForcedSlow = true;
                     }
                     //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
-                    PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -296,7 +280,7 @@ namespace RimThreaded
                         overrideForcedSlow = true;
                     }
                     //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
-                    PlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -313,11 +297,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(TimeControls);
-            Type patched = typeof(TimeControls_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "DoTimeControlsGUI");
-        }
     }
 }

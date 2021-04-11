@@ -11,7 +11,7 @@ namespace RimThreaded
 
     public class WorldPawns_Patch
     {
-        [ThreadStatic] static List<Pawn> tmpPawnsToRemove;
+        [ThreadStatic] public static List<Pawn> tmpPawnsToRemove;
 
         public static FieldRef<WorldPawns, List<Pawn>> allPawnsAliveResult = FieldRefAccess<WorldPawns, List<Pawn>>("allPawnsAliveResult");
         public static FieldRef<WorldPawns, HashSet<Pawn>> pawnsAlive = FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsAlive");

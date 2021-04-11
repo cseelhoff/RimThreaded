@@ -13,7 +13,7 @@ namespace RimThreaded
     public class PathFinder_Patch
     {
         [ThreadStatic] public static List<int> disallowedCornerIndices;
-        [ThreadStatic] static PathFinderNodeFast2[] calcGrid;
+        [ThreadStatic] public static PathFinderNodeFast2[] calcGrid;
         [ThreadStatic] public static FastPriorityQueue<CostNode2> openList;
         [ThreadStatic] public static ushort statusOpenValue;
         [ThreadStatic] public static ushort statusClosedValue;

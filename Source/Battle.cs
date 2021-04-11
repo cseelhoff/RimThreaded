@@ -2,31 +2,31 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using UnityEngine;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class Battle_Patch
     {
-        public static AccessTools.FieldRef<Battle, int> loadID =
-            AccessTools.FieldRefAccess<Battle, int>("loadID");
+        public static FieldRef<Battle, int> loadID =
+            FieldRefAccess<Battle, int>("loadID");
 
-        public static AccessTools.FieldRef<Battle, int> creationTimestamp =
-            AccessTools.FieldRefAccess<Battle, int>("creationTimestamp");
-        public static AccessTools.FieldRef<Battle, List<LogEntry>> entries =
-            AccessTools.FieldRefAccess<Battle, List<LogEntry>>("entries");
-        public static AccessTools.FieldRef<Battle, Battle> absorbedBy =
-            AccessTools.FieldRefAccess<Battle, Battle>("absorbedBy");
-        public static AccessTools.FieldRef<Battle, string> battleName =
-            AccessTools.FieldRefAccess<Battle, string>("battleName");
-        public static AccessTools.FieldRef<Battle, HashSet<Pawn>> concerns =
-            AccessTools.FieldRefAccess<Battle, HashSet<Pawn>>("concerns");
+        public static FieldRef<Battle, int> creationTimestamp = FieldRefAccess<Battle, int>("creationTimestamp");
+        public static FieldRef<Battle, List<LogEntry>> entries = FieldRefAccess<Battle, List<LogEntry>>("entries");
+        public static FieldRef<Battle, Battle> absorbedBy = FieldRefAccess<Battle, Battle>("absorbedBy");
+        public static FieldRef<Battle, string> battleName = FieldRefAccess<Battle, string>("battleName");
+        public static FieldRef<Battle, HashSet<Pawn>> concerns = FieldRefAccess<Battle, HashSet<Pawn>>("concerns");
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Battle);
+            Type patched = typeof(Battle_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ExposeData");
+            RimThreadedHarmony.Prefix(original, patched, "Absorb");
+        }
 
         public static bool Absorb(Battle __instance, Battle battle)
         {
@@ -72,12 +72,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(Battle);
-            Type patched = typeof(Battle_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "ExposeData");
-            RimThreadedHarmony.Prefix(original, patched, "Absorb");
-        }
     }
 }

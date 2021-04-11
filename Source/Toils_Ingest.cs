@@ -6,59 +6,26 @@ using Verse;
 
 namespace RimThreaded
 {
-
     public class Toils_Ingest_Patch
-	{
-        public static bool TryFindAdjacentIngestionPlaceSpot(ref bool __result,
-              IntVec3 root,
-              ThingDef ingestibleDef,
-              Pawn pawn,
-              out IntVec3 placeSpot)
+    {
+        [ThreadStatic] public static List<IntVec3> spotSearchList;
+        [ThreadStatic] public static List<IntVec3> cardinals;
+        [ThreadStatic] public static List<IntVec3> diagonals;
+
+        internal static void InitializeThreadStatics()
         {
-            placeSpot = IntVec3.Invalid;
-            for (int index = 0; index < 4; ++index)
-            {
-                IntVec3 c = root + GenAdj.CardinalDirections[index];
-                if (c.HasEatSurface(pawn.Map) && (!pawn.Map.thingGrid.ThingsAt(c).Where(t => t.def == ingestibleDef).Any() && !c.IsForbidden(pawn)))
-                {
-                    placeSpot = c;
-                    __result = true;
-                    return false;
-                }
-            }
-            if (!placeSpot.IsValid)
-            {
-                //Toils_Ingest.spotSearchList.Clear();
-                List<IntVec3> spotSearchList = new List<IntVec3>();
-                List<IntVec3> cardinals = ((IEnumerable<IntVec3>)GenAdj.CardinalDirections).ToList();
-                List<IntVec3> diagonals = ((IEnumerable<IntVec3>)GenAdj.DiagonalDirections).ToList();
-                cardinals.Shuffle();
-                for (int index = 0; index < 4; ++index)
-                    spotSearchList.Add(cardinals[index]);
-                diagonals.Shuffle();
-                for (int index = 0; index < 4; ++index)
-                    spotSearchList.Add(diagonals[index]);
-                spotSearchList.Add(IntVec3.Zero);
-                for (int index = 0; index < spotSearchList.Count; ++index)
-                {
-                    IntVec3 c = root + spotSearchList[index];
-                    if (c.Walkable(pawn.Map) && !c.IsForbidden(pawn) && !pawn.Map.thingGrid.ThingsAt(c).Where(t => t.def == ingestibleDef).Any())
-                    {
-                        placeSpot = c;
-                        __result = true;
-                        return false;
-                    }
-                }
-            }
-            __result = false;
-            return false;
+            spotSearchList = new List<IntVec3>();
+            cardinals = GenAdj.CardinalDirections.ToList();
+            diagonals = GenAdj.DiagonalDirections.ToList();
         }
 
-        internal static void RunDestructivePatches()
+        internal static void RunNonDestructivePatches()
         {
             Type original = typeof(Toils_Ingest);
             Type patched = typeof(Toils_Ingest_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "TryFindAdjacentIngestionPlaceSpot");
+            RimThreadedHarmony.AddAllMatchingFields(original, patched);
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindAdjacentIngestionPlaceSpot");
         }
+
     }
 }
