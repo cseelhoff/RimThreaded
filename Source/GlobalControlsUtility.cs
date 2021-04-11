@@ -7,8 +7,15 @@ namespace RimThreaded
 {
 
     public class GlobalControlsUtility_Patch
-	{
-		public static void DoTimespeedControls(float leftX, float width, ref float curBaseY)
+    {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(GlobalControlsUtility);
+            Type patched = typeof(GlobalControlsUtility_Patch);
+            RimThreadedHarmony.Postfix(original, patched, "DoTimespeedControls");
+        }
+
+        public static void DoTimespeedControls(float leftX, float width, ref float curBaseY)
 		{            
             DateTime now = DateTime.Now;
             if (now.Second != RimThreaded.lastTicksCheck.Second)
@@ -26,11 +33,5 @@ namespace RimThreaded
             curBaseY -= 26f;
 		}
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(GlobalControlsUtility);
-            Type patched = typeof(GlobalControlsUtility_Patch);
-            RimThreadedHarmony.Postfix(original, patched, "DoTimespeedControls");
-        }
     }
 }

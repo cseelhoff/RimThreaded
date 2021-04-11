@@ -101,6 +101,7 @@
     <Compile Include="Patch_TryOpportunisticJob_Transpile.cs" />
     <Compile Include="PawnCapacitiesHandler_Transpile.cs" />
     <Compile Include="Pawn_HealthTracker_Transpile.cs" />
+    <Compile Include="Pawn_RelationsTracker.cs" />
     <Compile Include="Pawn_RelationsTracker_Transpile.cs" />
     <Compile Include="PlayDataLoader_Patch.cs" />
     <Compile Include="PortraitRenderer_Patch.cs" />
@@ -131,7 +132,6 @@
     <Compile Include="Pawn_HealthTracker.cs" />
     <Compile Include="Pawn_JobTracker_DetermineNextJob_Transpile.cs" />
     <Compile Include="GenLabel_Transpile.cs" />
-    <Compile Include="Pawn_RotationTracker.cs" />
     <Compile Include="GenAdj.cs" />
     <Compile Include="MapPawns_Transpile.cs" />
     <Compile Include="RecipeWorkerCounter.cs" />
@@ -249,7 +249,6 @@
     <Compile Include="MapPawns.cs" />
     <Compile Include="AttackTargetReservationManager_Patch.cs" />
     <Compile Include="AttackTargetsCache_Patch.cs" />
-    <Compile Include="Battle.cs" />
     <Compile Include="Building_Door.cs" />
     <Compile Include="CellFinder.cs" />
     <Compile Include="ContentFinder.cs" />
@@ -269,7 +268,6 @@
     <Compile Include="PawnUtility.cs" />
     <Compile Include="Pawn_MeleeVerbs.cs" />
     <Compile Include="Pawn_MindState.cs" />
-    <Compile Include="Pawn_RelationsTracker.cs" />
     <Compile Include="PhysicalInteractionReservationManager.cs" />
     <Compile Include="Projectile.cs" />
     <Compile Include="Rand_Patch.cs" />

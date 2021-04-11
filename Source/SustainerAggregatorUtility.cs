@@ -15,6 +15,12 @@ namespace RimThreaded
 	{
         public static float AggregateRadius =
             AccessTools.StaticFieldRefAccess<float>(typeof(SustainerAggregatorUtility), "AggregateRadius");
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(SustainerAggregatorUtility);
+            Type patched = typeof(SustainerAggregatorUtility_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AggregateOrSpawnSustainerFor");
+        }
         public static bool AggregateOrSpawnSustainerFor(ref Sustainer __result, ISizeReporter reporter, SoundDef def, SoundInfo info)
         {
             Sustainer sustainer = null;
@@ -51,11 +57,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(SustainerAggregatorUtility);
-            Type patched = typeof(SustainerAggregatorUtility_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "AggregateOrSpawnSustainerFor");
-        }
     }
 }

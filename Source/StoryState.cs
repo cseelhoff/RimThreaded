@@ -1,19 +1,21 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 
 namespace RimThreaded
 {
 
     public class StoryState_Patch
     {
-		public static AccessTools.FieldRef<StoryState, Dictionary<int, int>> colonistCountTicks =
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(StoryState);
+            Type patched = typeof(StoryState_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "RecordPopulationIncrease");
+        }
+        public static AccessTools.FieldRef<StoryState, Dictionary<int, int>> colonistCountTicks =
 			AccessTools.FieldRefAccess<StoryState, Dictionary<int, int>>("colonistCountTicks");
         public static bool RecordPopulationIncrease(StoryState __instance)
         {
@@ -28,11 +30,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(StoryState);
-            Type patched = typeof(StoryState_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "RecordPopulationIncrease");
-        }
     }
 }

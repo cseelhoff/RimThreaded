@@ -50,6 +50,8 @@ namespace RimThreaded
         {
             RimThreadedHarmony.AddAllMatchingFields(original, patched);
             RimThreadedHarmony.TranspileFieldReplacements(original, "CheckSpawnWildPlantAt");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CalculateDistancesToNearbyClusters");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "EnoughLowerOrderPlantsNearby");
         }
         internal static void RunDestructivePatches()
         {

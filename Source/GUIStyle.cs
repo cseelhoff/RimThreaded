@@ -8,6 +8,14 @@ namespace RimThreaded
 
     public class GUIStyle_Patch
     {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(GUIStyle);
+            Type patched = typeof(GUIStyle_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "CalcHeight");
+            RimThreadedHarmony.Prefix(original, patched, "CalcSize");
+        }
+
         public static bool CalcHeight(GUIStyle __instance, ref float __result, GUIContent content, float width)
         {
             if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
@@ -35,12 +43,5 @@ namespace RimThreaded
             return true;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(GUIStyle);
-            Type patched = typeof(GUIStyle_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "CalcHeight");
-            RimThreadedHarmony.Prefix(original, patched, "CalcSize");
-        }
     }
 }

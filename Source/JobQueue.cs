@@ -9,12 +9,25 @@ namespace RimThreaded
 
     public class JobQueue_Patch
 	{
+
         public static FieldRef<JobQueue, List<QueuedJob>> jobs = FieldRefAccess<JobQueue, List<QueuedJob>>("jobs");
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(JobQueue);
+            Type patched = typeof(JobQueue_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "AnyCanBeginNow");
+            RimThreadedHarmony.Prefix(original, patched, "EnqueueFirst");
+            RimThreadedHarmony.Prefix(original, patched, "EnqueueLast");
+            RimThreadedHarmony.Prefix(original, patched, "Contains");
+            RimThreadedHarmony.Prefix(original, patched, "Extract");
+            RimThreadedHarmony.Prefix(original, patched, "Dequeue");
+        }
         public static bool AnyCanBeginNow(JobQueue __instance, ref bool __result, Pawn pawn, bool whileLyingDown)
         {
-            for (int i = 0; i < jobs(__instance).Count; i++)
+            List<QueuedJob> j = jobs(__instance);
+            for (int i = 0; i < j.Count; i++)
             {
-                QueuedJob queuedJob = jobs(__instance)[i];
+                QueuedJob queuedJob = j[i];
                 if (null != queuedJob)
                 {
                     if (queuedJob.job.CanBeginNow(pawn, whileLyingDown))
@@ -29,16 +42,18 @@ namespace RimThreaded
         }
         public static bool EnqueueFirst(JobQueue __instance, Job j, JobTag? tag = null)
         {
-            lock (jobs(__instance))
+            lock (__instance)
             {
-                jobs(__instance).Insert(0, new QueuedJob(j, tag));
+                List<QueuedJob> newJobs = new List<QueuedJob>(jobs(__instance));
+                newJobs.Insert(0, new QueuedJob(j, tag));
+                jobs(__instance) = newJobs;
             }
             return false;
         }
 
         public static bool EnqueueLast(JobQueue __instance, Job j, JobTag? tag = null)
         {
-            lock (jobs(__instance))
+            lock (__instance)
             {
                 jobs(__instance).Add(new QueuedJob(j, tag));
             }
@@ -47,12 +62,13 @@ namespace RimThreaded
 
         public static bool Contains(JobQueue __instance, ref bool __result, Job j)
         {
-            for (int i = 0; i < jobs(__instance).Count; i++)
+            List<QueuedJob> snapshotJobs = jobs(__instance);
+            for (int i = 0; i < snapshotJobs.Count; i++)
             {
                 QueuedJob jobi;
                 try
                 {
-                    jobi = jobs(__instance)[i];
+                    jobi = snapshotJobs[i];
                 }
                 catch (ArgumentOutOfRangeException)
                 {
@@ -70,7 +86,7 @@ namespace RimThreaded
 
         public static bool Extract(JobQueue __instance, ref QueuedJob __result, Job j)
         {
-            lock (jobs(__instance))
+            lock (__instance)
             {
                 int num = jobs(__instance).FindIndex((QueuedJob qj) => qj.job == j);
                 if (num >= 0)
@@ -88,7 +104,7 @@ namespace RimThreaded
         public static bool Dequeue(JobQueue __instance, ref QueuedJob __result)
         {
             QueuedJob result;
-            lock (jobs(__instance))
+            lock (__instance)
             {
                 if (jobs(__instance).NullOrEmpty())
                 {
@@ -103,16 +119,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(JobQueue);
-            Type patched = typeof(JobQueue_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "AnyCanBeginNow");
-            RimThreadedHarmony.Prefix(original, patched, "EnqueueFirst");
-            RimThreadedHarmony.Prefix(original, patched, "EnqueueLast");
-            RimThreadedHarmony.Prefix(original, patched, "Contains");
-            RimThreadedHarmony.Prefix(original, patched, "Extract");
-            RimThreadedHarmony.Prefix(original, patched, "Dequeue");
-        }
     }
 }

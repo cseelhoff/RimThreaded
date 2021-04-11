@@ -16,6 +16,13 @@ namespace RimThreaded
 	{
         public static Dictionary<Pawn, Dictionary<MeditationFocusDef, bool>> pawnCanUseMeditationTypeCached = StaticFieldRefAccess<Dictionary<Pawn, Dictionary<MeditationFocusDef, bool>>>(typeof(MeditationFocusTypeAvailabilityCache), "pawnCanUseMeditationTypeCached");
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(MeditationFocusTypeAvailabilityCache);
+            Type patched = typeof(MeditationFocusTypeAvailabilityCache_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "PawnCanUse");
+            RimThreadedHarmony.Prefix(original, patched, "ClearFor");
+        }
         public static bool PawnCanUse(ref bool __result, Pawn p, MeditationFocusDef type)
         {
             if (!pawnCanUseMeditationTypeCached.ContainsKey(p))
@@ -44,7 +51,7 @@ namespace RimThreaded
             {
                 lock (pawnCanUseMeditationTypeCached[p])
                 {
-                    pawnCanUseMeditationTypeCached[p].Clear();
+                    pawnCanUseMeditationTypeCached[p] = new Dictionary<MeditationFocusDef, bool>();
                 }
             }
             return false;
@@ -141,12 +148,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(MeditationFocusTypeAvailabilityCache);
-            Type patched = typeof(MeditationFocusTypeAvailabilityCache_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "PawnCanUse");
-            RimThreadedHarmony.Prefix(original, patched, "ClearFor");
-        }
     }
 }

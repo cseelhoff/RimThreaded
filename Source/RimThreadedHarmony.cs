@@ -471,6 +471,7 @@ namespace RimThreaded
 			GenLeaving_Patch.RunNonDestructivePatches();
 			GenRadial_Patch.RunNonDestructivePatches();
 			GenText_Patch.RunNonDestructivePatches();
+			GrammarResolverSimpleStringExtensions_Patch.RunNonDestructivePatches();
 			HaulAIUtility_Patch.RunNonDestructivePatches();
 			ImmunityHandler_Patch.RunNonDestructivePatches();
 			JobGiver_AnimalFlee_Patch.RunNonDestructivePatches(); //may need changes to FleeLargeFireJob
@@ -592,6 +593,8 @@ namespace RimThreaded
 			GenClosest_Patch.RunDestructivePatches();
 			GenCollection_Patch.RunDestructivePatches();
 			GenTemperature_Patch.RunDestructivePatches();
+			GlobalControlsUtility_Patch.RunDestructivePatches();
+			GrammarResolver_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches();
 			HediffSet_Patch.RunDestructivePatches();
 			ImmunityHandler_Patch.RunDestructivePatches();
@@ -628,9 +631,11 @@ namespace RimThreaded
 			SoundSizeAggregator_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
 			SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
 			SteadyEnvironmentEffects_Patch.RunDestructivePatches();
+			StoryState_Patch.RunDestructivePatches(); //WrapMethodInInstanceLock
 			SubSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			Sustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-			SustainerManager_Patch.RunDestructivePatches();
+			SustainerAggregatorUtility_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			SustainerManager_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
@@ -650,6 +655,7 @@ namespace RimThreaded
 			//main-thread-only
 			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
 			Graphics_Patch.RunDestructivePatches();//Graphics (Giddy-Up and others)
+			GUIStyle_Patch.RunDestructivePatches();
 			LightningBoltMeshMaker_Patch.RunDestructivePatches();
 			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
 			MeshMakerPlanes_Patch.RunDestructivePatches();
@@ -662,29 +668,19 @@ namespace RimThreaded
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			BiomeDef_Patch.RunDestructivePatches();
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
+			JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
+			JobQueue_Patch.RunDestructivePatches();
 			MapPawns_Patch.RunDestructivePatches();
+			MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
+			Pawn_JobTracker_Patch.RunDestructivePatches();
+			Pawn_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			Region_Patch.RunDestructivePatches();
 			ReservationManager_Patch.RunDestructivePatches();
 			Room_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches();
-
-
-			SustainerAggregatorUtility_Patch.RunDestructivePatches();
-			StoryState_Patch.RunDestructivePatches();
-			GrammarResolver_Patch.RunDestructivePatches();
-			JobQueue_Patch.RunDestructivePatches();
-			MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
-			GlobalControlsUtility_Patch.RunDestructivePatches();
-			GUIStyle_Patch.RunDestructivePatches();
-			Pawn_RotationTracker_Patch.RunDestructivePatches();
-			GrammarResolverSimpleStringExtensions_Patch.RunDestructivePatches();
-			Pawn_Patch.RunDestructivePatches();
-			Pawn_JobTracker_Patch.RunDestructivePatches();
-			JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
-			//Battle_Patch.RunDestructivePatches();
-			//PawnCollisionTweenerUtility_Patch.RunDestructivePatches();
+
 		}
 
 		private static void PatchModCompatibility()

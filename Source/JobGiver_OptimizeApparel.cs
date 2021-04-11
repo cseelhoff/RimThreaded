@@ -1,12 +1,9 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -16,6 +13,16 @@ namespace RimThreaded
     {
         public static StringBuilder debugSb = StaticFieldRefAccess<StringBuilder>(typeof(JobGiver_OptimizeApparel), "debugSb");
         public static NeededWarmth neededWarmth = StaticFieldRefAccess<NeededWarmth>(typeof(JobGiver_OptimizeApparel), "neededWarmth");
+
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(JobGiver_OptimizeApparel);
+            Type patched = typeof(JobGiver_OptimizeApparel_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ApparelScoreGain");
+            RimThreadedHarmony.Prefix(original, patched, "ApparelScoreGain_NewTmp");
+            RimThreadedHarmony.Prefix(original, patched, "TryGiveJob");
+        }
+        
         public static bool ApparelScoreGain(ref float __result, Pawn pawn, Apparel ap)
         {
             List<float> wornApparelScores = new List<float>();
@@ -182,13 +189,5 @@ namespace RimThreaded
             pawn.mindState.nextApparelOptimizeTick = Find.TickManager.TicksGame + Rand.Range(6000, 9000);
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(JobGiver_OptimizeApparel);
-            Type patched = typeof(JobGiver_OptimizeApparel_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "ApparelScoreGain");
-            RimThreadedHarmony.Prefix(original, patched, "ApparelScoreGain_NewTmp");
-            RimThreadedHarmony.Prefix(original, patched, "TryGiveJob");
-        }
     }
 }

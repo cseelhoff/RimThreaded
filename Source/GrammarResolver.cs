@@ -22,6 +22,13 @@ namespace RimThreaded
         public static Dictionary<string, List<RuleEntry>> rules = new Dictionary<string, List<RuleEntry>>();
         static object resolveLock = new object();
 
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(GrammarResolver);
+            Type patched = typeof(GrammarResolver_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "ResolveUnsafe", new Type[] { typeof(string), typeof(GrammarRequest), typeof(bool).MakeByRefType(), typeof(string), typeof(bool), typeof(bool), typeof(List<string>), typeof(List<string>), typeof(bool) });
+        }
+
         private static bool TryResolveRecursive(RuleEntry entry, int depth, Dictionary<string, string> constants, out string output, bool log, List<string> extraTags, List<string> resolvedTags)
         {
             string text = "";
@@ -473,12 +480,5 @@ namespace RimThreaded
             return list.RandomElementByWeightWithFallback((RuleEntry rule) => (rule.knownUnresolvable || !rule.ValidateConstantConstraints(constants) || !rule.ValidateRequiredTag(extraTags, resolvedTags) || rule.Priority != maxPriority) ? 0f : rule.SelectionWeight);
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(GrammarResolver);
-            Type patched = typeof(GrammarResolver_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "ResolveUnsafe", new Type[] { typeof(string), typeof(GrammarRequest), typeof(bool).MakeByRefType(), typeof(string), typeof(bool), typeof(bool), typeof(List<string>), typeof(List<string>), typeof(bool) });
-
-        }
     }
 }
