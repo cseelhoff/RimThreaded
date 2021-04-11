@@ -664,7 +664,7 @@ namespace RimThreaded
 			SectionLayer_Patch.RunDestructivePatches();
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 
-			//check methods for unneccessary try catches
+			//complex methods that need further review for simplification
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			BiomeDef_Patch.RunDestructivePatches();
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
