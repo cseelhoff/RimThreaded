@@ -27,7 +27,7 @@ namespace RimThreaded
             Type original = typeof(FloodFiller);
             Type patched = typeof(FloodFiller_Patch);
             RimThreadedHarmony.AddAllMatchingFields(original, patched);
-            RimThreadedHarmony.TranspileFieldReplacements(original, "FloodFill");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "FloodFill", new Type[] { typeof(IntVec3), typeof(Predicate<IntVec3>), typeof(Func<IntVec3, int, bool>), typeof(int), typeof(bool), typeof(IEnumerable<IntVec3>) });
             RimThreadedHarmony.TranspileFieldReplacements(original, "ClearVisited");
         }
 

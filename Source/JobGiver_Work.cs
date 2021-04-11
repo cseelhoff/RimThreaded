@@ -201,18 +201,18 @@ namespace RimThreaded
 									//long
 									thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 									
-									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
+									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200 && RimThreadedSettings.show200mswarning)
 									{
-										Log.Warning("ClosestThingReachable2 Took over 200ms for workGiver: " + workGiver.def.defName);
+										Log.Warning("ClosestThingReachable2 Took " + DateTime.Now.Subtract(startTime).TotalMilliseconds + "ms  for workGiver: " + workGiver.def.defName);
 									}
 								}
 								else
                                 {
 									DateTime startTime = DateTime.Now;
 									thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
+									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200 && RimThreadedSettings.show200mswarning)
 									{
-										Log.Warning("ClosestThingReachable Took over 200ms for workGiver: " + workGiver.def.defName);
+										Log.Warning("ClosestThingReachable Took " + DateTime.Now.Subtract(startTime).TotalMilliseconds + "ms for workGiver: " + workGiver.def.defName);
 									}
 								}
 							}

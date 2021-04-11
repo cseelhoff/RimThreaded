@@ -20,8 +20,9 @@ namespace RimThreaded
         public string timeSpeedUltrafastBuffer = "150";
         public bool disablesomealerts = false;
         public bool disablelimits = false;
-        public bool disableforcedslowdowns = false;
+        public bool disableforcedslowdowns = true;
         public bool showModConflictsAlert = true;
+        public static bool show200mswarning = true;
         public float scrollViewHeight;
         public Vector2 scrollPosition;
         public string modsText = "";
@@ -48,8 +49,10 @@ namespace RimThreaded
             Scribe_Values.Look(ref timeSpeedUltrafastBuffer, "timeSpeedUltrafastBuffer", "150");
             Scribe_Values.Look(ref disablesomealerts, "disablesomealets", false);
             Scribe_Values.Look(ref disablelimits, "disablelimits", false);
-            Scribe_Values.Look(ref disableforcedslowdowns, "disableforcedslowdowns", false);
+            Scribe_Values.Look(ref disableforcedslowdowns, "disableforcedslowdowns", true);
             Scribe_Values.Look(ref showModConflictsAlert, "showModConflictsAlert", true);
+            Scribe_Values.Look(ref showModConflictsAlert, "show200mswarning", true);
+
 
         }
 
@@ -74,6 +77,7 @@ namespace RimThreaded
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Disable thread/worker limit (debugging):", ref disablelimits);
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Disable slowdown on combat:", ref disableforcedslowdowns);
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Show alert when conflicting mods are detected:", ref showModConflictsAlert);
+            Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Show console warning when thread took over 200ms:", ref show200mswarning);
             Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText, ref scrollPos);
             listing_Standard.EndScrollView(ref viewRect);
             scrollViewHeight = viewRect.height;
