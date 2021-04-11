@@ -26,6 +26,7 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, "ResetDefs");
             RimThreadedHarmony.Prefix(original, patched, "ResetResourceCounts");
             RimThreadedHarmony.Prefix(original, patched, "GetCount"); //maybe not needed
+            RimThreadedHarmony.Prefix(original, patched, "UpdateResourceCounts"); //maybe not needed
             RimThreadedHarmony.Prefix(original, patched, "get_TotalHumanEdibleNutrition"); //maybe not needed
         }
 

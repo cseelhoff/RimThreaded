@@ -585,7 +585,8 @@ namespace RimThreaded
 			Lord_Patch.RunDestructivePatches();
 			LordManager_Patch.RunDestructivePatches();
 			MaterialPool_Patch.RunDestructivePatches();
-			MemoryThoughtHandler_Patch.RunDestructivePatches();
+			MemoryThoughtHandler_Patch.RunDestructivePatches(); 
+			Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			PawnUtility_Patch.RunDestructivePatches();
@@ -618,6 +619,7 @@ namespace RimThreaded
 			WindManager_Patch.RunDestructivePatches();
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 			WorldComponentUtility_Patch.RunDestructivePatches();
+			WorldObjectsHolder_Patch.RunDestructivePatches();
 			WorldPawns_Patch.RunDestructivePatches(); //todo examine GC optimization
 
 			//main-thread-only
@@ -682,8 +684,6 @@ namespace RimThreaded
 			Pawn_JobTracker_Patch.RunDestructivePatches();
 			JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches();
-			Pawn_MindState_Patch.RunDestructivePatches();
-			WorldObjectsHolder_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
 		}
 
