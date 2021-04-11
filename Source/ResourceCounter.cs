@@ -75,15 +75,41 @@ namespace RimThreaded
                     return false;
                 }
 
+                Dictionary<ThingDef, int> newCountedAmounts = new Dictionary<ThingDef, int>(__instance.AllCountedAmounts);
                 Log.Error("Looked for nonexistent key " + rDef + " in counted resources.");
-                {
-                    __instance.AllCountedAmounts.Add(rDef, 0);
-                }
+                newCountedAmounts.Add(rDef, 0);
+                countedAmountsFieldRef(__instance) = newCountedAmounts;
             }
             __result = 0;
             return false;
         }
-
+        public static bool UpdateResourceCounts(ResourceCounter __instance)
+        {
+            lock (lockObject)
+            {
+                __instance.ResetResourceCounts();
+                Dictionary<ThingDef, int> newCountedAmounts = new Dictionary<ThingDef, int>(__instance.AllCountedAmounts);
+                bool changed = false;
+                List<SlotGroup> allGroupsListForReading = map(__instance).haulDestinationManager.AllGroupsListForReading;
+                for (int i = 0; i < allGroupsListForReading.Count; i++)
+                {
+                    foreach (Thing heldThing in allGroupsListForReading[i].HeldThings)
+                    {
+                        Thing innerIfMinified = heldThing.GetInnerIfMinified();
+                        if (innerIfMinified.def.CountAsResource && !innerIfMinified.IsNotFresh())
+                        {
+                            newCountedAmounts[innerIfMinified.def] += innerIfMinified.stackCount;
+                            changed = true;
+                        }
+                    }
+                }
+                if (changed)
+                {
+                    countedAmountsFieldRef(__instance) = newCountedAmounts;
+                }
+            }
+            return false;
+        }
 
     }
 }

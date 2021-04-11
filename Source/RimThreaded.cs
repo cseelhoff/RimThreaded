@@ -531,6 +531,13 @@ namespace RimThreaded
 
         }
 
+        private static readonly MethodInfo methodDoCellSteadyEffects =
+            Method(typeof(SteadyEnvironmentEffects), "DoCellSteadyEffects", new Type[] { typeof(IntVec3) });
+        private static readonly Action<SteadyEnvironmentEffects, IntVec3> actionDoCellSteadyEffects =
+            (Action<SteadyEnvironmentEffects, IntVec3>)Delegate.CreateDelegate(
+                typeof(Action<SteadyEnvironmentEffects, IntVec3>), methodDoCellSteadyEffects);
+
+
         private static void ExecuteTicks()
         {
             if (mapPreTickComplete && plantMaterialsCount > 0)
@@ -740,7 +747,7 @@ namespace RimThreaded
                     IntVec3 c = steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
                     try
                     {
-                        SteadyEnvironmentEffects_Patch.DoCellSteadyEffects(
+                        actionDoCellSteadyEffects(
                             steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffects, c);
                     } catch (Exception ex)
                     {

@@ -604,6 +604,7 @@ namespace RimThreaded
 			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
 			SoundSizeAggregator_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
 			SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
+			SteadyEnvironmentEffects_Patch.RunDestructivePatches();
 			SubSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			Sustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			SustainerManager_Patch.RunDestructivePatches();
@@ -614,6 +615,7 @@ namespace RimThreaded
 			TradeShip_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
 			WealthWatcher_Patch.RunDestructivePatches();
+			WindManager_Patch.RunDestructivePatches();
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 			WorldComponentUtility_Patch.RunDestructivePatches();
 
@@ -682,8 +684,6 @@ namespace RimThreaded
 			Pawn_MindState_Patch.RunDestructivePatches();
 			WorldObjectsHolder_Patch.RunDestructivePatches();
 			WorldPawns_Patch.RunDestructivePatches();
-			SteadyEnvironmentEffects_Patch.RunDestructivePatches();
-			WindManager_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
 		}
 
