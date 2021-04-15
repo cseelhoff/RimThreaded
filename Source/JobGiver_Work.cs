@@ -142,13 +142,30 @@ namespace RimThreaded
 								{
 									//ClosestThingReachable2 checks validator before CanReach
 									DateTime startTime = DateTime.Now;
-									
+
 									//long
 									thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-									
+
 									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
 									{
 										Log.Warning("ClosestThingReachable2 Took over 200ms for workGiver: " + workGiver.def.defName);
+									}
+								}
+								else if (
+								   workGiver.def.defName.Equals("HaulGeneral")
+								)
+								{
+									//ClosestThingReachable2 checks validator before CanReach
+									DateTime startTime = DateTime.Now;
+
+									//long
+									thing = HaulingCache.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+
+									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 100)
+									{
+										Log.Warning("HaulingCache.ClosestThingReachable Took over 100ms for HaulGeneral: " + workGiver.def.defName);
+										Log.Warning(scanner.PotentialWorkThingRequest.ToString());
+										Log.Warning(validator.ToString());
 									}
 								}
 								/*

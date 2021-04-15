@@ -473,6 +473,7 @@ namespace RimThreaded
 			GenText_Patch.RunNonDestructivePatches();
 			GrammarResolverSimpleStringExtensions_Patch.RunNonDestructivePatches();
 			HaulAIUtility_Patch.RunNonDestructivePatches();
+			SlotGroup_Patch.RunNonDestructivePatches();
 			ImmunityHandler_Patch.RunNonDestructivePatches();
 			JobGiver_AnimalFlee_Patch.RunNonDestructivePatches(); //may need changes to FleeLargeFireJob
 			JobGiver_ConfigurableHostilityResponse_Patch.RunNonDestructivePatches();
