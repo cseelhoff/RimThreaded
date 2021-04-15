@@ -606,6 +606,7 @@ namespace RimThreaded
 			Lord_Patch.RunDestructivePatches();
 			LordManager_Patch.RunDestructivePatches();
 			LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. TRANSPILE
+			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
 			MaterialPool_Patch.RunDestructivePatches();
 			MemoryThoughtHandler_Patch.RunDestructivePatches();
 			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO re-add transpile

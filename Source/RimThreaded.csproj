@@ -97,6 +97,7 @@
     <Compile Include="Hauling_Transpile.cs" />
     <Compile Include="JobGiver_Haul_Patch.cs" />
     <Compile Include="JoyGiver_Ingest_Patch.cs" />
+    <Compile Include="Map_Patch.cs" />
     <Compile Include="MemoryThoughtHandler_Patch.cs" />
     <Compile Include="Patch_TryOpportunisticJob.cs" />
     <Compile Include="Patch_TryOpportunisticJob_Transpile.cs" />
