@@ -42,6 +42,9 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, "DebugString");
 			RimThreadedHarmony.Prefix(original, patched, "DebugDrawReservations");
 			RimThreadedHarmony.Prefix(original, patched, "ExposeData");
+
+			RimThreadedHarmony.Postfix(original, patched, "Release", "PostRelease");
+			RimThreadedHarmony.Postfix(original, patched, "Release", "PostReleaseAllForTarget");
 		}
 
 		public static bool ExposeData(ReservationManager __instance)
@@ -241,6 +244,21 @@ namespace RimThreaded
 				}
 			}
 			return reservationClaimantDict;
+		}
+
+		public static void PostRelease(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
+		{
+			if (target.Thing != null && target.Thing.def.EverHaulable && target.Thing.Map != null)
+			{
+				HaulingCache.ReregisterHaulableItem(target.Thing);
+			}
+		}
+		public static void PostReleaseAllForTarget(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
+		{
+			if (target.Thing != null && target.Thing.def.EverHaulable && target.Thing.Map != null)
+			{
+				HaulingCache.ReregisterHaulableItem(target.Thing);
+			}
 		}
 
 		public static bool CanReserve(ReservationManager __instance, ref bool __result, Pawn claimant, LocalTargetInfo target, int maxPawns = 1, int stackCount = -1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
@@ -598,6 +616,11 @@ namespace RimThreaded
 							}
 						}
 						reservationTargetDict[reservation.Target] = newReservationTargetList;
+						//HaulingCache
+						if (reservation.Target.Thing != null && reservation.Target.Thing.def.EverHaulable && reservation.Target.Thing.Map != null)
+						{
+							HaulingCache.ReregisterHaulableItem(reservation.Target.Thing);
+						}
 					}
 					reservationClaimantDict[claimant] = newReservationClaimantList;
 				}
@@ -624,7 +647,12 @@ namespace RimThreaded
 							newReservationTargetList.Add(reservation);
 						}
 					}
-					reservationTargetDict[reservation.Target] = newReservationTargetList;				
+					reservationTargetDict[reservation.Target] = newReservationTargetList;
+					//HaulingCache
+					if (reservation.Target.Thing != null && reservation.Target.Thing.def.EverHaulable && reservation.Target.Thing.Map != null)
+					{
+						HaulingCache.ReregisterHaulableItem(reservation.Target.Thing);
+					}
 				}
 				reservationClaimantDict[claimant] = newReservationClaimantList;
 			}

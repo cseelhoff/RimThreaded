@@ -456,8 +456,9 @@ namespace RimThreaded
 
 		private static void PatchNonDestructiveFixes()
 		{
-			
+
 			//Simple
+			Area_Patch.RunNonDestructivePatches();
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
 			BeautyUtility_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches(); 
@@ -646,6 +647,7 @@ namespace RimThreaded
 			TimeControls_Patch.RunDestructivePatches(); //TODO TRANSPILE - should releave needing TexButton2 class
 			TradeShip_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
+			Verb_Patch.RunDestructivePatches(); // TODO: why is this cauing null?
 			WealthWatcher_Patch.RunDestructivePatches();
 			WildPlantSpawner_Patch.RunDestructivePatches();
 			WindManager_Patch.RunDestructivePatches();

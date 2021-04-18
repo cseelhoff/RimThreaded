@@ -1,41 +1,54 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using static HarmonyLib.AccessTools;
+using static RimThreaded.Area_Patch;
 
 namespace RimThreaded
 {
-    class HaulingCache
-    {
+	class HaulingCache
+	{
 		static readonly Dictionary<Map, HashSet<Thing>[]> waitingForZoneBetterThanMapDict = new Dictionary<Map, HashSet<Thing>[]>(); //each Map has sets of Things for each storage priority (typically 6)
-		public static int[] power2array = new int[] { 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 }; // a 16384x16384 map is probably too big
+		public static List<int> zoomLevels = new List<int>();
 		public static Dictionary<Map, List<HashSet<Thing>[]>> awaitingHaulingMapDict = new Dictionary<Map, List<HashSet<Thing>[]>>();
-		// Map, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
+		public const float ZOOM_MULTIPLIER = 1.5f; //must be greater than 1. lower numbers will make searches slower, but ensure pawns find the closer things first.
+												   // Map, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
 
-		public static bool RegisterHaulableItem(Thing haulableThing) {
-			int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
-			bool foundDestination = false;
-			Map map = haulableThing.Map;
-			
-			if (StoreUtility.TryFindBestBetterStoreCellFor(haulableThing, null, map, StoreUtility.CurrentStoragePriorityOf(haulableThing), null, out _, false)) {
-				AddThingToAwaitingHaulingHashSets(haulableThing);
-			} else			
-            {
-				getWaitingForZoneBetterThan(map)[storagePriority].Add(haulableThing);
+
+		private static int getJumboCellWidth(int zoomLevel)
+        {
+			if (zoomLevels.Count <= zoomLevel)
+			{
+				int lastZoomLevel = 1;
+				for (int i = zoomLevels.Count; i <= zoomLevel; i++)
+				{
+					if (i > 0)
+						lastZoomLevel = zoomLevels[i - 1];
+					zoomLevels.Add(Mathf.CeilToInt(lastZoomLevel * ZOOM_MULTIPLIER));
+				}
 			}
-			return foundDestination;
+			return zoomLevels[zoomLevel];
+		}
+
+		public static void RegisterHaulableItem(Thing haulableThing) {
+			Map map = haulableThing.Map;
+			if (map.physicalInteractionReservationManager.IsReserved(haulableThing))
+			{
+				int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
+				if (StoreUtility.TryFindBestBetterStoreCellFor(haulableThing, null, map, StoreUtility.CurrentStoragePriorityOf(haulableThing), null, out _, false)) {
+					AddThingToAwaitingHaulingHashSets(haulableThing);
+				} else
+				{
+					getWaitingForZoneBetterThan(map)[storagePriority].Add(haulableThing);
+				}
+			}
 		}
 
 		private static void AddThingToAwaitingHaulingHashSets(Thing haulableThing)
 		{
-			int power2;
+			int jumboCellWidth;
 			Map map = haulableThing.Map;
 			int mapSizeX = map.Size.x;
 			int mapSizeZ = map.Size.z;
@@ -44,71 +57,65 @@ namespace RimThreaded
 			zoomLevel = 0;
 			do
 			{
-				power2 = power2array[zoomLevel];
-				int cellIndex = CellToIndexCustom(haulableThing.Position, mapSizeX, power2);
-                List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
-                HashSet<Thing> hashset = awaitingHaulingZoomLevels[zoomLevel][cellIndex];
-				if(hashset == null)
-                {
+				jumboCellWidth = getJumboCellWidth(zoomLevel);
+				List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
+				HashSet<Thing>[] awaitingHaulingGrid = awaitingHaulingZoomLevels[zoomLevel];
+				int jumboCellIndex = CellToIndexCustom(haulableThing.Position, mapSizeX, jumboCellWidth);
+				HashSet<Thing> hashset = awaitingHaulingGrid[jumboCellIndex];
+				if (hashset == null)
+				{
 					hashset = new HashSet<Thing>();
-					awaitingHaulingZoomLevels[zoomLevel][cellIndex] = hashset;
+					awaitingHaulingGrid[jumboCellIndex] = hashset;
 				}
 				hashset.Add(haulableThing);
 				zoomLevel++;
-			} while (power2 < mapSizeX || power2 < mapSizeZ);
+			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}
 
 		private static void RemoveThingToAwaitingHaulingHashSets(Thing haulableThing)
 		{
-			int power2;
+			int jumboCellWidth;
 			Map map = haulableThing.Map;
 			int mapSizeX = map.Size.x;
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;
-			List<HashSet<Thing>[]> awaitingHaulingZoomLevels = awaitingHaulingMapDict[map];
+			List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
 			zoomLevel = 0;
 			do
 			{
-				power2 = power2array[zoomLevel];
-				int cellIndex = CellToIndexCustom(haulableThing.Position, mapSizeX, power2);
+				jumboCellWidth = getJumboCellWidth(zoomLevel);
+				int cellIndex = CellToIndexCustom(haulableThing.Position, mapSizeX, jumboCellWidth);
 				HashSet<Thing> hashset = awaitingHaulingZoomLevels[zoomLevel][cellIndex];
 				if (hashset != null)
 				{
 					hashset.Remove(haulableThing);
 				}
 				zoomLevel++;
-			} while (power2 < mapSizeX || power2 < mapSizeZ);
+			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}
 
 		private static List<HashSet<Thing>[]> GetAwaitingHauling(Map map)
-        {
+		{
 			if (!awaitingHaulingMapDict.TryGetValue(map, out List<HashSet<Thing>[]> awaitingHaulingZoomLevels))
 			{
 				awaitingHaulingZoomLevels = new List<HashSet<Thing>[]>();
 				int mapSizeX = map.Size.x;
 				int mapSizeZ = map.Size.z;
-				int power2;
+				int jumboCellWidth;
 				int zoomLevel = 0;
 				do
 				{
-					power2 = power2array[zoomLevel];
-					int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, power2);
+					jumboCellWidth = getJumboCellWidth(zoomLevel);
+					int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, jumboCellWidth);
 					awaitingHaulingZoomLevels.Add(new HashSet<Thing>[numGridCells]);
 					zoomLevel++;
-				} while (power2 < mapSizeX || power2 < mapSizeZ);
+				} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 				awaitingHaulingMapDict[map] = awaitingHaulingZoomLevels;
 			}
 			return awaitingHaulingZoomLevels;
 		}
 
-		private static int CellToIndexCustom(IntVec3 c, int mapSizeX, int cellSize)
-		{
-			return (mapSizeX * c.z + c.x) / cellSize;
-		}
-		private static int NumGridCellsCustom(int mapSizeX, int mapSizeZ, int cellSize)
-		{
-			return Mathf.CeilToInt((mapSizeX * mapSizeZ) / (float)cellSize);
-		}
+
 		public static void DeregisterHaulableItem(Thing haulableThing)
 		{
 			int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
@@ -152,16 +159,122 @@ namespace RimThreaded
 
 		public static void ReregisterHaulableItem(Thing haulableThing)
         {
-			DeregisterHaulableItem(haulableThing);
-			RegisterHaulableItem(haulableThing);
+				DeregisterHaulableItem(haulableThing);
+				RegisterHaulableItem(haulableThing);
 		}
 
-		public static bool IsValidProcess(Thing t, Predicate<Thing> validator = null)
+        private static IEnumerable<Thing> GetClosestHaulableItems(Pawn pawn, Map map)
+        {
+			int jumboCellWidth;
+			int XposOfJumboCell;
+			int ZposOfJumboCell;
+			int cellIndex;
+			int mapSizeX = map.Size.x;
+			HashSet<Thing> thingsAtCellCopy;
+			List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
+			IntVec3 position = pawn.Position;
+			Area effectiveAreaRestrictionInPawnCurrentMap = pawn.playerSettings.EffectiveAreaRestrictionInPawnCurrentMap;
+			Range2D areaRange = GetCorners(effectiveAreaRestrictionInPawnCurrentMap);
+			Range2D scannedRange = new Range2D(position.x, position.z, position.x, position.z);
+			for (int zoomLevel = 0; zoomLevel < awaitingHaulingZoomLevels.Count; zoomLevel++)
+            {
+				HashSet<Thing>[] thingsGrid = awaitingHaulingZoomLevels[zoomLevel];
+				jumboCellWidth = getJumboCellWidth(zoomLevel);
+				//Log.Message("Searching with jumboCellSize of: " + jumboCellWidth.ToString());
+				int jumboCellColumnsInMap = GetJumboCellColumnsInMap(mapSizeX, jumboCellWidth);
+				XposOfJumboCell = position.x / jumboCellWidth;
+				ZposOfJumboCell = position.z / jumboCellWidth; //assuming square map
+				if (zoomLevel == 0)
+				{
+					cellIndex = CellToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
+					HashSet<Thing> thingsAtCell = thingsGrid[cellIndex];
+					if (thingsAtCell != null && thingsAtCell.Count > 0)
+					{
+						thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
+						foreach (Thing haulableThing in thingsAtCellCopy)
+						{
+							yield return haulableThing;
+						}
+					}
+				}
+				IEnumerable<IntVec3> offsetOrder = GetOffsetOrder(position, zoomLevel, scannedRange, areaRange);
+				foreach(IntVec3 offset in offsetOrder)
+                {
+					int newXposOfJumboCell = XposOfJumboCell + offset.x;
+					int newZposOfJumboCell = ZposOfJumboCell + offset.z;
+					if (newXposOfJumboCell >= 0 && newXposOfJumboCell < jumboCellColumnsInMap && newZposOfJumboCell >= 0 && newZposOfJumboCell < jumboCellColumnsInMap) { //assuming square map
+						HashSet<Thing> thingsAtCell = thingsGrid[CellToIndexCustom(newXposOfJumboCell, newZposOfJumboCell, jumboCellColumnsInMap)];
+						if (thingsAtCell != null && thingsAtCell.Count > 0)
+						{
+							thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
+							foreach (Thing haulableThing in thingsAtCellCopy)
+							{
+								yield return haulableThing;
+							}
+						}
+					}
+				}
+				scannedRange.minX = Math.Min(scannedRange.minX, (XposOfJumboCell - 1) * jumboCellWidth);
+				scannedRange.minZ = Math.Min(scannedRange.minZ, (ZposOfJumboCell - 1) * jumboCellWidth);
+				scannedRange.maxX = Math.Max(scannedRange.maxX, ((XposOfJumboCell + 2) * jumboCellWidth) - 1);
+				scannedRange.maxZ = Math.Max(scannedRange.maxZ, ((ZposOfJumboCell + 2) * jumboCellWidth) - 1);
+			}
+		}
+
+        private static IEnumerable<IntVec3> GetOffsetOrder(IntVec3 position, int zoomLevel, Range2D scannedRange, Range2D areaRange)
+        {
+			//TODO optimize direction to scan first
+			if (scannedRange.maxZ < areaRange.maxZ)
+				yield return IntVec3.North;
+			
+			if (scannedRange.maxZ < areaRange.maxZ && scannedRange.maxX < areaRange.maxX)
+				yield return IntVec3.NorthEast;
+
+			if (scannedRange.maxX < areaRange.maxX)
+				yield return IntVec3.East;
+
+			if (scannedRange.minZ > areaRange.minZ && scannedRange.maxX < areaRange.maxX)
+				yield return IntVec3.SouthEast;
+
+			if (scannedRange.minZ > areaRange.minZ)
+				yield return IntVec3.South;
+
+			if (scannedRange.minZ > areaRange.minZ && scannedRange.minX > areaRange.minX)
+				yield return IntVec3.SouthWest;
+
+			if (scannedRange.maxX < areaRange.maxX)
+				yield return IntVec3.West;
+
+			if (scannedRange.maxZ < areaRange.maxZ && scannedRange.minX > areaRange.minX)
+				yield return IntVec3.NorthWest;
+
+		}
+		private static int CellToIndexCustom(IntVec3 position, int mapSizeX, int jumboCellWidth)
 		{
-			return t.Spawned && (validator == null || validator(t));
+			int XposInJumboCell = position.x / jumboCellWidth;
+			int ZposInJumboCell = position.z / jumboCellWidth;
+			int jumboCellColumnsInMap = GetJumboCellColumnsInMap(mapSizeX, jumboCellWidth);
+			return CellToIndexCustom(XposInJumboCell, ZposInJumboCell, jumboCellColumnsInMap);
+		}
+		private static int CellToIndexCustom(int XposOfJumboCell, int ZposOfJumboCell, int jumboCellColumnsInMap)
+		{
+			return (jumboCellColumnsInMap * ZposOfJumboCell) + XposOfJumboCell;
+		}
+		private static int GetJumboCellColumnsInMap(int mapSizeX, int jumboCellWidth)
+		{
+			return Mathf.CeilToInt(mapSizeX / (float)jumboCellWidth);
+		}
+		private static int NumGridCellsCustom(int mapSizeX, int mapSizeZ, int jumboCellWidth)
+		{
+			return GetJumboCellColumnsInMap(mapSizeX, jumboCellWidth) * Mathf.CeilToInt(mapSizeZ / (float)jumboCellWidth);
 		}
 
-		public static Thing ClosestThingReachable(IntVec3 root, Map map, ThingRequest thingReq, PathEndMode peMode, TraverseParms traverseParams, float maxDistance = 9999f, Predicate<Thing> validator = null, IEnumerable<Thing> customGlobalSearchSet = null, int searchRegionsMin = 0, int searchRegionsMax = -1, bool forceAllowGlobalSearch = false, RegionType traversableRegionTypes = RegionType.Set_Passable, bool ignoreEntirelyForbiddenRegions = false)
+
+
+
+
+
+		public static Thing ClosestThingReachable(Pawn pawn, WorkGiver_Scanner scanner, Map map, ThingRequest thingReq, PathEndMode peMode, TraverseParms traverseParams, float maxDistance = 9999f, Predicate<Thing> validator = null, IEnumerable<Thing> customGlobalSearchSet = null, int searchRegionsMin = 0, int searchRegionsMax = -1, bool forceAllowGlobalSearch = false, RegionType traversableRegionTypes = RegionType.Set_Passable, bool ignoreEntirelyForbiddenRegions = false)
 		{
 			bool flag = searchRegionsMax < 0 || forceAllowGlobalSearch;
 			if (!flag && customGlobalSearchSet != null)
@@ -184,99 +297,67 @@ namespace RimThreaded
 				{
 					Log.ErrorOnce("ClosestThingReachable had to do a global search, but traversableRegionTypes is not set to passable only. It's not supported, because Reachability is based on passable regions only.", 14384767);
 				}
-
-				Predicate<Thing> validator2 = delegate (Thing t)
+				IntVec3 root = pawn.Position;
+				IEnumerable<Thing> searchSet = GetClosestHaulableItems(pawn, map);
+				int i = 0;
+				foreach (Thing tryThing in searchSet)
 				{
-					if (!map.reachability.CanReach(root, t, peMode, traverseParams))
+					if (tryThing.Spawned)
 					{
-						return false;
-					}
-
-					return (validator == null || validator(t)) ? true : false;
-				};
-				IEnumerable<Thing> searchSet = GetClosestHaulableItems(root, map);
-				if (validator == null)
-				{
-					foreach (Thing tryThing in searchSet)
-					{
-						if (tryThing.Spawned) {
-							thing = tryThing;
-							break;
-						}
-						else
+						if (!tryThing.IsForbidden(pawn))
 						{
-							ReregisterHaulableItem(tryThing);
-						}
-					}
-				} else
-                {
-					foreach (Thing tryThing in searchSet)
-					{
-						if (tryThing.Spawned && validator(tryThing)) {
-							thing = tryThing;
-							break;
-						} else
-                        {
-							ReregisterHaulableItem(tryThing);
-                        }
-					}
+							if (!map.physicalInteractionReservationManager.IsReserved(tryThing) || map.physicalInteractionReservationManager.IsReservedBy(pawn, tryThing))
+							{
+								UnfinishedThing unfinishedThing = tryThing as UnfinishedThing;
+								Building building;
+								if (!(unfinishedThing != null && unfinishedThing.BoundBill != null && ((building = (unfinishedThing.BoundBill.billStack.billGiver as Building)) == null || (building.Spawned && building.OccupiedRect().ExpandedBy(1).Contains(unfinishedThing.Position)))))
+								{
+									if (pawn.CanReach(tryThing, PathEndMode.ClosestTouch, pawn.NormalMaxDanger()))
+									{
+										if (pawn.CanReserve(tryThing, 1, -1, null, false))
+										{
+											if (pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+											{
+												if (!tryThing.def.IsNutritionGivingIngestible || !tryThing.def.ingestible.HumanEdible || tryThing.IsSociallyProper(pawn, forPrisoner: false, animalsCare: true))
+												{
+													if (HaulAIUtility.PawnCanAutomaticallyHaulFast(pawn, tryThing, false))
+													{
+														if (HaulAIUtility.HaulToStorageJob(pawn, tryThing) != null)
+														{
+															if (scanner.HasJobOnThing(pawn, tryThing))
+															{
+																Log.Message(pawn.ToString() + " is going to haul thing: " + tryThing.ToString() + " at pos " + tryThing.Position.ToString());
+																thing = tryThing;
+																break;
+															}
+															else if (i > -40) { Log.Warning("No Job " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+														}
+														else if (i > -40) { Log.Warning("Can't HaulToStorageJob " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+													}
+													else if (i > -40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+												}
+												else if (i > -40) { Log.Warning("Can't ReservedForPrisonersTrans " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+											}
+											else if (i > -40) { Log.Warning("Not capable of Manipulation " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+										}
+										else if (i > -40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+									}
+									else if (i > -40) { Log.Warning("Can't Haul unfinishedThing " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+								}								
+								else if (i > -40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+							} //else if(i > -40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+						} //else if (i > -40) { Log.Warning("Not Allowed " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+					} else if (i > -40) { Log.Warning("Not Spawned " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+					i++;
+					ReregisterHaulableItem(tryThing);
+				}
+				if (i > 100)
+				{
+					Log.Warning("took more than 100 haulable tries: " + i.ToString());
 				}
 			}
-
 			return thing;
 		}
 
-        private static IEnumerable<Thing> GetClosestHaulableItems(IntVec3 position, Map map)
-        {
-			int power2;
-			int cellIndex;
-			int mapSizeX = map.Size.x;
-			HashSet<Thing> thingsAtCellCopy;
-			List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
-			for (int zoomLevel = 0; zoomLevel < awaitingHaulingZoomLevels.Count; zoomLevel++)
-            {
-				HashSet<Thing>[] thingsGrid = awaitingHaulingZoomLevels[zoomLevel];
-				power2 = power2array[zoomLevel];
-				if (zoomLevel == 0)
-				{
-					cellIndex = CellToIndexCustom(position, mapSizeX, power2);
-					HashSet<Thing> thingsAtCell = thingsGrid[cellIndex];
-					if (thingsAtCell != null && thingsAtCell.Count > 0)
-					{
-						thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
-						foreach (Thing haulableThing in thingsAtCellCopy)
-						{
-							yield return haulableThing;
-						}
-					}
-				}
-				IEnumerable<IntVec3> offsetOrder = GetOffsetOrder(position, zoomLevel);
-				foreach(IntVec3 offset in offsetOrder)
-                {
-					cellIndex = CellToIndexCustom(position + offset, mapSizeX, power2);
-					HashSet<Thing> thingsAtCell = thingsGrid[cellIndex];
-					if (thingsAtCell != null && thingsAtCell.Count > 0)
-					{
-						thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
-						foreach (Thing haulableThing in thingsAtCellCopy)
-						{
-							yield return haulableThing;
-						}
-					}
-				}
-			}
-		}
-
-        private static IEnumerable<IntVec3> GetOffsetOrder(IntVec3 position, int zoomLevel)
-        {
-			yield return IntVec3.North;
-			yield return IntVec3.NorthEast;
-			yield return IntVec3.East;
-			yield return IntVec3.SouthEast;
-			yield return IntVec3.South;
-			yield return IntVec3.SouthWest;
-			yield return IntVec3.West;
-			yield return IntVec3.NorthWest;
-		}
 	}
 }

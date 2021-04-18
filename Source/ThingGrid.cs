@@ -53,7 +53,10 @@ namespace RimThreaded
                 lock (__instance)
                 {
                     thingGrid(__instance)[index].Add(t);
-                    HaulingCache.RegisterHaulableItem(t);
+                    if (t.def.EverHaulable)
+                    {
+                        HaulingCache.RegisterHaulableItem(t);
+                    }
                     /*
                     if (!thingBillPoints.TryGetValue(t.def, out Dictionary<WorkGiver_Scanner, float> billPointsDict))
                     {
@@ -104,7 +107,11 @@ namespace RimThreaded
                         List<Thing> newThingList = new List<Thing>(thingList);
                         newThingList.Remove(t);
                         thingGridInstance[index] = newThingList;
-                        HaulingCache.DeregisterHaulableItem(t);
+
+                        if (t.def.EverHaulable)
+                        {
+                            HaulingCache.DeregisterHaulableItem(t);
+                        }
                         /*
                         int mapSizeX = this_map.Size.x;
                         int mapSizeZ = this_map.Size.z;
