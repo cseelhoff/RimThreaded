@@ -500,6 +500,8 @@ namespace RimThreaded
 			WildPlantSpawner_Patch.RunNonDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
 			WorldGrid_Patch.RunNonDestructivePatches();
+			ZoneManager_Patch.RunNonDestructivePatches();
+			Zone_Patch.RunNonDestructivePatches();
 
 
 			//Complex

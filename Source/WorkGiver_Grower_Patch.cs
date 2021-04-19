@@ -10,6 +10,8 @@ namespace RimThreaded
 {
 	class WorkGiver_Grower_Patch
 	{
+		public static Dictionary<Map, List<HashSet<object>[]>> awaitingPlantCellsMapDict = new Dictionary<Map, List<HashSet<object>[]>>();
+
 		private static readonly MethodInfo methodExtraRequirements =
 			Method(typeof(WorkGiver_Grower), "ExtraRequirements", new Type[] { typeof(IPlantToGrowSettable), typeof(Pawn) });
 		private static readonly Func<WorkGiver_Grower, IPlantToGrowSettable, Pawn, bool> funcExtraRequirements =
@@ -129,5 +131,58 @@ namespace RimThreaded
 				}
 			}
 		}
-	}
+
+        internal static IntVec3 ClosestLocationReachable(WorkGiver_Grower workGiver_Grower, Pawn pawn)
+        {
+			Danger maxDanger = pawn.NormalMaxDanger();
+			/*
+			List<Building> bList = pawn.Map.listerBuildings.allBuildingsColonist;
+			for (int j = 0; j < bList.Count; j++)
+			{
+				Building_PlantGrower building_PlantGrower = bList[j] as Building_PlantGrower;
+				if (building_PlantGrower == null || !funcExtraRequirements(workGiver_Grower, building_PlantGrower, pawn) || building_PlantGrower.IsForbidden(pawn) || !pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, maxDanger) || building_PlantGrower.IsBurning())
+				{
+					continue;
+				}
+
+				foreach (IntVec3 item in building_PlantGrower.OccupiedRect())
+				{
+					return item;
+				}
+
+				//wantedPlantDef = null;
+			}
+			*/
+			//wantedPlantDef = null;
+			//List<Zone> zonesList = pawn.Map.zoneManager.AllZones;
+			//for (int j = 0; j < zonesList.Count; j++)
+			//{
+			ZoneManager zoneManager = pawn.Map.zoneManager;
+
+			//if (growZone.cells.Count == 0)
+			//{
+			//Log.ErrorOnce("Grow zone has 0 cells: " + growZone, -563487);
+			//}
+			foreach (object position in JumboCellCache.GetClosestActionableObjects(pawn, pawn.Map, awaitingPlantCellsMapDict))
+			{				
+				IntVec3 intVec3 = (IntVec3)position;
+                if (!(zoneManager.ZoneAt(intVec3) is Zone_Growing growZone))
+                {
+                    continue;
+                }
+                if (funcExtraRequirements(workGiver_Grower, growZone, pawn) && 
+					!growZone.ContainsStaticFire && 
+					pawn.CanReach(intVec3, PathEndMode.OnCell, maxDanger))
+				{
+					if (workGiver_Grower.HasJobOnCell(pawn, intVec3))
+					{
+						return intVec3;
+					} else { Log.Warning("No Job on Cell " + intVec3); }
+					//wantedPlantDef = null;
+				}				
+			}
+			//wantedPlantDef = null;
+			return IntVec3.Invalid;
+		}
+    }
 }

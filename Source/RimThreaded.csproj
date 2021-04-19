@@ -98,6 +98,7 @@
     <Compile Include="Hauling_Transpile.cs" />
     <Compile Include="JobGiver_Haul_Patch.cs" />
     <Compile Include="JoyGiver_Ingest_Patch.cs" />
+    <Compile Include="JumboCellCache.cs" />
     <Compile Include="Map_Patch.cs" />
     <Compile Include="MemoryThoughtHandler_Patch.cs" />
     <Compile Include="Patch_TryOpportunisticJob.cs" />
@@ -293,6 +294,8 @@
     <Compile Include="TickList.cs" />
     <Compile Include="TickManager.cs" />
     <Compile Include="World_Patch.cs" />
+    <Compile Include="ZoneManager_Patch.cs" />
+    <Compile Include="Zone_Patch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

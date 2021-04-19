@@ -131,7 +131,6 @@ namespace RimThreaded
 									workGiver.def.defName.Equals("DoctorTendEmergency") ||
 									workGiver.def.defName.Equals("HaulCorpses") ||
 									workGiver.def.defName.Equals("FillFermentingBarrel") ||
-									//workGiver.def.defName.Equals("HaulGeneral") ||
 									workGiver.def.defName.Equals("HandlingFeedPatientAnimals") ||
 									workGiver.def.defName.Equals("Train") ||
 									workGiver.def.defName.Equals("VisitSickPawn") ||
@@ -219,14 +218,16 @@ namespace RimThreaded
 							if (scanner is WorkGiver_Grower workGiver_Grower)
 							{
 								RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell = 0;
-								
-								enumerable4 = WorkGiver_Grower_Patch.PotentialWorkCellsGlobalWithoutCanReach(workGiver_Grower, pawn);
-								List<IntVec3> SortedList = enumerable4.OrderBy(o => (o - pawnPosition).LengthHorizontalSquared).ToList();
-								foreach (IntVec3 item in SortedList)
+
+								//thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+
+								IntVec3 bestCell = WorkGiver_Grower_Patch.ClosestLocationReachable(workGiver_Grower, pawn);
+								Log.Message(bestCell.ToString());
+								if (bestCell.IsValid)
 								{
-									ProcessCell(item); //long
+									bestTargetOfLastPriority = new TargetInfo(bestCell, pawn.Map);
+									scannerWhoProvidedTarget = scanner;
 								}
-								
 								//Log.Message(RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell.ToString());
 							}
 							else
