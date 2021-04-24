@@ -322,7 +322,7 @@ namespace RimThreaded
 												{
 													if (HaulAIUtility.PawnCanAutomaticallyHaulFast(pawn, tryThing, false))
 													{
-														if (HaulAIUtility.HaulToStorageJob(pawn, tryThing) != null)
+														if (HaulToStorageJobTest(pawn, tryThing))
 														{
 															if (scanner.HasJobOnThing(pawn, tryThing))
 															{
@@ -330,34 +330,197 @@ namespace RimThreaded
 																thing = tryThing;
 																break;
 															}
-															else if (i > 400) { Log.Warning("No Job " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+															else if (i > 40) { Log.Warning("No Hauling Job " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 														}
-														else if (i > 400) { Log.Warning("Can't HaulToStorageJob " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+														else if (i > 4000) { Log.Warning("Can't HaulToStorageJob " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 													}
-													else if (i > 400) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+													else if (i > 40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 												}
-												else if (i > 400) { Log.Warning("Can't ReservedForPrisonersTrans " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+												else if (i > 40) { Log.Warning("Can't ReservedForPrisonersTrans " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 											}
-											else if (i > 400) { Log.Warning("Not capable of Manipulation " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+											else if (i > 40) { Log.Warning("Not capable of Manipulation " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 										}
-										else if (i > 400) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+										else if (i > 40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 									}
-									else if (i > 400) { Log.Warning("Can't Haul unfinishedThing " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+									else if (i > 40) { Log.Warning("Can't Haul unfinishedThing " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 								}								
-								else if (i > 400) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+								else if (i > 40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 							} //else if(i > -40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 						} //else if (i > -40) { Log.Warning("Not Allowed " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 					} else if (i > -40) { Log.Warning("Not Spawned " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 					i++;
 					ReregisterHaulableItem(tryThing);
 				}
-				if (i > 400)
+				if (i > 40)
 				{
-					Log.Warning("took more than 400 haulable tries: " + i.ToString());
+					Log.Warning("took more than 40 haulable tries: " + i.ToString());
 				}
 			}
 			return thing;
 		}
+		public static bool HaulToStorageJobTest(Pawn p, Thing t)
+		{
+			StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(t);
+			if (!TryFindBestBetterStorageForTest(t, p, p.Map, currentPriority, p.Faction))
+			{				
+				return false;
+			}
+			return true;
+		}
+		public static bool TryFindBestBetterStorageForTest(Thing t, Pawn carrier, Map map, StoragePriority currentPriority, Faction faction, bool needAccurateResult = true)
+		{
+			if (!TryFindBestBetterStoreCellFor(t, carrier, map, currentPriority, faction, needAccurateResult) && 
+				!TryFindBestBetterNonSlotGroupStorageFor(t, carrier, map, currentPriority, faction, out IHaulDestination _))
+			{
+				return false;
+			}
 
+			return true;
+		}
+
+		public static bool TryFindBestBetterStoreCellFor(Thing t, Pawn carrier, Map map, StoragePriority currentPriority, Faction faction, bool needAccurateResult = true)
+		{
+			List<SlotGroup> allGroupsListInPriorityOrder = map.haulDestinationManager.AllGroupsListInPriorityOrder;
+			if (allGroupsListInPriorityOrder.Count == 0)
+			{
+				Log.Warning("allGroupsListInPriorityOrder.Count == 0");
+				return false;
+			}
+
+			StoragePriority foundPriority = currentPriority;
+			float closestDistSquared = 2.14748365E+09f;
+			IntVec3 closestSlot = IntVec3.Invalid;
+			int count = allGroupsListInPriorityOrder.Count;
+			for (int i = 0; i < count; i++)
+			{
+				SlotGroup slotGroup = allGroupsListInPriorityOrder[i];
+				StoragePriority priority = slotGroup.Settings.Priority;
+				if ((int)priority < (int)foundPriority || (int)priority <= (int)currentPriority)
+				{
+					break;
+				}
+
+				TryFindBestBetterStoreCellForWorker(t, carrier, map, faction, slotGroup, needAccurateResult, ref closestSlot, ref closestDistSquared, ref foundPriority);
+			}
+
+			if (!closestSlot.IsValid)
+			{
+				Log.Warning("closestSlot.IsValid");
+				return false;
+			}
+
+			return true;
+		}
+		private static void TryFindBestBetterStoreCellForWorker(Thing t, Pawn carrier, Map map, Faction faction, SlotGroup slotGroup, bool needAccurateResult, ref IntVec3 closestSlot, ref float closestDistSquared, ref StoragePriority foundPriority)
+		{
+			if (slotGroup == null || !slotGroup.parent.Accepts(t))
+			{
+				return;
+			}
+
+			IntVec3 a = t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld;
+			List<IntVec3> cellsList = slotGroup.CellsList;
+			int count = cellsList.Count;
+			int num = needAccurateResult ? Mathf.FloorToInt(count * Rand.Range(0.005f, 0.018f)) : 0;
+			for (int i = 0; i < count; i++)
+			{
+				IntVec3 intVec = cellsList[i];
+				float num2 = (a - intVec).LengthHorizontalSquared;
+				if (!(num2 > closestDistSquared) && StoreUtility.IsGoodStoreCell(intVec, map, t, carrier, faction))
+				{
+					closestSlot = intVec;
+					closestDistSquared = num2;
+					foundPriority = slotGroup.Settings.Priority;
+					if (i >= num)
+					{
+						break;
+					}
+				}
+			}
+		}
+		public static bool TryFindBestBetterNonSlotGroupStorageFor(Thing t, Pawn carrier, Map map, StoragePriority currentPriority, Faction faction, out IHaulDestination haulDestination, bool acceptSamePriority = false)
+		{
+			List<IHaulDestination> allHaulDestinationsListInPriorityOrder = map.haulDestinationManager.AllHaulDestinationsListInPriorityOrder;
+			IntVec3 intVec = t.SpawnedOrAnyParentSpawned ? t.PositionHeld : carrier.PositionHeld;
+			float num = float.MaxValue;
+			StoragePriority storagePriority = StoragePriority.Unstored;
+			haulDestination = null;
+			for (int i = 0; i < allHaulDestinationsListInPriorityOrder.Count; i++)
+			{
+				if (allHaulDestinationsListInPriorityOrder[i] is ISlotGroupParent)
+				{
+					continue;
+				}
+
+				StoragePriority priority = allHaulDestinationsListInPriorityOrder[i].GetStoreSettings().Priority;
+				if ((int)priority < (int)storagePriority || (acceptSamePriority && (int)priority < (int)currentPriority) || (!acceptSamePriority && (int)priority <= (int)currentPriority))
+				{
+					break;
+				}
+
+				float num2 = intVec.DistanceToSquared(allHaulDestinationsListInPriorityOrder[i].Position);
+				if (num2 > num || !allHaulDestinationsListInPriorityOrder[i].Accepts(t))
+				{
+					continue;
+				}
+
+				Thing thing = allHaulDestinationsListInPriorityOrder[i] as Thing;
+				if (thing != null && thing.Faction != faction)
+				{
+					continue;
+				}
+
+				if (thing != null)
+				{
+					if (carrier != null)
+					{
+						if (thing.IsForbidden(carrier))
+						{
+							continue;
+						}
+					}
+					else if (faction != null && thing.IsForbidden(faction))
+					{
+						continue;
+					}
+				}
+
+				if (thing != null)
+				{
+					if (carrier != null)
+					{
+						if (!carrier.CanReserveNew(thing))
+						{
+							continue;
+						}
+					}
+					else if (faction != null && map.reservationManager.IsReservedByAnyoneOf(thing, faction))
+					{
+						continue;
+					}
+				}
+
+				if (carrier != null)
+				{
+					if (thing != null)
+					{
+						if (!carrier.Map.reachability.CanReach(intVec, thing, PathEndMode.ClosestTouch, TraverseParms.For(carrier)))
+						{
+							continue;
+						}
+					}
+					else if (!carrier.Map.reachability.CanReach(intVec, allHaulDestinationsListInPriorityOrder[i].Position, PathEndMode.ClosestTouch, TraverseParms.For(carrier)))
+					{
+						continue;
+					}
+				}
+
+				num = num2;
+				storagePriority = priority;
+				haulDestination = allHaulDestinationsListInPriorityOrder[i];
+			}
+
+			return haulDestination != null;
+		}
 	}
 }

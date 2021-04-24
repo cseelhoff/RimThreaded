@@ -215,7 +215,7 @@ namespace RimThreaded
 							allowUnreachable = scanner.AllowUnreachable;
 							maxPathDanger = scanner.MaxPathDanger(pawn);
 							IEnumerable<IntVec3> enumerable4;
-							if (scanner is WorkGiver_Grower workGiver_Grower)
+							if (scanner is WorkGiver_GrowerSow workGiver_Grower)
 							{
 								RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell = 0;
 

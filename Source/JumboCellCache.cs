@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,18 +42,76 @@ namespace RimThreaded
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;
 
+			//---START--- For plant sowing
+			ThingDef localWantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(location, map);
+			List<Thing> thingList = location.GetThingList(map);
+			for (int i = 0; i < thingList.Count; i++)
+			{
+				Thing thing = thingList[i];
+				if (thing.def == localWantedPlantDef)
+				{
+					return;
+				}
+			}
+			if (map.physicalInteractionReservationManager.IsReserved(location))
+			{
+				return;
+			}
+			Thing thing2 = PlantUtility.AdjacentSowBlocker(localWantedPlantDef, location, map);
+			if (thing2 != null)
+			{
+				if (thing2 is Plant plant2 && !plant2.IsForbidden(Faction.OfPlayer))
+				{
+					IPlantToGrowSettable plantToGrowSettable = plant2.Position.GetPlantToGrowSettable(plant2.Map);
+					if (plantToGrowSettable != null && plantToGrowSettable.GetPlantDefToGrow() == plant2.def)
+					{
+						return;
+					}
+				}
+			}
+
+			for (int j = 0; j < thingList.Count; j++)
+			{
+				Thing thing3 = thingList[j];
+				if (!thing3.def.BlocksPlanting())
+				{
+					continue;
+				}
+
+				if (thing3.def.category == ThingCategory.Plant)
+				{
+					if (!thing3.IsForbidden(Faction.OfPlayer))
+					{
+						break; // JobMaker.MakeJob(JobDefOf.CutPlant, thing3);
+					}
+					return;
+				}
+
+				if (thing3.def.EverHaulable)
+				{
+					break; //HaulAIUtility.HaulAsideJobFor(pawn, thing3);
+				}
+				return;
+			}
+
+			if (!localWantedPlantDef.CanEverPlantAt_NewTemp(location, map))
+			{
+				return;
+			}
+			//---END--
+
 			zoomLevel = 0;
 			do
 			{
 				jumboCellWidth = getJumboCellWidth(zoomLevel);
-				List<HashSet<object>[]> awaitingHaulingZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);
-				HashSet<object>[] awaitingHaulingGrid = awaitingHaulingZoomLevels[zoomLevel];
+				List<HashSet<object>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);
+				HashSet<object>[] awaitingActionGrid = awaitingActionZoomLevels[zoomLevel];
 				int jumboCellIndex = CellToIndexCustom(location, mapSizeX, jumboCellWidth);
-				HashSet<object> hashset = awaitingHaulingGrid[jumboCellIndex];
+				HashSet<object> hashset = awaitingActionGrid[jumboCellIndex];
 				if (hashset == null)
 				{
 					hashset = new HashSet<object>();
-					awaitingHaulingGrid[jumboCellIndex] = hashset;
+					awaitingActionGrid[jumboCellIndex] = hashset;
 				}
 				hashset.Add(obj);
 				zoomLevel++;
