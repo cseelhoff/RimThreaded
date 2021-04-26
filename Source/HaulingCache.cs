@@ -5,6 +5,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using static RimThreaded.Area_Patch;
+using static Verse.AI.ReservationManager;
 
 namespace RimThreaded
 {
@@ -15,7 +16,7 @@ namespace RimThreaded
 		public static Dictionary<Map, List<HashSet<Thing>[]>> awaitingHaulingMapDict = new Dictionary<Map, List<HashSet<Thing>[]>>();
 		public const float ZOOM_MULTIPLIER = 1.5f; //must be greater than 1. lower numbers will make searches slower, but ensure pawns find the closer things first.
 												   // Map, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
-
+		[ThreadStatic] private static HashSet<Thing> retrunedThings;
 
 		private static int getJumboCellWidth(int zoomLevel)
         {
@@ -33,7 +34,48 @@ namespace RimThreaded
 		}
 
 		public static void RegisterHaulableItem(Thing haulableThing) {
+			if(haulableThing.IsForbidden(Faction.OfPlayer))
+            {
+				return;
+            }
 			Map map = haulableThing.Map;
+			int num = haulableThing.stackCount;
+			int maxPawns = 1;
+			if (map.physicalInteractionReservationManager.IsReserved(haulableThing))
+			{
+				//Log.Warning("IsReserved");
+				return;
+			}
+			int num3 = 0;
+			int num4 = 0;
+			List<Reservation> reservationTargetList = ReservationManager_Patch.getReservationTargetList(map.reservationManager, haulableThing);
+			foreach (Reservation reservation in reservationTargetList)
+			{
+				if (reservation.Layer == null)
+				{
+					if (reservation.Claimant != null && (reservation.StackCount == -1 || reservation.StackCount >= num))
+					{
+						break;
+					}
+					if (reservation.Claimant != null)
+					{
+						if (reservation.MaxPawns != maxPawns)
+						{
+							//Log.Warning("maxPawns");
+							return;
+						}
+
+						num3++;
+						num4 = (reservation.StackCount != -1) ? (num4 + reservation.StackCount) : (num4 + num);
+						if (num3 >= maxPawns || num + num4 > num)
+						{
+							//Log.Warning(reservation.Claimant.ToString() + " StackCount");
+							return;
+						}
+					}
+				}
+			}
+
 			if (!map.physicalInteractionReservationManager.IsReserved(haulableThing))
 			{
 				int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
@@ -171,6 +213,14 @@ namespace RimThreaded
 			int cellIndex;
 			int mapSizeX = map.Size.x;
 			HashSet<Thing> thingsAtCellCopy;
+			if(retrunedThings == null)
+            {
+				retrunedThings = new HashSet<Thing>();
+			} else
+            {
+				retrunedThings.Clear();
+			}
+
 			List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
 			IntVec3 position = pawn.Position;
 			Area effectiveAreaRestrictionInPawnCurrentMap = pawn.playerSettings.EffectiveAreaRestrictionInPawnCurrentMap;
@@ -193,7 +243,10 @@ namespace RimThreaded
 						thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
 						foreach (Thing haulableThing in thingsAtCellCopy)
 						{
-							yield return haulableThing;
+							if (!retrunedThings.Contains(haulableThing)) {
+								yield return haulableThing;
+								retrunedThings.Add(haulableThing);
+							}
 						}
 					}
 				}
@@ -209,7 +262,11 @@ namespace RimThreaded
 							thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
 							foreach (Thing haulableThing in thingsAtCellCopy)
 							{
-								yield return haulableThing;
+								if (!retrunedThings.Contains(haulableThing))
+								{
+									yield return haulableThing;
+									retrunedThings.Add(haulableThing);
+								}
 							}
 						}
 					}
@@ -314,13 +371,13 @@ namespace RimThreaded
 								{
 									if (pawn.CanReach(tryThing, PathEndMode.ClosestTouch, pawn.NormalMaxDanger()))
 									{
-										if (pawn.CanReserve(tryThing, 1, -1, null, false))
+										if (CanReserveTest(pawn.Map.reservationManager, pawn, tryThing))
 										{
 											if (pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
 											{
 												if (!tryThing.def.IsNutritionGivingIngestible || !tryThing.def.ingestible.HumanEdible || tryThing.IsSociallyProper(pawn, forPrisoner: false, animalsCare: true))
 												{
-													if (HaulAIUtility.PawnCanAutomaticallyHaulFast(pawn, tryThing, false))
+													if (PawnCanAutomaticallyHaulFastTest(pawn, tryThing, false))
 													{
 														if (HaulToStorageJobTest(pawn, tryThing))
 														{
@@ -330,34 +387,164 @@ namespace RimThreaded
 																thing = tryThing;
 																break;
 															}
-															else if (i > 40) { Log.Warning("No Hauling Job " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+															else if (i > -40) { Log.Warning("No Hauling Job " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 														}
-														else if (i > 4000) { Log.Warning("Can't HaulToStorageJob " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+														else if (i > -4000) { Log.Warning("Can't HaulToStorageJob " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 													}
-													else if (i > 40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+													else if (i > -40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 												}
-												else if (i > 40) { Log.Warning("Can't ReservedForPrisonersTrans " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+												else if (i > -40) { Log.Warning("Can't ReservedForPrisonersTrans " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 											}
-											else if (i > 40) { Log.Warning("Not capable of Manipulation " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+											else if (i > -40) { Log.Warning("Not capable of Manipulation " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 										}
-										else if (i > 40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+										else if (i > -40) {
+											RemoveThingToAwaitingHaulingHashSets(tryThing);
+											Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " reserved by: " + ReservationManager_Patch.getFirstPawnReservingTarget(pawn.Map.reservationManager, tryThing) + " tries: " + i.ToString()); 
+										
+										}
 									}
-									else if (i > 40) { Log.Warning("Can't Haul unfinishedThing " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+									else if (i > -40) { Log.Warning("Can't Haul unfinishedThing " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 								}								
-								else if (i > 40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
-							} //else if(i > -40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
-						} //else if (i > -40) { Log.Warning("Not Allowed " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+								else if (i > -40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+							} else if(i > -40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+						} else if (i > -40) { Log.Warning("Not Allowed " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 					} else if (i > -40) { Log.Warning("Not Spawned " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 					i++;
 					ReregisterHaulableItem(tryThing);
 				}
-				if (i > 40)
+				if (i > 0)
 				{
-					Log.Warning("took more than 40 haulable tries: " + i.ToString());
+					Log.Warning("took more than 0 haulable tries: " + i.ToString());
 				}
 			}
 			return thing;
 		}
+		public static bool PawnCanAutomaticallyHaulFastTest(Pawn p, Thing t, bool forced)
+		{
+			UnfinishedThing unfinishedThing = t as UnfinishedThing;
+			Building building;
+			if (unfinishedThing != null && unfinishedThing.BoundBill != null && ((building = (unfinishedThing.BoundBill.billStack.billGiver as Building)) == null || (building.Spawned && building.OccupiedRect().ExpandedBy(1).Contains(unfinishedThing.Position))))
+			{
+				Log.Warning("unfinishedThing");
+				return false;
+			}
+
+			if (!p.CanReach(t, PathEndMode.ClosestTouch, p.NormalMaxDanger()))
+			{
+				Log.Warning("CanReach");
+				return false;
+			}
+
+			//if (!p.CanReserve(t, 1, -1, null, forced))
+			//if (!p.Map.reservationManager.CanReserve(p, t, 1, -1, null, false))
+			if (!p.Map.reservationManager.CanReserve(p, t))
+			{
+				Log.Warning(CanReserveTest(p.Map.reservationManager, p, t).ToString());
+				Log.Warning("CanReserve");
+				return false;
+			}
+
+			if (!p.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+			{
+				Log.Warning("CapableOf");
+				return false;
+			}
+
+			if (t.def.IsNutritionGivingIngestible && t.def.ingestible.HumanEdible && !t.IsSociallyProper(p, forPrisoner: false, animalsCare: true))
+			{
+				Log.Warning("IsNutritionGivingIngestible");
+				return false;
+			}
+
+			if (t.IsBurning())
+			{
+				Log.Warning("IsBurning");
+				return false;
+			}
+
+			return true;
+		}
+
+		public static bool CanReserveTest(ReservationManager __instance, Pawn claimant, LocalTargetInfo target, int maxPawns = 1, int stackCount = -1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
+		{
+			Map mapInstance = claimant.Map;
+
+			if (claimant == null)
+			{
+				Log.Error("CanReserve with null claimant");
+				return false;
+			}
+
+			if (!claimant.Spawned || claimant.Map != mapInstance)
+			{
+				Log.Warning("Spawned");
+				return false;
+			}
+
+			if (!target.IsValid || target.ThingDestroyed)
+			{
+				Log.Warning("IsValid");
+				return false;
+			}
+
+			if (target.HasThing && target.Thing.SpawnedOrAnyParentSpawned && target.Thing.MapHeld != mapInstance)
+			{
+				Log.Warning("HasThing");
+				return false;
+			}
+
+			int num = (!target.HasThing) ? 1 : target.Thing.stackCount;
+			int num2 = (stackCount == -1) ? num : stackCount;
+			if (num2 > num)
+			{
+				Log.Warning("num2");
+				return false;
+			}
+
+			if (!ignoreOtherReservations)
+			{
+				if (mapInstance.physicalInteractionReservationManager.IsReserved(target) && !mapInstance.physicalInteractionReservationManager.IsReservedBy(claimant, target))
+				{
+					Log.Warning("IsReserved");
+					return false;
+				}
+				int num3 = 0;
+				int num4 = 0;
+				List<Reservation> reservationTargetList = ReservationManager_Patch.getReservationTargetList(__instance, target);
+				foreach (Reservation reservation in reservationTargetList)
+				{
+					if (reservation.Layer == layer)
+					{
+						if (reservation.Claimant == claimant && (reservation.StackCount == -1 || reservation.StackCount >= num2))
+						{
+							return true;
+						}
+						if (reservation.Claimant != claimant && ReservationManager_Patch.RespectsReservationsOf(claimant, reservation.Claimant))
+						{
+							if (reservation.MaxPawns != maxPawns)
+							{
+								Log.Warning("maxPawns");
+								return false;
+							}
+
+							num3++;
+							num4 = (reservation.StackCount != -1) ? (num4 + reservation.StackCount) : (num4 + num);
+							if (num3 >= maxPawns || num2 + num4 > num)
+							{
+								Log.Warning(reservation.Claimant.ToString()  + " StackCount");
+								return false;
+							}
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+
+
+
+
 		public static bool HaulToStorageJobTest(Pawn p, Thing t)
 		{
 			StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(t);
@@ -405,7 +592,7 @@ namespace RimThreaded
 
 			if (!closestSlot.IsValid)
 			{
-				Log.Warning("closestSlot.IsValid");
+				Log.Warning("!TryFindBestBetterStoreCellForWorker");
 				return false;
 			}
 

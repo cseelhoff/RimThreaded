@@ -125,7 +125,7 @@ namespace RimThreaded
 			}
 			return reservationClaimantList;
 		}
-		private static List<Reservation> getReservationTargetList(ReservationManager __instance, LocalTargetInfo target)
+		public static List<Reservation> getReservationTargetList(ReservationManager __instance, LocalTargetInfo target)
 		{
 			Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
 			if (!reservationTargetDict.TryGetValue(target, out List<Reservation> reservationTargetList))
@@ -244,6 +244,16 @@ namespace RimThreaded
 				}
 			}
 			return reservationClaimantDict;
+		}
+
+		public static Pawn getFirstPawnReservingTarget(ReservationManager __instance, LocalTargetInfo target)
+        {
+			List<Reservation> reservationTargetListUnsafe = getReservationTargetList(__instance, target);
+			foreach(Reservation r in reservationTargetListUnsafe)
+            {
+				return r.Claimant;
+            }
+			return null;
 		}
 
 		public static void PostRelease(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
@@ -450,6 +460,7 @@ namespace RimThreaded
 				List<Reservation> newReservationTargetList;
 				Dictionary<Pawn, List<Reservation>> reservationClaimantDict;
 				List<Reservation> newReservationClaimantList;
+				Thing haulableThing;
 				if (!canReserveResult)
 				{
 					if (job.playerForced && __instance.CanReserve(claimant, target, maxPawns, stackCount, layer, true))
@@ -473,6 +484,12 @@ namespace RimThreaded
 						{
 							if (reservation2.Claimant != claimant && (reservation2.Layer == layer && RespectsReservationsOf(claimant, reservation2.Claimant)))
 								reservation2.Claimant.jobs.EndCurrentOrQueuedJob(reservation2.Job, JobCondition.InterruptForced);
+						}
+						haulableThing = target.Thing;
+						if (haulableThing != null && haulableThing.def.EverHaulable && haulableThing.Map != null)
+						{
+							Log.Message("DeregisterHaulableItem " + haulableThing.ToString());
+							HaulingCache.DeregisterHaulableItem(haulableThing);
 						}
 						__result = true;
 						return false;
@@ -501,6 +518,13 @@ namespace RimThreaded
 						reservation
 					};
 				reservationClaimantDict[claimant] = newReservationClaimantList;
+
+				haulableThing = target.Thing;
+				if (haulableThing != null && haulableThing.def.EverHaulable && haulableThing.Map != null)
+				{
+					Log.Message("DeregisterHaulableItem " + haulableThing.ToString());
+					HaulingCache.DeregisterHaulableItem(haulableThing);
+				}
 			}
 			__result = true;
 			return false;
@@ -695,7 +719,7 @@ namespace RimThreaded
 			return false;
 		}
 
-		private static bool RespectsReservationsOf(Pawn newClaimant, Pawn oldClaimant)
+		public static bool RespectsReservationsOf(Pawn newClaimant, Pawn oldClaimant)
 		{
 			return newClaimant == oldClaimant || newClaimant.Faction != null && oldClaimant.Faction != null && (newClaimant.Faction == oldClaimant.Faction || !newClaimant.Faction.HostileTo(oldClaimant.Faction) || oldClaimant.HostFaction != null && oldClaimant.HostFaction == newClaimant.HostFaction || newClaimant.HostFaction != null && (oldClaimant.HostFaction != null || newClaimant.HostFaction == oldClaimant.Faction));
 		}

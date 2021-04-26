@@ -197,7 +197,7 @@ namespace RimThreaded
 			if (c.IsForbidden(pawn))
 			{
 				Log.Warning("IsForbidden");
-				JumboCellCache.RemoveObjectFromAwaitingHaulingHashSets(map, c, c, awaitingPlantCellsMapDict);
+				JumboCellCache.RemoveObjectFromAwaitingActionHashSets(map, c, c, awaitingPlantCellsMapDict);
 				JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
@@ -223,9 +223,9 @@ namespace RimThreaded
 				Thing thing = thingList[i];
 				if (thing.def == localWantedPlantDef)
 				{
-					Log.Warning("thing.def == localWantedPlantDef");
-					JumboCellCache.RemoveObjectFromAwaitingHaulingHashSets(map, c, c, awaitingPlantCellsMapDict);
-					JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
+					Log.Warning("thing.def == localWantedPlantDef... RemoveObjectFromAwaitingHaulingHashSets");
+					JumboCellCache.RemoveObjectFromAwaitingActionHashSets(map, c, c, awaitingPlantCellsMapDict);
+					//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 					return false;
 				}
 
@@ -290,7 +290,7 @@ namespace RimThreaded
 					}
 				}
 				Log.Warning("AdjacentSowBlocker");
-				JumboCellCache.RemoveObjectFromAwaitingHaulingHashSets(map, c, c, awaitingPlantCellsMapDict);
+				JumboCellCache.RemoveObjectFromAwaitingActionHashSets(map, c, c, awaitingPlantCellsMapDict);
 				JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
@@ -312,7 +312,7 @@ namespace RimThreaded
 				if (!pawn.CanReserve(thing3, 1, -1, null, forced))
 				{
 					Log.Warning("!CanReserve");
-					JumboCellCache.RemoveObjectFromAwaitingHaulingHashSets(map, c, c, awaitingPlantCellsMapDict);
+					JumboCellCache.RemoveObjectFromAwaitingActionHashSets(map, c, c, awaitingPlantCellsMapDict);
 					JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 
 					return false;
@@ -325,7 +325,7 @@ namespace RimThreaded
 						return true; // JobMaker.MakeJob(JobDefOf.CutPlant, thing3);
 					}
 					Log.Warning("Plant IsForbidden");
-					JumboCellCache.RemoveObjectFromAwaitingHaulingHashSets(map, c, c, awaitingPlantCellsMapDict);
+					JumboCellCache.RemoveObjectFromAwaitingActionHashSets(map, c, c, awaitingPlantCellsMapDict);
 					JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 
 					return false;
@@ -336,7 +336,7 @@ namespace RimThreaded
 					return true; //HaulAIUtility.HaulAsideJobFor(pawn, thing3);
 				}
 				Log.Warning("EverHaulable");
-				JumboCellCache.RemoveObjectFromAwaitingHaulingHashSets(map, c, c, awaitingPlantCellsMapDict);
+				JumboCellCache.RemoveObjectFromAwaitingActionHashSets(map, c, c, awaitingPlantCellsMapDict);
 				JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
@@ -344,7 +344,7 @@ namespace RimThreaded
 			if (!localWantedPlantDef.CanEverPlantAt_NewTemp(c, map))
 			{
 				Log.Warning("CanEverPlantAt_NewTemp");
-				JumboCellCache.RemoveObjectFromAwaitingHaulingHashSets(map, c, c, awaitingPlantCellsMapDict);
+				JumboCellCache.RemoveObjectFromAwaitingActionHashSets(map, c, c, awaitingPlantCellsMapDict);
 				JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
@@ -358,7 +358,7 @@ namespace RimThreaded
 			if (!pawn.CanReserve(c, 1, -1, null, forced))
 			{
 				Log.Warning("!pawn.CanReserve(c");
-				JumboCellCache.RemoveObjectFromAwaitingHaulingHashSets(map, c, c, awaitingPlantCellsMapDict);
+				JumboCellCache.RemoveObjectFromAwaitingActionHashSets(map, c, c, awaitingPlantCellsMapDict);
 				//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}

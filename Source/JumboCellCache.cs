@@ -1,9 +1,6 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using static RimThreaded.Area_Patch;
@@ -15,7 +12,8 @@ namespace RimThreaded
 		
 		private static readonly List<int> zoomLevels = new List<int>();
 		private const float ZOOM_MULTIPLIER = 1.5f;
-		public static void RemoveObjectFromAwaitingHaulingHashSets(Map map, IntVec3 location, object obj, Dictionary<Map, List<HashSet<object>[]>> awaitingActionMapDict)
+		[ThreadStatic] private static HashSet<object> retrunedThings;
+		public static void RemoveObjectFromAwaitingActionHashSets(Map map, IntVec3 location, object obj, Dictionary<Map, List<HashSet<object>[]>> awaitingActionMapDict)
 		{
 			int jumboCellWidth;
 			int mapSizeX = map.Size.x;
@@ -84,6 +82,7 @@ namespace RimThreaded
 					{
 						break; // JobMaker.MakeJob(JobDefOf.CutPlant, thing3);
 					}
+					Log.Warning("Plant IsForbidden");
 					return;
 				}
 
@@ -182,6 +181,14 @@ namespace RimThreaded
 			int ZposOfJumboCell;
 			int cellIndex;
 			int mapSizeX = map.Size.x;
+			if (retrunedThings == null)
+			{
+				retrunedThings = new HashSet<object>();
+			}
+			else
+			{
+				retrunedThings.Clear();
+			}
 			HashSet<object> objectsAtCellCopy;
 			List<HashSet<object>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);
 			IntVec3 position = pawn.Position;
@@ -202,9 +209,13 @@ namespace RimThreaded
 					if (objectsAtCell != null && objectsAtCell.Count > 0)
 					{
 						objectsAtCellCopy = new HashSet<object>(objectsAtCell);
-						foreach (object haulableThing in objectsAtCellCopy)
+						foreach (object actionalbeObject in objectsAtCellCopy)
 						{
-							yield return haulableThing;
+							if (!retrunedThings.Contains(actionalbeObject))
+							{
+								yield return actionalbeObject;
+								retrunedThings.Add(actionalbeObject);
+							}
 						}
 					}
 				}
@@ -221,7 +232,11 @@ namespace RimThreaded
 							objectsAtCellCopy = new HashSet<object>(thingsAtCell);
 							foreach (object actionalbeObject in objectsAtCellCopy)
 							{
-								yield return actionalbeObject;
+								if (!retrunedThings.Contains(actionalbeObject))
+								{
+									yield return actionalbeObject;
+									retrunedThings.Add(actionalbeObject);
+								}
 							}
 						}
 					}
