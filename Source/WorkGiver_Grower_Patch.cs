@@ -173,21 +173,24 @@ namespace RimThreaded
                 {
                     continue;
                 }
-				bool hasJob = false;
-                if (funcExtraRequirements(workGiver_Grower, growZone, pawn) && 
-					!growZone.ContainsStaticFire && 
-					pawn.CanReach(c, PathEndMode.OnCell, maxDanger))
+				if (!funcExtraRequirements(workGiver_Grower, growZone, pawn))
 				{
-					hasJob = JobOnCellTest(workGiver_Grower.def, pawn, c, forced);
-					if (hasJob && workGiver_Grower.HasJobOnCell(pawn, c))
-					{
-						return c;
-					}
-					else { 
-						Log.Warning("No Grower Job on Cell " + c);
-					}
-					//wantedPlantDef = null;
-				}				
+					continue;
+				}
+				if (!JobOnCellTest(workGiver_Grower.def, pawn, c, forced))
+				{
+					continue;
+				}
+				//!growZone.ContainsStaticFire && 
+				if (!workGiver_Grower.HasJobOnCell(pawn, c))
+				{
+					continue;
+				}
+				if (!pawn.CanReach(c, PathEndMode.OnCell, maxDanger))
+				{
+					continue;
+				}
+				return c;
 			}
 			//wantedPlantDef = null;
 			return IntVec3.Invalid;
