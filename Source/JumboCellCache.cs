@@ -13,13 +13,20 @@ namespace RimThreaded
 		private static readonly List<int> zoomLevels = new List<int>();
 		private const float ZOOM_MULTIPLIER = 1.5f;
 		[ThreadStatic] private static HashSet<object> retrunedThings;
-		public static void RemoveObjectFromAwaitingActionHashSets(Map map, IntVec3 location, object obj, Dictionary<Map, List<HashSet<object>[]>> awaitingActionMapDict)
+		public static object cache_lock = new object();
+
+		public static void ReregisterObject(Map map, IntVec3 location, object obj, Dictionary<Map, List<HashSet<object>[]>> awaitingActionMapDict)
+        {			
+			List<HashSet<object>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);
+			RemoveObjectFromAwaitingActionHashSets(map, location, obj, awaitingActionZoomLevels);
+			AddObjectToActionableObjects(map, location, obj, awaitingActionZoomLevels);
+		}
+		public static void RemoveObjectFromAwaitingActionHashSets(Map map, IntVec3 location, object obj, List<HashSet<object>[]> awaitingActionZoomLevels)
 		{
 			int jumboCellWidth;
 			int mapSizeX = map.Size.x;
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;
-			List<HashSet<object>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);
 			zoomLevel = 0;
 			do
 			{
@@ -33,13 +40,12 @@ namespace RimThreaded
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}
-		public static void AddObjectToActionableObjects(Map map, IntVec3 location, object obj, Dictionary<Map, List<HashSet<object>[]>> awaitingActionMapDict)
+		public static void AddObjectToActionableObjects(Map map, IntVec3 location, object obj, List<HashSet<object>[]> awaitingActionZoomLevels)
 		{
 			int jumboCellWidth;
 			int mapSizeX = map.Size.x;
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;
-
 			//---START--- For plant sowing
 			ThingDef localWantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(location, map);
 			List<Thing> thingList = location.GetThingList(map);
@@ -102,8 +108,7 @@ namespace RimThreaded
 			zoomLevel = 0;
 			do
 			{
-				jumboCellWidth = getJumboCellWidth(zoomLevel);
-				List<HashSet<object>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);
+				jumboCellWidth = getJumboCellWidth(zoomLevel);				
 				HashSet<object>[] awaitingActionGrid = awaitingActionZoomLevels[zoomLevel];
 				int jumboCellIndex = CellToIndexCustom(location, mapSizeX, jumboCellWidth);
 				HashSet<object> hashset = awaitingActionGrid[jumboCellIndex];
@@ -121,19 +126,37 @@ namespace RimThreaded
         {
             if(!awaitingActionMapDict.TryGetValue(map, out List<HashSet<object>[]> awaitingActionsZoomLevels))
             {
-				awaitingActionsZoomLevels = new List<HashSet<object>[]>();
-				int mapSizeX = map.Size.x;
-				int mapSizeZ = map.Size.z;
-				int jumboCellWidth;
-				int zoomLevel = 0;
-				do
+				lock (awaitingActionMapDict)
 				{
-					jumboCellWidth = getJumboCellWidth(zoomLevel);
-					int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, jumboCellWidth);
-					awaitingActionsZoomLevels.Add(new HashSet<object>[numGridCells]);
-					zoomLevel++;
-				} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
-				awaitingActionMapDict[map] = awaitingActionsZoomLevels;
+					if (!awaitingActionMapDict.TryGetValue(map, out List<HashSet<object>[]> awaitingActionsZoomLevels2))
+					{
+						Log.Message("Caching Plant Cells...");
+						awaitingActionsZoomLevels2 = new List<HashSet<object>[]>();
+						int mapSizeX = map.Size.x;
+						int mapSizeZ = map.Size.z;
+						int jumboCellWidth;
+						int zoomLevel = 0;
+						do
+						{
+							jumboCellWidth = getJumboCellWidth(zoomLevel);
+							int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, jumboCellWidth);
+							awaitingActionsZoomLevels2.Add(new HashSet<object>[numGridCells]);
+							zoomLevel++;
+						} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
+
+						List<Zone> zones = map.zoneManager.AllZones;
+						foreach (Zone zone in zones)
+						{
+							if (zone is Zone_Growing)
+							{
+								foreach (IntVec3 c in zone.Cells)
+									AddObjectToActionableObjects(zone.Map, c, c, awaitingActionsZoomLevels2);
+							}
+						}
+						awaitingActionMapDict[map] = awaitingActionsZoomLevels2;
+					}
+					awaitingActionsZoomLevels = awaitingActionsZoomLevels2;
+				}
 			}
 			return awaitingActionsZoomLevels;
 

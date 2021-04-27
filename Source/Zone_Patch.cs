@@ -19,12 +19,15 @@ namespace RimThreaded
 
         public static void CheckAddHaulDestination(Zone __instance)
         {
-            if (__instance is Zone_Growing zone)
+            if (Current.ProgramState == ProgramState.Playing)
             {
-                //Log.Message("Adding growing zone cell to awaiting plant cells");
-                foreach (IntVec3 c in zone.cells)
+                if (__instance is Zone_Growing zone)
                 {
-                    JumboCellCache.AddObjectToActionableObjects(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                    //Log.Message("Adding growing zone cell to awaiting plant cells");
+                    foreach (IntVec3 c in zone.cells)
+                    {
+                        JumboCellCache.ReregisterObject(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                    }
                 }
             }
         }
