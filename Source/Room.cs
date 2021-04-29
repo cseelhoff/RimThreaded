@@ -44,6 +44,8 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, "RemoveRegion");
 			RimThreadedHarmony.Prefix(original, patched, "Notify_RoofChanged");
 			RimThreadedHarmony.Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
+			RimThreadedHarmony.Prefix(original, patched, "Notify_ContainedThingSpawnedOrDespawned");
+			
 		}
 
 
@@ -192,6 +194,28 @@ namespace RimThreaded
 			}
 			return false;
 		}
+		public static bool Notify_ContainedThingSpawnedOrDespawned(Room __instance, Thing th)
+		{
+			if (th.def.category == ThingCategory.Mote || th.def.category == ThingCategory.Projectile || th.def.category == ThingCategory.Ethereal || th.def.category == ThingCategory.Pawn)
+			{
+				return false;
+			}
 
-    }
+			if (__instance.IsDoorway)
+			{
+                Region regions0 = __instance.Regions[0];
+				for (int i = 0; i < regions0.links.Count; i++)
+				{
+					Region otherRegion = regions0.links[i].GetOtherRegion(regions0);
+					if (otherRegion != null && !otherRegion.IsDoorway)
+					{
+						otherRegion.Room.Notify_ContainedThingSpawnedOrDespawned(th);
+					}
+				}
+			}
+
+			statsAndRoleDirty(__instance) = true;
+			return false;
+		}
+	}
 }

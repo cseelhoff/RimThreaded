@@ -1,6 +1,10 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 using Verse.AI;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -26,7 +30,24 @@ namespace RimThreaded
             RimThreadedHarmony.AddAllMatchingFields(original, patched);
             RimThreadedHarmony.TranspileFieldReplacements(original, "PathableNeighborIndices");
             RimThreadedHarmony.TranspileFieldReplacements(original, "GetPreciseRegionLinkDistances");
+            RimThreadedHarmony.Transpile(original, patched, "GetPreciseRegionLinkDistances");
         }
+        public static IEnumerable<CodeInstruction> GetPreciseRegionLinkDistances(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            foreach(CodeInstruction codeInstruction in instructions)
+            {
+                if(codeInstruction.opcode == OpCodes.Call && codeInstruction.operand is MethodInfo methodInfo && methodInfo ==
+                    Method(typeof(Verse.Dijkstra<int>), "Run", new Type[] {
+                        typeof(IEnumerable<int>), typeof(Func<int, IEnumerable<int>>), typeof(Func<int, int, float>), typeof(Dictionary<int, float>), typeof(Dictionary<int, int>)
+                    }))
+                {
+                    codeInstruction.operand = Method(typeof(Dijkstra_Patch<int>), "Run", new Type[] {
+                        typeof(IEnumerable<int>), typeof(Func<int, IEnumerable<int>>), typeof(Func<int, int, float>), typeof(Dictionary<int, float>), typeof(Dictionary<int, int>)
+                    });
+                }
+                yield return codeInstruction;
+            }
+		}
 
-    }
+	}
 }

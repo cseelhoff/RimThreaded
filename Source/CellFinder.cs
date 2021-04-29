@@ -1,5 +1,8 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 using Verse;
 using static HarmonyLib.AccessTools;
 
@@ -49,9 +52,26 @@ namespace RimThreaded
                 typeof(Predicate<IntVec3>), typeof(Map), typeof(float), typeof(IntVec3).MakeByRefType() });
             RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindRandomEdgeCellWith", new Type[] {
                 typeof(Predicate<IntVec3>), typeof(Map), typeof(Rot4), typeof(float), typeof(IntVec3).MakeByRefType() });
-            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindBestPawnStandCell");
             RimThreadedHarmony.TranspileFieldReplacements(original, "FindNoWipeSpawnLocNear");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "TryFindBestPawnStandCell");
+            RimThreadedHarmony.Transpile(original, patched, "TryFindBestPawnStandCell");
 
+        }
+        public static IEnumerable<CodeInstruction> TryFindBestPawnStandCell(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            foreach (CodeInstruction codeInstruction in instructions)
+            {
+                if (codeInstruction.opcode == OpCodes.Call && codeInstruction.operand is MethodInfo methodInfo && methodInfo ==
+                    Method(typeof(Dijkstra<Region>), "Run", new Type[] {
+                        typeof(IntVec3), typeof(Func<IntVec3, IEnumerable<IntVec3>>), typeof(Func<IntVec3, IntVec3, float>), typeof(Dictionary < IntVec3, float >), typeof(Dictionary<IntVec3, IntVec3>)
+                    }))
+                {
+                    codeInstruction.operand = Method(typeof(Dijkstra_Patch<Region>), "Run", new Type[] {
+                        typeof(IntVec3), typeof(Func<IntVec3, IEnumerable<IntVec3>>), typeof(Func<IntVec3, IntVec3, float>), typeof(Dictionary < IntVec3, float >), typeof(Dictionary<IntVec3, IntVec3>)
+                    });
+                }
+                yield return codeInstruction;
+            }
         }
 
 

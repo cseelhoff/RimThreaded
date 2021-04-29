@@ -1,32 +1,132 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Verse;
 
 namespace RimThreaded
 {
-
-    public class DijkstraInt
+    public static class Dijkstra_Patch<T>
     {
-        [ThreadStatic] public static Dictionary<int, float> distances;
-        [ThreadStatic] public static FastPriorityQueueKeyValuePairIntFloat queue;
-        [ThreadStatic] public static List<KeyValuePair<int, float>> tmpResult;
+        [ThreadStatic] public static Dictionary<T, float> distances;
+        [ThreadStatic] public static FastPriorityQueue<KeyValuePair<T, float>> queue;
+        [ThreadStatic] private static List<T> singleNodeList = new List<T>();
+        [ThreadStatic] public static List<KeyValuePair<T, float>> tmpResult;
 
         public static void InitializeThreadStatics()
         {
-            distances = new Dictionary<int, float>();
-            queue = new FastPriorityQueueKeyValuePairIntFloat(new DistanceComparer());
-            tmpResult = new List<KeyValuePair<int, float>>();
+            distances = new Dictionary<T, float>();
+            queue = new FastPriorityQueue<KeyValuePair<T, float>>(new DistanceComparer());
+            tmpResult = new List<KeyValuePair<T, float>>();
         }
 
-        private class DistanceComparer : IComparer<KeyValuePair<int, float>>
+        private class DistanceComparer : IComparer<KeyValuePair<T, float>>
         {
-            public int Compare(KeyValuePair<int, float> a, KeyValuePair<int, float> b)
+            public int Compare(KeyValuePair<T, float> a, KeyValuePair<T, float> b)
             {
                 return a.Value.CompareTo(b.Value);
             }
         }
-        private static void HandleNeighbor(int n, float nodeDist, KeyValuePair<int, float> node, 
-            Func<int, int, float> distanceGetter, Dictionary<int, int> outParents, Dictionary<int, float> distances, FastPriorityQueueKeyValuePairIntFloat queue)
+
+        public static void Run(T startingNode, Func<T, IEnumerable<T>> neighborsGetter,
+            Func<T, T, float> distanceGetter, List<KeyValuePair<T, float>> outDistances,
+            Dictionary<T, T> outParents = null)
+        {
+            singleNodeList.Clear();
+            singleNodeList.Add(startingNode);
+            Run(singleNodeList, neighborsGetter, distanceGetter, outDistances, outParents);
+        }
+
+        public static void Run(IEnumerable<T> startingNodes, Func<T, IEnumerable<T>> neighborsGetter, Func<T, T, float> distanceGetter, List<KeyValuePair<T, float>> outDistances, Dictionary<T, T> outParents = null)
+        {
+            outDistances.Clear();
+            distances.Clear();
+            queue.Clear();
+            outParents?.Clear();
+            IList<T> list = startingNodes as IList<T>;
+            if (list != null)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    T key = list[i];
+                    if (!distances.ContainsKey(key))
+                    {
+                        distances.Add(key, 0f);
+                        queue.Push(new KeyValuePair<T, float>(key, 0f));
+                    }
+                }
+            }
+            else
+            {
+                foreach (T startingNode in startingNodes)
+                {
+                    if (!distances.ContainsKey(startingNode))
+                    {
+                        distances.Add(startingNode, 0f);
+                        queue.Push(new KeyValuePair<T, float>(startingNode, 0f));
+                    }
+                }
+            }
+
+            while (queue.Count != 0)
+            {
+                KeyValuePair<T, float> node = queue.Pop();
+                float num = distances[node.Key];
+                if (node.Value != num)
+                {
+                    continue;
+                }
+
+                IEnumerable<T> enumerable = neighborsGetter(node.Key);
+                if (enumerable == null)
+                {
+                    continue;
+                }
+
+                IList<T> list2 = enumerable as IList<T>;
+                if (list2 != null)
+                {
+                    for (int j = 0; j < list2.Count; j++)
+                    {
+                        HandleNeighbor(list2[j], num, node, distanceGetter, outParents);
+                    }
+
+                    continue;
+                }
+
+                foreach (T item in enumerable)
+                {
+                    HandleNeighbor(item, num, node, distanceGetter, outParents);
+                }
+            }
+
+            foreach (KeyValuePair<T, float> distance in distances)
+            {
+                outDistances.Add(distance);
+            }
+
+            distances.Clear();
+        }
+
+        public static void Run(T startingNode, Func<T, IEnumerable<T>> neighborsGetter, Func<T, T, float> distanceGetter, Dictionary<T, float> outDistances, Dictionary<T, T> outParents = null)
+        {
+            singleNodeList.Clear();
+            singleNodeList.Add(startingNode);
+            Run(singleNodeList, neighborsGetter, distanceGetter, outDistances, outParents);
+        }
+
+        public static void Run(IEnumerable<T> startingNodes, Func<T, IEnumerable<T>> neighborsGetter, Func<T, T, float> distanceGetter, Dictionary<T, float> outDistances, Dictionary<T, T> outParents = null)
+        {
+            Run(startingNodes, neighborsGetter, distanceGetter, tmpResult, outParents);
+            outDistances.Clear();
+            for (int i = 0; i < tmpResult.Count; i++)
+            {
+                outDistances.Add(tmpResult[i].Key, tmpResult[i].Value);
+            }
+
+            tmpResult.Clear();
+        }
+
+        private static void HandleNeighbor(T n, float nodeDist, KeyValuePair<T, float> node, Func<T, T, float> distanceGetter, Dictionary<T, T> outParents)
         {
             float num = nodeDist + Mathf.Max(distanceGetter(node.Key, n), 0f);
             bool flag = false;
@@ -49,7 +149,7 @@ namespace RimThreaded
                 return;
             }
 
-            queue.Push(new KeyValuePair<int, float>(n, num));
+            queue.Push(new KeyValuePair<T, float>(n, num));
             if (outParents != null)
             {
                 if (outParents.ContainsKey(n))
@@ -62,121 +162,5 @@ namespace RimThreaded
                 }
             }
         }
-
-        public static void Run(IEnumerable<int> startingNodes, Func<int, IEnumerable<int>> neighborsGetter, 
-            Func<int, int, float> distanceGetter, List<KeyValuePair<int, float>> outDistances, 
-            Dictionary<int, int> outParents = null)
-        {
-            outDistances.Clear();
-            //distances.Clear();
-            if (distances == null)
-            {
-                distances = new Dictionary<int, float>();
-            } else
-            {
-                distances.Clear();
-            }
-            //queue.Clear();
-            if (queue == null)
-            {
-                queue = new FastPriorityQueueKeyValuePairIntFloat(new DistanceComparer());
-            } else
-            {
-                queue.Clear();
-            }
-            outParents?.Clear();
-            if (startingNodes is IList<int> list)
-            {
-                for (int i = 0; i < list.Count; i++)
-                {
-                    int key = list[i];
-                    if (!distances.ContainsKey(key))
-                    {
-                        distances.Add(key, 0f);
-                        queue.Push(new KeyValuePair<int, float>(key, 0f));
-                    }
-                }
-            }
-            else
-            {
-                foreach (int startingNode in startingNodes)
-                {
-                    if (!distances.ContainsKey(startingNode))
-                    {
-                        distances.Add(startingNode, 0f);
-                        queue.Push(new KeyValuePair<int, float>(startingNode, 0f));
-                    }
-                }
-            }
-
-            while (queue.Count != 0)
-            {
-                KeyValuePair<int, float> node = queue.Pop();
-                float num = distances[node.Key];
-                if (node.Value != num)
-                {
-                    continue;
-                }
-
-                IEnumerable<int> enumerable = neighborsGetter(node.Key);
-                if (enumerable == null)
-                {
-                    continue;
-                }
-
-                if (enumerable is IList<int> list2)
-                {
-                    for (int j = 0; j < list2.Count; j++)
-                    {
-                        int i2;
-                        try
-                        {
-                            i2 = list2[j];
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            break;
-                        }
-
-                        HandleNeighbor(i2, num, node, distanceGetter, outParents, distances, queue);
-                    }
-                }
-                else
-                {
-                    foreach (int item in enumerable)
-                    {
-                        HandleNeighbor(item, num, node, distanceGetter, outParents, distances, queue);
-                    }
-                }
-            }
-
-            foreach (KeyValuePair<int, float> distance in distances)
-            {
-                outDistances.Add(distance);
-            }
-
-            //distances.Clear();
-        }
-
-        public static void Run(IEnumerable<int> startingNodes, Func<int, IEnumerable<int>> neighborsGetter, Func<int, int, float> distanceGetter, Dictionary<int, float> outDistances, Dictionary<int, int> outParents = null)
-        {
-            if (tmpResult == null)
-            {
-                tmpResult = new List<KeyValuePair<int, float>>();
-            } else
-            {
-                tmpResult.Clear();
-            }
-            Run(startingNodes, neighborsGetter, distanceGetter, tmpResult, outParents);
-            outDistances.Clear();
-            for (int i = 0; i < tmpResult.Count; i++)
-            {
-                outDistances.Add(tmpResult[i].Key, tmpResult[i].Value);
-            }
-
-            //tmpResult.Clear();
-        }
-
-
     }
 }
