@@ -57,6 +57,10 @@ namespace RimThreaded
                     {
                         HaulingCache.RegisterHaulableItem(t);
                     }
+                    if(t is Building_PlantGrower building_PlantGrower)
+                    {
+                        JumboCellCache.ReregisterObject(t.Map, t.Position, t, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                    }
                     /*
                     if (!thingBillPoints.TryGetValue(t.def, out Dictionary<WorkGiver_Scanner, float> billPointsDict))
                     {
@@ -111,6 +115,11 @@ namespace RimThreaded
                         if (t.def.EverHaulable)
                         {
                             HaulingCache.DeregisterHaulableItem(t);
+                        }
+
+                        if (t is Building_PlantGrower building_PlantGrower)
+                        {
+                            //JumboCellCache.ReregisterObject(building_PlantGrower.Map, building_PlantGrower.Position, building_PlantGrower, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                         }
                         /*
                         int mapSizeX = this_map.Size.x;

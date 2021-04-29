@@ -136,29 +136,10 @@ namespace RimThreaded
         internal static IntVec3 ClosestLocationReachable(WorkGiver_Grower workGiver_Grower, Pawn pawn)
         {
 			Danger maxDanger = pawn.NormalMaxDanger();
-			/*
-			List<Building> bList = pawn.Map.listerBuildings.allBuildingsColonist;
-			for (int j = 0; j < bList.Count; j++)
-			{
-				Building_PlantGrower building_PlantGrower = bList[j] as Building_PlantGrower;
-				if (building_PlantGrower == null || !funcExtraRequirements(workGiver_Grower, building_PlantGrower, pawn) || building_PlantGrower.IsForbidden(pawn) || !pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, maxDanger) || building_PlantGrower.IsBurning())
-				{
-					continue;
-				}
-
-				foreach (IntVec3 item in building_PlantGrower.OccupiedRect())
-				{
-					return item;
-				}
-
-				//wantedPlantDef = null;
-			}
-			*/
 			//wantedPlantDef = null;
 			//List<Zone> zonesList = pawn.Map.zoneManager.AllZones;
 			//for (int j = 0; j < zonesList.Count; j++)
 			//{
-			ZoneManager zoneManager = pawn.Map.zoneManager;
 
 			//if (growZone.cells.Count == 0)
 			//{
@@ -166,31 +147,52 @@ namespace RimThreaded
 			//}
 			bool forced = false;
 			Map map = pawn.Map;
-			foreach (object position in JumboCellCache.GetClosestActionableObjects(pawn, map, awaitingPlantCellsMapDict))
+			ZoneManager zoneManager = pawn.Map.zoneManager;
+			foreach (object obj in JumboCellCache.GetClosestActionableObjects(pawn, map, awaitingPlantCellsMapDict))
 			{
-				IntVec3 c = (IntVec3)position;
-                if (!(zoneManager.ZoneAt(c) is Zone_Growing growZone))
+				/*
+				if(obj is Building_PlantGrower building_PlantGrower)
                 {
-                    continue;
-                }
-				if (!funcExtraRequirements(workGiver_Grower, growZone, pawn))
-				{
-					continue;
+					if (building_PlantGrower == null || !funcExtraRequirements(workGiver_Grower, building_PlantGrower, pawn) 
+						|| building_PlantGrower.IsForbidden(pawn) 
+						|| !pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, maxDanger)
+						//|| building_PlantGrower.IsBurning()
+						)
+					{
+						continue;
+					}
+
+					foreach (IntVec3 item in building_PlantGrower.OccupiedRect())
+					{
+						return item; //TODO ADD check
+					}
 				}
-				if (!JobOnCellTest(workGiver_Grower.def, pawn, c, forced))
+				else */ if (obj is IntVec3 c)
+				
 				{
-					continue;
+					if (!(zoneManager.ZoneAt(c) is Zone_Growing growZone))
+					{
+						continue;
+					}
+					if (!funcExtraRequirements(workGiver_Grower, growZone, pawn))
+					{
+						continue;
+					}
+					if (!JobOnCellTest(workGiver_Grower.def, pawn, c, forced))
+					{
+						continue;
+					}
+					//!growZone.ContainsStaticFire && 
+					if (!workGiver_Grower.HasJobOnCell(pawn, c))
+					{
+						continue;
+					}
+					if (!pawn.CanReach(c, PathEndMode.OnCell, maxDanger))
+					{
+						continue;
+					}
+					return c;
 				}
-				//!growZone.ContainsStaticFire && 
-				if (!workGiver_Grower.HasJobOnCell(pawn, c))
-				{
-					continue;
-				}
-				if (!pawn.CanReach(c, PathEndMode.OnCell, maxDanger))
-				{
-					continue;
-				}
-				return c;
 			}
 			//wantedPlantDef = null;
 			return IntVec3.Invalid;
