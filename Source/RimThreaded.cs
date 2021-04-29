@@ -242,7 +242,9 @@ namespace RimThreaded
             CellFinder_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             DamageWorker_Patch.InitializeThreadStatics();
-            DijkstraInt.InitializeThreadStatics();
+            Dijkstra_Patch<IntVec3>.InitializeThreadStatics();
+            Dijkstra_Patch<Region>.InitializeThreadStatics();
+            Dijkstra_Patch<int>.InitializeThreadStatics();
             Fire_Patch.InitializeThreadStatics();
             FloatMenuMakerMap_Patch.InitializeThreadStatics();
             FoodUtility_Patch.InitializeThreadStatics();

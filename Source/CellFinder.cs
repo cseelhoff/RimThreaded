@@ -62,11 +62,11 @@ namespace RimThreaded
             foreach (CodeInstruction codeInstruction in instructions)
             {
                 if (codeInstruction.opcode == OpCodes.Call && codeInstruction.operand is MethodInfo methodInfo && methodInfo ==
-                    Method(typeof(Dijkstra<Region>), "Run", new Type[] {
+                    Method(typeof(Dijkstra<IntVec3>), "Run", new Type[] {
                         typeof(IntVec3), typeof(Func<IntVec3, IEnumerable<IntVec3>>), typeof(Func<IntVec3, IntVec3, float>), typeof(Dictionary < IntVec3, float >), typeof(Dictionary<IntVec3, IntVec3>)
                     }))
                 {
-                    codeInstruction.operand = Method(typeof(Dijkstra_Patch<Region>), "Run", new Type[] {
+                    codeInstruction.operand = Method(typeof(Dijkstra_Patch<IntVec3>), "Run", new Type[] {
                         typeof(IntVec3), typeof(Func<IntVec3, IEnumerable<IntVec3>>), typeof(Func<IntVec3, IntVec3, float>), typeof(Dictionary < IntVec3, float >), typeof(Dictionary<IntVec3, IntVec3>)
                     });
                 }
