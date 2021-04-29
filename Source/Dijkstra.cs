@@ -9,13 +9,14 @@ namespace RimThreaded
     {
         [ThreadStatic] public static Dictionary<T, float> distances;
         [ThreadStatic] public static FastPriorityQueue<KeyValuePair<T, float>> queue;
-        [ThreadStatic] private static List<T> singleNodeList = new List<T>();
+        [ThreadStatic] private static List<T> singleNodeList;
         [ThreadStatic] public static List<KeyValuePair<T, float>> tmpResult;
 
         public static void InitializeThreadStatics()
         {
             distances = new Dictionary<T, float>();
             queue = new FastPriorityQueue<KeyValuePair<T, float>>(new DistanceComparer());
+            singleNodeList = new List<T>();
             tmpResult = new List<KeyValuePair<T, float>>();
         }
 
