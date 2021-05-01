@@ -491,6 +491,7 @@ namespace RimThreaded
 			RegionAndRoomUpdater_Patch.RunNonDestructivePatches();
 			RegionCostCalculator_Patch.RunNonDestructivePatches();
 			RegionListersUpdater_Patch.RunNonDestructivePatches();
+			RegionMaker_Patch.RunNonDestructivePatches();
 			TendUtility_Patch.RunNonDestructivePatches();
 			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
 			ThoughtHandler_Patch.RunNonDestructivePatches();
@@ -628,6 +629,7 @@ namespace RimThreaded
 			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
 			RegionDirtyer_Patch.RunDestructivePatches();
+			RegionMaker_Patch.RunDestructivePatches();
 			ResourceCounter_Patch.RunDestructivePatches();
 			Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			SampleSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound

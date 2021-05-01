@@ -279,6 +279,7 @@ namespace RimThreaded
             RegionCostCalculator_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionListersUpdater_Patch.InitializeThreadStatics();
+            RegionMaker_Patch.InitializeThreadStatics();
             RegionTraverser_Transpile.InitializeThreadStatics();
             Room_Patch.InitializeThreadStatics();
             Projectile_Patch.InitializeThreadStatics();

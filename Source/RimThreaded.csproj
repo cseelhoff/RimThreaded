@@ -113,6 +113,7 @@
     <Compile Include="ReachabilityCache.cs" />
     <Compile Include="RegionDirtyer_Patch.cs" />
     <Compile Include="RegionListersUpdater_Transpile.cs" />
+    <Compile Include="RegionMaker_Patch.cs" />
     <Compile Include="RegionTraverser_Transpile.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="SlotGroup_Patch.cs" />

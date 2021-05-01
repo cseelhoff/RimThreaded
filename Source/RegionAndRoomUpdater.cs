@@ -76,6 +76,7 @@ namespace RimThreaded
         {
             RimThreadedHarmony.AddAllMatchingFields(original, patched);
             RimThreadedHarmony.TranspileFieldReplacements(original, "FloodAndSetRoomGroups");
+            RimThreadedHarmony.TranspileFieldReplacements(original, "CombineNewAndReusedRoomsIntoContiguousGroups");
         }
 
         internal static void RunDestructivePatches()
@@ -139,10 +140,10 @@ namespace RimThreaded
 
         private static void CreateOrUpdateRooms2(RegionAndRoomUpdater __instance)
         {
-            newRooms(__instance).Clear();
-            reusedOldRooms(__instance).Clear();
-            newRoomGroups(__instance).Clear();
-            reusedOldRoomGroups(__instance).Clear();
+            newRooms(__instance) = new List<Room>();
+            reusedOldRooms(__instance) = new HashSet<Room>();
+            newRoomGroups(__instance) = new List<RoomGroup>();
+            reusedOldRoomGroups(__instance) = new HashSet<RoomGroup>();
             int numRegionGroups = funcCombineNewRegionsIntoContiguousGroups(__instance); //CombineNewRegionsIntoContiguousGroups2(__instance);
             //actionCreateOrAttachToExistingRooms(__instance, numRegionGroups); //CreateOrAttachToExistingRooms2(__instance, numRegionGroups);
             CreateOrAttachToExistingRooms2(__instance, numRegionGroups);
