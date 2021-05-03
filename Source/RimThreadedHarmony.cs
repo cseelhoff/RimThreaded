@@ -376,28 +376,32 @@ namespace RimThreaded
 
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
-		public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
+        public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
+        public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
 
-
-		public static void TranspileFieldReplacements(Type original, string methodName, Type[] orig_type = null)
+		public static void TranspileTimeFrameCountReplacement(Type original, string methodName, Type[] origType = null)
+        {
+            harmony.Patch(Method(original, methodName, origType), transpiler: TimeFrameCountTranspiler);
+        }
+		public static void TranspileFieldReplacements(Type original, string methodName, Type[] origType = null)
 		{
 			//Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.Name + "." + methodName);
-			harmony.Patch(Method(original, methodName, orig_type), transpiler: replaceFieldsHarmonyTranspiler);
+			harmony.Patch(Method(original, methodName, origType), transpiler: replaceFieldsHarmonyTranspiler);
 		}
 
-		public static void TranspileLockAdd3(Type original, string methodName, Type[] orig_type = null)
+		public static void TranspileLockAdd3(Type original, string methodName, Type[] origType = null)
 		{
-			harmony.Patch(Method(original, methodName, orig_type), transpiler: add3Transpiler);
+			harmony.Patch(Method(original, methodName, origType), transpiler: add3Transpiler);
 		}
 
-		public static void Prefix(Type original, Type patched, string methodName, Type[] orig_type = null, bool destructive = true)
+		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true)
 		{
-			MethodInfo oMethod = Method(original, methodName, orig_type);
+			MethodInfo oMethod = Method(original, methodName, origType);
 			Type[] patch_type = null;
-			if (orig_type != null)
+			if (origType != null)
 			{
-				patch_type = new Type[orig_type.Length];
-				Array.Copy(orig_type, patch_type, orig_type.Length);
+				patch_type = new Type[origType.Length];
+				Array.Copy(origType, patch_type, origType.Length);
 
 				if (!oMethod.ReturnType.Name.Equals("Void"))
 				{
@@ -431,9 +435,9 @@ namespace RimThreaded
 			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
 		}
 
-		public static void Transpile(Type original, Type patched, string methodName, Type[] orig_type = null, string[] harmonyAfter = null)
+		public static void Transpile(Type original, Type patched, string methodName, Type[] origType = null, string[] harmonyAfter = null)
 		{
-			MethodInfo oMethod = Method(original, methodName, orig_type);
+			MethodInfo oMethod = Method(original, methodName, origType);
 			MethodInfo pMethod = Method(patched, methodName);
 			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod)
 			{
@@ -447,9 +451,9 @@ namespace RimThreaded
 				Log.Error("Exception Transpiling: " + oMethod.ToString() + " " + transpilerMethod.ToString() + " " + e.ToString());
             }
 		}
-		public static void TranspileMethodLock(Type original, string methodName, Type[] orig_type = null, string[] harmonyAfter = null)
+		public static void TranspileMethodLock(Type original, string methodName, Type[] origType = null, string[] harmonyAfter = null)
 		{
-			MethodInfo oMethod = Method(original, methodName, orig_type);
+			MethodInfo oMethod = Method(original, methodName, origType);
 			harmony.Patch(oMethod, transpiler: methodLockTranspiler);
 		}
 
@@ -590,7 +594,6 @@ namespace RimThreaded
 			AudioSourceMaker_Patch.RunDestructivePatches();
 			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			CompCauseGameCondition_Patch.RunDestructivePatches();
-			ContentFinder_Texture2D_Patch.RunDestructivePatches();
 			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
 			DrugAIUtility_Patch.RunDestructivePatches();
 			DynamicDrawManager_Patch.RunDestructivePatches();
@@ -622,7 +625,7 @@ namespace RimThreaded
 			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			PlayLog_Patch.RunDestructivePatches();
 			PortraitRenderer_Patch.RunDestructivePatches();
-			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrentdictionary
+			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
 			Reachability_Patch.RunDestructivePatches();
 			ReachabilityCache_Patch.RunDestructivePatches();
 			RealtimeMoteList_Patch.RunDestructivePatches();
@@ -651,7 +654,7 @@ namespace RimThreaded
 			TimeControls_Patch.RunDestructivePatches(); //TODO TRANSPILE - should releave needing TexButton2 class
 			TradeShip_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
-			Verb_Patch.RunDestructivePatches(); // TODO: why is this cauing null?
+			Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
 			WealthWatcher_Patch.RunDestructivePatches();
 			WildPlantSpawner_Patch.RunDestructivePatches();
 			WindManager_Patch.RunDestructivePatches();
@@ -661,18 +664,68 @@ namespace RimThreaded
 			WorldPawns_Patch.RunDestructivePatches(); //todo examine GC optimization
 
 			//main-thread-only
+			ContentFinder_Texture2D_Patch.RunDestructivePatches();
 			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
 			Graphics_Patch.RunDestructivePatches();//Graphics (Giddy-Up and others)
 			GUIStyle_Patch.RunDestructivePatches();
 			LightningBoltMeshMaker_Patch.RunDestructivePatches();
 			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
+			Material_Patch.RunDestructivePatches();
 			MeshMakerPlanes_Patch.RunDestructivePatches();
 			MeshMakerShadows_Patch.RunDestructivePatches();
 			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
 			SectionLayer_Patch.RunDestructivePatches();
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
+            UnityEngine_Object_Patch.RunDestructivePatches(); // Simple
+            
+            //TimeFrameCountTranspiler Fixes
+			harmony.Patch(Method(typeof(RimWorld.AlertsReadout), "AlertsReadoutUpdate"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Alert_Critical), "AlertActiveUpdate"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Building_Bed), "ToggleForPrisonersByInterface"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.CompAbilityEffect_Chunkskip), "FindClosestChunks"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.GenWorld), "MouseTile"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.InfestationCellFinder), "DebugDraw"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.LessonAutoActivator), "LessonAutoActivatorUpdate"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.ListerHaulables), "DebugString"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.ListerMergeables), "DebugString"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "DrawPowerGridOverlayThisFrame"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "ShouldDrawPowerGrid"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "DrawZonesThisFrame"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "ShouldDrawZones"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.SocialCardUtility), "CheckRecache"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Storyteller), "DebugString"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Sound.MouseoverSounds), "SilenceForNextFrame"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Sound.MouseoverSounds), "ResolveFrame"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Constructor(typeof(Verse.Sound.SubSustainer)), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "StartSample"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Constructor(typeof(Verse.Sound.Sustainer)), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "SustainerUpdate"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "Maintain"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.CameraDriver), "get_CurrentViewRect"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.CellRenderer), "InitFrame"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.DebugInputLogger), "InputLogOnGUI"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.DesignationDragger), "UpdateDragCellsIfNeeded"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.Dialog_Rename), "AcceptsInput"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.Dialog_Rename), "WasOpenedByHotkey"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.FloatMenuWorld), "DoWindowContents"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.GenUI), "GetWidthCached"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.GizmoGridDrawer), "HeightDrawnRecently"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.GizmoGridDrawer), "DrawGizmoGrid"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.GUIEventFilterForOSX), "CheckRejectGUIEvent"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.GUIEventFilterForOSX), "RejectEvent"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.RealTime), "Update"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Region), "DangerFor"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.RoomGroupTempTracker), "DebugString"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Root), "Update"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.ScreenshotTaker), "Update"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.ScreenshotTaker), "TakeNonSteamShot"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.UIHighlighter), "HighlightTag"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.UIHighlighter), "HighlightOpportunity"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.UIHighlighter), "UIHighlighterUpdate"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.UnityGUIBugsFixer), "FixDelta"), transpiler: TimeFrameCountTranspiler);
 
-			//complex methods that need further review for simplification
+
+            //complex methods that need further review for simplification
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			BiomeDef_Patch.RunDestructivePatches();
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?

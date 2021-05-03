@@ -63,7 +63,7 @@ namespace RimThreaded
                 actionCheckAddOrRemoveAlert(__instance, AllAlerts(__instance)[i], false);
             }
 
-            if (Time.frameCount % 20 == 0)
+            if (Time_Patch.get_frameCount() % 20 == 0)
             {
                 List<Quest> questsListForReading = Find.QuestManager.QuestsListForReading;
                 for (int j = 0; j < questsListForReading.Count; j++)

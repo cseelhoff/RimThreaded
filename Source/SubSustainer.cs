@@ -104,7 +104,7 @@ namespace RimThreaded
 			SampleSustainer sampleSustainer = SampleSustainer.TryMakeAndPlay(__instance, ((ResolvedGrain_Clip)resolvedGrain).clip, num2);
 			if (sampleSustainer != null)
 			{
-				if (__instance.subDef.sustainSkipFirstAttack && Time.frameCount == __instance.creationFrame)
+				if (__instance.subDef.sustainSkipFirstAttack && Time_Patch.get_frameCount() == __instance.creationFrame)
 				{
 					sampleSustainer.resolvedSkipAttack = true;
 				}

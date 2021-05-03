@@ -64,7 +64,7 @@ namespace RimThreaded
             }
             else if (__instance.info.Maintenance == MaintenanceType.PerFrame)
             {
-                lastMaintainFrame(__instance) = Time.frameCount;
+                lastMaintainFrame(__instance) = Time_Patch.get_frameCount();
             }
             return false;
         }

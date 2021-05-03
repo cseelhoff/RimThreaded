@@ -32,13 +32,13 @@ namespace RimThreaded
 		{
             if (Current.ProgramState == ProgramState.Playing)
             {
-                if (cachedDangersForFrame(__instance) != Time.frameCount)
+                if (cachedDangersForFrame(__instance) != Time_Patch.get_frameCount())
                 {
                     lock (__instance)
                     {
                         cachedDangers(__instance) = new List<KeyValuePair<Pawn, Danger>>();
                     }
-                    cachedDangersForFrame(__instance) = Time.frameCount;
+                    cachedDangersForFrame(__instance) = Time_Patch.get_frameCount();
                 }
                 else
                 {
@@ -66,13 +66,13 @@ namespace RimThreaded
                 FloatRange floatRange;
                 if (Current.ProgramState == ProgramState.Playing)
                 {
-                    if (cachedSafeTemperatureRangesForFrame != Time.frameCount)
+                    if (cachedSafeTemperatureRangesForFrame != Time_Patch.get_frameCount())
                     {
                         lock (cachedSafeTemperatureRanges)
                         {
                             cachedSafeTemperatureRanges = new Dictionary<Pawn, FloatRange>();
                         }
-                        cachedSafeTemperatureRangesForFrame = Time.frameCount;
+                        cachedSafeTemperatureRangesForFrame = Time_Patch.get_frameCount();
                     }
                     if (!cachedSafeTemperatureRanges.TryGetValue(p, out floatRange))
                     {

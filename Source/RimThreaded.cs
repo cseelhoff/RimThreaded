@@ -1069,27 +1069,25 @@ namespace RimThreaded
         private static void RespondToSafeFunctionRequests()
         {
             ThreadInfo[] threadInfos = allThreads2.Values.ToArray();
-            for (int i = 0; i < threadInfos.Length; i++) { 
-                ThreadInfo threadInfo = threadInfos[i];
+            foreach (ThreadInfo threadInfo in threadInfos)
+            {
                 object[] functionAndParameters = threadInfo.safeFunctionRequest;
-                if (functionAndParameters != null)
+                if (functionAndParameters == null) continue;
+                object[] parameters = (object[])functionAndParameters[1];
+                switch (functionAndParameters[0])
                 {
-                    object[] parameters = (object[])functionAndParameters[1];
-                    if (functionAndParameters[0] is Func<object[], object> safeFunction)
-                    {
+                    case Func<object[], object> safeFunction:
                         threadInfo.safeFunctionResult = safeFunction(parameters);
-                    }
-                    else if (functionAndParameters[0] is Action<object[]> safeAction)
-                    {
+                        break;
+                    case Action<object[]> safeAction:
                         safeAction(parameters);
-                    }
-                    else
-                    {
+                        break;
+                    default:
                         Log.Error("First parameter of thread-safe function request was not an action or function");
-                    }
-                    threadInfo.safeFunctionRequest = null;
-                    threadInfo.eventWaitStart.Set();
+                        break;
                 }
+                threadInfo.safeFunctionRequest = null;
+                threadInfo.eventWaitStart.Set();
             }
         }
 
