@@ -18,11 +18,17 @@ namespace RimThreaded
                 Method(typeof(Material), "SetFloat", new[]
                     { typeof(string), typeof(float) }));
 
+        private static readonly Action<object[]> ActionSetStringFloat2 = parameters =>
+            ActionSetStringFloat((Material)parameters[0], (string)parameters[1], (float)parameters[2]);
+
         private static readonly Action<Material, int, float> ActionSetIntFloat =
             (Action<Material, int, float>)Delegate.CreateDelegate(
                 typeof(Action<Material, int, float>),
                 Method(typeof(Material), "SetFloat", new[]
                     { typeof(int), typeof(float) }));
+
+        private static readonly Action<object[]> ActionSetIntFloat2 = parameters =>
+            ActionSetIntFloat((Material)parameters[0], (int)parameters[1], (float)parameters[2]);
 
         private static readonly Action<Material, string, int> ActionSetStringInt =
             (Action<Material, string, int>)Delegate.CreateDelegate(
@@ -30,11 +36,17 @@ namespace RimThreaded
                 Method(typeof(Material), "SetInt", new[]
                     { typeof(string), typeof(int) }));
 
+        private static readonly Action<object[]> ActionSetStringInt2 = parameters =>
+            ActionSetStringInt((Material)parameters[0], (string)parameters[1], (int)parameters[2]);
+
         private static readonly Action<Material, int, int> ActionSetIntInt =
             (Action<Material, int, int>)Delegate.CreateDelegate(
                 typeof(Action<Material, int, int>),
                 Method(typeof(Material), "SetInt", new[]
                     { typeof(int), typeof(int) }));
+
+        private static readonly Action<object[]> ActionSetIntInt2 = parameters =>
+            ActionSetIntInt((Material)parameters[0], (int)parameters[1], (int)parameters[2]);
 
         internal static void RunDestructivePatches()
         {
@@ -50,10 +62,12 @@ namespace RimThreaded
                 prefix: new HarmonyMethod(Method(patched, "SetIntInt")));
         }
 
+
+
         public static bool SetStringFloat(Material __instance, string name, float value)
         {
             if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
-            threadInfo.safeFunctionRequest = new object[] { ActionSetStringFloat, new object[] { __instance, name, value } };
+            threadInfo.safeFunctionRequest = new object[] { ActionSetStringFloat2, new object[] { __instance, name, value } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             return false;
@@ -61,7 +75,7 @@ namespace RimThreaded
         public static bool SetIntFloat(Material __instance, int nameID, float value)
         {
             if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
-            threadInfo.safeFunctionRequest = new object[] { ActionSetIntFloat, new object[] { __instance, nameID, value } };
+            threadInfo.safeFunctionRequest = new object[] { ActionSetIntFloat2, new object[] { __instance, nameID, value } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             return false;
@@ -69,7 +83,7 @@ namespace RimThreaded
         public static bool SetStringInt(Material __instance, string name, int value)
         {
             if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
-            threadInfo.safeFunctionRequest = new object[] { ActionSetStringInt, new object[] { __instance, name, value } };
+            threadInfo.safeFunctionRequest = new object[] { ActionSetStringInt2, new object[] { __instance, name, value } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             return false;
@@ -77,7 +91,7 @@ namespace RimThreaded
         public static bool SetIntInt(Material __instance, int nameID, int value)
         {
             if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
-            threadInfo.safeFunctionRequest = new object[] { ActionSetIntInt, new object[] { __instance, nameID, value } };
+            threadInfo.safeFunctionRequest = new object[] { ActionSetIntInt2, new object[] { __instance, nameID, value } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             return false;

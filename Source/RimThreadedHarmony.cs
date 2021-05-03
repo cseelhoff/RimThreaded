@@ -6,6 +6,7 @@ using System.Reflection;
 using Verse;
 using System.Reflection.Emit;
 using System.Threading;
+using UnityEngine;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -377,7 +378,9 @@ namespace RimThreaded
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
         public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
-        public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
+		public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
+		public static readonly HarmonyMethod RealtimeSinceStartupTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileRealtimeSinceStartup"));
+        public static readonly HarmonyMethod ComponentTransformTranspiler = new HarmonyMethod(Method(typeof(Component_Patch), "TranspileComponentTransform"));
 
 		public static void TranspileTimeFrameCountReplacement(Type original, string methodName, Type[] origType = null)
         {
@@ -670,15 +673,18 @@ namespace RimThreaded
 			GUIStyle_Patch.RunDestructivePatches();
 			LightningBoltMeshMaker_Patch.RunDestructivePatches();
 			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
-			Material_Patch.RunDestructivePatches();
 			MeshMakerPlanes_Patch.RunDestructivePatches();
 			MeshMakerShadows_Patch.RunDestructivePatches();
 			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
 			SectionLayer_Patch.RunDestructivePatches();
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
-            UnityEngine_Object_Patch.RunDestructivePatches(); // Simple
-            
-            //TimeFrameCountTranspiler Fixes
+
+			//Development mode patches
+            Material_Patch.RunDestructivePatches();
+			Transform_Patch.RunDestructivePatches();
+			UnityEngine_Object_Patch.RunDestructivePatches();
+
+			//TimeFrameCountTranspiler Fixes
 			harmony.Patch(Method(typeof(RimWorld.AlertsReadout), "AlertsReadoutUpdate"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(RimWorld.Alert_Critical), "AlertActiveUpdate"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(RimWorld.Building_Bed), "ToggleForPrisonersByInterface"), transpiler: TimeFrameCountTranspiler);
@@ -689,27 +695,27 @@ namespace RimThreaded
             harmony.Patch(Method(typeof(RimWorld.ListerHaulables), "DebugString"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(RimWorld.ListerMergeables), "DebugString"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "DrawPowerGridOverlayThisFrame"), transpiler: TimeFrameCountTranspiler);
-            harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "ShouldDrawPowerGrid"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "get_ShouldDrawPowerGrid"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "DrawZonesThisFrame"), transpiler: TimeFrameCountTranspiler);
-            harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "ShouldDrawZones"), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "get_ShouldDrawZones"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(RimWorld.SocialCardUtility), "CheckRecache"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(RimWorld.Storyteller), "DebugString"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.Sound.MouseoverSounds), "SilenceForNextFrame"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.Sound.MouseoverSounds), "ResolveFrame"), transpiler: TimeFrameCountTranspiler);
-            harmony.Patch(Constructor(typeof(Verse.Sound.SubSustainer)), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "<.ctor>b__12_0"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "StartSample"), transpiler: TimeFrameCountTranspiler);
-            harmony.Patch(Constructor(typeof(Verse.Sound.Sustainer)), transpiler: TimeFrameCountTranspiler);
+            harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "<.ctor>b__15_0"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "SustainerUpdate"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "Maintain"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.CameraDriver), "get_CurrentViewRect"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.CellRenderer), "InitFrame"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.DebugInputLogger), "InputLogOnGUI"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.DesignationDragger), "UpdateDragCellsIfNeeded"), transpiler: TimeFrameCountTranspiler);
-			harmony.Patch(Method(typeof(Verse.Dialog_Rename), "AcceptsInput"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.Dialog_Rename), "get_AcceptsInput"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.Dialog_Rename), "WasOpenedByHotkey"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.FloatMenuWorld), "DoWindowContents"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.GenUI), "GetWidthCached"), transpiler: TimeFrameCountTranspiler);
-			harmony.Patch(Method(typeof(Verse.GizmoGridDrawer), "HeightDrawnRecently"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(Verse.GizmoGridDrawer), "get_HeightDrawnRecently"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.GizmoGridDrawer), "DrawGizmoGrid"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.GUIEventFilterForOSX), "CheckRejectGUIEvent"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.GUIEventFilterForOSX), "RejectEvent"), transpiler: TimeFrameCountTranspiler);
@@ -724,8 +730,88 @@ namespace RimThreaded
             harmony.Patch(Method(typeof(Verse.UIHighlighter), "UIHighlighterUpdate"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.UnityGUIBugsFixer), "FixDelta"), transpiler: TimeFrameCountTranspiler);
 
+			//RealtimeSinceStartupTranspiler
+            harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "CalculateCurInputDollyVect"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Planet.WorldSelectionDrawer), "Notify_Selected"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Alert), "Notify_Started"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.CompProjectileInterceptor), "GetCurrentAlpha_Idle"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.CompProjectileInterceptor), "GetCurrentAlpha_Selected"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Designator_Place), "HandleRotationShortcuts"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.LearningReadout), "LearningReadoutOnGUI"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Lesson), "get_AgeSeconds"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Lesson), "OnActivated"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.OverlayDrawer), "RenderPulsingOverlayInternal"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.PlaceWorker_WatermillGenerator), "DrawGhost"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Screen_Credits), "PreOpen"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Screen_Credits), "WindowUpdate"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.SelectionDrawer), "Notify_Selected"), transpiler: RealtimeSinceStartupTranspiler);
+            ColonistBarColonistDrawer_Patch.RunNonDestructivePatches();
+            WorldSelectionDrawer_Patch.RunNonDestructivePatches();
+			//harmony.Patch(Method(typeof(RimWorld.SelectionDrawerUtility), "CalculateSelectionBracketPositionsUI"), transpiler: RealtimeSinceStartupTranspiler);
+			//harmony.Patch(Method(typeof(RimWorld.SelectionDrawerUtility), "CalculateSelectionBracketPositionsWorld"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.Sample), "get_AgeRealTime"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Constructor(typeof(Verse.Sound.Sample)), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SampleSustainer), "get_Volume"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SoundParamSource_Perlin), "ValueFor"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SoundParamSource_SourceAge), "ValueFor"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SoundSlotManager), "CanPlayNow"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SoundSlotManager), "Notify_Played"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "<.ctor>b__12_0"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "StartSample"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "SubSustainerUpdate"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "get_TimeSinceEnd"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "End"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.ArenaUtility), "PerformBattleRoyale"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.CameraDriver), "CalculateCurInputDollyVect"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(Verse.CameraShaker), "get_ShakeOffset"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.DesignationDragger), "DraggerUpdate"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.Dialog_MessageBox), "get_TimeUntilInteractive"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.Dialog_NodeTree), "get_InteractiveNow"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.Dialog_ResolutionConfirm), "get_TimeUntilRevert"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Constructor(typeof(Verse.Dialog_ResolutionConfirm), Type.EmptyTypes), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.GameInfo), "GameInfoOnGUI"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.GameInfo), "GameInfoUpdate"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.GameplayTipWindow), "DrawContents"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.GenText), "MarchingEllipsis"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.LongEventHandler), "UpdateCurrentEnumeratorEvent"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.Mote), "get_AgeSecs"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.Mote), "SpawnSetup"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.Pulser), "PulseBrightness", new [] {typeof(float), typeof(float) }), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.RealTime), "Update"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.Region), "DebugDrawMouseover"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.ScreenFader), "get_CurTime"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.TooltipHandler), "TipRegion", new [] {typeof(Rect), typeof(TipSignal)}), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.TooltipHandler), "DrawActiveTips"), transpiler: RealtimeSinceStartupTranspiler);
+            harmony.Patch(Method(typeof(Verse.Widgets), "CheckPlayDragSliderSound"), transpiler: RealtimeSinceStartupTranspiler);
 
-            //complex methods that need further review for simplification
+			//TranspileComponentTransform Fixes
+			harmony.Patch(Method(typeof(RimWorld.Planet.DebugTile), "get_DistanceToCamera"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Planet.GenWorldUI), "CurUITileSize"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "get_CurrentRealPosition"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "Update"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "ApplyPositionToGameObject"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraManager), "CreateWorldSkyboxCamera"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "get_Position"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "get_Rotation"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "set_Rotation"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "get_LocalPosition"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "set_LocalPosition"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "Init"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.MusicManagerEntry), "StartPlaying"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.MusicManagerPlay), "MusicUpdate"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.Page_SelectStartingSite), "PostOpen"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.PortraitCameraManager), "CreatePortraitCamera"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Method(typeof(RimWorld.PortraitRenderer), "RenderPortrait"), transpiler: ComponentTransformTranspiler);
+            harmony.Patch(Constructor(typeof(Verse.Sound.AudioSourcePoolCamera)), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.Sample), "ToString"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(Verse.Sound.SoundParamSource_CameraAltitude), "ValueFor"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(Verse.CameraDriver), "get_CurrentRealPosition"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(Verse.CameraDriver), "ApplyPositionToGameObject"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(Verse.DamageWorker), "ExplosionStart"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(Verse.SkyOverlay), "DrawOverlay"), transpiler: ComponentTransformTranspiler);
+			harmony.Patch(Method(typeof(Verse.SubcameraDriver), "Init"), transpiler: ComponentTransformTranspiler);
+
+			//complex methods that need further review for simplification
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
 			BiomeDef_Patch.RunDestructivePatches();
 			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?

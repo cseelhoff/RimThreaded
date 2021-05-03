@@ -40,14 +40,14 @@ namespace RimThreaded
 					sample = samples(__instance)[num];
 					if (sample != null)
 					{
-						if (Time.realtimeSinceStartup > samples(__instance)[num].scheduledEndTime)
+						if (Time_Patch.get_realtimeSinceStartup() > samples(__instance)[num].scheduledEndTime)
 						{
 							EndSample2(__instance, sample);
 						}
 					}
 				}
 
-				if (Time.realtimeSinceStartup > nextSampleStartTime(__instance))
+				if (Time_Patch.get_realtimeSinceStartup() > nextSampleStartTime(__instance))
 				{
 					StartSample(__instance);
 				}
@@ -90,11 +90,11 @@ namespace RimThreaded
 			{
 				num = resolvedGrain.duration;
 			}
-			float num2 = Time.realtimeSinceStartup + num;
+			float num2 = Time_Patch.get_realtimeSinceStartup() + num;
 			nextSampleStartTime(__instance) = num2 + __instance.subDef.sustainIntervalRange.RandomInRange;
-			if (nextSampleStartTime(__instance) < Time.realtimeSinceStartup + 0.01f)
+			if (nextSampleStartTime(__instance) < Time_Patch.get_realtimeSinceStartup() + 0.01f)
 			{
-				nextSampleStartTime(__instance) = Time.realtimeSinceStartup + 0.01f;
+				nextSampleStartTime(__instance) = Time_Patch.get_realtimeSinceStartup() + 0.01f;
 			}
 			if (resolvedGrain is ResolvedGrain_Silence)
 			{

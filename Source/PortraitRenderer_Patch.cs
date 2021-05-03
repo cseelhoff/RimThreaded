@@ -26,15 +26,15 @@ namespace RimThreaded
                 Camera portraitCamera = Find.PortraitCamera;
                 //portraitCamera.targetTexture = renderTexture;
                 set_targetTexture(portraitCamera, renderTexture);
-                Vector3 position = portraitCamera.transform.position;
+                Vector3 position = Component_Patch.get_transform(portraitCamera).position;
                 float orthographicSize = portraitCamera.orthographicSize;
-                portraitCamera.transform.position += cameraOffset;
+                Component_Patch.get_transform(portraitCamera).position += cameraOffset;
                 portraitCamera.orthographicSize = 1f / cameraZoom;
                 pawnFR(__instance) = pawn;
                 //portraitCamera.Render();
                 Render(portraitCamera);
                 pawnFR(__instance) = null;
-                portraitCamera.transform.position = position;
+                Component_Patch.get_transform(portraitCamera).position = position;
                 portraitCamera.orthographicSize = orthographicSize;
                 //portraitCamera.targetTexture = null;
                 set_targetTexture(portraitCamera, null);

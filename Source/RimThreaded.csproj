@@ -78,8 +78,11 @@
     <Compile Include="Alert_MinorBreakRisk_Patch.cs" />
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="Area_Patch.cs" />
-    <Compile Include="Dijkstra.cs" />
+    <Compile Include="ColonistBarColonistDrawer_Patch.cs" />
+    <Compile Include="Component_Patch.cs" />
+    <Compile Include="Dijkstra_Patch.cs" />
     <Compile Include="FoodUtility_Patch.cs" />
+    <Compile Include="GameObject_Patch.cs" />
     <Compile Include="GenRadial_Patch.cs" />
     <Compile Include="Fire_Patch.cs" />
     <Compile Include="AttackTargetFinder_Patch.cs" />
@@ -117,12 +120,14 @@
     <Compile Include="RegionMaker_Patch.cs" />
     <Compile Include="RegionTraverser_Transpile.cs" />
     <Compile Include="Resources.cs" />
+    <Compile Include="SelectionDrawerUtility_Patch.cs" />
     <Compile Include="SlotGroup_Patch.cs" />
     <Compile Include="StatWorker.cs" />
     <Compile Include="ThinkNode_ConditionalAnyColonistTryingToExitMap_Patch.cs" />
     <Compile Include="ThinkNode_PrioritySorter_Patch.cs" />
     <Compile Include="thinkTree.cs" />
     <Compile Include="Time_Patch.cs" />
+    <Compile Include="Transform_Patch.cs" />
     <Compile Include="UnityEngine_Object_Patch.cs" />
     <Compile Include="Verb_MeleeAttack_Patch.cs" />
     <Compile Include="WorkGiver_DoBill_Transpile.cs" />
@@ -297,6 +302,7 @@
     <Compile Include="ThoughtHandler.cs" />
     <Compile Include="TickList.cs" />
     <Compile Include="TickManager.cs" />
+    <Compile Include="WorldSelectionDrawer_Patch.cs" />
     <Compile Include="World_Patch.cs" />
     <Compile Include="ZoneManager_Patch.cs" />
     <Compile Include="Zone_Patch.cs" />
