@@ -6,7 +6,9 @@ using System.Reflection;
 using Verse;
 using System.Reflection.Emit;
 using System.Threading;
+using RimWorld;
 using UnityEngine;
+using Verse.Sound;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -378,10 +380,12 @@ namespace RimThreaded
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
         public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
-		public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
+        public static readonly HarmonyMethod GameObjectTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectConstructor"));
+        public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
 		public static readonly HarmonyMethod RealtimeSinceStartupTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileRealtimeSinceStartup"));
         public static readonly HarmonyMethod ComponentTransformTranspiler = new HarmonyMethod(Method(typeof(Component_Patch), "TranspileComponentTransform"));
-
+		public static readonly HarmonyMethod GameObjectTransformTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectTransform"));
+        
 		public static void TranspileTimeFrameCountReplacement(Type original, string methodName, Type[] origType = null)
         {
             harmony.Patch(Method(original, methodName, origType), transpiler: TimeFrameCountTranspiler);
@@ -666,6 +670,23 @@ namespace RimThreaded
 			WorldObjectsHolder_Patch.RunDestructivePatches();
 			WorldPawns_Patch.RunDestructivePatches(); //todo examine GC optimization
 
+            //complex methods that need further review for simplification
+            AttackTargetReservationManager_Patch.RunDestructivePatches();
+            BiomeDef_Patch.RunDestructivePatches();
+            FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
+            JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
+            JobQueue_Patch.RunDestructivePatches();
+            MapPawns_Patch.RunDestructivePatches();
+            MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
+            Pawn_JobTracker_Patch.RunDestructivePatches();
+            Pawn_Patch.RunDestructivePatches();
+            PawnCapacitiesHandler_Patch.RunDestructivePatches();
+            Region_Patch.RunDestructivePatches();
+            ReservationManager_Patch.RunDestructivePatches();
+            Room_Patch.RunDestructivePatches();
+            SituationalThoughtHandler_Patch.RunDestructivePatches();
+            ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
+
 			//main-thread-only
 			ContentFinder_Texture2D_Patch.RunDestructivePatches();
 			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
@@ -680,13 +701,20 @@ namespace RimThreaded
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 
 			//Development mode patches
-            Material_Patch.RunDestructivePatches();
+			//GameObject_Patch.RunNonDestructivePatches();
+            //TranspileGameObjectConstructor
+			Material_Patch.RunDestructivePatches();
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
 
+			//harmony.Patch(Constructor(typeof(Verse.Sound.Sustainer)), transpiler: GameObjectTranspiler);
+            //List<ConstructorInfo> constructorInfos = GetDeclaredConstructors(typeof(Verse.Sound.Sustainer));
+            ConstructorInfo constructorSustainer = Constructor(typeof(Verse.Sound.Sustainer), new Type[] {typeof(SoundDef), typeof(SoundInfo)});
+			harmony.Patch(constructorSustainer, transpiler: GameObjectTranspiler);
+            
 			//TimeFrameCountTranspiler Fixes
-			harmony.Patch(Method(typeof(RimWorld.AlertsReadout), "AlertsReadoutUpdate"), transpiler: TimeFrameCountTranspiler);
-            harmony.Patch(Method(typeof(RimWorld.Alert_Critical), "AlertActiveUpdate"), transpiler: TimeFrameCountTranspiler);
+			//harmony.Patch(Method(typeof(RimWorld.AlertsReadout), "AlertsReadoutUpdate"), transpiler: TimeFrameCountTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Alert_Critical), "AlertActiveUpdate"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(RimWorld.Building_Bed), "ToggleForPrisonersByInterface"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(RimWorld.CompAbilityEffect_Chunkskip), "FindClosestChunks"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(RimWorld.GenWorld), "MouseTile"), transpiler: TimeFrameCountTranspiler);
@@ -706,7 +734,7 @@ namespace RimThreaded
             harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "StartSample"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "<.ctor>b__15_0"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "SustainerUpdate"), transpiler: TimeFrameCountTranspiler);
-            harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "Maintain"), transpiler: TimeFrameCountTranspiler);
+            //harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "Maintain"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.CameraDriver), "get_CurrentViewRect"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.CellRenderer), "InitFrame"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.DebugInputLogger), "InputLogOnGUI"), transpiler: TimeFrameCountTranspiler);
@@ -720,7 +748,7 @@ namespace RimThreaded
 			harmony.Patch(Method(typeof(Verse.GUIEventFilterForOSX), "CheckRejectGUIEvent"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(Verse.GUIEventFilterForOSX), "RejectEvent"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.RealTime), "Update"), transpiler: TimeFrameCountTranspiler);
-            harmony.Patch(Method(typeof(Verse.Region), "DangerFor"), transpiler: TimeFrameCountTranspiler);
+            //harmony.Patch(Method(typeof(Verse.Region), "DangerFor"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.RoomGroupTempTracker), "DebugString"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.Root), "Update"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.ScreenshotTaker), "Update"), transpiler: TimeFrameCountTranspiler);
@@ -758,7 +786,7 @@ namespace RimThreaded
 			harmony.Patch(Method(typeof(Verse.Sound.SoundSlotManager), "Notify_Played"), transpiler: RealtimeSinceStartupTranspiler);
 			harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "<.ctor>b__12_0"), transpiler: RealtimeSinceStartupTranspiler);
 			harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "StartSample"), transpiler: RealtimeSinceStartupTranspiler);
-			harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "SubSustainerUpdate"), transpiler: RealtimeSinceStartupTranspiler);
+			//harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "SubSustainerUpdate"), transpiler: RealtimeSinceStartupTranspiler);
 			harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "get_TimeSinceEnd"), transpiler: RealtimeSinceStartupTranspiler);
 			harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "End"), transpiler: RealtimeSinceStartupTranspiler);
 			harmony.Patch(Method(typeof(Verse.ArenaUtility), "PerformBattleRoyale"), transpiler: RealtimeSinceStartupTranspiler);
@@ -811,22 +839,21 @@ namespace RimThreaded
 			harmony.Patch(Method(typeof(Verse.SkyOverlay), "DrawOverlay"), transpiler: ComponentTransformTranspiler);
 			harmony.Patch(Method(typeof(Verse.SubcameraDriver), "Init"), transpiler: ComponentTransformTranspiler);
 
-			//complex methods that need further review for simplification
-			AttackTargetReservationManager_Patch.RunDestructivePatches();
-			BiomeDef_Patch.RunDestructivePatches();
-			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
-			JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
-			JobQueue_Patch.RunDestructivePatches();
-			MapPawns_Patch.RunDestructivePatches();
-			MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
-			Pawn_JobTracker_Patch.RunDestructivePatches();
-			Pawn_Patch.RunDestructivePatches();
-			PawnCapacitiesHandler_Patch.RunDestructivePatches();
-			Region_Patch.RunDestructivePatches();
-			ReservationManager_Patch.RunDestructivePatches();
-			Room_Patch.RunDestructivePatches();
-			SituationalThoughtHandler_Patch.RunDestructivePatches();
-			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
+			//GameObjectTransformTranspiler
+            harmony.Patch(Method(typeof(MusicManagerEntry), "StartPlaying"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(MusicManagerPlay), "MusicUpdate"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Constructor(typeof(Verse.Sound.AudioSourcePoolCamera)), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Constructor(typeof(AudioSourcePoolWorld)), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(SampleOneShot), "TryMakeAndPlay"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(SampleSustainer), "TryMakeAndPlay"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(Sustainer), "get_CameraDistanceSquared"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(Sustainer), "UpdateRootObjectPosition"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(Sustainer), "Cleanup"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(CameraDriver), "ApplyPositionToGameObject"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(CameraSwooper), "OffsetCameraFrom"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(GenDebug), "DebugPlaceSphere"), transpiler: GameObjectTransformTranspiler);
+            harmony.Patch(Method(typeof(SubcameraDriver), "Init"), transpiler: GameObjectTransformTranspiler);
+
 
 		}
 

@@ -41,7 +41,7 @@ namespace RimThreaded
                     {
                         Map map = __instance.info.Maker.Map;
                         if (map != null)
-                            __instance.def.sustainStopSound.PlayOneShot(SoundInfo.InMap(new TargetInfo(worldRootObject(__instance).transform.position.ToIntVec3(), map, false), MaintenanceType.None));
+                            __instance.def.sustainStopSound.PlayOneShot(SoundInfo.InMap(new TargetInfo(GameObject_Patch.get_transform(worldRootObject(__instance)).position.ToIntVec3(), map, false), MaintenanceType.None));
                     }
                     else
                         __instance.def.sustainStopSound.PlayOneShot(SoundInfo.OnCamera(MaintenanceType.None));

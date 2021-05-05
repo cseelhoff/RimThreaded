@@ -22,6 +22,23 @@ namespace RimThreaded
         private static readonly Func<object[], object> ActionGet_position2 = parameters =>
             ActionGet_position((Transform)parameters[0]);
 
+        private static readonly Action<Transform, Vector3> ActionSet_position =
+            (Action<Transform, Vector3>)Delegate.CreateDelegate(
+                typeof(Action<Transform, Vector3>),
+                Method(typeof(Transform), "set_position" ));
+
+        private static readonly Action<object[]> ActionSet_position2 = parameters =>
+            ActionSet_position((Transform)parameters[0], (Vector3)parameters[1]);
+
+
+        public static bool set_position(Transform __instance, ref Vector3 value)
+        {
+            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
+            threadInfo.safeFunctionRequest = new object[] { ActionSet_position2, new object[] { __instance, value } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return false;
+        }
 
         public static bool get_position(Transform __instance, ref Vector3 __result)
         {
@@ -29,7 +46,7 @@ namespace RimThreaded
             threadInfo.safeFunctionRequest = new object[] { ActionGet_position2, new object[] { __instance } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
-            __result = (Vector3) threadInfo.safeFunctionResult;
+            __result = (Vector3)threadInfo.safeFunctionResult;
             return false;
         }
 
@@ -38,6 +55,7 @@ namespace RimThreaded
             Type original = typeof(Transform);
             Type patched = typeof(Transform_Patch);
             RimThreadedHarmony.Prefix(original, patched, "get_position");
+            //RimThreadedHarmony.Prefix(original, patched, "set_position");
         }
     }
 }

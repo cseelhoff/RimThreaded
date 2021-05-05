@@ -16,52 +16,166 @@ namespace RimThreaded
 {
     class GameObject_Patch
     {
-        private ConstructorInfo MethodGameObjectString = Constructor(typeof(GameObject), new Type[] { typeof(string) });
-        private ConstructorInfo MethodGameObject = Constructor(typeof(GameObject), Type.EmptyTypes);
-        private ConstructorInfo MethodGameObjectStringParams = Constructor(typeof(GameObject), new Type[] { typeof(string), typeof(Type[]) });
+        private static MethodInfo methodInternal_CreateGameObject =
+            Method(typeof(GameObject), "Internal_CreateGameObject", new[]
+                {typeof(GameObject), typeof(string)});
 
-        private static readonly Func<object[], object> FuncGameObjectString = parameters =>
-            new UnityEngine.GameObject((string)parameters[0]);
-        private static readonly Func<object[], object> FuncGameObject = parameters =>
-            new UnityEngine.GameObject();
-        private static readonly Func<object[], object> FuncGameObjectStringParams = parameters =>
-            new UnityEngine.GameObject((string)parameters[0], (Type[])parameters[1]);
+        private static readonly Action<GameObject, string> ActionInternal_CreateGameObject =
+            (Action<GameObject, string>)Delegate.CreateDelegate(
+                typeof(Action<GameObject, string>), methodInternal_CreateGameObject);
 
-        public static bool GameObjectString(GameObject __instance, string name)
+        private static readonly Action<object[]> ActionGameObject = parameters =>
+            ActionInternal_CreateGameObject((GameObject)parameters[0], (string)parameters[1]);
+
+        private static MethodInfo methodInternal_CreateGameObject_Patch =
+            Method(typeof(GameObject_Patch), "Internal_CreateGameObject", new[]
+                {typeof(GameObject), typeof(string)});
+
+
+        private static ConstructorInfo constructorGameObjectStringParams =
+            Constructor(typeof(GameObject), new[]
+                {typeof(string), typeof(Type[])});
+        private static ConstructorInfo constructorGameObjectString =
+            Constructor(typeof(GameObject), new[]
+                {typeof(string)});
+        private static ConstructorInfo constructorGameObject =
+            Constructor(typeof(GameObject), Type.EmptyTypes);
+
+        private static MethodInfo methodGameObjectStringParams =
+            Method(typeof(GameObject_Patch), "GameObjectStringParams");
+        private static MethodInfo methodGameObjectString =
+            Method(typeof(GameObject_Patch), "GameObjectString");
+        private static MethodInfo methodGameObject =
+            Method(typeof(GameObject_Patch), "GameObject");
+
+        public static void Internal_CreateGameObject(GameObject gameObject, string name)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
-            threadInfo.safeFunctionRequest = new object[] { FuncGameObjectString, new object[] { name } };
+            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            {
+                ActionInternal_CreateGameObject(gameObject, name);
+                return;
+            }
+
+            threadInfo.safeFunctionRequest = new object[] { ActionGameObject, new object[] { gameObject, name } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
-            return false;
         }
-        public static bool GameObject(GameObject __instance)
+
+        static readonly Func<object[], object> FuncGameObjectStringParams = parameters =>
+            new GameObject((string)parameters[0], (Type[])parameters[1]);
+        static readonly Func<object[], object> FuncGameObjectString = parameters =>
+            new GameObject((string)parameters[0]);
+        static readonly Func<object[], object> FuncGameObject = parameters =>
+            new GameObject();
+
+        public static GameObject GameObjectStringParams(string name, params Type[] components)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
-            threadInfo.safeFunctionRequest = new object[] { FuncGameObject, new object[] { } };
-            mainThreadWaitHandle.Set();
-            threadInfo.eventWaitStart.WaitOne();
-            return false;
-        }
-        public static bool GameObjectStringParams(GameObject __instance, string name, params Type[] components)
-        {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
+            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+                return new GameObject(name);
             threadInfo.safeFunctionRequest = new object[] { FuncGameObjectStringParams, new object[] { name, components } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
-            return false;
+            return (GameObject)threadInfo.safeFunctionResult;
+        }
+        public static GameObject GameObjectString(string name)
+        {
+            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+                return new GameObject(name);
+            threadInfo.safeFunctionRequest = new object[] { FuncGameObjectString, new object[] { name } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (GameObject)threadInfo.safeFunctionResult;
+        }
+
+        public static GameObject GameObject()
+        {
+            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+                return new GameObject();
+            threadInfo.safeFunctionRequest = new object[] { FuncGameObject, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (GameObject)threadInfo.safeFunctionResult;
+        }
+
+        public static void RunNonDestructivePatches()
+        {
+            Type original = typeof(GameObject);
+            Type patched = typeof(GameObject_Patch);
+
+            HarmonyMethod transpilerMethod = new HarmonyMethod(Method(patched, "TranspileGameObjectString"));
+            RimThreadedHarmony.harmony.Patch(Constructor(original, 
+                    new[] {typeof(string)}), transpiler: transpilerMethod);
+            RimThreadedHarmony.harmony.Patch(Constructor(original, 
+                    new[] {typeof(string), typeof(Type[])}), transpiler: transpilerMethod);
+            RimThreadedHarmony.harmony.Patch(Constructor(original, 
+                    Type.EmptyTypes), transpiler: transpilerMethod);
+        }
+
+        private static readonly MethodInfo MethodGameObjectTransform = Method(typeof(GameObject), "get_transform");
+        private static readonly MethodInfo MethodGameObject_PatchTransform = Method(typeof(GameObject_Patch), "get_transform");
+        
+
+        public static Transform get_transform(GameObject __instance)
+        {
+            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.transform;
+            Func<object[], object> FuncTransform = parameters => __instance.transform;
+            threadInfo.safeFunctionRequest = new object[] { FuncTransform, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (Transform)threadInfo.safeFunctionResult;
+        }
+
+        public static IEnumerable<CodeInstruction> TranspileGameObjectTransform(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            foreach (CodeInstruction codeInstruction in instructions)
+            {
+                if (codeInstruction.operand is MethodInfo methodInfo)
+                {
+                    if (methodInfo == MethodGameObjectTransform)
+                    {
+                        //Log.Message("RimThreaded is replacing method call: ");
+                        codeInstruction.operand = MethodGameObject_PatchTransform;
+                    }
+                }
+                yield return codeInstruction;
+            }
+        }
+        public static IEnumerable<CodeInstruction> TranspileGameObjectConstructor(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            foreach (CodeInstruction codeInstruction in instructions)
+            {
+                if (codeInstruction.operand is ConstructorInfo constructorInfo)
+                {
+                    if (constructorInfo == constructorGameObjectStringParams)
+                    {
+                        codeInstruction.opcode = OpCodes.Call;
+                        codeInstruction.operand = methodGameObjectStringParams;
+                    }
+                    else if (constructorInfo == constructorGameObjectString)
+                    {
+                        codeInstruction.opcode = OpCodes.Call;
+                        codeInstruction.operand = methodGameObjectString;
+                    }
+                    else if (constructorInfo == constructorGameObject)
+                    {
+                        codeInstruction.opcode = OpCodes.Call;
+                        codeInstruction.operand = methodGameObject;
+                    }
+                }
+                yield return codeInstruction;
+            }
         }
 
         public static IEnumerable<CodeInstruction> TranspileGameObjectString(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             foreach (CodeInstruction codeInstruction in instructions)
             {
-                if (codeInstruction.operand is ConstructorInfo constructorInfo)
+                if (codeInstruction.operand is MethodInfo methodInfo)
                 {
-                    if (methodInfo == MethodTimeFrameCount)
+                    if (methodInfo == methodInternal_CreateGameObject)
                     {
                         //Log.Message("RimThreaded is replacing method call: ");
-                        codeInstruction.operand = MethodTime_PatchedFrameCount;
+                        codeInstruction.operand = methodInternal_CreateGameObject_Patch;
                     }
                 }
                 yield return codeInstruction;

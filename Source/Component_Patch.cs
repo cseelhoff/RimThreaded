@@ -14,9 +14,7 @@ namespace RimThreaded
     {
         private static readonly MethodInfo MethodComponentTransform = Method(typeof(Component), "get_transform");
         private static readonly MethodInfo MethodComponent_PatchTransform = Method(typeof(Component_Patch), "get_transform");
-
-
-        private static readonly Func<object[], object> FuncFrameCount = parameters => Time.frameCount;
+        
 
         public static Transform get_transform(Component __instance)
         {
