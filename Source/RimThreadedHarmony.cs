@@ -7,6 +7,7 @@ using Verse;
 using System.Reflection.Emit;
 using System.Threading;
 using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using Verse.Sound;
 using static HarmonyLib.AccessTools;
@@ -380,11 +381,12 @@ namespace RimThreaded
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
         public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
-        public static readonly HarmonyMethod GameObjectTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectConstructor"));
+        //public static readonly HarmonyMethod GameObjectTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectConstructor"));
         public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
 		public static readonly HarmonyMethod RealtimeSinceStartupTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileRealtimeSinceStartup"));
         public static readonly HarmonyMethod ComponentTransformTranspiler = new HarmonyMethod(Method(typeof(Component_Patch), "TranspileComponentTransform"));
-		public static readonly HarmonyMethod GameObjectTransformTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectTransform"));
+        public static readonly HarmonyMethod GameObjectTransformTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectTransform"));
+		//public static readonly HarmonyMethod TransformPositionTranspiler = new HarmonyMethod(Method(typeof(Transform_Patch), "TranspileTransformPosition"));
         
 		public static void TranspileTimeFrameCountReplacement(Type original, string methodName, Type[] origType = null)
         {
@@ -602,6 +604,7 @@ namespace RimThreaded
 			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			CompCauseGameCondition_Patch.RunDestructivePatches();
 			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
+            DesignationManager_Patch.RunDestructivePatches(); //added for development build
 			DrugAIUtility_Patch.RunDestructivePatches();
 			DynamicDrawManager_Patch.RunDestructivePatches();
 			FactionManager_Patch.RunDestructivePatches();
@@ -701,17 +704,11 @@ namespace RimThreaded
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 
 			//Development mode patches
-			//GameObject_Patch.RunNonDestructivePatches();
-            //TranspileGameObjectConstructor
+			GameObject_Patch.RunNonDestructivePatches();
 			Material_Patch.RunDestructivePatches();
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
-
-			//harmony.Patch(Constructor(typeof(Verse.Sound.Sustainer)), transpiler: GameObjectTranspiler);
-            //List<ConstructorInfo> constructorInfos = GetDeclaredConstructors(typeof(Verse.Sound.Sustainer));
-            ConstructorInfo constructorSustainer = Constructor(typeof(Verse.Sound.Sustainer), new Type[] {typeof(SoundDef), typeof(SoundInfo)});
-			harmony.Patch(constructorSustainer, transpiler: GameObjectTranspiler);
-            
+			
 			//TimeFrameCountTranspiler Fixes
 			//harmony.Patch(Method(typeof(RimWorld.AlertsReadout), "AlertsReadoutUpdate"), transpiler: TimeFrameCountTranspiler);
 			harmony.Patch(Method(typeof(RimWorld.Alert_Critical), "AlertActiveUpdate"), transpiler: TimeFrameCountTranspiler);
@@ -839,6 +836,7 @@ namespace RimThreaded
 			harmony.Patch(Method(typeof(Verse.SkyOverlay), "DrawOverlay"), transpiler: ComponentTransformTranspiler);
 			harmony.Patch(Method(typeof(Verse.SubcameraDriver), "Init"), transpiler: ComponentTransformTranspiler);
 
+			
 			//GameObjectTransformTranspiler
             harmony.Patch(Method(typeof(MusicManagerEntry), "StartPlaying"), transpiler: GameObjectTransformTranspiler);
             harmony.Patch(Method(typeof(MusicManagerPlay), "MusicUpdate"), transpiler: GameObjectTransformTranspiler);
@@ -853,8 +851,16 @@ namespace RimThreaded
             harmony.Patch(Method(typeof(CameraSwooper), "OffsetCameraFrom"), transpiler: GameObjectTransformTranspiler);
             harmony.Patch(Method(typeof(GenDebug), "DebugPlaceSphere"), transpiler: GameObjectTransformTranspiler);
             harmony.Patch(Method(typeof(SubcameraDriver), "Init"), transpiler: GameObjectTransformTranspiler);
+			
 
-
+			/*
+			//TransformPositionTranspiler
+            harmony.Patch(Method(typeof(WorldCameraDriver), "ApplyPositionToGameObject"), transpiler: TransformPositionTranspiler);
+            harmony.Patch(Method(typeof(PortraitCameraManager), "CreatePortraitCamera"), transpiler: TransformPositionTranspiler);
+            harmony.Patch(Method(typeof(PortraitRenderer), "RenderPortrait"), transpiler: TransformPositionTranspiler);
+            harmony.Patch(Constructor(typeof(AudioSourcePoolWorld)), transpiler: TransformPositionTranspiler);
+            harmony.Patch(Method(typeof(SampleOneShot), "TryMakeAndPlay"), transpiler: TransformPositionTranspiler);
+			*/
 		}
 
 		private static void PatchModCompatibility()

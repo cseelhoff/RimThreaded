@@ -20,16 +20,14 @@ namespace RimThreaded
 
 		public static bool MatFrom(ref Material __result, MaterialRequest req)
 		{
-			if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-			{
-				threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { req } };
-				mainThreadWaitHandle.Set();
-				threadInfo.eventWaitStart.WaitOne();
-				__result = (Material)threadInfo.safeFunctionResult;
-				return false;
-			}
-			return true;
-		}
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { req } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            __result = (Material)threadInfo.safeFunctionResult;
+            return false;
+        }
 	}
 
 }

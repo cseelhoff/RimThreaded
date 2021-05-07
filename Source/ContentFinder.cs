@@ -21,15 +21,13 @@ namespace RimThreaded
         }
         public static bool Get(ref Texture2D __result, string itemPath, bool reportFailure = true)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { itemPath, reportFailure } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                __result = (Texture2D)threadInfo.safeFunctionResult;
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { itemPath, reportFailure } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            __result = (Texture2D)threadInfo.safeFunctionResult;
+            return false;
         }
         
 

@@ -25,15 +25,13 @@ namespace RimThreaded
 
         public static bool TryMakeAndPlay(ref SampleSustainer __result, SubSustainer subSus, AudioClip clip, float scheduledEndTime)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { subSus, clip, scheduledEndTime } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                __result = (SampleSustainer)threadInfo.safeFunctionResult;
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { subSus, clip, scheduledEndTime } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            __result = (SampleSustainer)threadInfo.safeFunctionResult;
+            return false;
         }
 
 

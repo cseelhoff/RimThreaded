@@ -23,15 +23,13 @@ namespace RimThreaded
 
         public static bool NewShadowMesh(ref Mesh __result, float baseWidth, float baseHeight, float tallness)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { baseWidth, baseHeight, tallness } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                __result = (Mesh)threadInfo.safeFunctionResult;
-                return false;
-            }
-            return true;        
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { baseWidth, baseHeight, tallness } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            __result = (Mesh)threadInfo.safeFunctionResult;
+            return false;
         }
 
     }

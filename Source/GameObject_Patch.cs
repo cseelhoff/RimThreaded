@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
-using System.CodeDom;
 using System.Reflection;
 using System.Reflection.Emit;
 using static HarmonyLib.AccessTools;
@@ -27,30 +23,17 @@ namespace RimThreaded
         private static readonly Action<object[]> ActionGameObject = parameters =>
             ActionInternal_CreateGameObject((GameObject)parameters[0], (string)parameters[1]);
 
-        private static MethodInfo methodInternal_CreateGameObject_Patch =
+        private static readonly MethodInfo methodInternal_CreateGameObject_Patch =
             Method(typeof(GameObject_Patch), "Internal_CreateGameObject", new[]
                 {typeof(GameObject), typeof(string)});
 
+        private static readonly MethodInfo MethodGameObjectTransform = Method(typeof(GameObject), "get_transform");
+        private static readonly MethodInfo MethodGameObject_PatchTransform = Method(typeof(GameObject_Patch), "get_transform");
 
-        private static ConstructorInfo constructorGameObjectStringParams =
-            Constructor(typeof(GameObject), new[]
-                {typeof(string), typeof(Type[])});
-        private static ConstructorInfo constructorGameObjectString =
-            Constructor(typeof(GameObject), new[]
-                {typeof(string)});
-        private static ConstructorInfo constructorGameObject =
-            Constructor(typeof(GameObject), Type.EmptyTypes);
-
-        private static MethodInfo methodGameObjectStringParams =
-            Method(typeof(GameObject_Patch), "GameObjectStringParams");
-        private static MethodInfo methodGameObjectString =
-            Method(typeof(GameObject_Patch), "GameObjectString");
-        private static MethodInfo methodGameObject =
-            Method(typeof(GameObject_Patch), "GameObject");
 
         public static void Internal_CreateGameObject(GameObject gameObject, string name)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
                 ActionInternal_CreateGameObject(gameObject, name);
                 return;
@@ -59,42 +42,6 @@ namespace RimThreaded
             threadInfo.safeFunctionRequest = new object[] { ActionGameObject, new object[] { gameObject, name } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
-        }
-
-        static readonly Func<object[], object> FuncGameObjectStringParams = parameters =>
-            new GameObject((string)parameters[0], (Type[])parameters[1]);
-        static readonly Func<object[], object> FuncGameObjectString = parameters =>
-            new GameObject((string)parameters[0]);
-        static readonly Func<object[], object> FuncGameObject = parameters =>
-            new GameObject();
-
-        public static GameObject GameObjectStringParams(string name, params Type[] components)
-        {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-                return new GameObject(name);
-            threadInfo.safeFunctionRequest = new object[] { FuncGameObjectStringParams, new object[] { name, components } };
-            mainThreadWaitHandle.Set();
-            threadInfo.eventWaitStart.WaitOne();
-            return (GameObject)threadInfo.safeFunctionResult;
-        }
-        public static GameObject GameObjectString(string name)
-        {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-                return new GameObject(name);
-            threadInfo.safeFunctionRequest = new object[] { FuncGameObjectString, new object[] { name } };
-            mainThreadWaitHandle.Set();
-            threadInfo.eventWaitStart.WaitOne();
-            return (GameObject)threadInfo.safeFunctionResult;
-        }
-
-        public static GameObject GameObject()
-        {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-                return new GameObject();
-            threadInfo.safeFunctionRequest = new object[] { FuncGameObject, new object[] { } };
-            mainThreadWaitHandle.Set();
-            threadInfo.eventWaitStart.WaitOne();
-            return (GameObject)threadInfo.safeFunctionResult;
         }
 
         public static void RunNonDestructivePatches()
@@ -110,11 +57,21 @@ namespace RimThreaded
             RimThreadedHarmony.harmony.Patch(Constructor(original, 
                     Type.EmptyTypes), transpiler: transpilerMethod);
         }
-
-        private static readonly MethodInfo MethodGameObjectTransform = Method(typeof(GameObject), "get_transform");
-        private static readonly MethodInfo MethodGameObject_PatchTransform = Method(typeof(GameObject_Patch), "get_transform");
         
-
+        public static IEnumerable<CodeInstruction> TranspileGameObjectString(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            foreach (CodeInstruction codeInstruction in instructions)
+            {
+                if (codeInstruction.operand is MethodInfo methodInfo)
+                {
+                    if (methodInfo == methodInternal_CreateGameObject)
+                    {
+                        codeInstruction.operand = methodInternal_CreateGameObject_Patch;
+                    }
+                }
+                yield return codeInstruction;
+            }
+        }
         public static Transform get_transform(GameObject __instance)
         {
             if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.transform;
@@ -135,47 +92,6 @@ namespace RimThreaded
                     {
                         //Log.Message("RimThreaded is replacing method call: ");
                         codeInstruction.operand = MethodGameObject_PatchTransform;
-                    }
-                }
-                yield return codeInstruction;
-            }
-        }
-        public static IEnumerable<CodeInstruction> TranspileGameObjectConstructor(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
-            foreach (CodeInstruction codeInstruction in instructions)
-            {
-                if (codeInstruction.operand is ConstructorInfo constructorInfo)
-                {
-                    if (constructorInfo == constructorGameObjectStringParams)
-                    {
-                        codeInstruction.opcode = OpCodes.Call;
-                        codeInstruction.operand = methodGameObjectStringParams;
-                    }
-                    else if (constructorInfo == constructorGameObjectString)
-                    {
-                        codeInstruction.opcode = OpCodes.Call;
-                        codeInstruction.operand = methodGameObjectString;
-                    }
-                    else if (constructorInfo == constructorGameObject)
-                    {
-                        codeInstruction.opcode = OpCodes.Call;
-                        codeInstruction.operand = methodGameObject;
-                    }
-                }
-                yield return codeInstruction;
-            }
-        }
-
-        public static IEnumerable<CodeInstruction> TranspileGameObjectString(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
-            foreach (CodeInstruction codeInstruction in instructions)
-            {
-                if (codeInstruction.operand is MethodInfo methodInfo)
-                {
-                    if (methodInfo == methodInternal_CreateGameObject)
-                    {
-                        //Log.Message("RimThreaded is replacing method call: ");
-                        codeInstruction.operand = methodInternal_CreateGameObject_Patch;
                     }
                 }
                 yield return codeInstruction;

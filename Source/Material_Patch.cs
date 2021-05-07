@@ -66,7 +66,8 @@ namespace RimThreaded
 
         public static bool SetStringFloat(Material __instance, string name, float value)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetStringFloat2, new object[] { __instance, name, value } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
@@ -74,7 +75,8 @@ namespace RimThreaded
         }
         public static bool SetIntFloat(Material __instance, int nameID, float value)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetIntFloat2, new object[] { __instance, nameID, value } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
@@ -82,7 +84,8 @@ namespace RimThreaded
         }
         public static bool SetStringInt(Material __instance, string name, int value)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetStringInt2, new object[] { __instance, name, value } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
@@ -90,7 +93,8 @@ namespace RimThreaded
         }
         public static bool SetIntInt(Material __instance, int nameID, int value)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetIntInt2, new object[] { __instance, nameID, value } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();

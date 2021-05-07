@@ -18,7 +18,8 @@ namespace RimThreaded
 
         public static Transform get_transform(Component __instance)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.transform;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return __instance.transform;
             Func<object[], object> FuncTransform = parameters => __instance.transform;
             threadInfo.safeFunctionRequest = new object[] { FuncTransform, new object[] { } };
             mainThreadWaitHandle.Set();

@@ -23,14 +23,12 @@ namespace RimThreaded
 
         public static bool Stop(AudioSource __instance)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { actionAudioSourceStop, new object[] { __instance } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] { actionAudioSourceStop, new object[] { __instance } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return false;
         }
 
     }

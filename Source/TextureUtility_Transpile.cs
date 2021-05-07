@@ -40,14 +40,12 @@ namespace RimThreaded
             SafeGetReadableTexture((Texture2D)parameters[0]);
         public static Texture2D GetReadableTexture(Texture2D texture)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { safeFunction2, new object[] { texture } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                return (Texture2D)threadInfo.safeFunctionResult;
-            }
-            return SafeGetReadableTexture(texture);
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+                return SafeGetReadableTexture(texture);
+            threadInfo.safeFunctionRequest = new object[] { safeFunction2, new object[] { texture } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (Texture2D)threadInfo.safeFunctionResult;
         }
 
         public static Texture2D SafeGetReadableTexture(Texture2D texture)

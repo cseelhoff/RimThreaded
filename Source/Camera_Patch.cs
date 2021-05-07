@@ -23,15 +23,13 @@ namespace RimThreaded
 
         public static bool set_targetTexture(Camera __instance, RenderTexture value)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] {
-                    safeActionSet_targetTexture, new object[] { __instance, value } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] {
+                safeActionSet_targetTexture, new object[] { __instance, value } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return false;
         }
 
         static MethodInfo methodRender =
@@ -45,14 +43,12 @@ namespace RimThreaded
             actionRender((Camera)p[0]);
         public static bool Render(Camera __instance)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { safeActionRender, new object[] { __instance } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] { safeActionRender, new object[] { __instance } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return false;
         }
     }
 }

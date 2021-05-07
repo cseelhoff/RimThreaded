@@ -28,18 +28,16 @@ namespace RimThreaded
 
         public static bool GenerateMap(ref Map __result, IntVec3 mapSize, MapParent parent, MapGeneratorDef mapGenerator, IEnumerable<GenStepWithParams> extraGenStepDefs = null, Action<Map> extraInitBeforeContentGen = null)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.timeoutExempt = 60000;
-                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { 
-                    mapSize, parent, mapGenerator, extraGenStepDefs, extraInitBeforeContentGen } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                threadInfo.timeoutExempt = 0;
-                __result = (Map)threadInfo.safeFunctionResult;
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.timeoutExempt = 60000;
+            threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { 
+                mapSize, parent, mapGenerator, extraGenStepDefs, extraInitBeforeContentGen } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            threadInfo.timeoutExempt = 0;
+            __result = (Map)threadInfo.safeFunctionResult;
+            return false;
         }
     }
 }

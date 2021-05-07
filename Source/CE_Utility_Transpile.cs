@@ -66,14 +66,12 @@ namespace RimThreaded
 
         public static Texture2D Blit(Texture2D texture, Rect blitRect, int[] rtSize)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { texture, blitRect, rtSize } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                return (Texture2D)threadInfo.safeFunctionResult;
-            }
-            return SafeBlit(texture, blitRect, rtSize);
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+                return SafeBlit(texture, blitRect, rtSize);
+            threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { texture, blitRect, rtSize } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (Texture2D)threadInfo.safeFunctionResult;
         }
 
         public static Texture2D SafeBlit(Texture2D texture, Rect blitRect, int[] rtSize)

@@ -18,16 +18,14 @@ namespace RimThreaded
 
         public static bool GetSubMesh(SectionLayer __instance, ref LayerSubMesh __result, Material material)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                Func<object[], object> safeFunction = parameters => __instance.GetSubMesh((Material)parameters[0]);
-                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { material } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                __result = (LayerSubMesh)threadInfo.safeFunctionResult;
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            Func<object[], object> safeFunction = parameters => __instance.GetSubMesh((Material)parameters[0]);
+            threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { material } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            __result = (LayerSubMesh)threadInfo.safeFunctionResult;
+            return false;
         }
 
     }

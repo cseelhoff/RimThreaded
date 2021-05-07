@@ -16,17 +16,16 @@ namespace RimThreaded
 
         public static bool ToString(UnityEngine.Object __instance, ref string __result)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
-                Func<object[], object> safeFunction = parameters =>
-                __instance.ToString();
-                threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                __result = (string)threadInfo.safeFunctionResult;
-                return false;
+                return true;
             }
-            return true;
+            Func<object[], object> safeFunction = parameters => __instance.ToString();
+            threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            __result = (string)threadInfo.safeFunctionResult;
+            return false;
         }
     }
 }
