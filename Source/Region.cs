@@ -9,6 +9,8 @@ namespace RimThreaded
 
     public class Region_Patch
     {
+        public static AccessTools.FieldRef<Region, Room> roomIntFieldRef =
+            AccessTools.FieldRefAccess<Region, Room>("roomInt");
         public static AccessTools.FieldRef<Region, Dictionary<Area, AreaOverlap>> cachedAreaOverlaps =
             AccessTools.FieldRefAccess<Region, Dictionary<Area, AreaOverlap>>("cachedAreaOverlaps");
         public static AccessTools.FieldRef<Region, int> cachedDangersForFrame =
@@ -25,11 +27,20 @@ namespace RimThreaded
             Type original = typeof(Region);
             Type patched = typeof(Region_Patch);
             RimThreadedHarmony.Prefix(original, patched, "DangerFor");
+            RimThreadedHarmony.Prefix(original, patched, "get_Room");
         }
 
 
+        public static bool get_Room(Region __instance, ref Room __result)
+        {
+            lock (RegionDirtyer_Patch.regionDirtyerLock)
+            {
+                __result = roomIntFieldRef(__instance);
+                return false;
+            }
+        }
         public static bool DangerFor(Region __instance, ref Danger __result, Pawn p)
-		{
+        {
             if (Current.ProgramState == ProgramState.Playing)
             {
                 if (cachedDangersForFrame(__instance) != Time_Patch.get_frameCount())

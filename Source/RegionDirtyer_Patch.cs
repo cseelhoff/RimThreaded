@@ -224,6 +224,7 @@ namespace RimThreaded
                 List<IntVec3> dirtyCells = get_DirtyCells(__instance);
                 foreach (IntVec3 cell in reg.Cells)
                 {
+                    //RegionAndRoomUpdater_Patch.cellsWithNewRegions.Remove(cell);
                     dirtyCells.Add(cell);
                     if (DebugViewSettings.drawRegionDirties)
                     {

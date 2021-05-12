@@ -19,7 +19,7 @@ namespace RimThreaded
 
         public static FieldRef<RegionAndRoomUpdater, Map> map =
             FieldRefAccess<RegionAndRoomUpdater, Map>("map");
-        public static FieldRef<RegionAndRoomUpdater, List<Region>> newRegions =
+        public static FieldRef<RegionAndRoomUpdater, List<Region>> newRegionsFieldRef =
             FieldRefAccess<RegionAndRoomUpdater, List<Region>>("newRegions");
         public static FieldRef<RegionAndRoomUpdater, List<Room>> newRooms =
             FieldRefAccess<RegionAndRoomUpdater, List<Room>>("newRooms");
@@ -84,6 +84,8 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
         }
 
+        public static HashSet<IntVec3> cellsWithNewRegions = new HashSet<IntVec3>();
+        public static List<Region> regionsToReDirty = new List<Region>();
         public static bool TryRebuildDirtyRegionsAndRooms(RegionAndRoomUpdater __instance)
         {
             if (!__instance.Enabled || working) return false;
@@ -111,6 +113,11 @@ namespace RimThreaded
                         map(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
                     }
                     dirtyCells.Clear();
+                    foreach (Region region in regionsToReDirty)
+                    {
+                        RegionDirtyer_Patch.SetRegionDirty(region.Map.regionDirtyer, region);
+                    }
+                    regionsToReDirty.Clear();
                     initialized(__instance) = true;
                     working = false;
                     //regionCleaning.Set();
@@ -122,17 +129,21 @@ namespace RimThreaded
 
         private static void RegenerateNewRegionsFromDirtyCells2(RegionAndRoomUpdater __instance, List<IntVec3> dirtyCells)
         {
-            newRegions(__instance).Clear();
+            cellsWithNewRegions.Clear();
+            List<Region> newRegions = newRegionsFieldRef(__instance);
+            newRegions.Clear();
             Map localMap = map(__instance);
             //while (dirtyCells.TryDequeue(out IntVec3 dirtyCell))
-            foreach(IntVec3 dirtyCell in dirtyCells)
+            for (int index = 0; index < dirtyCells.Count; index++)
             {
-                if (dirtyCell.GetRegion(localMap, RegionType.Set_All) == null)
+                IntVec3 dirtyCell = dirtyCells[index];
+                Region oldRegion = dirtyCell.GetRegion(localMap, RegionType.Set_All);
+                if (oldRegion == null)
                 {
                     Region region = localMap.regionMaker.TryGenerateRegionFrom(dirtyCell);
                     if (region != null)
                     {
-                        newRegions(__instance).Add(region);
+                        newRegions.Add(region);
                     }
                 }
             }
@@ -155,15 +166,16 @@ namespace RimThreaded
         private static void CreateOrAttachToExistingRooms2(RegionAndRoomUpdater __instance, int numRegionGroups)
         {
             Region currentRegionGroup3;
+            List<Region> newRegions = newRegionsFieldRef(__instance);
             for (int i = 0; i < numRegionGroups; i++)
             {
                 List<Region> currentRegionGroup2 = currentRegionGroup(__instance);
                 currentRegionGroup2.Clear();
-                for (int j = 0; j < newRegions(__instance).Count; j++)
+                for (int j = 0; j < newRegions.Count; j++)
                 {
-                    if (newRegions(__instance)[j].newRegionGroupIndex == i)
+                    if (newRegions[j].newRegionGroupIndex == i)
                     {
-                        currentRegionGroup2.Add(newRegions(__instance)[j]);
+                        currentRegionGroup2.Add(newRegions[j]);
                     }
                 }
                 currentRegionGroup3 = currentRegionGroup2[0];

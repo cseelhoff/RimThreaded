@@ -642,6 +642,7 @@ namespace RimThreaded
 			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
 			RegionDirtyer_Patch.RunDestructivePatches();
+            RegionLink_Patch.RunDestructivePatches();
 			RegionMaker_Patch.RunDestructivePatches();
 			ResourceCounter_Patch.RunDestructivePatches();
 			Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound

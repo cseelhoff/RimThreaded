@@ -29,8 +29,8 @@ namespace RimThreaded
             (Action<RegionMaker, Rot4, IntVec3>)Delegate.CreateDelegate(
                 typeof(Action<RegionMaker, Rot4, IntVec3>), methodSweepInTwoDirectionsAndTryToCreateLink);
 
-        readonly static Type original = typeof(RegionMaker);
-        readonly static Type patched = typeof(RegionMaker_Patch);
+        static readonly Type original = typeof(RegionMaker);
+        static readonly Type patched = typeof(RegionMaker_Patch);
         public static void InitializeThreadStatics()
         {
             tmpProcessedThings = new HashSet<Thing>();
@@ -55,13 +55,22 @@ namespace RimThreaded
             newRegCellsFieldRef(__instance) = new List<IntVec3>();
             if (newReg.type.IsOneCellRegion())
             {
-                actionAddCell(__instance, root);
+                if (!RegionAndRoomUpdater_Patch.cellsWithNewRegions.Contains(root))
+                {
+                    RegionAndRoomUpdater_Patch.cellsWithNewRegions.Add(root);
+                    actionAddCell(__instance, root);
+                }
+
                 return false;
             }
 
             map.floodFiller.FloodFill(root, (IntVec3 x) => newReg.extentsLimit.Contains(x) && x.GetExpectedRegionType(map) == newReg.type, delegate (IntVec3 x)
             {
-                actionAddCell(__instance, x);
+                if (!RegionAndRoomUpdater_Patch.cellsWithNewRegions.Contains(x))
+                {
+                    RegionAndRoomUpdater_Patch.cellsWithNewRegions.Add(x);
+                    actionAddCell(__instance, x);
+                }
             });
             return false;
         }
