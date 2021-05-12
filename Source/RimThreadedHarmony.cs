@@ -381,8 +381,10 @@ namespace RimThreaded
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
         public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
-        //public static readonly HarmonyMethod GameObjectTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectConstructor"));
-        public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
+		//public static readonly HarmonyMethod GameObjectTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectConstructor"));
+		public static readonly HarmonyMethod InputGetMousePositionTranspiler = new HarmonyMethod(Method(typeof(UnityEngine_Input_Patch), "TranspileInputGetMousePosition"));
+		public static readonly HarmonyMethod TimeGetTimeTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeGetTime"));
+		public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
 		public static readonly HarmonyMethod RealtimeSinceStartupTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileRealtimeSinceStartup"));
         public static readonly HarmonyMethod ComponentTransformTranspiler = new HarmonyMethod(Method(typeof(Component_Patch), "TranspileComponentTransform"));
         public static readonly HarmonyMethod GameObjectTransformTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectTransform"));
@@ -756,8 +758,17 @@ namespace RimThreaded
             harmony.Patch(Method(typeof(Verse.UIHighlighter), "UIHighlighterUpdate"), transpiler: TimeFrameCountTranspiler);
             harmony.Patch(Method(typeof(Verse.UnityGUIBugsFixer), "FixDelta"), transpiler: TimeFrameCountTranspiler);
 
+			//TimeGetTimeTranspiler Fixes
+			//TODO add remaining methods
+			harmony.Patch(Method(typeof(LetterStack), "ReceiveLetter", new Type[] { typeof(Letter), typeof(string) }), transpiler: TimeGetTimeTranspiler);
+
+			//InputGetMousePositionTranspiler Fixes
+			//TODO add remaining methods
+			//harmony.Patch(Method(typeof(LetterStack), "ReceiveLetter", new Type[] { typeof(Letter), typeof(string) }), transpiler: InputGetMousePositionTranspiler);
+			CameraPlus_Patch.RunNonDestructivePatches();
+
 			//RealtimeSinceStartupTranspiler
-            harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "CalculateCurInputDollyVect"), transpiler: RealtimeSinceStartupTranspiler);
+			harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "CalculateCurInputDollyVect"), transpiler: RealtimeSinceStartupTranspiler);
             harmony.Patch(Method(typeof(RimWorld.Planet.WorldSelectionDrawer), "Notify_Selected"), transpiler: RealtimeSinceStartupTranspiler);
             harmony.Patch(Method(typeof(RimWorld.Alert), "Notify_Started"), transpiler: RealtimeSinceStartupTranspiler);
             harmony.Patch(Method(typeof(RimWorld.CompProjectileInterceptor), "GetCurrentAlpha_Idle"), transpiler: RealtimeSinceStartupTranspiler);
