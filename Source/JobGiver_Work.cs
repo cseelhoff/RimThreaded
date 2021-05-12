@@ -222,7 +222,7 @@ namespace RimThreaded
 								//thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 
 								IntVec3 bestCell = WorkGiver_Grower_Patch.ClosestLocationReachable(workGiver_Grower, pawn);
-								Log.Message(bestCell.ToString());
+								//Log.Message(bestCell.ToString());
 								if (bestCell.IsValid)
 								{
 									bestTargetOfLastPriority = new TargetInfo(bestCell, pawn.Map);

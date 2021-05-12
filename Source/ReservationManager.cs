@@ -488,7 +488,7 @@ namespace RimThreaded
 						haulableThing = target.Thing;
 						if (haulableThing != null && haulableThing.def.EverHaulable && haulableThing.Map != null)
 						{
-							Log.Message("DeregisterHaulableItem " + haulableThing.ToString());
+							//Log.Message("DeregisterHaulableItem " + haulableThing.ToString());
 							HaulingCache.DeregisterHaulableItem(haulableThing);
 						}
 						__result = true;
@@ -522,7 +522,7 @@ namespace RimThreaded
 				haulableThing = target.Thing;
 				if (haulableThing != null && haulableThing.def.EverHaulable && haulableThing.Map != null)
 				{
-					Log.Message("DeregisterHaulableItem " + haulableThing.ToString());
+					//Log.Message("DeregisterHaulableItem " + haulableThing.ToString());
 					HaulingCache.DeregisterHaulableItem(haulableThing);
 				}
 			}

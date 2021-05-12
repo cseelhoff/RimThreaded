@@ -78,7 +78,6 @@
     <Compile Include="Alert_MinorBreakRisk_Patch.cs" />
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="Area_Patch.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="ColonistBarColonistDrawer_Patch.cs" />
     <Compile Include="Component_Patch.cs" />
     <Compile Include="DesignationManager_Patch.cs" />
