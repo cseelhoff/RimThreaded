@@ -761,10 +761,11 @@ namespace RimThreaded
 			//TimeGetTimeTranspiler Fixes
 			//TODO add remaining methods
 			harmony.Patch(Method(typeof(LetterStack), "ReceiveLetter", new Type[] { typeof(Letter), typeof(string) }), transpiler: TimeGetTimeTranspiler);
-
+			//harmony.Patch(Method(typeof(AlertBounce), "", new Type[] { typeof(), typeof(string) }), transpiler: TimeGetTimeTranspiler);
+			harmony.Patch(Method(typeof(Dialog_FormCaravan), "FlashMass", new Type[] { }), transpiler: TimeGetTimeTranspiler);
+			
 			//InputGetMousePositionTranspiler Fixes
 			//TODO add remaining methods
-			//harmony.Patch(Method(typeof(LetterStack), "ReceiveLetter", new Type[] { typeof(Letter), typeof(string) }), transpiler: InputGetMousePositionTranspiler);
 			CameraPlus_Patch.RunNonDestructivePatches();
 
 			//RealtimeSinceStartupTranspiler
