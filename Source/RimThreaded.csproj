@@ -34,7 +34,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\Lib.Harmony.2.0.4\lib\net472\0Harmony.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Assemblies\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\RWDev\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
@@ -123,6 +124,7 @@
     <Compile Include="ProjectileCE_Transpile.cs" />
     <Compile Include="ReachabilityCache.cs" />
     <Compile Include="RegionDirtyer_Patch.cs" />
+    <Compile Include="RegionGrid_Patch.cs" />
     <Compile Include="RegionLink_Patch.cs" />
     <Compile Include="RegionListersUpdater_Transpile.cs" />
     <Compile Include="RegionMaker_Patch.cs" />
