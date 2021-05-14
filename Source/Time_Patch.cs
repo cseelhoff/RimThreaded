@@ -35,12 +35,16 @@ namespace RimThreaded
         }
         public static int get_frameCount()
         {
+#if DEBUG
             if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return Time.frameCount;
             threadInfo.safeFunctionRequest = new object[] { FuncFrameCount, new object[] { } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             return (int)threadInfo.safeFunctionResult;
+#else
+            return Time.frameCount;
+#endif
         }
         public static float get_realtimeSinceStartup()
         {

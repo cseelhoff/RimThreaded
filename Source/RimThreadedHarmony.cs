@@ -480,7 +480,9 @@ namespace RimThreaded
 			Area_Patch.RunNonDestructivePatches();
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
 			BeautyUtility_Patch.RunNonDestructivePatches();
-			BuildableDef_Patch.RunNonDestructivePatches(); 
+			BuildableDef_Patch.RunNonDestructivePatches();
+            Caravan_BedsTracker_Patch.RunNonDestructivePatches();
+            CaravanInventoryUtility_Patch.RunNonDestructivePatches();
 			CellFinder_Patch.RunNonDestructivePatches();
 			DamageWorker_Patch.RunNonDestructivePatches();
 			Fire_Patch.RunNonDestructivePatches();
@@ -687,7 +689,7 @@ namespace RimThreaded
             FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
             JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
             JobQueue_Patch.RunDestructivePatches();
-            MapPawns_Patch.RunDestructivePatches();
+            MapPawns_Patch.RunDestructivePatches(); //TODO: Affects Animal Master Assignment
             MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
             Pawn_JobTracker_Patch.RunDestructivePatches();
             Pawn_Patch.RunDestructivePatches();
@@ -954,7 +956,6 @@ namespace RimThreaded
 
 			//InputGetMousePositionTranspiler Fixes
 			//TODO add remaining methods
-			CameraPlus_Patch.RunNonDestructivePatches();
 
 			//RealtimeSinceStartupTranspiler
 			harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "CalculateCurInputDollyVect"), transpiler: RealtimeSinceStartupTranspiler);

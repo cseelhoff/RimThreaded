@@ -239,6 +239,8 @@ namespace RimThreaded
             AttackTargetFinder_Patch.InitializeThreadStatics();
             AttackTargetsCache_Patch.InitializeThreadStatics();
             BeautyUtility_Patch.InitializeThreadStatics();
+            Caravan_BedsTracker_Patch.InitializeThreadStatics();
+            CaravanInventoryUtility_Patch.InitializeThreadStatics();
             CellFinder_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             DamageWorker_Patch.InitializeThreadStatics();

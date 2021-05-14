@@ -84,7 +84,8 @@
     <Compile Include="Alert_MinorBreakRisk_Patch.cs" />
     <Compile Include="AmbientSoundManager_Patch.cs" />
     <Compile Include="Area_Patch.cs" />
-    <Compile Include="CameraPlus_Patch.cs" />
+    <Compile Include="CaravanInventoryUtility_Patch.cs" />
+    <Compile Include="Caravan_BedsTracker_Patch.cs" />
     <Compile Include="ColonistBarColonistDrawer_Patch.cs" />
     <Compile Include="Component_Patch.cs" />
     <Compile Include="DesignationManager_Patch.cs" />

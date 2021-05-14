@@ -99,7 +99,8 @@ namespace RimThreaded
 				return;
 			}
 
-			if (!localWantedPlantDef.CanEverPlantAt_NewTemp(location, map))
+			//TODO fix null check? find root cause. Or maybe it was just from a bad save?
+			if (localWantedPlantDef != null &&!localWantedPlantDef.CanEverPlantAt_NewTemp(location, map))
 			{
 				return;
 			}
