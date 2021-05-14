@@ -150,7 +150,7 @@ namespace RimThreaded
 			ZoneManager zoneManager = pawn.Map.zoneManager;
 			foreach (object obj in JumboCellCache.GetClosestActionableObjects(pawn, map, awaitingPlantCellsMapDict))
 			{
-				/*
+				
 				if(obj is Building_PlantGrower building_PlantGrower)
                 {
 					if (building_PlantGrower == null || !funcExtraRequirements(workGiver_Grower, building_PlantGrower, pawn) 
@@ -167,7 +167,7 @@ namespace RimThreaded
 						return item; //TODO ADD check
 					}
 				}
-				else */ if (obj is IntVec3 c)
+				else  if (obj is IntVec3 c)
 				
 				{
 					if (!(zoneManager.ZoneAt(c) is Zone_Growing growZone))

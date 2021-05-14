@@ -215,7 +215,7 @@ namespace RimThreaded
 							allowUnreachable = scanner.AllowUnreachable;
 							maxPathDanger = scanner.MaxPathDanger(pawn);
 							IEnumerable<IntVec3> enumerable4;
-							if (scanner is WorkGiver_Grower workGiver_Grower)
+							if (scanner is WorkGiver_GrowerSow workGiver_Grower)
 							{
 								RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell = 0;
 
@@ -296,6 +296,23 @@ namespace RimThreaded
 						__result = new ThinkResult(job3, __instance, list[j].def.tagToGive);
 						return false;
 					}
+
+					//If this was a cached plant job, deregister it
+                    if (scannerWhoProvidedTarget is WorkGiver_GrowerSow)
+                    {
+                        Map map = pawn.Map;
+                        IntVec3 cell = bestTargetOfLastPriority.Cell;
+                        List<Thing> thingList = cell.GetThingList(map);
+                        foreach (Thing thing in thingList)
+                        {
+                            if (thing is Building_PlantGrower buildingPlantGrower)
+                            {
+                                JumboCellCache.ReregisterObject(map, cell, buildingPlantGrower,
+                                    WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+							}
+                        }
+						JumboCellCache.ReregisterObject(map, cell, cell, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                    }
 					//HACK - I know. I'm awful.
 					//Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
 					Log.Warning(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."));
