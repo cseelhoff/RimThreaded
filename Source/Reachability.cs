@@ -18,6 +18,8 @@ namespace RimThreaded
 
         public static FieldRef<Reachability, Map> mapFieldRef = FieldRefAccess<Reachability, Map>("map");
         public static FieldRef<Reachability, ReachabilityCache> cacheFieldRef = FieldRefAccess<Reachability, ReachabilityCache>("cache");
+        public static FieldRef<Reachability, RegionGrid> regionGridFieldRef = FieldRefAccess<Reachability, RegionGrid>("regionGrid");
+        public static FieldRef<Reachability, PathGrid> pathGridFieldRef = FieldRefAccess<Reachability, PathGrid>("pathGrid");
 
         private static readonly MethodInfo methodCheckCellBasedReachability =
             Method(typeof(Reachability), "CheckCellBasedReachability", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
@@ -138,7 +140,9 @@ namespace RimThreaded
             dest = (LocalTargetInfo)GenPath.ResolvePathMode(traverseParams.pawn, dest.ToTargetInfo(map), ref peMode);
             try
             {
+                pathGridFieldRef(__instance) = map.pathGrid;
                 PathGrid pathGrid = map.pathGrid;
+                regionGridFieldRef(__instance) = map.regionGrid;
                 RegionGrid regionGrid = map.regionGrid;
 
                 destRegions.Clear();
