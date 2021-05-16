@@ -44,13 +44,12 @@ namespace RimThreaded
             }
         }
 
-        public static bool WorldObjectsListTick()
+        public static void WorldObjectsListTick()
         {
             while (true)
             {
                 int index = Interlocked.Decrement(ref worldObjectsTicks);
-                if (index < -1) return false;
-                if (index == -1) return true; //causes method to return "true" only once upon completion
+                if (index < 0) return;
                 WorldObject worldObject = worldObjectsTickList[index];
                 try
                 {

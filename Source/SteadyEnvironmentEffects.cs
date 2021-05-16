@@ -94,8 +94,7 @@ namespace RimThreaded
             while (true)
             {
                 int ticketIndex = Interlocked.Increment(ref steadyEnvironmentEffectsTicksCompleted) - 1;
-                if (ticketIndex >= totalSteadyEnvironmentEffectsTicks) return; // false;
-                //if (ticketIndex == totalSteadyEnvironmentEffectsTicks) return true; //causes method to return "true" only once upon completion
+                if (ticketIndex >= totalSteadyEnvironmentEffectsTicks) return;
                 int index = ticketIndex;
                 while (ticketIndex >= steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsTicks)
                 {

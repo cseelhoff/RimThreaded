@@ -6,8 +6,9 @@ namespace RimThreaded
     public class ThreadedTickList
     {
         public Action prepareAction;
-        public Func<bool> tickAction;
+        public Action tickAction;
         public int preparing = -1;
+        public int threadCount = -1;
         public bool readyToTick = false;
         public EventWaitHandle prepEventWaitStart = new ManualResetEvent(false);
     }

@@ -7,20 +7,16 @@ using Verse.Sound;
 using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Reflection;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     [StaticConstructorOnStartup]
     public class RimThreaded
     {
-
-
         public static int WorkGiver_GrowerSow_Patch_JobOnCell; //debugging
 
         //TODO clear on new game or load
-        public static HashSet<ThingDef> recipeThingDefs = new HashSet<ThingDef>();
+        //public static HashSet<ThingDef> recipeThingDefs = new HashSet<ThingDef>();
         public static Dictionary<RecipeDef, List<float>> sortedRecipeValues = new Dictionary<RecipeDef, List<float>>();
         public static Dictionary<RecipeDef, Dictionary<float, List<ThingDef>>> recipeThingDefValues = new Dictionary<RecipeDef, Dictionary<float, List<ThingDef>>>();
         public static Dictionary<Bill_Production, List<Pawn>> billFreeColonistsSpawned = new Dictionary<Bill_Production, List<Pawn>>();
@@ -39,8 +35,8 @@ namespace RimThreaded
 
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
-        private static Thread monitorThread = null;
-        private static bool allWorkerThreadsFinished = false;
+        private static Thread monitorThread;
+        private static bool allWorkerThreadsFinished;
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
@@ -80,12 +76,12 @@ namespace RimThreaded
         public static int workingOnHistoryTick = -1;
         public static int workingOnMiscellaneous = -1;
         public static TickManager callingTickManager;
-        public static int listsFullyProcessed = 0;
-        public static bool dateNotifierTickComplete = false;
-        public static bool worldTickComplete = false;
-        public static bool mapPostTickComplete = false;
-        public static bool historyTickComplete = false;
-        public static bool miscellaneousComplete = false;
+        public static int listsFullyProcessed;
+        public static bool dateNotifierTickComplete;
+        public static bool worldTickComplete;
+        public static bool mapPostTickComplete;
+        public static bool historyTickComplete;
+        public static bool miscellaneousComplete;
         
         public static Dictionary<Thread, ThreadInfo> allThreads2 = new Dictionary<Thread, ThreadInfo>();
 
@@ -405,9 +401,10 @@ namespace RimThreaded
             foreach (ThreadedTickList tickList in threadedTickLists)
             {
                 if (!tickList.readyToTick) continue;
-                if (tickList.tickAction())
-                    Interlocked.Increment(ref listsFullyProcessed);
+                tickList.tickAction();
                 tickList.readyToTick = false;
+                if (Interlocked.Increment(ref tickList.threadCount) == 0)
+                    Interlocked.Increment(ref listsFullyProcessed);
                 break;
             }
         }
@@ -418,32 +415,24 @@ namespace RimThreaded
             {
                 monitorThreadWaitHandle.WaitOne();
 
+                foreach (ThreadedTickList tickList in threadedTickLists)
+                {
+                    tickList.preparing = -1;
+                    tickList.threadCount = -1;
+                }
+
+                listsFullyProcessed = 0;
                 workingOnDateNotifierTick = -1;
                 workingOnWorldTick = -1;
                 workingOnMapPostTick = -1;
                 workingOnHistoryTick = -1;
                 currentPrepsDone = -1;
                 workingOnMiscellaneous = -1;
-                listsFullyProcessed = 0;
-                SteadyEnvironmentEffects_Patch.totalSteadyEnvironmentEffectsTicks = 0;
-                SteadyEnvironmentEffects_Patch.steadyEnvironmentEffectsTicksCompleted = 0;
-                SteadyEnvironmentEffects_Patch.steadyEnvironmentEffectsCount = 0;
-                WildPlantSpawner_Patch.wildPlantSpawnerCount = 0;
-                WildPlantSpawner_Patch.wildPlantSpawnerTicksCount = 0;
-                WildPlantSpawner_Patch.wildPlantSpawnerTicksCompleted = 0;
-                TradeShip_Patch.totalTradeShipTicks = 0;
-                TradeShip_Patch.totalTradeShipTicksCompleted = 0;
-                TradeShip_Patch.totalTradeShipsCount = 0;
-                foreach (ThreadedTickList tickList in threadedTickLists)
-                {
-                    tickList.preparing = -1;
-                }
                 dateNotifierTickComplete = false;
                 worldTickComplete = false;
                 mapPostTickComplete = false;
                 historyTickComplete = false;
                 miscellaneousComplete = false;
-                RegionAndRoomUpdater_Patch.regionCleaning.Set();
                 foreach (ThreadInfo threadInfo in allThreads2.Values)
                 {
                     threadInfo.eventWaitStart.Set();

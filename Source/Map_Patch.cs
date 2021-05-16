@@ -27,7 +27,6 @@ namespace RimThreaded
             return false;
 
         }
-        public static int mapPostThreads;
 
         public static void MapsPostTickPrepare()
         {
@@ -43,17 +42,22 @@ namespace RimThreaded
             {
                 Log.Error(ex3.ToString());
             }
-
-            mapPostThreads = -1;
+            SteadyEnvironmentEffects_Patch.totalSteadyEnvironmentEffectsTicks = 0;
+            SteadyEnvironmentEffects_Patch.steadyEnvironmentEffectsTicksCompleted = 0;
+            SteadyEnvironmentEffects_Patch.steadyEnvironmentEffectsCount = 0;
+            WildPlantSpawner_Patch.wildPlantSpawnerCount = 0;
+            WildPlantSpawner_Patch.wildPlantSpawnerTicksCount = 0;
+            WildPlantSpawner_Patch.wildPlantSpawnerTicksCompleted = 0;
+            TradeShip_Patch.totalTradeShipTicks = 0;
+            TradeShip_Patch.totalTradeShipTicksCompleted = 0;
+            TradeShip_Patch.totalTradeShipsCount = 0;
         }
 
-        public static bool MapPostListTick()
+        public static void MapPostListTick()
         {
-            int threadIndex = Interlocked.Increment(ref mapPostThreads);
             SteadyEnvironmentEffects_Patch.SteadyEffectTick();
             WildPlantSpawner_Patch.WildPlantSpawnerListTick();
             TradeShip_Patch.PassingShipListTick();
-            return threadIndex == 0;
         }
     }
 }

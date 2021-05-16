@@ -105,13 +105,12 @@ namespace RimThreaded
             normalThingListTicks = normalThingList.Count;
         }
 
-        public static bool NormalThingTick()
+        public static void NormalThingTick()
         {
             while (true)
             {
                 int index = Interlocked.Decrement(ref normalThingListTicks);
-                if (index < -1) return false;
-                if (index == -1) return true; //causes method to return "true" only once upon completion
+                if (index < 0) return;
                 Thing thing = normalThingList[index];
                 if (thing.Destroyed) continue;
                 try
@@ -147,13 +146,12 @@ namespace RimThreaded
             rareThingListTicks = rareThingList.Count;
         }
 
-        public static bool RareThingTick()
+        public static void RareThingTick()
         {
             while (true)
             {
                 int index = Interlocked.Decrement(ref rareThingListTicks);
-                if (index < -1) return false;
-                if (index == -1) return true; //causes method to return "true" only once upon completion
+                if (index < 0) return;
                 Thing thing = rareThingList[index];
                 if (thing.Destroyed) continue;
                 try
@@ -189,13 +187,12 @@ namespace RimThreaded
             longThingListTicks = longThingList.Count;
         }
 
-        public static bool LongThingTick()
+        public static void LongThingTick()
         {
             while (true)
             {
                 int index = Interlocked.Decrement(ref longThingListTicks);
-                if (index < -1) return false;
-                if (index == -1) return true; //causes method to return "true" only once upon completion
+                if (index < 0) return;
                 Thing thing = longThingList[index];
                 if (thing.Destroyed) continue;
                 try

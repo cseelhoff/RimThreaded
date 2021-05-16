@@ -139,8 +139,7 @@ namespace RimThreaded
             while (true)
             {
                 int ticketIndex = Interlocked.Increment(ref wildPlantSpawnerTicksCompleted) - 1;
-                if (ticketIndex >= wildPlantSpawnerTicksCount) return; //false;
-                //if (ticketIndex == wildPlantSpawnerTicksCount) return true; //causes method to return "true" only once upon completion
+                if (ticketIndex >= wildPlantSpawnerTicksCount) return;
                 int wildPlantSpawnerIndex = 0;
                 WildPlantSpawnerStructure wildPlantSpawner;
                 int index;

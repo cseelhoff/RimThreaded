@@ -63,13 +63,12 @@ namespace RimThreaded
             }
         }
 
-        public static bool FactionsListTick()
+        public static void FactionsListTick()
         {
             while (true)
             {
                 int index = Interlocked.Decrement(ref allFactionsTicks);
-                if (index < -1) return false;
-                if (index == -1) return true; //causes method to return "true" only once upon completion
+                if (index < 0) return;
                 Faction faction = allFactionsTickList[index];
                 try
                 {

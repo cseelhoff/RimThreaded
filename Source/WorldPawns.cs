@@ -154,13 +154,12 @@ namespace RimThreaded
             }
         }
 
-        public static bool WorldPawnsListTick()
+        public static void WorldPawnsListTick()
         {
             while (true)
             {
                 int index = Interlocked.Decrement(ref worldPawnsTicks);
-                if (index < -1) return false;
-                if (index == -1) return true; //causes method to return "true" only once upon completion
+                if (index < 0) return;
                 Pawn pawn = worldPawnsAlive[index];
                 try
                 {

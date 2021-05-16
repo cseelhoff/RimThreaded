@@ -47,7 +47,7 @@ namespace RimThreaded
             while (true)
             {
                 int ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted) - 1;
-                if (ticketIndex >= totalTradeShipTicks) return; // false;
+                if (ticketIndex >= totalTradeShipTicks) return;
                 int totalTradeShipIndex = 0;
                 while (ticketIndex < totalTradeShipTicks)
                 {
@@ -58,8 +58,7 @@ namespace RimThreaded
                     }
                     if (totalTradeShipIndex > 0)
                         index = ticketIndex - tradeShips[totalTradeShipIndex - 1].TradeShipTicks;
-                    Pawn pawn = tradeShips[totalTradeShipIndex].TradeShipThings[index] as Pawn;
-                    if (pawn != null)
+                    if (tradeShips[totalTradeShipIndex].TradeShipThings[index] is Pawn pawn)
                     {
                         try
                         {

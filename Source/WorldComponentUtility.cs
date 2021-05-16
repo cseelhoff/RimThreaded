@@ -42,13 +42,12 @@ namespace RimThreaded
             }
         }
 
-        public static bool WorldComponentListTick()
+        public static void WorldComponentListTick()
         {
             while (true)
             {
                 int index = Interlocked.Decrement(ref worldComponentTicks);
-                if (index < -1) return false;
-                if (index == -1) return true; //causes method to return "true" only once upon completion
+                if (index < 0) return;
                 WorldComponent worldComponent = worldComponents[index];
                 if (null != worldComponent) //TODO: is null-check and lock necessary?
                 {

@@ -1,11 +1,8 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using System.Reflection;
-using System.Threading;
-using System.Collections.Concurrent;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -31,12 +28,8 @@ namespace RimThreaded
             FieldRefAccess<RegionAndRoomUpdater, HashSet<RoomGroup>>("reusedOldRoomGroups");
         public static FieldRef<RegionAndRoomUpdater, List<Region>> currentRegionGroup =
             FieldRefAccess<RegionAndRoomUpdater, List<Region>>("currentRegionGroup");
-        public static FieldRef<RegionAndRoomUpdater, List<Room>> currentRoomGroup =
-            FieldRefAccess<RegionAndRoomUpdater, List<Room>>("currentRoomGroup");
         public static FieldRef<RegionAndRoomUpdater, bool> initialized =
             FieldRefAccess<RegionAndRoomUpdater, bool>("initialized");
-        public static Dictionary<int, bool> threadRebuilding = new Dictionary<int, bool>();
-        public static EventWaitHandle regionCleaning = new AutoResetEvent(true);
 
         static readonly MethodInfo methodShouldBeInTheSameRoomGroup =
             Method(typeof(RegionAndRoomUpdater), "ShouldBeInTheSameRoomGroup", new Type[] { typeof(Room), typeof(Room) });

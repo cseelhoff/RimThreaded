@@ -81,13 +81,12 @@ namespace RimThreaded
             }
         }
 
-        public static bool WindManagerListTick()
+        public static void WindManagerListTick()
         {
             while (true)
             {
                 int index = Interlocked.Decrement(ref plantMaterialsCount);
-                if (index < -1) return false;
-                if (index == -1) return true; //causes method to return "true" only once upon completion
+                if (index < 0) return;
                 Material material = plantMaterials[index];
                 try
                 {

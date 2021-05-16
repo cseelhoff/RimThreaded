@@ -543,7 +543,7 @@ namespace RimThreaded
 			Rand_Patch.RunNonDestructivePatches(); //uses old transpile for lock
 			RegionTraverser_Transpile.RunNonDestructivePatches(); 
 			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
-			Thing_Patch.RunNonDestructivePatches();
+			//Thing_Patch.RunNonDestructivePatches();
 			ThingOwnerThing_Transpile.RunNonDestructivePatches();
 			TickList_Patch.RunNonDestructivePatches();
 			WealthWatcher_Patch.RunNonDestructivePatches();
