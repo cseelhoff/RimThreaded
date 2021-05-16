@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -8,5 +9,6 @@ namespace RimThreaded
         public Func<bool> tickAction;
         public int preparing = -1;
         public bool readyToTick = false;
+        public EventWaitHandle prepEventWaitStart = new ManualResetEvent(false);
     }
 }

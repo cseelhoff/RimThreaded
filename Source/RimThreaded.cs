@@ -74,7 +74,6 @@ namespace RimThreaded
         public static List<Faction> allFactions = null;
         
         public static int currentPrepsDone = -1;
-        public static List<EventWaitHandle> prepEventWaitStarts = new List<EventWaitHandle>();
         public static int workingOnDateNotifierTick = -1;
         public static int workingOnWorldTick = -1;
         public static int workingOnMapPostTick = -1;
@@ -109,10 +108,6 @@ namespace RimThreaded
             CreateWorkerThreads();
             monitorThread = new Thread(MonitorThreads) { IsBackground = true };
             monitorThread.Start();
-            for(int index = 0; index < threadedTickLists.Count; index++)
-            {
-                prepEventWaitStarts.Add(new ManualResetEvent(false));
-            }
             string potentialConflicts = RimThreadedMod.getPotentialModConflicts();
             if(potentialConflicts.Length > 0)
             {
@@ -125,7 +120,7 @@ namespace RimThreaded
             new ThreadedTickList
             {
                 prepareAction = WindManager_Patch.WindManagerPrepare,
-                tickAction = WindManager_Patch.WindManagerTick
+                tickAction = WindManager_Patch.WindManagerListTick
             },
             new ThreadedTickList
             {
@@ -269,7 +264,7 @@ namespace RimThreaded
                 PrepareWorkLists();
                 for(int loopsCompleted = listsFullyProcessed; loopsCompleted < threadedTickLists.Count; loopsCompleted++)
                 {
-                    prepEventWaitStarts[loopsCompleted].WaitOne();
+                    threadedTickLists[loopsCompleted].prepEventWaitStart.WaitOne();
                     ExecuteTicks();
                 }
                 CompletePostWorkLists();
@@ -401,7 +396,7 @@ namespace RimThreaded
                 if (Interlocked.Increment(ref tickList.preparing) != 0) continue;
                 tickList.prepareAction();
                 tickList.readyToTick = true;
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set();
+                threadedTickLists[Interlocked.Increment(ref currentPrepsDone)].prepEventWaitStart.Set();
             }
         }
         

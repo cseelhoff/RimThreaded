@@ -81,7 +81,7 @@ namespace RimThreaded
             }
         }
 
-        public static bool WindManagerTick()
+        public static bool WindManagerListTick()
         {
             while (true)
             {
