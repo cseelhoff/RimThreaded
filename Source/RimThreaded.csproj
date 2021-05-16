@@ -88,6 +88,7 @@
     <Compile Include="Caravan_BedsTracker_Patch.cs" />
     <Compile Include="ColonistBarColonistDrawer_Patch.cs" />
     <Compile Include="Component_Patch.cs" />
+    <Compile Include="CustomTickList.cs" />
     <Compile Include="DesignationManager_Patch.cs" />
     <Compile Include="Dijkstra_Patch.cs" />
     <Compile Include="FoodUtility_Patch.cs" />

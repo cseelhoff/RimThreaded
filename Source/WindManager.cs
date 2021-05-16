@@ -5,6 +5,7 @@ using UnityEngine;
 using Verse.Noise;
 using static HarmonyLib.AccessTools;
 using System.Reflection;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -66,6 +67,37 @@ namespace RimThreaded
                 RimThreaded.plantMaterialsCount = plantMaterials.Count;
             }
             return false;
+        }
+
+        //public static List<Material> plantMaterialsList;
+        public static int plantMaterialsCount;
+
+        public static void WindManagerPrepare()
+        {
+            List<Map> maps = Find.Maps;
+            for (int i = 0; i < maps.Count; i++)
+            {
+                maps[i].MapPreTick();
+            }
+        }
+
+        public static bool WindManagerTick()
+        {
+            while (true)
+            {
+                int index = Interlocked.Decrement(ref plantMaterialsCount);
+                if (index < -1) return false;
+                if (index == -1) return true; //causes method to return "true" only once upon completion
+                Material material = plantMaterials[index];
+                try
+                {
+                    material.SetFloat(ShaderPropertyIDs.SwayHead, RimThreaded.plantSwayHead);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Exception ticking " + WindManager_Patch.plantMaterials[index].ToStringSafe() + ": " + ex);
+                }
+            }
         }
 
     }

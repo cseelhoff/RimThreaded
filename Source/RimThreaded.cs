@@ -15,15 +15,7 @@ namespace RimThreaded
     [StaticConstructorOnStartup]
     public class RimThreaded
     {
-        private static readonly MethodInfo methodGetDesiredPlantsCountAt =
-            Method(typeof(WildPlantSpawner), "GetDesiredPlantsCountAt", new Type[] { typeof(IntVec3), typeof(IntVec3), typeof(float) });
-        private static readonly Func<WildPlantSpawner, IntVec3, IntVec3, float, float> funcGetDesiredPlantsCountAt =
-            (Func<WildPlantSpawner, IntVec3, IntVec3, float, float>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, IntVec3, float, float>), methodGetDesiredPlantsCountAt);
 
-        private static readonly MethodInfo methodCanRegrowAt =
-            Method(typeof(WildPlantSpawner), "CanRegrowAt", new Type[] { typeof(IntVec3) });
-        private static readonly Func<WildPlantSpawner, IntVec3, bool> funcCanRegrowAt =
-            (Func<WildPlantSpawner, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, bool>), methodCanRegrowAt);
 
         public static int WorkGiver_GrowerSow_Patch_JobOnCell; //debugging
 
@@ -60,37 +52,19 @@ namespace RimThreaded
         public static int thingListRareTicks = 0;
         public static List<Thing> thingListLong;
         public static int thingListLongTicks = 0;
-
-        //SteadyEnvironmentEffects
-        public struct SteadyEnvironmentEffectsStructure
-        {
-            public SteadyEnvironmentEffects steadyEnvironmentEffects;
-            public MapCellsInRandomOrder steadyEnvironmentEffectsCellsInRandomOrder;
-            public int steadyEnvironmentEffectsTicks;
-            public int steadyEnvironmentEffectsArea;
-            public int steadyEnvironmentEffectsCycleIndex;
-            public int steadyEnvironmentEffectsCycleIndexOffset;
-        }
+        
 
         internal static IEnumerable<IntVec3> GetClosestPlantGrowerCells(IntVec3 position)
         {
             throw new NotImplementedException();
         }
 
-        public static int totalSteadyEnvironmentEffectsTicks = 0;
-        public static int steadyEnvironmentEffectsTicksCompleted = 0;
-        public static int steadyEnvironmentEffectsCount = 0;
-        public static SteadyEnvironmentEffectsStructure[] steadyEnvironmentEffectsStructures = new SteadyEnvironmentEffectsStructure[99];
-
         //WorldObjectsHolder
-        public static WorldObjectsHolder worldObjectsHolder = null;
         public static int worldObjectsTicks = 0;
         public static List<WorldObject> worldObjects = null;
 
         //WorldPawns
         public static WorldPawns worldPawns = null;
-        public static int worldPawnsTicks = 0;
-        public static List<Pawn> worldPawnsAlive = null;
 
         //WindManager
         public static int plantMaterialsCount = 0;
@@ -98,99 +72,44 @@ namespace RimThreaded
         
         //FactionManager
         public static List<Faction> allFactions = null;
-        public static int allFactionsTicks = 0;
-
-        //WildPlantSpawner
-        public struct WildPlantSpawnerStructure
-        {
-            public int WildPlantSpawnerTicks;
-            public int WildPlantSpawnerCycleIndexOffset;
-            public int WildPlantSpawnerArea;
-            public Map WildPlantSpawnerMap;
-            public MapCellsInRandomOrder WildPlantSpawnerCellsInRandomOrder;
-            public float WildPlantSpawnerCurrentPlantDensity;
-            public float DesiredPlants;
-            public float DesiredPlantsTmp;
-            public int DesiredPlants1000;
-            public int DesiredPlantsTmp1000;
-            public int DesiredPlants2Tmp1000;
-            public int FertilityCellsTmp;
-            public int FertilityCells2Tmp;
-            public int FertilityCells;
-            public WildPlantSpawner WildPlantSpawnerInstance;
-            public float WildPlantSpawnerChance;
-        }
-        public static int wildPlantSpawnerCount = 0;
-        public static int wildPlantSpawnerTicksCount = 0;
-        public static int wildPlantSpawnerTicksCompleted = 0;
-        public static WildPlantSpawnerStructure[] wildPlantSpawners = new WildPlantSpawnerStructure[9999];
-
-        //TradeShip
-        public struct TradeShipStructure
-        {
-            public int TradeShipTicks;
-            public ThingOwner TradeShipThings;
-        }
-        public static int totalTradeShipsCount = 0;
-        public static int totalTradeShipTicks = 0;
-        public static int totalTradeShipTicksCompleted = 0;
-        public static TradeShipStructure[] tradeShips = new TradeShipStructure[99];
-
-        //WorldComponents
-        public static int WorldComponentTicks = 0;
-        public static List<WorldComponent> WorldComponents = null;
-
+        
         public static int currentPrepsDone = -1;
-        public static readonly int totalPrepsCount = 11;
         public static List<EventWaitHandle> prepEventWaitStarts = new List<EventWaitHandle>();
-        public static EventWaitHandle ProcessTicksManualWait = new ManualResetEvent(false);
-        public static EventWaitHandle WaitingForAllThreadsToComplete = new ManualResetEvent(false);
-        public static int workingOnMapPreTick = -1;
-        public static int workingOnTickListNormal = -1;
-        public static int workingOnTickListRare = -1;
-        public static int workingOnTickListLong = -1;
         public static int workingOnDateNotifierTick = -1;
         public static int workingOnWorldTick = -1;
         public static int workingOnMapPostTick = -1;
         public static int workingOnHistoryTick = -1;
         public static int workingOnMiscellaneous = -1;
-        public static TickManager currentInstance;
+        public static TickManager callingTickManager;
         public static int listsFullyProcessed = 0;
-        public static bool mapPreTickComplete = false;
-        public static bool tickListNormalComplete = false;
-        public static bool tickListRareComplete = false;
-        public static bool tickListLongComplete = false;
         public static bool dateNotifierTickComplete = false;
         public static bool worldTickComplete = false;
         public static bool mapPostTickComplete = false;
         public static bool historyTickComplete = false;
         public static bool miscellaneousComplete = false;
-
+        
         public static Dictionary<Thread, ThreadInfo> allThreads2 = new Dictionary<Thread, ThreadInfo>();
 
         public static object allSustainersLock = new object();
-        public static object biomeAmbientSustainersLock = new object();
         public static object map_AttackTargetReservationManager_reservations_Lock = new object();
 
 
         public class ThreadInfo
         {
-            public EventWaitHandle mainRequestWait = new AutoResetEvent(false);
             public EventWaitHandle eventWaitStart = new AutoResetEvent(false);
             public EventWaitHandle eventWaitDone = new AutoResetEvent(false);
             public int timeoutExempt = 0;
             public Thread thread;
             public object[] safeFunctionRequest;
             public object safeFunctionResult;
-        }   
-
+        }
         static RimThreaded()
         {
             InitializeAllThreadStatics();
             CreateWorkerThreads();
-            monitorThread = new Thread(() => MonitorThreads()) { IsBackground = true };
+            monitorThread = new Thread(MonitorThreads) { IsBackground = true };
             monitorThread.Start();
-            for(int index = 0; index < totalPrepsCount; index++)
+            for(int index = 0; index < threadedTickLists.Count; index++)
             {
                 prepEventWaitStarts.Add(new ManualResetEvent(false));
             }
@@ -201,6 +120,54 @@ namespace RimThreaded
             }
         }
 
+        public static List<ThreadedTickList> threadedTickLists = new List<ThreadedTickList>()
+        {
+            new ThreadedTickList
+            {
+                prepareAction = WindManager_Patch.WindManagerPrepare,
+                tickAction = WindManager_Patch.WindManagerTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = TickList_Patch.NormalThingPrepare,
+                tickAction = TickList_Patch.NormalThingTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = TickList_Patch.RareThingPrepare,
+                tickAction = TickList_Patch.RareThingTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = TickList_Patch.LongThingPrepare,
+                tickAction = TickList_Patch.LongThingTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = WorldPawns_Patch.WorldPawnsPrepare,
+                tickAction = WorldPawns_Patch.WorldPawnsListTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = WorldObjectsHolder_Patch.WorldObjectsPrepare,
+                tickAction = WorldObjectsHolder_Patch.WorldObjectsListTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = FactionManager_Patch.FactionsPrepare,
+                tickAction = FactionManager_Patch.FactionsListTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = WorldComponentUtility_Patch.WorldComponentPrepare,
+                tickAction = WorldComponentUtility_Patch.WorldComponentListTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = Map_Patch.MapsPostTickPrepare,
+                tickAction = Map_Patch.MapPostListTick
+            }
+        };
         public static void RestartAllWorkerThreads()
         {
             foreach(Thread thread in allThreads2.Keys.ToArray())
@@ -210,7 +177,6 @@ namespace RimThreaded
             allThreads2.Clear();
             CreateWorkerThreads();
         }
-
         private static void CreateWorkerThreads()
         {
             while(allThreads2.Count < maxThreads)
@@ -219,7 +185,6 @@ namespace RimThreaded
                 allThreads2.Add(threadInfo.thread, threadInfo);
             }
         }
-
         private static ThreadInfo CreateWorkerThread()
         {
             ThreadInfo threadInfo = new ThreadInfo();
@@ -227,13 +192,11 @@ namespace RimThreaded
             threadInfo.thread.Start();
             return threadInfo;
         }
-
         private static void InitializeThread(ThreadInfo threadInfo)
         {
             InitializeAllThreadStatics();
             ProcessTicks(threadInfo);
         }
-
         public static void InitializeAllThreadStatics()
         {
             AttackTargetFinder_Patch.InitializeThreadStatics();
@@ -298,28 +261,21 @@ namespace RimThreaded
             WorldGrid_Patch.InitializeThreads();
             WorldPawns_Patch.InitializeThreadStatics();
         }
-
         private static void ProcessTicks(ThreadInfo threadInfo)
         {
             while (true)
             {
                 threadInfo.eventWaitStart.WaitOne();
                 PrepareWorkLists();
-                for(int loopsCompleted = listsFullyProcessed; loopsCompleted < totalPrepsCount; loopsCompleted++)
+                for(int loopsCompleted = listsFullyProcessed; loopsCompleted < threadedTickLists.Count; loopsCompleted++)
                 {
                     prepEventWaitStarts[loopsCompleted].WaitOne();
                     ExecuteTicks();
                 }
                 CompletePostWorkLists();
                 threadInfo.eventWaitDone.Set();
-                //WaitingForAllThreadsToComplete.WaitOne();
             }
         }
-        public static IEnumerable<Thing> GetClosestThings(ThingRequest thingRequest)
-        {
-            return null;
-        }
-
         private static void CompletePostWorkLists()
         {
             if (Interlocked.Increment(ref workingOnDateNotifierTick) == 0)
@@ -438,541 +394,27 @@ namespace RimThreaded
                 }
             }
         }
-
         private static void PrepareWorkLists()
         {
-            if (Interlocked.Increment(ref workingOnMapPreTick) == 0)
+            foreach (ThreadedTickList tickList in threadedTickLists)
             {
-                List<Map> maps = Find.Maps;
-                for (int i = 0; i < maps.Count; i++)
-                {
-                    maps[i].MapPreTick();
-                }
-                if (plantMaterialsCount == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                mapPreTickComplete = true;
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WindManager
+                if (Interlocked.Increment(ref tickList.preparing) != 0) continue;
+                tickList.prepareAction();
+                tickList.readyToTick = true;
+                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set();
             }
-
-            if (Interlocked.Increment(ref workingOnTickListNormal) == 0)
-            {
-                TickManager_Patch.tickListNormal(currentInstance).Tick();
-                if (thingListNormalTicks == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                tickListNormalComplete = true;
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickNormal
-            }
-            if (Interlocked.Increment(ref workingOnTickListRare) == 0)
-            {
-                TickManager_Patch.tickListRare(currentInstance).Tick();
-                if (thingListRareTicks == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                tickListRareComplete = true;
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickRare
-            }
-            if (Interlocked.Increment(ref workingOnTickListLong) == 0)
-            {
-                TickManager_Patch.tickListLong(currentInstance).Tick();
-                if (thingListLongTicks == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                tickListLongComplete = true;
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //TickLong
-            }
-            if (Interlocked.Increment(ref workingOnWorldTick) == 0)
-            {
-                try
-                {
-                    World world = Find.World;
-                    world.worldPawns.WorldPawnsTick();
-                    world.factionManager.FactionManagerTick();
-                    world.worldObjects.WorldObjectsHolderTick();
-                    world.debugDrawer.WorldDebugDrawerTick();
-                    world.pathGrid.WorldPathGridTick();
-                    WorldComponentUtility.WorldComponentTick(world);
-                }
-                catch (Exception ex3)
-                {
-                    Log.Error(ex3.ToString());
-                }
-                if (worldPawnsTicks == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                if (allFactionsTicks == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                if (worldObjectsTicks == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                if (WorldComponentTicks == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-
-                worldTickComplete = true;
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WorldPawns
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //Factions
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WorldObjects
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WorldComponents
-            }
-            if (Interlocked.Increment(ref workingOnMapPostTick) == 0)
-            {
-                List<Map> maps = Find.Maps;
-                for (int j = 0; j < maps.Count; j++)
-                {                    
-                    maps[j].MapPostTick();
-                }
-                if (wildPlantSpawnerTicksCount == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                if (totalSteadyEnvironmentEffectsTicks == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                if (totalTradeShipsCount == 0)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-                mapPostTickComplete = true;
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //WildPlantSpawner
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //SteadyEnvironment
-                prepEventWaitStarts[Interlocked.Increment(ref currentPrepsDone)].Set(); //PassingShipManagerTick
-            }
-
         }
-
-        private static readonly MethodInfo methodDoCellSteadyEffects =
-            Method(typeof(SteadyEnvironmentEffects), "DoCellSteadyEffects", new Type[] { typeof(IntVec3) });
-        private static readonly Action<SteadyEnvironmentEffects, IntVec3> actionDoCellSteadyEffects =
-            (Action<SteadyEnvironmentEffects, IntVec3>)Delegate.CreateDelegate(
-                typeof(Action<SteadyEnvironmentEffects, IntVec3>), methodDoCellSteadyEffects);
-        private static readonly MethodInfo methodGoodRoofForCavePlant =
-            Method(typeof(WildPlantSpawner), "GoodRoofForCavePlant", new Type[] { typeof(IntVec3) });
-        private static readonly Func<WildPlantSpawner, IntVec3, bool> funcGoodRoofForCavePlant =
-            (Func<WildPlantSpawner, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, bool>), methodGoodRoofForCavePlant);
-
-
+        
         private static void ExecuteTicks()
         {
-            if (mapPreTickComplete && plantMaterialsCount > 0)
+            foreach (ThreadedTickList tickList in threadedTickLists)
             {
-                int index = Interlocked.Decrement(ref plantMaterialsCount);
-                while (index >= 0)
-                {
-                    try
-                    {
-                        WindManager_Patch.plantMaterials[index].SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Exception ticking " + WindManager_Patch.plantMaterials[index].ToStringSafe() + ": " + ex);
-                    }
-                    index = Interlocked.Decrement(ref plantMaterialsCount);
-                }
-                if (index == -1)
-                {
+                if (!tickList.readyToTick) continue;
+                if (tickList.tickAction())
                     Interlocked.Increment(ref listsFullyProcessed);
-                }
+                tickList.readyToTick = false;
+                break;
             }
-
-            else if (tickListNormalComplete && thingListNormalTicks > 0)
-            {
-                int index = Interlocked.Decrement(ref thingListNormalTicks);
-                while (index >= 0)
-                {
-                    Thing thing = thingListNormal[index];
-                    if (!thing.Destroyed)
-                    {
-                        try
-                        {
-                            thing.Tick();
-                        }
-                        catch (Exception ex)
-                        {
-                            string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
-                            if (Prefs.DevMode)
-                            {
-                                Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
-                            }
-                            else
-                            {
-                                Log.ErrorOnce("Exception ticking " + thing.ToStringSafe() + text + ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
-                            }
-                        }
-                    }
-                    index = Interlocked.Decrement(ref thingListNormalTicks);
-                }
-                if(index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-            else if (tickListRareComplete && thingListRareTicks > 0)
-            {
-                int index = Interlocked.Decrement(ref thingListRareTicks);
-                while (index >= 0)
-                {
-                    Thing thing = thingListRare[index];
-                    if (!thing.Destroyed)
-                    {
-                        try
-                        {
-                            thing.TickRare();
-                        }
-                        catch (Exception ex)
-                        {
-                            string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
-                            if (Prefs.DevMode)
-                            {
-                                Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
-                            }
-                            else
-                            {
-                                Log.ErrorOnce("Exception ticking " + thing.ToStringSafe() + text + ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
-                            }
-                        }
-                    }
-                    index = Interlocked.Decrement(ref thingListRareTicks);
-                }
-                if (index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-            else if (tickListLongComplete && thingListLongTicks > 0)
-            {
-                int index = Interlocked.Decrement(ref thingListLongTicks);
-                while (index >= 0)
-                {
-                    Thing thing = thingListLong[index];
-                    if (!thing.Destroyed)
-                    {
-                        try
-                        {
-                            thing.TickLong();
-                        }
-                        catch (Exception ex)
-                        {
-                            string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
-                            if (Prefs.DevMode)
-                            {
-                                Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
-                            }
-                            else
-                            {
-                                Log.ErrorOnce("Exception ticking " + thing.ToStringSafe() + text + ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
-                            }
-                        }
-                    }
-                    index = Interlocked.Decrement(ref thingListLongTicks);
-                }
-                if (index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-            else if (worldTickComplete && worldPawnsTicks > 0)
-            {
-                int index = Interlocked.Decrement(ref worldPawnsTicks);
-                while (index >= 0)
-                {
-                    Pawn pawn = worldPawnsAlive[index];
-                    try
-                    {
-                        pawn.Tick();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 1148571423, false);
-                    }
-                    try
-                    {
-                        if (!pawn.Dead && !pawn.Destroyed && (pawn.IsHashIntervalTick(7500) && !pawn.IsCaravanMember()) && !PawnUtility.IsTravelingInTransportPodWorldObject(pawn))
-                            TendUtility.DoTend(null, pawn, null);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 8765780, false);
-                    }
-                    index = Interlocked.Decrement(ref worldPawnsTicks);
-                }
-                if (index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-
-            else if (worldTickComplete && worldObjectsTicks > 0)
-            {
-                int index = Interlocked.Decrement(ref worldObjectsTicks);
-                while (index >= 0)
-                {
-                    try
-                    {
-                        worldObjects[index].Tick();
-                    } catch (Exception ex)
-                    {
-                            Log.Error("Exception ticking " + worldObjects[index].ToStringSafe() + ": " + ex);
-                    }
-                    index = Interlocked.Decrement(ref worldObjectsTicks);
-                }
-                if (index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-
-            else if (worldTickComplete && allFactionsTicks > 0)
-            {
-                int index = Interlocked.Decrement(ref allFactionsTicks);
-                while (index >= 0)
-                {
-                    try
-                    {
-                        allFactions[index].FactionTick();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Exception ticking " + allFactions[index].ToStringSafe() + ": " + ex);
-                    }
-                    index = Interlocked.Decrement(ref allFactionsTicks);
-                }
-                if (index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-
-            else if (mapPostTickComplete && steadyEnvironmentEffectsTicksCompleted < totalSteadyEnvironmentEffectsTicks)
-            {
-                int ticketIndex = Interlocked.Increment(ref steadyEnvironmentEffectsTicksCompleted) - 1;
-                int steadyEnvironmentEffectsIndex = 0;
-                while (ticketIndex < totalSteadyEnvironmentEffectsTicks)
-                {
-                    int index = ticketIndex;
-                    while (ticketIndex >= steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsTicks)
-                    {
-                        steadyEnvironmentEffectsIndex++;
-                    }
-                    if(steadyEnvironmentEffectsIndex > 0)
-                        index = ticketIndex - steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex-1].steadyEnvironmentEffectsTicks;
-                    int cycleIndex = (steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsCycleIndexOffset
-                        - index) % steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsArea;
-                    IntVec3 c = steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffectsCellsInRandomOrder.Get(cycleIndex);
-                    try
-                    {
-                        actionDoCellSteadyEffects(
-                            steadyEnvironmentEffectsStructures[steadyEnvironmentEffectsIndex].steadyEnvironmentEffects, c);
-                    } catch (Exception ex)
-                    {
-                            Log.Error("Exception ticking steadyEnvironmentEffectsCells " + index.ToStringSafe() + ": " + ex);
-                    }
-                    //Interlocked.Increment(ref SteadyEnvironmentEffects_Patch.cycleIndex(steadyEnvironmentEffectsInstance));
-                    ticketIndex = Interlocked.Increment(ref steadyEnvironmentEffectsTicksCompleted) - 1;
-                }
-                if (ticketIndex == totalSteadyEnvironmentEffectsTicks)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-
-            else if (mapPostTickComplete && wildPlantSpawnerTicksCompleted < wildPlantSpawnerTicksCount)
-            {
-                int ticketIndex = Interlocked.Increment(ref wildPlantSpawnerTicksCompleted) - 1;
-                int wildPlantSpawnerIndex = 0;
-                WildPlantSpawnerStructure wildPlantSpawner;
-                int index;
-                while (ticketIndex < wildPlantSpawnerTicksCount)
-                {
-                    index = ticketIndex;
-                    while (ticketIndex >= wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerTicks)
-                    {
-                        wildPlantSpawnerIndex++;
-                    }
-                    if(wildPlantSpawnerIndex > 0)
-                        index = ticketIndex - wildPlantSpawners[wildPlantSpawnerIndex-1].WildPlantSpawnerTicks;
-                    try
-                    {
-                        wildPlantSpawner = wildPlantSpawners[wildPlantSpawnerIndex];                        
-                        int cycleIndex = (wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) % wildPlantSpawner.WildPlantSpawnerArea;
-                        IntVec3 intVec = wildPlantSpawner.WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
-
-                        if ((wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) > wildPlantSpawner.WildPlantSpawnerArea)
-                        {
-                            Interlocked.Add(ref wildPlantSpawner.DesiredPlants2Tmp1000,
-                                1000 * (int)funcGetDesiredPlantsCountAt(
-                                    wildPlantSpawner.WildPlantSpawnerInstance, intVec, intVec,
-                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
-                            if (intVec.GetTerrain(wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerMap).fertility > 0f)
-                            {
-                                Interlocked.Increment(ref wildPlantSpawner.FertilityCells2Tmp);
-                            }
-
-                            float mtb = funcGoodRoofForCavePlant(
-                                wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
-                                wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && 
-                                funcCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))
-                            {
-                                wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec,
-                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity, wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f);
-                            }
-                        }
-                        else
-                        {
-                            Interlocked.Add(ref wildPlantSpawner.DesiredPlantsTmp1000,
-                                1000 * (int)funcGetDesiredPlantsCountAt(
-                                    wildPlantSpawner.WildPlantSpawnerInstance, intVec, intVec,
-                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
-                            if (intVec.GetTerrain(wildPlantSpawner.WildPlantSpawnerMap).fertility > 0f)
-                            {
-                                Interlocked.Increment(ref wildPlantSpawner.FertilityCellsTmp);
-                            }
-
-                            float mtb = funcGoodRoofForCavePlant(wildPlantSpawner.WildPlantSpawnerInstance, intVec) ? 130f :
-                                wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) &&
-                                funcCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))
-                            {
-                                wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec, 
-                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity, wildPlantSpawner.DesiredPlants);
-                            }
-                        }
-
-                        if(ticketIndex == wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerTicks - 1)
-                        {
-                            if ((wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) > wildPlantSpawner.WildPlantSpawnerArea)
-                            {
-                                WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlants(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f;
-                                WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.DesiredPlants2Tmp1000 / 1000.0f;
-                                WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.FertilityCellsTmp;
-                                WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCellsTmp(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.FertilityCells2Tmp;
-                            }
-                            else
-                            {
-                                WildPlantSpawner_Patch.calculatedWholeMapNumDesiredPlantsTmp(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f;
-                                WildPlantSpawner_Patch.calculatedWholeMapNumNonZeroFertilityCells(wildPlantSpawner.WildPlantSpawnerInstance) = wildPlantSpawner.FertilityCellsTmp;
-                            }
-                            if (index == -1)
-                            {
-                                Interlocked.Increment(ref listsFullyProcessed);
-                            }
-                        }
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Exception ticking WildPlantSpawner: " + ex);
-                    }
-                    ticketIndex = Interlocked.Increment(ref wildPlantSpawnerTicksCompleted) - 1;
-                }
-                if (ticketIndex == wildPlantSpawnerTicksCount)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-            else if (mapPostTickComplete && totalTradeShipTicksCompleted < totalTradeShipTicks)
-            {
-                int ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted) - 1;
-                int totalTradeShipIndex = 0;
-                while (ticketIndex < totalTradeShipTicks)
-                {
-                    int index = ticketIndex;
-                    while (ticketIndex >= tradeShips[totalTradeShipIndex].TradeShipTicks)
-                    {                        
-                        totalTradeShipIndex++;
-                    }
-                    if(totalTradeShipIndex > 0)
-                        index = ticketIndex - tradeShips[totalTradeShipIndex - 1].TradeShipTicks;
-                    Pawn pawn = tradeShips[totalTradeShipIndex].TradeShipThings[index] as Pawn;
-                    if (pawn != null)
-                    {
-                        try
-                        {
-                            pawn.Tick();
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error("Exception ticking Pawn: " + pawn.ToStringSafe() + " " + ex);
-                        }
-                        if (pawn.Dead)
-                        {
-                            lock (tradeShips[totalTradeShipIndex].TradeShipThings)
-                            {
-                                tradeShips[totalTradeShipIndex].TradeShipThings.Remove(pawn);
-                            }
-                        }
-                    }
-                    ticketIndex = Interlocked.Increment(ref totalTradeShipTicksCompleted) - 1;
-                }
-                if (ticketIndex == totalTradeShipTicks)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-            else if (worldTickComplete && WorldComponentTicks > 0)
-            {
-                int index = Interlocked.Decrement(ref WorldComponentTicks);
-                while (index >= 0)
-                {
-                    //try
-                    //{
-                    WorldComponent wc = WorldComponents[index];
-                    if (null != wc)
-                    {
-                        lock (wc)
-                        {
-                            try
-                            {
-                                wc.WorldComponentTick();
-                            } catch(Exception ex)
-                            {
-                                Log.Error("Exception ticking World Component: " + wc.ToStringSafe() + ex);
-                            }
-                        }
-                    }
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    Log.Error(ex.ToString());
-                    //}
-                    index = Interlocked.Decrement(ref WorldComponentTicks);
-                }
-                if (index == -1)
-                {
-                    Interlocked.Increment(ref listsFullyProcessed);
-                }
-            }
-
-            /*
-            while(drawQueue.TryDequeue(out Thing drawThing))
-            {
-                IntVec3 position = drawThing.Position;
-                if ((cellRect.Contains(position) || drawThing.def.drawOffscreen) && (!fogGrid[cellIndices.CellToIndex(position)] || drawThing.def.seeThroughFog) && (drawThing.def.hideAtSnowDepth >= 1.0 || snowGrid.GetDepth(position) <= (double)drawThing.def.hideAtSnowDepth))
-                {
-                    try
-                    {
-                        drawThing.Draw();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error("Exception drawing " + (object)drawThing + ": " + ex.ToString(), false);
-                    }
-                }
-            }
-            */
-
         }
 
         private static void MonitorThreads()
@@ -980,10 +422,7 @@ namespace RimThreaded
             while (true)
             {
                 monitorThreadWaitHandle.WaitOne();
-                workingOnMapPreTick = -1;
-                workingOnTickListNormal = -1;
-                workingOnTickListRare = -1;
-                workingOnTickListLong = -1;
+
                 workingOnDateNotifierTick = -1;
                 workingOnWorldTick = -1;
                 workingOnMapPostTick = -1;
@@ -991,19 +430,19 @@ namespace RimThreaded
                 currentPrepsDone = -1;
                 workingOnMiscellaneous = -1;
                 listsFullyProcessed = 0;
-                totalSteadyEnvironmentEffectsTicks = 0;
-                steadyEnvironmentEffectsTicksCompleted = 0;
-                steadyEnvironmentEffectsCount = 0;
-                totalTradeShipTicks = 0;
-                totalTradeShipTicksCompleted = 0;
-                totalTradeShipsCount = 0;
-                wildPlantSpawnerCount = 0;
-                wildPlantSpawnerTicksCount = 0;
-                wildPlantSpawnerTicksCompleted = 0;
-                mapPreTickComplete = false;
-                tickListNormalComplete = false;
-                tickListRareComplete = false;
-                tickListLongComplete = false;
+                SteadyEnvironmentEffects_Patch.totalSteadyEnvironmentEffectsTicks = 0;
+                SteadyEnvironmentEffects_Patch.steadyEnvironmentEffectsTicksCompleted = 0;
+                SteadyEnvironmentEffects_Patch.steadyEnvironmentEffectsCount = 0;
+                WildPlantSpawner_Patch.wildPlantSpawnerCount = 0;
+                WildPlantSpawner_Patch.wildPlantSpawnerTicksCount = 0;
+                WildPlantSpawner_Patch.wildPlantSpawnerTicksCompleted = 0;
+                TradeShip_Patch.totalTradeShipTicks = 0;
+                TradeShip_Patch.totalTradeShipTicksCompleted = 0;
+                TradeShip_Patch.totalTradeShipsCount = 0;
+                foreach (ThreadedTickList tickList in threadedTickLists)
+                {
+                    tickList.preparing = -1;
+                }
                 dateNotifierTickComplete = false;
                 worldTickComplete = false;
                 mapPostTickComplete = false;
@@ -1022,7 +461,7 @@ namespace RimThreaded
                     {         
                         if (threadInfo.timeoutExempt == 0)
                         {
-                            Log.Error("Thread: " + threadInfo.thread.ToString() + " did not finish within " + timeoutMS.ToString() + "ms. Restarting thread...");
+                            Log.Error("Thread: " + threadInfo.thread + " did not finish within " + timeoutMS + "ms. Restarting thread...");
                             Thread thread = threadPair.Key;
                             thread.Abort();
                             allThreads2.Remove(thread);
@@ -1039,8 +478,9 @@ namespace RimThreaded
             }
         }
 
-        public static void MainThreadWaitLoop()
-        {            
+        public static void MainThreadWaitLoop(TickManager tickManager)
+        {
+            callingTickManager = tickManager;
             allWorkerThreadsFinished = false;
             monitorThreadWaitHandle.Set();
 
@@ -1048,25 +488,27 @@ namespace RimThreaded
             {
                 mainThreadWaitHandle.WaitOne();
                 RespondToSafeFunctionRequests();
-
-                while (PlayOneShot.Count > 0)
-                {
-                    if (PlayOneShot.TryDequeue(out Tuple<SoundDef, SoundInfo> s))
-                    {
-                        s.Item1.PlayOneShot(s.Item2);
-                    }
-                }
-                while (PlayOneShotCamera.Count > 0)
-                {
-                    if (PlayOneShotCamera.TryDequeue(out Tuple<SoundDef, Map> s))
-                    {
-                        s.Item1.PlayOneShotOnCamera(s.Item2);
-                    }
-                }
-
+                MainPlayOneShot(); //TODO: is PlayOneShot section still needed?
             }
         }
 
+        private static void MainPlayOneShot()
+        {
+            while (PlayOneShot.Count > 0)
+            {
+                if (PlayOneShot.TryDequeue(out Tuple<SoundDef, SoundInfo> s))
+                {
+                    s.Item1.PlayOneShot(s.Item2);
+                }
+            }
+            while (PlayOneShotCamera.Count > 0)
+            {
+                if (PlayOneShotCamera.TryDequeue(out Tuple<SoundDef, Map> s))
+                {
+                    s.Item1.PlayOneShotOnCamera(s.Item2);
+                }
+            }
+        }
 
         private static void RespondToSafeFunctionRequests()
         {

@@ -4,6 +4,9 @@ using System.Linq;
 using Verse;
 using RimWorld.Planet;
 using System.Reflection;
+using System.Threading;
+using RimWorld;
+using UnityEngine;
 using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
@@ -93,8 +96,11 @@ namespace RimThreaded
 
         public static bool WorldPawnsTick(WorldPawns __instance)
         {
-            RimThreaded.worldPawnsAlive = pawnsAlive(__instance).ToList();
-            RimThreaded.worldPawnsTicks = pawnsAlive(__instance).Count;
+            lock (__instance)
+            {
+                worldPawnsAlive = pawnsAlive(__instance).ToList();
+            }
+            worldPawnsTicks = worldPawnsAlive.Count;
 
             if (Find.TickManager.TicksGame % 15000 == 0)
                 DoMothballProcessing(__instance);
@@ -132,5 +138,48 @@ namespace RimThreaded
             return false;
         }
 
+        public static List<Pawn> worldPawnsAlive;
+        public static int worldPawnsTicks;
+
+        public static void WorldPawnsPrepare()
+        {
+            try
+            {
+                World world = Find.World;
+                world.worldPawns.WorldPawnsTick();
+            }
+            catch (Exception ex3)
+            {
+                Log.Error(ex3.ToString());
+            }
+        }
+
+        public static bool WorldPawnsListTick()
+        {
+            while (true)
+            {
+                int index = Interlocked.Decrement(ref worldPawnsTicks);
+                if (index < -1) return false;
+                if (index == -1) return true; //causes method to return "true" only once upon completion
+                Pawn pawn = worldPawnsAlive[index];
+                try
+                {
+                    pawn.Tick();
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 1148571423, false);
+                }
+                try
+                {
+                    if (!pawn.Dead && !pawn.Destroyed && (pawn.IsHashIntervalTick(7500) && !pawn.IsCaravanMember()) && !PawnUtility.IsTravelingInTransportPodWorldObject(pawn))
+                        TendUtility.DoTend(null, pawn, null);
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 8765780, false);
+                }
+            }
+        }
     }
 }

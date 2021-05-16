@@ -1,5 +1,7 @@
 ﻿using RimWorld;
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using Verse;
 
 namespace RimThreaded
@@ -25,6 +27,33 @@ namespace RimThreaded
             return false;
 
         }
+        public static int mapPostThreads;
 
+        public static void MapsPostTickPrepare()
+        {
+            try
+            {
+                List<Map> maps = Find.Maps;
+                for (int j = 0; j < maps.Count; j++)
+                {
+                    maps[j].MapPostTick();
+                }
+            }
+            catch (Exception ex3)
+            {
+                Log.Error(ex3.ToString());
+            }
+
+            mapPostThreads = -1;
+        }
+
+        public static bool MapPostListTick()
+        {
+            int threadIndex = Interlocked.Increment(ref mapPostThreads);
+            SteadyEnvironmentEffects_Patch.SteadyEffectTick();
+            WildPlantSpawner_Patch.WildPlantSpawnerListTick();
+            TradeShip_Patch.PassingShipListTick();
+            return threadIndex == 0;
+        }
     }
 }

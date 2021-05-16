@@ -5,6 +5,7 @@ using Verse;
 using RimWorld.Planet;
 using static HarmonyLib.AccessTools;
 using System.Reflection;
+using System.Threading;
 
 namespace RimThreaded
 {
@@ -30,8 +31,8 @@ namespace RimThreaded
         {
             SettlementProximityGoodwillUtility.CheckSettlementProximityGoodwillChange();
 
-            RimThreaded.allFactions = allFactions(__instance);
-            RimThreaded.allFactionsTicks = allFactions(__instance).Count;
+            allFactionsTickList = allFactions(__instance);
+            allFactionsTicks = allFactionsTickList.Count;
             lock (__instance)
             {
                 List<Faction> newList = toRemove(__instance);
@@ -46,6 +47,39 @@ namespace RimThreaded
             }
             return false;
         }
+        public static List<Faction> allFactionsTickList;
+        public static int allFactionsTicks;
 
+        public static void FactionsPrepare()
+        {
+            try
+            {
+                World world = Find.World;
+                world.factionManager.FactionManagerTick();
+            }
+            catch (Exception ex3)
+            {
+                Log.Error(ex3.ToString());
+            }
+        }
+
+        public static bool FactionsListTick()
+        {
+            while (true)
+            {
+                int index = Interlocked.Decrement(ref allFactionsTicks);
+                if (index < -1) return false;
+                if (index == -1) return true; //causes method to return "true" only once upon completion
+                Faction faction = allFactionsTickList[index];
+                try
+                {
+                    faction.FactionTick();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Exception ticking faction: " + faction.ToStringSafe() + ": " + ex);
+                }
+            }
+        }
     }
 }

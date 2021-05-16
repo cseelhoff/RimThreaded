@@ -1,5 +1,9 @@
 ﻿using RimWorld.Planet;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using RimWorld;
+using Verse;
 
 namespace RimThreaded
 {
@@ -8,8 +12,8 @@ namespace RimThreaded
 	{
         public static bool WorldComponentTick(World world)
         {
-            RimThreaded.WorldComponents = world.components;
-            RimThreaded.WorldComponentTicks = world.components.Count;
+            worldComponents = world.components;
+            worldComponentTicks = worldComponents.Count;
             return false;
         }
 
@@ -18,6 +22,49 @@ namespace RimThreaded
             Type original = typeof(WorldComponentUtility);
             Type patched = typeof(WorldComponentUtility_Patch);
             RimThreadedHarmony.Prefix(original, patched, "WorldComponentTick");
+        }
+
+        public static List<WorldComponent> worldComponents;
+        public static int worldComponentTicks;
+
+        public static void WorldComponentPrepare()
+        {
+            try
+            {
+                World world = Find.World; 
+                world.debugDrawer.WorldDebugDrawerTick();
+                world.pathGrid.WorldPathGridTick();
+                WorldComponentUtility.WorldComponentTick(world);
+            }
+            catch (Exception ex3)
+            {
+                Log.Error(ex3.ToString());
+            }
+        }
+
+        public static bool WorldComponentListTick()
+        {
+            while (true)
+            {
+                int index = Interlocked.Decrement(ref worldComponentTicks);
+                if (index < -1) return false;
+                if (index == -1) return true; //causes method to return "true" only once upon completion
+                WorldComponent worldComponent = worldComponents[index];
+                if (null != worldComponent) //TODO: is null-check and lock necessary?
+                {
+                    lock (worldComponent)
+                    {
+                        try
+                        {
+                            worldComponent.WorldComponentTick();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Exception ticking World Component: " + worldComponent.ToStringSafe() + ex);
+                        }
+                    }
+                }
+            }
         }
     }
 }

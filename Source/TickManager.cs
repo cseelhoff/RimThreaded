@@ -31,7 +31,7 @@ namespace RimThreaded
 
         public static bool DoSingleTick(TickManager __instance)
         {
-            RimThreaded.currentInstance = __instance;
+            //RimThreaded.currentInstance = __instance;
                         
             if (!DebugSettings.fastEcology)
             {
@@ -43,7 +43,7 @@ namespace RimThreaded
             }
             Shader.SetGlobalFloat(ShaderPropertyIDs.GameSeconds, __instance.TicksGame.TicksToSeconds());
 
-            RimThreaded.MainThreadWaitLoop();
+            RimThreaded.MainThreadWaitLoop(__instance);
 
             if (DebugViewSettings.logHourlyScreenshot && Find.TickManager.TicksGame >= lastAutoScreenshot(__instance) + 2500)
             {

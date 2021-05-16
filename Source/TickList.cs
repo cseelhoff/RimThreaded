@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Threading;
 using Verse;
 using static HarmonyLib.AccessTools;
 
@@ -19,7 +20,7 @@ namespace RimThreaded
 
         private static readonly MethodInfo methodGetTickInterval =
             Method(typeof(TickList), "get_TickInterval");
-        private static readonly Func<TickList, int> funcGetTickInterval =
+        public static readonly Func<TickList, int> funcGetTickInterval =
             (Func<TickList, int>)Delegate.CreateDelegate(typeof(Func<TickList, int>), methodGetTickInterval);
 
         public static void RunNonDestructivePatches()
@@ -51,6 +52,10 @@ namespace RimThreaded
                     RimThreaded.thingListLong = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
                     RimThreaded.thingListLongTicks = RimThreaded.thingListLong.Count;
                     break;
+                case TickerType.Never:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -85,6 +90,132 @@ namespace RimThreaded
                     }
                 }
                 yield return instructionsList[i++];
+            }
+        }
+
+        public static List<Thing> normalThingList;
+        public static int normalThingListTicks;
+
+        public static void NormalThingPrepare()
+        {
+            TickList tickList = TickManager_Patch.tickListNormal(RimThreaded.callingTickManager);
+            tickList.Tick();
+            int currentTickInterval = funcGetTickInterval(tickList);
+            normalThingList = thingLists(tickList)[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
+            normalThingListTicks = normalThingList.Count;
+        }
+
+        public static bool NormalThingTick()
+        {
+            while (true)
+            {
+                int index = Interlocked.Decrement(ref normalThingListTicks);
+                if (index < -1) return false;
+                if (index == -1) return true; //causes method to return "true" only once upon completion
+                Thing thing = normalThingList[index];
+                if (thing.Destroyed) continue;
+                try
+                {
+                    thing.Tick();
+                }
+                catch (Exception ex)
+                {
+                    string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
+                    if (Prefs.DevMode)
+                    {
+                        Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
+                    }
+                    else
+                    {
+                        Log.ErrorOnce(
+                            "Exception ticking " + thing.ToStringSafe() + text +
+                            ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
+                    }
+                }
+            }
+        }
+
+        public static List<Thing> rareThingList;
+        public static int rareThingListTicks;
+
+        public static void RareThingPrepare()
+        {
+            TickList tickList = TickManager_Patch.tickListRare(RimThreaded.callingTickManager);
+            tickList.Tick();
+            int currentTickInterval = funcGetTickInterval(tickList);
+            rareThingList = thingLists(tickList)[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
+            rareThingListTicks = rareThingList.Count;
+        }
+
+        public static bool RareThingTick()
+        {
+            while (true)
+            {
+                int index = Interlocked.Decrement(ref rareThingListTicks);
+                if (index < -1) return false;
+                if (index == -1) return true; //causes method to return "true" only once upon completion
+                Thing thing = rareThingList[index];
+                if (thing.Destroyed) continue;
+                try
+                {
+                    thing.TickRare();
+                }
+                catch (Exception ex)
+                {
+                    string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
+                    if (Prefs.DevMode)
+                    {
+                        Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
+                    }
+                    else
+                    {
+                        Log.ErrorOnce(
+                            "Exception ticking " + thing.ToStringSafe() + text +
+                            ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
+                    }
+                }
+            }
+        }
+
+        public static List<Thing> longThingList;
+        public static int longThingListTicks;
+
+        public static void LongThingPrepare()
+        {
+            TickList tickList = TickManager_Patch.tickListLong(RimThreaded.callingTickManager);
+            tickList.Tick();
+            int currentTickInterval = funcGetTickInterval(tickList);
+            longThingList = thingLists(tickList)[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
+            longThingListTicks = longThingList.Count;
+        }
+
+        public static bool LongThingTick()
+        {
+            while (true)
+            {
+                int index = Interlocked.Decrement(ref longThingListTicks);
+                if (index < -1) return false;
+                if (index == -1) return true; //causes method to return "true" only once upon completion
+                Thing thing = longThingList[index];
+                if (thing.Destroyed) continue;
+                try
+                {
+                    thing.TickLong();
+                }
+                catch (Exception ex)
+                {
+                    string text = thing.Spawned ? (" (at " + thing.Position + ")") : "";
+                    if (Prefs.DevMode)
+                    {
+                        Log.Error("Exception ticking " + thing.ToStringSafe() + text + ": " + ex);
+                    }
+                    else
+                    {
+                        Log.ErrorOnce(
+                            "Exception ticking " + thing.ToStringSafe() + text +
+                            ". Suppressing further errors. Exception: " + ex, thing.thingIDNumber ^ 0x22627165);
+                    }
+                }
             }
         }
 
