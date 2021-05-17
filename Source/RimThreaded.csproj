@@ -50,6 +50,9 @@
 		</PackageReference>
 		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
   <Target Name="MyCode" BeforeTargets="UpdateReferences">
 		<PropertyGroup>
 			<AssemblyCSharp>$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll</AssemblyCSharp>
