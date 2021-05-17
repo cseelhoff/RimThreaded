@@ -110,6 +110,17 @@ namespace RimThreaded
                 Log.Warning("Potential RimThreaded mod conflicts :" + potentialConflicts);
             }
         }
+        public static void AddNormalTicking(object instance, Action<object> prepare, Action<object> tick)
+        {
+            Log.Message("Loading TickList: " + instance.ToString());
+            threadedTickLists.Insert(2,
+            new ThreadedTickList
+            {
+                prepareAction = () => prepare(instance),
+                tickAction = () => tick(instance)
+            }
+            );
+        }
 
         public static List<ThreadedTickList> threadedTickLists = new List<ThreadedTickList>()
         {
