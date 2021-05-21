@@ -11,9 +11,6 @@ namespace RimThreaded
     public class MemoryThoughtHandler_Patch
     {
 
-        private static readonly FieldRef<MemoryThoughtHandler, List<Thought_Memory>> memoriesFieldRef = 
-            FieldRefAccess<MemoryThoughtHandler, List<Thought_Memory>>("memories");
-
         public static void RunDestructivePatches()
         {
             Type original = typeof(MemoryThoughtHandler);
@@ -33,7 +30,7 @@ namespace RimThreaded
                 }
                 else
                 {
-                    memoriesFieldRef(__instance) = newMemories;
+                    __instance.memories = newMemories;
                 }
             }
             return false;
@@ -58,7 +55,7 @@ namespace RimThreaded
             {
                 lock (__instance) //ADDED
                 {
-                    memoriesFieldRef(__instance).Add(newThought);
+                    __instance.memories.Add(newThought);
                 }
             }
 

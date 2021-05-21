@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using RimWorld;
 using Verse;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -19,15 +18,9 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, "SpawnedDesignationsOfDef");
         }
 
-        private static readonly Action<Designation> ActionNotify_Removing =
-            (Action<Designation>)Delegate.CreateDelegate(
-                typeof(Action<Designation>),
-                Method(typeof(Designation), "Notify_Removing"));
-
-
         public static bool RemoveDesignation(DesignationManager __instance, Designation des)
         {
-            ActionNotify_Removing(des);
+            des.Notify_Removing();
             if (!__instance.allDesignations.Contains(des)) return false;
 
             lock (__instance)
@@ -46,7 +39,7 @@ namespace RimThreaded
                 Designation designation = __instance.allDesignations[index];
                 if ((!standardCanceling || designation.def.designateCancelable) && designation.target.Thing == t)
                 {
-                    ActionNotify_Removing(designation);
+                    designation.Notify_Removing();
                     matchFound = true;
                 }
             }
@@ -54,7 +47,7 @@ namespace RimThreaded
             lock (__instance)
             {
                 List<Designation> newAllDesignations = new List<Designation>(__instance.allDesignations);
-                newAllDesignations.RemoveAll((Predicate<Designation>)(d => (!standardCanceling || d.def.designateCancelable) && d.target.Thing == t));
+                newAllDesignations.RemoveAll(d => (!standardCanceling || d.def.designateCancelable) && d.target.Thing == t);
                 __instance.allDesignations = newAllDesignations;
             }
             
@@ -69,7 +62,7 @@ namespace RimThreaded
                 {
                     if (newAllDesignations[index].def != def) continue;
                     
-                    ActionNotify_Removing(newAllDesignations[index]);
+                    newAllDesignations[index].Notify_Removing();
                     newAllDesignations.RemoveAt(index);
                 }
                 __instance.allDesignations = newAllDesignations;
@@ -80,10 +73,10 @@ namespace RimThreaded
         public static bool AddDesignation(DesignationManager __instance, Designation newDes)
         {
             if (newDes.def.targetType == TargetType.Cell && __instance.DesignationAt(newDes.target.Cell, newDes.def) != null)
-                Log.Error("Tried to double-add designation at location " + (object)newDes.target);
+                Log.Error("Tried to double-add designation at location " + newDes.target);
             else if (newDes.def.targetType == TargetType.Thing && __instance.DesignationOn(newDes.target.Thing, newDes.def) != null)
             {
-                Log.Error("Tried to double-add designation on Thing " + (object)newDes.target);
+                Log.Error("Tried to double-add designation on Thing " + newDes.target);
             }
             else
             {

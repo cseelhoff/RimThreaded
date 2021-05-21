@@ -1,13 +1,10 @@
 ﻿using System;
 using Verse;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     class RegionGrid_Patch
     {
-        private static readonly FieldRef<RegionGrid, Map> mapFieldRef = FieldRefAccess<RegionGrid, Map>("map");
-        private static readonly FieldRef<RegionGrid, Region[]> regionGridFieldRef = FieldRefAccess<RegionGrid, Region[]>("regionGrid");
 
         public static void RunDestructivePatches()
         {
@@ -18,7 +15,7 @@ namespace RimThreaded
 
         public static bool GetValidRegionAt(RegionGrid __instance, ref Region __result, IntVec3 c)
         {
-            Map map = mapFieldRef(__instance);
+            Map map = __instance.map;
             if (!c.InBounds(map))
             {
                 Log.Error("Tried to get valid region out of bounds at " + c);
@@ -29,11 +26,11 @@ namespace RimThreaded
             {
                 Log.Warning(string.Concat("Trying to get valid region at ", c, " but RegionAndRoomUpdater is disabled. The result may be incorrect."));
             }
-            Region region = regionGridFieldRef(__instance)[map.cellIndices.CellToIndex(c)];
+            Region region = __instance.regionGrid[map.cellIndices.CellToIndex(c)];
             if (region == null || !region.valid)
             {
                 map.regionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms();
-                region = regionGridFieldRef(__instance)[map.cellIndices.CellToIndex(c)];
+                region = __instance.regionGrid[map.cellIndices.CellToIndex(c)];
             }
             if (region != null && region.valid)
             {

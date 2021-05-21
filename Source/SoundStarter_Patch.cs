@@ -3,7 +3,6 @@ using System;
 using Verse;
 using Verse.Sound;
 using static RimThreaded.RimThreaded;
-using static System.Threading.Thread;
 
 namespace RimThreaded
 {

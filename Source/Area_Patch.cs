@@ -33,14 +33,12 @@ namespace RimThreaded
 
         public static void Set(Area __instance, IntVec3 c, bool val)
         {
-            if(val)
-            {
-                Range2D range = GetCorners(__instance);
-                range.minX = Math.Min(range.minX, c.x);
-                range.minZ = Math.Min(range.minZ, c.z);
-                range.maxX = Math.Max(range.maxX, c.x);
-                range.maxZ = Math.Max(range.maxZ, c.z);
-            }
+            if (!val) return;
+            Range2D range = GetCorners(__instance);
+            range.minX = Math.Min(range.minX, c.x);
+            range.minZ = Math.Min(range.minZ, c.z);
+            range.maxX = Math.Max(range.maxX, c.x);
+            range.maxZ = Math.Max(range.maxZ, c.z);
         }
 
         public static Range2D GetCorners(Area __instance)
@@ -49,22 +47,22 @@ namespace RimThreaded
             {
                 return new Range2D(0, 0, 99999, 99999); //TODO use map max range
             }
-            if(!corners.TryGetValue(__instance, out Range2D range))
+
+            if (corners.TryGetValue(__instance, out Range2D range)) return range;
+            bool initialized = false;
+            foreach (IntVec3 intVec3 in __instance.ActiveCells)
             {
-                bool initialized = false;
-                foreach (IntVec3 intVec3 in __instance.ActiveCells)
+                if(!initialized)
                 {
-                    if(!initialized)
-                    {
-                        range = new Range2D(intVec3.x, intVec3.z, intVec3.x, intVec3.z);
-                    }
-                    range.minX = Math.Min(range.minX, intVec3.x);
-                    range.minZ = Math.Min(range.minZ, intVec3.z);
-                    range.maxX = Math.Max(range.maxX, intVec3.x);
-                    range.maxZ = Math.Max(range.maxZ, intVec3.z);
+                    range = new Range2D(intVec3.x, intVec3.z, intVec3.x, intVec3.z);
+                    initialized = true;
                 }
-                corners[__instance] = range;
+                range.minX = Math.Min(range.minX, intVec3.x);
+                range.minZ = Math.Min(range.minZ, intVec3.z);
+                range.maxX = Math.Max(range.maxX, intVec3.x);
+                range.maxZ = Math.Max(range.maxZ, intVec3.z);
             }
+            corners[__instance] = range;
             return range;
         }
 

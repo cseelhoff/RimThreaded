@@ -6,6 +6,7 @@ using System.Reflection;
 using Verse;
 using System.Reflection.Emit;
 using System.Threading;
+using RimThreaded.Mod_Patches;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;

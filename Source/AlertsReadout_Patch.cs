@@ -1,30 +1,14 @@
-﻿using RimWorld;
-using RimWorld.Planet;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
+using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using Verse;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     class AlertsReadout_Patch
     {
-        public static FieldRef<AlertsReadout, List<Alert>> activeAlerts =
-            FieldRefAccess<AlertsReadout, List<Alert>>("activeAlerts");
-        public static FieldRef<AlertsReadout, int> curAlertIndex =
-            FieldRefAccess<AlertsReadout, int>("curAlertIndex");
-        public static FieldRef<AlertsReadout, List<Alert>> AllAlerts =
-            FieldRefAccess<AlertsReadout, List<Alert>>("AllAlerts");
-        public static FieldRef<AlertsReadout, int> mouseoverAlertIndex =
-            FieldRefAccess<AlertsReadout, int>("mouseoverAlertIndex");
-
-        private static readonly MethodInfo methodCheckAddOrRemoveAlert =
-            Method(typeof(AlertsReadout), "CheckAddOrRemoveAlert", new Type[] { typeof(Alert), typeof(bool) });
-        private static readonly Action<AlertsReadout, Alert, bool> actionCheckAddOrRemoveAlert =
-            (Action<AlertsReadout, Alert, bool>)Delegate.CreateDelegate(typeof(Action<AlertsReadout, Alert, bool>), methodCheckAddOrRemoveAlert);
-
         public static void RunDestructivesPatches()
         {
             Type original = typeof(AlertsReadout);
@@ -41,7 +25,7 @@ namespace RimThreaded
 
             if (Find.Storyteller.def != null && Find.Storyteller.def.disableAlerts)
             {
-                activeAlerts(__instance).Clear();
+                __instance.activeAlerts.Clear();
                 return false;
             }
 
@@ -51,16 +35,16 @@ namespace RimThreaded
                 return false; 
             }
 
-            curAlertIndex(__instance)++;
-            if (curAlertIndex(__instance) >= 24)
+            __instance.curAlertIndex++;
+            if (__instance.curAlertIndex >= 24)
             {
-                curAlertIndex(__instance) = 0;
+                __instance.curAlertIndex = 0;
             }
 
-            for (int i = curAlertIndex(__instance); i < AllAlerts(__instance).Count; i += 24)
+            for (int i = __instance.curAlertIndex; i < __instance.AllAlerts.Count; i += 24)
             {
                 //CheckAddOrRemoveAlert2(__instance, AllAlerts(__instance)[i]);
-                actionCheckAddOrRemoveAlert(__instance, AllAlerts(__instance)[i], false);
+                __instance.CheckAddOrRemoveAlert(__instance.AllAlerts[i], false);
             }
 
             if (Time_Patch.get_frameCount() % 20 == 0)
@@ -78,38 +62,36 @@ namespace RimThreaded
                         }
 
                         Alert cachedAlert = questPartActivable.CachedAlert;
-                        if (cachedAlert != null)
+                        if (cachedAlert == null) continue;
+                        bool flag = questsListForReading[j].State != QuestState.Ongoing || questPartActivable.State != QuestPartState.Enabled;
+                        bool alertDirty = questPartActivable.AlertDirty;
+                        //CheckAddOrRemoveAlert(__instance, cachedAlert, flag || alertDirty);
+                        __instance.CheckAddOrRemoveAlert(cachedAlert, flag || alertDirty);
+                        if (alertDirty)
                         {
-                            bool flag = questsListForReading[j].State != QuestState.Ongoing || questPartActivable.State != QuestPartState.Enabled;
-                            bool alertDirty = questPartActivable.AlertDirty;
-                            //CheckAddOrRemoveAlert(__instance, cachedAlert, flag || alertDirty);
-                            actionCheckAddOrRemoveAlert(__instance, cachedAlert, flag || alertDirty);
-                            if (alertDirty)
-                            {
-                                questPartActivable.ClearCachedAlert();
-                            }
+                            questPartActivable.ClearCachedAlert();
                         }
                     }
                 }
             }
 
-            for (int num = activeAlerts(__instance).Count - 1; num >= 0; num--)
+            for (int num = __instance.activeAlerts.Count - 1; num >= 0; num--)
             {
-                Alert alert = activeAlerts(__instance)[num];
+                Alert alert = __instance.activeAlerts[num];
                 try
                 {
-                    activeAlerts(__instance)[num].AlertActiveUpdate();
+                    __instance.activeAlerts[num].AlertActiveUpdate();
                 }
                 catch (Exception ex)
                 {
                     Log.ErrorOnce("Exception updating alert " + alert.ToString() + ": " + ex.ToString(), 743575);
-                    activeAlerts(__instance).RemoveAt(num);
+                    __instance.activeAlerts.RemoveAt(num);
                 }
             }
 
-            if (mouseoverAlertIndex(__instance) >= 0 && mouseoverAlertIndex(__instance) < activeAlerts(__instance).Count)
+            if (__instance.mouseoverAlertIndex >= 0 && __instance.mouseoverAlertIndex < __instance.activeAlerts.Count)
             {
-                IEnumerable<GlobalTargetInfo> allCulprits = activeAlerts(__instance)[mouseoverAlertIndex(__instance)].GetReport().AllCulprits;
+                IEnumerable<GlobalTargetInfo> allCulprits = __instance.activeAlerts[__instance.mouseoverAlertIndex].GetReport().AllCulprits;
                 if (allCulprits != null)
                 {
                     foreach (GlobalTargetInfo item in allCulprits)
@@ -119,7 +101,7 @@ namespace RimThreaded
                 }
             }
 
-            mouseoverAlertIndex(__instance) = -1;
+            __instance.mouseoverAlertIndex = -1;
             return false;
         }
 

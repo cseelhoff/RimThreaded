@@ -7,8 +7,8 @@ namespace RimThreaded
 {
     class Caravan_BedsTracker_Patch
     {
-        [ThreadStatic] public static List<Building_Bed> tmpUsableBeds = new List<Building_Bed>();
-        [ThreadStatic] public static List<string> tmpPawnLabels = new List<string>();
+        [ThreadStatic] public static List<Building_Bed> tmpUsableBeds;
+        [ThreadStatic] public static List<string> tmpPawnLabels;
         public static void InitializeThreadStatics()
         {
             tmpUsableBeds = new List<Building_Bed>();

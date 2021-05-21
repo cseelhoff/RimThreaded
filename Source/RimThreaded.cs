@@ -388,7 +388,8 @@ namespace RimThreaded
 
                 try
                 {
-                    FilthMonitor2.FilthMonitorTick();
+                    FilthMonitor.FilthMonitorTick();
+                    //FilthMonitor2.FilthMonitorTick();
                 }
                 catch (Exception ex13)
                 {

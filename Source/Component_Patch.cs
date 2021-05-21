@@ -15,7 +15,6 @@ namespace RimThreaded
         private static readonly MethodInfo MethodComponentTransform = Method(typeof(Component), "get_transform");
         private static readonly MethodInfo MethodComponent_PatchTransform = Method(typeof(Component_Patch), "get_transform");
         
-
         public static Transform get_transform(Component __instance)
         {
             if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 

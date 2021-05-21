@@ -7,12 +7,12 @@ namespace RimThreaded
 {
     class AttackTargetFinder_Patch
     {
-        [ThreadStatic] public static List<IAttackTarget> tmpTargets = new List<IAttackTarget>();
-        [ThreadStatic] public static List<Pair<IAttackTarget, float>> availableShootingTargets = new List<Pair<IAttackTarget, float>>();
-        [ThreadStatic] public static List<float> tmpTargetScores = new List<float>();
-        [ThreadStatic] public static List<bool> tmpCanShootAtTarget = new List<bool>();
-        [ThreadStatic] public static List<IntVec3> tempDestList = new List<IntVec3>();
-        [ThreadStatic] public static List<IntVec3> tempSourceList = new List<IntVec3>();
+        [ThreadStatic] public static List<IAttackTarget> tmpTargets;
+        [ThreadStatic] public static List<Pair<IAttackTarget, float>> availableShootingTargets;
+        [ThreadStatic] public static List<float> tmpTargetScores;
+        [ThreadStatic] public static List<bool> tmpCanShootAtTarget;
+        [ThreadStatic] public static List<IntVec3> tempDestList;
+        [ThreadStatic] public static List<IntVec3> tempSourceList;
         public static void InitializeThreadStatics()
         {
             tmpTargets = new List<IAttackTarget>();

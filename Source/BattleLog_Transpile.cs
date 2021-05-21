@@ -1,11 +1,10 @@
-﻿using HarmonyLib;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System;
-using static HarmonyLib.AccessTools;
-using static RimThreaded.RimThreadedHarmony;
+using HarmonyLib;
 using Verse;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -30,7 +29,7 @@ namespace RimThreaded
 			};
 			LocalBuilder lockObject = iLGenerator.DeclareLocal(lockObjectType);
 			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
-			foreach (CodeInstruction ci in EnterLock(
+			foreach (CodeInstruction ci in RimThreadedHarmony.EnterLock(
 				lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
 				yield return ci;
 
@@ -38,7 +37,7 @@ namespace RimThreaded
 			{
 				yield return instructionsList[i++];
 			}
-			foreach (CodeInstruction ci in ExitLock(
+			foreach (CodeInstruction ci in RimThreadedHarmony.ExitLock(
 				iLGenerator, lockObject, lockTaken, instructionsList[i]))
 				yield return ci;
 

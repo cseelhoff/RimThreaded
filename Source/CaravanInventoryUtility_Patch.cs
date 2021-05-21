@@ -8,10 +8,10 @@ namespace RimThreaded
 {
     class CaravanInventoryUtility_Patch
     {
-        [ThreadStatic] public static List<Thing> inventoryItems = new List<Thing>();
-        [ThreadStatic] public static List<Thing> inventoryToMove = new List<Thing>();
-        [ThreadStatic] public static List<Apparel> tmpApparel = new List<Apparel>();
-        [ThreadStatic] public static List<ThingWithComps> tmpEquipment = new List<ThingWithComps>();
+        [ThreadStatic] public static List<Thing> inventoryItems;
+        [ThreadStatic] public static List<Thing> inventoryToMove;
+        [ThreadStatic] public static List<Apparel> tmpApparel;
+        [ThreadStatic] public static List<ThingWithComps> tmpEquipment;
         public static void InitializeThreadStatics()
         {
             inventoryItems = new List<Thing>();

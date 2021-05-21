@@ -1,21 +1,15 @@
-﻿using HarmonyLib;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using Verse;
 using Verse.AI;
 using static Verse.AI.AttackTargetReservationManager;
-using System;
 
 namespace RimThreaded
 {
 
     public class AttackTargetReservationManager_Patch
 	{
-		public static AccessTools.FieldRef<AttackTargetReservationManager, List<AttackTargetReservation>> reservations =
-			AccessTools.FieldRefAccess<AttackTargetReservationManager, List<AttackTargetReservation>>("reservations");
-		public static AccessTools.FieldRef<AttackTargetReservationManager, Map> map =
-			AccessTools.FieldRefAccess<AttackTargetReservationManager, Map>("map");
-
 		internal static void RunDestructivePatches()
 		{
 			Type original = typeof(AttackTargetReservationManager);
@@ -33,7 +27,7 @@ namespace RimThreaded
 		{
 			lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
 			{
-				List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+				List<AttackTargetReservation> snapshotReservations = __instance.reservations;
 				List<AttackTargetReservation> newAttackTargetReservations = new List<AttackTargetReservation>(snapshotReservations.Count);
 				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
@@ -43,7 +37,7 @@ namespace RimThreaded
 						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 				}
-				reservations(__instance) = newAttackTargetReservations;
+                __instance.reservations = newAttackTargetReservations;
 			}
 			
 			return false;
@@ -53,7 +47,7 @@ namespace RimThreaded
 		{
 			lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
 			{
-				List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+				List<AttackTargetReservation> snapshotReservations = __instance.reservations;
 				List<AttackTargetReservation> newAttackTargetReservations = new List<AttackTargetReservation>(snapshotReservations.Count);
 				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
@@ -63,7 +57,7 @@ namespace RimThreaded
 						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 				}
-				reservations(__instance) = newAttackTargetReservations;
+                __instance.reservations = newAttackTargetReservations;
 			}
 			return false;
 		}
@@ -85,7 +79,7 @@ namespace RimThreaded
                 };
                 lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
 				{
-					reservations(__instance) = new List<AttackTargetReservation>(reservations(__instance))
+                    __instance.reservations = new List<AttackTargetReservation>(__instance.reservations)
                     {
                         attackTargetReservation
                     };
@@ -96,16 +90,14 @@ namespace RimThreaded
 
 		public static bool FirstReservationFor(AttackTargetReservationManager __instance, ref IAttackTarget __result, Pawn claimant)
 		{
-            List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+            List<AttackTargetReservation> snapshotReservations = __instance.reservations;
 			for (int i = snapshotReservations.Count - 1; i >= 0; i--)
 			{
                 AttackTargetReservation reservation = snapshotReservations[i];
-				if (reservation.claimant == claimant)
-				{
-					__result = reservation.target;
-					return false;
-				}
-			}			
+                if (reservation.claimant != claimant) continue;
+                __result = reservation.target;
+                return false;
+            }			
 			__result = null;
 			return false;
 		}
@@ -113,7 +105,7 @@ namespace RimThreaded
 		{
 			lock (RimThreaded.map_AttackTargetReservationManager_reservations_Lock)
 			{
-				List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+				List<AttackTargetReservation> snapshotReservations = __instance.reservations;
 				List<AttackTargetReservation> newAttackTargetReservations = new List<AttackTargetReservation>(snapshotReservations.Count);
 				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
@@ -123,22 +115,20 @@ namespace RimThreaded
 						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 				}
-				reservations(__instance) = newAttackTargetReservations;
+                __instance.reservations = newAttackTargetReservations;
 			}
 			return false;
 		}
 		public static bool IsReservedBy(AttackTargetReservationManager __instance, ref bool __result, Pawn claimant, IAttackTarget target)
 		{
-			List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+			List<AttackTargetReservation> snapshotReservations = __instance.reservations;
 			for (int i = 0; i < snapshotReservations.Count; i++)
 			{
 				AttackTargetReservation attackTargetReservation = snapshotReservations[i];
-				if (attackTargetReservation.target == target && attackTargetReservation.claimant == claimant)
-				{
-					__result = true;
-					return false;
-				}
-			}
+                if (attackTargetReservation.target != target || attackTargetReservation.claimant != claimant) continue;
+                __result = true;
+                return false;
+            }
 
 			__result = false;
 			return false;
@@ -147,7 +137,7 @@ namespace RimThreaded
 		public static bool GetReservationsCount(AttackTargetReservationManager __instance, ref int __result, IAttackTarget target, Faction faction)
 		{
 			int num = 0;
-			List<AttackTargetReservation> snapshotReservations = reservations(__instance);
+			List<AttackTargetReservation> snapshotReservations = __instance.reservations;
 			for (int i = 0; i < snapshotReservations.Count; i++)
 			{
 				AttackTargetReservation attackTargetReservation = snapshotReservations[i];

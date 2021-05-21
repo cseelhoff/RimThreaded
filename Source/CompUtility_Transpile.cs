@@ -1,9 +1,9 @@
-﻿using HarmonyLib;
+﻿using System;
 using System.Collections.Generic;
-using Verse;
-using System.Reflection.Emit;
 using System.Linq;
-using System;
+using System.Reflection.Emit;
+using HarmonyLib;
+using Verse;
 
 namespace RimThreaded
 {
@@ -12,7 +12,7 @@ namespace RimThreaded
 		public static IEnumerable<CodeInstruction> CompGuest(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			List<CodeInstruction> instructionsList = instructions.ToList();
-			Type loadLockObjectType = typeof(Dictionary<,>).MakeGenericType(new Type[] { typeof(Pawn), RimThreadedHarmony.hospitalityCompGuest });
+			Type loadLockObjectType = typeof(Dictionary<,>).MakeGenericType(new[] { typeof(Pawn), RimThreadedHarmony.hospitalityCompGuest });
 			List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
 			{
 				new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(RimThreadedHarmony.hospitalityCompUtility, "guestComps"))

@@ -2,7 +2,6 @@
 using System;
 using UnityEngine;
 using Verse;
-using static HarmonyLib.AccessTools;
 using static RimThreaded.Camera_Patch;
 using static RimThreaded.RimThreaded;
 using static System.Threading.Thread;
@@ -11,8 +10,6 @@ namespace RimThreaded
 {
     public class PortraitRenderer_Patch
     {
-        public static FieldRef<PortraitRenderer, Pawn> pawnFR = FieldRefAccess<PortraitRenderer, Pawn>("pawn");
-
         public static void RunDestructivePatches()
         {
             Type original = typeof(PortraitRenderer);
@@ -30,10 +27,10 @@ namespace RimThreaded
             float orthographicSize = portraitCamera.orthographicSize;
             Component_Patch.get_transform(portraitCamera).position += cameraOffset;
             portraitCamera.orthographicSize = 1f / cameraZoom;
-            pawnFR(__instance) = pawn;
+            __instance.pawn = pawn;
             //portraitCamera.Render();
             Render(portraitCamera);
-            pawnFR(__instance) = null;
+            __instance.pawn = null;
             Component_Patch.get_transform(portraitCamera).position = position;
             portraitCamera.orthographicSize = orthographicSize;
             //portraitCamera.targetTexture = null;

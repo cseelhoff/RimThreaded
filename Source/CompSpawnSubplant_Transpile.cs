@@ -1,10 +1,10 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Verse;
 using System.Reflection.Emit;
+using HarmonyLib;
 using RimWorld;
+using Verse;
 
 namespace RimThreaded
 {

@@ -9,8 +9,6 @@ namespace RimThreaded
     {
         [ThreadStatic] public static List<Region> regionsToDirty;
         public static Dictionary<RegionDirtyer, List<IntVec3>> dirtyCellsDict = new Dictionary<RegionDirtyer, List<IntVec3>>();
-
-        public static FieldRef<RegionDirtyer, Map> map = FieldRefAccess<RegionDirtyer, Map>("map");
         public static object regionDirtyerLock = new object();
 
         public static void InitializeThreadStatics()
@@ -37,7 +35,7 @@ namespace RimThreaded
                 List<IntVec3> dirtyCells = get_DirtyCells(__instance);
                 foreach (IntVec3 dirtyCell in dirtyCells)
                 {
-                    map(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
+                    __instance.map.temperatureCache.ResetCachedCellInfo(dirtyCell);
                 }
                 dirtyCellsDict.SetOrAdd(__instance, new List<IntVec3>());
             }
@@ -72,12 +70,12 @@ namespace RimThreaded
                 for (int i = 0; i < 9; i++)
                 {
                     IntVec3 c2 = c + GenAdj.AdjacentCellsAndInside[i];
-                    if (c2.InBounds(map(__instance)))
+                    if (c2.InBounds(__instance.map))
                     {
-                        Region regionAt_NoRebuild_InvalidAllowed = map(__instance).regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2);
+                        Region regionAt_NoRebuild_InvalidAllowed = __instance.map.regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2);
                         if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
                         {
-                            map(__instance).temperatureCache.TryCacheRegionTempInfo(c, regionAt_NoRebuild_InvalidAllowed);
+                            __instance.map.temperatureCache.TryCacheRegionTempInfo(c, regionAt_NoRebuild_InvalidAllowed);
                             regionsToDirty.Add(regionAt_NoRebuild_InvalidAllowed);
                         }
                     }
@@ -90,7 +88,7 @@ namespace RimThreaded
 
                 //regionsToDirty.Clear();
                 List<IntVec3> dirtyCells = get_DirtyCells(__instance);
-                if (c.Walkable(map(__instance)))
+                if (c.Walkable(__instance.map))
                 {
                     lock (regionDirtyerLock)
                     {
@@ -133,21 +131,21 @@ namespace RimThreaded
             lock (regionDirtyerLock)
             {
                 regionsToDirty.Clear();
-                Region validRegionAt_NoRebuild = map(__instance).regionGrid.GetValidRegionAt_NoRebuild(b.Position);
+                Region validRegionAt_NoRebuild = __instance.map.regionGrid.GetValidRegionAt_NoRebuild(b.Position);
                 if (validRegionAt_NoRebuild != null)
                 {
-                    map(__instance).temperatureCache.TryCacheRegionTempInfo(b.Position, validRegionAt_NoRebuild);
+                    __instance.map.temperatureCache.TryCacheRegionTempInfo(b.Position, validRegionAt_NoRebuild);
                     regionsToDirty.Add(validRegionAt_NoRebuild);
                 }
 
                 foreach (IntVec3 item2 in GenAdj.CellsAdjacent8Way(b))
                 {
-                    if (item2.InBounds(map(__instance)))
+                    if (item2.InBounds(__instance.map))
                     {
-                        Region validRegionAt_NoRebuild2 = map(__instance).regionGrid.GetValidRegionAt_NoRebuild(item2);
+                        Region validRegionAt_NoRebuild2 = __instance.map.regionGrid.GetValidRegionAt_NoRebuild(item2);
                         if (validRegionAt_NoRebuild2 != null)
                         {
-                            map(__instance).temperatureCache.TryCacheRegionTempInfo(item2, validRegionAt_NoRebuild2);
+                            __instance.map.temperatureCache.TryCacheRegionTempInfo(item2, validRegionAt_NoRebuild2);
                             regionsToDirty.Add(validRegionAt_NoRebuild2);
                         }
                     }
@@ -184,12 +182,12 @@ namespace RimThreaded
             {
                 List<IntVec3> dirtyCells = new List<IntVec3>();
 
-                foreach (IntVec3 item in map(__instance))
+                foreach (IntVec3 item in __instance.map)
                 {
                     dirtyCells.Add(item);
                 }
                 dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
-                foreach (Region item2 in map(__instance).regionGrid.AllRegions_NoRebuild_InvalidAllowed)
+                foreach (Region item2 in __instance.map.regionGrid.AllRegions_NoRebuild_InvalidAllowed)
                 {
                     SetRegionDirty(__instance, item2, addCellsToDirtyCells: false);
                 }
@@ -228,7 +226,7 @@ namespace RimThreaded
                     dirtyCells.Add(cell);
                     if (DebugViewSettings.drawRegionDirties)
                     {
-                        map(__instance).debugDrawer.FlashCell(cell);
+                        __instance.map.debugDrawer.FlashCell(cell);
                     }
                 }
             }

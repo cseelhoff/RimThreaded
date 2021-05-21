@@ -1,6 +1,5 @@
-﻿using RimWorld;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using RimWorld;
 using Verse;
 using Verse.Sound;
 
@@ -18,26 +17,16 @@ namespace RimThreaded
         public static bool EnsureWorldAmbientSoundCreated()
         {
             SoundRoot soundRoot = Find.SoundRoot;
-            if (null != soundRoot)
+            if (null == soundRoot) return false;
+            SustainerManager sManager = soundRoot.sustainerManager;
+            if (null == sManager) return false;
+            SoundDef aSpace = SoundDefOf.Ambient_Space;
+            if (null == aSpace) return false;
+            lock (sManager.AllSustainers)
             {
-                SustainerManager sManager = soundRoot.sustainerManager;
-                if (null != sManager)
-                {
-                    SoundDef aSpace = SoundDefOf.Ambient_Space;
-                    if (null != aSpace)
-                    {
-                        lock (sManager.AllSustainers)
-                        {
-                            if (sManager.SustainerExists(aSpace))
-                            {
-                                return false;
-                            } else
-                            {
-                                aSpace.TrySpawnSustainer(SoundInfo.OnCamera());                                
-                            }
-                        }
-                    }
-                }
+                if (sManager.SustainerExists(aSpace))return false;
+                aSpace.TrySpawnSustainer(SoundInfo.OnCamera());                                
+                
             }
             return false;
         }
