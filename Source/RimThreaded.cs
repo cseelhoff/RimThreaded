@@ -84,6 +84,7 @@ namespace RimThreaded
         public static bool miscellaneousComplete;
         
         public static Dictionary<Thread, ThreadInfo> allThreads2 = new Dictionary<Thread, ThreadInfo>();
+        public static HashSet<int> initializedThreads = new HashSet<int>();
 
         public static object allSustainersLock = new object();
         public static object map_AttackTargetReservationManager_reservations_Lock = new object();
@@ -189,18 +190,21 @@ namespace RimThreaded
         }
         private static ThreadInfo CreateWorkerThread()
         {
-            ThreadInfo threadInfo = new ThreadInfo();
-            threadInfo.thread = new Thread(() => InitializeThread(threadInfo)) { IsBackground = true };
-            threadInfo.thread.Start();
+            ThreadInfo threadInfo = new ThreadInfo {thread = new Thread(InitializeThread) {IsBackground = true}};
+            threadInfo.thread.Start(threadInfo);
             return threadInfo;
         }
-        private static void InitializeThread(ThreadInfo threadInfo)
+        private static void InitializeThread(object threadInfo)
         {
+            ThreadInfo ti = (ThreadInfo) threadInfo;
+            //Log.Message("Initializing thread ID: " + ti.thread.ManagedThreadId);
             InitializeAllThreadStatics();
-            ProcessTicks(threadInfo);
+            ProcessTicks(ti);
         }
         public static void InitializeAllThreadStatics()
         {
+            //if (initializedThreads.Contains(Thread.CurrentThread.ManagedThreadId)) return;
+            //initializedThreads.Add(Thread.CurrentThread.ManagedThreadId);
             AttackTargetFinder_Patch.InitializeThreadStatics();
             AttackTargetsCache_Patch.InitializeThreadStatics();
             BeautyUtility_Patch.InitializeThreadStatics();

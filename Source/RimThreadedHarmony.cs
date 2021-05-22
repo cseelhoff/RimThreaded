@@ -48,8 +48,10 @@ namespace RimThreaded
 
 		static RimThreadedHarmony()
 		{
+#if DEBUG
 			Harmony.DEBUG = true;
-			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + "  is patching methods...");
+#endif
+			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version + "  is patching methods...");
 
 			PatchDestructiveFixes();
 			PatchNonDestructiveFixes();
@@ -325,22 +327,19 @@ namespace RimThreaded
 		{
 			foreach(CodeInstruction codeInstruction in instructions)
 			{
-				if (codeInstruction.operand != null)
-				{
-					if (codeInstruction.operand is FieldInfo fieldInfo)
-					{
-						if (replaceFields.TryGetValue(fieldInfo, out object newFieldInfo))
-						{
-							//Log.Message("RimThreaded is replacing field: " + fieldInfo.DeclaringType.ToString() + "." + fieldInfo.Name + " with field: " + newFieldInfo.DeclaringType.ToString() + "." + newFieldInfo.Name);
-							if(newFieldInfo is MethodInfo)
-                            {
-								codeInstruction.opcode = OpCodes.Call;
-							}
-							codeInstruction.operand = newFieldInfo;
-						}
-					}
-				}
-				yield return codeInstruction;
+                if (codeInstruction.operand is FieldInfo fieldInfo)
+                {
+                    if (replaceFields.TryGetValue(fieldInfo, out object newFieldInfo))
+                    {
+                        //Log.Message("RimThreaded is replacing field: " + fieldInfo.DeclaringType.ToString() + "." + fieldInfo.Name + " with field: " + newFieldInfo.DeclaringType.ToString() + "." + newFieldInfo.Name);
+                        if(newFieldInfo is MethodInfo)
+                        {
+                            codeInstruction.opcode = OpCodes.Call;
+                        }
+                        codeInstruction.operand = newFieldInfo;
+                    }
+                }
+                yield return codeInstruction;
 			}
 		}
 
