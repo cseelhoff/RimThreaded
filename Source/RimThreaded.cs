@@ -197,14 +197,11 @@ namespace RimThreaded
         private static void InitializeThread(object threadInfo)
         {
             ThreadInfo ti = (ThreadInfo) threadInfo;
-            //Log.Message("Initializing thread ID: " + ti.thread.ManagedThreadId);
             InitializeAllThreadStatics();
             ProcessTicks(ti);
         }
         public static void InitializeAllThreadStatics()
         {
-            //if (initializedThreads.Contains(Thread.CurrentThread.ManagedThreadId)) return;
-            //initializedThreads.Add(Thread.CurrentThread.ManagedThreadId);
             AttackTargetFinder_Patch.InitializeThreadStatics();
             AttackTargetsCache_Patch.InitializeThreadStatics();
             BeautyUtility_Patch.InitializeThreadStatics();

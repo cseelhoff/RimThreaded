@@ -519,7 +519,7 @@ namespace RimThreaded
 			Toils_Ingest_Patch.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
 			WanderUtility_Patch.RunNoneDestructivePatches();
-			WildPlantSpawner_Patch.RunNonDestructivePatches();
+			//WildPlantSpawner_Patch.RunNonDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
 			WorldGrid_Patch.RunNonDestructivePatches();
 			ZoneManager_Patch.RunNonDestructivePatches();
@@ -676,7 +676,7 @@ namespace RimThreaded
 			UniqueIDsManager_Patch.RunDestructivePatches();
 			Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
 			WealthWatcher_Patch.RunDestructivePatches();
-			WildPlantSpawner_Patch.RunDestructivePatches();
+			//WildPlantSpawner_Patch.RunDestructivePatches();
 			WindManager_Patch.RunDestructivePatches();
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 			WorldComponentUtility_Patch.RunDestructivePatches();

@@ -33,23 +33,15 @@ namespace RimThreaded
 
         public bool Get_RegionProcessor(Region r)
         {
-			RecipeDef recipe = bill.recipe;
-            Dictionary<float, List<ThingDef>> thingDefValues = RimThreaded.recipeThingDefValues[recipe];
-			foreach (float value in RimThreaded.sortedRecipeValues[recipe])
+			List<Thing> thingList = r.ListerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.HaulableEver));
+			for (int index = 0; index < thingList.Count; ++index)
 			{
-				foreach (ThingDef thingDef in thingDefValues[value])
+				Thing thing = thingList[index];
+				if (!processedThings.Contains(thing) && ReachabilityWithinRegion.ThingFromRegionListerReachable(
+					thing, r, PathEndMode.ClosestTouch, pawn) && (baseValidator(thing) && !(thing.def.IsMedicine & billGiverIsPawn)))
 				{
-					List<Thing> thingList = r.ListerThings.ThingsOfDef(thingDef);
-					for (int index = 0; index < thingList.Count; ++index)
-					{
-						Thing thing = thingList[index];
-						if (!processedThings.Contains(thing) && ReachabilityWithinRegion.ThingFromRegionListerReachable(
-							thing, r, PathEndMode.ClosestTouch, pawn) && (baseValidator(thing) && !(thing.def.IsMedicine & billGiverIsPawn)))
-						{
-							newRelevantThings.Add(thing);
-							processedThings.Add(thing);
-						}
-					}
+					newRelevantThings.Add(thing);
+					processedThings.Add(thing);
 				}
 			}
 			++regionsProcessed;

@@ -18,22 +18,7 @@ namespace RimThreaded
         [ThreadStatic] public static List<ThingDef> tmpPlantDefsLowerOrder;
         [ThreadStatic] public static List<KeyValuePair<ThingDef, float>> tmpPossiblePlantsWithWeight;
         [ThreadStatic] public static List<ThingDef> tmpPossiblePlants;
-
-        public static FieldRef<WildPlantSpawner, Map> map = FieldRefAccess<WildPlantSpawner, Map>("map");
-
-        public static FieldRef<WildPlantSpawner, bool> hasWholeMapNumDesiredPlantsCalculated =
-            FieldRefAccess<WildPlantSpawner, bool>("hasWholeMapNumDesiredPlantsCalculated");
-        public static FieldRef<WildPlantSpawner, float> calculatedWholeMapNumDesiredPlantsTmp =
-            FieldRefAccess<WildPlantSpawner, float>("calculatedWholeMapNumDesiredPlantsTmp");
-        public static FieldRef<WildPlantSpawner, float> calculatedWholeMapNumDesiredPlants =
-            FieldRefAccess<WildPlantSpawner, float>("calculatedWholeMapNumDesiredPlants");
-        public static FieldRef<WildPlantSpawner, int> calculatedWholeMapNumNonZeroFertilityCells =
-            FieldRefAccess<WildPlantSpawner, int>("calculatedWholeMapNumNonZeroFertilityCells");
-        public static FieldRef<WildPlantSpawner, int> calculatedWholeMapNumNonZeroFertilityCellsTmp =
-            FieldRefAccess<WildPlantSpawner, int>("calculatedWholeMapNumNonZeroFertilityCellsTmp");
-        public static FieldRef<WildPlantSpawner, int> cycleIndexFieldRef =
-            FieldRefAccess<WildPlantSpawner, int>("cycleIndex");
-
+        
         internal static void InitializeThreadStatics()
         {
             tmpPossiblePlantsWithWeight = new List<KeyValuePair<ThingDef, float>>();
@@ -61,52 +46,36 @@ namespace RimThreaded
 
         public static bool WildPlantSpawnerTickInternal(WildPlantSpawner __instance)
         {
-            Map map2 = map(__instance);
-            int area = map2.Area;
+            int area = __instance.map.Area;
             int num = Mathf.CeilToInt(area * 0.0001f);
             float currentPlantDensity = __instance.CurrentPlantDensity;
-            if (!hasWholeMapNumDesiredPlantsCalculated(__instance))
+            if (!__instance.hasWholeMapNumDesiredPlantsCalculated)
             {
-                calculatedWholeMapNumDesiredPlants(__instance) = __instance.CurrentWholeMapNumDesiredPlants;
-                calculatedWholeMapNumNonZeroFertilityCells(__instance) = __instance.CurrentWholeMapNumNonZeroFertilityCells;
-                hasWholeMapNumDesiredPlantsCalculated(__instance) = true;
+                __instance.calculatedWholeMapNumDesiredPlants = __instance.CurrentWholeMapNumDesiredPlants;
+                __instance.calculatedWholeMapNumNonZeroFertilityCells = __instance.CurrentWholeMapNumNonZeroFertilityCells;
+                __instance.hasWholeMapNumDesiredPlantsCalculated = true;
             }
             //int num2 = Mathf.CeilToInt(10000f);
-            float chance = calculatedWholeMapNumDesiredPlants(__instance) / calculatedWholeMapNumNonZeroFertilityCells(__instance);
-            map2.cellsInRandomOrder.Get(0); //This helps call "Create List If Should"
+            float chance = __instance.calculatedWholeMapNumDesiredPlants / __instance.calculatedWholeMapNumNonZeroFertilityCells;
+            __instance.map.cellsInRandomOrder.Get(0); //This helps call "Create List If Should"
             int index = Interlocked.Increment(ref wildPlantSpawnerCount) - 1;
             int newNum = Interlocked.Add(ref wildPlantSpawnerTicksCount, num);
-            wildPlantSpawners[index].WildPlantSpawnerTicks = newNum;
-            wildPlantSpawners[index].WildPlantSpawnerCycleIndexOffset = num + cycleIndexFieldRef(__instance);
-            wildPlantSpawners[index].WildPlantSpawnerArea = area;
-            wildPlantSpawners[index].WildPlantSpawnerCellsInRandomOrder = map2.cellsInRandomOrder;
-            wildPlantSpawners[index].WildPlantSpawnerMap = map2;
-            wildPlantSpawners[index].WildPlantSpawnerCurrentPlantDensity = currentPlantDensity;
-            wildPlantSpawners[index].DesiredPlants = calculatedWholeMapNumDesiredPlants(__instance);
-            wildPlantSpawners[index].DesiredPlantsTmp1000 = 1000 * (int)calculatedWholeMapNumDesiredPlantsTmp(__instance);
-            wildPlantSpawners[index].FertilityCellsTmp = calculatedWholeMapNumNonZeroFertilityCellsTmp(__instance);
-            wildPlantSpawners[index].DesiredPlants2Tmp1000 = 0;
-            wildPlantSpawners[index].FertilityCells2Tmp = 0;
-            wildPlantSpawners[index].WildPlantSpawnerInstance = __instance;
-            wildPlantSpawners[index].WildPlantSpawnerChance = chance;
-            cycleIndexFieldRef(__instance) = (cycleIndexFieldRef(__instance) + num) % area;
+            wildPlantSpawners[index].ticks = newNum;
+            wildPlantSpawners[index].cycleIndexOffset = num + __instance.cycleIndex;
+            wildPlantSpawners[index].area = area;
+            wildPlantSpawners[index].randomCells = __instance.map.cellsInRandomOrder;
+            wildPlantSpawners[index].map = __instance.map;
+            wildPlantSpawners[index].plantDensity = currentPlantDensity;
+            wildPlantSpawners[index].desiredPlants = __instance.calculatedWholeMapNumDesiredPlants;
+            wildPlantSpawners[index].desiredPlantsTmp1000 = 1000 * (int)__instance.calculatedWholeMapNumDesiredPlantsTmp;
+            wildPlantSpawners[index].fertilityCellsTmp = __instance.calculatedWholeMapNumNonZeroFertilityCellsTmp;
+            wildPlantSpawners[index].desiredPlants2Tmp1000 = 0;
+            wildPlantSpawners[index].fertilityCells2Tmp = 0;
+            wildPlantSpawners[index].wildPlantSpawnerInstance = __instance;
+            wildPlantSpawners[index].chance = chance;
+            __instance.cycleIndex = (__instance.cycleIndex + num) % area;
             return false;
         }
-
-        private static readonly MethodInfo MethodGetDesiredPlantsCountAt =
-            Method(typeof(WildPlantSpawner), "GetDesiredPlantsCountAt", new [] { typeof(IntVec3), typeof(IntVec3), typeof(float) });
-        private static readonly Func<WildPlantSpawner, IntVec3, IntVec3, float, float> FuncGetDesiredPlantsCountAt =
-            (Func<WildPlantSpawner, IntVec3, IntVec3, float, float>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, IntVec3, float, float>), MethodGetDesiredPlantsCountAt);
-        
-        private static readonly MethodInfo MethodCanRegrowAt =
-            Method(typeof(WildPlantSpawner), "CanRegrowAt", new [] { typeof(IntVec3) });
-        private static readonly Func<WildPlantSpawner, IntVec3, bool> FuncCanRegrowAt =
-            (Func<WildPlantSpawner, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, bool>), MethodCanRegrowAt);
-
-        private static readonly MethodInfo MethodGoodRoofForCavePlant =
-            Method(typeof(WildPlantSpawner), "GoodRoofForCavePlant", new [] { typeof(IntVec3) });
-        private static readonly Func<WildPlantSpawner, IntVec3, bool> FuncGoodRoofForCavePlant =
-            (Func<WildPlantSpawner, IntVec3, bool>)Delegate.CreateDelegate(typeof(Func<WildPlantSpawner, IntVec3, bool>), MethodGoodRoofForCavePlant);
 
 
         public static int wildPlantSpawnerCount = 0; 
@@ -115,22 +84,20 @@ namespace RimThreaded
 
         public struct WildPlantSpawnerStructure
         {
-            public int WildPlantSpawnerTicks;
-            public int WildPlantSpawnerCycleIndexOffset;
-            public int WildPlantSpawnerArea;
-            public Map WildPlantSpawnerMap;
-            public MapCellsInRandomOrder WildPlantSpawnerCellsInRandomOrder;
-            public float WildPlantSpawnerCurrentPlantDensity;
-            public float DesiredPlants;
-            public float DesiredPlantsTmp;
-            public int DesiredPlants1000;
-            public int DesiredPlantsTmp1000;
-            public int DesiredPlants2Tmp1000;
-            public int FertilityCellsTmp;
-            public int FertilityCells2Tmp;
-            public int FertilityCells;
-            public WildPlantSpawner WildPlantSpawnerInstance;
-            public float WildPlantSpawnerChance;
+            public int ticks;
+            public int cycleIndexOffset;
+            public int area;
+            public Map map;
+            public MapCellsInRandomOrder randomCells;
+            public float plantDensity;
+            public float desiredPlants;
+            public int desiredPlantsTmp1000;
+            public int desiredPlants2Tmp1000;
+            public int fertilityCellsTmp;
+            public int fertilityCells2Tmp;
+            public int fertilityCells;
+            public WildPlantSpawner wildPlantSpawnerInstance;
+            public float chance;
         }
         public static WildPlantSpawnerStructure[] wildPlantSpawners = new WildPlantSpawnerStructure[9999];
 
@@ -141,95 +108,69 @@ namespace RimThreaded
                 int ticketIndex = Interlocked.Increment(ref wildPlantSpawnerTicksCompleted) - 1;
                 if (ticketIndex >= wildPlantSpawnerTicksCount) return;
                 int wildPlantSpawnerIndex = 0;
-                WildPlantSpawnerStructure wildPlantSpawner;
-                int index;
                 while (ticketIndex < wildPlantSpawnerTicksCount)
                 {
-                    index = ticketIndex;
-                    while (ticketIndex >= wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerTicks)
+                    int index = ticketIndex;
+                    while (ticketIndex >= wildPlantSpawners[wildPlantSpawnerIndex].ticks)
                     {
                         wildPlantSpawnerIndex++;
                     }
 
                     if (wildPlantSpawnerIndex > 0)
-                        index = ticketIndex - wildPlantSpawners[wildPlantSpawnerIndex - 1].WildPlantSpawnerTicks;
+                        index = ticketIndex - wildPlantSpawners[wildPlantSpawnerIndex - 1].ticks;
                     try
                     {
-                        wildPlantSpawner = wildPlantSpawners[wildPlantSpawnerIndex];
-                        int cycleIndex = (wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) %
-                                         wildPlantSpawner.WildPlantSpawnerArea;
-                        IntVec3 intVec = wildPlantSpawner.WildPlantSpawnerCellsInRandomOrder.Get(cycleIndex);
+                        WildPlantSpawnerStructure wpsStruct = wildPlantSpawners[wildPlantSpawnerIndex];
+                        WildPlantSpawner spawner = wpsStruct.wildPlantSpawnerInstance;
+                        int cycleIndex = (wpsStruct.cycleIndexOffset - index) % wpsStruct.area;
+                        IntVec3 intVec = wpsStruct.randomCells.Get(cycleIndex);
 
-                        if ((wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) >
-                            wildPlantSpawner.WildPlantSpawnerArea)
+                        if ((wpsStruct.cycleIndexOffset - index) > wpsStruct.area)
                         {
-                            Interlocked.Add(ref wildPlantSpawner.DesiredPlants2Tmp1000,
-                                1000 * (int) FuncGetDesiredPlantsCountAt(
-                                    wildPlantSpawner.WildPlantSpawnerInstance, intVec, intVec,
-                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
-                            if (intVec.GetTerrain(wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerMap)
-                                .fertility > 0f)
+                            Interlocked.Add(ref wpsStruct.desiredPlants2Tmp1000,
+                                1000 * (int)spawner.GetDesiredPlantsCountAt(
+                                    intVec, intVec, wpsStruct.plantDensity));
+                            if (intVec.GetTerrain(wildPlantSpawners[wildPlantSpawnerIndex].map).fertility > 0f)
                             {
-                                Interlocked.Increment(ref wildPlantSpawner.FertilityCells2Tmp);
+                                Interlocked.Increment(ref wpsStruct.fertilityCells2Tmp);
                             }
 
-                            float mtb = FuncGoodRoofForCavePlant(
-                                wildPlantSpawner.WildPlantSpawnerInstance, intVec)
-                                ? 130f
-                                : wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) &&
-                                Rand.MTBEventOccurs(mtb, 60000f, 10000) &&
-                                FuncCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))
+                            float mtb = spawner.GoodRoofForCavePlant(intVec) ? 130f : wpsStruct.map.Biome.wildPlantRegrowDays;
+                            if (Rand.Chance(wpsStruct.chance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && spawner.CanRegrowAt(intVec))
                             {
-                                wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec,
-                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity,
-                                    wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f);
+                                spawner.CheckSpawnWildPlantAt(intVec, wpsStruct.plantDensity, wpsStruct.desiredPlantsTmp1000 / 1000.0f);
                             }
                         }
                         else
                         {
-                            Interlocked.Add(ref wildPlantSpawner.DesiredPlantsTmp1000,
-                                1000 * (int) FuncGetDesiredPlantsCountAt(
-                                    wildPlantSpawner.WildPlantSpawnerInstance, intVec, intVec,
-                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity));
-                            if (intVec.GetTerrain(wildPlantSpawner.WildPlantSpawnerMap).fertility > 0f)
+                            Interlocked.Add(ref wpsStruct.desiredPlantsTmp1000,
+                                1000 * (int)spawner.GetDesiredPlantsCountAt(intVec, intVec, wpsStruct.plantDensity));
+                            if (intVec.GetTerrain(wpsStruct.map).fertility > 0f)
                             {
-                                Interlocked.Increment(ref wildPlantSpawner.FertilityCellsTmp);
+                                Interlocked.Increment(ref wpsStruct.fertilityCellsTmp);
                             }
 
-                            float mtb = FuncGoodRoofForCavePlant(wildPlantSpawner.WildPlantSpawnerInstance, intVec)
-                                ? 130f
-                                : wildPlantSpawner.WildPlantSpawnerMap.Biome.wildPlantRegrowDays;
-                            if (Rand.Chance(wildPlantSpawner.WildPlantSpawnerChance) &&
-                                Rand.MTBEventOccurs(mtb, 60000f, 10000) &&
-                                FuncCanRegrowAt(wildPlantSpawner.WildPlantSpawnerInstance, intVec))
+                            float mtb = spawner.GoodRoofForCavePlant(intVec) ? 130f : wpsStruct.map.Biome.wildPlantRegrowDays;
+                            if (Rand.Chance(wpsStruct.chance) && Rand.MTBEventOccurs(mtb, 60000f, 10000) && spawner.CanRegrowAt(intVec))
                             {
-                                wildPlantSpawner.WildPlantSpawnerInstance.CheckSpawnWildPlantAt(intVec,
-                                    wildPlantSpawner.WildPlantSpawnerCurrentPlantDensity,
-                                    wildPlantSpawner.DesiredPlants);
+                                spawner.CheckSpawnWildPlantAt(intVec, wpsStruct.plantDensity, wpsStruct.desiredPlants);
                             }
                         }
 
-                        if (ticketIndex == wildPlantSpawners[wildPlantSpawnerIndex].WildPlantSpawnerTicks - 1)
+                        if (ticketIndex == wildPlantSpawners[wildPlantSpawnerIndex].ticks - 1)
                         {
-                            if ((wildPlantSpawner.WildPlantSpawnerCycleIndexOffset - index) >
-                                wildPlantSpawner.WildPlantSpawnerArea)
+                            if ((wpsStruct.cycleIndexOffset - index) >
+                                wpsStruct.area)
                             {
-                                calculatedWholeMapNumDesiredPlants(wildPlantSpawner.WildPlantSpawnerInstance) =
-                                    wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f;
-                                calculatedWholeMapNumDesiredPlantsTmp(wildPlantSpawner.WildPlantSpawnerInstance) =
-                                    wildPlantSpawner.DesiredPlants2Tmp1000 / 1000.0f;
-                                calculatedWholeMapNumNonZeroFertilityCells(wildPlantSpawner.WildPlantSpawnerInstance) =
-                                    wildPlantSpawner.FertilityCellsTmp;
-                                calculatedWholeMapNumNonZeroFertilityCellsTmp(wildPlantSpawner
-                                    .WildPlantSpawnerInstance) = wildPlantSpawner.FertilityCells2Tmp;
+                                spawner.calculatedWholeMapNumDesiredPlants = wpsStruct.desiredPlantsTmp1000 / 1000.0f;
+                                spawner.calculatedWholeMapNumDesiredPlantsTmp = wpsStruct.desiredPlants2Tmp1000 / 1000.0f;
+                                spawner.calculatedWholeMapNumNonZeroFertilityCells = wpsStruct.fertilityCellsTmp;
+                                spawner.calculatedWholeMapNumNonZeroFertilityCellsTmp = wpsStruct.fertilityCells2Tmp;
                             }
                             else
                             {
-                                calculatedWholeMapNumDesiredPlantsTmp(wildPlantSpawner.WildPlantSpawnerInstance) =
-                                    wildPlantSpawner.DesiredPlantsTmp1000 / 1000.0f;
-                                calculatedWholeMapNumNonZeroFertilityCells(wildPlantSpawner.WildPlantSpawnerInstance) =
-                                    wildPlantSpawner.FertilityCellsTmp;
+                                spawner.calculatedWholeMapNumDesiredPlantsTmp = wpsStruct.desiredPlantsTmp1000 / 1000.0f;
+                                spawner.calculatedWholeMapNumNonZeroFertilityCells = wpsStruct.fertilityCellsTmp;
                             }
                         }
                     }

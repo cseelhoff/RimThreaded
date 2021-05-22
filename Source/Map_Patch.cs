@@ -30,18 +30,6 @@ namespace RimThreaded
 
         public static void MapsPostTickPrepare()
         {
-            try
-            {
-                List<Map> maps = Find.Maps;
-                for (int j = 0; j < maps.Count; j++)
-                {
-                    maps[j].MapPostTick();
-                }
-            }
-            catch (Exception ex3)
-            {
-                Log.Error(ex3.ToString());
-            }
             SteadyEnvironmentEffects_Patch.totalSteadyEnvironmentEffectsTicks = 0;
             SteadyEnvironmentEffects_Patch.steadyEnvironmentEffectsTicksCompleted = 0;
             SteadyEnvironmentEffects_Patch.steadyEnvironmentEffectsCount = 0;
@@ -51,12 +39,27 @@ namespace RimThreaded
             TradeShip_Patch.totalTradeShipTicks = 0;
             TradeShip_Patch.totalTradeShipTicksCompleted = 0;
             TradeShip_Patch.totalTradeShipsCount = 0;
+            try
+            {
+                List<Map> maps = Find.Maps;
+                for (int j = 0; j < maps.Count; j++)
+                {
+                    Map map = maps[j];
+                    map.MapPostTick();
+                    map.wildPlantSpawner.WildPlantSpawnerTick();
+                }
+            }
+            catch (Exception ex3)
+            {
+                Log.Error(ex3.ToString());
+            }
+
         }
 
         public static void MapPostListTick()
         {
             SteadyEnvironmentEffects_Patch.SteadyEffectTick();
-            WildPlantSpawner_Patch.WildPlantSpawnerListTick();
+            //WildPlantSpawner_Patch.WildPlantSpawnerListTick();
             TradeShip_Patch.PassingShipListTick();
         }
     }
