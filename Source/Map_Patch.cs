@@ -46,7 +46,6 @@ namespace RimThreaded
                 {
                     Map map = maps[j];
                     map.MapPostTick();
-                    map.wildPlantSpawner.WildPlantSpawnerTick();
                 }
             }
             catch (Exception ex3)
@@ -59,7 +58,7 @@ namespace RimThreaded
         public static void MapPostListTick()
         {
             SteadyEnvironmentEffects_Patch.SteadyEffectTick();
-            //WildPlantSpawner_Patch.WildPlantSpawnerListTick();
+            WildPlantSpawner_Patch.WildPlantSpawnerListTick();
             TradeShip_Patch.PassingShipListTick();
         }
     }

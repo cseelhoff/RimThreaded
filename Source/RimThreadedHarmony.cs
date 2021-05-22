@@ -475,6 +475,8 @@ namespace RimThreaded
 
 		private static void PatchNonDestructiveFixes()
 		{
+			//Prevents Game Crash from wooden floors and others
+            GameObject_Patch.RunNonDestructivePatches();
 
 			//Simple
 			Area_Patch.RunNonDestructivePatches();
@@ -519,7 +521,7 @@ namespace RimThreaded
 			Toils_Ingest_Patch.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
 			WanderUtility_Patch.RunNoneDestructivePatches();
-			//WildPlantSpawner_Patch.RunNonDestructivePatches();
+			WildPlantSpawner_Patch.RunNonDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
 			WorldGrid_Patch.RunNonDestructivePatches();
 			ZoneManager_Patch.RunNonDestructivePatches();
@@ -676,7 +678,7 @@ namespace RimThreaded
 			UniqueIDsManager_Patch.RunDestructivePatches();
 			Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
 			WealthWatcher_Patch.RunDestructivePatches();
-			//WildPlantSpawner_Patch.RunDestructivePatches();
+			WildPlantSpawner_Patch.RunDestructivePatches();
 			WindManager_Patch.RunDestructivePatches();
 			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 			WorldComponentUtility_Patch.RunDestructivePatches();
@@ -896,8 +898,6 @@ namespace RimThreaded
 		private static void PatchDevelopmentBuild()
 		{
 			//Development mode patches
-
-			GameObject_Patch.RunNonDestructivePatches();
 			Material_Patch.RunDestructivePatches();
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
@@ -974,6 +974,7 @@ namespace RimThreaded
 			harmony.Patch(Method(typeof(RimWorld.SelectionDrawer), "Notify_Selected"), transpiler: RealtimeSinceStartupTranspiler);
 			ColonistBarColonistDrawer_Patch.RunNonDestructivePatches();
 			WorldSelectionDrawer_Patch.RunNonDestructivePatches();
+
 			//harmony.Patch(Method(typeof(RimWorld.SelectionDrawerUtility), "CalculateSelectionBracketPositionsUI"), transpiler: RealtimeSinceStartupTranspiler);
 			//harmony.Patch(Method(typeof(RimWorld.SelectionDrawerUtility), "CalculateSelectionBracketPositionsWorld"), transpiler: RealtimeSinceStartupTranspiler);
 			harmony.Patch(Method(typeof(Verse.Sound.Sample), "get_AgeRealTime"), transpiler: RealtimeSinceStartupTranspiler);
@@ -1011,7 +1012,7 @@ namespace RimThreaded
 			harmony.Patch(Method(typeof(Verse.TooltipHandler), "DrawActiveTips"), transpiler: RealtimeSinceStartupTranspiler);
 			harmony.Patch(Method(typeof(Verse.Widgets), "CheckPlayDragSliderSound"), transpiler: RealtimeSinceStartupTranspiler);
 
-			//TranspileComponentTransform Fixes
+            //TranspileComponentTransform Fixes
 			harmony.Patch(Method(typeof(RimWorld.Planet.DebugTile), "get_DistanceToCamera"), transpiler: ComponentTransformTranspiler);
 			harmony.Patch(Method(typeof(RimWorld.Planet.GenWorldUI), "CurUITileSize"), transpiler: ComponentTransformTranspiler);
 			harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "get_CurrentRealPosition"), transpiler: ComponentTransformTranspiler);
