@@ -13,18 +13,11 @@ namespace RimThreaded
     [StaticConstructorOnStartup]
     public class RimThreaded
     {
-        public static int WorkGiver_GrowerSow_Patch_JobOnCell; //debugging
-
         //TODO clear on new game or load
-        //public static HashSet<ThingDef> recipeThingDefs = new HashSet<ThingDef>();
-        public static Dictionary<RecipeDef, List<float>> sortedRecipeValues = new Dictionary<RecipeDef, List<float>>();
-        public static Dictionary<RecipeDef, Dictionary<float, List<ThingDef>>> recipeThingDefValues = new Dictionary<RecipeDef, Dictionary<float, List<ThingDef>>>();
         public static Dictionary<Bill_Production, List<Pawn>> billFreeColonistsSpawned = new Dictionary<Bill_Production, List<Pawn>>();
-
-        public static DateTime lastClosestThingGlobal = DateTime.Now;
-
+        
         public static int maxThreads = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1), 128);
-        public static int timeoutMS = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 5000), 100000);
+        public static int timeoutMS = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 5000), 1000000);
         public static float timeSpeedNormal = float.Parse(RimThreadedMod.Settings.timeSpeedNormalBuffer);
         public static float timeSpeedFast = float.Parse(RimThreadedMod.Settings.timeSpeedFastBuffer);
         public static float timeSpeedSuperfast = float.Parse(RimThreadedMod.Settings.timeSpeedSuperfastBuffer);
@@ -48,12 +41,7 @@ namespace RimThreaded
         public static int thingListRareTicks = 0;
         public static List<Thing> thingListLong;
         public static int thingListLongTicks = 0;
-        
 
-        internal static IEnumerable<IntVec3> GetClosestPlantGrowerCells(IntVec3 position)
-        {
-            throw new NotImplementedException();
-        }
 
         //WorldObjectsHolder
         public static int worldObjectsTicks = 0;
@@ -65,16 +53,17 @@ namespace RimThreaded
         //WindManager
         public static int plantMaterialsCount = 0;
         public static float plantSwayHead = 0;
-        
+
         //FactionManager
         public static List<Faction> allFactions = null;
-        
+
         public static int currentPrepsDone = -1;
         public static int workingOnDateNotifierTick = -1;
         public static int workingOnWorldTick = -1;
         public static int workingOnMapPostTick = -1;
         public static int workingOnHistoryTick = -1;
         public static int workingOnMiscellaneous = -1;
+
         public static TickManager callingTickManager;
         public static int listsFullyProcessed;
         public static bool dateNotifierTickComplete;
@@ -82,13 +71,13 @@ namespace RimThreaded
         public static bool mapPostTickComplete;
         public static bool historyTickComplete;
         public static bool miscellaneousComplete;
-        
+
         public static Dictionary<Thread, ThreadInfo> allThreads2 = new Dictionary<Thread, ThreadInfo>();
         public static HashSet<int> initializedThreads = new HashSet<int>();
 
         public static object allSustainersLock = new object();
         public static object map_AttackTargetReservationManager_reservations_Lock = new object();
-
+        
 
         public class ThreadInfo
         {

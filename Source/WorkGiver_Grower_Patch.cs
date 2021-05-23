@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using System;
+using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -92,38 +93,7 @@ namespace RimThreaded
 				}
 			}
 		}
-		public static IEnumerable<IntVec3> ClosestPotentialWorkCellsGlobalWithoutCanReach(WorkGiver_Grower __instance, Pawn pawn)
-		{
-			Danger maxDanger = pawn.NormalMaxDanger();
-			foreach (IntVec3 cell in RimThreaded.GetClosestPlantGrowerCells(pawn.Position))
-			{
-				List<Thing> thingsAtCell = pawn.Map.thingGrid.ThingsListAtFast(cell);
-				foreach (Thing thingAtCell in thingsAtCell)
-				{
-                    if (!(thingAtCell is Building_PlantGrower building_PlantGrower) || 
-						!__instance.ExtraRequirements(building_PlantGrower, pawn) || 
-						building_PlantGrower.IsForbidden(pawn) || 
-						building_PlantGrower.IsBurning())
-                    {
-                        continue;
-                    }
-					yield return cell;
-					break;
-				}
-                if (!(pawn.Map.zoneManager.ZoneAt(cell) is Zone_Growing growZone))
-                {
-                    continue;
-                }
-                if (growZone.cells.Count == 0)
-				{
-					Log.ErrorOnce("Grow zone has 0 cells: " + growZone, -563487);
-				}
-				else if (__instance.ExtraRequirements(growZone, pawn) && !growZone.ContainsStaticFire)
-				{
-					yield return cell;
-				}
-			}
-		}
+        
 
         internal static IntVec3 ClosestLocationReachable(WorkGiver_Grower workGiver_Grower, Pawn pawn)
         {
