@@ -10,7 +10,6 @@ namespace RimThreaded
     public class JobQueue_Patch
 	{
 
-        public static FieldRef<JobQueue, List<QueuedJob>> jobs = FieldRefAccess<JobQueue, List<QueuedJob>>("jobs");
         internal static void RunDestructivePatches()
         {
             Type original = typeof(JobQueue);
@@ -24,7 +23,7 @@ namespace RimThreaded
         }
         public static bool AnyCanBeginNow(JobQueue __instance, ref bool __result, Pawn pawn, bool whileLyingDown)
         {
-            List<QueuedJob> j = jobs(__instance);
+            List<QueuedJob> j = __instance.jobs;
             for (int i = 0; i < j.Count; i++)
             {
                 QueuedJob queuedJob = j[i];
@@ -40,9 +39,9 @@ namespace RimThreaded
         {
             lock (__instance)
             {
-                List<QueuedJob> newJobs = new List<QueuedJob>(jobs(__instance));
+                List<QueuedJob> newJobs = new List<QueuedJob>(__instance.jobs);
                 newJobs.Insert(0, new QueuedJob(j, tag));
-                jobs(__instance) = newJobs;
+                __instance.jobs = newJobs;
             }
             return false;
         }
@@ -51,14 +50,14 @@ namespace RimThreaded
         {
             lock (__instance)
             {
-                jobs(__instance).Add(new QueuedJob(j, tag));
+                __instance.jobs.Add(new QueuedJob(j, tag));
             }
             return false;
         }
 
         public static bool Contains(JobQueue __instance, ref bool __result, Job j)
         {
-            List<QueuedJob> snapshotJobs = jobs(__instance);
+            List<QueuedJob> snapshotJobs = __instance.jobs;
             for (int i = 0; i < snapshotJobs.Count; i++)
             {
                 QueuedJob jobi;
@@ -84,11 +83,11 @@ namespace RimThreaded
         {
             lock (__instance)
             {
-                int num = jobs(__instance).FindIndex((QueuedJob qj) => qj.job == j);
+                int num = __instance.jobs.FindIndex((QueuedJob qj) => qj.job == j);
                 if (num >= 0)
                 {
-                    QueuedJob result = jobs(__instance)[num];
-                    jobs(__instance).RemoveAt(num);
+                    QueuedJob result = __instance.jobs[num];
+                    __instance.jobs.RemoveAt(num);
                     __result = result;
                     return false;
                 }
@@ -102,14 +101,14 @@ namespace RimThreaded
             QueuedJob result;
             lock (__instance)
             {
-                if (jobs(__instance).NullOrEmpty())
+                if (__instance.jobs.NullOrEmpty())
                 {
                     __result = null;
                     return false;
                 }
 
-                result = jobs(__instance)[0];
-                jobs(__instance).RemoveAt(0);
+                result = __instance.jobs[0];
+                __instance.jobs.RemoveAt(0);
             }
             __result = result;
             return false;

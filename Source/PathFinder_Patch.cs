@@ -4,8 +4,6 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using UnityEngine;
-using System.Reflection;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -18,46 +16,7 @@ namespace RimThreaded
         [ThreadStatic] public static ushort statusOpenValue;
         [ThreadStatic] public static ushort statusClosedValue;
         [ThreadStatic] public static Dictionary<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorDict;
-
-
-        static readonly MethodInfo methodIsCornerTouchAllowed =
-            Method(typeof(PathFinder), "IsCornerTouchAllowed", new Type[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) });
-        static readonly Func<PathFinder, int, int, int, int, int, int, bool> funcIsCornerTouchAllowed =
-            (Func<PathFinder, int, int, int, int, int, int, bool>)Delegate.CreateDelegate(typeof(Func<PathFinder, int, int, int, int, int, int, bool>), methodIsCornerTouchAllowed);
-
-        static readonly MethodInfo methodCalculateDestinationRect =
-            Method(typeof(PathFinder), "CalculateDestinationRect");
-        static readonly Func<PathFinder, LocalTargetInfo, PathEndMode, CellRect> funcCalculateDestinationRect =
-            (Func<PathFinder, LocalTargetInfo, PathEndMode, CellRect>)Delegate.CreateDelegate(typeof(Func<PathFinder, LocalTargetInfo, PathEndMode, CellRect>), methodCalculateDestinationRect);
-
-        static readonly MethodInfo methodGetAllowedArea =
-            Method(typeof(PathFinder), "GetAllowedArea");
-        static readonly Func<PathFinder, Pawn, Area> funcGetAllowedArea =
-            (Func<PathFinder, Pawn, Area>)Delegate.CreateDelegate(typeof(Func<PathFinder, Pawn, Area>), methodGetAllowedArea);
-
-        static readonly MethodInfo methodDetermineHeuristicStrength =
-            Method(typeof(PathFinder), "DetermineHeuristicStrength");
-        static readonly Func<PathFinder, Pawn, IntVec3, LocalTargetInfo, float> funcDetermineHeuristicStrength =
-            (Func<PathFinder, Pawn, IntVec3, LocalTargetInfo, float>)Delegate.CreateDelegate(typeof(Func<PathFinder, Pawn, IntVec3, LocalTargetInfo, float>), methodDetermineHeuristicStrength);
-
-        private static readonly MethodInfo methodDebugDrawRichData =
-            Method(typeof(PathFinder), "DebugDrawRichData");
-        private static readonly Action<PathFinder> actionDebugDrawRichData =
-            (Action<PathFinder>)Delegate.CreateDelegate(typeof(Action<PathFinder>), methodDebugDrawRichData);
-
-        private static readonly MethodInfo methodPfProfilerEndSample =
-            Method(typeof(PathFinder), "PfProfilerEndSample");
-        private static readonly Action<PathFinder> actionPfProfilerEndSample =
-            (Action<PathFinder>)Delegate.CreateDelegate(typeof(Action<PathFinder>), methodPfProfilerEndSample);
-
-        private static readonly MethodInfo methodPfProfilerBeginSample =
-            Method(typeof(PathFinder), "PfProfilerBeginSample");
-        private static readonly Action<PathFinder, string> actionPfProfilerBeginSample =
-            (Action<PathFinder, string>)Delegate.CreateDelegate(typeof(Action<PathFinder, string>), methodPfProfilerBeginSample);
-
-        private static readonly SimpleCurve RegionHeuristicWeightByNodesOpened =
-            StaticFieldRefAccess<SimpleCurve>(typeof(PathFinder), "RegionHeuristicWeightByNodesOpened");
-
+        
         public static void InitializeThreadStatics()
         {
             openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
@@ -173,22 +132,22 @@ namespace RimThreaded
                 int maxX = destinationRect.maxX;
                 int maxZ = destinationRect.maxZ;
                 Map map = __instance.map;
-                if (!funcIsCornerTouchAllowed(__instance, minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
+                if (!__instance.IsCornerTouchAllowed(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
                 {
                     disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, minZ));
                 }
 
-                if (!funcIsCornerTouchAllowed(__instance, minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
+                if (!__instance.IsCornerTouchAllowed(minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
                 {
                     disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, maxZ));
                 }
 
-                if (!funcIsCornerTouchAllowed(__instance, maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
+                if (!__instance.IsCornerTouchAllowed(maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
                 {
                     disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, maxZ));
                 }
 
-                if (!funcIsCornerTouchAllowed(__instance, maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
+                if (!__instance.IsCornerTouchAllowed(maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
                 {
                     disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, minZ));
                 }
@@ -238,7 +197,7 @@ namespace RimThreaded
                 return false;
             }
 
-            actionPfProfilerBeginSample(__instance, string.Concat("FindPath for ", pawn, " from ", start, " to ", dest, dest.HasThing ? (" at " + dest.Cell) : ""));
+            __instance.PfProfilerBeginSample(string.Concat("FindPath for ", pawn, " from ", start, " to ", dest, dest.HasThing ? (" at " + dest.Cell) : ""));
             __instance.cellIndices = __instance.map.cellIndices;
             __instance.pathGrid = __instance.map.pathGrid;
             __instance.edificeGrid = __instance.map.edificeGrid.InnerArray;
@@ -251,14 +210,14 @@ namespace RimThreaded
             bool flag = traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater;
             bool flag2 = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
             bool flag3 = !flag;
-            CellRect destinationRect = funcCalculateDestinationRect(__instance, dest, peMode);
+            CellRect destinationRect = __instance.CalculateDestinationRect(dest, peMode);
             bool flag4 = destinationRect.Width == 1 && destinationRect.Height == 1;
             int[] array = __instance.map.pathGrid.pathGrid;
             TerrainDef[] topGrid = __instance.map.terrainGrid.topGrid;
             EdificeGrid edificeGrid = __instance.map.edificeGrid;
             int num2 = 0;
             int num3 = 0;
-            Area allowedArea = funcGetAllowedArea(__instance, pawn);
+            Area allowedArea = __instance.GetAllowedArea(pawn);
             bool flag5 = pawn != null && PawnUtility.ShouldCollideWithPawns(pawn);
             bool flag6 = !flag && start.GetRegion(__instance.map) != null && flag2;
             bool flag7 = !flag || !flag3;
@@ -267,7 +226,7 @@ namespace RimThreaded
             int num4 = (pawn?.IsColonist ?? false) ? 100000 : 2000;
             int num5 = 0;
             int num6 = 0;
-            float num7 = funcDetermineHeuristicStrength(__instance, pawn, start, dest);
+            float num7 = __instance.DetermineHeuristicStrength(pawn, start, dest);
             int num8;
             int num9;
             if (pawn != null)
@@ -284,15 +243,15 @@ namespace RimThreaded
             InitStatusesAndPushStartNode2(__instance, ref curIndex, start);
             while (true)
             {
-                actionPfProfilerBeginSample(__instance, "Open cell");
+                __instance.PfProfilerBeginSample("Open cell");
                 if (openList.Count <= 0)
                 {
                     string text = (pawn != null && pawn.CurJob != null) ? pawn.CurJob.ToString() : "null";
                     string text2 = (pawn != null && pawn.Faction != null) ? pawn.Faction.ToString() : "null";
                     Log.Warning(string.Concat(pawn, " pathing from ", start, " to ", dest, " ran out of cells to process.\nJob:", text, "\nFaction: ", text2));
-                    actionDebugDrawRichData(__instance);
-                    actionPfProfilerEndSample(__instance);
-                    actionPfProfilerEndSample(__instance);
+                    __instance.DebugDrawRichData();
+                    __instance.PfProfilerEndSample();
+                    __instance.PfProfilerEndSample();
                     __result = PawnPath.NotFound;
                     return false;
                 }
@@ -303,13 +262,13 @@ namespace RimThreaded
                 curIndex = costNode.index;
                 if (costNode.cost != calcGrid[curIndex].costNodeCost)
                 {
-                    actionPfProfilerEndSample(__instance);
+                    __instance.PfProfilerEndSample();
                     continue;
                 }
 
                 if (calcGrid[curIndex].status == statusClosedValue)
                 {
-                    actionPfProfilerEndSample(__instance);
+                    __instance.PfProfilerEndSample();
                     continue;
                 }
 
@@ -320,18 +279,18 @@ namespace RimThreaded
                 {
                     if (curIndex == num)
                     {
-                        actionPfProfilerEndSample(__instance);
+                        __instance.PfProfilerEndSample();
                         PawnPath result = FinalizedPath2(__instance, curIndex, flag8);
-                        actionPfProfilerEndSample(__instance);
+                        __instance.PfProfilerEndSample();
                         __result = result;
                         return false;
                     }
                 }
                 else if (destinationRect.Contains(c) && !disallowedCornerIndices.Contains(curIndex))
                 {
-                    actionPfProfilerEndSample(__instance);
+                    __instance.PfProfilerEndSample();
                     PawnPath result2 = FinalizedPath2(__instance, curIndex, flag8);
-                    actionPfProfilerEndSample(__instance);
+                    __instance.PfProfilerEndSample();
                     __result = result2;
                     return false;
                 }
@@ -341,8 +300,8 @@ namespace RimThreaded
                     break;
                 }
 
-                actionPfProfilerEndSample(__instance);
-                actionPfProfilerBeginSample(__instance, "Neighbor consideration");
+                __instance.PfProfilerEndSample();
+                __instance.PfProfilerBeginSample("Neighbor consideration");
                 for (int i = 0; i < 8; i++)
                 {
                     uint num10 = (uint)(x2 + PathFinder.Directions[i]);
@@ -503,22 +462,22 @@ namespace RimThreaded
                     Building building2 = __instance.edificeGrid[num14];
                     if (building2 != null)
                     {
-                        actionPfProfilerBeginSample(__instance, "Edifices");
+                        __instance.PfProfilerBeginSample("Edifices");
                         int buildingCost = PathFinder.GetBuildingCost(building2, traverseParms, pawn);
                         if (buildingCost == int.MaxValue)
                         {
-                            actionPfProfilerEndSample(__instance);
+                            __instance.PfProfilerEndSample();
                             continue;
                         }
 
                         num16 += buildingCost;
-                        actionPfProfilerEndSample(__instance);
+                        __instance.PfProfilerEndSample();
                     }
 
                     List<Blueprint> list = __instance.blueprintGrid[num14];
                     if (list != null)
                     {
-                        actionPfProfilerBeginSample(__instance, "Blueprints");
+                        __instance.PfProfilerBeginSample("Blueprints");
                         int num17 = 0;
                         for (int j = 0; j < list.Count; j++)
                         {
@@ -527,12 +486,12 @@ namespace RimThreaded
 
                         if (num17 == int.MaxValue)
                         {
-                            actionPfProfilerEndSample(__instance);
+                            __instance.PfProfilerEndSample();
                             continue;
                         }
 
                         num16 += num17;
-                        actionPfProfilerEndSample(__instance);
+                        __instance.PfProfilerEndSample();
                     }
 
                     int num18 = num16 + calcGrid[curIndex].knownCost;
@@ -553,7 +512,7 @@ namespace RimThreaded
 
                     if (flag8)
                     {
-                        calcGrid[num14].heuristicCost = Mathf.RoundToInt(get_regionCostCalculator(__instance).GetPathCostFromDestToRegion(num14) * RegionHeuristicWeightByNodesOpened.Evaluate(num3));
+                        calcGrid[num14].heuristicCost = Mathf.RoundToInt(get_regionCostCalculator(__instance).GetPathCostFromDestToRegion(num14) * PathFinder.RegionHeuristicWeightByNodesOpened.Evaluate(num3));
                         if (calcGrid[num14].heuristicCost < 0)
                         {
                             Log.ErrorOnce(string.Concat("Heuristic cost overflow for ", pawn.ToStringSafe(), " pathing from ", start, " to ", dest, "."), pawn.GetHashCode() ^ 0xB8DC389);
@@ -583,7 +542,7 @@ namespace RimThreaded
                     openList.Push(new CostNode2(num14, num21));
                 }
 
-                actionPfProfilerEndSample(__instance);
+                __instance.PfProfilerEndSample();
                 num2++;
                 calcGrid[curIndex].status = statusClosedValue;
                 if (num3 >= num4 && flag6 && !flag8)
@@ -599,9 +558,9 @@ namespace RimThreaded
             }
 
             Log.Warning(string.Concat(pawn, " pathing from ", start, " to ", dest, " hit search limit of ", 160000, " cells."));
-            actionDebugDrawRichData(__instance);
-            actionPfProfilerEndSample(__instance);
-            actionPfProfilerEndSample(__instance);
+            __instance.DebugDrawRichData();
+            __instance.PfProfilerEndSample();
+            __instance.PfProfilerEndSample();
             __result = PawnPath.NotFound;
             return false;
         }

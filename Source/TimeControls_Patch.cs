@@ -3,8 +3,6 @@ using Verse;
 using Verse.Sound;
 using UnityEngine;
 using System;
-using System.Reflection;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -158,17 +156,8 @@ namespace RimThreaded
     }
     public class TimeControls_Patch
     {
-        public static FieldRef<TimeSlower, int> forceNormalSpeedUntil = FieldRefAccess<TimeSlower, int>("forceNormalSpeedUntil");
-        public static TimeSpeed[] CachedTimeSpeedValues = StaticFieldRefAccess<TimeSpeed[]>(typeof(TimeControls), "CachedTimeSpeedValues");
-
         public static bool lastTickForcedSlow = false;
         public static bool overrideForcedSlow = false;
-
-        private static readonly MethodInfo methodPlaySoundOf =
-            Method(typeof(TimeControls), "PlaySoundOf", new Type[] { typeof(TimeSpeed) });
-        private static readonly Action<TimeSpeed> actionPlaySoundOf =
-            (Action<TimeSpeed>)Delegate.CreateDelegate(
-                typeof(Action<TimeSpeed>), methodPlaySoundOf);
 
 
         internal static void RunDestructivePatches()
@@ -183,9 +172,9 @@ namespace RimThreaded
             TickManager tickManager = Find.TickManager;
             GUI.BeginGroup(timerRect);
             Rect rect = new Rect(0f, 0f, TimeControls.TimeButSize.x, TimeControls.TimeButSize.y);
-            for (int i = 0; i < CachedTimeSpeedValues.Length; i++)
+            for (int i = 0; i < TimeControls.CachedTimeSpeedValues.Length; i++)
             {
-                TimeSpeed timeSpeed = CachedTimeSpeedValues[i];
+                TimeSpeed timeSpeed = TimeControls.CachedTimeSpeedValues[i];
                 if (timeSpeed == TimeSpeed.Ultrafast)
                 {
                     continue;
@@ -204,7 +193,7 @@ namespace RimThreaded
                         PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     }
 
-                    actionPlaySoundOf(tickManager.CurTimeSpeed);
+                    TimeControls.PlaySoundOf(tickManager.CurTimeSpeed);
                 }
 
                 if (tickManager.CurTimeSpeed == timeSpeed)
@@ -231,7 +220,7 @@ namespace RimThreaded
             if (KeyBindingDefOf.TogglePause.KeyDownEvent)
             {
                 Find.TickManager.TogglePaused();
-                actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
+                TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
                 PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Pause, KnowledgeAmount.SpecificInteraction);
                 Event.current.Use();
             }
@@ -241,7 +230,7 @@ namespace RimThreaded
                 if (KeyBindingDefOf.TimeSpeed_Normal.KeyDownEvent)
                 {
                     Find.TickManager.CurTimeSpeed = TimeSpeed.Normal;
-                    actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -254,7 +243,7 @@ namespace RimThreaded
                         overrideForcedSlow = true;
                     }
                     //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
-                    actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -267,7 +256,7 @@ namespace RimThreaded
                         overrideForcedSlow = true;
                     }
                     //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
-                    actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }
@@ -280,7 +269,7 @@ namespace RimThreaded
                         overrideForcedSlow = true;
                     }
                     //forceNormalSpeedUntil(Find.TickManager.slower) = 0;
-                    actionPlaySoundOf(Find.TickManager.CurTimeSpeed);
+                    TimeControls.PlaySoundOf(Find.TickManager.CurTimeSpeed);
                     PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.TimeControls, KnowledgeAmount.SpecificInteraction);
                     Event.current.Use();
                 }

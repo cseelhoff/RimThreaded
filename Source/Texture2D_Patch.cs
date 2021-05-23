@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using System.Threading;
 using UnityEngine.Experimental.Rendering;
 using System;
 using System.Reflection;
 using HarmonyLib;
-using Verse;
 using static System.Threading.Thread;
 using static RimThreaded.RimThreaded;
 

@@ -1,14 +1,12 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Verse;
-using System.Reflection.Emit;
-using System;
-using Verse.AI;
-using static HarmonyLib.AccessTools;
 using System.Reflection;
+using System.Reflection.Emit;
+using HarmonyLib;
+using Verse;
+using static HarmonyLib.AccessTools;
 
-namespace RimThreaded
+namespace RimThreaded.Mod_Patches
 {
     public class Verb_MeleeAttackCE_Transpile
     {

@@ -3,16 +3,12 @@ using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     class WorkGiver_GrowerSow_Patch
     {
-        public static ThingDef wantedPlantDef = StaticFieldRefAccess<ThingDef>(typeof(WorkGiver_Grower), "wantedPlantDef");
-        public static string CantSowCavePlantBecauseOfLightTrans = StaticFieldRefAccess<string>(typeof(WorkGiver_GrowerSow), "CantSowCavePlantBecauseOfLightTrans");
-        public static string CantSowCavePlantBecauseUnroofedTrans = StaticFieldRefAccess<string>(typeof(WorkGiver_GrowerSow), "CantSowCavePlantBecauseUnroofedTrans");
-        
+
         public static void RunDestructivePatches()
         {
             Type original = typeof(WorkGiver_GrowerSow);
@@ -36,7 +32,7 @@ namespace RimThreaded
                 return false;
             }
             ThingDef localWantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(c, map);
-            wantedPlantDef = localWantedPlantDef;
+            WorkGiver_GrowerSow.wantedPlantDef = localWantedPlantDef;
             if (localWantedPlantDef == null)
             {
                 __result = null;
@@ -74,14 +70,14 @@ namespace RimThreaded
             {
                 if (!c.Roofed(map))
                 {
-                    JobFailReason.Is(CantSowCavePlantBecauseUnroofedTrans);
+                    JobFailReason.Is(WorkGiver_GrowerSow.CantSowCavePlantBecauseUnroofedTrans);
                     __result = null;
                     return false;
                 }
 
                 if (map.glowGrid.GameGlowAt(c, ignoreCavePlants: true) > 0f)
                 {
-                    JobFailReason.Is(CantSowCavePlantBecauseOfLightTrans);
+                    JobFailReason.Is(WorkGiver_GrowerSow.CantSowCavePlantBecauseOfLightTrans);
                     __result = null;
                     return false;
                 }

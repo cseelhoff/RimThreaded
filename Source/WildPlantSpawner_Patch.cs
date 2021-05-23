@@ -18,7 +18,6 @@ namespace RimThreaded
         [ThreadStatic] public static List<KeyValuePair<ThingDef, float>> tmpPossiblePlantsWithWeight;
         [ThreadStatic] public static List<ThingDef> tmpPossiblePlants;
         [ThreadStatic] public static List<ThingDef> allCavePlants;
-        //why does this cause map gen to produce no trees?
         [ThreadStatic] public static List<ThingDef> tmpPlantDefsLowerOrder;
 
         internal static void InitializeThreadStatics()
@@ -29,7 +28,6 @@ namespace RimThreaded
             tmpPossiblePlantsWithWeight = new List<KeyValuePair<ThingDef, float>>();
             tmpPossiblePlants = new List<ThingDef>();
             allCavePlants = new List<ThingDef>();
-            //why does this cause map gen to produce no trees?
             tmpPlantDefsLowerOrder = new List<ThingDef>();
         }
 
@@ -44,45 +42,15 @@ namespace RimThreaded
             RimThreadedHarmony.TranspileFieldReplacements(original, "get_CavePlantsCommonalitiesSum");
             RimThreadedHarmony.TranspileFieldReplacements(original, "ResetStaticData");
             RimThreadedHarmony.TranspileFieldReplacements(original, "CalculatePlantsWhichCanGrowAt");
-            //why does this cause map gen to produce no trees?
-            //RimThreadedHarmony.TranspileFieldReplacements(original, "EnoughLowerOrderPlantsNearby");
-
+            RimThreadedHarmony.TranspileFieldReplacements(original, "EnoughLowerOrderPlantsNearby");
+            RimThreadedHarmony.TranspileFieldReplacements(
+                TypeByName("RimWorld.WildPlantSpawner+<>c__DisplayClass45_0"), "<EnoughLowerOrderPlantsNearby>b__1");
+            
         }
         internal static void RunDestructivePatches()
         {
             RimThreadedHarmony.Prefix(original, patched, "WildPlantSpawnerTickInternal");
-            RimThreadedHarmony.Prefix(original, patched, "EnoughLowerOrderPlantsNearby");
         }
-        public static bool EnoughLowerOrderPlantsNearby(WildPlantSpawner __instance, ref bool __result,
-            IntVec3 c,
-            float plantDensity,
-            float radiusToScan,
-            ThingDef plantDef)
-        {
-            float num1 = 0.0f;
-            WildPlantSpawner.tmpPlantDefsLowerOrder.Clear();
-            List<ThingDef> allWildPlants = __instance.map.Biome.AllWildPlants;
-            for (int index = 0; index < allWildPlants.Count; ++index)
-            {
-                if ((double)allWildPlants[index].plant.wildOrder < (double)plantDef.plant.wildOrder)
-                {
-                    num1 += __instance.GetCommonalityPctOfPlant(allWildPlants[index]);
-                    WildPlantSpawner.tmpPlantDefsLowerOrder.Add(allWildPlants[index]);
-                }
-            }
-            float numDesiredPlantsLocally = 0.0f;
-            int numPlantsLowerOrder = 0;
-            RegionTraverser.BreadthFirstTraverse(c, __instance.map, (RegionEntryPredicate)((from, to) => c.InHorDistOf(to.extentsClose.ClosestCellTo(c), radiusToScan)), (RegionProcessor)(reg =>
-            {
-                numDesiredPlantsLocally += __instance.GetDesiredPlantsCountIn(reg, c, plantDensity);
-                for (int index = 0; index < WildPlantSpawner.tmpPlantDefsLowerOrder.Count; ++index)
-                    numPlantsLowerOrder += reg.ListerThings.ThingsOfDef(WildPlantSpawner.tmpPlantDefsLowerOrder[index]).Count;
-                return false;
-            }));
-            float num2 = numDesiredPlantsLocally * num1;
-            return (double)num2 < 4.0 || (double)numPlantsLowerOrder / (double)num2 >= 0.569999992847443;
-        }
-
 
         public static bool WildPlantSpawnerTickInternal(WildPlantSpawner __instance)
         {

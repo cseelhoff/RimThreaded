@@ -8,12 +8,6 @@ namespace RimThreaded
     
     public class DynamicDrawManager_Patch
     {
-
-        public static AccessTools.FieldRef<DynamicDrawManager, HashSet<Thing>> drawThings =
-            AccessTools.FieldRefAccess<DynamicDrawManager, HashSet<Thing>>("drawThings");
-        public static AccessTools.FieldRef<DynamicDrawManager, bool> drawingNow =
-            AccessTools.FieldRefAccess<DynamicDrawManager, bool>("drawingNow");
-
         public static void RunDestructivePatches()
         {
             Type original = typeof(DynamicDrawManager);
@@ -25,11 +19,11 @@ namespace RimThreaded
         public static bool RegisterDrawable(DynamicDrawManager __instance, Thing t)
         {
             if (t.def.drawerType == DrawerType.None) return false;
-            if (drawingNow(__instance))
+            if (__instance.drawingNow)
                 Log.Warning("Cannot register drawable " + t + " while drawing is in progress. Things shouldn't be spawned in Draw methods.", false);
             lock (__instance)
             {
-                drawThings(__instance).Add(t);
+                __instance.drawThings.Add(t);
             }
             return false;
         }
@@ -37,13 +31,13 @@ namespace RimThreaded
         public static bool DeRegisterDrawable(DynamicDrawManager __instance, Thing t)
         {
             if (t.def.drawerType == DrawerType.None) return false;
-            if (drawingNow(__instance))
+            if (__instance.drawingNow)
                 Log.Warning("Cannot deregister drawable " + t + " while drawing is in progress. Things shouldn't be despawned in Draw methods.", false);
             lock (__instance)
             {
-                HashSet<Thing> newDrawThings = new HashSet<Thing>(drawThings(__instance));
+                HashSet<Thing> newDrawThings = new HashSet<Thing>(__instance.drawThings);
                 newDrawThings.Remove(t);
-                drawThings(__instance) = newDrawThings;
+                __instance.drawThings = newDrawThings;
             }
             return false;
         }

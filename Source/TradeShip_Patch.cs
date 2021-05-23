@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using RimWorld;
 using Verse;
 using System.Threading;
@@ -9,9 +8,6 @@ namespace RimThreaded
 
     public class TradeShip_Patch
     {
-        public static AccessTools.FieldRef<TradeShip, ThingOwner> things =
-            AccessTools.FieldRefAccess<TradeShip, ThingOwner>("things");
-
         internal static void RunDestructivePatches()
         {
             Type original = typeof(TradeShip);
@@ -25,7 +21,7 @@ namespace RimThreaded
             if (__instance.Departed)
                 __instance.Depart();
             int index = Interlocked.Increment(ref totalTradeShipsCount) - 1;
-            ThingOwner thingsOwner = things(__instance);
+            ThingOwner thingsOwner = __instance.things;
             tradeShips[index].TradeShipThings = thingsOwner;
             Interlocked.Add(ref totalTradeShipTicks, thingsOwner.Count);
             tradeShips[index].TradeShipTicks = totalTradeShipTicks;
@@ -58,7 +54,9 @@ namespace RimThreaded
                     }
                     if (totalTradeShipIndex > 0)
                         index = ticketIndex - tradeShips[totalTradeShipIndex - 1].TradeShipTicks;
-                    if (tradeShips[totalTradeShipIndex].TradeShipThings[index] is Pawn pawn)
+                    ThingOwner thingOwner = tradeShips[totalTradeShipIndex].TradeShipThings;
+                    Thing thing = thingOwner.GetAt(index);
+                    if (thing is Pawn pawn)
                     {
                         try
                         {
@@ -70,9 +68,9 @@ namespace RimThreaded
                         }
                         if (pawn.Dead)
                         {
-                            lock (tradeShips[totalTradeShipIndex].TradeShipThings)
+                            lock (thingOwner)
                             {
-                                tradeShips[totalTradeShipIndex].TradeShipThings.Remove(pawn);
+                                thingOwner.Remove(pawn);
                             }
                         }
                     }

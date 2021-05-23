@@ -125,24 +125,20 @@ namespace RimThreaded
             return false;
         }
 
-
-
-        public static FieldRef<ThingWithComps, List<ThingComp>> comps = FieldRefAccess<ThingWithComps, List<ThingComp>>("comps");
-
+        
         private static void ThingWithCompsDestroy(ThingWithComps __instance, DestroyMode mode = DestroyMode.Vanish)
         {
             Map map = __instance.Map;
             ThingDestroy(__instance, mode);
-            if (comps != null)
+            if (__instance.comps != null)
             {
-                for (int i = 0; i < comps(__instance).Count; i++)
+                for (int i = 0; i < __instance.comps.Count; i++)
                 {
-                    comps(__instance)[i].PostDestroy(mode, map);
+                    __instance.comps[i].PostDestroy(mode, map);
                 }
             }
         }
 
-        public static FieldRef<Thing, sbyte> mapIndexOrState = FieldRefAccess<Thing, sbyte>("mapIndexOrState");
         public static void ThingDestroy(Thing __instance, DestroyMode mode = DestroyMode.Vanish)
         {
             if (!Thing.allowDestroyNonDestroyable && !__instance.def.destroyable)
@@ -164,7 +160,7 @@ namespace RimThreaded
                 __instance.DeSpawn(mode);
             }
 
-            mapIndexOrState(__instance) = -2;
+            __instance.mapIndexOrState = -2;
             if (__instance.def.DiscardOnDestroyed)
             {
                 __instance.Discard();

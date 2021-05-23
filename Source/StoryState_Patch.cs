@@ -1,6 +1,4 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using RimWorld;
 using Verse;
 
@@ -15,16 +13,14 @@ namespace RimThreaded
             Type patched = typeof(StoryState_Patch);
             RimThreadedHarmony.Prefix(original, patched, "RecordPopulationIncrease");
         }
-        public static AccessTools.FieldRef<StoryState, Dictionary<int, int>> colonistCountTicks =
-			AccessTools.FieldRefAccess<StoryState, Dictionary<int, int>>("colonistCountTicks");
         public static bool RecordPopulationIncrease(StoryState __instance)
         {
             int count = PawnsFinder.AllMapsCaravansAndTravelingTransportPods_Alive_FreeColonists.Count;
-            lock (colonistCountTicks(__instance))
+            lock (__instance.colonistCountTicks)
             {
-                if (!colonistCountTicks(__instance).ContainsKey(count))
+                if (!__instance.colonistCountTicks.ContainsKey(count))
                 {
-                    colonistCountTicks(__instance).Add(count, Find.TickManager.TicksGame);
+                    __instance.colonistCountTicks.Add(count, Find.TickManager.TicksGame);
                 }
             }
             return false;

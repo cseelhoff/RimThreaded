@@ -11,8 +11,6 @@ namespace RimThreaded
 
     public class WorldObjectsHolder_Patch
 	{
-        public static AccessTools.FieldRef<WorldObjectsHolder, List<WorldObject>> worldObjects =
-            AccessTools.FieldRefAccess<WorldObjectsHolder, List<WorldObject>>("worldObjects");
 
         internal static void RunDestructivePatches()
         {
@@ -23,8 +21,8 @@ namespace RimThreaded
 
         public static bool WorldObjectsHolderTick(WorldObjectsHolder __instance)
         {
-            RimThreaded.worldObjects = worldObjects(__instance);
-            RimThreaded.worldObjectsTicks = worldObjects(__instance).Count;
+            RimThreaded.worldObjects = __instance.worldObjects;
+            RimThreaded.worldObjectsTicks = __instance.worldObjects.Count;
             return false;
         }
 

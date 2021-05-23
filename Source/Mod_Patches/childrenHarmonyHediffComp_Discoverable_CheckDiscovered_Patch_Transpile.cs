@@ -9,15 +9,14 @@ namespace RimThreaded.Mod_Patches
 {
     class childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch_Transpile
     {
-		private static readonly FieldRef<HediffComp_Discoverable, bool> discoveredRef = FieldRefAccess<HediffComp_Discoverable, bool>("discovered");
-
+		
 		public static bool getDiscovered(HediffComp_Discoverable hediffComp_Discoverable)
 		{
-			return discoveredRef(hediffComp_Discoverable);
+			return hediffComp_Discoverable.discovered;
 		}
 		public static void setDiscovered(HediffComp_Discoverable hediffComp_Discoverable, bool value)
 		{
-			discoveredRef(hediffComp_Discoverable) = value;
+            hediffComp_Discoverable.discovered = value;
 		}
 
 		public static IEnumerable<CodeInstruction> CheckDiscovered_Pre(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)

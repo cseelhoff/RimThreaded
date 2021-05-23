@@ -7,6 +7,14 @@ namespace RimThreaded
 
     public class Sustainer_Patch
     {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Sustainer);
+            Type patched = typeof(Sustainer_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "Cleanup");
+            RimThreadedHarmony.Prefix(original, patched, "Maintain");
+        }
+
         public static bool Cleanup(Sustainer __instance)
         {
             if (__instance.def.subSounds.Count > 0)
@@ -54,12 +62,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(Sustainer);
-            Type patched = typeof(Sustainer_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "Cleanup");
-            RimThreadedHarmony.Prefix(original, patched, "Maintain");
-        }
     }
 }

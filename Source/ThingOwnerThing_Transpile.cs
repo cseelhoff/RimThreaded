@@ -4,9 +4,7 @@ using Verse;
 using System.Reflection.Emit;
 using System.Linq;
 using System;
-using System.Threading;
 using System.Reflection;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {

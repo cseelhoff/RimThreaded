@@ -1,22 +1,14 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
+using System.Linq;
 using Verse;
 using Verse.AI;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 	class WorkGiver_Grower_Patch
 	{
 		public static Dictionary<Map, List<HashSet<object>[]>> awaitingPlantCellsMapDict = new Dictionary<Map, List<HashSet<object>[]>>();
-
-		private static readonly MethodInfo methodExtraRequirements =
-			Method(typeof(WorkGiver_Grower), "ExtraRequirements", new Type[] { typeof(IPlantToGrowSettable), typeof(Pawn) });
-		private static readonly Func<WorkGiver_Grower, IPlantToGrowSettable, Pawn, bool> funcExtraRequirements =
-			(Func<WorkGiver_Grower, IPlantToGrowSettable, Pawn, bool>)Delegate.CreateDelegate(typeof(Func<WorkGiver_Grower, IPlantToGrowSettable, Pawn, bool>), methodExtraRequirements);
 
 		public static bool PotentialWorkCellsGlobal(WorkGiver_Grower __instance, ref IEnumerable<IntVec3> __result, Pawn pawn)
 		{
@@ -30,7 +22,7 @@ namespace RimThreaded
 			for (int j = 0; j < bList.Count; j++)
 			{
 				Building_PlantGrower building_PlantGrower = bList[j] as Building_PlantGrower;
-				if (building_PlantGrower == null || !funcExtraRequirements(__instance, building_PlantGrower, pawn) || building_PlantGrower.IsForbidden(pawn) ||
+				if (building_PlantGrower == null || !__instance.ExtraRequirements(building_PlantGrower, pawn) || building_PlantGrower.IsForbidden(pawn) ||
 					//!pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, maxDanger) || 
 					building_PlantGrower.IsBurning())
 				{
@@ -53,8 +45,8 @@ namespace RimThreaded
 				{
 					Log.ErrorOnce("Grow zone has 0 cells: " + growZone, -563487);
 				}
-				else if (funcExtraRequirements(__instance, growZone, pawn) && !growZone.ContainsStaticFire &&
-					pawn.CanReach(growZone.Cells[0], PathEndMode.OnCell, maxDanger))
+                else if (__instance.ExtraRequirements(growZone, pawn) && !growZone.ContainsStaticFire &&
+                         pawn.CanReach(growZone.Cells.First(), PathEndMode.OnCell, maxDanger))
 				{
 					for (int k = 0; k < growZone.cells.Count; k++)
 					{
@@ -70,7 +62,7 @@ namespace RimThreaded
 			for (int j = 0; j < bList.Count; j++)
 			{
 				Building_PlantGrower building_PlantGrower = bList[j] as Building_PlantGrower;
-				if (building_PlantGrower == null || !funcExtraRequirements(__instance, building_PlantGrower, pawn) || building_PlantGrower.IsForbidden(pawn) || building_PlantGrower.IsBurning())
+				if (building_PlantGrower == null || !__instance.ExtraRequirements(building_PlantGrower, pawn) || building_PlantGrower.IsForbidden(pawn) || building_PlantGrower.IsBurning())
 				{
 					continue;
 				}
@@ -91,7 +83,7 @@ namespace RimThreaded
 				{
 					Log.ErrorOnce("Grow zone has 0 cells: " + growZone, -563487);
 				}
-				else if (funcExtraRequirements(__instance, growZone, pawn) && !growZone.ContainsStaticFire)
+				else if (__instance.ExtraRequirements(growZone, pawn) && !growZone.ContainsStaticFire)
 				{
 					for (int k = 0; k < growZone.cells.Count; k++)
 					{
@@ -109,7 +101,7 @@ namespace RimThreaded
 				foreach (Thing thingAtCell in thingsAtCell)
 				{
                     if (!(thingAtCell is Building_PlantGrower building_PlantGrower) || 
-						!funcExtraRequirements(__instance, building_PlantGrower, pawn) || 
+						!__instance.ExtraRequirements(building_PlantGrower, pawn) || 
 						building_PlantGrower.IsForbidden(pawn) || 
 						building_PlantGrower.IsBurning())
                     {
@@ -126,7 +118,7 @@ namespace RimThreaded
 				{
 					Log.ErrorOnce("Grow zone has 0 cells: " + growZone, -563487);
 				}
-				else if (funcExtraRequirements(__instance, growZone, pawn) && !growZone.ContainsStaticFire)
+				else if (__instance.ExtraRequirements(growZone, pawn) && !growZone.ContainsStaticFire)
 				{
 					yield return cell;
 				}
@@ -153,7 +145,7 @@ namespace RimThreaded
 				
 				if(obj is Building_PlantGrower building_PlantGrower)
                 {
-					if (building_PlantGrower == null || !funcExtraRequirements(workGiver_Grower, building_PlantGrower, pawn) 
+					if (building_PlantGrower == null || !workGiver_Grower.ExtraRequirements(building_PlantGrower, pawn) 
 						|| building_PlantGrower.IsForbidden(pawn) 
 						|| !pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, maxDanger)
 						//|| building_PlantGrower.IsBurning()
@@ -174,7 +166,7 @@ namespace RimThreaded
 					{
 						continue;
 					}
-					if (!funcExtraRequirements(workGiver_Grower, growZone, pawn))
+					if (!workGiver_Grower.ExtraRequirements(growZone, pawn))
 					{
 						continue;
 					}
@@ -214,7 +206,7 @@ namespace RimThreaded
 			}
 
 			ThingDef localWantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(c, map);
-			WorkGiver_GrowerSow_Patch.wantedPlantDef = localWantedPlantDef;
+			WorkGiver_GrowerSow.wantedPlantDef = localWantedPlantDef;
 			if (localWantedPlantDef == null)
 			{
 				Log.Warning("localWantedPlantDef==null");

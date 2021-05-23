@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using RimWorld.Planet;
-using System.Reflection;
 using System.Threading;
 using RimWorld;
-using UnityEngine;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -15,16 +12,7 @@ namespace RimThreaded
     public class WorldPawns_Patch
     {
         [ThreadStatic] public static List<Pawn> tmpPawnsToRemove;
-
-        public static FieldRef<WorldPawns, List<Pawn>> allPawnsAliveResult = FieldRefAccess<WorldPawns, List<Pawn>>("allPawnsAliveResult");
-        public static FieldRef<WorldPawns, HashSet<Pawn>> pawnsAlive = FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsAlive");
-        public static FieldRef<WorldPawns, HashSet<Pawn>> pawnsMothballed = FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsMothballed");
-        public static FieldRef<WorldPawns, HashSet<Pawn>> pawnsDead = FieldRefAccess<WorldPawns, HashSet<Pawn>>("pawnsDead");
-
-        private static readonly MethodInfo methodShouldMothball =
-            Method(typeof(WorldPawns), "ShouldMothball", new Type[] { typeof(Pawn) });
-        private static readonly Func<WorldPawns, Pawn, bool> funcShouldMothball =
-            (Func<WorldPawns, Pawn, bool>)Delegate.CreateDelegate(typeof(Func<WorldPawns, Pawn, bool>), methodShouldMothball);
+        
         public static void InitializeThreadStatics()
         {
             tmpPawnsToRemove = new List<Pawn>();
@@ -43,9 +31,9 @@ namespace RimThreaded
             List<Pawn> newAllPawnsAliveResult;
             lock (__instance)
             {
-                newAllPawnsAliveResult = new List<Pawn>(pawnsAlive(__instance));
-                newAllPawnsAliveResult.AddRange(pawnsMothballed(__instance));
-                allPawnsAliveResult(__instance) = newAllPawnsAliveResult;
+                newAllPawnsAliveResult = new List<Pawn>(__instance.pawnsAlive);
+                newAllPawnsAliveResult.AddRange(__instance.pawnsMothballed);
+                __instance.allPawnsAliveResult = newAllPawnsAliveResult;
             }
             __result = newAllPawnsAliveResult;
             return false;
@@ -54,9 +42,9 @@ namespace RimThreaded
         private static void DoMothballProcessing(WorldPawns __instance)
         {
             Pawn[] pawnArray;
-            lock (pawnsMothballed(__instance))
+            lock (__instance.pawnsMothballed)
             {
-                pawnArray = pawnsMothballed(__instance).ToArray();
+                pawnArray = __instance.pawnsMothballed.ToArray();
             }
             Pawn p;
             for (int index=0; index< pawnArray.Length; index++)
@@ -71,24 +59,24 @@ namespace RimThreaded
                     Log.ErrorOnce("Exception ticking mothballed world pawn. Suppressing further errors. " + ex, p.thingIDNumber ^ 1535437893, false);
                 }
             }
-            lock (pawnsAlive(__instance))
+            lock (__instance.pawnsAlive)
             {
-                pawnArray = pawnsAlive(__instance).ToArray();
+                pawnArray = __instance.pawnsAlive.ToArray();
             }
             for (int index = 0; index < pawnArray.Length; index++)
             {
                 p = pawnArray[index];
-                if (funcShouldMothball(__instance, p))
+                if (__instance.ShouldMothball(p))
                 {
                     lock (__instance)
                     {
-                        HashSet<Pawn> newSet = new HashSet<Pawn>(pawnsAlive(__instance));
+                        HashSet<Pawn> newSet = new HashSet<Pawn>(__instance.pawnsAlive);
                         newSet.Remove(p);
-                        pawnsAlive(__instance) = newSet;
+                        __instance.pawnsAlive = newSet;
                     }
-                    lock (pawnsMothballed(__instance))
+                    lock (__instance.pawnsMothballed)
                     {
-                        pawnsMothballed(__instance).Add(p);
+                        __instance.pawnsMothballed.Add(p);
                     }
                 }
             }
@@ -98,7 +86,7 @@ namespace RimThreaded
         {
             lock (__instance)
             {
-                worldPawnsAlive = pawnsAlive(__instance).ToList();
+                worldPawnsAlive = __instance.pawnsAlive.ToList();
             }
             worldPawnsTicks = worldPawnsAlive.Count;
 
@@ -106,7 +94,7 @@ namespace RimThreaded
                 DoMothballProcessing(__instance);
 
             tmpPawnsToRemove.Clear();
-            foreach (Pawn pawn in pawnsDead(__instance))
+            foreach (Pawn pawn in __instance.pawnsDead)
             {
                 if (pawn == null)
                 {
@@ -121,10 +109,10 @@ namespace RimThreaded
             }
             lock (__instance)
             {
-                HashSet<Pawn> newSet = new HashSet<Pawn>(pawnsDead(__instance));
+                HashSet<Pawn> newSet = new HashSet<Pawn>(__instance.pawnsDead);
                 foreach (Pawn p in tmpPawnsToRemove)
                     newSet.Remove(p);
-                pawnsDead(__instance) = newSet;
+                __instance.pawnsDead = newSet;
             }
             try
             {

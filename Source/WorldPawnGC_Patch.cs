@@ -11,13 +11,9 @@ namespace RimThreaded
 {
     class WorldPawnGC_Patch
     {
-
-        private static readonly FieldRef<WorldPawnGC, int> lastSuccessfulGCTickFieldRef = FieldRefAccess<WorldPawnGC, int>("lastSuccessfulGCTick");
-        private static readonly FieldRef<WorldPawnGC, int> currentGCRateFieldRef = FieldRefAccess<WorldPawnGC, int>("currentGCRate");
-
         public static bool WorldPawnGCTick(WorldPawnGC __instance)
         {
-            if (lastSuccessfulGCTickFieldRef(__instance) >= Find.TickManager.TicksGame / 15000 * 15000)
+            if (__instance.lastSuccessfulGCTick >= Find.TickManager.TicksGame / 15000 * 15000)
             {
                 return false;
             }
@@ -27,7 +23,7 @@ namespace RimThreaded
                 //activeGCProcess = PawnGCPass().GetEnumerator();
                 if (DebugViewSettings.logWorldPawnGC)
                 {
-                    Log.Message($"World pawn GC started at rate {currentGCRateFieldRef(__instance)}");
+                    Log.Message($"World pawn GC started at rate {__instance.currentGCRate}");
                 }
             //}
 
@@ -37,7 +33,7 @@ namespace RimThreaded
             //}
 
             bool flag = false;
-            for (int i = 0; i < currentGCRateFieldRef(__instance); i++)
+            for (int i = 0; i < __instance.currentGCRate; i++)
             {
                 if (flag)
                 {
@@ -49,8 +45,8 @@ namespace RimThreaded
 
             if (flag)
             {
-                lastSuccessfulGCTickFieldRef(__instance) = Find.TickManager.TicksGame;
-                currentGCRateFieldRef(__instance) = 1;
+                __instance.lastSuccessfulGCTick = Find.TickManager.TicksGame;
+                __instance.currentGCRate = 1;
                 //activeGCProcess = null;
                 if (DebugViewSettings.logWorldPawnGC)
                 {

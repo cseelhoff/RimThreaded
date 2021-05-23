@@ -10,7 +10,6 @@ namespace RimThreaded
 {
     class DrugAIUtility_Patch
     {
-        public static FieldRef<DrugPolicy, List<DrugPolicyEntry>> entriesInt = FieldRefAccess<DrugPolicy, List<DrugPolicyEntry>>("entriesInt");
         
         public static void RunDestructivePatches()
         {
@@ -24,7 +23,7 @@ namespace RimThreaded
         {
             Job job = JobMaker.MakeJob(JobDefOf.Ingest, drug);
             job.count = Mathf.Min(drug.stackCount, drug.def.ingestible.maxNumToIngestAtOnce, maxNumToCarry);
-            if (pawn.drugs != null && drugPolicyExists(entriesInt(pawn.drugs.CurrentPolicy), drug.def))
+            if (pawn.drugs != null && drugPolicyExists(pawn.drugs.CurrentPolicy.entriesInt, drug.def))
             {
                 DrugPolicyEntry drugPolicyEntry = pawn.drugs.CurrentPolicy[drug.def];
                 int num = pawn.inventory.innerContainer.TotalStackCountOfDef(drug.def) - job.count;

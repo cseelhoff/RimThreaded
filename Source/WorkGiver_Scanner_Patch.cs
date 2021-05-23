@@ -2,36 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using static HarmonyLib.AccessTools;
 using static RimThreaded.WorkGiver_DoBill_Patch;
 
 namespace RimThreaded
 {
     class WorkGiver_Scanner_Patch
     {
-        private static readonly IntRange ReCheckFailedBillTicksRange = StaticFieldRefAccess<IntRange>(typeof(WorkGiver_DoBill), "ReCheckFailedBillTicksRange");
-
-        private static readonly MethodInfo methodGetBillGiverRootCell =
-            Method(typeof(WorkGiver_DoBill), "GetBillGiverRootCell", new Type[] { typeof(Thing), typeof(Pawn) });
-        private static readonly Func<Thing, Pawn, IntVec3> funcGetBillGiverRootCell =
-            (Func<Thing, Pawn, IntVec3>)Delegate.CreateDelegate(typeof(Func<Thing, Pawn, IntVec3>), methodGetBillGiverRootCell);
-        
-        private static readonly MethodInfo methodMakeIngredientsListInProcessingOrder =
-            Method(typeof(WorkGiver_DoBill), "MakeIngredientsListInProcessingOrder", new Type[] { typeof(List<IngredientCount>), typeof(Bill) });
-        private static readonly Action<List<IngredientCount>, Bill> actionMakeIngredientsListInProcessingOrder =
-            (Action<List<IngredientCount>, Bill>)Delegate.CreateDelegate(
-                typeof(Action<List<IngredientCount>, Bill>), methodMakeIngredientsListInProcessingOrder);
-
-        private static readonly MethodInfo methodAddEveryMedicineToRelevantThings =
-            Method(typeof(WorkGiver_DoBill), "AddEveryMedicineToRelevantThings", new Type[] { typeof(Pawn), typeof(Thing), typeof(List<Thing>), typeof(Predicate<Thing>), typeof(Map) });
-        private static readonly Action<Pawn, Thing, List<Thing>, Predicate<Thing>, Map> actionAddEveryMedicineToRelevantThings =
-            (Action<Pawn, Thing, List<Thing>, Predicate<Thing>, Map>)Delegate.CreateDelegate(
-                typeof(Action<Pawn, Thing, List<Thing>, Predicate<Thing>, Map>), methodAddEveryMedicineToRelevantThings);
-
 
         public static bool HasJobOnThing(WorkGiver_DoBill __instance, Pawn pawn, Thing thing, bool forced = false)
         {
@@ -61,7 +40,7 @@ namespace RimThreaded
             {
                 Bill bill = giver.BillStack[i];
                 if ((bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType != __instance.def.workType) || 
-                    (Find.TickManager.TicksGame < bill.lastIngredientSearchFailTicks + ReCheckFailedBillTicksRange.RandomInRange && FloatMenuMakerMap.makingFor != pawn))
+                    (Find.TickManager.TicksGame < bill.lastIngredientSearchFailTicks + WorkGiver_DoBill.ReCheckFailedBillTicksRange.RandomInRange && FloatMenuMakerMap.makingFor != pawn))
                 {
                     continue;
                 }
@@ -135,14 +114,14 @@ namespace RimThreaded
                 return true;
             }
 
-            IntVec3 rootCell = funcGetBillGiverRootCell(billGiver, pawn);
+            IntVec3 rootCell = WorkGiver_DoBill.GetBillGiverRootCell(billGiver, pawn);
             Region rootReg = rootCell.GetRegion(pawn.Map);
             if (rootReg == null)
             {
                 return false;
             }
             List<IngredientCount> ingredientsOrdered = new List<IngredientCount>();
-            actionMakeIngredientsListInProcessingOrder(ingredientsOrdered, bill);
+            WorkGiver_DoBill.MakeIngredientsListInProcessingOrder(ingredientsOrdered, bill);
             relevantThings.Clear();
             HashSet<Thing> processedThings = new HashSet<Thing>();
             bool foundAll = false;
@@ -150,7 +129,7 @@ namespace RimThreaded
             bool billGiverIsPawn = billGiver is Pawn;
             if (billGiverIsPawn)
             {
-                actionAddEveryMedicineToRelevantThings(pawn, billGiver, relevantThings, baseValidator, pawn.Map);
+                WorkGiver_DoBill.AddEveryMedicineToRelevantThings(pawn, billGiver, relevantThings, baseValidator, pawn.Map);
                 if (TryFindAnyBillIngredientsInSet(relevantThings, bill, chosen, rootCell, billGiverIsPawn, ingredientsOrdered))
                 {
                     relevantThings.Clear();

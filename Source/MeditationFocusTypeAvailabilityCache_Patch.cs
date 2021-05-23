@@ -1,20 +1,13 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class MeditationFocusTypeAvailabilityCache_Patch
 	{
-        //public static Dictionary<Pawn, Dictionary<MeditationFocusDef, bool>> MeditationFocusTypeAvailabilityCache.pawnCanUseMeditationTypeCached = StaticFieldRefAccess<Dictionary<Pawn, Dictionary<MeditationFocusDef, bool>>>(typeof(MeditationFocusTypeAvailabilityCache), "MeditationFocusTypeAvailabilityCache.pawnCanUseMeditationTypeCached");
 
         internal static void RunDestructivePatches()
         {

@@ -11,10 +11,7 @@ namespace RimThreaded
     public class WealthWatcher_Patch
 	{
 		[ThreadStatic] public static List<Thing> tmpThings;
-
-		public static float[] cachedTerrainMarketValue =
-			AccessTools.StaticFieldRefAccess<float[]>(typeof(WealthWatcher), "cachedTerrainMarketValue");
-
+		
 		static Type original = typeof(WealthWatcher);
 		static Type patched = typeof(WealthWatcher_Patch);
 
@@ -48,7 +45,7 @@ namespace RimThreaded
 			{
 				newCachedTerrainMarketValue[allDefsListForReading[j].index] = allDefsListForReading[j].GetStatValueAbstract(StatDefOf.MarketValue);
 			}
-			cachedTerrainMarketValue = newCachedTerrainMarketValue;
+            WealthWatcher.cachedTerrainMarketValue = newCachedTerrainMarketValue;
 			return false;
 		}
 

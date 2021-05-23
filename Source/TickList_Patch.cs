@@ -12,16 +12,6 @@ namespace RimThreaded
 {
     public class TickList_Patch
     {
-        public static FieldRef<TickList, List<List<Thing>>> thingLists =
-            FieldRefAccess<TickList, List<List<Thing>>>("thingLists");
-        public static FieldRef<TickList, TickerType> tickType =
-            FieldRefAccess<TickList, TickerType>("tickType");
-
-
-        private static readonly MethodInfo methodGetTickInterval =
-            Method(typeof(TickList), "get_TickInterval");
-        public static readonly Func<TickList, int> funcGetTickInterval =
-            (Func<TickList, int>)Delegate.CreateDelegate(typeof(Func<TickList, int>), methodGetTickInterval);
 
         public static void RunNonDestructivePatches()
         {
@@ -36,20 +26,20 @@ namespace RimThreaded
 
         public static void TickPostfix(TickList __instance)
         {
-            int currentTickInterval = funcGetTickInterval(__instance);
-            TickerType currentTickType = tickType(__instance);
+            int currentTickInterval = __instance.TickInterval;
+            TickerType currentTickType = __instance.tickType;
             switch (currentTickType)
             {
                 case TickerType.Normal:
-                    RimThreaded.thingListNormal = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
+                    RimThreaded.thingListNormal = __instance.thingLists[Find.TickManager.TicksGame % currentTickInterval];
                     RimThreaded.thingListNormalTicks = RimThreaded.thingListNormal.Count;
                     break;
                 case TickerType.Rare:
-                    RimThreaded.thingListRare = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
+                    RimThreaded.thingListRare = __instance.thingLists[Find.TickManager.TicksGame % currentTickInterval];
                     RimThreaded.thingListRareTicks = RimThreaded.thingListRare.Count;
                     break;
                 case TickerType.Long:
-                    RimThreaded.thingListLong = thingLists(__instance)[Find.TickManager.TicksGame % currentTickInterval];
+                    RimThreaded.thingListLong = __instance.thingLists[Find.TickManager.TicksGame % currentTickInterval];
                     RimThreaded.thingListLongTicks = RimThreaded.thingListLong.Count;
                     break;
                 case TickerType.Never:
@@ -98,10 +88,10 @@ namespace RimThreaded
 
         public static void NormalThingPrepare()
         {
-            TickList tickList = TickManager_Patch.tickListNormal(RimThreaded.callingTickManager);
+            TickList tickList = RimThreaded.callingTickManager.tickListNormal;
             tickList.Tick();
-            int currentTickInterval = funcGetTickInterval(tickList);
-            normalThingList = thingLists(tickList)[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
+            int currentTickInterval = tickList.TickInterval;
+            normalThingList = tickList.thingLists[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
             normalThingListTicks = normalThingList.Count;
         }
 
@@ -139,10 +129,10 @@ namespace RimThreaded
 
         public static void RareThingPrepare()
         {
-            TickList tickList = TickManager_Patch.tickListRare(RimThreaded.callingTickManager);
+            TickList tickList = RimThreaded.callingTickManager.tickListRare;
             tickList.Tick();
-            int currentTickInterval = funcGetTickInterval(tickList);
-            rareThingList = thingLists(tickList)[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
+            int currentTickInterval = tickList.TickInterval;
+            rareThingList = tickList.thingLists[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
             rareThingListTicks = rareThingList.Count;
         }
 
@@ -180,10 +170,10 @@ namespace RimThreaded
 
         public static void LongThingPrepare()
         {
-            TickList tickList = TickManager_Patch.tickListLong(RimThreaded.callingTickManager);
+            TickList tickList = RimThreaded.callingTickManager.tickListLong;
             tickList.Tick();
-            int currentTickInterval = funcGetTickInterval(tickList);
-            longThingList = thingLists(tickList)[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
+            int currentTickInterval = tickList.TickInterval;
+            longThingList = tickList.thingLists[RimThreaded.callingTickManager.TicksGame % currentTickInterval];
             longThingListTicks = longThingList.Count;
         }
 

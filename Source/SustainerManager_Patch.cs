@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.Sound;
@@ -8,14 +7,7 @@ namespace RimThreaded
 {
     public class SustainerManager_Patch
     {
-        public static Comparison<Sustainer> SortSustainersByCameraDistanceCached =
-            AccessTools.StaticFieldRefAccess<Comparison<Sustainer>>(typeof(SustainerManager), "SortSustainersByCameraDistanceCached");
-
-        public static AccessTools.FieldRef<SustainerManager, List<Sustainer>> allSustainers =
-            AccessTools.FieldRefAccess< SustainerManager, List<Sustainer>>("allSustainers");
-
-        [ThreadStatic]
-        public static Dictionary<SoundDef, List<Sustainer>> playingPerDef;
+        [ThreadStatic] public static Dictionary<SoundDef, List<Sustainer>> playingPerDef;
 
         public static void RunDestructivePatches()
         {	
@@ -35,7 +27,7 @@ namespace RimThreaded
             {
                 List<Sustainer> newAllSustainers = __instance.AllSustainers.ListFullCopy();
                 newAllSustainers.Add(newSustainer);
-                allSustainers(__instance) = newAllSustainers;
+                __instance.allSustainers = newAllSustainers;
             }
             return false;
         }
@@ -45,7 +37,7 @@ namespace RimThreaded
             {
                 List<Sustainer> newAllSustainers = __instance.AllSustainers.ListFullCopy();
                 newAllSustainers.Remove(oldSustainer);
-                allSustainers(__instance) = newAllSustainers;
+                __instance.allSustainers = newAllSustainers;
             }
             return false;
         }
@@ -119,7 +111,7 @@ namespace RimThreaded
                     value[k].scopeFader.inScope = false;
                 }
 
-                value.Sort(SortSustainersByCameraDistanceCached);
+                value.Sort(SustainerManager.SortSustainersByCameraDistanceCached);
                 int num = 0;
                 for (int l = 0; l < valueCount; l++)
                 {

@@ -1,21 +1,12 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Verse;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     class TaleManager_Patch
     {
-        public static FieldRef<TaleManager, List<Tale>> tales = FieldRefAccess<TaleManager, List<Tale>>("tales");
-
-        private static readonly MethodInfo methodCheckCullTales =
-            Method(typeof(TaleManager), "CheckCullTales", new Type[] { typeof(Tale) });
-        private static readonly Action<TaleManager, Tale> actionCheckCullTales =
-            (Action<TaleManager, Tale>)Delegate.CreateDelegate(
-                typeof(Action<TaleManager, Tale>), methodCheckCullTales);
 
         public static void RunDestructivePatches()
         {
@@ -29,9 +20,9 @@ namespace RimThreaded
         {
             lock (__instance)
             {
-                tales(__instance).Add(tale);
+                __instance.tales.Add(tale);
             }
-            actionCheckCullTales(__instance, tale);
+            __instance.CheckCullTales(tale);
             return false;
         }
         public static bool RemoveTale(TaleManager __instance, Tale tale)
@@ -44,9 +35,9 @@ namespace RimThreaded
             {
                 lock (__instance)
                 {
-                    List<Tale> newTales = new List<Tale>(tales(__instance));
+                    List<Tale> newTales = new List<Tale>(__instance.tales);
                     newTales.Remove(tale);
-                    tales(__instance) = newTales;
+                    __instance.tales = newTales;
                 }
             }
             return false;

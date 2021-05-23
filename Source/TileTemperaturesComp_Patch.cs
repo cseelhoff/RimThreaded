@@ -1,16 +1,9 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using Verse.Sound;
 using RimWorld.Planet;
 using Verse.Noise;
 using System.Threading;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {

@@ -9,8 +9,6 @@ namespace RimThreaded
     [StaticConstructorOnStartup]
     class Lord_Patch
     {
-        public static FieldRef<Lord, LordToil> curLordToil = FieldRefAccess<Lord, LordToil>("curLordToil");
-        public static FieldRef<Lord, LordJob> curJob = FieldRefAccess<Lord, LordJob>("curJob");
         public static Dictionary<Pawn, Lord> pawnsLord = new Dictionary<Pawn, Lord>();
 
         public static bool AddPawn(Lord __instance, Pawn p)
@@ -35,8 +33,8 @@ namespace RimThreaded
                 }
                 __instance.numPawnsEverGained++;
                 __instance.Map.attackTargetsCache.UpdateTarget(p);
-                curLordToil(__instance).UpdateAllDuties();
-                curJob(__instance).Notify_PawnAdded(p);
+                __instance.curLordToil.UpdateAllDuties();
+                __instance.curJob.Notify_PawnAdded(p);
             }
             return false;
         }

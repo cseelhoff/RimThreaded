@@ -39,7 +39,7 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 2.2.4
+Version 2.2.5
 -New version reworked many aspects to improve mod compatibility
 
 Version 1.3.2 - The Child of the Force
