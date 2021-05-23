@@ -21,37 +21,43 @@ namespace RimThreaded
 
         public static bool set_Master(Pawn_PlayerSettings __instance, Pawn value)
 		{
-            if (value == null || __instance.master == value)
+            if (__instance.master == value)
             {
                 return false;
             }
 
+            if(petsInit == false)
+            {
+                RebuildPetsDictionary();
+            }
+
+            bool flag = ThinkNode_ConditionalShouldFollowMaster.ShouldFollowMaster(__instance.pawn);
+            if (__instance.master != null)
+            {
+                if (pets.TryGetValue(__instance.master, out List<Pawn> pawnList2))
+                {
+                    pawnList2.Remove(__instance.pawn);
+                }
+            }
+            __instance.master = null;
             if (!__instance.pawn.training.HasLearned(TrainableDefOf.Obedience))
             {
                 Log.ErrorOnce("Attempted to set master for non-obedient pawn", 73908573);
                 return false;
             }
-            if(petsInit == false)
-            {
-                RebuildPetsDictionary();
-            }
-            bool flag = ThinkNode_ConditionalShouldFollowMaster.ShouldFollowMaster(__instance.pawn);
-            if (__instance.master != null)
-            {
-                if (pets.TryGetValue(value, out List<Pawn> pawnList2))
-                {
-                    pawnList2.Remove(__instance.pawn);
-                }
-            }
             __instance.master = value;
-            if (!pets.TryGetValue(value, out List<Pawn> pawnList))
+            if (value != null)
             {
-                pawnList = new List<Pawn>();
-                lock (pets) {
-                    pets[value] = pawnList;
+                if (!pets.TryGetValue(value, out List<Pawn> pawnList))
+                {
+                    pawnList = new List<Pawn>();
+                    lock (pets)
+                    {
+                        pets[value] = pawnList;
+                    }
                 }
+                pawnList.Add(__instance.pawn);
             }
-            pawnList.Add(__instance.pawn);
 
             if (__instance.pawn.Spawned && (flag || ThinkNode_ConditionalShouldFollowMaster.ShouldFollowMaster(__instance.pawn)))
             {
