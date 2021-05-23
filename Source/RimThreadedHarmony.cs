@@ -613,6 +613,7 @@ namespace RimThreaded
 			AudioSourceMaker_Patch.RunDestructivePatches();
 			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			CompCauseGameCondition_Patch.RunDestructivePatches();
+            CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
 			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
             DesignationManager_Patch.RunDestructivePatches(); //added for development build
 			DrugAIUtility_Patch.RunDestructivePatches();
@@ -832,16 +833,16 @@ namespace RimThreaded
 				Log.Message("RimThreaded is patching " + combatExtendedCE_Utility.FullName + " " + methodName);
 				Transpile(combatExtendedCE_Utility, patched, methodName);
 			}
-			if (combatExtendedVerb_LaunchProjectileCE != null)
-			{
-				string methodName = "CanHitFromCellIgnoringRange";
-				patched = typeof(Verb_LaunchProjectileCE_Transpile);
-				Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
-				Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
-				methodName = "TryFindCEShootLineFromTo";
-				Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
-				Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
-			}
+			//if (combatExtendedVerb_LaunchProjectileCE != null)
+			//{
+			//	string methodName = "CanHitFromCellIgnoringRange";
+			//	patched = typeof(Verb_LaunchProjectileCE_Transpile);
+			//	Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
+			//	Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
+			//	methodName = "TryFindCEShootLineFromTo";
+			//	Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
+			//	Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
+			//}
 			if (combatExtendedVerb_MeleeAttackCE != null)
 			{
 				string methodName = "TryCastShot";

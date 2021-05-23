@@ -10,13 +10,53 @@ namespace RimThreaded
 {
 
     public class CompSpawnSubplant_Transpile
-	{
-		internal static void RunNonDestructivePatches()
-		{
-			Type original = typeof(CompSpawnSubplant);
-			Type patched = typeof(CompSpawnSubplant_Transpile);
-			RimThreadedHarmony.Transpile(original, patched, "DoGrowSubplant");
+    {
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(CompSpawnSubplant);
+            Type patched = typeof(CompSpawnSubplant_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "DoGrowSubplant");
 		}
+		internal static void RunDestructivePatches()
+        {
+            Type original = typeof(CompSpawnSubplant);
+            Type patched = typeof(CompSpawnSubplant_Transpile);
+            RimThreadedHarmony.Prefix(original, patched, "AddProgress_NewTmp"); //could use interlock instead
+			RimThreadedHarmony.Prefix(original, patched, "TryGrowSubplants"); //could use interlock instead
+		}
+		
+        public static bool AddProgress_NewTmp(CompSpawnSubplant __instance, float progress, bool ignoreMultiplier = false)
+        {
+            if (!ModLister.RoyaltyInstalled)
+            {
+                Log.ErrorOnce("Subplant spawners are a Royalty-specific game system. If you want to use this code please check ModLister.RoyaltyInstalled before calling it. See rules on the Ludeon forum for more info.", 43254);
+            }
+            else
+            {
+                if (!ignoreMultiplier)
+                    progress *= __instance.ProgressMultiplier;
+                lock (__instance)
+                {
+                    __instance.progressToNextSubplant += progress;
+                }
+
+                ++__instance.meditationTicksToday;
+                __instance.TryGrowSubplants();
+            }
+
+            return false;
+        }
+
+		public static bool TryGrowSubplants(CompSpawnSubplant __instance)
+        {
+            lock (__instance)
+            {
+                for (; __instance.progressToNextSubplant >= 1.0; --__instance.progressToNextSubplant)
+                    __instance.DoGrowSubplant();
+            }
+
+            return false;
+        }
 		public static IEnumerable<CodeInstruction> DoGrowSubplant(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			List<CodeInstruction> instructionsList = instructions.ToList();
