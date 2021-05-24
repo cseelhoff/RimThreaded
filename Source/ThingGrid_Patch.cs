@@ -111,11 +111,17 @@ namespace RimThreaded
                         {
                             HaulingCache.DeregisterHaulableItem(t);
                         }
+                        
+                        if(c.GetZone(__instance.map) is Zone_Growing zone)
+                            JumboCellCache.ReregisterObject(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
 
-                        //if (t is Building_PlantGrower building_PlantGrower)
-                        //{
-                            //JumboCellCache.ReregisterObject(building_PlantGrower.Map, building_PlantGrower.Position, building_PlantGrower, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
-                        //}
+                        foreach (Thing thing2 in newThingList) {
+                            if (thing2 is Building_PlantGrower building_PlantGrower)
+                            {
+                                JumboCellCache.ReregisterObject(building_PlantGrower.Map, building_PlantGrower.Position,
+                                    building_PlantGrower, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                            }
+                        }
                         /*
                         int mapSizeX = this_map.Size.x;
                         int mapSizeZ = this_map.Size.z;

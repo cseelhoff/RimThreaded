@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace RimThreaded
@@ -45,12 +46,13 @@ namespace RimThreaded
         {
             if(__instance == null)
             {
-                return new Range2D(0, 0, 99999, 99999); //TODO use map max range
+                return new Range2D(0, 0, __instance.Map.Size.x, __instance.Map.Size.z);
             }
 
             if (corners.TryGetValue(__instance, out Range2D range)) return range;
+            IntVec3[] iv3 = __instance.ActiveCells.ToArray();
             bool initialized = false;
-            foreach (IntVec3 intVec3 in __instance.ActiveCells)
+            foreach (IntVec3 intVec3 in iv3)
             {
                 if(!initialized)
                 {

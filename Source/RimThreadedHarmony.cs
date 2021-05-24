@@ -6,6 +6,8 @@ using System.Reflection;
 using Verse;
 using System.Reflection.Emit;
 using System.Threading;
+using System.Xml;
+using System.Xml.Linq;
 using RimThreaded.Mod_Patches;
 using RimWorld;
 using RimWorld.Planet;
@@ -52,8 +54,10 @@ namespace RimThreaded
 			Harmony.DEBUG = true;
 #endif
 			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version + "  is patching methods...");
-
-			PatchDestructiveFixes();
+			
+            LoadFieldReplacements(); 
+            PatchDestructiveFixes();
+            ApplyFieldReplacements();
 			PatchNonDestructiveFixes();
 			PatchModCompatibility();
 #if DEBUG
@@ -63,8 +67,33 @@ namespace RimThreaded
 			Log.Message("RimThreaded patching is complete.");
 		}
 
+        private static void LoadFieldReplacements()
+        {
+			//XmlReader reader = XmlReader.Create("Field_Replacements.xml");
+   //         reader.ReadToFollowing("replacement");
+   //         do
+   //         {
+   //             reader.ReadToFollowing("class");
+   //             Console.WriteLine($"class: {reader.ReadElementContentAsString()}");
 
-		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, CodeInstruction currentInstruction)
+   //             reader.ReadToFollowing("field");
+   //             Console.WriteLine($"field: {reader.ReadElementContentAsString()}");
+
+   //             reader.ReadToFollowing("type");
+   //             Console.WriteLine($"type: {reader.ReadElementContentAsString()}");
+
+   //             Console.WriteLine("-------------------------");
+
+   //         } while (reader.ReadToFollowing("replacement"));
+        }
+		private static void ApplyFieldReplacements()
+        {
+            
+        }
+
+
+
+        public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, CodeInstruction currentInstruction)
 		{
 			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
 			loadLockObjectInstructions[0].labels = currentInstruction.labels;
@@ -294,7 +323,7 @@ namespace RimThreaded
 		}
 
 		//public static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>();
-		public static readonly Dictionary<FieldInfo, object> replaceFields = new Dictionary<FieldInfo, object>();
+		public static readonly Dictionary<object, object> replaceFields = new Dictionary<object, object>();
 
 		public static void AddAllMatchingFields(Type original, Type patched, bool matchStaticFieldsOnly = true)
 		{
@@ -326,17 +355,65 @@ namespace RimThreaded
 		public static IEnumerable<CodeInstruction> ReplaceFieldsTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			foreach(CodeInstruction codeInstruction in instructions)
-			{
-                if (codeInstruction.operand is FieldInfo fieldInfo)
+            {
+                object operand = codeInstruction.operand;
+                if (operand != null && replaceFields.TryGetValue(operand, out object newObjectInfo))
                 {
-                    if (replaceFields.TryGetValue(fieldInfo, out object newFieldInfo))
+                    switch (operand)
                     {
-                        //Log.Message("RimThreaded is replacing field: " + fieldInfo.DeclaringType.ToString() + "." + fieldInfo.Name + " with field: " + newFieldInfo.DeclaringType.ToString() + "." + newFieldInfo.Name);
-                        if(newFieldInfo is MethodInfo)
+                        case FieldInfo fieldInfo:
                         {
-                            codeInstruction.opcode = OpCodes.Call;
+                            switch (newObjectInfo)
+                            {
+                                case FieldInfo newFieldInfo:
+#if DEBUG
+                                    Log.Message("RimThreaded is replacing field: " +
+                                                fieldInfo.DeclaringType + "." + fieldInfo.Name +
+                                                " with field: " + newFieldInfo.DeclaringType + "." + newFieldInfo.Name);
+#endif
+                                    codeInstruction.operand = newFieldInfo;
+                                    break;
+                                case MethodInfo newMethodInfo:
+#if DEBUG
+                                    Log.Message("RimThreaded is replacing field: " +
+                                                fieldInfo.DeclaringType + "." + fieldInfo.Name +
+                                                " with CALL method: " + newMethodInfo.DeclaringType + "." +
+                                                newMethodInfo.Name);
+#endif
+                                    codeInstruction.opcode = OpCodes.Call;
+                                    codeInstruction.operand = newMethodInfo;
+                                    break;
+                            }
+
+                            break;
                         }
-                        codeInstruction.operand = newFieldInfo;
+                        case MethodInfo methodInfo:
+                        {
+                            switch (newObjectInfo)
+                            {
+                                case FieldInfo newFieldInfo:
+#if DEBUG
+                                    Log.Message("RimThreaded is replacing method: " +
+                                                methodInfo.DeclaringType + "." + methodInfo.Name +
+                                                " with STATIC field: " + newFieldInfo.DeclaringType + "." +
+                                                newFieldInfo.Name);
+#endif
+                                    codeInstruction.opcode = OpCodes.Ldsfld;
+                                    codeInstruction.operand = newFieldInfo;
+                                    break;
+                                case MethodInfo newMethodInfo:
+#if DEBUG
+                                    Log.Message("RimThreaded is replacing method: " +
+                                                methodInfo.DeclaringType + "." + methodInfo.Name +
+                                                " with method: " + newMethodInfo.DeclaringType + "." +
+                                                newMethodInfo.Name);
+#endif
+                                    codeInstruction.operand = newMethodInfo;
+                                    break;
+                            }
+
+                            break;
+                        }
                     }
                 }
                 yield return codeInstruction;
@@ -483,8 +560,8 @@ namespace RimThreaded
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
 			BeautyUtility_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches();
-            Caravan_BedsTracker_Patch.RunNonDestructivePatches();
-            CaravanInventoryUtility_Patch.RunNonDestructivePatches();
+			Caravan_BedsTracker_Patch.RunNonDestructivePatches();
+			CaravanInventoryUtility_Patch.RunNonDestructivePatches();
 			CellFinder_Patch.RunNonDestructivePatches();
 			DamageWorker_Patch.RunNonDestructivePatches();
 			Fire_Patch.RunNonDestructivePatches();

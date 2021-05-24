@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<replacements>
+  <replacement>
+    <class>AttackTargetFinder</class>
+    <field>tmpTargets</field>
+    <type>ThreadStatic</type>
+  </replacement>
+</replacements>

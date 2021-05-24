@@ -1,5 +1,4 @@
-﻿using System;
-using RimWorld;
+﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -164,14 +163,18 @@ namespace RimThreaded
 			Map map = pawn.Map;
 			if (c.IsForbidden(pawn))
 			{
+#if DEBUG
 				Log.Warning("IsForbidden");
+#endif
 				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
 			if (!PlantUtility.GrowthSeasonNow(c, map, forSowing: true))
 			{
+#if DEBUG
 				Log.Warning("GrowthSeasonNow");
+#endif
 				return false;
 			}
 
@@ -179,7 +182,9 @@ namespace RimThreaded
 			WorkGiver_GrowerSow.wantedPlantDef = localWantedPlantDef;
 			if (localWantedPlantDef == null)
 			{
+#if DEBUG
 				Log.Warning("localWantedPlantDef==null");
+#endif
 				return false;
 			}
 
@@ -190,8 +195,9 @@ namespace RimThreaded
 				Thing thing = thingList[i];
 				if (thing.def == localWantedPlantDef)
 				{
+#if DEBUG
 					Log.Warning("thing.def == localWantedPlantDef... RemoveObjectFromAwaitingHaulingHashSets");
-
+#endif
 					JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 					//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 					return false;
@@ -208,7 +214,9 @@ namespace RimThreaded
 				Thing edifice = c.GetEdifice(map);
 				if (edifice == null || edifice.def.fertility < 0f)
 				{
+#if DEBUG
 					Log.Warning("fertility");
+#endif
 					return false;
 				}
 			}
@@ -217,13 +225,17 @@ namespace RimThreaded
 			{
 				if (!c.Roofed(map))
 				{
+#if DEBUG
 					Log.Warning("cavePlant");
+#endif
 					return false;
 				}
 
 				if (map.glowGrid.GameGlowAt(c, ignoreCavePlants: true) > 0f)
 				{
+#if DEBUG
 					Log.Warning("GameGlowAt");
+#endif
 					return false;
 				}
 			}
@@ -238,7 +250,9 @@ namespace RimThreaded
 			{
 				if (!pawn.CanReserve(plant, 1, -1, null, forced) || plant.IsForbidden(pawn))
 				{
+#if DEBUG
 					Log.Warning("blockAdjacentSow");
+#endif
 					return false;
 				}
 
@@ -257,14 +271,18 @@ namespace RimThreaded
 						return true; // JobMaker.MakeJob(JobDefOf.CutPlant, plant2);
 					}
 				}
+#if DEBUG
 				Log.Warning("AdjacentSowBlocker");
+#endif
 				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
 			if (localWantedPlantDef.plant.sowMinSkill > 0 && pawn.skills != null && pawn.skills.GetSkill(SkillDefOf.Plants).Level < localWantedPlantDef.plant.sowMinSkill)
 			{
+#if DEBUG
 				Log.Warning("UnderAllowedSkill");
+#endif
 				return false;
 			}
 
@@ -278,7 +296,9 @@ namespace RimThreaded
 
 				if (!pawn.CanReserve(thing3, 1, -1, null, forced))
 				{
+#if DEBUG
 					Log.Warning("!CanReserve");
+#endif
 					JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 
 					return false;
@@ -290,7 +310,9 @@ namespace RimThreaded
 					{
 						return true; // JobMaker.MakeJob(JobDefOf.CutPlant, thing3);
 					}
+#if DEBUG
 					Log.Warning("Plant IsForbidden");
+#endif
 					JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 
 					return false;
@@ -300,27 +322,35 @@ namespace RimThreaded
 				{
 					return true; //HaulAIUtility.HaulAsideJobFor(pawn, thing3);
 				}
+#if DEBUG
 				Log.Warning("EverHaulable");
+#endif
 				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
 			if (!localWantedPlantDef.CanEverPlantAt_NewTemp(c, map))
 			{
+#if DEBUG
 				Log.Warning("CanEverPlantAt_NewTemp");
+#endif
 				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
 			if (!PlantUtility.GrowthSeasonNow(c, map, forSowing: true))
 			{
+#if DEBUG
 				Log.Warning("GrowthSeasonNow");
+#endif
 				return false;
 			}
 
 			if (!pawn.CanReserve(c, 1, -1, null, forced))
 			{
+#if DEBUG
 				Log.Warning("!pawn.CanReserve(c");
+#endif
 				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 				return false;
