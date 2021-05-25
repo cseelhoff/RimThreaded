@@ -100,8 +100,10 @@ namespace RimThreaded
 			}
 
 			//TODO fix null check? find root cause. Or maybe it was just from a bad save?
-			if (localWantedPlantDef != null &&!localWantedPlantDef.CanEverPlantAt_NewTemp(location, map, true))
-			{
+			//if (localWantedPlantDef != null &&!localWantedPlantDef.CanEverPlantAt_NewTemp(location, map, true))
+			// this change helps with boulders blocking growing zones. likely at a small performance cost
+			if(localWantedPlantDef != null && (!location.InBounds(map) || (double)map.fertilityGrid.FertilityAt(location) < localWantedPlantDef.plant.fertilityMin))
+            {
 				return;
 			}
 			//---END--
