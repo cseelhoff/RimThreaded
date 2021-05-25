@@ -46,7 +46,7 @@ namespace RimThreaded
         {
             if(__instance == null)
             {
-                return new Range2D(0, 0, __instance.Map.Size.x, __instance.Map.Size.z);
+                return new Range2D(0, 0, 99999, 99999);
             }
 
             if (corners.TryGetValue(__instance, out Range2D range)) return range;

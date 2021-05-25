@@ -69,23 +69,28 @@ namespace RimThreaded
 
         private static void LoadFieldReplacements()
         {
+            //XmlDocument doc = new XmlDocument();
+            //doc.Load("Field_Replacements.xml");
+
+            //XmlNode root = doc.FirstChild;
+            //Console.WriteLine(root.FirstChild.OuterXml);
 			//XmlReader reader = XmlReader.Create("Field_Replacements.xml");
-   //         reader.ReadToFollowing("replacement");
-   //         do
-   //         {
-   //             reader.ReadToFollowing("class");
-   //             Console.WriteLine($"class: {reader.ReadElementContentAsString()}");
+			//         reader.ReadToFollowing("replacement");
+			//         do
+			//         {
+			//             reader.ReadToFollowing("class");
+			//             Console.WriteLine($"class: {reader.ReadElementContentAsString()}");
 
-   //             reader.ReadToFollowing("field");
-   //             Console.WriteLine($"field: {reader.ReadElementContentAsString()}");
+			//             reader.ReadToFollowing("field");
+			//             Console.WriteLine($"field: {reader.ReadElementContentAsString()}");
 
-   //             reader.ReadToFollowing("type");
-   //             Console.WriteLine($"type: {reader.ReadElementContentAsString()}");
+			//             reader.ReadToFollowing("type");
+			//             Console.WriteLine($"type: {reader.ReadElementContentAsString()}");
 
-   //             Console.WriteLine("-------------------------");
+			//             Console.WriteLine("-------------------------");
 
-   //         } while (reader.ReadToFollowing("replacement"));
-        }
+			//         } while (reader.ReadToFollowing("replacement"));
+		}
 		private static void ApplyFieldReplacements()
         {
             
