@@ -569,6 +569,8 @@ namespace RimThreaded
 			CaravanInventoryUtility_Patch.RunNonDestructivePatches();
 			CellFinder_Patch.RunNonDestructivePatches();
 			DamageWorker_Patch.RunNonDestructivePatches();
+			Designator_Haul_Patch.RunNonDestructivePatches();
+            Designator_Unforbid_Patch.RunNonDestructivePatches();
 			Fire_Patch.RunNonDestructivePatches();
 			FloatMenuMakerMap_Patch.RunNonDestructivePatches();
 			FoodUtility_Patch.RunNonDestructivePatches();
