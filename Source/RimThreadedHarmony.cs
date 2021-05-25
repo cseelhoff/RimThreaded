@@ -588,6 +588,7 @@ namespace RimThreaded
 			LanguageWordInfo_Patch.RunNonDestructivePatches();
 			MapTemperature_Patch.RunNonDestructivePatches();
 			Medicine_Patch.RunNonDestructivePatches();
+			//MemoryUtility_Patch.RunNonDestructivePatches();
 			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
 			Pawn_MeleeVerbs_Patch.RunNonDestructivePatches();
 			Pawn_WorkSettings_Patch.RunNonDestructivePatches();
@@ -764,11 +765,11 @@ namespace RimThreaded
 			Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
 			WealthWatcher_Patch.RunDestructivePatches();
 			WildPlantSpawner_Patch.RunDestructivePatches();
-			WindManager_Patch.RunDestructivePatches();
-			WorkGiver_GrowerSow_Patch.RunDestructivePatches();
-			WorldComponentUtility_Patch.RunDestructivePatches();
-			WorldObjectsHolder_Patch.RunDestructivePatches();
-			WorldPawns_Patch.RunDestructivePatches(); //todo examine GC optimization
+            WindManager_Patch.RunDestructivePatches();
+            WorkGiver_GrowerSow_Patch.RunDestructivePatches();
+            WorldComponentUtility_Patch.RunDestructivePatches();
+            WorldObjectsHolder_Patch.RunDestructivePatches();
+            WorldPawns_Patch.RunDestructivePatches(); //todo examine GC optimization
 
             //complex methods that need further review for simplification
             AttackTargetReservationManager_Patch.RunDestructivePatches();

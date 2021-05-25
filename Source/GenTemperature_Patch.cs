@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RimWorld.Planet;
 using Verse;
 
 namespace RimThreaded
@@ -16,7 +17,7 @@ namespace RimThreaded
 
 		static readonly Type original = typeof(GenTemperature);
 		static readonly Type patched = typeof(GenTemperature_Patch);
-
+        private static WorldGrid worldGrid;
 		public static void InitializeThreadStatics()
         {
 			neighRoomGroups = new List<RoomGroup>();
@@ -35,20 +36,41 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, "GetTemperatureFromSeasonAtTile");
 			RimThreadedHarmony.Prefix(original, patched, "SeasonalShiftAmplitudeAt");
 		}
-		
+
 		public static bool SeasonalShiftAmplitudeAt(ref float __result, int tile)
-		{
-			if (!SeasonalShiftAmplitudeCache.TryGetValue(tile, out __result))
-			{
-				__result = Find.WorldGrid.LongLatOf(tile).y >= 0.0 ?
-					TemperatureTuning.SeasonalTempVariationCurve.Evaluate(Find.WorldGrid.DistanceFromEquatorNormalized(tile)) :
-					-TemperatureTuning.SeasonalTempVariationCurve.Evaluate(Find.WorldGrid.DistanceFromEquatorNormalized(tile));
-				SeasonalShiftAmplitudeCache[tile] = __result;
-			}
-			return false;
+        {
+            WorldGrid newWorldGrid = Find.WorldGrid;
+            if (worldGrid != newWorldGrid)
+            {
+                worldGrid = newWorldGrid;
+                SeasonalShiftAmplitudeCache.Clear();
+                tileAbsTickTemperature.Clear();
+                tileTemperature.Clear();
+#if DEBUG
+                Log.Message("RimThreaded is rebuilding WorldGrid Temperature Cache");
+#endif
+            }
+
+            if (SeasonalShiftAmplitudeCache.TryGetValue(tile, out __result)) return false;
+            __result = Find.WorldGrid.LongLatOf(tile).y >= 0.0 ?
+                TemperatureTuning.SeasonalTempVariationCurve.Evaluate(newWorldGrid.DistanceFromEquatorNormalized(tile)) :
+                -TemperatureTuning.SeasonalTempVariationCurve.Evaluate(newWorldGrid.DistanceFromEquatorNormalized(tile));
+            SeasonalShiftAmplitudeCache[tile] = __result;
+            return false;
 		}
 		public static bool GetTemperatureFromSeasonAtTile(ref float __result, int absTick, int tile)
 		{
+            WorldGrid newWorldGrid = Find.WorldGrid;
+            if (worldGrid != newWorldGrid)
+            {
+                worldGrid = newWorldGrid;
+                SeasonalShiftAmplitudeCache.Clear();
+                tileAbsTickTemperature.Clear();
+                tileTemperature.Clear();
+#if DEBUG
+				Log.Message("RimThreaded is rebuilding WorldGrid Temperature Cache");
+#endif
+			}
 			if (absTick == 0)
 			{
 				absTick = 1;
@@ -59,6 +81,7 @@ namespace RimThreaded
 				absTickTemperature = new Dictionary<int, float>();
 				tileAbsTickTemperature[tile] = absTickTemperature;
 			}
+
 			if (!absTickTemperature.TryGetValue(absTick, out float temperature))
 			{
 				if (!tileTemperature.TryGetValue(tile, out float temperatureFromTile))

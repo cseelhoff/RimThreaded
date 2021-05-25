@@ -2,19 +2,19 @@
 using RimWorld;
 using Verse;
 using RimWorld.Planet;
-using Verse.Noise;
 using System.Threading;
+using static RimWorld.Planet.TileTemperaturesComp;
 
 namespace RimThreaded
 {
 
     public class TileTemperaturesComp_Patch
     {
-		private static int startIndex = 0;
-		private static int endIndex = 0;
+		private static int startIndex;
+		private static int endIndex;
 		private static int[] usedSlots;
-		private static CachedTileTemperatureData2[] cache;
-		private static int tileCount;
+        private static CachedTileTemperatureData[] cache;
+        private static int tileCount;
 
         internal static void RunDestructivePatches()
         {
@@ -52,125 +52,22 @@ namespace RimThreaded
 			}
 			return false;
         }
-        private class CachedTileTemperatureData2
-        {
-            private int tile;
-
-            private int tickCachesNeedReset = int.MinValue;
-
-            private float cachedOutdoorTemp = float.MinValue;
-
-            private float cachedSeasonalTemp = float.MinValue;
-
-            private float[] twelfthlyTempAverages;
-
-            private Perlin dailyVariationPerlinCached;
-
-            private const int CachedTempUpdateInterval = 60;
-
-            public CachedTileTemperatureData2(int tile)
-            {
-                this.tile = tile;
-                int seed = Gen.HashCombineInt(tile, 199372327);
-                dailyVariationPerlinCached = new Perlin(4.9999998736893758E-06, 2.0, 0.5, 3, seed, QualityMode.Medium);
-                twelfthlyTempAverages = new float[12];
-                for (int i = 0; i < 12; i++)
-                {
-                    twelfthlyTempAverages[i] = GenTemperature.AverageTemperatureAtTileForTwelfth(tile, (Twelfth)i);
-                }
-
-                CheckCache();
-            }
-
-            public float GetOutdoorTemp()
-            {
-                return cachedOutdoorTemp;
-            }
-
-            public float GetSeasonalTemp()
-            {
-                return cachedSeasonalTemp;
-            }
-
-            public float OutdoorTemperatureAt(int absTick)
-            {
-                return CalculateOutdoorTemperatureAtTile(absTick, includeDailyVariations: true);
-            }
-
-            public float OffsetFromDailyRandomVariation(int absTick)
-            {
-                return (float)dailyVariationPerlinCached.GetValue(absTick, 0.0, 0.0) * 7f;
-            }
-
-            public float AverageTemperatureForTwelfth(Twelfth twelfth)
-            {
-                return twelfthlyTempAverages[(uint)twelfth];
-            }
-
-            public void CheckCache()
-            {
-                if (tickCachesNeedReset <= Find.TickManager.TicksGame)
-                {
-                    tickCachesNeedReset = Find.TickManager.TicksGame + 60;
-                    Map map = Current.Game.FindMap(tile);
-                    cachedOutdoorTemp = OutdoorTemperatureAt(Find.TickManager.TicksAbs);
-                    if (map != null)
-                    {
-                        cachedOutdoorTemp += AggregateTemperatureOffset(map.gameConditionManager);
-                    }
-
-                    cachedSeasonalTemp = CalculateOutdoorTemperatureAtTile(Find.TickManager.TicksAbs, includeDailyVariations: false);
-                }
-            }
-
-            private float AggregateTemperatureOffset(GameConditionManager gameConditionManager)
-            {
-                float num = 0f;
-                for (int i = 0; i < gameConditionManager.ActiveConditions.Count; i++)
-                {
-                    num += gameConditionManager.ActiveConditions[i].TemperatureOffset();
-                }
-
-                if (gameConditionManager.Parent != null)
-                {
-                    num += AggregateTemperatureOffset(gameConditionManager.Parent);
-                }
-
-                return num;
-            }
-
-            private float CalculateOutdoorTemperatureAtTile(int absTick, bool includeDailyVariations)
-            {
-                if (absTick == 0)
-                {
-                    absTick = 1;
-                }
-
-                float num = Find.WorldGrid[tile].temperature + GenTemperature.OffsetFromSeasonCycle(absTick, tile);
-                if (includeDailyVariations)
-                {
-                    num += OffsetFromDailyRandomVariation(absTick) + GenTemperature.OffsetFromSunCycle(absTick, tile);
-                }
-
-                return num;
-            }
-        }
-
+        
         public static bool ClearCaches(TileTemperaturesComp __instance)
-		{
-			tileCount = Find.WorldGrid.TilesCount;
-			cache = new CachedTileTemperatureData2[tileCount];
+        {
+            tileCount = Find.WorldGrid.TilesCount;
+			cache = new CachedTileTemperatureData[tileCount];
 			usedSlots = new int[tileCount];
             return false;
 		}
-		private static CachedTileTemperatureData2 RetrieveCachedData2(TileTemperaturesComp __instance, int tile)
-		{
-			if (cache[tile] != null)
+		private static CachedTileTemperatureData RetrieveCachedData2(TileTemperaturesComp __instance, int tile)
+        {
+            if (cache[tile] != null)
 			{
 				return cache[tile];
 			}
 
-			cache[tile] = new CachedTileTemperatureData2(tile);
+			cache[tile] = new CachedTileTemperatureData(tile);
 			usedSlots[(Interlocked.Increment(ref endIndex) - 1) % tileCount] = tile;
 			return cache[tile];
 		}

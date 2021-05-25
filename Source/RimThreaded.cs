@@ -49,11 +49,7 @@ namespace RimThreaded
 
         //WorldPawns
         public static WorldPawns worldPawns = null;
-
-        //WindManager
-        public static int plantMaterialsCount = 0;
-        public static float plantSwayHead = 0;
-
+        
         //FactionManager
         public static List<Faction> allFactions = null;
 

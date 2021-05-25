@@ -43,17 +43,15 @@ namespace RimThreaded
                 __instance.plantSwayHead = 0f;
             }
 
-            if (Find.CurrentMap == __instance.map)
-            {
-                RimThreaded.plantSwayHead = __instance.plantSwayHead;
-                RimThreaded.plantMaterialsCount = WindManager.plantMaterials.Count;
-            }
+            if (Find.CurrentMap != __instance.map) return false;
+            plantSwayHead = __instance.plantSwayHead;
+            plantMaterialsCount = WindManager.plantMaterials.Count;
             return false;
         }
 
         //public static List<Material> plantMaterialsList;
         public static int plantMaterialsCount;
-
+        public static float plantSwayHead;
         public static void WindManagerPrepare()
         {
             List<Map> maps = Find.Maps;
@@ -72,7 +70,7 @@ namespace RimThreaded
                 Material material = WindManager.plantMaterials[index];
                 try
                 {
-                    material.SetFloat(ShaderPropertyIDs.SwayHead, RimThreaded.plantSwayHead);
+                    material.SetFloat(ShaderPropertyIDs.SwayHead, plantSwayHead);
                 }
                 catch (Exception ex)
                 {
