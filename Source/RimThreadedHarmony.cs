@@ -6,14 +6,12 @@ using System.Reflection;
 using Verse;
 using System.Reflection.Emit;
 using System.Threading;
-using System.Xml;
-using System.Xml.Linq;
 using RimThreaded.Mod_Patches;
 using RimWorld;
-using RimWorld.Planet;
 using UnityEngine;
 using Verse.Sound;
 using static HarmonyLib.AccessTools;
+using Verse.AI;
 
 namespace RimThreaded
 {
@@ -557,9 +555,11 @@ namespace RimThreaded
 
 		private static void PatchNonDestructiveFixes()
 		{
-			//Prevents Game Crash from wooden floors and others
-            GameObject_Patch.RunNonDestructivePatches();
 
+			//Prevents Game Crash from wooden floors and others
+			GameObject_Patch.RunNonDestructivePatches();
+
+            SimplePool_Patch_RunNonDestructivePatches();
 			//Simple
 			Area_Patch.RunNonDestructivePatches();
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
@@ -685,6 +685,80 @@ namespace RimThreaded
 			*/
 			// 
 			//FocusStrengthOffset_GraveCorpseRelationship.CanApply
+
+		}
+
+        private static void SimplePool_Patch_RunNonDestructivePatches()
+        {
+            replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Get"),
+				Method(typeof(SimplePool_Patch<List<float>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Return"),
+                Method(typeof(SimplePool_Patch<List<float>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<List<float>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<List<float>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "Get"),
+				Method(typeof(SimplePool_Patch<List<Pawn>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "Return"),
+				Method(typeof(SimplePool_Patch<List<Pawn>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<List<Pawn>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<List<Pawn>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<List<Sustainer>>), "Get"),
+				Method(typeof(SimplePool_Patch<List<Sustainer>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<List<Sustainer>>), "Return"),
+				Method(typeof(SimplePool_Patch<List<Sustainer>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<List<Sustainer>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<List<Sustainer>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<List<IntVec3>>), "Get"),
+				Method(typeof(SimplePool_Patch<List<IntVec3>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<List<IntVec3>>), "Return"),
+				Method(typeof(SimplePool_Patch<List<IntVec3>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<List<IntVec3>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<List<IntVec3>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<List<Thing>>), "Get"),
+				Method(typeof(SimplePool_Patch<List<Thing>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<List<Thing>>), "Return"),
+				Method(typeof(SimplePool_Patch<List<Thing>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<List<Thing>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<List<Thing>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<List<Gizmo>>), "Get"),
+				Method(typeof(SimplePool_Patch<List<Gizmo>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<List<Gizmo>>), "Return"),
+				Method(typeof(SimplePool_Patch<List<Gizmo>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<List<Gizmo>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<List<Gizmo>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<List<Hediff>>), "Get"),
+				Method(typeof(SimplePool_Patch<List<Hediff>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<List<Hediff>>), "Return"),
+				Method(typeof(SimplePool_Patch<List<Hediff>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<List<Hediff>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<List<Hediff>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<HashSet<IntVec3>>), "Get"),
+				Method(typeof(SimplePool_Patch<HashSet<IntVec3>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<HashSet<IntVec3>>), "Return"),
+				Method(typeof(SimplePool_Patch<HashSet<IntVec3>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<HashSet<IntVec3>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<HashSet<IntVec3>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "Get"),
+				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "Return"),
+				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<HashSet<Pawn>>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<HashSet<Pawn>>), "FreeItemsCount"));
+
+			replaceFields.Add(Method(typeof(SimplePool<Job>), "Get"),
+				Method(typeof(SimplePool_Patch<Job>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<Job>), "Return"),
+				Method(typeof(SimplePool_Patch<Job>), "Return"));
+            replaceFields.Add(Field(typeof(SimplePool<Job>), "FreeItemsCount"),
+                Field(typeof(SimplePool_Patch<Job>), "FreeItemsCount"));
 
 		}
 

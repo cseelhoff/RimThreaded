@@ -2,11 +2,17 @@
 
 namespace RimThreaded
 {
-    public static class SimplePool<T> where T : new()
+    public static class SimplePool_Patch<T> where T : new()
     {
         private static readonly ConcurrentStack<T> FreeItems = new ConcurrentStack<T>();
 
         public static int FreeItemsCount => FreeItems.Count;
+
+        public static void RunNonDestructivePatches()
+        {
+            
+
+        }
 
         public static T Get()
         {
