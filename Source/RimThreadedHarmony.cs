@@ -780,6 +780,7 @@ namespace RimThreaded
 			FactionManager_Patch.RunDestructivePatches();
 			GenClosest_Patch.RunDestructivePatches();
 			GenCollection_Patch.RunDestructivePatches();
+            GenSpawn_Patch.RunDestructivePatches();
 			GenTemperature_Patch.RunDestructivePatches();
 			GlobalControlsUtility_Patch.RunDestructivePatches();
 			GrammarResolver_Patch.RunDestructivePatches();

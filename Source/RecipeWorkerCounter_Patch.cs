@@ -25,16 +25,13 @@ namespace RimThreaded
             }
             for (int i = 0; i < freeColonistsSpawned.Count; i++)
             {
-                Pawn item = freeColonistsSpawned[i];
-                Thing carriedThing = item.carryTracker.CarriedThing;
-                if (carriedThing != null)
+                Thing carriedThing = freeColonistsSpawned[i]?.carryTracker?.CarriedThing;
+                if (carriedThing == null) continue;
+                int stackCount = carriedThing.stackCount;
+                carriedThing = carriedThing.GetInnerIfMinified();
+                if (__instance.CountValidThing(carriedThing, bill, prodDef))
                 {
-                    int stackCount = carriedThing.stackCount;
-                    carriedThing = carriedThing.GetInnerIfMinified();
-                    if (__instance.CountValidThing(carriedThing, bill, prodDef))
-                    {
-                        num += stackCount;
-                    }
+                    num += stackCount;
                 }
             }
 

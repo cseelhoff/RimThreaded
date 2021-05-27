@@ -1,10 +1,7 @@
-﻿using HarmonyLib;
-using RimWorld;
+﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Verse;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -16,7 +13,7 @@ namespace RimThreaded
             Type original = typeof(MemoryThoughtHandler);
             Type patched = typeof(MemoryThoughtHandler_Patch);
             RimThreadedHarmony.Prefix(original, patched, "RemoveMemory");
-            //RimThreadedHarmony.Prefix(original, patched, "TryGainMemory", new Type[] { typeof(Thought_Memory), typeof(Pawn) });
+            RimThreadedHarmony.Prefix(original, patched, "TryGainMemory", new Type[] { typeof(Thought_Memory), typeof(Pawn) });
         }
 
         public static bool RemoveMemory(MemoryThoughtHandler __instance, Thought_Memory th)
