@@ -32,10 +32,10 @@ namespace RimThreaded
                 {
                     typeof(GUIContent)
                 }));
-
+        
         public static bool CalcHeight(GUIStyle __instance, ref float __result, GUIContent content, float width)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
             //Func<object[], object> FuncCalcHeight = p => __instance.CalcHeight((GUIContent)p[0], (float)p[1]);
             threadInfo.safeFunctionRequest = new object[] { FuncCalcHeight, new object[] { __instance, content, width } };
@@ -46,10 +46,10 @@ namespace RimThreaded
         }
         public static bool CalcSize(GUIStyle __instance, ref Vector2 __result, GUIContent content)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
-            //Func<object[], object> FuncCalcSize = p => __instance.CalcSize((GUIContent)p[0]);
-            threadInfo.safeFunctionRequest = new object[] { FuncCalcSize, new object[] { __instance, content } };
+            Func<object[], object> FuncCalcSize2 = p => __instance.CalcSize((GUIContent)p[1]);
+            threadInfo.safeFunctionRequest = new object[] { FuncCalcSize2, new object[] { __instance, content } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             __result = (Vector2)threadInfo.safeFunctionResult;

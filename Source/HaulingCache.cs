@@ -390,7 +390,7 @@ namespace RimThreaded
 															if (scanner.HasJobOnThing(pawn, tryThing))
 															{
 #if DEBUG
-                                                                Log.Message(pawn.ToString() + " is going to haul thing: " + tryThing.ToString() + " at pos " + tryThing.Position.ToString());
+                                                                Log.Message(pawn + " is going to haul thing: " + tryThing + " at pos " + tryThing.Position);
 #endif
 																thing = tryThing;
 																break;
@@ -398,43 +398,43 @@ namespace RimThreaded
 															//else if (i > -40) { Log.Warning("No Hauling Job " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
 														}
 #if DEBUG
-														else if (i > -4000) { Log.Warning("Can't HaulToStorageJob " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+														else if (i > -4000) { Log.Warning("Can't HaulToStorageJob " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 													}
 #if DEBUG
-													else if (i > -40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+													else if (i > -40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 												}
 #if DEBUG
-												else if (i > -40) { Log.Warning("Can't ReservedForPrisonersTrans " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+												else if (i > -40) { Log.Warning("Can't ReservedForPrisonersTrans " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 											}
 #if DEBUG
-											else if (i > -40) { Log.Warning("Not capable of Manipulation " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+											else if (i > -40) { Log.Warning("Not capable of Manipulation " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 										}
 #if DEBUG
-										else if (i > -40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " reserved by: " + ReservationManager_Patch.getFirstPawnReservingTarget(pawn.Map.reservationManager, tryThing) + " tries: " + i.ToString()); }
+										else if (i > -40) { Log.Warning("Can't Reserve " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " reserved by: " + ReservationManager_Patch.getFirstPawnReservingTarget(pawn.Map.reservationManager, tryThing) + " tries: " + i); }
 #endif
 									}
 #if DEBUG
-									else if (i > -40) { Log.Warning("Can't Haul unfinishedThing " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+									else if (i > -40) { Log.Warning("Can't Haul unfinishedThing " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 								}
 #if DEBUG
-								else if (i > -40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+								else if (i > -40) { Log.Warning("Can't PawnCanAutomaticallyHaulFast " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 							}
 #if DEBUG
-							else if(i > -40) { Log.Warning("Can't Reserve " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+							else if(i > -40) { Log.Warning("Can't Reserve " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 						}
 #if DEBUG
-						else if (i > -40) { Log.Warning("Not Allowed " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+						else if (i > -40) { Log.Warning("Not Allowed " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 					}
 #if DEBUG
-					else if (i > -40) { Log.Warning("Not Spawned " + tryThing.ToString() + " at pos " + tryThing.Position.ToString() + " for pawn " + pawn.ToString() + " tries: " + i.ToString()); }
+					else if (i > -40) { Log.Warning("Not Spawned " + tryThing + " at pos " + tryThing.Position + " for pawn " + pawn + " tries: " + i); }
 #endif
 					i++;
 					ReregisterHaulableItem(tryThing);
@@ -442,7 +442,7 @@ namespace RimThreaded
 #if DEBUG
 				if (i > 0)
 				{
-					Log.Warning("took more than 0 haulable tries: " + i.ToString());
+					Log.Warning("took more than 0 haulable tries: " + i);
 				}
 #endif
             }
@@ -585,7 +585,7 @@ namespace RimThreaded
 							if (num3 >= maxPawns || num2 + num4 > num)
 							{
 #if DEBUG
-								Log.Warning(reservation.Claimant.ToString()  + " StackCount");
+								Log.Warning(reservation.Claimant  + " StackCount");
 #endif
 								return false;
 							}

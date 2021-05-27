@@ -829,6 +829,7 @@ namespace RimThreaded
 			SustainerAggregatorUtility_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			SustainerManager_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 			TaleManager_Patch.RunDestructivePatches();
+            Text_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			TickManager_Patch.RunDestructivePatches();
