@@ -58,4 +58,12 @@
         <downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
     </li>
   </modDependencies>
+  <incompatibleWith>
+    <li>dingo.noforcedslowdown</li>
+    <li>krkr.rocketman</li>
+    <li>torann.rimwar</li>
+    <li>kentington.saveourship2</li>
+    <li>sarg.smartspeed</li>
+    <li>tickspersecond.sparr.rw</li>
+  </incompatibleWith>
 </ModMetaData>
