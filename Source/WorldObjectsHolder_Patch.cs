@@ -21,8 +21,8 @@ namespace RimThreaded
 
         public static bool WorldObjectsHolderTick(WorldObjectsHolder __instance)
         {
-            RimThreaded.worldObjects = __instance.worldObjects;
-            RimThreaded.worldObjectsTicks = __instance.worldObjects.Count;
+            worldObjectsTickList = __instance.worldObjects;
+            worldObjectsTicks = __instance.worldObjects.Count;
             return false;
         }
 
