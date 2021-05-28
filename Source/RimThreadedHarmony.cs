@@ -584,8 +584,9 @@ namespace RimThreaded
 			SlotGroup_Patch.RunNonDestructivePatches();
 			ImmunityHandler_Patch.RunNonDestructivePatches();
 			JobGiver_AnimalFlee_Patch.RunNonDestructivePatches(); //may need changes to FleeLargeFireJob
-			JobGiver_ConfigurableHostilityResponse_Patch.RunNonDestructivePatches();
-			LanguageWordInfo_Patch.RunNonDestructivePatches();
+			JobGiver_ConfigurableHostilityResponse_Patch.RunNonDestructivePatches(); 
+            JobGiver_OptimizeApparel_Patch.RunNonDestructivePatches();
+            LanguageWordInfo_Patch.RunNonDestructivePatches();
 			MapTemperature_Patch.RunNonDestructivePatches();
 			Medicine_Patch.RunNonDestructivePatches();
 			//MemoryUtility_Patch.RunNonDestructivePatches();
@@ -851,7 +852,6 @@ namespace RimThreaded
             AttackTargetReservationManager_Patch.RunDestructivePatches();
             BiomeDef_Patch.RunDestructivePatches();
             FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
-            JobGiver_OptimizeApparel_Patch.RunDestructivePatches();
             JobQueue_Patch.RunDestructivePatches();
             MapPawns_Patch.RunDestructivePatches(); //TODO: Affects Animal Master Assignment
             MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();

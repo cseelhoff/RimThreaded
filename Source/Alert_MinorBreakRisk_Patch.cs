@@ -20,17 +20,15 @@ namespace RimThreaded
             for (int i = 0; i < pawnList.Count; i++)
             {
                 Pawn item = pawnList[i];
-                if (!item.Downed && item.MentalStateDef == null)
+                if (item.Downed || item.MentalStateDef != null) continue;
+                float curMood = item.mindState.mentalBreaker.CurMood;
+                if(curMood < item.mindState.mentalBreaker.BreakThresholdMajor)
                 {
-                    float curMood = item.mindState.mentalBreaker.CurMood;
-                    if(curMood < item.mindState.mentalBreaker.BreakThresholdMajor)
-                    {
-                        return false;
-                    }
-                    if (curMood < item.mindState.mentalBreaker.BreakThresholdMinor)
-                    {
-                        pawnsAtRiskMinorResult.Add(item);
-                    }
+                    return false;
+                }
+                if (curMood < item.mindState.mentalBreaker.BreakThresholdMinor)
+                {
+                    pawnsAtRiskMinorResult.Add(item);
                 }
             }
             __result = AlertReport.CulpritsAre(pawnsAtRiskMinorResult);

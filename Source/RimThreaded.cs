@@ -213,6 +213,7 @@ namespace RimThreaded
             InfestationCellFinder_Patch.InitializeThreadStatics();
             JobGiver_AnimalFlee_Patch.InitializeThreadStatics();
             JobGiver_ConfigurableHostilityResponse_Patch.InitializeThreadStatics();
+            JobGiver_OptimizeApparel_Patch.InitializeThreadStatics();
             LanguageWordInfo_Patch.InitializeThreadStatics();
             MapPawns_Patch.InitializeThreadStatics();
             MapTemperature_Patch.InitializeThreadStatics();

@@ -38,8 +38,8 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, "DebugDrawReservations");
 			RimThreadedHarmony.Prefix(original, patched, "ExposeData");
 
-			RimThreadedHarmony.Postfix(original, patched, "Release", "PostRelease");
-			RimThreadedHarmony.Postfix(original, patched, "Release", "PostReleaseAllForTarget");
+			//RimThreadedHarmony.Postfix(original, patched, "Release", "PostRelease");
+			//RimThreadedHarmony.Postfix(original, patched, "Release", "PostReleaseAllForTarget");
 		}
 
 		public static bool ExposeData(ReservationManager __instance)
@@ -576,6 +576,13 @@ namespace RimThreaded
 					reservationTargetDict[target] = newReservationTargetList;					
 				}
 			}
+
+			//Postfix
+            if (target.Thing != null && target.Thing.def.EverHaulable && target.Thing.Map != null)
+            {
+                HaulingCache.ReregisterHaulableItem(target.Thing);
+            }
+
 			return false;
 		}
 		public static bool ReleaseAllForTarget(ReservationManager __instance, Thing t)

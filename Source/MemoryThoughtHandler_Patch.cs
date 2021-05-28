@@ -20,7 +20,7 @@ namespace RimThreaded
         {
             lock (__instance)
             {
-                List<Thought_Memory> newMemories = new List<Thought_Memory>(__instance.Memories);
+                List<Thought_Memory> newMemories = new List<Thought_Memory>(__instance.memories);
                 if (!newMemories.Remove(th))
                 {
                     Log.Warning("Tried to remove memory thought of def " + th.def.defName + " but it's not here.");
