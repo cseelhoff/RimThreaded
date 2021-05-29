@@ -9,10 +9,10 @@ namespace RimThreaded
     class WorkGiver_GrowerSow_Patch
     {
 
+        public static readonly Type original = typeof(WorkGiver_GrowerSow);
+        public static readonly Type patched = typeof(WorkGiver_GrowerSow_Patch);
         public static void RunDestructivePatches()
         {
-            Type original = typeof(WorkGiver_GrowerSow);
-            Type patched = typeof(WorkGiver_GrowerSow_Patch);
             RimThreadedHarmony.Prefix(original, patched, "JobOnCell"); //WorkGiver_Grower.wantedPlantDef replaced with local var for thread overwrite
         }
 

@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -8,7 +9,20 @@ namespace RimThreaded
 {
 	class WorkGiver_Grower_Patch
 	{
+		[ThreadStatic] public static ThingDef wantedPlantDef;
+
 		public static Dictionary<Map, List<HashSet<object>[]>> awaitingPlantCellsMapDict = new Dictionary<Map, List<HashSet<object>[]>>();
+
+		private static readonly Type Original = typeof(WorkGiver_Grower);
+		private static readonly Type Patched = typeof(WorkGiver_Grower_Patch);
+
+		public static void RunNonDestructivePatches()
+        {
+			RimThreadedHarmony.AddAllMatchingFields(Original, Patched);
+			//RimThreadedHarmony.TranspileFieldReplacements(Original, "PotentialWorkCellsGlobal");
+			RimThreadedHarmony.TranspileFieldReplacements(WorkGiver_GrowerSow_Patch.original, "ExtraRequirements");
+			RimThreadedHarmony.TranspileFieldReplacements(WorkGiver_GrowerSow_Patch.original, "JobOnCell");
+		}
 
 		public static bool PotentialWorkCellsGlobal(WorkGiver_Grower __instance, ref IEnumerable<IntVec3> __result, Pawn pawn)
 		{
@@ -32,7 +46,9 @@ namespace RimThreaded
 				{
 					yield return item;
 				}
+				wantedPlantDef = null;
 			}
+			wantedPlantDef = null;
 			List<Zone> zonesList = pawn.Map.zoneManager.AllZones;
 			for (int j = 0; j < zonesList.Count; j++)
 			{
@@ -52,8 +68,11 @@ namespace RimThreaded
 					{
 						yield return growZone.cells[k];
 					}
+					wantedPlantDef = null;
+					growZone = null;
 				}
 			}
+			wantedPlantDef = null;
 		}
 		public static IEnumerable<IntVec3> PotentialWorkCellsGlobalWithoutCanReach(WorkGiver_Grower __instance, Pawn pawn)
 		{

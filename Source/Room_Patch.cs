@@ -35,7 +35,7 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, "OpenRoofCountStopAt");
 			RimThreadedHarmony.Prefix(original, patched, "RemoveRegion");
 			RimThreadedHarmony.Prefix(original, patched, "Notify_RoofChanged");
-			RimThreadedHarmony.Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
+			//RimThreadedHarmony.Prefix(original, patched, "Notify_RoomShapeOrContainedBedsChanged");
 			RimThreadedHarmony.Prefix(original, patched, "Notify_ContainedThingSpawnedOrDespawned");
 			
 		}

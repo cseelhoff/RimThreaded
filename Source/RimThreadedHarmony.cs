@@ -561,7 +561,9 @@ namespace RimThreaded
 
             SimplePool_Patch_RunNonDestructivePatches();
 			//Simple
+            AlertsReadout_Patch.RunNonDestructivesPatches(); //this will disable alert checks on ultrafast speed for an added speed boost
 			Area_Patch.RunNonDestructivePatches();
+            AttackTargetsCache_Patch.RunNonDestructivePatches();
 			AttackTargetFinder_Patch.RunNonDestructivePatches();
 			BeautyUtility_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches();
@@ -603,11 +605,13 @@ namespace RimThreaded
 			RegionMaker_Patch.RunNonDestructivePatches();
 			TendUtility_Patch.RunNonDestructivePatches();
 			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
-			ThoughtHandler_Patch.RunNonDestructivePatches();
+			ThoughtHandler_Patch.RunNonDestructivePatches(); 
+			TimeControls_Patch.RunNonDestructivePatches(); //TODO TRANSPILE - should releave needing TexButton2 class
 			Toils_Ingest_Patch.RunNonDestructivePatches();
 			Verb_Patch.RunNonDestructivePatches();
 			WanderUtility_Patch.RunNoneDestructivePatches();
 			WildPlantSpawner_Patch.RunNonDestructivePatches();
+			WorkGiver_Grower_Patch.RunNonDestructivePatches();
 			World_Patch.RunNonDestructivePatches();
 			WorldGrid_Patch.RunNonDestructivePatches();
 			ZoneManager_Patch.RunNonDestructivePatches();
@@ -615,7 +619,6 @@ namespace RimThreaded
 
 
 			//Complex
-			AttackTargetsCache_Patch.RunNonDestructivePatches();
 			BattleLog_Transpile.RunNonDestructivePatches();
 			CompSpawnSubplant_Transpile.RunNonDestructivePatches();//uses old transpile for lock
 			GenTemperature_Patch.RunNonDestructivePatches();
@@ -641,7 +644,7 @@ namespace RimThreaded
 			QuestUtility_Patch.RunNonDestructivePatches();
 
 
-			Pawn_RelationsTracker_Transpile.RunNonDestructivePatches(); //TODO - should transpile ReplacePotentiallyRelatedPawns instead
+            Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //TODO - should transpile ReplacePotentiallyRelatedPawns instead
 																		// Pawn_RelationsTracker.<get_PotentiallyRelatedPawns>d__28'.MoveNext()
 																		// // <stack>5__2 = SimplePool<List<Pawn>>.Get();
 																		//IL_004c: call!0 class Verse.SimplePool`1<class [mscorlib] System.Collections.Generic.List`1<class Verse.Pawn>>::Get()
@@ -765,8 +768,7 @@ namespace RimThreaded
 
 		private static void PatchDestructiveFixes()
 		{
-			Alert_MinorBreakRisk_Patch.RunDestructivePatches();
-			AlertsReadout_Patch.RunDestructivesPatches();
+			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
 			AmbientSoundManager_Patch.RunDestructivePatches();
 			AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			AudioSource_Patch.RunDestructivePatches();
@@ -836,14 +838,13 @@ namespace RimThreaded
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			TickManager_Patch.RunDestructivePatches();
 			TileTemperaturesComp_Patch.RunDestructivePatches(); //TODO - good simple transpile candidate
-			TimeControls_Patch.RunDestructivePatches(); //TODO TRANSPILE - should releave needing TexButton2 class
 			TradeShip_Patch.RunDestructivePatches();
 			UniqueIDsManager_Patch.RunDestructivePatches();
 			Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
 			WealthWatcher_Patch.RunDestructivePatches();
 			WildPlantSpawner_Patch.RunDestructivePatches();
             WindManager_Patch.RunDestructivePatches();
-            WorkGiver_GrowerSow_Patch.RunDestructivePatches();
+            //WorkGiver_GrowerSow_Patch.RunDestructivePatches();
             WorldComponentUtility_Patch.RunDestructivePatches();
             WorldObjectsHolder_Patch.RunDestructivePatches();
             WorldPawns_Patch.RunDestructivePatches(); //todo examine GC optimization

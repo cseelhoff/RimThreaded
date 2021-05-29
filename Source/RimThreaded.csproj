@@ -11,15 +11,15 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net472</TargetFramework>
-		<Version>2.2.18</Version>
+		<Version>2.2.19</Version>
 		<Copyright>Copyright ©  2021</Copyright>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <AssemblyVersion>2.2.18.0</AssemblyVersion>
+    <AssemblyVersion>2.2.19.0</AssemblyVersion>
     <Authors>Caleb Seelhoff</Authors>
-    <FileVersion>2.2.18.0</FileVersion>
+    <FileVersion>2.2.19.0</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

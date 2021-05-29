@@ -8,23 +8,23 @@ namespace RimThreaded
     {
 
         [ThreadStatic] public static HashSet<Thing> tmpProcessedThings;
-        
-        static readonly Type original = typeof(RegionMaker);
-        static readonly Type patched = typeof(RegionMaker_Patch);
+
+        private static readonly Type Original = typeof(RegionMaker);
+        private static readonly Type Patched = typeof(RegionMaker_Patch);
         public static void InitializeThreadStatics()
         {
             tmpProcessedThings = new HashSet<Thing>();
         }
         public static void RunDestructivePatches()
         {
-            RimThreadedHarmony.Prefix(original, patched, "FloodFillAndAddCells");
-            RimThreadedHarmony.Prefix(original, patched, "CreateLinks");
+            RimThreadedHarmony.Prefix(Original, Patched, "FloodFillAndAddCells");
+            RimThreadedHarmony.Prefix(Original, Patched, "CreateLinks");
         }
 
         public static void RunNonDestructivePatches()
         {
-            RimThreadedHarmony.AddAllMatchingFields(original, patched);
-            RimThreadedHarmony.TranspileFieldReplacements(original, "RegisterThingsInRegionListers");
+            RimThreadedHarmony.AddAllMatchingFields(Original, Patched);
+            RimThreadedHarmony.TranspileFieldReplacements(Original, "RegisterThingsInRegionListers");
         }
 
 
