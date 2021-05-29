@@ -1004,13 +1004,13 @@ namespace RimThreaded
 			//	Log.Message("RimThreaded is patching " + combatExtendedVerb_LaunchProjectileCE.FullName + " " + methodName);
 			//	Transpile(combatExtendedVerb_LaunchProjectileCE, patched, methodName);
 			//}
-			if (combatExtendedVerb_MeleeAttackCE != null)
-			{
-				string methodName = "TryCastShot";
-				patched = typeof(Verb_MeleeAttackCE_Transpile);
-				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
-				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
-			}
+			//if (combatExtendedVerb_MeleeAttackCE != null)
+			//{
+			//	string methodName = "TryCastShot";
+			//	patched = typeof(Verb_MeleeAttackCE_Transpile);
+			//	Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
+			//	Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
+			//}
 
 			if (dubsSkylight_Patch_GetRoof != null)
 			{
@@ -1043,6 +1043,7 @@ namespace RimThreaded
 				patched = typeof(childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch_Transpile);
 				Log.Message("RimThreaded is patching " + childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch.FullName + " " + methodName);
 				Transpile(childrenHarmonyHediffComp_Discoverable_CheckDiscovered_Patch, patched, methodName);
+                PawnComponentsUtility_Patch.RunDestructivePatches();
 			}
 
 			if (androidTiers_GeneratePawns_Patch != null)
