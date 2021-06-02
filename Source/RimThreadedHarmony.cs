@@ -230,14 +230,18 @@ namespace RimThreaded
 											break;
 										}
 									}
-								} catch(System.NotSupportedException) {}
+								} catch(NotSupportedException) {}
 							}
                         }
                     }
                 }
             }
-
-            Log.Message("Apply");
+            Log.Message("RimThreaded Field Replacements Complete.");
+            List<CodeInstruction> g = PatchProcessor.GetCurrentInstructions(Method(TypeByName("RimWorld.Pawn_MeleeVerbs"), "PawnMeleeVerbsStaticUpdate"));
+			foreach(CodeInstruction h in g)
+            {
+				Log.Message(h.ToString());
+            }
 		}
 
 
