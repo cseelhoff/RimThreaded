@@ -22,12 +22,6 @@ namespace RimThreaded
             RimThreadedHarmony.TranspileFieldReplacements(original, "GetExtraFaction");
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(QuestUtility);
-            Type patched = typeof(QuestUtility_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetExtraFaction");
-        }
 
 
     }

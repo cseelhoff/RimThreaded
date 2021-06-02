@@ -4,6 +4,12 @@ using RimWorld;
 using Verse;
 using Verse.AI;
 using UnityEngine;
+using HarmonyLib;
+using static HarmonyLib.AccessTools;
+using System.Reflection.Emit;
+using System.Reflection;
+using static Verse.AI.PathFinder;
+using System.Linq;
 
 namespace RimThreaded
 {
@@ -11,147 +17,36 @@ namespace RimThreaded
     public class PathFinder_Patch
     {
         [ThreadStatic] public static List<int> disallowedCornerIndices;
-        [ThreadStatic] public static PathFinderNodeFast2[] calcGrid;
-        [ThreadStatic] public static FastPriorityQueue<CostNode2> openList;
+        [ThreadStatic] public static PathFinder.PathFinderNodeFast[] calcGrid;
+        [ThreadStatic] public static FastPriorityQueue<PathFinder.CostNode> openList;
         [ThreadStatic] public static ushort statusOpenValue;
         [ThreadStatic] public static ushort statusClosedValue;
-        [ThreadStatic] public static Dictionary<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorDict;
+        //[ThreadStatic] public static Dictionary<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorDict;
         
         public static void InitializeThreadStatics()
         {
-            openList = new FastPriorityQueue<CostNode2>(new CostNodeComparer2());
+            openList = new FastPriorityQueue<PathFinder.CostNode>(new PathFinder.CostNodeComparer());
             statusOpenValue = 1;
             statusClosedValue = 2;
             disallowedCornerIndices = new List<int>(4);
-            regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
+            //regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
         }
 
-        public class CostNodeComparer2 : IComparer<CostNode2>
+        public static void InitializeDisallowedCornerIndices()
         {
-            public int Compare(CostNode2 a, CostNode2 b)
-            {
-                return a.cost.CompareTo(b.cost);
-            }
+            disallowedCornerIndices = new List<int>(4);
         }
-        public struct CostNode2
+        public static void InitializeOpenList()
         {
-            public int index;
-
-            public int cost;
-
-            public CostNode2(int index, int cost)
-            {
-                this.index = index;
-                this.cost = cost;
-            }
+            openList = new FastPriorityQueue<PathFinder.CostNode>(new PathFinder.CostNodeComparer());
         }
-        public struct PathFinderNodeFast2
+        public static void InitializeStatusOpenValue()
         {
-            public int knownCost;
-
-            public int heuristicCost;
-
-            public int parentIndex;
-
-            public int costNodeCost;
-
-            public ushort status;
+            statusOpenValue = 1;
         }
-
-        public static void InitStatusesAndPushStartNode2(PathFinder __instance, ref int curIndex, IntVec3 start)
+        public static void InitializeStatusClosedValue()
         {
-            statusOpenValue += 2;
-            statusClosedValue += 2;
-
-            int size = __instance.mapSizeX * __instance.mapSizeZ;
-            if (calcGrid == null || calcGrid.Length < size)
-            {
-                calcGrid = new PathFinderNodeFast2[size];
-            }
-
-            if (statusClosedValue >= 65435)
-            {
-                int num = calcGrid.Length;
-                for (int i = 0; i < num; i++)
-                {
-                    calcGrid[i].status = 0;
-                }
-
-                statusOpenValue = 1;
-                statusClosedValue = 2;
-            }
-            curIndex = __instance.cellIndices.CellToIndex(start);
-            calcGrid[curIndex].knownCost = 0;
-            calcGrid[curIndex].heuristicCost = 0;
-            calcGrid[curIndex].costNodeCost = 0;
-            calcGrid[curIndex].parentIndex = curIndex;
-            calcGrid[curIndex].status = statusOpenValue;
-            if(openList == null)
-            {
-                openList = new FastPriorityQueue<CostNode2>();
-            }
-            openList.Clear();
-            openList.Push(new CostNode2(curIndex, 0));
-        }
-
-        public static PawnPath FinalizedPath2(PathFinder __instance, int finalIndex, bool usedRegionHeuristics)
-        {
-            //HACK - fix pool
-            //PawnPath emptyPawnPath = map(__instance).pawnPathPool.GetEmptyPawnPath();
-            PawnPath emptyPawnPath = new PawnPath();
-            int num = finalIndex;
-            while (true)
-            {
-                int parentIndex = calcGrid[num].parentIndex;
-                emptyPawnPath.AddNode(__instance.cellIndices.IndexToCell(num));
-                if (num == parentIndex)
-                {
-                    break;
-                }
-
-                num = parentIndex;
-            }
-            emptyPawnPath.SetupFound(calcGrid[finalIndex].knownCost, usedRegionHeuristics);
-            return emptyPawnPath;
-        }
-
-        public static void CalculateAndAddDisallowedCorners2(PathFinder __instance, TraverseParms traverseParms, PathEndMode peMode, CellRect destinationRect)
-        {
-            if (disallowedCornerIndices == null)
-            {
-                disallowedCornerIndices = new List<int>();
-            }
-            else
-            {
-                disallowedCornerIndices.Clear();
-            }
-            if (peMode == PathEndMode.Touch)
-            {
-                int minX = destinationRect.minX;
-                int minZ = destinationRect.minZ;
-                int maxX = destinationRect.maxX;
-                int maxZ = destinationRect.maxZ;
-                Map map = __instance.map;
-                if (!__instance.IsCornerTouchAllowed(minX + 1, minZ + 1, minX + 1, minZ, minX, minZ + 1))
-                {
-                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, minZ));
-                }
-
-                if (!__instance.IsCornerTouchAllowed(minX + 1, maxZ - 1, minX + 1, maxZ, minX, maxZ - 1))
-                {
-                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(minX, maxZ));
-                }
-
-                if (!__instance.IsCornerTouchAllowed(maxX - 1, maxZ - 1, maxX - 1, maxZ, maxX, maxZ - 1))
-                {
-                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, maxZ));
-                }
-
-                if (!__instance.IsCornerTouchAllowed(maxX - 1, minZ + 1, maxX - 1, minZ, maxX, minZ + 1))
-                {
-                    disallowedCornerIndices.Add(map.cellIndices.CellToIndex(maxX, minZ));
-                }
-            }
+            statusClosedValue = 2;
         }
 
         public static bool FindPath(PathFinder __instance, ref PawnPath __result, IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)
@@ -239,8 +134,8 @@ namespace RimThreaded
                 num8 = 13;
                 num9 = 18;
             }
-            CalculateAndAddDisallowedCorners2(__instance, traverseParms, peMode, destinationRect);
-            InitStatusesAndPushStartNode2(__instance, ref curIndex, start);
+            __instance.CalculateAndAddDisallowedCorners(traverseParms, peMode, destinationRect);
+            __instance.InitStatusesAndPushStartNode(ref curIndex, start);
             while (true)
             {
                 __instance.PfProfilerBeginSample("Open cell");
@@ -258,7 +153,7 @@ namespace RimThreaded
 
                 num5 += openList.Count;
                 num6++;
-                CostNode2 costNode = openList.Pop();
+                PathFinder.CostNode costNode = openList.Pop();
                 curIndex = costNode.index;
                 if (costNode.cost != calcGrid[curIndex].costNodeCost)
                 {
@@ -280,7 +175,7 @@ namespace RimThreaded
                     if (curIndex == num)
                     {
                         __instance.PfProfilerEndSample();
-                        PawnPath result = FinalizedPath2(__instance, curIndex, flag8);
+                        PawnPath result = __instance.FinalizedPath(curIndex, flag8);
                         __instance.PfProfilerEndSample();
                         __result = result;
                         return false;
@@ -289,7 +184,7 @@ namespace RimThreaded
                 else if (destinationRect.Contains(c) && !disallowedCornerIndices.Contains(curIndex))
                 {
                     __instance.PfProfilerEndSample();
-                    PawnPath result2 = FinalizedPath2(__instance, curIndex, flag8);
+                    PawnPath result2 = __instance.FinalizedPath(curIndex, flag8);
                     __instance.PfProfilerEndSample();
                     __result = result2;
                     return false;
@@ -512,7 +407,7 @@ namespace RimThreaded
 
                     if (flag8)
                     {
-                        calcGrid[num14].heuristicCost = Mathf.RoundToInt(get_regionCostCalculator(__instance).GetPathCostFromDestToRegion(num14) * PathFinder.RegionHeuristicWeightByNodesOpened.Evaluate(num3));
+                        calcGrid[num14].heuristicCost = Mathf.RoundToInt(__instance.regionCostCalculator.GetPathCostFromDestToRegion(num14) * PathFinder.RegionHeuristicWeightByNodesOpened.Evaluate(num3));
                         if (calcGrid[num14].heuristicCost < 0)
                         {
                             Log.ErrorOnce(string.Concat("Heuristic cost overflow for ", pawn.ToStringSafe(), " pathing from ", start, " to ", dest, "."), pawn.GetHashCode() ^ 0xB8DC389);
@@ -539,7 +434,7 @@ namespace RimThreaded
                     calcGrid[num14].status = statusOpenValue;
                     calcGrid[num14].costNodeCost = num21;
                     num3++;
-                    openList.Push(new CostNode2(num14, num21));
+                    openList.Push(new PathFinder.CostNode(num14, num21));
                 }
 
                 __instance.PfProfilerEndSample();
@@ -548,10 +443,10 @@ namespace RimThreaded
                 if (num3 >= num4 && flag6 && !flag8)
                 {
                     flag8 = true;
-                    get_regionCostCalculator(__instance).Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, disallowedCornerIndices);
-                    InitStatusesAndPushStartNode2(__instance, ref curIndex, start);
+                    __instance.regionCostCalculator.Init(destinationRect, traverseParms, num8, num9, byteGrid, allowedArea, flag9, disallowedCornerIndices);
+                    __instance.InitStatusesAndPushStartNode(ref curIndex, start);
                     openList.Clear();
-                    openList.Push(new CostNode2(curIndex, 0));
+                    openList.Push(new PathFinder.CostNode(curIndex, 0));
                     num3 = 0;
                     num2 = 0;
                 }
@@ -565,13 +460,251 @@ namespace RimThreaded
             return false;
         }
 
-        public static RegionCostCalculatorWrapper get_regionCostCalculator(PathFinder __instance)
+
+        static readonly Type costNodeType = TypeByName("Verse.AI.PathFinder+CostNode");
+        static readonly Type icomparerCostNodeType1 = typeof(IComparer<>).MakeGenericType(costNodeType);
+        static readonly Type fastPriorityQueueCostNodeType1 = typeof(FastPriorityQueue<>).MakeGenericType(costNodeType);
+
+        static readonly Type costNodeType2 = typeof(CostNode);
+        static readonly Type icomparerCostNodeType2 = typeof(IComparer<>).MakeGenericType(costNodeType2);
+        static readonly Type fastPriorityQueueCostNodeType2 = typeof(FastPriorityQueue<>).MakeGenericType(costNodeType2);
+
+        internal static void RunNonDestructivePatches()
         {
-            if (!regionCostCalculatorDict.TryGetValue(__instance, out RegionCostCalculatorWrapper regionCostCalculatorWrapper)) {
-                regionCostCalculatorWrapper = new RegionCostCalculatorWrapper(__instance.map);
-                regionCostCalculatorDict[__instance] = regionCostCalculatorWrapper;
-            }
-            return regionCostCalculatorWrapper;
+            Type original = typeof(PathFinder);
+            Type patched = typeof(PathFinder_Patch);
+            //RimThreadedHarmony.Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
         }
+
+        public static IEnumerable<CodeInstruction> FindPath(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            //calcGrid
+            //statusOpenValue
+            //statusClosedValue
+            //disallowedCornerIndices
+            //openList
+            //InitStatusesAndPushStartNode2
+            //FinalizedPath2
+            //CalculateAndAddDisallowedCorners2
+            //FastPriorityQueueCostNode.get_Count
+            //FastPriorityQueueCostNode.pop
+            //FastPriorityQueueCostNode.push
+            //FastPriorityQueueCostNode.Clear
+            //CostNode.index
+            //CostNode.cost
+            //CostNode(int, int)
+            //FastPriorityQueueCostNode(icomparerCostNode)
+
+            int[] matchesFound = new int[14];
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            int i = 0;
+            while (i < instructionsList.Count)
+            {
+                int matchIndex = 0;
+                if (
+                    instructionsList[i].opcode == OpCodes.Ldsfld &&
+                    (FieldInfo)instructionsList[i].operand == Field(typeof(PathFinder), "calcGrid")
+                    )
+                {
+                    instructionsList[i].operand = Field(typeof(PathFinder_Patch), "calcGrid");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+
+                if (
+                   instructionsList[i].opcode == OpCodes.Ldsfld &&
+                   (FieldInfo)instructionsList[i].operand == Field(typeof(PathFinder), "statusOpenValue")
+                   )
+                {
+                    instructionsList[i].operand = Field(typeof(PathFinder_Patch), "statusOpenValue");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                   instructionsList[i].opcode == OpCodes.Ldsfld &&
+                   (FieldInfo)instructionsList[i].operand == Field(typeof(PathFinder), "statusClosedValue")
+                   )
+                {
+                    instructionsList[i].operand = Field(typeof(PathFinder_Patch), "statusClosedValue");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                  i + 1 < instructionsList.Count &&
+                  instructionsList[i + 1].opcode == OpCodes.Ldfld &&
+                  (FieldInfo)instructionsList[i + 1].operand == Field(typeof(PathFinder), "disallowedCornerIndices")
+                  )
+                {
+                    instructionsList[i].opcode = OpCodes.Ldsfld;
+                    instructionsList[i].operand = Field(typeof(PathFinder_Patch), "disallowedCornerIndices");
+                    yield return instructionsList[i++];
+                    i++;
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Ldfld &&
+                    (FieldInfo)instructionsList[i].operand == Field(typeof(PathFinder), "regionCostCalculator")
+                    )
+                {
+                    instructionsList[i].opcode = OpCodes.Call;
+                    instructionsList[i].operand = Method(typeof(PathFinder_Patch), "get_regionCostCalculator");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                if (
+                    i + 1 < instructionsList.Count &&
+                    instructionsList[i + 1].opcode == OpCodes.Ldfld &&
+                    (FieldInfo)instructionsList[i + 1].operand == Field(typeof(PathFinder), "openList")
+                    )
+                {
+                    instructionsList[i].opcode = OpCodes.Ldsfld;
+                    instructionsList[i].operand = Field(typeof(PathFinder_Patch), "openList");
+                    yield return instructionsList[i++];
+                    i++;
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Call &&
+                    (MethodInfo)instructionsList[i].operand == Method(typeof(PathFinder), "InitStatusesAndPushStartNode")
+                   )
+                {
+                    instructionsList[i].operand = Method(typeof(PathFinder_Patch), "InitStatusesAndPushStartNode2");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                   instructionsList[i].opcode == OpCodes.Call &&
+                   (MethodInfo)instructionsList[i].operand == Method(typeof(PathFinder), "FinalizedPath")
+                   )
+                {
+                    instructionsList[i].operand = Method(typeof(PathFinder_Patch), "FinalizedPath2");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                   instructionsList[i].opcode == OpCodes.Call &&
+                   (MethodInfo)instructionsList[i].operand == Method(typeof(PathFinder), "CalculateAndAddDisallowedCorners")
+                   )
+                {
+                    instructionsList[i].operand = Method(typeof(PathFinder_Patch), "CalculateAndAddDisallowedCorners2");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Callvirt &&
+                    (MethodInfo)instructionsList[i].operand == Method(fastPriorityQueueCostNodeType1, "get_Count")
+                    )
+                {
+                    instructionsList[i].operand = Method(fastPriorityQueueCostNodeType2, "get_Count");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Callvirt &&
+                    (MethodInfo)instructionsList[i].operand == Method(fastPriorityQueueCostNodeType1, "Pop")
+                )
+                {
+                    instructionsList[i].operand = Method(fastPriorityQueueCostNodeType2, "Pop");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Callvirt &&
+                    (MethodInfo)instructionsList[i].operand == Method(fastPriorityQueueCostNodeType1, "Push")
+                )
+                {
+                    instructionsList[i].operand = Method(fastPriorityQueueCostNodeType2, "Push");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                /*
+				matchIndex++;
+				if (
+					instructionsList[i].opcode == OpCodes.Callvirt &&
+					(MethodInfo)instructionsList[i].operand == Method(fastPriorityQueueCostNodeType1, "Clear")
+				)
+				{
+					instructionsList[i].operand = Method(fastPriorityQueueCostNodeType2, "Clear");
+					yield return instructionsList[i++];
+					matchesFound[matchIndex]++;
+					continue;
+				}
+				*/
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Ldfld &&
+                    (FieldInfo)instructionsList[i].operand == Field(costNodeType, "index")
+                )
+                {
+                    instructionsList[i].operand = Field(costNodeType2, "index");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Ldfld &&
+                    (FieldInfo)instructionsList[i].operand == Field(costNodeType, "cost")
+)
+                {
+                    instructionsList[i].operand = Field(costNodeType2, "cost");
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Newobj &&
+                    (ConstructorInfo)instructionsList[i].operand == costNodeType.GetConstructor(new Type[] { typeof(int), typeof(int) })
+                )
+                {
+                    instructionsList[i].operand = costNodeType2.GetConstructor(new Type[] { typeof(int), typeof(int) });
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+                matchIndex++;
+                if (
+                    instructionsList[i].opcode == OpCodes.Newobj &&
+                    (ConstructorInfo)instructionsList[i].operand == fastPriorityQueueCostNodeType1.GetConstructor(new Type[] { icomparerCostNodeType1 })
+                )
+                {
+                    instructionsList[i].operand = fastPriorityQueueCostNodeType2.GetConstructor(new Type[] { icomparerCostNodeType2 });
+                    yield return instructionsList[i++];
+                    matchesFound[matchIndex]++;
+                    continue;
+                }
+
+                yield return instructionsList[i++];
+            }
+            for (int mIndex = 0; mIndex < matchesFound.Length; mIndex++)
+            {
+                if (matchesFound[mIndex] < 1)
+                    Log.Error("IL code instruction set " + mIndex + " not found");
+            }
+        }
+
     }
 }

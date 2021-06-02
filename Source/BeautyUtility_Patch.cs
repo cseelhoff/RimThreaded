@@ -9,16 +9,12 @@ namespace RimThreaded
     public class BeautyUtility_Patch
     {
         [ThreadStatic] public static List<Thing> tempCountedThings;
-        [ThreadStatic] public static List<IntVec3> tmpBeautyRelevantCells;
-        [ThreadStatic] public static List<Room> tmpVisibleRooms;
         [ThreadStatic] public static List<IntVec3> beautyRelevantCells;
         [ThreadStatic] public static List<Room> visibleRooms;
 
         public static void InitializeThreadStatics()
         {
             tempCountedThings = new List<Thing>();
-            tmpBeautyRelevantCells = new List<IntVec3>();
-            tmpVisibleRooms = new List<Room>();
             beautyRelevantCells = new List<IntVec3>();
             visibleRooms = new List<Room>();
         }

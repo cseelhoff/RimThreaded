@@ -7,7 +7,7 @@ namespace RimThreaded
 {
     class RegionTraverser_Transpile
     {
-        [ThreadStatic] public static Dictionary<Region, uint[]> regionClosedIndex;
+        [ThreadStatic] public static Dictionary<Region, uint[]> regionClosedIndex; //newly defined
         [ThreadStatic] public static Queue<RegionTraverser.BFSWorker> freeWorkers;
         [ThreadStatic] public static int NumWorkers;
 
@@ -16,6 +16,20 @@ namespace RimThreaded
 			regionClosedIndex = new Dictionary<Region, uint[]>();
             NumWorkers = 8;
 			freeWorkers = new Queue<RegionTraverser.BFSWorker>(NumWorkers);
+            for (int closedArrayPos = 0; closedArrayPos < NumWorkers; closedArrayPos++)
+            {
+                freeWorkers.Enqueue(new RegionTraverser.BFSWorker(closedArrayPos));
+            }
+        }
+
+        public static void InitializeNumWorkers()
+        {
+            NumWorkers = 8;
+        }
+
+        public static void InitializeFreeWorkers()
+        {
+            freeWorkers = new Queue<RegionTraverser.BFSWorker>(NumWorkers);
             for (int closedArrayPos = 0; closedArrayPos < NumWorkers; closedArrayPos++)
             {
                 freeWorkers.Enqueue(new RegionTraverser.BFSWorker(closedArrayPos));
@@ -33,7 +47,7 @@ namespace RimThreaded
 			Type original = typeof(RegionTraverser);
             Type patched = typeof(RegionTraverser_Transpile);
 			RimThreadedHarmony.AddAllMatchingFields(original, patched);
-            RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), Method(typeof(RegionTraverser_Transpile), "GetRegionClosedIndex"));
+            
 
             RimThreadedHarmony.TranspileFieldReplacements(original, "BreadthFirstTraverse", new[] {
                 typeof(Region),

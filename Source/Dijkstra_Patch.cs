@@ -20,6 +20,11 @@ namespace RimThreaded
             tmpResult = new List<KeyValuePair<T, float>>();
         }
 
+        public static void InitializeQueue()
+        {
+            queue = new FastPriorityQueue<KeyValuePair<T, float>>(new DistanceComparer());
+        }
+
         private class DistanceComparer : IComparer<KeyValuePair<T, float>>
         {
             public int Compare(KeyValuePair<T, float> a, KeyValuePair<T, float> b)

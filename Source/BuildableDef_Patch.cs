@@ -7,7 +7,7 @@ namespace RimThreaded
 
     public class BuildableDef_Patch
     {
-        [ThreadStatic] public static List<PlaceWorker> placeWorkersInstantiatedInt;
+        [ThreadStatic] public static List<PlaceWorker> placeWorkersInstantiatedInt; //TODO candidate for linked list?
 
         public static void RunNonDestructivePatches()
         {

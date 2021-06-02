@@ -19,6 +19,16 @@ namespace RimThreaded
             diagonals = GenAdj.DiagonalDirections.ToList();
         }
 
+        public static void InitializeCardinals()
+        {
+            cardinals = GenAdj.CardinalDirections.ToList();
+        }
+
+        public static void InitializeDiagonals()
+        {
+            diagonals = GenAdj.DiagonalDirections.ToList();
+        }
+
         internal static void RunNonDestructivePatches()
         {
             Type original = typeof(Toils_Ingest);

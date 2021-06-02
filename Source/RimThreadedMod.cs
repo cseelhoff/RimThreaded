@@ -5,6 +5,7 @@ using System.Reflection;
 using Verse;
 using UnityEngine;
 using System.Reflection.Emit;
+using System.Linq;
 
 namespace RimThreaded 
 { 
@@ -94,35 +95,44 @@ namespace RimThreaded
                 if (patches is null) { }
                 else
                 {
+                    Patch[] sortedPrefixes = patches.Prefixes.ToArray();
+                    PatchProcessor.GetSortedPatchMethods(originalMethod, sortedPrefixes);
                     bool isRimThreadedPrefixed = false;
-                    foreach (Patch patch in patches.Prefixes)
+                    string modsText1 = "";
+                    foreach (Patch patch in sortedPrefixes)
                     {
-
                         if (patch.owner.Equals("majorhoff.rimthreaded") && !RimThreadedHarmony.nonDestructivePrefixes.Contains(patch.PatchMethod) && (patches.Prefixes.Count > 1 || patches.Postfixes.Count > 0 || patches.Transpilers.Count > 0))
                         {
                             isRimThreadedPrefixed = true;
-                            modsText += "\n  ---Patch method: " + patch.PatchMethod.DeclaringType.FullName + " " + patch.PatchMethod + "---\n";
-                            modsText += "  RimThreaded priority: " + patch.priority + "\n";
+                            modsText1 = "\n  ---Patch method: " + patch.PatchMethod.DeclaringType.FullName + " " + patch.PatchMethod + "---\n";
+                            modsText1 += "  RimThreaded priority: " + patch.priority + "\n";
                             break;
                         }
                     }
                     if (isRimThreadedPrefixed)
                     {
-                        foreach (Patch patch in patches.Prefixes)
+                        bool rimThreadedPatchFound = false;
+                        bool headerPrinted = false;
+                        foreach (Patch patch in sortedPrefixes)
                         {
-                            if (!patch.owner.Equals("majorhoff.rimthreaded"))
+                            if (patch.owner.Equals("majorhoff.rimthreaded"))
+                                rimThreadedPatchFound = true;
+                            if (!patch.owner.Equals("majorhoff.rimthreaded") && rimThreadedPatchFound)
                             {
                                 //Settings.modsText += "method: " + patch.PatchMethod + " - ";
+                                if(!headerPrinted)
+                                    modsText += modsText1;
+                                headerPrinted = true;
                                 modsText += "  owner: " + patch.owner + " - ";
                                 modsText += "  priority: " + patch.priority + "\n";
                             }
                         }
-                        foreach (Patch patch in patches.Postfixes)
-                        {
-                            //Settings.modsText += "method: " + patch.PatchMethod + " - ";
-                            modsText += "  owner: " + patch.owner + " - ";
-                            modsText += "  priority: " + patch.priority + "\n";
-                        }
+                        //foreach (Patch patch in patches.Postfixes)
+                        //{
+                        //    //Settings.modsText += "method: " + patch.PatchMethod + " - ";
+                        //    modsText += "  owner: " + patch.owner + " - ";
+                        //    modsText += "  priority: " + patch.priority + "\n";
+                        //}
                         foreach (Patch patch in patches.Transpilers)
                         {
                             //Settings.modsText += "method: " + patch.PatchMethod + " - ";

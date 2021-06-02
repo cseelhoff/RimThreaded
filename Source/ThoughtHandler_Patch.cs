@@ -7,10 +7,10 @@ namespace RimThreaded
     
     public class ThoughtHandler_Patch
     {
-        [ThreadStatic] public static List<Thought> tmpThoughts = new List<Thought>();
-        [ThreadStatic] public static List<Thought> tmpTotalMoodOffsetThoughts = new List<Thought>();
-        [ThreadStatic] public static List<ISocialThought> tmpSocialThoughts = new List<ISocialThought>();
-        [ThreadStatic] public static List<ISocialThought> tmpTotalOpinionOffsetThoughts = new List<ISocialThought>();
+        [ThreadStatic] public static List<Thought> tmpThoughts;
+        [ThreadStatic] public static List<Thought> tmpTotalMoodOffsetThoughts;
+        [ThreadStatic] public static List<ISocialThought> tmpSocialThoughts;
+        [ThreadStatic] public static List<ISocialThought> tmpTotalOpinionOffsetThoughts;
 
         public static void InitializeThreadStatics()
         {

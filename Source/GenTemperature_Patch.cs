@@ -23,6 +23,10 @@ namespace RimThreaded
 			neighRoomGroups = new List<RoomGroup>();
 			beqRoomGroups = new RoomGroup[4];
 		}
+		public static void InitializeBeqRoomGroups()
+        {
+			beqRoomGroups = new RoomGroup[4];
+		}
 
 		public static void RunNonDestructivePatches()
         {

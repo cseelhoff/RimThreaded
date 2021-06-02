@@ -57,6 +57,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
+		<PackageReference Include="Unity.Newtonsoft.Json" Version="7.0.0" />
   </ItemGroup>
   <Target Name="MyCode" BeforeTargets="UpdateReferences">
 		<PropertyGroup>

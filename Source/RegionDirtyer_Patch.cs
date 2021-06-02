@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Verse;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {

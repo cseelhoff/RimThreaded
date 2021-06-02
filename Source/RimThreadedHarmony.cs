@@ -12,6 +12,8 @@ using UnityEngine;
 using Verse.Sound;
 using static HarmonyLib.AccessTools;
 using Verse.AI;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace RimThreaded
 {
@@ -53,9 +55,9 @@ namespace RimThreaded
 #endif
 			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version + "  is patching methods...");
 			
-            LoadFieldReplacements(); 
-            PatchDestructiveFixes();
-            ApplyFieldReplacements();
+            LoadFieldReplacements();
+			ApplyFieldReplacements();
+			PatchDestructiveFixes();
 			PatchNonDestructiveFixes();
 			PatchModCompatibility();
 #if DEBUG
@@ -65,38 +67,182 @@ namespace RimThreaded
 			Log.Message("RimThreaded patching is complete.");
 		}
 
-        private static void LoadFieldReplacements()
-        {
-            //XmlDocument doc = new XmlDocument();
-            //doc.Load("Field_Replacements.xml");
-
-            //XmlNode root = doc.FirstChild;
-            //Console.WriteLine(root.FirstChild.OuterXml);
-			//XmlReader reader = XmlReader.Create("Field_Replacements.xml");
-			//         reader.ReadToFollowing("replacement");
-			//         do
-			//         {
-			//             reader.ReadToFollowing("class");
-			//             Console.WriteLine($"class: {reader.ReadElementContentAsString()}");
-
-			//             reader.ReadToFollowing("field");
-			//             Console.WriteLine($"field: {reader.ReadElementContentAsString()}");
-
-			//             reader.ReadToFollowing("type");
-			//             Console.WriteLine($"type: {reader.ReadElementContentAsString()}");
-
-			//             Console.WriteLine("-------------------------");
-
-			//         } while (reader.ReadToFollowing("replacement"));
+		[Serializable]
+		class Replacements
+		{
+			public List<ClassReplacement> FieldReplacements;
 		}
-		private static void ApplyFieldReplacements()
-        {
-            
+
+		[Serializable]
+		class ClassReplacement
+		{
+			public string ClassName;
+			public List<ThreadStaticDetail> ThreadStatics;
+			public List<MethodDetail> TargetedMethods;
+		}
+		[Serializable]
+		class ThreadStaticDetail
+		{
+			public string FieldName;
+			public string PatchedClassName;
+			public string InitializerMethodName;
+		}
+		[Serializable]
+		class MethodDetail
+		{
+			public string MethodName;
+			public List<TypeDetail> ParameterTypes;
+		}
+		[Serializable]
+		class TypeDetail
+		{
+			public string TypeName;
+			public bool IsRef;
+			public TypeDetail GenericChildType;
+		}
+
+		static Dictionary<FieldInfo, FieldInfo> replacementFields = new Dictionary<FieldInfo, FieldInfo>();
+		private static void LoadFieldReplacements()
+		{
+			string fileName = "replacements2.json";
+            string jsonString = File.ReadAllText(fileName);
+            Replacements replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
+
+            //IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
+            //                               where !a.FullName.StartsWith("Microsoft.VisualStudio")
+            //                               select a;
+            //foreach (Assembly a in source)
+            //{
+            //    Type[] b = GetTypesFromAssembly(a);
+            //    if (a.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+            //    {
+            //        foreach (Type c in b)
+            //        {
+            //            if (c.FullName.Contains("BFSW"))
+            //            {
+            //                Log.Message(c.FullName);
+            //                //Console.WriteLine(c.FullName);
+            //            }
+            //        }
+            //    }
+            //}
+            foreach (ClassReplacement classReplacement in replacements.FieldReplacements)
+            {
+
+				Type type = TypeByName(classReplacement.ClassName);
+				if(type == null)
+                {
+					Log.Error("Cannot find class named: " + classReplacement.ClassName);
+					continue;
+                }
+				if (classReplacement.ThreadStatics != null && classReplacement.ThreadStatics.Count > 0)
+				{
+					AssemblyName aName = null;
+					AssemblyBuilder ab = null;
+					ModuleBuilder modBuilder = null;
+					TypeBuilder tb = null;
+					foreach (ThreadStaticDetail threadStaticDetail in classReplacement.ThreadStatics)
+					{
+						FieldInfo fieldInfo = Field(type, threadStaticDetail.FieldName);
+                        if (fieldInfo == null)
+                        {
+                            Log.Error("Cannot find field named: " + classReplacement.ClassName + "." + threadStaticDetail.FieldName);
+                            continue;
+                        }
+                        FieldInfo replacementField;
+                        if (threadStaticDetail.PatchedClassName == null)
+                        {
+							if (aName == null)
+								aName = new AssemblyName(type.Name + "_Replacement");
+							if (ab == null)
+								ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
+							if (modBuilder == null)
+								modBuilder = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
+							if (tb == null)
+								tb = modBuilder.DefineType(type.Name + "_Replacement", TypeAttributes.Public);
+							
+							ConstructorInfo threadStaticConstructor = typeof(ThreadStaticAttribute).GetConstructor(new Type[0]);
+							CustomAttributeBuilder attributeBuilder = new CustomAttributeBuilder(threadStaticConstructor, new object[0]);
+							FieldBuilder fb = tb.DefineField(fieldInfo.Name, fieldInfo.FieldType, fieldInfo.Attributes);
+							fb.SetCustomAttribute(attributeBuilder);
+							replacementField = fb;
+						}
+                        else
+                        {
+                            Type replacementType = TypeByName(threadStaticDetail.PatchedClassName);
+                            if (replacementType == null)
+                            {
+                                Log.Error("Cannot find replacement class named: " + threadStaticDetail.PatchedClassName);
+                                continue;
+                            }
+                            replacementField = Field(replacementType, threadStaticDetail.FieldName);
+                            if (replacementField == null)
+                            {
+                                Log.Error("Cannot find replacement field named: " + threadStaticDetail.PatchedClassName + "." + threadStaticDetail.FieldName);
+                                continue;
+                            }
+                        }
+                        replaceFields[fieldInfo] = replacementField;
+					}
+					if (tb != null)
+					{
+						Type newFieldType = tb.CreateType();
+						//MethodBuilder mb = tb.DefineMethod("dummy", MethodAttributes.Public | MethodAttributes.Static, typeof(void), null);
+						//mb.InitLocals = true;
+						//ILGenerator il = mb.GetILGenerator();
+						//il.Emit(OpCodes.Ret);
+					}
+				}
+            }
         }
 
+		private static void ApplyFieldReplacements()
+        {
+			SimplePool_Patch_RunNonDestructivePatches();
+			replaceFields.Add(Field(typeof(Region), "closedIndex"), Method(typeof(RegionTraverser_Transpile), "GetRegionClosedIndex"));
+
+			IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
+                                           where !a.FullName.StartsWith("Microsoft.VisualStudio")
+                                           select a;
+            foreach (Assembly a in source)
+            {
+                Type[] b = GetTypesFromAssembly(a);
+                if (a.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+                {
+                    foreach (Type c in b)
+                    {
+                        foreach (MethodInfo d in c.GetMethods())
+                        {
+							if (d.IsDeclaredMember())
+							{
+								try {
+									IEnumerable<KeyValuePair<OpCode, object>> f = PatchProcessor.ReadMethodBody(d);
+									foreach (KeyValuePair<OpCode, object> e in f)
+									{
+										if (e.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
+										{
+											TranspileFieldReplacements2(d);
+											break;
+										}
+										if (e.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
+										{
+											TranspileFieldReplacements2(d);
+											break;
+										}
+									}
+								} catch(System.NotSupportedException) {}
+							}
+                        }
+                    }
+                }
+            }
+
+            Log.Message("Apply");
+		}
 
 
-        public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, CodeInstruction currentInstruction)
+
+		public static List<CodeInstruction> EnterLock(LocalBuilder lockObject, LocalBuilder lockTaken, List<CodeInstruction> loadLockObjectInstructions, CodeInstruction currentInstruction)
 		{
 			List<CodeInstruction> codeInstructions = new List<CodeInstruction>();
 			loadLockObjectInstructions[0].labels = currentInstruction.labels;
@@ -330,12 +476,12 @@ namespace RimThreaded
 
 		public static void AddAllMatchingFields(Type original, Type patched, bool matchStaticFieldsOnly = true)
 		{
-			IEnumerable<KeyValuePair<FieldInfo, FieldInfo>> allMatchingFields = GetAllMatchingFields(original, patched, matchStaticFieldsOnly);
-			foreach (KeyValuePair<FieldInfo, FieldInfo> matchingFields in allMatchingFields)
-			{
-				//Log.Message("Adding field replacement for: " + matchingFields.Key.DeclaringType.Name + "." + matchingFields.Key.Name + " with: " + matchingFields.Value.DeclaringType.Name + "." + matchingFields.Value.Name);
-				replaceFields.Add(matchingFields.Key, matchingFields.Value);
-			}
+			//IEnumerable<KeyValuePair<FieldInfo, FieldInfo>> allMatchingFields = GetAllMatchingFields(original, patched, matchStaticFieldsOnly);
+			//foreach (KeyValuePair<FieldInfo, FieldInfo> matchingFields in allMatchingFields)
+			//{
+			//	//Log.Message("Adding field replacement for: " + matchingFields.Key.DeclaringType.Name + "." + matchingFields.Key.Name + " with: " + matchingFields.Value.DeclaringType.Name + "." + matchingFields.Value.Name);
+			//	replaceFields.Add(matchingFields.Key, matchingFields.Value);
+			//}
 		}
 
 		public static IEnumerable<KeyValuePair<FieldInfo, FieldInfo>> GetAllMatchingFields(Type original, Type patched, bool matchStaticFieldsOnly = true)
@@ -354,10 +500,12 @@ namespace RimThreaded
 				}
 			}
 		}
+		public static HashSet<object> notifiedObjects = new HashSet<object>();
 
 		public static IEnumerable<CodeInstruction> ReplaceFieldsTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
-			foreach(CodeInstruction codeInstruction in instructions)
+			notifiedObjects.Clear();
+			foreach (CodeInstruction codeInstruction in instructions)
             {
                 object operand = codeInstruction.operand;
                 if (operand != null && replaceFields.TryGetValue(operand, out object newObjectInfo))
@@ -370,18 +518,26 @@ namespace RimThreaded
                             {
                                 case FieldInfo newFieldInfo:
 #if DEBUG
-                                    Log.Message("RimThreaded is replacing field: " +
-                                                fieldInfo.DeclaringType + "." + fieldInfo.Name +
-                                                " with field: " + newFieldInfo.DeclaringType + "." + newFieldInfo.Name);
+									if (!notifiedObjects.Contains(newFieldInfo))
+									{
+										notifiedObjects.Add(newFieldInfo);
+										Log.Message("RimThreaded is replacing field: " +
+													fieldInfo.DeclaringType + "." + fieldInfo.Name +
+													" with field: " + newFieldInfo.DeclaringType + "." + newFieldInfo.Name);
+									}
 #endif
                                     codeInstruction.operand = newFieldInfo;
                                     break;
                                 case MethodInfo newMethodInfo:
 #if DEBUG
-                                    Log.Message("RimThreaded is replacing field: " +
-                                                fieldInfo.DeclaringType + "." + fieldInfo.Name +
-                                                " with CALL method: " + newMethodInfo.DeclaringType + "." +
-                                                newMethodInfo.Name);
+										if (!notifiedObjects.Contains(newMethodInfo))
+										{
+											notifiedObjects.Add(newMethodInfo);
+											Log.Message("RimThreaded is replacing field: " +
+												fieldInfo.DeclaringType + "." + fieldInfo.Name +
+												" with CALL method: " + newMethodInfo.DeclaringType + "." +
+												newMethodInfo.Name);
+										}
 #endif
                                     codeInstruction.opcode = OpCodes.Call;
                                     codeInstruction.operand = newMethodInfo;
@@ -396,20 +552,28 @@ namespace RimThreaded
                             {
                                 case FieldInfo newFieldInfo:
 #if DEBUG
-                                    Log.Message("RimThreaded is replacing method: " +
-                                                methodInfo.DeclaringType + "." + methodInfo.Name +
-                                                " with STATIC field: " + newFieldInfo.DeclaringType + "." +
-                                                newFieldInfo.Name);
+									if (!notifiedObjects.Contains(newFieldInfo))
+									{
+										notifiedObjects.Add(newFieldInfo);
+										Log.Message("RimThreaded is replacing method: " +
+											methodInfo.DeclaringType + "." + methodInfo.Name +
+											" with STATIC field: " + newFieldInfo.DeclaringType + "." +
+											newFieldInfo.Name);
+									}
 #endif
                                     codeInstruction.opcode = OpCodes.Ldsfld;
                                     codeInstruction.operand = newFieldInfo;
                                     break;
                                 case MethodInfo newMethodInfo:
 #if DEBUG
-                                    Log.Message("RimThreaded is replacing method: " +
-                                                methodInfo.DeclaringType + "." + methodInfo.Name +
-                                                " with method: " + newMethodInfo.DeclaringType + "." +
-                                                newMethodInfo.Name);
+									if (!notifiedObjects.Contains(newMethodInfo))
+									{
+										notifiedObjects.Add(newMethodInfo);
+										Log.Message("RimThreaded is replacing method: " +
+											methodInfo.DeclaringType + "." + methodInfo.Name +
+											" with method: " + newMethodInfo.DeclaringType + "." +
+											newMethodInfo.Name);
+									}
 #endif
                                     codeInstruction.operand = newMethodInfo;
                                     break;
@@ -481,7 +645,12 @@ namespace RimThreaded
 		public static void TranspileFieldReplacements(Type original, string methodName, Type[] origType = null)
 		{
 			//Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.Name + "." + methodName);
-			harmony.Patch(Method(original, methodName, origType), transpiler: replaceFieldsHarmonyTranspiler);
+			//harmony.Patch(Method(original, methodName, origType), transpiler: replaceFieldsHarmonyTranspiler);
+		}
+		public static void TranspileFieldReplacements2(MethodBase original)
+		{
+			Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
+			harmony.Patch(original, transpiler: replaceFieldsHarmonyTranspiler);
 		}
 
 		public static void TranspileLockAdd3(Type original, string methodName, Type[] origType = null)
@@ -489,7 +658,7 @@ namespace RimThreaded
 			harmony.Patch(Method(original, methodName, origType), transpiler: add3Transpiler);
 		}
 
-		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true)
+		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true, int priority = 0)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
 			Type[] patch_type = null;
@@ -514,7 +683,7 @@ namespace RimThreaded
 				}
 			}
 			MethodInfo pMethod = Method(patched, methodName, patch_type);
-			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod));
+			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod, priority));
 			if (!destructive)
 			{
 				nonDestructivePrefixes.Add(pMethod);
@@ -559,7 +728,6 @@ namespace RimThreaded
 			//Prevents Game Crash from wooden floors and others
 			GameObject_Patch.RunNonDestructivePatches();
 
-            SimplePool_Patch_RunNonDestructivePatches();
 			//Simple
             AlertsReadout_Patch.RunNonDestructivesPatches(); //this will disable alert checks on ultrafast speed for an added speed boost
 			Area_Patch.RunNonDestructivePatches();
@@ -592,6 +760,7 @@ namespace RimThreaded
 			MapTemperature_Patch.RunNonDestructivePatches();
 			Medicine_Patch.RunNonDestructivePatches();
 			//MemoryUtility_Patch.RunNonDestructivePatches();
+			PathFinder_Patch.RunNonDestructivePatches(); //large method
 			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
 			Pawn_MeleeVerbs_Patch.RunNonDestructivePatches();
 			Pawn_WorkSettings_Patch.RunNonDestructivePatches();
@@ -629,9 +798,8 @@ namespace RimThreaded
 			InfestationCellFinder_Patch.RunNonDestructivePatches(); //fix public struct
 			LongEventHandler_Patch.RunNonDestructivePatches();
 			Map_Transpile.RunNonDestructivePatches();
-			PathFinder_Transpile.RunNonDestructivePatches(); //large method
 			PawnCapacitiesHandler_Transpile.RunNonDestructivePatches(); //reexamine complexity?
-			Rand_Patch.RunNonDestructivePatches(); //uses old transpile for lock
+			Rand_Patch.RunNonDestructivePatches(); //TODO replace with concurrent stack - uses old transpile for lock
 			RegionTraverser_Transpile.RunNonDestructivePatches(); 
 			SituationalThoughtHandler_Patch.RunNonDestructivePatches();
 			//Thing_Patch.RunNonDestructivePatches();
@@ -781,6 +949,7 @@ namespace RimThreaded
 			DrugAIUtility_Patch.RunDestructivePatches();
 			DynamicDrawManager_Patch.RunDestructivePatches();
 			FactionManager_Patch.RunDestructivePatches();
+			FilthMaker_Patch.RunDestructivePatches();
 			GenClosest_Patch.RunDestructivePatches();
 			GenCollection_Patch.RunDestructivePatches();
             GenSpawn_Patch.RunDestructivePatches();
@@ -811,7 +980,7 @@ namespace RimThreaded
 			PortraitRenderer_Patch.RunDestructivePatches();
 			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
 			Reachability_Patch.RunDestructivePatches();
-			ReachabilityCache_Patch.RunDestructivePatches();
+			ReachabilityCache_Patch.RunDestructivePatches(); //TODO simplfy instance.fields
 			RealtimeMoteList_Patch.RunDestructivePatches();
 			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
@@ -1176,7 +1345,14 @@ namespace RimThreaded
 			harmony.Patch(Method(typeof(Verse.TooltipHandler), "DrawActiveTips"), transpiler: RealtimeSinceStartupTranspiler);
 			harmony.Patch(Method(typeof(Verse.Widgets), "CheckPlayDragSliderSound"), transpiler: RealtimeSinceStartupTranspiler);
 
-            //TranspileComponentTransform Fixes
+            Type zlsh = TypeByName("ZombieLand.ZombieStateHandler");
+			if (zlsh != null)
+			{
+				harmony.Patch(Method(zlsh, "CastBrainzThought"), transpiler: RealtimeSinceStartupTranspiler);
+				harmony.Patch(Method(zlsh, "StartRage"), transpiler: RealtimeSinceStartupTranspiler);
+			}
+
+			//TranspileComponentTransform Fixes
 			harmony.Patch(Method(typeof(RimWorld.Planet.DebugTile), "get_DistanceToCamera"), transpiler: ComponentTransformTranspiler);
 			harmony.Patch(Method(typeof(RimWorld.Planet.GenWorldUI), "CurUITileSize"), transpiler: ComponentTransformTranspiler);
 			harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "get_CurrentRealPosition"), transpiler: ComponentTransformTranspiler);

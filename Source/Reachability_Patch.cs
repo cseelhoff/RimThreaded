@@ -11,7 +11,7 @@ namespace RimThreaded
         [ThreadStatic] public static Queue<Region> openQueue;
         [ThreadStatic] public static List<Region> destRegions;
         [ThreadStatic] public static List<Region> startingRegions;
-        [ThreadStatic] public static HashSet<Region> regionsReached;
+        [ThreadStatic] public static HashSet<Region> regionsReached; //newly defined
 
         public static void InitializeThreadStatics()
         {
