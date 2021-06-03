@@ -126,7 +126,10 @@ namespace RimThreaded
             //        }
             //    }
             //}
-            foreach (ClassReplacement classReplacement in replacements.FieldReplacements)
+            MethodInfo initializer = Method(typeof(RimThreaded), "InitializeAllThreadStatics"); 
+			ConstructorInfo threadStaticConstructor = typeof(ThreadStaticAttribute).GetConstructor(new Type[0]);
+			CustomAttributeBuilder attributeBuilder = new CustomAttributeBuilder(threadStaticConstructor, new object[0]);
+			foreach (ClassReplacement classReplacement in replacements.FieldReplacements)
             {
 
 				Type type = TypeByName(classReplacement.ClassName);
@@ -137,10 +140,13 @@ namespace RimThreaded
                 }
 				if (classReplacement.ThreadStatics != null && classReplacement.ThreadStatics.Count > 0)
 				{
-					AssemblyName aName = null;
-					AssemblyBuilder ab = null;
-					ModuleBuilder modBuilder = null;
-					TypeBuilder tb = null;
+					AssemblyName aName = new AssemblyName(type.Name + "_Replacement");
+					AssemblyBuilder ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
+					ModuleBuilder modBuilder = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
+					TypeBuilder tb = modBuilder.DefineType(type.Name + "_Replacement", TypeAttributes.Public);
+					MethodBuilder mb = tb.DefineMethod("InitializeThreadStatics", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
+					//mb.InitLocals = true;
+					ILGenerator il = mb.GetILGenerator();
 					foreach (ThreadStaticDetail threadStaticDetail in classReplacement.ThreadStatics)
 					{
 						FieldInfo fieldInfo = Field(type, threadStaticDetail.FieldName);
@@ -151,23 +157,12 @@ namespace RimThreaded
                         }
                         FieldInfo replacementField;
                         if (threadStaticDetail.PatchedClassName == null)
-                        {
-							if (aName == null)
-								aName = new AssemblyName(type.Name + "_Replacement");
-							if (ab == null)
-								ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
-							if (modBuilder == null)
-								modBuilder = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
-							if (tb == null)
-								tb = modBuilder.DefineType(type.Name + "_Replacement", TypeAttributes.Public);
-							
-							ConstructorInfo threadStaticConstructor = typeof(ThreadStaticAttribute).GetConstructor(new Type[0]);
-							CustomAttributeBuilder attributeBuilder = new CustomAttributeBuilder(threadStaticConstructor, new object[0]);
-							FieldBuilder fb = tb.DefineField(fieldInfo.Name, fieldInfo.FieldType, fieldInfo.Attributes);
+                        {							
+							FieldBuilder fb = tb.DefineField(fieldInfo.Name, fieldInfo.FieldType, FieldAttributes.Public | FieldAttributes.Static);
 							fb.SetCustomAttribute(attributeBuilder);
 							replacementField = fb;
 						}
-                        else
+						else
                         {
                             Type replacementType = TypeByName(threadStaticDetail.PatchedClassName);
                             if (replacementType == null)
@@ -183,15 +178,25 @@ namespace RimThreaded
                             }
                         }
                         replaceFields[fieldInfo] = replacementField;
+						if (threadStaticDetail.InitializerMethodName == null)
+						{
+							ConstructorInfo constructor = fieldInfo.FieldType.GetConstructor(Type.EmptyTypes);
+							if (constructor != null)
+							{
+								il.Emit(OpCodes.Newobj, constructor);
+								il.Emit(OpCodes.Stsfld, replacementField);
+							}
+						}
 					}
-					if (tb != null)
-					{
-						Type newFieldType = tb.CreateType();
-						//MethodBuilder mb = tb.DefineMethod("dummy", MethodAttributes.Public | MethodAttributes.Static, typeof(void), null);
-						//mb.InitLocals = true;
-						//ILGenerator il = mb.GetILGenerator();
-						//il.Emit(OpCodes.Ret);
-					}
+					il.Emit(OpCodes.Ret);
+					Type newFieldType = tb.CreateType();
+					//Directory.SetCurrentDirectory("C:\\STUFF");
+#if DEBUG
+					ab.Save(type.Name + "_Replacement.dll");
+#endif
+					MethodInfo mb2 = Method(newFieldType, "InitializeThreadStatics");
+					HarmonyMethod pf = new HarmonyMethod(mb2);
+					harmony.Patch(initializer, postfix: pf);
 				}
             }
         }
@@ -199,6 +204,8 @@ namespace RimThreaded
 		private static void ApplyFieldReplacements()
         {
 			SimplePool_Patch_RunNonDestructivePatches();
+			Dijkstra_Patch_RunNonDestructivePatches();
+
 			replaceFields.Add(Field(typeof(Region), "closedIndex"), Method(typeof(RegionTraverser_Transpile), "GetRegionClosedIndex"));
 
 			IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
@@ -236,12 +243,13 @@ namespace RimThreaded
                     }
                 }
             }
-            Log.Message("RimThreaded Field Replacements Complete.");
-            List<CodeInstruction> g = PatchProcessor.GetCurrentInstructions(Method(TypeByName("RimWorld.Pawn_MeleeVerbs"), "PawnMeleeVerbsStaticUpdate"));
-			foreach(CodeInstruction h in g)
-            {
-				Log.Message(h.ToString());
-            }
+            Log.Message("RimThreaded Field Replacements Complete. InitializingThreadStatics");
+			RimThreaded.InitializeAllThreadStatics();
+   //         List<CodeInstruction> g = PatchProcessor.GetCurrentInstructions(Method(TypeByName("RimWorld.Pawn_MeleeVerbs"), "PawnMeleeVerbsStaticUpdate"));
+			//foreach(CodeInstruction h in g)
+   //         {
+			//	Log.Message(h.ToString());
+   //         }
 		}
 
 
@@ -864,77 +872,156 @@ namespace RimThreaded
 
 		}
 
-        private static void SimplePool_Patch_RunNonDestructivePatches()
-        {
-            replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Get"),
+		private static void SimplePool_Patch_RunNonDestructivePatches()
+		{
+			replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Get"),
 				Method(typeof(SimplePool_Patch<List<float>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Return"),
-                Method(typeof(SimplePool_Patch<List<float>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<List<float>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<List<float>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Return"),
+				Method(typeof(SimplePool_Patch<List<float>>), "Return"));
+			replaceFields.Add(Method(typeof(SimplePool<List<float>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<List<float>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "Get"),
 				Method(typeof(SimplePool_Patch<List<Pawn>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "Return"),
 				Method(typeof(SimplePool_Patch<List<Pawn>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<List<Pawn>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<List<Pawn>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<List<Sustainer>>), "Get"),
 				Method(typeof(SimplePool_Patch<List<Sustainer>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Sustainer>>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<List<Sustainer>>), "Return"),
 				Method(typeof(SimplePool_Patch<List<Sustainer>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Sustainer>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<List<Sustainer>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<List<Sustainer>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<List<Sustainer>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<List<IntVec3>>), "Get"),
 				Method(typeof(SimplePool_Patch<List<IntVec3>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<List<IntVec3>>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<List<IntVec3>>), "Return"),
 				Method(typeof(SimplePool_Patch<List<IntVec3>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<List<IntVec3>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<List<IntVec3>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<List<IntVec3>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<List<IntVec3>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<List<Thing>>), "Get"),
 				Method(typeof(SimplePool_Patch<List<Thing>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Thing>>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<List<Thing>>), "Return"),
 				Method(typeof(SimplePool_Patch<List<Thing>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Thing>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<List<Thing>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<List<Thing>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<List<Thing>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<List<Gizmo>>), "Get"),
 				Method(typeof(SimplePool_Patch<List<Gizmo>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Gizmo>>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<List<Gizmo>>), "Return"),
 				Method(typeof(SimplePool_Patch<List<Gizmo>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Gizmo>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<List<Gizmo>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<List<Gizmo>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<List<Gizmo>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<List<Hediff>>), "Get"),
 				Method(typeof(SimplePool_Patch<List<Hediff>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Hediff>>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<List<Hediff>>), "Return"),
 				Method(typeof(SimplePool_Patch<List<Hediff>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<List<Hediff>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<List<Hediff>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<List<Hediff>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<List<Hediff>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<HashSet<IntVec3>>), "Get"),
 				Method(typeof(SimplePool_Patch<HashSet<IntVec3>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<HashSet<IntVec3>>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<HashSet<IntVec3>>), "Return"),
 				Method(typeof(SimplePool_Patch<HashSet<IntVec3>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<HashSet<IntVec3>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<HashSet<IntVec3>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<HashSet<IntVec3>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<HashSet<IntVec3>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "Get"),
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "Return"),
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "get_FreeItemsCount"));
 
 			replaceFields.Add(Method(typeof(SimplePool<Job>), "Get"),
 				Method(typeof(SimplePool_Patch<Job>), "Get"));
-            replaceFields.Add(Method(typeof(SimplePool<Job>), "Return"),
+			replaceFields.Add(Method(typeof(SimplePool<Job>), "Return"),
 				Method(typeof(SimplePool_Patch<Job>), "Return"));
-            replaceFields.Add(Method(typeof(SimplePool<Job>), "get_FreeItemsCount"),
-                Method(typeof(SimplePool_Patch<Job>), "get_FreeItemsCount"));
+			replaceFields.Add(Method(typeof(SimplePool<Job>), "get_FreeItemsCount"),
+				Method(typeof(SimplePool_Patch<Job>), "get_FreeItemsCount"));
+
+		}
+
+		private static void Dijkstra_Patch_RunNonDestructivePatches()
+		{
+			//replaceFields.Add(Method(typeof(Dijkstra<Region>), "Run", new Type[] {
+			//	typeof(Region),
+			//	typeof(Func<Region, IEnumerable<Region>>),
+			//	typeof(Func<Region, Region, float>),
+			//	typeof(List<KeyValuePair<Region, float>>),
+			//	typeof(Dictionary<Region, Region>)
+			//}),
+			//	Method(typeof(Dijkstra_Patch<Region>), "Run", new Type[] {
+			//	typeof(Region),
+			//	typeof(Func<Region, IEnumerable<Region>>),
+			//	typeof(Func<Region, Region, float>),
+			//	typeof(List<KeyValuePair<Region, float>>),
+			//	typeof(Dictionary<Region, Region>)
+			//	}));
+
+			replaceFields.Add(Method(typeof(Dijkstra<IntVec3>), "Run", new Type[] {
+				typeof(IEnumerable<IntVec3>),
+				typeof(Func<IntVec3, IEnumerable<IntVec3>>),
+				typeof(Func<IntVec3, IntVec3, float>),
+				typeof(List<KeyValuePair<IntVec3, float>>),
+				typeof(Dictionary<IntVec3, IntVec3>)
+			}),
+				Method(typeof(Dijkstra_Patch<IntVec3>), "Run", new Type[] {
+				typeof(IEnumerable<IntVec3>),
+				typeof(Func<IntVec3, IEnumerable<IntVec3>>),
+				typeof(Func<IntVec3, IntVec3, float>),
+				typeof(List<KeyValuePair<IntVec3, float>>),
+				typeof(Dictionary<IntVec3, IntVec3>) }
+				));
+
+			replaceFields.Add(Method(typeof(Dijkstra<IntVec3>), "Run", new Type[] {
+				typeof(IntVec3),
+				typeof(Func<IntVec3, IEnumerable<IntVec3>>),
+				typeof(Func<IntVec3, IntVec3, float>),
+				typeof(Dictionary<IntVec3, float>),
+				typeof(Dictionary<IntVec3, IntVec3>)
+			}),
+				Method(typeof(Dijkstra_Patch<IntVec3>), "Run", new Type[] {
+				typeof(IntVec3),
+				typeof(Func<IntVec3, IEnumerable<IntVec3>>),
+				typeof(Func<IntVec3, IntVec3, float>),
+				typeof(Dictionary<IntVec3, float>),
+				typeof(Dictionary<IntVec3, IntVec3>) }
+				));
+
+			replaceFields.Add(Method(typeof(Dijkstra<Region>), "Run", new Type[] {
+				typeof(IEnumerable<Region>),
+				typeof(Func<Region, IEnumerable<Region>>),
+				typeof(Func<Region, Region, float>),
+				typeof(Dictionary<Region, float>),
+				typeof(Dictionary<Region, Region>)
+			}),
+				Method(typeof(Dijkstra_Patch<Region>), "Run", new Type[] {
+				typeof(IEnumerable<Region>),
+				typeof(Func<Region, IEnumerable<Region>>),
+				typeof(Func<Region, Region, float>),
+				typeof(Dictionary<Region, float>),
+				typeof(Dictionary<Region, Region>) }
+				));
+
+			replaceFields.Add(Method(typeof(Dijkstra<int>), "Run", new Type[] {
+				typeof(IEnumerable<int>),
+				typeof(Func<int, IEnumerable<int>>),
+				typeof(Func<int, int, float>),
+				typeof(Dictionary<int, float>),
+				typeof(Dictionary<int, int>)
+			}),
+				Method(typeof(Dijkstra_Patch<int>), "Run", new Type[] {
+				typeof(IEnumerable<int>),
+				typeof(Func<int, IEnumerable<int>>),
+				typeof(Func<int, int, float>),
+				typeof(Dictionary<int, float>),
+				typeof(Dictionary<int, int>) }
+				));
 
 		}
 
