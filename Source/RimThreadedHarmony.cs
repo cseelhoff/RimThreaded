@@ -85,7 +85,7 @@ namespace RimThreaded
 		{
 			public string FieldName;
 			public string PatchedClassName;
-			public string InitializerMethodName;
+			public bool SelfInitialized;
 		}
 		[Serializable]
 		class MethodDetail
@@ -178,7 +178,7 @@ namespace RimThreaded
                             }
                         }
                         replaceFields[fieldInfo] = replacementField;
-						if (threadStaticDetail.InitializerMethodName == null)
+						if (!threadStaticDetail.SelfInitialized)
 						{
 							ConstructorInfo constructor = fieldInfo.FieldType.GetConstructor(Type.EmptyTypes);
 							if (constructor != null)

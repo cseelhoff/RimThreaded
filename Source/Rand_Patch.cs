@@ -12,20 +12,11 @@ namespace RimThreaded
 
     public static class Rand_Patch
     {
-        [ThreadStatic] public static List<int> tmpRange;
-
-
-        public static void InitializeThreadStatics()
-        {
-            tmpRange = new List<int>();
-        }
 
         internal static void RunNonDestructivePatches()
         {
             Type original = typeof(Rand);
             Type patched = typeof(Rand_Patch);
-            RimThreadedHarmony.AddAllMatchingFields(original, patched);
-            RimThreadedHarmony.TranspileFieldReplacements(original, "TryRangeInclusiveWhere");
             RimThreadedHarmony.Transpile(original, patched, "PushState", Type.EmptyTypes);
             RimThreadedHarmony.Transpile(original, patched, "PopState");
         }

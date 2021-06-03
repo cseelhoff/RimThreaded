@@ -13,17 +13,6 @@ namespace RimThreaded
 
 		public static Dictionary<Map, List<HashSet<object>[]>> awaitingPlantCellsMapDict = new Dictionary<Map, List<HashSet<object>[]>>();
 
-		private static readonly Type Original = typeof(WorkGiver_Grower);
-		private static readonly Type Patched = typeof(WorkGiver_Grower_Patch);
-
-		public static void RunNonDestructivePatches()
-        {
-			RimThreadedHarmony.AddAllMatchingFields(Original, Patched);
-			//RimThreadedHarmony.TranspileFieldReplacements(Original, "PotentialWorkCellsGlobal");
-			RimThreadedHarmony.TranspileFieldReplacements(WorkGiver_GrowerSow_Patch.original, "ExtraRequirements");
-			RimThreadedHarmony.TranspileFieldReplacements(WorkGiver_GrowerSow_Patch.original, "JobOnCell");
-		}
-
 		public static bool PotentialWorkCellsGlobal(WorkGiver_Grower __instance, ref IEnumerable<IntVec3> __result, Pawn pawn)
 		{
 			__result = PotentialWorkCellsGlobalIE(__instance, pawn);

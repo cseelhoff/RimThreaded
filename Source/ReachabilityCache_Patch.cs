@@ -9,11 +9,6 @@ namespace RimThreaded
     {
         [ThreadStatic] public static List<ReachabilityCache.CachedEntry> tmpCachedEntries;
 
-        public static void InitializeThreadStatics()
-        {
-            tmpCachedEntries = new List<ReachabilityCache.CachedEntry>();
-        }
-
         public static void RunDestructivePatches()
         {
             Type original = typeof(ReachabilityCache);

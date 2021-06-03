@@ -8,30 +8,11 @@ namespace RimThreaded
 
     public class Room_Patch
 	{
-        [ThreadStatic] public static HashSet<Thing> uniqueContainedThingsSet;
-        [ThreadStatic] public static List<Thing> uniqueContainedThings;
-        [ThreadStatic] public static HashSet<Room> uniqueNeighborsSet;
-        [ThreadStatic] public static List<Room> uniqueNeighbors;
-        [ThreadStatic] public static HashSet<Thing> uniqueContainedThingsOfDef;
-        [ThreadStatic] public static List<IntVec3> fields;
-
-		public static void InitializeThreadStatics()
-		{
-            uniqueContainedThingsSet = new HashSet<Thing>();
-            uniqueContainedThings = new List<Thing>();
-			uniqueNeighborsSet = new HashSet<Room>();
-            uniqueNeighbors = new List<Room>();
-            uniqueContainedThingsOfDef = new HashSet<Thing>();
-            fields = new List<IntVec3>();
-		}
 
 		internal static void RunDestructivePatches()
 		{
 			Type original = typeof(Room);
 			Type patched = typeof(Room_Patch);
-			RimThreadedHarmony.AddAllMatchingFields(original, patched, false);
-			RimThreadedHarmony.TranspileFieldReplacements(original, "get_ContainedAndAdjacentThings");
-			RimThreadedHarmony.TranspileFieldReplacements(original, "get_Neighbors");
 			RimThreadedHarmony.Prefix(original, patched, "OpenRoofCountStopAt");
 			RimThreadedHarmony.Prefix(original, patched, "RemoveRegion");
 			RimThreadedHarmony.Prefix(original, patched, "Notify_RoofChanged");

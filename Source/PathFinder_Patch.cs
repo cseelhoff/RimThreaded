@@ -32,23 +32,6 @@ namespace RimThreaded
             //regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
         }
 
-        public static void InitializeDisallowedCornerIndices()
-        {
-            disallowedCornerIndices = new List<int>(4);
-        }
-        public static void InitializeOpenList()
-        {
-            openList = new FastPriorityQueue<PathFinder.CostNode>(new PathFinder.CostNodeComparer());
-        }
-        public static void InitializeStatusOpenValue()
-        {
-            statusOpenValue = 1;
-        }
-        public static void InitializeStatusClosedValue()
-        {
-            statusClosedValue = 2;
-        }
-
         public static bool FindPath(PathFinder __instance, ref PawnPath __result, IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)
         {
             if (DebugSettings.pathThroughWalls)

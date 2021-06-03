@@ -10,22 +10,10 @@ namespace RimThreaded
 
     public class WealthWatcher_Patch
 	{
-		[ThreadStatic] public static List<Thing> tmpThings;
-		
+
 		static Type original = typeof(WealthWatcher);
 		static Type patched = typeof(WealthWatcher_Patch);
 
-		public static void InitializeThreadStatics()
-        {
-			tmpThings = new List<Thing>();
-		}
-
-		public static void RunNonDestructivePatches()
-        {
-			RimThreadedHarmony.AddAllMatchingFields(original, patched);
-			RimThreadedHarmony.TranspileFieldReplacements(original, "CalculateWealthItems");
-			RimThreadedHarmony.TranspileFieldReplacements(original, "CalculateWealthFloors");
-		}
 		public static void RunDestructivePatches()
 		{
 			RimThreadedHarmony.Prefix(original, patched, "ResetStaticData");

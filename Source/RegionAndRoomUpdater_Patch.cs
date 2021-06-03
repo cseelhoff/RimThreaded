@@ -9,17 +9,10 @@ namespace RimThreaded
     public class RegionAndRoomUpdater_Patch
     {
         [ThreadStatic] public static Stack<Room> tmpRoomStack;
-        [ThreadStatic] public static HashSet<Room> tmpVisitedRooms;
         [ThreadStatic] public static bool working;
 
         static readonly Type original = typeof(RegionAndRoomUpdater);
         static readonly Type patched = typeof(RegionAndRoomUpdater_Patch);
-
-        internal static void InitializeThreadStatics()
-        {
-            tmpRoomStack = new Stack<Room>();
-            tmpVisitedRooms = new HashSet<Room>();
-        }
 
         internal static void RunNonDestructivePatches()
         {

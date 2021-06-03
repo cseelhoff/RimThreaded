@@ -8,50 +8,11 @@ namespace RimThreaded
 
     public class MapPawns_Patch
     {
-        [ThreadStatic] public static List<Pawn> allPawnsResult;
-        [ThreadStatic] public static List<Pawn> allPawnsUnspawnedResult;
-        [ThreadStatic] public static List<Pawn> prisonersOfColonyResult;
-        [ThreadStatic] public static List<Pawn> freeColonistsAndPrisonersResult;
-        [ThreadStatic] public static List<Thing> tmpThings;
-        [ThreadStatic] public static List<Pawn> freeColonistsAndPrisonersSpawnedResult;
-        [ThreadStatic] public static List<Pawn> spawnedPawnsWithAnyHediffResult;
-        [ThreadStatic] public static List<Pawn> spawnedHungryPawnsResult;
-        [ThreadStatic] public static List<Pawn> spawnedDownedPawnsResult;
-        [ThreadStatic] public static List<Pawn> spawnedPawnsWhoShouldHaveSurgeryDoneNowResult;
-        [ThreadStatic] public static List<Pawn> spawnedPawnsWhoShouldHaveInventoryUnloadedResult;
-        
-        public static void InitializeThreadStatics()
-        {
-            allPawnsResult = new List<Pawn>();
-            allPawnsUnspawnedResult = new List<Pawn>();
-            prisonersOfColonyResult = new List<Pawn>();
-            freeColonistsAndPrisonersResult = new List<Pawn>();
-            tmpThings = new List<Thing>();
-            freeColonistsAndPrisonersSpawnedResult = new List<Pawn>();
-            spawnedPawnsWithAnyHediffResult = new List<Pawn>();
-            spawnedHungryPawnsResult = new List<Pawn>();
-            spawnedDownedPawnsResult = new List<Pawn>();
-            spawnedPawnsWhoShouldHaveSurgeryDoneNowResult = new List<Pawn>();
-            spawnedPawnsWhoShouldHaveInventoryUnloadedResult = new List<Pawn>();
-        }
 
         internal static void RunDestructivePatches()
         {
             Type original = typeof(MapPawns);
             Type patched = typeof(MapPawns_Patch);
-            RimThreadedHarmony.AddAllMatchingFields(original, patched, false);
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllPawns");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AllPawnsUnspawned");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_PrisonersOfColony");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_FreeColonistsAndPrisoners");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_AnyPawnBlockingMapRemoval");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_FreeColonistsAndPrisonersSpawned");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedPawnsWithAnyHediff");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedHungryPawns");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedDownedPawns");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedPawnsWhoShouldHaveSurgeryDoneNow");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_SpawnedPawnsWhoShouldHaveInventoryUnloaded");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_FreeColonistsSpawnedOrInPlayerEjectablePodsCount");
             RimThreadedHarmony.Prefix(original, patched, "EnsureFactionsListsInit");
             RimThreadedHarmony.Prefix(original, patched, "PawnsInFaction");
             RimThreadedHarmony.Prefix(original, patched, "FreeHumanlikesOfFaction");

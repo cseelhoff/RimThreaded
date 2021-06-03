@@ -1,52 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using RimWorld;
 using Verse;
 using UnityEngine;
 using System.Threading;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
 
     public class WildPlantSpawner_Patch
     {
-        [ThreadStatic] public static Dictionary<ThingDef, List<float>> nearbyClusters;
-        [ThreadStatic] public static List<KeyValuePair<ThingDef, List<float>>> nearbyClustersList;
-        [ThreadStatic] public static Dictionary<ThingDef, float> distanceSqToNearbyClusters;
-        [ThreadStatic] public static List<KeyValuePair<ThingDef, float>> tmpPossiblePlantsWithWeight;
-        [ThreadStatic] public static List<ThingDef> tmpPossiblePlants;
-        [ThreadStatic] public static List<ThingDef> allCavePlants;
-        [ThreadStatic] public static List<ThingDef> tmpPlantDefsLowerOrder;
-
-        internal static void InitializeThreadStatics()
-        {
-            nearbyClusters = new Dictionary<ThingDef, List<float>>();
-            nearbyClustersList = new List<KeyValuePair<ThingDef, List<float>>>();
-            distanceSqToNearbyClusters = new Dictionary<ThingDef, float>();
-            tmpPossiblePlantsWithWeight = new List<KeyValuePair<ThingDef, float>>();
-            tmpPossiblePlants = new List<ThingDef>();
-            allCavePlants = new List<ThingDef>();
-            tmpPlantDefsLowerOrder = new List<ThingDef>();
-        }
-
         static readonly Type original = typeof(WildPlantSpawner);
         static readonly Type patched = typeof(WildPlantSpawner_Patch);
 
-        internal static void RunNonDestructivePatches()
-        {
-            RimThreadedHarmony.AddAllMatchingFields(original, patched);
-            RimThreadedHarmony.TranspileFieldReplacements(original, "CheckSpawnWildPlantAt");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "CalculateDistancesToNearbyClusters");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "get_CavePlantsCommonalitiesSum");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "ResetStaticData");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "CalculatePlantsWhichCanGrowAt");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "EnoughLowerOrderPlantsNearby");
-            RimThreadedHarmony.TranspileFieldReplacements(
-                TypeByName("RimWorld.WildPlantSpawner+<>c__DisplayClass45_0"), "<EnoughLowerOrderPlantsNearby>b__1");
-            
-        }
         internal static void RunDestructivePatches()
         {
             RimThreadedHarmony.Prefix(original, patched, "WildPlantSpawnerTickInternal");

@@ -15,9 +15,6 @@ namespace RimThreaded
 
         public static void InitializeThreadStatics()
         {
-            openQueue = new Queue<Region>();
-            startingRegions = new List<Region>();
-            destRegions = new List<Region>();
             regionsReached = new HashSet<Region>();
         }
 

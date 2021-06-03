@@ -13,11 +13,6 @@ namespace RimThreaded
     {
         [ThreadStatic] public static List<Pawn> tmpPawnsToRemove;
         
-        public static void InitializeThreadStatics()
-        {
-            tmpPawnsToRemove = new List<Pawn>();
-        }
-
         internal static void RunDestructivePatches()
         {
             Type original = typeof(WorldPawns);
