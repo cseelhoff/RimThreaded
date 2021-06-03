@@ -8,7 +8,6 @@ namespace RimThreaded
 
 	public class GenTemperature_Patch
     {
-		[ThreadStatic] public static List<RoomGroup> neighRoomGroups;
 		[ThreadStatic] public static RoomGroup[] beqRoomGroups;
 
 		public static Dictionary<int, float> SeasonalShiftAmplitudeCache = new Dictionary<int, float>();
@@ -20,19 +19,7 @@ namespace RimThreaded
         private static WorldGrid worldGrid;
 		public static void InitializeThreadStatics()
         {
-			neighRoomGroups = new List<RoomGroup>();
 			beqRoomGroups = new RoomGroup[4];
-		}
-		public static void InitializeBeqRoomGroups()
-        {
-			beqRoomGroups = new RoomGroup[4];
-		}
-
-		public static void RunNonDestructivePatches()
-        {
-			RimThreadedHarmony.AddAllMatchingFields(original, patched);
-			RimThreadedHarmony.TranspileFieldReplacements(original, "PushHeat", new[] { typeof(IntVec3), typeof(Map), typeof(float) });
-			RimThreadedHarmony.TranspileFieldReplacements(original, "EqualizeTemperaturesThroughBuilding");
 		}
 
 		public static void RunDestructivePatches()

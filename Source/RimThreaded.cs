@@ -187,27 +187,11 @@ namespace RimThreaded
         }
         public static void InitializeAllThreadStatics()
         {
-            AttackTargetFinder_Patch.InitializeThreadStatics();
-            AttackTargetsCache_Patch.InitializeThreadStatics();
-            BeautyUtility_Patch.InitializeThreadStatics();
-            Caravan_BedsTracker_Patch.InitializeThreadStatics();
-            CaravanInventoryUtility_Patch.InitializeThreadStatics();
-            CellFinder_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
-            DamageWorker_Patch.InitializeThreadStatics();
             Dijkstra_Patch<IntVec3>.InitializeThreadStatics();
             Dijkstra_Patch<Region>.InitializeThreadStatics();
             Dijkstra_Patch<int>.InitializeThreadStatics();
-            Fire_Patch.InitializeThreadStatics();
-            FloatMenuMakerMap_Patch.InitializeThreadStatics();
-            FoodUtility_Patch.InitializeThreadStatics();
-            GenAdj_Patch.InitializeThreadStatics();
-            GenAdjFast_Patch.InitializeThreadStatics();
-            GenLeaving_Patch.InitializeThreadStatics();
-            GenRadial_Patch.InitializeThreadStatics();
             GenTemperature_Patch.InitializeThreadStatics();
-            GenText_Patch.InitializedThreadStatics();
-            GrammarResolverSimpleStringExtensions_Patch.InitializeThreadStatics();
             HaulAIUtility_Patch.InitializeThreadStatics();
             ImmunityHandler_Patch.InitializeThreadStatics();
             InfestationCellFinder_Patch.InitializeThreadStatics();

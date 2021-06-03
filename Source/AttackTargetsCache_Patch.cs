@@ -9,9 +9,6 @@ namespace RimThreaded
 
     public class AttackTargetsCache_Patch
     {
-		[ThreadStatic] public static List<IAttackTarget> tmpTargets;
-		[ThreadStatic] public static List<IAttackTarget> tmpToUpdate;
-
         private static readonly List<IAttackTarget> EmptyList = new List<IAttackTarget>();
 		private static readonly HashSet<IAttackTarget> EmptySet = new HashSet<IAttackTarget>();
 
@@ -24,12 +21,6 @@ namespace RimThreaded
 		private static readonly Dictionary<AttackTargetsCache, List<IAttackTarget>> AllTargetsListDict =
 			new Dictionary<AttackTargetsCache, List<IAttackTarget>>();
 
-		public static void InitializeThreadStatics()
-        {
-			tmpTargets = new List<IAttackTarget>();
-			tmpToUpdate = new List<IAttackTarget>();
-		}
-
 		public static void RunDestructivesPatches()
 		{
 			Type original = typeof(AttackTargetsCache);
@@ -41,14 +32,6 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, "UpdateTarget");
 		}
 
-		internal static void RunNonDestructivePatches()
-		{
-			Type original = typeof(AttackTargetsCache);
-			Type patched = typeof(AttackTargetsCache_Patch);
-			RimThreadedHarmony.AddAllMatchingFields(original, patched);
-			RimThreadedHarmony.TranspileFieldReplacements(original, "Notify_FactionHostilityChanged");
-			RimThreadedHarmony.TranspileFieldReplacements(original, "Debug_AssertHostile");
-		}
 		public static bool DeregisterTarget(AttackTargetsCache __instance, IAttackTarget target)
 		{
             if (!AllTargetsListDict.TryGetValue(__instance, out List<IAttackTarget> snapshotAllTargets)) return false;

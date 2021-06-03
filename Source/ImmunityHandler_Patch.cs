@@ -10,28 +10,12 @@ namespace RimThreaded
 
     public class ImmunityHandler_Patch
     {
-        [ThreadStatic] public static List<ImmunityInfo> tmpNeededImmunitiesNow;
-        
-        public static void InitializeThreadStatics()
-        {
-            tmpNeededImmunitiesNow = new List<ImmunityInfo>(); ;
-        }
-
         internal static void RunDestructivePatches()
         {
             Type original = typeof(ImmunityHandler);
             Type patched = typeof(ImmunityHandler_Patch);
             RimThreadedHarmony.Prefix(original, patched, "ImmunityHandlerTick");
         }
-
-        public static void RunNonDestructivePatches()
-        {
-            Type original = typeof(ImmunityHandler);
-            Type patched = typeof(ImmunityHandler_Patch);
-            RimThreadedHarmony.AddAllMatchingFields(original, patched);
-            RimThreadedHarmony.TranspileFieldReplacements(original, "NeededImmunitiesNow");
-        }
-
 
         public static bool ImmunityHandlerTick(ImmunityHandler __instance)
         {
