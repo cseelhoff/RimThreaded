@@ -70,7 +70,7 @@ namespace RimThreaded
 		[Serializable]
 		class Replacements
 		{
-			public List<ClassReplacement> FieldReplacements;
+			public List<ClassReplacement> ClassReplacements;
 		}
 
 		[Serializable]
@@ -78,7 +78,6 @@ namespace RimThreaded
 		{
 			public string ClassName;
 			public List<ThreadStaticDetail> ThreadStatics;
-			public List<MethodDetail> TargetedMethods;
 		}
 		[Serializable]
 		class ThreadStaticDetail
@@ -87,26 +86,14 @@ namespace RimThreaded
 			public string PatchedClassName;
 			public bool SelfInitialized;
 		}
-		[Serializable]
-		class MethodDetail
-		{
-			public string MethodName;
-			public List<TypeDetail> ParameterTypes;
-		}
-		[Serializable]
-		class TypeDetail
-		{
-			public string TypeName;
-			public bool IsRef;
-			public TypeDetail GenericChildType;
-		}
 
 		static Dictionary<FieldInfo, FieldInfo> replacementFields = new Dictionary<FieldInfo, FieldInfo>();
+		static Replacements replacements;
 		private static void LoadFieldReplacements()
 		{
-			string fileName = "replacements2.json";
+			string fileName = "replacements3.json";
             string jsonString = File.ReadAllText(fileName);
-            Replacements replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
+            replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
 
             //IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
             //                               where !a.FullName.StartsWith("Microsoft.VisualStudio")
@@ -129,7 +116,7 @@ namespace RimThreaded
             MethodInfo initializer = Method(typeof(RimThreaded), "InitializeAllThreadStatics"); 
 			ConstructorInfo threadStaticConstructor = typeof(ThreadStaticAttribute).GetConstructor(new Type[0]);
 			CustomAttributeBuilder attributeBuilder = new CustomAttributeBuilder(threadStaticConstructor, new object[0]);
-			foreach (ClassReplacement classReplacement in replacements.FieldReplacements)
+			foreach (ClassReplacement classReplacement in replacements.ClassReplacements)
             {
 
 				Type type = TypeByName(classReplacement.ClassName);
@@ -200,7 +187,9 @@ namespace RimThreaded
 				}
             }
         }
-
+		public static Dictionary<Type, HashSet<FieldInfo>> untouchedStaticFields = new Dictionary<Type, HashSet<FieldInfo>>();
+		public static HashSet<string> fieldFullNames = new HashSet<string>();
+		public static HashSet<string> allStaticFieldNames = new HashSet<string>();
 		private static void ApplyFieldReplacements()
         {
 			SimplePool_Patch_RunNonDestructivePatches();
@@ -213,27 +202,82 @@ namespace RimThreaded
                                            select a;
             foreach (Assembly a in source)
             {
-                Type[] b = GetTypesFromAssembly(a);
+                Type[] types = GetTypesFromAssembly(a);
                 if (a.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
                 {
-                    foreach (Type c in b)
+                    foreach (Type type in types)
                     {
-                        foreach (MethodInfo d in c.GetMethods())
+						//foreach (FieldInfo field in type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static))
+      //                  {
+						//	if((field.Name.StartsWith("tmp") || field.Name.StartsWith("temp")) && !replaceFields.ContainsKey(field))
+      //                      {
+						//		if(!untouchedStaticFields.TryGetValue(type, out HashSet<FieldInfo> fields)) {
+						//			fields = new HashSet<FieldInfo>();
+						//			untouchedStaticFields[type] = fields;
+						//		}
+						//		fields.Add(field);
+						//		fieldFullNames.Add(type.Name + "." + field.Name);
+						//		bool classExists = false;
+						//		int count = 0;
+						//		foreach (ClassReplacement classReplacement in replacements.ClassReplacements)
+      //                          {
+						//			count++;
+						//			if(classReplacement.ClassName.Equals(type.FullName))
+      //                              {
+						//				classExists = true;
+						//				bool fieldExists = false;
+						//				foreach(ThreadStaticDetail threadStaticDetail in classReplacement.ThreadStatics)
+      //                                  {
+						//					if (threadStaticDetail.FieldName.Equals(field.Name))
+						//					{
+						//						fieldExists = true;
+						//						break;
+						//					}
+      //                                  }
+						//				if (!fieldExists)
+						//				{
+						//					classReplacement.ThreadStatics.Add(new ThreadStaticDetail()
+						//					{
+						//						FieldName = field.Name
+						//					}
+						//					);
+						//				}
+						//				break;
+						//			}
+      //                          }
+						//		if(!classExists)
+      //                          {
+						//			replacements.ClassReplacements.Add(new ClassReplacement()
+						//			{
+						//				ClassName = type.FullName,
+						//				ThreadStatics = new List<ThreadStaticDetail>() {
+						//					new ThreadStaticDetail()
+						//					{
+						//						FieldName = field.Name
+						//					}
+						//				}
+						//			});
+						//		}
+
+						//	}
+
+						//}
+                        foreach (MethodInfo method in type.GetMethods())
                         {
-							if (d.IsDeclaredMember())
+							if (method.IsDeclaredMember())
 							{
 								try {
-									IEnumerable<KeyValuePair<OpCode, object>> f = PatchProcessor.ReadMethodBody(d);
+									IEnumerable<KeyValuePair<OpCode, object>> f = PatchProcessor.ReadMethodBody(method);
 									foreach (KeyValuePair<OpCode, object> e in f)
 									{
 										if (e.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
 										{
-											TranspileFieldReplacements2(d);
+											TranspileFieldReplacements2(method);
 											break;
 										}
 										if (e.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
 										{
-											TranspileFieldReplacements2(d);
+											TranspileFieldReplacements2(method);
 											break;
 										}
 									}
@@ -243,7 +287,15 @@ namespace RimThreaded
                     }
                 }
             }
-            Log.Message("RimThreaded Field Replacements Complete. InitializingThreadStatics");
+			//JsonSerializer serializer = new JsonSerializer();
+			//serializer.NullValueHandling = NullValueHandling.Ignore;
+
+			//using (StreamWriter sw = new StreamWriter(@"replacements4.json"))
+			//using (JsonWriter writer = new JsonTextWriter(sw))
+			//{
+			//	serializer.Serialize(writer, replacements);
+			//}
+			Log.Message("RimThreaded Field Replacements Complete. Initializing all ThreadStatics...");
 			RimThreaded.InitializeAllThreadStatics();
    //         List<CodeInstruction> g = PatchProcessor.GetCurrentInstructions(Method(TypeByName("RimWorld.Pawn_MeleeVerbs"), "PawnMeleeVerbsStaticUpdate"));
 			//foreach(CodeInstruction h in g)
@@ -743,58 +795,15 @@ namespace RimThreaded
 			//Simple
             AlertsReadout_Patch.RunNonDestructivesPatches(); //this will disable alert checks on ultrafast speed for an added speed boost
 			Area_Patch.RunNonDestructivePatches();
-            AttackTargetsCache_Patch.RunNonDestructivePatches();
-			AttackTargetFinder_Patch.RunNonDestructivePatches();
-			BeautyUtility_Patch.RunNonDestructivePatches();
 			BuildableDef_Patch.RunNonDestructivePatches();
-			Caravan_BedsTracker_Patch.RunNonDestructivePatches();
-			CaravanInventoryUtility_Patch.RunNonDestructivePatches();
 			CellFinder_Patch.RunNonDestructivePatches();
-			DamageWorker_Patch.RunNonDestructivePatches();
 			Designator_Haul_Patch.RunNonDestructivePatches();
             Designator_Unforbid_Patch.RunNonDestructivePatches();
-			Fire_Patch.RunNonDestructivePatches();
-			FloatMenuMakerMap_Patch.RunNonDestructivePatches();
-			FoodUtility_Patch.RunNonDestructivePatches();
-			GenAdj_Patch.RunNonDestructivePatches();
-			GenAdjFast_Patch.RunNonDestructivePatches();
-			GenLeaving_Patch.RunNonDestructivePatches();
-			GenRadial_Patch.RunNonDestructivePatches();
-			GenText_Patch.RunNonDestructivePatches();
-			GrammarResolverSimpleStringExtensions_Patch.RunNonDestructivePatches();
-			HaulAIUtility_Patch.RunNonDestructivePatches();
 			SlotGroup_Patch.RunNonDestructivePatches();
-			ImmunityHandler_Patch.RunNonDestructivePatches();
-			JobGiver_AnimalFlee_Patch.RunNonDestructivePatches(); //may need changes to FleeLargeFireJob
-			JobGiver_ConfigurableHostilityResponse_Patch.RunNonDestructivePatches(); 
-            JobGiver_OptimizeApparel_Patch.RunNonDestructivePatches();
-            LanguageWordInfo_Patch.RunNonDestructivePatches();
-			MapTemperature_Patch.RunNonDestructivePatches();
-			Medicine_Patch.RunNonDestructivePatches();
 			//MemoryUtility_Patch.RunNonDestructivePatches();
 			PathFinder_Patch.RunNonDestructivePatches(); //large method
-			Pawn_InteractionsTracker_Transpile.RunNonDestructivePatches();
-			Pawn_MeleeVerbs_Patch.RunNonDestructivePatches();
-			Pawn_WorkSettings_Patch.RunNonDestructivePatches();
-			PawnsFinder_Patch.RunNonDestructivePatches();
-			PawnDiedOrDownedThoughtsUtility_Patch.RunNonDestructivePatches();
-			Projectile_Patch.RunNonDestructivePatches();
-			RCellFinder_Patch.RunNonDestructivePatches();
 			RegionAndRoomUpdater_Patch.RunNonDestructivePatches();
-			RegionCostCalculator_Patch.RunNonDestructivePatches();
-			RegionListersUpdater_Patch.RunNonDestructivePatches();
-			RegionMaker_Patch.RunNonDestructivePatches();
-			TendUtility_Patch.RunNonDestructivePatches();
-			ThinkNode_PrioritySorter_Patch.RunNonDestructivePatches();
-			ThoughtHandler_Patch.RunNonDestructivePatches(); 
 			TimeControls_Patch.RunNonDestructivePatches(); //TODO TRANSPILE - should releave needing TexButton2 class
-			Toils_Ingest_Patch.RunNonDestructivePatches();
-			Verb_Patch.RunNonDestructivePatches();
-			WanderUtility_Patch.RunNoneDestructivePatches();
-			WildPlantSpawner_Patch.RunNonDestructivePatches();
-			WorkGiver_Grower_Patch.RunNonDestructivePatches();
-			World_Patch.RunNonDestructivePatches();
-			WorldGrid_Patch.RunNonDestructivePatches();
 			ZoneManager_Patch.RunNonDestructivePatches();
 			Zone_Patch.RunNonDestructivePatches();
 
@@ -802,12 +811,10 @@ namespace RimThreaded
 			//Complex
 			BattleLog_Transpile.RunNonDestructivePatches();
 			CompSpawnSubplant_Transpile.RunNonDestructivePatches();//uses old transpile for lock
-			GenTemperature_Patch.RunNonDestructivePatches();
 			GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
 			GrammarResolverSimple_Transpile.RunNonDestructivePatches();//reexamine complexity
 			HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches();
 			HediffSet_Patch.RunNonDestructivePatches();
-			InfestationCellFinder_Patch.RunNonDestructivePatches(); //fix public struct
 			LongEventHandler_Patch.RunNonDestructivePatches();
 			Map_Transpile.RunNonDestructivePatches();
 			PawnCapacitiesHandler_Transpile.RunNonDestructivePatches(); //reexamine complexity?
@@ -817,11 +824,8 @@ namespace RimThreaded
 			//Thing_Patch.RunNonDestructivePatches();
 			ThingOwnerThing_Transpile.RunNonDestructivePatches();
 			TickList_Patch.RunNonDestructivePatches();
-			WealthWatcher_Patch.RunNonDestructivePatches();
-			WorldFloodFiller_Patch.RunNonDestructivePatches();
 			WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
 			WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
-			QuestUtility_Patch.RunNonDestructivePatches();
 
 
             Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //TODO - should transpile ReplacePotentiallyRelatedPawns instead

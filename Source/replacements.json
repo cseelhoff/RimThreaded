@@ -1,0 +1,2635 @@
+{
+    "ClassReplacements": [
+        {
+            "ClassName": "Verse.AI.AttackTargetFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTargets"
+                },
+                {
+                    "FieldName": "availableShootingTargets"
+                },
+                {
+                    "FieldName": "tmpTargetScores"
+                },
+                {
+                    "FieldName": "tmpCanShootAtTarget"
+                },
+                {
+                    "FieldName": "tempDestList"
+                },
+                {
+                    "FieldName": "tempSourceList"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.AttackTargetsCache",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTargets"
+                },
+                {
+                    "FieldName": "tmpToUpdate"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.BeautyUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tempCountedThings"
+                },
+                {
+                    "FieldName": "beautyRelevantCells"
+                },
+                {
+                    "FieldName": "visibleRooms"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanInventoryUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "inventoryItems"
+                },
+                {
+                    "FieldName": "inventoryToMove"
+                },
+                {
+                    "FieldName": "tmpApparel"
+                },
+                {
+                    "FieldName": "tmpEquipment"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.Caravan_BedsTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpUsableBeds"
+                },
+                {
+                    "FieldName": "tmpPawnLabels"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.CellFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "workingCells"
+                },
+                {
+                    "FieldName": "workingRegions"
+                },
+                {
+                    "FieldName": "workingListX"
+                },
+                {
+                    "FieldName": "workingListZ"
+                },
+                {
+                    "FieldName": "mapEdgeCells"
+                },
+                {
+                    "FieldName": "mapEdgeCellsSize"
+                },
+                {
+                    "FieldName": "mapSingleEdgeCells"
+                },
+                {
+                    "FieldName": "mapSingleEdgeCellsSize"
+                },
+                {
+                    "FieldName": "tmpDistances"
+                },
+                {
+                    "FieldName": "tmpParents"
+                },
+                {
+                    "FieldName": "tmpCells"
+                },
+                {
+                    "FieldName": "tmpUniqueWipedThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.CompCauseGameCondition",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpDeadConditionMaps",
+                    "PatchedClassName": "RimThreaded.CompCauseGameCondition_Patch"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.DamageWorker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "thingsToAffect"
+                },
+                {
+                    "FieldName": "openCells"
+                },
+                {
+                    "FieldName": "adjWallCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Fire",
+            "ThreadStatics": [
+                {
+                    "FieldName": "flammableList"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.FloatMenuMakerMap",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.FoodUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "bestFoodSourceOnMap_minNutrition_NewTemp"
+                },
+                {
+                    "FieldName": "filtered"
+                },
+                {
+                    "FieldName": "tmpPredatorCandidates"
+                },
+                {
+                    "FieldName": "ingestThoughts"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenAdjFast",
+            "ThreadStatics": [
+                {
+                    "FieldName": "resultList"
+                },
+                {
+                    "FieldName": "working"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenAdj",
+            "ThreadStatics": [
+                {
+                    "FieldName": "validCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GenLeaving",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCellsCandidates"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenRadial",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCells"
+                },
+                {
+                    "FieldName": "working"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenTemperature",
+            "ThreadStatics": [
+                {
+                    "FieldName": "neighRoomGroups"
+                },
+                {
+                    "FieldName": "beqRoomGroups",
+                    "PatchedClassName": "RimThreaded.GenTemperature_Patch",
+                    "SelfInitialized": true
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenText",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSbForCapitalizedSentences"
+                },
+                {
+                    "FieldName": "tmpSb"
+                },
+                {
+                    "FieldName": "tmpStringBuilder"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GrammarResolverSimpleStringExtensions",
+            "ThreadStatics": [
+                {
+                    "FieldName": "argsLabels"
+                },
+                {
+                    "FieldName": "argsObjects"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.HaulAIUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "candidates"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.ImmunityHandler",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpNeededImmunitiesNow"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.InfestationCellFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "regionsDistanceToUnroofed"
+                },
+                {
+                    "FieldName": "tmpColonyBuildingsLocs"
+                },
+                {
+                    "FieldName": "tmpDistanceResult"
+                },
+                {
+                    "FieldName": "distToColonyBuilding"
+                },
+                {
+                    "FieldName": "closedAreaSize"
+                },
+                {
+                    "FieldName": "tmpCachedInfestationChanceCellColors"
+                },
+                {
+                    "FieldName": "tempUnroofedRegions"
+                },
+                {
+                    "FieldName": "locationCandidates"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JobGiver_AnimalFlee",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JobGiver_ConfigurableHostilityResponse",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThreats"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JobGiver_OptimizeApparel",
+            "ThreadStatics": [
+                {
+                    "FieldName": "neededWarmth"
+                },
+                {
+                    "FieldName": "debugSb"
+                },
+                {
+                    "FieldName": "wornApparelScores"
+                },
+                {
+                    "FieldName": "tmpBodyPartGroupsWithRequirement"
+                },
+                {
+                    "FieldName": "tmpAllowedApparels"
+                },
+                {
+                    "FieldName": "tmpRequiredApparels"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.LanguageWordInfo",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpLowercase"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.MapPawns",
+            "ThreadStatics": [
+                {
+                    "FieldName": "allPawnsResult"
+                },
+                {
+                    "FieldName": "allPawnsUnspawnedResult"
+                },
+                {
+                    "FieldName": "prisonersOfColonyResult"
+                },
+                {
+                    "FieldName": "freeColonistsAndPrisonersResult"
+                },
+                {
+                    "FieldName": "tmpThings"
+                },
+                {
+                    "FieldName": "freeColonistsAndPrisonersSpawnedResult"
+                },
+                {
+                    "FieldName": "spawnedPawnsWithAnyHediffResult"
+                },
+                {
+                    "FieldName": "spawnedHungryPawnsResult"
+                },
+                {
+                    "FieldName": "spawnedDownedPawnsResult"
+                },
+                {
+                    "FieldName": "spawnedPawnsWhoShouldHaveSurgeryDoneNowResult"
+                },
+                {
+                    "FieldName": "spawnedPawnsWhoShouldHaveInventoryUnloadedResult"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.MapTemperature",
+            "ThreadStatics": [
+                {
+                    "FieldName": "fastProcessedRoomGroups"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Medicine",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tendableHediffsInTendPriorityOrder"
+                },
+                {
+                    "FieldName": "tmpHediffs"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.PathFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "openList",
+                    "PatchedClassName": "RimThreaded.PathFinder_Patch",
+                    "SelfInitialized": true
+                },
+                {
+                    "FieldName": "statusOpenValue",
+                    "PatchedClassName": "RimThreaded.PathFinder_Patch",
+                    "SelfInitialized": true
+                },
+                {
+                    "FieldName": "statusClosedValue",
+                    "PatchedClassName": "RimThreaded.PathFinder_Patch",
+                    "SelfInitialized": true
+                },
+                {
+                    "FieldName": "disallowedCornerIndices",
+                    "PatchedClassName": "RimThreaded.PathFinder_Patch",
+                    "SelfInitialized": true
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PawnDiedOrDownedThoughtsUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpIndividualThoughtsToAdd"
+                },
+                {
+                    "FieldName": "tmpAllColonistsThoughts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PawnsFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "allMapsWorldAndTemporary_AliveOrDead_Result"
+                },
+                {
+                    "FieldName": "allMapsWorldAndTemporary_Alive_Result"
+                },
+                {
+                    "FieldName": "allMapsAndWorld_Alive_Result"
+                },
+                {
+                    "FieldName": "allMaps_Result"
+                },
+                {
+                    "FieldName": "allMaps_Spawned_Result"
+                },
+                {
+                    "FieldName": "all_AliveOrDead_Result"
+                },
+                {
+                    "FieldName": "temporary_Result"
+                },
+                {
+                    "FieldName": "temporary_Alive_Result"
+                },
+                {
+                    "FieldName": "temporary_Dead_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_Result"
+                },
+                {
+                    "FieldName": "allCaravansAndTravelingTransportPods_Alive_Result"
+                },
+                {
+                    "FieldName": "allCaravansAndTravelingTransportPods_AliveOrDead_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_Colonists_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoLodgers_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonists_NoCryptosleep_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_OfPlayerFaction_NoCryptosleep_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_PrisonersOfColony_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_Result"
+                },
+                {
+                    "FieldName": "allMapsCaravansAndTravelingTransportPods_Alive_FreeColonistsAndPrisoners_NoCryptosleep_Result"
+                },
+                {
+                    "FieldName": "allMaps_PrisonersOfColonySpawned_Result"
+                },
+                {
+                    "FieldName": "allMaps_PrisonersOfColony_Result"
+                },
+                {
+                    "FieldName": "allMaps_FreeColonists_Result"
+                },
+                {
+                    "FieldName": "allMaps_FreeColonistsSpawned_Result"
+                },
+                {
+                    "FieldName": "allMaps_FreeColonistsAndPrisonersSpawned_Result"
+                },
+                {
+                    "FieldName": "allMaps_FreeColonistsAndPrisoners_Result"
+                },
+                {
+                    "FieldName": "allMaps_SpawnedPawnsInFaction_Result"
+                },
+                {
+                    "FieldName": "homeMaps_FreeColonistsSpawned_Result"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Pawn_InteractionsTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "workingList"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Pawn_MeleeVerbs",
+            "ThreadStatics": [
+                {
+                    "FieldName": "meleeVerbs"
+                },
+                {
+                    "FieldName": "verbsToAdd"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Pawn_WorkSettings",
+            "ThreadStatics": [
+                {
+                    "FieldName": "wtsByPrio"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Projectile",
+            "ThreadStatics": [
+                {
+                    "FieldName": "cellThingsFiltered"
+                },
+                {
+                    "FieldName": "checkedCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpExtraFactions"
+                },
+                {
+                    "FieldName": "tmpQuestParts"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Rand",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpRange"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.RCellFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "regions"
+                },
+                {
+                    "FieldName": "tmpBuildings"
+                },
+                {
+                    "FieldName": "tmpSpotThings"
+                },
+                {
+                    "FieldName": "tmpSpotsToAvoid"
+                },
+                {
+                    "FieldName": "tmpEdgeCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Reachability",
+            "ThreadStatics": [
+                {
+                    "FieldName": "openQueue",
+                    "PatchedClassName": "RimThreaded.Reachability_Patch"
+                },
+                {
+                    "FieldName": "destRegions",
+                    "PatchedClassName": "RimThreaded.Reachability_Patch"
+                },
+                {
+                    "FieldName": "startingRegions",
+                    "PatchedClassName": "RimThreaded.Reachability_Patch"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.ReachabilityCache",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCachedEntries",
+                    "PatchedClassName": "RimThreaded.ReachabilityCache_Patch"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.RegionAndRoomUpdater",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpVisitedRooms"
+                },
+                {
+                    "FieldName": "tmpRoomStack",
+                    "PatchedClassName": "RimThreaded.RegionAndRoomUpdater_Patch"
+                },
+                {
+                    "FieldName": "working",
+                    "PatchedClassName": "RimThreaded.RegionAndRoomUpdater_Patch"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.RegionCostCalculator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPathableNeighborIndices"
+                },
+                {
+                    "FieldName": "tmpDistances"
+                },
+                {
+                    "FieldName": "tmpCellIndices"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.RegionDirtyer",
+            "ThreadStatics": [
+                {
+                    "FieldName": "regionsToDirty",
+                    "PatchedClassName": "RimThreaded.RegionDirtyer_Patch"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.RegionListersUpdater",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpRegions"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.RegionMaker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpProcessedThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.RegionTraverser",
+            "ThreadStatics": [
+                {
+                    "FieldName": "NumWorkers",
+                    "PatchedClassName": "RimThreaded.RegionTraverser_Transpile",
+                    "SelfInitialized": true
+                },
+                {
+                    "FieldName": "freeWorkers",
+                    "PatchedClassName": "RimThreaded.RegionTraverser_Transpile",
+                    "SelfInitialized": true
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Room",
+            "ThreadStatics": [
+                {
+                    "FieldName": "uniqueContainedThingsSet"
+                },
+                {
+                    "FieldName": "uniqueContainedThings"
+                },
+                {
+                    "FieldName": "uniqueNeighborsSet"
+                },
+                {
+                    "FieldName": "uniqueNeighbors"
+                },
+                {
+                    "FieldName": "uniqueContainedThingsOfDef"
+                },
+                {
+                    "FieldName": "fields"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Sound.SustainerManager",
+            "ThreadStatics": [
+                {
+                    "FieldName": "playingPerDef",
+                    "PatchedClassName": "RimThreaded.SustainerManager_Patch"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.TendUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpHediffsToTend"
+                },
+                {
+                    "FieldName": "tmpHediffs"
+                },
+                {
+                    "FieldName": "tmpHediffsWithTendPriority"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.ThinkNode_PrioritySorter",
+            "ThreadStatics": [
+                {
+                    "FieldName": "workingNodes"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ThoughtHandler",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThoughts"
+                },
+                {
+                    "FieldName": "tmpTotalMoodOffsetThoughts"
+                },
+                {
+                    "FieldName": "tmpSocialThoughts"
+                },
+                {
+                    "FieldName": "tmpTotalOpinionOffsetThoughts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Toils_Ingest",
+            "ThreadStatics": [
+                {
+                    "FieldName": "spotSearchList"
+                },
+                {
+                    "FieldName": "cardinals",
+                    "PatchedClassName": "RimThreaded.Toils_Ingest_Patch",
+                    "SelfInitialized": true
+                },
+                {
+                    "FieldName": "diagonals",
+                    "PatchedClassName": "RimThreaded.Toils_Ingest_Patch",
+                    "SelfInitialized": true
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Verb",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tempLeanShootSources"
+                },
+                {
+                    "FieldName": "tempDestList"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.WanderUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "gatherSpots"
+                },
+                {
+                    "FieldName": "candidateCells"
+                },
+                {
+                    "FieldName": "candidateBuildingsInRandomOrder"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.WealthWatcher",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.WildPlantSpawner",
+            "ThreadStatics": [
+                {
+                    "FieldName": "nearbyClusters"
+                },
+                {
+                    "FieldName": "nearbyClustersList"
+                },
+                {
+                    "FieldName": "distanceSqToNearbyClusters"
+                },
+                {
+                    "FieldName": "tmpPossiblePlantsWithWeight"
+                },
+                {
+                    "FieldName": "tmpPossiblePlants"
+                },
+                {
+                    "FieldName": "allCavePlants"
+                },
+                {
+                    "FieldName": "tmpPlantDefsLowerOrder"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.WorkGiver_Grower",
+            "ThreadStatics": [
+                {
+                    "FieldName": "wantedPlantDef",
+                    "PatchedClassName": "RimThreaded.WorkGiver_Grower_Patch"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.WorkGiver_InteractAnimal"
+        },
+        {
+            "ClassName": "Verse.WorldFloodFiller",
+            "ThreadStatics": [
+                {
+                    "FieldName": "openSet"
+                },
+                {
+                    "FieldName": "traversalDistance"
+                },
+                {
+                    "FieldName": "visited"
+                },
+                {
+                    "FieldName": "working"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.WorldGrid",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpNeighbors"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.WorldPawns",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawnsToRemove",
+                    "PatchedClassName": "RimThreaded.WorldPawns_Patch"
+                },
+                {
+                    "FieldName": "tmpPawnsToTick"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.World",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpNaturalRockDefs"
+                },
+                {
+                    "FieldName": "tmpOceanDirs"
+                },
+                {
+                    "FieldName": "tmpNeighbors"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ShipLandingBeaconUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpShipLandingAreas"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.DropCellFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpColonyBuildings"
+                },
+                {
+                    "FieldName": "tmpShipLandingAreas"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenMath",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpElements"
+                },
+                {
+                    "FieldName": "tmpPairs"
+                },
+                {
+                    "FieldName": "tmpScores"
+                },
+                {
+                    "FieldName": "tmpCalcList"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Autotests_RegionListers",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTouchableRegions"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Game",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPlayerHomeMaps"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GrammarResolverSimple",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpResultBuffer"
+                },
+                {
+                    "FieldName": "tmpSymbolBuffer"
+                },
+                {
+                    "FieldName": "tmpSymbolBuffer_objectLabel"
+                },
+                {
+                    "FieldName": "tmpSymbolBuffer_subSymbol"
+                },
+                {
+                    "FieldName": "tmpSymbolBuffer_args"
+                },
+                {
+                    "FieldName": "tmpArgsLabels"
+                },
+                {
+                    "FieldName": "tmpArgsObjects"
+                },
+                {
+                    "FieldName": "tmpArg"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.LanguageReportGenerator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpStr1Symbols"
+                },
+                {
+                    "FieldName": "tmpStr2Symbols"
+                },
+                {
+                    "FieldName": "tmpSymbol"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.LanguageWorker_French",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpStr"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.LanguageWorker_Korean",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpStringBuilder"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.TranslationHandleUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpStringBuilder"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.MapDeiniter",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenStep_ScatterThings",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpRotations"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.MapGenerator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGenSteps"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.HealthUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpHediffs"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Pawn",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpExtraFactions"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Pawn_InventoryTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpDrugsToKeep"
+                },
+                {
+                    "FieldName": "tmpThingList"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.DirectXmlToObject",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpOneTypeArray"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.XmlInheritance",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tempUsedNodeNames"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Explosion",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Thing",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpDeteriorationReasons"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.ThingOwnerUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpStack"
+                },
+                {
+                    "FieldName": "tmpHolders"
+                },
+                {
+                    "FieldName": "tmpThings"
+                },
+                {
+                    "FieldName": "tmpMapChildHolders"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.DebugActionsMisc",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpLentColonists"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Command_SetPlantToGrow",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAvailablePlants"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GizmoGridDrawer",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAllGizmos"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Text",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTextGUIContent"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenUI",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpRects"
+                },
+                {
+                    "FieldName": "tmpRects2"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.TabDrawer",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTabs"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.BackCompatibility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThingsToSpawnLater"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.GenMorphology",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpOutput"
+                },
+                {
+                    "FieldName": "tmpEdgeCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.LargestAreaFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpProcessed"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Grammar.Rule_String",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPrefix"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.JailbreakerMentalStateUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPrisoners"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.MentalBreaker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThoughts"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.MentalState_TargetedTantrum",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.MentalStateWorker_TantrumAll",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.MentalStateWorker_BedroomTantrum",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.MentalStateWorker_TargetedTantrum",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.MentalStateWorker_SadisticRageTantrum",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.MurderousRageMentalStateUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTargets"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.SlaughtererMentalStateUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAnimals"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.Pawn_JobTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpJobsToDequeue"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.AI.ThinkNode_Random",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tempList"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JobDriver_HaulCorpseToPublicPlace",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JobGiver_SatisfyChemicalNeed",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpChemicalNeeds"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JobGiver_EnterTransporter",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTransporters"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JobGiver_LoadTransporters",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTransporters"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.StealAIUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpToSteal"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.StealAIDebugDrawer",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpToSteal"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JoyGiver_InteractBuilding",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCandidates"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JoyGiver_InteractBuildingSitAdjacent",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JoyGiver_Ingest",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCandidates"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.JoyUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tempKindList"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.WorkGiver_DoBill",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpMedicine"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.LoadTransportersJobUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAlreadyLoading"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ThoughtWorker_BondedAnimalMaster",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAnimals"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.FeatureWorker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpNeighbors"
+                },
+                {
+                    "FieldName": "tmpTilesForTextDrawPosCalculationSet"
+                },
+                {
+                    "FieldName": "tmpEdgeTiles"
+                },
+                {
+                    "FieldName": "tmpTraversedTiles"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GatheringWorker_Concert",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpInstruments"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ConceptDef",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpParseErrors"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.InstructionDef",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpParseErrors"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestPartUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                },
+                {
+                    "FieldName": "tmpThingDefs"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GameCondition",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGameConditionManagers"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.IncidentWorker_DeepDrillInfestation",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpDrills"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Storyteller",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAllIncidentTargets"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.StorytellerComp_DeepDrillInfestation",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpDrills"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.StorytellerUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpOldStoryStates"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GenStep_Caves",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGroupSet"
+                },
+                {
+                    "FieldName": "tmpCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GenStep_Power",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTransmitterCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GenStep_Terrain",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpVisited"
+                },
+                {
+                    "FieldName": "tmpIsland"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GenStep_Settlement",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCandidates"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Sketch",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSketchThings"
+                },
+                {
+                    "FieldName": "tmpSuggestedRoofCellsVisited"
+                },
+                {
+                    "FieldName": "tmpSuggestedRoofCells"
+                },
+                {
+                    "FieldName": "tmpYieldedSuggestedRoofCells"
+                },
+                {
+                    "FieldName": "tmpToRemove"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.AbstractShapeGenerator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCircleCells"
+                },
+                {
+                    "FieldName": "tmpStack"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.VoluntarilyJoinableLordsStarter",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGatherings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PawnBanishUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpHediffs"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PawnApparelGenerator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpApparelCandidates"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PawnBioAndNameGenerator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpNames"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PawnTechHediffsGenerator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGeneratedTechHediffsList"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PawnUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                },
+                {
+                    "FieldName": "tmpPawnKindsStr"
+                },
+                {
+                    "FieldName": "tmpAddedPawnKinds"
+                },
+                {
+                    "FieldName": "tmpPawnKinds"
+                },
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.RoyalTitlePermitWorker_Targeted",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tempSourceList"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PrisonBreakUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpToRemove"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Need_RoomSize",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tempScanRooms"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Pawn_ApparelTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpApparelList"
+                },
+                {
+                    "FieldName": "tmpApparel"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Pawn_RoyaltyTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPermits"
+                },
+                {
+                    "FieldName": "tmpInheritedTitles"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Pawn_RelationsTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSocialThoughts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.MonumentMarker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAllowedBuildings"
+                },
+                {
+                    "FieldName": "tmpUniqueBuildableDefs"
+                },
+                {
+                    "FieldName": "tmpBuildables"
+                },
+                {
+                    "FieldName": "tmpBuiltParts"
+                },
+                {
+                    "FieldName": "tmpStuffCategories"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PlaceWorker_MonumentMarker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpMonumentThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PowerBeam",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Tornado",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.DropPodLeaving",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpActiveDropPods"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.DropPodUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tempList"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ThingSetMaker_Techprints",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGenerated"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.CompShuttle",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpRequiredItemsWithoutDuplicates"
+                },
+                {
+                    "FieldName": "tmpAllowedPawns"
+                },
+                {
+                    "FieldName": "tmpRequiredLabels"
+                },
+                {
+                    "FieldName": "tmpRequiredItems"
+                },
+                {
+                    "FieldName": "tmpRequiredPawns"
+                },
+                {
+                    "FieldName": "tmpAllSendablePawns"
+                },
+                {
+                    "FieldName": "tmpAllSendableItems"
+                },
+                {
+                    "FieldName": "tmpRequiredPawnsPossibleToSend"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.CompTransporter",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTransportersInGroup"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Command_LoadToTransporter",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpFuelingPortGivers"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PassingShipManager",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPassingShips"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.TradeShip",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpExtantNames"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Alert",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTargets"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Alert_Thought",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThoughts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ColonistBar",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                },
+                {
+                    "FieldName": "tmpMaps"
+                },
+                {
+                    "FieldName": "tmpCaravans"
+                },
+                {
+                    "FieldName": "tmpColonistsInOrder"
+                },
+                {
+                    "FieldName": "tmpColonistsWithMap"
+                },
+                {
+                    "FieldName": "tmpColonists"
+                },
+                {
+                    "FieldName": "tmpMapColonistsOrCorpsesInScreenRect"
+                },
+                {
+                    "FieldName": "tmpCaravanPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Designator_Place",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Dialog_FormCaravan",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPackingSpots"
+                },
+                {
+                    "FieldName": "tmpTicksToArrive"
+                },
+                {
+                    "FieldName": "tmpBeds"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Dialog_LoadTransporters",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpLeftToLoadCopy"
+                },
+                {
+                    "FieldName": "tmpLeftCountToTransfer"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.CharacterCardUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpExtraFactions"
+                },
+                {
+                    "FieldName": "tmpInspectStrings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.HealthCardUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpMedicineBestToWorst"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.SocialCardUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpToCache"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.TransferableUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Page_SelectStartingSite",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTileVertices"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.LearningReadout",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpConceptsToShow"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ITab_ContentsBase",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSingleThing"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ITab_Pawn_FormingCaravan",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSingleThing"
+                },
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ThingSelectionUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpColonists"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Selector",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSelectedPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.MainTabWindow_Quests",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpQuestsToShow"
+                },
+                {
+                    "FieldName": "tmpStackElements"
+                },
+                {
+                    "FieldName": "tmpRemainingQuestParts"
+                },
+                {
+                    "FieldName": "tmpLookTargets"
+                },
+                {
+                    "FieldName": "tmpSelectTargets"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.MainTabWindow_Research",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAllBuildings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.CollectionsMassCalculator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThingCounts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GenThing",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                },
+                {
+                    "FieldName": "tmpThingLabels"
+                },
+                {
+                    "FieldName": "tmpThingCounts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GenLabel",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThingCounts"
+                },
+                {
+                    "FieldName": "tmpThingsLabelElements"
+                },
+                {
+                    "FieldName": "tmpHumanlikes"
+                },
+                {
+                    "FieldName": "tmpHumanlikeLabels"
+                },
+                {
+                    "FieldName": "tmpLabels"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.GenWorld",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpWorldObjectsUnderMouse"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PlayerItemAccessibilityUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                },
+                {
+                    "FieldName": "tmpWorkTables"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ShortCircuitUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPowerNetHasActivePowerSource"
+                },
+                {
+                    "FieldName": "tmpCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.RoyalTitleInheritanceWorker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.PlaceWorker_ShowInstrumentAoE",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.SketchGen.SketchGenUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpProcessed"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.SketchGen.SketchResolver_FloorFill",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpWalls"
+                },
+                {
+                    "FieldName": "tmpVisited"
+                },
+                {
+                    "FieldName": "tmpStack"
+                },
+                {
+                    "FieldName": "tmpCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.BaseGen.BaseGen",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpResolvers"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.BaseGen.SymbolResolver_Clear",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThingsToDestroy"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.BaseGen.SymbolResolver_CultivatedPlants",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.BaseGen.SymbolResolver_SingleThing",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpRotations"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.BaseGen.SymbolResolver_Interior_ThroneRoom",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCells"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestGen.QuestGen_Rewards",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPrevQuestParts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestGen.QuestGenUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAddedSlateVars"
+                },
+                {
+                    "FieldName": "tmpSymbol"
+                },
+                {
+                    "FieldName": "tmpVarAbsoluteName"
+                },
+                {
+                    "FieldName": "tmpPathParts"
+                },
+                {
+                    "FieldName": "tmpSb"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestGen.QuestNode_GetRelationsInfo",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpRelations"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestGen.QuestNode_GetSitePartDefsByTagsAndFaction",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTags"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestGen.QuestNode_GetThingPlayerCanProduce",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCandidates"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestGen.QuestNode_SplitRandomly",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpValues"
+                },
+                {
+                    "FieldName": "tmpZeroIfFractionBelow"
+                },
+                {
+                    "FieldName": "tmpMinFractions"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestGen.QuestNode_SetItemStashContents",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpItems"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.QuestGen.QuestNode_Root_Mission",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpMaps"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.SettlementProximityGoodwillUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGoodwillOffsets"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.FeatureWorker_Cluster",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGroup"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.FeatureWorker_FloodFill",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGroup"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.FeatureWorker_Protrusion",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGroup"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.DebugTile",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpVerts"
+                },
+                {
+                    "FieldName": "tmpIndices"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.ExpandableWorldObjectsUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpWorldObjects"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.TileFinder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTiles"
+                },
+                {
+                    "FieldName": "tmpPlayerTiles"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.GenPlanetMorphology",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpOutput"
+                },
+                {
+                    "FieldName": "tmpNeighbors"
+                },
+                {
+                    "FieldName": "tmpEdgeTiles"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.PlanetShapeGenerator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTileIDs"
+                },
+                {
+                    "FieldName": "tmpVerts"
+                },
+                {
+                    "FieldName": "tmpNeighborsToAdd"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.WorldGenerator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpGenSteps"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanArrivalAction_VisitSite",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpDefs"
+                },
+                {
+                    "FieldName": "tmpUsedDefs"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanArrivalTimeEstimator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpTicksToArrive"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanEnterMapUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanExitMapUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpNeighbors"
+                },
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanFormingUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpCaravanPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanMaker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanMergeUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSelectedPlayerCaravans"
+                },
+                {
+                    "FieldName": "tmpCaravansOnSameTile"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanTendUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawnsNeedingTreatment"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanVisibilityCalculator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThingCounts"
+                },
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanUIUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpInfo"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.DaysUntilRotCalculator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpThingCounts"
+                },
+                {
+                    "FieldName": "tmpThingCountsFromTradeables"
+                },
+                {
+                    "FieldName": "tmpNutritions"
+                },
+                {
+                    "FieldName": "tmpTicksToArrive"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.DaysWorthOfFoodCalculator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                },
+                {
+                    "FieldName": "tmpThingDefCounts"
+                },
+                {
+                    "FieldName": "tmpThingCounts"
+                },
+                {
+                    "FieldName": "tmpDaysWorthOfFoodForPawn"
+                },
+                {
+                    "FieldName": "tmpFood"
+                },
+                {
+                    "FieldName": "tmpFood2"
+                },
+                {
+                    "FieldName": "tmpTicksToArrive"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.ForagedFoodPerDayCalculator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                },
+                {
+                    "FieldName": "tmpThingCounts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.SettleInEmptyTileUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSettleFailReason"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.SettleInExistingMapUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPlayerPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.TilesPerDayCalculator",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                },
+                {
+                    "FieldName": "tmpThingCounts"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.Caravan_CarryTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawnsWhoCanCarry"
+                },
+                {
+                    "FieldName": "tmpPawnLabels"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.Caravan_NeedsTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpAvailableJoyKinds"
+                },
+                {
+                    "FieldName": "tmpInvFood"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.PeaceTalks",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPossibleOutcomes"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.Site",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpSitePartsLabels"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.TransportPodsArrivalAction_FormCaravan",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                },
+                {
+                    "FieldName": "tmpContainedThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.TransportPodsArrivalAction_GiveToCaravan",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpContainedThings"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.DefeatAllEnemiesQuestComp",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpRewards"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.TimedDetectionRaids",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.TimedForcedExit",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpPawns"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.WorldObjectsHolder",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpUnsavedWorldObjects"
+                },
+                {
+                    "FieldName": "tmpWorldObjects"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.CaravanNeedsTabUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpNeeds"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.WITab_Caravan_Gear",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpApparel"
+                },
+                {
+                    "FieldName": "tmpExistingEquipment"
+                },
+                {
+                    "FieldName": "tmpExistingApparel"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Planet.WorldInspectPane",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpObjectsList"
+                }
+            ]
+        }
+    ]
+}
