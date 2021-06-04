@@ -79,7 +79,7 @@ namespace RimThreaded
             throw new ArgumentOutOfRangeException();
         }
 
-        public void Add(ThreadSafeNode<T> threadSafeNode)
+        public void AddNode(ThreadSafeNode<T> threadSafeNode)
         {
             bool lockTaken = false;
             try
@@ -104,7 +104,7 @@ namespace RimThreaded
         }
         public new void Add(T obj)
         {
-            Add(new ThreadSafeNode<T>(obj));
+            AddNode(new ThreadSafeNode<T>(obj));
         }
         public void InsertAfter(ThreadSafeNode<T> previousNode, ThreadSafeNode<T> newNode)
         {
@@ -148,10 +148,10 @@ namespace RimThreaded
         }
         public new void Insert(int index, T obj)
         {
-            Insert(index, new ThreadSafeNode<T>(obj));
+            InsertNode(index, new ThreadSafeNode<T>(obj));
         }
 
-        public void Insert(int index, ThreadSafeNode<T> newNode)
+        public void InsertNode(int index, ThreadSafeNode<T> newNode)
         {
             bool lockTaken = false;
             try
@@ -172,7 +172,7 @@ namespace RimThreaded
                 if (lockTaken) spinLock.Exit();
             }
         }
-        public bool Remove(ThreadSafeNode<T> threadSafeNode)
+        public bool RemoveNode(ThreadSafeNode<T> threadSafeNode)
         {
             bool lockTaken = false;
             try
@@ -227,7 +227,7 @@ namespace RimThreaded
             bool lockTaken = false;
             try
             {
-                Remove(getNodeAtIndex(index));
+                RemoveNode(getNodeAtIndex(index));
             }
             finally
             {
@@ -240,7 +240,7 @@ namespace RimThreaded
         {
             if (!warningIssuedRemove)
             {
-                Log.Warning("Calling ThreadSafeLinkedList.Remove(T item) is not optimal and will remove the first occurance. ThreadSafeLinkedList.Remove(T item) is preferred.");
+                Log.Warning("Calling ThreadSafeLinkedList.Remove(T) is not optimal and will remove the first occurance. ThreadSafeLinkedList.RemoveNode(ThreadSafeNode<T>) is preferred.");
                 warningIssuedRemove = true;
             }
             bool lockTaken = false;
@@ -252,7 +252,7 @@ namespace RimThreaded
                     if (threadSafeNode.value.Equals(item))
                     {
                         itemCount--;
-                        Remove(threadSafeNode);
+                        RemoveNode(threadSafeNode);
                     }
                 }
             }
@@ -262,6 +262,21 @@ namespace RimThreaded
             }
             return true;
         }
+
+        public new int RemoveAll(Predicate<T> predicate)
+        {
+            int totalRemoved = 0;
+            foreach (ThreadSafeNode<T> threadSafeNode in this)
+            {
+                if (predicate(threadSafeNode.value))
+                {
+                    RemoveNode(threadSafeNode);
+                    totalRemoved++;
+                }
+            }
+            return totalRemoved;
+        }
+
         public new void Clear()
         {
             bool lockTaken = false;
@@ -306,7 +321,7 @@ namespace RimThreaded
             return null;
         }
 
-        public bool Contains(ThreadSafeNode<T> node)
+        public bool ContainsNode(ThreadSafeNode<T> node)
         {
             foreach (ThreadSafeNode<T> threadSafeNode in this)
             {
@@ -327,6 +342,16 @@ namespace RimThreaded
                     array[i - arrayIndex] = threadSafeNode.value;
                 i++;
             };
+        }
+
+        public List<T> ToList()
+        {
+            List<T> newList = new List<T>();
+            foreach (ThreadSafeNode<T> threadSafeNode in this)
+            {
+                newList.Add(threadSafeNode.value);
+            }
+            return newList;
         }
 
         public new IEnumerator GetEnumerator()
@@ -390,6 +415,7 @@ namespace RimThreaded
                 list = threadSafeLinkedList;
                 currentNode = threadSafeLinkedList.firstNode;
             }
+
         }
 
     }

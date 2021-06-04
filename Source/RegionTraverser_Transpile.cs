@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Verse;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -20,57 +19,6 @@ namespace RimThreaded
             {
                 freeWorkers.Enqueue(new RegionTraverser.BFSWorker(closedArrayPos));
             }
-        }
-
-        public static void InitializeNumWorkers()
-        {
-            NumWorkers = 8;
-        }
-
-        public static void InitializeFreeWorkers()
-        {
-            freeWorkers = new Queue<RegionTraverser.BFSWorker>(NumWorkers);
-            for (int closedArrayPos = 0; closedArrayPos < NumWorkers; closedArrayPos++)
-            {
-                freeWorkers.Enqueue(new RegionTraverser.BFSWorker(closedArrayPos));
-            }
-        }
-
-        public static Queue<RegionTraverser.BFSWorker> get_freeWorkers()
-        {
-            return freeWorkers;
-        }
-
-
-        public static void RunNonDestructivePatches()
-		{
-			Type original = typeof(RegionTraverser);
-            Type patched = typeof(RegionTraverser_Transpile);
-			RimThreadedHarmony.AddAllMatchingFields(original, patched);
-            
-
-            RimThreadedHarmony.TranspileFieldReplacements(original, "BreadthFirstTraverse", new[] {
-                typeof(Region),
-                typeof(RegionEntryPredicate),
-                typeof(RegionProcessor),
-                typeof(int),
-                typeof(RegionType)
-            });
-            RimThreadedHarmony.TranspileFieldReplacements(original, "RecreateWorkers");
-            RimThreadedHarmony.harmony.Patch(Constructor(original), transpiler: RimThreadedHarmony.replaceFieldsHarmonyTranspiler);
-            //RimThreadedHarmony.Prefix(original, patched, "BreadthFirstTraverse", new[] {
-            //    typeof(Region),
-            //    typeof(RegionEntryPredicate),
-            //    typeof(RegionProcessor),
-            //    typeof(int),
-            //    typeof(RegionType)
-            //});
-            //RimThreadedHarmony.Prefix(original, patched, "RecreateWorkers");
-
-            original = typeof(RegionTraverser.BFSWorker);
-            RimThreadedHarmony.TranspileFieldReplacements(original, "QueueNewOpenRegion");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "BreadthFirstTraverseWork");
-            
         }
 		public static uint[] GetRegionClosedIndex(Region region)
 		{

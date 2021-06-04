@@ -22,7 +22,7 @@ namespace RimThreaded.Mod_Patches
             {
                 CodeInstruction codeInstruction = instructionsList[currentInstructionIndex];
                 if (codeInstruction.opcode == OpCodes.Call &&
-                    (MethodInfo)codeInstruction.operand == AccessTools.Method(RimThreadedHarmony.combatExtendedCE_Utility, "Blit"))
+                    (MethodInfo)codeInstruction.operand == AccessTools.Method(CombatExteneded_Patch.combatExtendedCE_Utility, "Blit"))
                 {
                     matchFound++;
                     codeInstruction.operand = AccessTools.Method(typeof(CE_Utility_Transpile), "Blit");
@@ -44,7 +44,7 @@ namespace RimThreaded.Mod_Patches
             {
                 CodeInstruction codeInstruction = instructionsList[currentInstructionIndex];
                 if (codeInstruction.opcode == OpCodes.Call && codeInstruction.operand is MethodInfo methodInfo &&
-                    methodInfo == AccessTools.Method(RimThreadedHarmony.combatExtendedCE_Utility, "Blit"))
+                    methodInfo == AccessTools.Method(CombatExteneded_Patch.combatExtendedCE_Utility, "Blit"))
                 {
                     matchFound++;
                     codeInstruction.operand = AccessTools.Method(typeof(CE_Utility_Transpile), "Blit");

@@ -7,7 +7,7 @@ using Verse;
 
 namespace RimThreaded
 {
-
+    //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
     public class WorldComponentUtility_Patch
 	{
         public static bool WorldComponentTick(World world)
@@ -51,16 +51,13 @@ namespace RimThreaded
                 WorldComponent worldComponent = worldComponents[index];
                 if (null != worldComponent) //TODO: is null-check and lock necessary?
                 {
-                    lock (worldComponent)
+                    try
                     {
-                        try
-                        {
-                            worldComponent.WorldComponentTick();
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error("Exception ticking World Component: " + worldComponent.ToStringSafe() + ex);
-                        }
+                        worldComponent.WorldComponentTick();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("Exception ticking World Component: " + worldComponent.ToStringSafe() + ex);
                     }
                 }
             }

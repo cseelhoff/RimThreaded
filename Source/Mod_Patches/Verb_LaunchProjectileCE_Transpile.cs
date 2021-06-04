@@ -8,7 +8,7 @@ using Verse.AI;
 using static HarmonyLib.AccessTools;
 using System.Reflection;
 
-namespace RimThreaded
+namespace RimThreaded.Mod_Patches
 {
     public class Verb_LaunchProjectileCE_Transpile
     {
@@ -37,7 +37,7 @@ namespace RimThreaded
             yield return new CodeInstruction(OpCodes.Ldarg_1);
             yield return new CodeInstruction(OpCodes.Ldloc_0);
             yield return new CodeInstruction(OpCodes.Ldloc, thing.LocalIndex);
-            yield return new CodeInstruction(OpCodes.Call, Method(RimThreadedHarmony.combatExtendedVerb_LaunchProjectileCE, "CanHitCellFromCellIgnoringRange"));
+            yield return new CodeInstruction(OpCodes.Call, Method(CombatExteneded_Patch.combatExtendedVerb_LaunchProjectileCE, "CanHitCellFromCellIgnoringRange"));
             Label label25 = iLGenerator.DefineLabel();
             yield return new CodeInstruction(OpCodes.Brfalse_S, label25);
 
@@ -96,7 +96,7 @@ namespace RimThreaded
                     yield return new CodeInstruction(OpCodes.Ldarg_1, null);
                 }
                 if ( instructionsList[i].opcode == OpCodes.Ldsfld &&
-                    (FieldInfo)instructionsList[i].operand == Field(RimThreadedHarmony.combatExtendedVerb_LaunchProjectileCE, "tempLeanShootSources"))
+                    (FieldInfo)instructionsList[i].operand == Field(CombatExteneded_Patch.combatExtendedVerb_LaunchProjectileCE, "tempLeanShootSources"))
                 {
                     matchFound = true;
                     instructionsList[i].opcode = OpCodes.Ldloc;

@@ -8,7 +8,7 @@ using RimWorld;
 
 namespace RimThreaded
 {
-
+    //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
     public class WorldPawns_Patch
     {
         [ThreadStatic] public static List<Pawn> tmpPawnsToRemove;
@@ -21,15 +21,13 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, "get_AllPawnsAlive");
         }
 
+        //ThreadSafety: Return a new list, instead of an instance field (allPawnsAliveResult)
         public static bool get_AllPawnsAlive(WorldPawns __instance, ref List<Pawn> __result)
         {
             List<Pawn> newAllPawnsAliveResult;
-            lock (__instance)
-            {
-                newAllPawnsAliveResult = new List<Pawn>(__instance.pawnsAlive);
-                newAllPawnsAliveResult.AddRange(__instance.pawnsMothballed);
-                __instance.allPawnsAliveResult = newAllPawnsAliveResult;
-            }
+            newAllPawnsAliveResult = new List<Pawn>(__instance.pawnsAlive);
+            newAllPawnsAliveResult.AddRange(__instance.pawnsMothballed);
+            __instance.allPawnsAliveResult = newAllPawnsAliveResult;
             __result = newAllPawnsAliveResult;
             return false;
         }
@@ -79,10 +77,7 @@ namespace RimThreaded
 
         public static bool WorldPawnsTick(WorldPawns __instance)
         {
-            lock (__instance)
-            {
-                worldPawnsAlive = __instance.pawnsAlive.ToList();
-            }
+            worldPawnsAlive = __instance.pawnsAlive.ToList();
             worldPawnsTicks = worldPawnsAlive.Count;
 
             if (Find.TickManager.TicksGame % 15000 == 0)
@@ -137,6 +132,7 @@ namespace RimThreaded
             }
         }
 
+        //candidate for reverse patch
         public static void WorldPawnsListTick()
         {
             while (true)

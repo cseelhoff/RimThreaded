@@ -56,50 +56,50 @@ namespace RimThreaded
             return (float)threadInfo.safeFunctionResult;
         }
 
-        public static IEnumerable<CodeInstruction> TranspileTimeGetTime(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
-            foreach (CodeInstruction codeInstruction in instructions)
-            {
-                if (codeInstruction.operand is MethodInfo methodInfo)
-                {
-                    if (methodInfo == MethodTimeGetTime)
-                    {
-                        //Log.Message("RimThreaded is replacing method call: ");
-                        codeInstruction.operand = MethodTime_PatchedGetTime;
-                    }
-                }
-                yield return codeInstruction;
-            }
-        }
-        public static IEnumerable<CodeInstruction> TranspileTimeFrameCount(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
-            foreach (CodeInstruction codeInstruction in instructions)
-            {
-                if (codeInstruction.operand is MethodInfo methodInfo)
-                {
-                    if (methodInfo == MethodTimeFrameCount)
-                    {
-                        //Log.Message("RimThreaded is replacing method call: ");
-                        codeInstruction.operand = MethodTime_PatchedFrameCount;
-                    }
-                }
-                yield return codeInstruction;
-            }
-        }
-        public static IEnumerable<CodeInstruction> TranspileRealtimeSinceStartup(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
-            foreach (CodeInstruction codeInstruction in instructions)
-            {
-                if (codeInstruction.operand is MethodInfo methodInfo)
-                {
-                    if (methodInfo == MethodTimeRealtimeSinceStartup)
-                    {
-                        //Log.Message("RimThreaded is replacing method call: ");
-                        codeInstruction.operand = MethodTime_PatchedRealtimeSinceStartup;
-                    }
-                }
-                yield return codeInstruction;
-            }
-        }
+        //public static IEnumerable<CodeInstruction> TranspileTimeGetTime(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        //{
+        //    foreach (CodeInstruction codeInstruction in instructions)
+        //    {
+        //        if (codeInstruction.operand is MethodInfo methodInfo)
+        //        {
+        //            if (methodInfo == MethodTimeGetTime)
+        //            {
+        //                //Log.Message("RimThreaded is replacing method call: ");
+        //                codeInstruction.operand = MethodTime_PatchedGetTime;
+        //            }
+        //        }
+        //        yield return codeInstruction;
+        //    }
+        //}
+        //public static IEnumerable<CodeInstruction> TranspileTimeFrameCount(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        //{
+        //    foreach (CodeInstruction codeInstruction in instructions)
+        //    {
+        //        if (codeInstruction.operand is MethodInfo methodInfo)
+        //        {
+        //            if (methodInfo == MethodTimeFrameCount)
+        //            {
+        //                //Log.Message("RimThreaded is replacing method call: ");
+        //                codeInstruction.operand = MethodTime_PatchedFrameCount;
+        //            }
+        //        }
+        //        yield return codeInstruction;
+        //    }
+        //}
+        //public static IEnumerable<CodeInstruction> TranspileRealtimeSinceStartup(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        //{
+        //    foreach (CodeInstruction codeInstruction in instructions)
+        //    {
+        //        if (codeInstruction.operand is MethodInfo methodInfo)
+        //        {
+        //            if (methodInfo == MethodTimeRealtimeSinceStartup)
+        //            {
+        //                //Log.Message("RimThreaded is replacing method call: ");
+        //                codeInstruction.operand = MethodTime_PatchedRealtimeSinceStartup;
+        //            }
+        //        }
+        //        yield return codeInstruction;
+        //    }
+        //}
     }
 }

@@ -11,11 +11,11 @@ namespace RimThreaded.Mod_Patches
     {
         public static IEnumerable<CodeInstruction> DeleteExtendedDataFor(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            Type typeDictionaryIntData = typeof(Dictionary<,>).MakeGenericType(new Type[] { typeof(int), RimThreadedHarmony.giddyUpCoreStorageExtendedPawnData });
+            Type typeDictionaryIntData = typeof(Dictionary<,>).MakeGenericType(new Type[] { typeof(int), GiddyUpCore_Patch.giddyUpCoreStorageExtendedPawnData });
             List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
             {
                 new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.giddyUpCoreStorageExtendedDataStorage, "_store")),
+                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(GiddyUpCore_Patch.giddyUpCoreStorageExtendedDataStorage, "_store")),
             };
             List<CodeInstruction> searchInstructions = loadLockObjectInstructions.ListFullCopy();
             searchInstructions.Add(new CodeInstruction(OpCodes.Ldarg_1));
@@ -51,11 +51,11 @@ namespace RimThreaded.Mod_Patches
         }
         public static IEnumerable<CodeInstruction> GetExtendedDataFor(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            Type typeDictionaryIntData = typeof(Dictionary<,>).MakeGenericType(new Type[] { typeof(int), RimThreadedHarmony.giddyUpCoreStorageExtendedPawnData });
+            Type typeDictionaryIntData = typeof(Dictionary<,>).MakeGenericType(new Type[] { typeof(int), GiddyUpCore_Patch.giddyUpCoreStorageExtendedPawnData });
             List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
             {
                 new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.giddyUpCoreStorageExtendedDataStorage, "_store")),
+                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(GiddyUpCore_Patch.giddyUpCoreStorageExtendedDataStorage, "_store")),
             };
             List<CodeInstruction> searchInstructions = loadLockObjectInstructions.ListFullCopy();
             searchInstructions.Add(new CodeInstruction(OpCodes.Ldloc_0));

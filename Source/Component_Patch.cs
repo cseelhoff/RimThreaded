@@ -12,8 +12,8 @@ namespace RimThreaded
 {
     class Component_Patch
     {
-        private static readonly MethodInfo MethodComponentTransform = Method(typeof(Component), "get_transform");
-        private static readonly MethodInfo MethodComponent_PatchTransform = Method(typeof(Component_Patch), "get_transform");
+        //private static readonly MethodInfo MethodComponentTransform = Method(typeof(Component), "get_transform");
+        //private static readonly MethodInfo MethodComponent_PatchTransform = Method(typeof(Component_Patch), "get_transform");
         
         public static Transform get_transform(Component __instance)
         {
@@ -26,20 +26,20 @@ namespace RimThreaded
             return (Transform)threadInfo.safeFunctionResult;
         }
 
-        public static IEnumerable<CodeInstruction> TranspileComponentTransform(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
-            foreach (CodeInstruction codeInstruction in instructions)
-            {
-                if (codeInstruction.operand is MethodInfo methodInfo)
-                {
-                    if (methodInfo == MethodComponentTransform)
-                    {
-                        //Log.Message("RimThreaded is replacing method call: ");
-                        codeInstruction.operand = MethodComponent_PatchTransform;
-                    }
-                }
-                yield return codeInstruction;
-            }
-        }
+        //public static IEnumerable<CodeInstruction> TranspileComponentTransform(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        //{
+        //    foreach (CodeInstruction codeInstruction in instructions)
+        //    {
+        //        if (codeInstruction.operand is MethodInfo methodInfo)
+        //        {
+        //            if (methodInfo == MethodComponentTransform)
+        //            {
+        //                //Log.Message("RimThreaded is replacing method call: ");
+        //                codeInstruction.operand = MethodComponent_PatchTransform;
+        //            }
+        //        }
+        //        yield return codeInstruction;
+        //    }
+        //}
     }
 }

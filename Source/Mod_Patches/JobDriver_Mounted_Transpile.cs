@@ -14,12 +14,12 @@ namespace RimThreaded.Mod_Patches
             List<CodeInstruction> searchInstructions2 = new List<CodeInstruction>
             {
                 new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Call, AccessTools.Method(RimThreadedHarmony.giddyUpCoreJobsJobDriver_Mounted, "get_Rider")),
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(GiddyUpCore_Patch.giddyUpCoreJobsJobDriver_Mounted, "get_Rider")),
                 new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Pawn), "get_CurJob")),
             };
             List<CodeInstruction> searchInstructions = searchInstructions2.ListFullCopy();
             searchInstructions.Add(new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Job), "def")));
-            searchInstructions.Add(new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(RimThreadedHarmony.giddyUpCoreJobsGUC_JobDefOf, "Mount")));
+            searchInstructions.Add(new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(GiddyUpCore_Patch.giddyUpCoreJobsGUC_JobDefOf, "Mount")));
             searchInstructions.Add(new CodeInstruction(OpCodes.Beq_S));
 
             List<CodeInstruction> instructionsList = instructions.ToList();

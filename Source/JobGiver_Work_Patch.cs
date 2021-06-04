@@ -72,6 +72,8 @@ namespace RimThreaded
 					{
 						if (scanner.def.scanThings)
 						{
+//----------------------THERE HAVE BEEN NO CHANGES ABOVE THIS---------------------------------
+
 							Predicate<Thing> validator;
 							if (scanner is WorkGiver_DoBill workGiver_DoBill)
 							{

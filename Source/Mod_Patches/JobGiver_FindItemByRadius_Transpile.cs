@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System;
 using System.Reflection;
 using UnityEngine;
+using RimThreaded.Mod_Patches;
 
 namespace RimThreaded
 {
@@ -24,7 +25,7 @@ namespace RimThreaded
                 CodeInstruction codeInstruction = instructionsList[currentInstructionIndex];
                 if (currentInstructionIndex + 1 < instructionsList.Count &&
                     instructionsList[currentInstructionIndex + 1].opcode == OpCodes.Ldfld &&
-                    (FieldInfo)instructionsList[currentInstructionIndex + 1].operand == AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_radius"))
+                    (FieldInfo)instructionsList[currentInstructionIndex + 1].operand == AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_radius"))
                 {
                     matchFound++;
                     codeInstruction.opcode = OpCodes.Ldloc;
@@ -35,7 +36,7 @@ namespace RimThreaded
                 {
                     yield return new CodeInstruction(OpCodes.Ldloc, tmpRadius.LocalIndex);
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_radius"));
+                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_radius"));
                     yield return instructionsList[currentInstructionIndex];
                     currentInstructionIndex++;
                 }
@@ -63,7 +64,7 @@ namespace RimThreaded
             {
                 if (currentInstructionIndex + 3 < instructionsList.Count &&
                     instructionsList[currentInstructionIndex + 3].opcode == OpCodes.Call &&
-                    (MethodInfo)instructionsList[currentInstructionIndex + 3].operand == AccessTools.Method(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "Reset")
+                    (MethodInfo)instructionsList[currentInstructionIndex + 3].operand == AccessTools.Method(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "Reset")
                     )
                 {
                     matchFound++;
@@ -72,7 +73,7 @@ namespace RimThreaded
                     instructionsList[currentInstructionIndex].operand = null;
                     yield return instructionsList[currentInstructionIndex];
                     //yield return new CodeInstruction(OpCodes.Ldloc_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadiusSub, "pawn"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadiusSub, "pawn"));
                     yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Thing), "get_Map"));
                     yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Map), "get_Size"));
                     yield return new CodeInstruction(OpCodes.Stloc_S, intvec3.LocalIndex);
@@ -92,7 +93,7 @@ namespace RimThreaded
                     yield return new CodeInstruction(OpCodes.Ldc_I4_0);
                     yield return new CodeInstruction(OpCodes.Ldloc, lengthHorizontal.LocalIndex);
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_tinyRadiusFactor"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_tinyRadiusFactor"));
                     yield return new CodeInstruction(OpCodes.Mul);
                     yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Mathf), "FloorToInt", new Type[] { typeof(float) }));
                     yield return new CodeInstruction(OpCodes.Stelem_I4);
@@ -100,7 +101,7 @@ namespace RimThreaded
                     yield return new CodeInstruction(OpCodes.Ldc_I4_1);
                     yield return new CodeInstruction(OpCodes.Ldloc, lengthHorizontal.LocalIndex);
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_smallRadiusFactor"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_smallRadiusFactor"));
                     yield return new CodeInstruction(OpCodes.Mul);
                     yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Mathf), "FloorToInt", new Type[] { typeof(float) }));
                     yield return new CodeInstruction(OpCodes.Stelem_I4);
@@ -108,7 +109,7 @@ namespace RimThreaded
                     yield return new CodeInstruction(OpCodes.Ldc_I4_2);
                     yield return new CodeInstruction(OpCodes.Ldloc, lengthHorizontal.LocalIndex);
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_mediumRadiusFactor"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_mediumRadiusFactor"));
                     yield return new CodeInstruction(OpCodes.Mul);
                     yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Mathf), "FloorToInt", new Type[] { typeof(float) }));
                     yield return new CodeInstruction(OpCodes.Stelem_I4);
@@ -116,12 +117,12 @@ namespace RimThreaded
 
                     // int lastUsedRadius = _lastUsedRadiusIndex;
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex"));
                     yield return new CodeInstruction(OpCodes.Stloc, lastUsedRadius.LocalIndex);
 
                     // if (_itemFound)
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound"));
                     yield return new CodeInstruction(OpCodes.Stloc, itemFound.LocalIndex);
                     yield return new CodeInstruction(OpCodes.Ldloc, itemFound.LocalIndex);                    
                     yield return new CodeInstruction(OpCodes.Brfalse_S, IL_00b2);
@@ -176,7 +177,7 @@ namespace RimThreaded
                 else if (currentInstructionIndex + 2 < instructionsList.Count &&
                    instructionsList[currentInstructionIndex + 1].opcode == OpCodes.Ldc_I4_1 &&
                    instructionsList[currentInstructionIndex + 2].opcode == OpCodes.Stfld &&
-                   (FieldInfo)instructionsList[currentInstructionIndex + 2].operand == AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound")
+                   (FieldInfo)instructionsList[currentInstructionIndex + 2].operand == AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound")
                )
                 {
                     matchFound++;
@@ -204,11 +205,11 @@ namespace RimThreaded
                     // if (num >= _radius.Count)
                     yield return new CodeInstruction(OpCodes.Ldloc, lastUsedRadius.LocalIndex);
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_radius"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_radius"));
                     yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(List<int>), "get_Count"));
                     yield return new CodeInstruction(OpCodes.Blt_S, IL_0122);
                     // num = DefaultRadiusIndex;
-                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "get_DefaultRadiusIndex"));
+                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "get_DefaultRadiusIndex"));
                     yield return new CodeInstruction(OpCodes.Stloc, lastUsedRadius.LocalIndex);
                     currentInstructionIndex += 16;
                 }
@@ -231,11 +232,11 @@ namespace RimThreaded
                     yield return codeInstruction;
                     //yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Ldloc, lastUsedRadius.LocalIndex);
-                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex"));
+                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex"));
 
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Ldloc, itemFound.LocalIndex);
-                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound"));
+                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound"));
                     yield return instructionsList[currentInstructionIndex];
                     currentInstructionIndex++;
                 }
@@ -262,7 +263,7 @@ namespace RimThreaded
             {
                 if (currentInstructionIndex + 2 < instructionsList.Count &&
                     instructionsList[currentInstructionIndex + 1].opcode == OpCodes.Ldfld &&
-                    (FieldInfo)instructionsList[currentInstructionIndex + 1].operand == AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound") &&
+                    (FieldInfo)instructionsList[currentInstructionIndex + 1].operand == AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_itemFound") &&
                     instructionsList[currentInstructionIndex + 2].opcode == OpCodes.Brfalse_S)
                 {
                     matchFound++;
@@ -276,9 +277,9 @@ namespace RimThreaded
                     //IL_005e: call int32[mscorlib]System.Math::Min(int32, int32)
                     //IL_0063: stloc.1
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex"));
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_radius"));
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_radius"));
                     yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(List<int>), "get_Count"));
                     yield return new CodeInstruction(OpCodes.Ldc_I4_1);
                     yield return new CodeInstruction(OpCodes.Sub);
@@ -329,7 +330,7 @@ namespace RimThreaded
                 //_radius[_lastUsedRadiusIndex]
                 else if (currentInstructionIndex + 2 < instructionsList.Count &&
                  instructionsList[currentInstructionIndex + 1].opcode == OpCodes.Ldfld &&
-                 (FieldInfo)instructionsList[currentInstructionIndex + 1].operand == AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex") &&
+                 (FieldInfo)instructionsList[currentInstructionIndex + 1].operand == AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex") &&
                  instructionsList[currentInstructionIndex + 2].opcode == OpCodes.Callvirt &&
                  (MethodInfo)instructionsList[currentInstructionIndex + 2].operand == AccessTools.Method(typeof(List<int>), "get_Item")
                  )
@@ -346,7 +347,7 @@ namespace RimThreaded
                  instructionsList[currentInstructionIndex].opcode == OpCodes.Ldarg_0 &&
                  instructionsList[currentInstructionIndex + 1].opcode == OpCodes.Ldarg_0 &&
                  instructionsList[currentInstructionIndex + 2].opcode == OpCodes.Ldfld &&
-                 (FieldInfo)instructionsList[currentInstructionIndex + 2].operand == AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex") &&
+                 (FieldInfo)instructionsList[currentInstructionIndex + 2].operand == AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex") &&
                  instructionsList[currentInstructionIndex + 3].opcode == OpCodes.Ldc_I4_1 &&
                  instructionsList[currentInstructionIndex + 4].opcode == OpCodes.Add
                  )
@@ -416,7 +417,7 @@ namespace RimThreaded
                 {
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Ldloc, lastUsedRadius.LocalIndex);
-                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(RimThreadedHarmony.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex"));
+                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(AwesomeInventory_Patch.awesomeInventoryJobsJobGiver_FindItemByRadius, "_lastUsedRadiusIndex"));
                     yield return instructionsList[currentInstructionIndex];
                     currentInstructionIndex++;
                 }

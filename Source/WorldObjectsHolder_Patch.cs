@@ -11,7 +11,7 @@ namespace RimThreaded
 
     public class WorldObjectsHolder_Patch
 	{
-
+        //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
         internal static void RunDestructivePatches()
         {
             Type original = typeof(WorldObjectsHolder);

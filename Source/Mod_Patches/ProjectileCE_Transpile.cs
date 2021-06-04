@@ -12,8 +12,8 @@ using UnityEngine;
 using Verse;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreadedHarmony;
-
-namespace RimThreaded
+using static RimThreaded.Mod_Patches.CombatExteneded_Patch;
+namespace RimThreaded.Mod_Patches
 {
 	class ProjectileCE_Transpile
     {

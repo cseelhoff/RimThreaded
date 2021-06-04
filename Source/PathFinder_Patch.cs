@@ -452,13 +452,6 @@ namespace RimThreaded
         static readonly Type icomparerCostNodeType2 = typeof(IComparer<>).MakeGenericType(costNodeType2);
         static readonly Type fastPriorityQueueCostNodeType2 = typeof(FastPriorityQueue<>).MakeGenericType(costNodeType2);
 
-        internal static void RunNonDestructivePatches()
-        {
-            Type original = typeof(PathFinder);
-            Type patched = typeof(PathFinder_Patch);
-            //RimThreadedHarmony.Transpile(original, patched, "FindPath", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms), typeof(PathEndMode) });
-        }
-
         public static IEnumerable<CodeInstruction> FindPath(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             //calcGrid

@@ -9,7 +9,7 @@ using UnityEngine;
 using static RimThreaded.RimThreaded;
 using static System.Threading.Thread;
 
-namespace RimThreaded
+namespace RimThreaded.Mod_Patches
 {
     public class TextureUtility_Transpile
     {
@@ -22,7 +22,7 @@ namespace RimThreaded
             {
                 CodeInstruction codeInstruction = instructionsList[currentInstructionIndex];
                 if (codeInstruction.opcode == OpCodes.Call &&
-                    (MethodInfo)codeInstruction.operand == AccessTools.Method(RimThreadedHarmony.giddyUpCoreUtilitiesTextureUtility, "getReadableTexture"))
+                    (MethodInfo)codeInstruction.operand == AccessTools.Method(GiddyUpCore_Patch.giddyUpCoreUtilitiesTextureUtility, "getReadableTexture"))
                 {
                     matchFound = true;
                     codeInstruction.operand = AccessTools.Method(typeof(TextureUtility_Transpile), "GetReadableTexture");

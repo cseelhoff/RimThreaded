@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
+using RimThreaded.Mod_Patches;
 using Verse;
 
 namespace RimThreaded
@@ -12,10 +13,10 @@ namespace RimThreaded
 		public static IEnumerable<CodeInstruction> CompGuest(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			List<CodeInstruction> instructionsList = instructions.ToList();
-			Type loadLockObjectType = typeof(Dictionary<,>).MakeGenericType(new[] { typeof(Pawn), RimThreadedHarmony.hospitalityCompGuest });
+			Type loadLockObjectType = typeof(Dictionary<,>).MakeGenericType(new[] { typeof(Pawn), Hospitality_Patch.hospitalityCompGuest });
 			List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
 			{
-				new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(RimThreadedHarmony.hospitalityCompUtility, "guestComps"))
+				new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(Hospitality_Patch.hospitalityCompUtility, "guestComps"))
 			};
 			List<CodeInstruction> searchInstructions = loadLockObjectInstructions.ListFullCopy();
 			searchInstructions.Add(new CodeInstruction(OpCodes.Ldarg_0));
@@ -51,10 +52,10 @@ namespace RimThreaded
 		public static IEnumerable<CodeInstruction> OnPawnRemoved(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			List<CodeInstruction> instructionsList = instructions.ToList();
-			Type loadLockObjectType = typeof(Dictionary<,>).MakeGenericType(new Type[] { typeof(Pawn), RimThreadedHarmony.hospitalityCompGuest });
+			Type loadLockObjectType = typeof(Dictionary<,>).MakeGenericType(new Type[] { typeof(Pawn), Hospitality_Patch.hospitalityCompGuest });
 			List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
 			{
-				new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(RimThreadedHarmony.hospitalityCompUtility, "guestComps"))
+				new CodeInstruction(OpCodes.Ldsfld, AccessTools.Field(Hospitality_Patch.hospitalityCompUtility, "guestComps"))
 			};
 			List<CodeInstruction> searchInstructions = loadLockObjectInstructions.ListFullCopy();
 			searchInstructions.Add(new CodeInstruction(OpCodes.Ldarg_0));

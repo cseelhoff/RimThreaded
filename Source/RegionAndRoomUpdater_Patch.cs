@@ -14,13 +14,6 @@ namespace RimThreaded
         static readonly Type original = typeof(RegionAndRoomUpdater);
         static readonly Type patched = typeof(RegionAndRoomUpdater_Patch);
 
-        internal static void RunNonDestructivePatches()
-        {
-            RimThreadedHarmony.AddAllMatchingFields(original, patched);
-            RimThreadedHarmony.TranspileFieldReplacements(original, "FloodAndSetRoomGroups");
-            RimThreadedHarmony.TranspileFieldReplacements(original, "CombineNewAndReusedRoomsIntoContiguousGroups");
-        }
-
         internal static void RunDestructivePatches()
         {
             RimThreadedHarmony.Prefix(original, patched, "TryRebuildDirtyRegionsAndRooms");
