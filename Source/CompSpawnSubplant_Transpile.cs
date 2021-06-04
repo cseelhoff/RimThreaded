@@ -18,11 +18,11 @@ namespace RimThreaded
             Type original = typeof(CompSpawnSubplant);
             Type patched = typeof(CompSpawnSubplant_Transpile);
             RimThreadedHarmony.harmony.Patch(Constructor(original), transpiler: new HarmonyMethod(Method(patched, "CreateNewThreadSafeLinkedList_Thing")));
-            RimThreadedHarmony.harmony.Patch(Method(original, "DoGrowSubplant"), transpiler: new HarmonyMethod(Method(patched, "ConvertListThing_ToList")));
+            RimThreadedHarmony.harmony.Patch(Method(original, "get_SubplantsForReading"), transpiler: new HarmonyMethod(Method(patched, "ConvertListThing_ToList")));
             RimThreadedHarmony.harmony.Patch(Method(original, "DoGrowSubplant"), transpiler: new HarmonyMethod(Method(patched, "ReplaceAdd_Thing")));
             RimThreadedHarmony.harmony.Patch(Method(original, "Cleanup"), transpiler: new HarmonyMethod(Method(patched, "ReplaceRemoveAll_Thing")));
             RimThreadedHarmony.harmony.Patch(Method(original, "PostExposeData"), transpiler: new HarmonyMethod(Method(patched, "ReplaceRemoveAll_Thing")));
-            RimThreadedHarmony.harmony.Patch(Method(original, "PostExposeData"), transpiler: new HarmonyMethod(Method(patched, "ReplaceLook")));
+            RimThreadedHarmony.harmony.Patch(Method(original, "PostExposeData"), transpiler: new HarmonyMethod(Method(patched, "ReplaceLook_Thing")));
         }
         internal static void RunDestructivePatches()
         {
@@ -91,7 +91,7 @@ namespace RimThreaded
         {
             foreach (CodeInstruction codeInstruction in instructions)
             {
-                if (codeInstruction.opcode == OpCodes.Callvirt && (MethodInfo)codeInstruction.operand == Method(typeof(List<Thing>), "Add", Type.EmptyTypes))
+                if (codeInstruction.opcode == OpCodes.Callvirt && (MethodInfo)codeInstruction.operand == Method(typeof(List<Thing>), "Add"))
                 {
                     codeInstruction.operand = Method(typeof(ThreadSafeLinkedList<Thing>), "Add");
                 }
@@ -101,13 +101,13 @@ namespace RimThreaded
 
         //public override void PostExposeData()
         //Scribe_Collections.Look(ref subplants, "subplants", LookMode.Reference);   ------Add Scribe_Collections.Look(ref ThreadSafeLinkedList, string, LookMode)
-        public static IEnumerable<CodeInstruction> ReplaceLook(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        public static IEnumerable<CodeInstruction> ReplaceLook_Thing(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             foreach (CodeInstruction codeInstruction in instructions)
             {
-                if (codeInstruction.opcode == OpCodes.Call && ((MethodInfo)codeInstruction.operand) == Method(typeof(Scribe_Collections), "Look", new Type[] { typeof(List<>).MakeGenericType().MakeByRefType(), typeof(string), typeof(LookMode), typeof(object[]) }))
+                if (codeInstruction.opcode == OpCodes.Call && ((MethodInfo)codeInstruction.operand) == Method(typeof(Scribe_Collections), "Look", new Type[] { typeof(List<>).MakeGenericType().MakeByRefType(), typeof(string), typeof(LookMode), typeof(object[]) }, new Type[] { typeof(Thing) }))
                 {
-                    codeInstruction.operand = Method(typeof(Scribe_Collections_Patch), "Look", new Type[] { typeof(ThreadSafeLinkedList<>).MakeGenericType().MakeByRefType(), typeof(string), typeof(LookMode), typeof(object[]) });
+                    codeInstruction.operand = Method(typeof(Scribe_Collections_Patch), "Look1", null, new Type[] { typeof(Thing) });
                 }
                 yield return codeInstruction;
             }

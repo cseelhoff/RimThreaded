@@ -25,6 +25,7 @@ namespace RimThreaded
 
 		public static FieldInfo cachedStoreCell;
 		public static HashSet<MethodInfo> nonDestructivePrefixes = new HashSet<MethodInfo>();
+		public static List<Assembly> assemblies;
 
 		static RimThreadedHarmony()
 		{
@@ -83,6 +84,10 @@ namespace RimThreaded
 		static Replacements replacements;
 		private static void LoadFieldReplacements()
 		{
+			assemblies = (from a in AppDomain.CurrentDomain.GetAssemblies()
+						  where !a.FullName.StartsWith("Microsoft.VisualStudio")
+						  select a).ToList();
+
 			string fileName = "replacements3.json";
             string jsonString = File.ReadAllText(fileName);
             replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
@@ -108,6 +113,9 @@ namespace RimThreaded
             MethodInfo initializer = Method(typeof(RimThreaded), "InitializeAllThreadStatics"); 
 			ConstructorInfo threadStaticConstructor = typeof(ThreadStaticAttribute).GetConstructor(new Type[0]);
 			CustomAttributeBuilder attributeBuilder = new CustomAttributeBuilder(threadStaticConstructor, new object[0]);
+			AssemblyName aName = new AssemblyName("RimThreadedReplacements");
+			AssemblyBuilder ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
+			ModuleBuilder modBuilder = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
 			foreach (ClassReplacement classReplacement in replacements.ClassReplacements)
             {
 
@@ -119,12 +127,8 @@ namespace RimThreaded
                 }
 				if (classReplacement.ThreadStatics != null && classReplacement.ThreadStatics.Count > 0)
 				{
-					AssemblyName aName = new AssemblyName(type.Name + "_Replacement");
-					AssemblyBuilder ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
-					ModuleBuilder modBuilder = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
 					TypeBuilder tb = modBuilder.DefineType(type.Name + "_Replacement", TypeAttributes.Public);
 					MethodBuilder mb = tb.DefineMethod("InitializeThreadStatics", MethodAttributes.Public | MethodAttributes.Static, typeof(void), Type.EmptyTypes);
-					//mb.InitLocals = true;
 					ILGenerator il = mb.GetILGenerator();
 					foreach (ThreadStaticDetail threadStaticDetail in classReplacement.ThreadStatics)
 					{
@@ -170,29 +174,26 @@ namespace RimThreaded
 					il.Emit(OpCodes.Ret);
 					Type newFieldType = tb.CreateType();
 					//Directory.SetCurrentDirectory("C:\\STUFF");
-#if DEBUG
-					ab.Save(type.Name + "_Replacement.dll");
-#endif
 					MethodInfo mb2 = Method(newFieldType, "InitializeThreadStatics");
 					HarmonyMethod pf = new HarmonyMethod(mb2);
 					harmony.Patch(initializer, postfix: pf);
 				}
             }
-        }
+#if DEBUG
+			ab.Save(aName.Name + ".dll");
+#endif
+		}
 		public static Dictionary<Type, HashSet<FieldInfo>> untouchedStaticFields = new Dictionary<Type, HashSet<FieldInfo>>();
 		public static HashSet<string> fieldFullNames = new HashSet<string>();
 		public static HashSet<string> allStaticFieldNames = new HashSet<string>();
 		private static void ApplyFieldReplacements()
         {
-			IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
-                                           where !a.FullName.StartsWith("Microsoft.VisualStudio")
-                                           select a;
-            foreach (Assembly a in source)
+            foreach (Assembly assembly in assemblies)
             {
-                Type[] types = GetTypesFromAssembly(a);
-                if (a.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
-                {
-                    foreach (Type type in types)
+                if (assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+				{
+					Type[] types = GetTypesFromAssembly(assembly);
+					foreach (Type type in types)
                     {
 						//foreach (FieldInfo field in type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static))
       //                  {
@@ -254,15 +255,15 @@ namespace RimThreaded
 							if (method.IsDeclaredMember())
 							{
 								try {
-									IEnumerable<KeyValuePair<OpCode, object>> f = PatchProcessor.ReadMethodBody(method);
-									foreach (KeyValuePair<OpCode, object> e in f)
+									IEnumerable<KeyValuePair<OpCode, object>> codeInstructions = PatchProcessor.ReadMethodBody(method);
+									foreach (KeyValuePair<OpCode, object> codeInstruction in codeInstructions)
 									{
-										if (e.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
+										if (codeInstruction.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
 										{
 											TranspileFieldReplacements(method);
 											break;
 										}
-										if (e.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
+										if (codeInstruction.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
 										{
 											TranspileFieldReplacements(method);
 											break;

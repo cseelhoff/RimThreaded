@@ -448,12 +448,12 @@ namespace RimThreaded
     }
     public class Scribe_Collections_Patch
     {
-        public static void Look<T>(ref ThreadSafeLinkedList<T> list, string label, LookMode lookMode = LookMode.Undefined, params object[] ctorArgs)
+        public static void Look1<T>(ref ThreadSafeLinkedList<T> list, string label, LookMode lookMode = LookMode.Undefined, params object[] ctorArgs)
         {
-            Look(ref list, saveDestroyedThings: false, label, lookMode, ctorArgs);
+            Look2(ref list, saveDestroyedThings: false, label, lookMode, ctorArgs);
         }
 
-        public static void Look<T>(ref ThreadSafeLinkedList<T> list, bool saveDestroyedThings, string label, LookMode lookMode = LookMode.Undefined, params object[] ctorArgs)
+        public static void Look2<T>(ref ThreadSafeLinkedList<T> list, bool saveDestroyedThings, string label, LookMode lookMode = LookMode.Undefined, params object[] ctorArgs)
         {
             if (lookMode == LookMode.Undefined && !Scribe_Universal.TryResolveLookMode(typeof(T), out lookMode))
             {
