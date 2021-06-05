@@ -86,15 +86,11 @@ namespace RimThreaded
         }
         static RimThreaded()
         {
+            RimThreadedHarmony rtHarmony = new RimThreadedHarmony();
             InitializeAllThreadStatics();
             CreateWorkerThreads();
             monitorThread = new Thread(MonitorThreads) { IsBackground = true };
             monitorThread.Start();
-            string potentialConflicts = RimThreadedMod.getPotentialModConflicts();
-            if(potentialConflicts.Length > 0)
-            {
-                Log.Warning("Potential RimThreaded mod conflicts :" + potentialConflicts);
-            }
         }
         public static void AddNormalTicking(object instance, Action<object> prepare, Action<object> tick)
         {

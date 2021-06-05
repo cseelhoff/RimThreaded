@@ -2,10 +2,9 @@
 using System;
 using System.Collections.Generic;
 using Verse;
-using System.Reflection;
 using System.Reflection.Emit;
 using System.Linq;
-using static HarmonyLib.AccessTools;
+using static Verse.PawnCapacitiesHandler;
 
 namespace RimThreaded
 {
@@ -13,108 +12,69 @@ namespace RimThreaded
     public class PawnCapacitiesHandler_Patch
     {
 
-        static Type original = typeof(PawnCapacitiesHandler);
-        static Type patched = typeof(PawnCapacitiesHandler_Patch);
-        internal static void RunNonDestructivePatches()
-        {
-            RimThreadedHarmony.Transpile(original, patched, "GetLevel");
-        }
-
+        static readonly Type original = typeof(PawnCapacitiesHandler);
+        static readonly Type patched = typeof(PawnCapacitiesHandler_Patch);
         internal static void RunDestructivePatches()
         {
-            RimThreadedHarmony.Prefix(original, patched, "Notify_CapacityLevelsDirty");
-            RimThreadedHarmony.Prefix(original, patched, "Clear");
-            RimThreadedHarmony.Prefix(original, patched, "CapableOf");
-            ConstructorInfo constructorMethod = original.GetConstructor(new Type[] { typeof(Pawn) });
-            MethodInfo cpMethod = patched.GetMethod("Postfix_Constructor");
-            RimThreadedHarmony.harmony.Patch(constructorMethod, postfix: new HarmonyMethod(cpMethod));
+            RimThreadedHarmony.Prefix(original, patched, "GetLevel");
         }
-        
-        public static Dictionary<PawnCapacitiesHandler, DefMap<PawnCapacityDef, CacheElement2>> cachedCapacityLevelsDict =
-            new Dictionary<PawnCapacitiesHandler, DefMap<PawnCapacityDef, CacheElement2>>();
-        
-            public class CacheElement2        
+        internal static void RunNonDestructivePatches()
         {
-            public CacheStatus status;
-
-            public float value;
-        }
-        public enum CacheStatus
-        {
-            Uncached,
-            Caching,
-            Cached
+            //RimThreadedHarmony.Transpile(original, patched, "GetLevel"); //wrap method in lock to protect CacheStatus changes
+            RimThreadedHarmony.Transpile(original, patched, "Notify_CapacityLevelsDirty"); //wrap method in lock to protect CacheStatus changes
         }
 
-        public static IEnumerable<CodeInstruction> GetLevel(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        public static IEnumerable<CodeInstruction> GetLevel2(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            int[] matchesFound = new int[1]; //EDIT
             List<CodeInstruction> instructionsList = instructions.ToList();
-            LocalBuilder cacheElement = iLGenerator.DeclareLocal(typeof(CacheElement2));
             int i = 0;
-            while (i < instructionsList.Count)
-            {
-                int matchIndex = 0;
-                if (
-                    i + 2 < instructionsList.Count &&
-                    instructionsList[i + 1].opcode == OpCodes.Ldfld &&
-                    (FieldInfo)instructionsList[i + 1].operand == Field(typeof(PawnCapacitiesHandler), "cachedCapacityLevels") &&
-                    instructionsList[i + 2].opcode == OpCodes.Brtrue_S
-                    )
+            List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
                 {
-                    instructionsList[i].opcode = OpCodes.Ldarg_0;
-                    instructionsList[i].operand = null;
-                    yield return instructionsList[i++];
-                    yield return new CodeInstruction(OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(OpCodes.Call, Method(typeof(PawnCapacitiesHandler_Patch), "getCacheElementResult"));
-                    yield return new CodeInstruction(OpCodes.Ret);
-                    matchesFound[matchIndex]++;
-                    break;
-                }
+                    new CodeInstruction(OpCodes.Ldarg_0)
+                };
+            LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(PawnCapacitiesHandler));
+            LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+            foreach (CodeInstruction ci in RimThreadedHarmony.EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
+                yield return ci;
+
+            while (i < instructionsList.Count - 3)
+            {
                 yield return instructionsList[i++];
             }
-            for (int mIndex = 0; mIndex < matchesFound.Length; mIndex++)
+
+            foreach (CodeInstruction ci in RimThreadedHarmony.ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
+                yield return ci;
+
+            while (i < instructionsList.Count)
             {
-                if (matchesFound[mIndex] < 1)
-                    Log.Error("IL code instruction set " + mIndex + " not found");
+                yield return instructionsList[i++];
             }
+        }
+        public static IEnumerable<CodeInstruction> Notify_CapacityLevelsDirty(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            int i = 0;
+            List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
+                {
+                    new CodeInstruction(OpCodes.Ldarg_0)
+                };
+            LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(PawnCapacitiesHandler));
+            LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+            foreach (CodeInstruction ci in RimThreadedHarmony.EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
+                yield return ci;
+
+            while (i < instructionsList.Count - 1)
+            {
+                yield return instructionsList[i++];
+            }
+
+            foreach (CodeInstruction ci in RimThreadedHarmony.ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
+                yield return ci;
+
+            yield return instructionsList[i];
         }
 
-        public static void Postfix_Constructor(PawnCapacitiesHandler __instance, Pawn pawn)
-        {
-            cachedCapacityLevelsDict[__instance] = new DefMap<PawnCapacityDef, CacheElement2>();
-        }
-        public static bool Clear(PawnCapacitiesHandler __instance)
-        {
-            cachedCapacityLevelsDict[__instance] = null;
-            return false;
-        }
-        public static bool Notify_CapacityLevelsDirty(PawnCapacitiesHandler __instance)
-        {
-            if (cachedCapacityLevelsDict[__instance] == null)
-            {
-                cachedCapacityLevelsDict[__instance] = new DefMap<PawnCapacityDef, CacheElement2>();
-            }
 
-            for (int i = 0; i < cachedCapacityLevelsDict[__instance].Count; i++)
-            {
-                cachedCapacityLevelsDict[__instance][i].status = CacheStatus.Uncached;
-            }
-            return false;
-        }
-        
-        public static bool CapableOf(PawnCapacitiesHandler __instance, ref bool __result, PawnCapacityDef capacity)
-        {
-            float levelResult = 0f;
-            __result = false;
-            if (capacity != null)
-            {
-                GetLevel(__instance, ref levelResult, capacity);
-                __result = levelResult > capacity.minForCapable;
-            }
-            return false;
-        }
-        
         public static bool GetLevel(PawnCapacitiesHandler __instance, ref float __result, PawnCapacityDef capacity)
         {
             if (__instance.pawn.health.Dead)
@@ -122,28 +82,19 @@ namespace RimThreaded
                 __result = 0f;
                 return false;
             }
-            //if (cachedCapacityLevels == null) //REMOVED
-            //CacheElement cacheElement = cachedCapacityLevels[capacity]; //REMOVED   
-            
-            __result = getCacheElementResult(__instance, capacity);
-            return false;
-        }
-
-        private static float getCacheElementResult(PawnCapacitiesHandler __instance, PawnCapacityDef capacity)
-        {
-            if (capacity == null) //ADDED
+            if (__instance.cachedCapacityLevels == null)
             {
-                return 0f;
+                __instance.Notify_CapacityLevelsDirty();
             }
-            CacheElement2 cacheElement = get_cacheElement(__instance, capacity); //ADDED
-            lock (cacheElement) //ADDED
+            lock (__instance)
             {
+                CacheElement cacheElement = __instance.cachedCapacityLevels[capacity];
                 if (cacheElement.status == CacheStatus.Caching)
                 {
                     Log.Error($"Detected infinite stat recursion when evaluating {capacity}");
-                    return 0f;
+                    __result = 0f;
+                    return false;
                 }
-
                 if (cacheElement.status == CacheStatus.Uncached)
                 {
                     cacheElement.status = CacheStatus.Caching;
@@ -156,25 +107,25 @@ namespace RimThreaded
                         cacheElement.status = CacheStatus.Cached;
                     }
                 }
+                __result = cacheElement.value;
+                return false;
             }
-            return cacheElement.value;
         }
 
-        private static CacheElement2 get_cacheElement(PawnCapacitiesHandler __instance, PawnCapacityDef capacity)
-        {
-            DefMap<PawnCapacityDef, CacheElement2> defMap = cachedCapacityLevelsDict[__instance];
-            if (defMap == null)
-            {
-                defMap = new DefMap<PawnCapacityDef, CacheElement2>();
-                cachedCapacityLevelsDict[__instance] = defMap;
-                for (int i = 0; i < defMap.Count; i++)
-                {
-                    defMap[i].status = CacheStatus.Uncached;
-                }
-            }
-            return defMap[capacity];
-        }
-
+        //public void Notify_CapacityLevelsDirty2(PawnCapacitiesHandler __instance)
+        //{
+        //    lock (__instance)
+        //    {
+        //        if (__instance.cachedCapacityLevels == null)
+        //        {
+        //            __instance.cachedCapacityLevels = new DefMap<PawnCapacityDef, CacheElement>();
+        //        }
+        //        for (int i = 0; i < __instance.cachedCapacityLevels.Count; i++)
+        //        {
+        //            __instance.cachedCapacityLevels[i].status = CacheStatus.Uncached;
+        //        }
+        //    }
+        //}
 
     }
 }

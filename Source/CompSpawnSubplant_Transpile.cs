@@ -105,7 +105,7 @@ namespace RimThreaded
         {
             foreach (CodeInstruction codeInstruction in instructions)
             {
-                if (codeInstruction.opcode == OpCodes.Call && ((MethodInfo)codeInstruction.operand) == Method(typeof(Scribe_Collections), "Look", new Type[] { typeof(List<>).MakeGenericType().MakeByRefType(), typeof(string), typeof(LookMode), typeof(object[]) }, new Type[] { typeof(Thing) }))
+                if (codeInstruction.opcode == OpCodes.Call && ((MethodInfo)codeInstruction.operand) == Method(typeof(Scribe_Collections), "Look", new Type[] { typeof(List<>).MakeByRefType(), typeof(string), typeof(LookMode), typeof(object[]) }, new Type[] { typeof(Thing) }))
                 {
                     codeInstruction.operand = Method(typeof(Scribe_Collections_Patch), "Look1", null, new Type[] { typeof(Thing) });
                 }
