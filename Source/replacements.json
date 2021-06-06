@@ -689,14 +689,14 @@
             "ThreadStatics": [
                 {
                     "FieldName": "NumWorkers",
-                    "PatchedClassName": "RimThreaded.RegionTraverser_Transpile",
+                    "PatchedClassName": "RimThreaded.RegionTraverser_Patch",
                     "SelfInitialized": true
                 },
-                {
-                    "FieldName": "freeWorkers",
-                    "PatchedClassName": "RimThreaded.RegionTraverser_Transpile",
-                    "SelfInitialized": true
-                }
+              {
+                "FieldName": "freeWorkers",
+                "PatchedClassName": "RimThreaded.RegionTraverser_Patch",
+                "SelfInitialized": true
+              }
             ]
         },
         {

@@ -20,7 +20,7 @@ namespace RimThreaded
         }
         public static bool Blit(Texture source, RenderTexture dest)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionGraphicsBlit, new object[] { source, dest } };
             mainThreadWaitHandle.Set();
@@ -33,7 +33,7 @@ namespace RimThreaded
 
         public static bool DrawMesh(Mesh mesh, Vector3 position, Quaternion rotation, Material material, int layer)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionGraphicsDrawMesh, new object[] { mesh, position, rotation, material, layer } };
             mainThreadWaitHandle.Set();

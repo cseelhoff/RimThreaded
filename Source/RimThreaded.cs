@@ -68,7 +68,7 @@ namespace RimThreaded
         public static bool historyTickComplete;
         public static bool miscellaneousComplete;
 
-        public static Dictionary<Thread, ThreadInfo> allThreads2 = new Dictionary<Thread, ThreadInfo>();
+        public static Dictionary<Thread, ThreadInfo> allWorkerThreads = new Dictionary<Thread, ThreadInfo>();
         public static HashSet<int> initializedThreads = new HashSet<int>();
 
         public static object allSustainersLock = new object();
@@ -154,19 +154,19 @@ namespace RimThreaded
         };
         public static void RestartAllWorkerThreads()
         {
-            foreach(Thread thread in allThreads2.Keys.ToArray())
+            foreach(Thread thread in allWorkerThreads.Keys.ToArray())
             {
                 thread.Abort();
             }
-            allThreads2.Clear();
+            allWorkerThreads.Clear();
             CreateWorkerThreads();
         }
         private static void CreateWorkerThreads()
         {
-            while(allThreads2.Count < maxThreads)
+            while(allWorkerThreads.Count < maxThreads)
             {
                 ThreadInfo threadInfo = CreateWorkerThread();
-                allThreads2.Add(threadInfo.thread, threadInfo);
+                allWorkerThreads.Add(threadInfo.thread, threadInfo);
             }
         }
         private static ThreadInfo CreateWorkerThread()
@@ -190,7 +190,8 @@ namespace RimThreaded
             GenTemperature_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
-            RegionTraverser_Transpile.InitializeThreadStatics();
+            Region_Patch.InitializeThreadStatics();
+            RegionTraverser_Patch.InitializeThreadStatics();
             Toils_Ingest_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)
@@ -375,11 +376,11 @@ namespace RimThreaded
                 mapPostTickComplete = false;
                 historyTickComplete = false;
                 miscellaneousComplete = false;
-                foreach (ThreadInfo threadInfo in allThreads2.Values)
+                foreach (ThreadInfo threadInfo in allWorkerThreads.Values)
                 {
                     threadInfo.eventWaitStart.Set();
                 }
-                List<KeyValuePair<Thread, ThreadInfo>> threadPairs = allThreads2.ToList();
+                List<KeyValuePair<Thread, ThreadInfo>> threadPairs = allWorkerThreads.ToList();
                 foreach(KeyValuePair<Thread, ThreadInfo> threadPair in threadPairs)
                 {
                     ThreadInfo threadInfo = threadPair.Value;
@@ -390,7 +391,7 @@ namespace RimThreaded
                             Log.Error("Thread: " + threadInfo.thread + " did not finish within " + timeoutMS + "ms. Restarting thread...");
                             Thread thread = threadPair.Key;
                             thread.Abort();
-                            allThreads2.Remove(thread);
+                            allWorkerThreads.Remove(thread);
                             CreateWorkerThread();
                         } else
                         {
@@ -438,8 +439,7 @@ namespace RimThreaded
 
         private static void RespondToSafeFunctionRequests()
         {
-            ThreadInfo[] threadInfos = allThreads2.Values.ToArray();
-            foreach (ThreadInfo threadInfo in threadInfos)
+            foreach (ThreadInfo threadInfo in allWorkerThreads.Values)
             {
                 object[] functionAndParameters = threadInfo.safeFunctionRequest;
                 if (functionAndParameters == null) continue;

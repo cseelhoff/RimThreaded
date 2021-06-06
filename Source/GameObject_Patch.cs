@@ -33,7 +33,7 @@ namespace RimThreaded
 
         public static void Internal_CreateGameObject(GameObject gameObject, string name)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
                 ActionInternal_CreateGameObject(gameObject, name);
                 return;
@@ -74,13 +74,14 @@ namespace RimThreaded
         }
         public static Transform get_transform(GameObject __instance)
         {
-            if (!allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.transform;
+            if (!allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.transform;
             Func<object[], object> FuncTransform = parameters => __instance.transform;
             threadInfo.safeFunctionRequest = new object[] { FuncTransform, new object[] { } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             return (Transform)threadInfo.safeFunctionResult;
         }
+
 
         public static IEnumerable<CodeInstruction> TranspileGameObjectTransform(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {

@@ -20,7 +20,7 @@ namespace RimThreaded
         public static Func<object[], object> safeFunction = parameters => { return Text.CurFontStyle; };
         public static bool get_CurFontStyle(ref GUIStyle __result)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
             threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { } };
             mainThreadWaitHandle.Set();

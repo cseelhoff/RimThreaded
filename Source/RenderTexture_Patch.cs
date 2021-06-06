@@ -37,7 +37,7 @@ namespace RimThreaded
 
         public static bool GetTemporaryImpl(ref RenderTexture __result, int width, int height, int depthBuffer, GraphicsFormat format, int antiAliasing = 1, RenderTextureMemoryless memorylessMode = RenderTextureMemoryless.None, VRTextureUsage vrUsage = VRTextureUsage.None, bool useDynamicScale = false)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { width, height, depthBuffer, format, antiAliasing, memorylessMode, vrUsage, useDynamicScale } };
             mainThreadWaitHandle.Set();
@@ -51,7 +51,7 @@ namespace RimThreaded
 
         public static bool ReleaseTemporary(RenderTexture temp)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { FuncReleaseTemporary, new object[] { temp } };
             mainThreadWaitHandle.Set();

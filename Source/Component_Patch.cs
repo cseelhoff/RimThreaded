@@ -14,16 +14,27 @@ namespace RimThreaded
     {
         //private static readonly MethodInfo MethodComponentTransform = Method(typeof(Component), "get_transform");
         //private static readonly MethodInfo MethodComponent_PatchTransform = Method(typeof(Component_Patch), "get_transform");
-        
+
         public static Transform get_transform(Component __instance)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return __instance.transform;
             Func<object[], object> FuncTransform = parameters => __instance.transform;
             threadInfo.safeFunctionRequest = new object[] { FuncTransform, new object[] { } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             return (Transform)threadInfo.safeFunctionResult;
+        }
+
+        public static GameObject get_gameObject(Component __instance)
+        {
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+                return __instance.gameObject;
+            Func<object[], object> FuncGameObject = parameters => __instance.gameObject;
+            threadInfo.safeFunctionRequest = new object[] { FuncGameObject, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (GameObject)threadInfo.safeFunctionResult;
         }
 
         //public static IEnumerable<CodeInstruction> TranspileComponentTransform(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)

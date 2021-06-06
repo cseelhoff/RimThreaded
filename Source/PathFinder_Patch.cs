@@ -17,11 +17,11 @@ namespace RimThreaded
     public class PathFinder_Patch
     {
         [ThreadStatic] public static List<int> disallowedCornerIndices;
-        [ThreadStatic] public static PathFinder.PathFinderNodeFast[] calcGrid;
-        [ThreadStatic] public static FastPriorityQueue<PathFinder.CostNode> openList;
+        [ThreadStatic] public static PathFinderNodeFast[] calcGrid;
+        [ThreadStatic] public static FastPriorityQueue<CostNode> openList;
         [ThreadStatic] public static ushort statusOpenValue;
         [ThreadStatic] public static ushort statusClosedValue;
-        //[ThreadStatic] public static Dictionary<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorDict;
+        [ThreadStatic] public static Dictionary<PathFinder, RegionCostCalculatorWrapper> regionCostCalculatorDict;
         
         public static void InitializeThreadStatics()
         {
@@ -29,7 +29,32 @@ namespace RimThreaded
             statusOpenValue = 1;
             statusClosedValue = 2;
             disallowedCornerIndices = new List<int>(4);
-            //regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
+            regionCostCalculatorDict = new Dictionary<PathFinder, RegionCostCalculatorWrapper>();
+        }
+
+        internal static void AddFieldReplacements()
+        {
+            Dictionary<OpCode, MethodInfo> regionCostCalculatorReplacements = new Dictionary<OpCode, MethodInfo>();
+            regionCostCalculatorReplacements.Add(OpCodes.Ldfld, Method(typeof(PathFinder_Patch), "GetRegionCostCalculator"));
+            regionCostCalculatorReplacements.Add(OpCodes.Stfld, Method(typeof(PathFinder_Patch), "SetRegionCostCalculator"));
+            RimThreadedHarmony.replaceFields.Add(Field(typeof(PathFinder), "regionCostCalculator"), regionCostCalculatorReplacements);
+        }
+
+        public static RegionCostCalculatorWrapper GetRegionCostCalculator(PathFinder __instance)
+        {
+            if (!regionCostCalculatorDict.TryGetValue(__instance, out RegionCostCalculatorWrapper regionCostCalculatorWrapper))
+            {
+                regionCostCalculatorWrapper = new RegionCostCalculatorWrapper(__instance.map);
+                regionCostCalculatorDict[__instance] = regionCostCalculatorWrapper;
+            }
+            return regionCostCalculatorWrapper;
+        }
+
+
+        public static void SetRegionCostCalculator(PathFinder __instance, RegionCostCalculatorWrapper regionCostCalculatorWrapper)
+        {
+            regionCostCalculatorDict[__instance] = regionCostCalculatorWrapper;
+            return;
         }
 
         public static bool FindPath(PathFinder __instance, ref PawnPath __result, IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)

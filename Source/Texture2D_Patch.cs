@@ -23,7 +23,7 @@ namespace RimThreaded
 
         public static bool GetPixel(Texture2D __instance, ref Color __result, int x, int y)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             Func<object[], object> safeFunction3 = parameters =>
                 __instance.GetPixel(
@@ -53,7 +53,7 @@ namespace RimThreaded
 
         public static bool Internal_Create(Texture2D mono, int w, int h, int mipCount, GraphicsFormat format, TextureCreationFlags flags, IntPtr nativeTex)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { mono, w, h, mipCount, format, flags, nativeTex } };
             mainThreadWaitHandle.Set();
@@ -64,7 +64,7 @@ namespace RimThreaded
 
         public static bool ReadPixels(Texture2D __instance, Rect source, int destX, int destY, bool recalculateMipMaps = true)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             Action<object[]> safeFunction = p => __instance.ReadPixels((Rect)p[0], (int)p[1], (int)p[2], (bool)p[3]);
             threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { source, destX, destY, recalculateMipMaps } };
@@ -76,7 +76,7 @@ namespace RimThreaded
 
         public static bool Apply(Texture2D __instance, bool updateMipmaps = true, bool makeNoLongerReadable = false)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             Action<object[]> safeFunction = p => __instance.Apply((bool)p[0], (bool)p[1]);
             threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { updateMipmaps, makeNoLongerReadable } };

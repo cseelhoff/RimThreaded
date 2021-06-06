@@ -21,7 +21,7 @@ namespace RimThreaded
 
         public static bool BuildDatabaseIfNecessary()
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { SafeFunction, new object[] { } };
             mainThreadWaitHandle.Set();

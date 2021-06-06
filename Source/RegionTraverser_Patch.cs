@@ -4,15 +4,13 @@ using Verse;
 
 namespace RimThreaded
 {
-    class RegionTraverser_Transpile
+    class RegionTraverser_Patch
     {
-        [ThreadStatic] public static Dictionary<Region, uint[]> regionClosedIndex; //newly defined
         [ThreadStatic] public static Queue<RegionTraverser.BFSWorker> freeWorkers;
         [ThreadStatic] public static int NumWorkers;
 
 		public static void InitializeThreadStatics()
 		{
-			regionClosedIndex = new Dictionary<Region, uint[]>();
             NumWorkers = 8;
 			freeWorkers = new Queue<RegionTraverser.BFSWorker>(NumWorkers);
             for (int closedArrayPos = 0; closedArrayPos < NumWorkers; closedArrayPos++)
@@ -20,13 +18,7 @@ namespace RimThreaded
                 freeWorkers.Enqueue(new RegionTraverser.BFSWorker(closedArrayPos));
             }
         }
-		public static uint[] GetRegionClosedIndex(Region region)
-		{
-            if (regionClosedIndex.TryGetValue(region, out uint[] closedIndex)) return closedIndex;
-            closedIndex = new uint[8];
-            regionClosedIndex[region] = closedIndex;
-            return closedIndex;
-		}
+
         //public static bool RecreateWorkers()
         //{
         //    freeWorkers.Clear();
@@ -40,7 +32,7 @@ namespace RimThreaded
         //public static bool BreadthFirstTraverse(Region root, RegionEntryPredicate entryCondition, RegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
         //{
         //    Queue<RegionTraverser.BFSWorker> f = freeWorkers;
-            
+
         //    if (f.Count == 0)
         //    {
         //        Log.Message(System.Threading.Thread.CurrentThread.ManagedThreadId.ToString());

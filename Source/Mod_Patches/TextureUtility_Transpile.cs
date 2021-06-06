@@ -40,7 +40,7 @@ namespace RimThreaded.Mod_Patches
             SafeGetReadableTexture((Texture2D)parameters[0]);
         public static Texture2D GetReadableTexture(Texture2D texture)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return SafeGetReadableTexture(texture);
             threadInfo.safeFunctionRequest = new object[] { safeFunction2, new object[] { texture } };
             mainThreadWaitHandle.Set();

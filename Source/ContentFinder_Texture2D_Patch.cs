@@ -21,7 +21,7 @@ namespace RimThreaded
         }
         public static bool Get(ref Texture2D __result, string itemPath, bool reportFailure = true)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { FuncContentFinder, new object[] { itemPath, reportFailure } };
             mainThreadWaitHandle.Set();

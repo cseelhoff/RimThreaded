@@ -23,7 +23,7 @@ namespace RimThreaded
 
         public static bool NewShadowMesh(ref Mesh __result, float baseWidth, float baseHeight, float tallness)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { FuncNewShadowMesh, new object[] { baseWidth, baseHeight, tallness } };
             mainThreadWaitHandle.Set();

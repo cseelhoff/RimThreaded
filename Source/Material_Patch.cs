@@ -99,7 +99,7 @@ namespace RimThreaded
 
         public static bool HasProperty(Material __instance, ref bool __result, string name)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
             threadInfo.safeFunctionRequest = new object[] { funcHasProperty2, new object[] { __instance, name } };
             mainThreadWaitHandle.Set();
@@ -109,7 +109,7 @@ namespace RimThreaded
         }
         public static bool GetTextureScaleAndOffsetImpl(Material __instance, ref Vector4 __result, int name)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
             threadInfo.safeFunctionRequest = new object[] { funcGetTextureScaleAndOffsetImpl2, new object[] { __instance, name } };
             mainThreadWaitHandle.Set();
@@ -119,7 +119,7 @@ namespace RimThreaded
         }
         public static bool SetTextureOffsetImpl(Material __instance, int name, Vector2 offset)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetTextureOffsetImpl2, new object[] { __instance, name, offset } };
             mainThreadWaitHandle.Set();
@@ -128,7 +128,7 @@ namespace RimThreaded
         }
         public static bool SetStringFloat(Material __instance, string name, float value)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetStringFloat2, new object[] { __instance, name, value } };
             mainThreadWaitHandle.Set();
@@ -137,7 +137,7 @@ namespace RimThreaded
         }
         public static bool SetIntFloat(Material __instance, int nameID, float value)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetIntFloat2, new object[] { __instance, nameID, value } };
             mainThreadWaitHandle.Set();
@@ -146,7 +146,7 @@ namespace RimThreaded
         }
         public static bool SetStringInt(Material __instance, string name, int value)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetStringInt2, new object[] { __instance, name, value } };
             mainThreadWaitHandle.Set();
@@ -155,7 +155,7 @@ namespace RimThreaded
         }
         public static bool SetIntInt(Material __instance, int nameID, int value)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSetIntInt2, new object[] { __instance, nameID, value } };
             mainThreadWaitHandle.Set();

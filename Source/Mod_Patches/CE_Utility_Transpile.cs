@@ -66,7 +66,7 @@ namespace RimThreaded.Mod_Patches
 
         public static Texture2D Blit(Texture2D texture, Rect blitRect, int[] rtSize)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return SafeBlit(texture, blitRect, rtSize);
             threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { texture, blitRect, rtSize } };
             mainThreadWaitHandle.Set();

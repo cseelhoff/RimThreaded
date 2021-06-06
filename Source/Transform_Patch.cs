@@ -23,6 +23,10 @@ namespace RimThreaded
             Method(typeof(Transform), "set_position");
         private static readonly MethodInfo TransformSetPositionPatch =
             Method(typeof(Transform_Patch), "set_position");
+        private static readonly MethodInfo TransformSetParent =
+            Method(typeof(Transform), "set_parent");
+        private static readonly MethodInfo TransformSetLocalPosition =
+            Method(typeof(Transform), "set_localPosition");
 
         private static readonly Func<Transform, Vector3> ActionGet_position =
             (Func<Transform, Vector3>)Delegate.CreateDelegate(
@@ -37,13 +41,56 @@ namespace RimThreaded
                 typeof(Action<Transform, Vector3>),
                 TransformSetPosition);
 
+        private static readonly Action<Transform, Transform> ActionSet_parent =
+            (Action<Transform, Transform>)Delegate.CreateDelegate(
+                typeof(Action<Transform, Transform>),
+                TransformSetParent);
+
+        private static readonly Action<Transform, Vector3> ActionSet_localPosition =
+            (Action<Transform, Vector3>)Delegate.CreateDelegate(
+                typeof(Action<Transform, Vector3>),
+                TransformSetLocalPosition);
+
         private static readonly Action<object[]> ActionSet_position2 = parameters =>
             ActionSet_position((Transform)parameters[0], (Vector3)parameters[1]);
 
+        private static readonly Action<object[]> ActionSet_parent2 = parameters =>
+            ActionSet_parent((Transform)parameters[0], (Transform)parameters[1]);
+
+        private static readonly Action<object[]> ActionSet_localPosition2 = parameters =>
+            ActionSet_localPosition((Transform)parameters[0], (Vector3)parameters[1]);
+
+
+
+        public static void set_localPosition(Transform __instance, Vector3 value)
+        {
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            {
+                __instance.localPosition = value;
+                return;
+            }
+            threadInfo.safeFunctionRequest = new object[] { ActionSet_localPosition2, new object[] { __instance, value } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return;
+        }
+
+        public static void set_parent(Transform __instance, Transform value)
+        {
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            {
+                __instance.parent = value;
+                return;
+            }
+            threadInfo.safeFunctionRequest = new object[] { ActionSet_parent2, new object[] { __instance, value } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return;
+        }
 
         public static bool set_position(Transform __instance, Vector3 value)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionSet_position2, new object[] { __instance, value } };
             mainThreadWaitHandle.Set();
@@ -53,7 +100,7 @@ namespace RimThreaded
 
         public static bool get_position(Transform __instance, ref Vector3 __result)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { ActionGet_position2, new object[] { __instance } };
             mainThreadWaitHandle.Set();
@@ -64,7 +111,7 @@ namespace RimThreaded
 
         public static Vector3 get_position2(Transform __instance)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return __instance.position;
             threadInfo.safeFunctionRequest = new object[] { ActionGet_position2, new object[] { __instance } };
             mainThreadWaitHandle.Set();
@@ -74,7 +121,7 @@ namespace RimThreaded
 
         public static void set_position2(Transform __instance, Vector3 value)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
                 __instance.position = value;
                 return;

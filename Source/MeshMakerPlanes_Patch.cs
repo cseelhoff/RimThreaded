@@ -21,7 +21,7 @@ namespace RimThreaded
 
         public static bool NewPlaneMesh(ref Mesh __result, Vector2 size, bool flipped, bool backLift, bool twist)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { FuncNewPlaneMesh, new object[] { size, flipped, backLift, twist } };
             mainThreadWaitHandle.Set();

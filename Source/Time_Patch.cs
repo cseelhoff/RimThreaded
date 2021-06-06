@@ -26,7 +26,7 @@ namespace RimThreaded
 
         public static float get_time()
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return Time.time;
             threadInfo.safeFunctionRequest = new object[] { FuncGetTime, new object[] { } };
             mainThreadWaitHandle.Set();
@@ -36,7 +36,7 @@ namespace RimThreaded
         public static int get_frameCount()
         {
 #if DEBUG
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return Time.frameCount;
             threadInfo.safeFunctionRequest = new object[] { FuncFrameCount, new object[] { } };
             mainThreadWaitHandle.Set();
@@ -48,7 +48,7 @@ namespace RimThreaded
         }
         public static float get_realtimeSinceStartup()
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return Time.realtimeSinceStartup;
             threadInfo.safeFunctionRequest = new object[] { FuncRealtimeSinceStartup, new object[] { } };
             mainThreadWaitHandle.Set();

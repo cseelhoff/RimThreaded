@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 using Verse;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -8,6 +11,7 @@ namespace RimThreaded
     public class Region_Patch
     {
 
+        [ThreadStatic] public static Dictionary<Region, uint[]> regionClosedIndex; //newly defined
         internal static void RunDestructivePatches()
         {
             Type original = typeof(Region);
@@ -16,6 +20,31 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, "get_Room");
         }
 
+        internal static void InitializeThreadStatics()
+        {
+            regionClosedIndex = new Dictionary<Region, uint[]>();
+        }
+
+        public static uint[] GetRegionClosedIndex(Region region)
+        {
+            if (regionClosedIndex.TryGetValue(region, out uint[] closedIndex)) return closedIndex;
+            closedIndex = new uint[8];
+            regionClosedIndex[region] = closedIndex;
+            return closedIndex;
+        }
+        public static void SetRegionClosedIndex(Region region, uint[] value)
+        {
+            regionClosedIndex[region] = value;
+            return;
+        }
+
+        internal static void AddFieldReplacements()
+        {
+            Dictionary<OpCode, MethodInfo> regionTraverserReplacements = new Dictionary<OpCode, MethodInfo>();
+            regionTraverserReplacements.Add(OpCodes.Ldfld, Method(typeof(Region_Patch), "GetRegionClosedIndex"));
+            regionTraverserReplacements.Add(OpCodes.Stfld, Method(typeof(Region_Patch), "SetRegionClosedIndex"));
+            RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), regionTraverserReplacements);
+        }
 
         public static bool get_Room(Region __instance, ref Room __result)
         {

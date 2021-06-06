@@ -21,7 +21,7 @@ namespace RimThreaded
 
         public static bool NewAudioSourceOn(ref AudioSource __result, GameObject go)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { go } };
             mainThreadWaitHandle.Set();

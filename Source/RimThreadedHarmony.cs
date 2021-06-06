@@ -53,7 +53,8 @@ namespace RimThreaded
         {
 			SimplePool_Patch_RunNonDestructivePatches();
 			Dijkstra_Patch_RunNonDestructivePatches();
-			replaceFields.Add(Field(typeof(Region), "closedIndex"), Method(typeof(RegionTraverser_Transpile), "GetRegionClosedIndex"));
+			PathFinder_Patch.AddFieldReplacements();
+			Region_Patch.AddFieldReplacements();
 			replaceFields.Add(Method(typeof(Time), "get_realtimeSinceStartup"), Method(typeof(Time_Patch), "get_realtimeSinceStartup"));
 #if DEBUG
 			Material_Patch.RunDestructivePatches();
@@ -62,7 +63,20 @@ namespace RimThreaded
 			replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), "get_frameCount"));
 			replaceFields.Add(Method(typeof(Time), "get_time"), Method(typeof(Time_Patch), "get_time"));
 			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), "get_transform"));
+			replaceFields.Add(Method(typeof(Component), "get_gameObject"), Method(typeof(Component_Patch), "get_gameObject"));
 			replaceFields.Add(Method(typeof(GameObject), "get_transform"), Method(typeof(GameObject_Patch), "get_transform"));
+			replaceFields.Add(Method(typeof(Transform), "set_parent"), Method(typeof(Transform_Patch), "set_parent"));
+			replaceFields.Add(Method(typeof(Transform), "set_localPosition"), Method(typeof(Transform_Patch), "set_localPosition"));
+			replaceFields.Add(Method(typeof(AudioSource), "set_clip"), Method(typeof(AudioSource_Patch), "set_clip"));
+			replaceFields.Add(Method(typeof(AudioSource), "set_volume"), Method(typeof(AudioSource_Patch), "set_volume"));
+			replaceFields.Add(Method(typeof(AudioSource), "set_pitch"), Method(typeof(AudioSource_Patch), "set_pitch"));
+			replaceFields.Add(Method(typeof(AudioSource), "set_minDistance"), Method(typeof(AudioSource_Patch), "set_minDistance"));
+			replaceFields.Add(Method(typeof(AudioSource), "set_maxDistance"), Method(typeof(AudioSource_Patch), "set_maxDistance"));
+			replaceFields.Add(Method(typeof(AudioSource), "set_spatialBlend"), Method(typeof(AudioSource_Patch), "set_spatialBlend"));
+			replaceFields.Add(Method(typeof(AudioSource), "set_loop"), Method(typeof(AudioSource_Patch), "set_loop"));
+			replaceFields.Add(Method(typeof(AudioSource), "set_mute"), Method(typeof(AudioSource_Patch), "set_mute"));
+			replaceFields.Add(Method(typeof(AudioSource), "Play", Type.EmptyTypes), Method(typeof(AudioSource_Patch), "Play"));
+			replaceFields.Add(Method(typeof(AudioSource), "get_volume"), Method(typeof(AudioSource_Patch), "get_volume"));
 #endif
 		}
 #pragma warning disable 649
@@ -201,62 +215,11 @@ namespace RimThreaded
 					Type[] types = GetTypesFromAssembly(assembly);
 					foreach (Type type in types)
                     {
-						//foreach (FieldInfo field in type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static))
-      //                  {
-						//	if((field.Name.StartsWith("tmp") || field.Name.StartsWith("temp")) && !replaceFields.ContainsKey(field))
-      //                      {
-						//		if(!untouchedStaticFields.TryGetValue(type, out HashSet<FieldInfo> fields)) {
-						//			fields = new HashSet<FieldInfo>();
-						//			untouchedStaticFields[type] = fields;
-						//		}
-						//		fields.Add(field);
-						//		fieldFullNames.Add(type.Name + "." + field.Name);
-						//		bool classExists = false;
-						//		int count = 0;
-						//		foreach (ClassReplacement classReplacement in replacements.ClassReplacements)
-      //                          {
-						//			count++;
-						//			if(classReplacement.ClassName.Equals(type.FullName))
-      //                              {
-						//				classExists = true;
-						//				bool fieldExists = false;
-						//				foreach(ThreadStaticDetail threadStaticDetail in classReplacement.ThreadStatics)
-      //                                  {
-						//					if (threadStaticDetail.FieldName.Equals(field.Name))
-						//					{
-						//						fieldExists = true;
-						//						break;
-						//					}
-      //                                  }
-						//				if (!fieldExists)
-						//				{
-						//					classReplacement.ThreadStatics.Add(new ThreadStaticDetail()
-						//					{
-						//						FieldName = field.Name
-						//					}
-						//					);
-						//				}
-						//				break;
-						//			}
-      //                          }
-						//		if(!classExists)
-      //                          {
-						//			replacements.ClassReplacements.Add(new ClassReplacement()
-						//			{
-						//				ClassName = type.FullName,
-						//				ThreadStatics = new List<ThreadStaticDetail>() {
-						//					new ThreadStaticDetail()
-						//					{
-						//						FieldName = field.Name
-						//					}
-						//				}
-						//			});
-						//		}
+						List<MethodBase> allMethods = new List<MethodBase>();
+						allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));
+						allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
 
-						//	}
-
-						//}
-                        foreach (MethodInfo method in type.GetMethods(all | BindingFlags.DeclaredOnly))
+						foreach (MethodBase method in allMethods)
                         {
 							if (method.IsDeclaredMember())
 							{
@@ -281,22 +244,7 @@ namespace RimThreaded
                     }
                 }
             }
-			//JsonSerializer serializer = new JsonSerializer();
-			//serializer.NullValueHandling = NullValueHandling.Ignore;
-
-			//using (StreamWriter sw = new StreamWriter(@"replacements4.json"))
-			//using (JsonWriter writer = new JsonTextWriter(sw))
-			//{
-			//	serializer.Serialize(writer, replacements);
-			//}
 			Log.Message("RimThreaded Field Replacements Complete.");
-			//intializersReady = true;
-			//RimThreaded.InitializeAllThreadStatics();
-   //         List<CodeInstruction> g = PatchProcessor.GetCurrentInstructions(Method(TypeByName("RimWorld.Pawn_MeleeVerbs"), "PawnMeleeVerbsStaticUpdate"));
-			//foreach(CodeInstruction h in g)
-   //         {
-			//	Log.Message(h.ToString());
-   //         }
 		}
 
 
@@ -529,35 +477,8 @@ namespace RimThreaded
 			yield return instructionsList[i++];
 		}
 
-		//public static readonly Dictionary<Type, Type> threadStaticPatches = new Dictionary<Type, Type>();
 		public static readonly Dictionary<object, object> replaceFields = new Dictionary<object, object>();
 
-		//public static void AddAllMatchingFields(Type original, Type patched, bool matchStaticFieldsOnly = true)
-		//{
-		//	//IEnumerable<KeyValuePair<FieldInfo, FieldInfo>> allMatchingFields = GetAllMatchingFields(original, patched, matchStaticFieldsOnly);
-		//	//foreach (KeyValuePair<FieldInfo, FieldInfo> matchingFields in allMatchingFields)
-		//	//{
-		//	//	//Log.Message("Adding field replacement for: " + matchingFields.Key.DeclaringType.Name + "." + matchingFields.Key.Name + " with: " + matchingFields.Value.DeclaringType.Name + "." + matchingFields.Value.Name);
-		//	//	replaceFields.Add(matchingFields.Key, matchingFields.Value);
-		//	//}
-		//}
-
-		//public static IEnumerable<KeyValuePair<FieldInfo, FieldInfo>> GetAllMatchingFields(Type original, Type patched, bool matchStaticFieldsOnly = true)
-		//{
-		//	foreach (FieldInfo newFieldInfo in GetDeclaredFields(patched))
-		//	{
-		//		if (!matchStaticFieldsOnly || newFieldInfo.IsStatic)
-		//		{
-		//			foreach (FieldInfo fieldInfo in GetDeclaredFields(original))
-		//			{
-		//				if (fieldInfo.Name.Equals(newFieldInfo.Name) && fieldInfo.FieldType == newFieldInfo.FieldType)
-		//				{
-		//					yield return new KeyValuePair<FieldInfo, FieldInfo>(fieldInfo, newFieldInfo);
-		//				}
-		//			}
-		//		}
-		//	}
-		//}
 		public static HashSet<object> notifiedObjects = new HashSet<object>();
 
 		public static IEnumerable<CodeInstruction> ReplaceFieldsTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
@@ -586,20 +507,21 @@ namespace RimThreaded
 #endif
                                     codeInstruction.operand = newFieldInfo;
                                     break;
-                                case MethodInfo newMethodInfo:
+                                case Dictionary<OpCode, MethodInfo> newMethodInfoDict:
+                                    MethodInfo newMethodInfo = newMethodInfoDict[codeInstruction.opcode];
 #if DEBUG
-										if (!notifiedObjects.Contains(newMethodInfo))
-										{
-											notifiedObjects.Add(newMethodInfo);
-											Log.Message("RimThreaded is replacing field: " +
-												fieldInfo.DeclaringType + "." + fieldInfo.Name +
-												" with CALL method: " + newMethodInfo.DeclaringType + "." +
-												newMethodInfo.Name);
-										}
+									if (!notifiedObjects.Contains(newMethodInfo))
+									{
+										notifiedObjects.Add(newMethodInfo);
+										Log.Message("RimThreaded is replacing field: " +
+											fieldInfo.DeclaringType + "." + fieldInfo.Name +
+											" with CALL method: " + newMethodInfo.DeclaringType + "." +
+											newMethodInfo.Name);
+									}
 #endif
-                                    codeInstruction.opcode = OpCodes.Call;
-                                    codeInstruction.operand = newMethodInfo;
-                                    break;
+									codeInstruction.opcode = OpCodes.Call;
+									codeInstruction.operand = newMethodInfo;
+									break;
                             }
 
                             break;
@@ -687,24 +609,6 @@ namespace RimThreaded
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
         public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
-		//public static readonly HarmonyMethod GameObjectTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectConstructor"));
-		//public static readonly HarmonyMethod InputGetMousePositionTranspiler = new HarmonyMethod(Method(typeof(UnityEngine_Input_Patch), "TranspileInputGetMousePosition"));
-		//public static readonly HarmonyMethod TimeGetTimeTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeGetTime"));
-		//public static readonly HarmonyMethod TimeFrameCountTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileTimeFrameCount"));
-		//public static readonly HarmonyMethod RealtimeSinceStartupTranspiler = new HarmonyMethod(Method(typeof(Time_Patch), "TranspileRealtimeSinceStartup"));
-        //public static readonly HarmonyMethod ComponentTransformTranspiler = new HarmonyMethod(Method(typeof(Component_Patch), "TranspileComponentTransform"));
-        //public static readonly HarmonyMethod GameObjectTransformTranspiler = new HarmonyMethod(Method(typeof(GameObject_Patch), "TranspileGameObjectTransform"));
-		//public static readonly HarmonyMethod TransformPositionTranspiler = new HarmonyMethod(Method(typeof(Transform_Patch), "TranspileTransformPosition"));
-        
-		//public static void TranspileTimeFrameCountReplacement(Type original, string methodName, Type[] origType = null)
-  //      {
-  //          harmony.Patch(Method(original, methodName, origType), transpiler: TimeFrameCountTranspiler);
-  //      }
-		//public static void TranspileFieldReplacements(Type original, string methodName, Type[] origType = null)
-		//{
-		//	//Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.Name + "." + methodName);
-		//	//harmony.Patch(Method(original, methodName, origType), transpiler: replaceFieldsHarmonyTranspiler);
-		//}
 		public static void TranspileFieldReplacements(MethodBase original)
 		{
 			Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
@@ -782,32 +686,31 @@ namespace RimThreaded
 
 		private static void PatchNonDestructiveFixes()
 		{
-			//REQUIRED
+			//---REQUIRED---
 			GameObject_Patch.RunNonDestructivePatches(); //Prevents Game Crash from wooden floors and others
 			LongEventHandler_Patch.RunNonDestructivePatches(); //replaced concurrentqueue and run init on new threads
 
-            ////Simple
-            AlertsReadout_Patch.RunNonDestructivesPatches(); //this will disable alert checks on ultrafast speed for an added speed boost
+			//---Simple---
+			AlertsReadout_Patch.RunNonDestructivesPatches(); //this will disable alert checks on ultrafast speed for an added speed boost
             Area_Patch.RunNonDestructivePatches(); //added for sowing area speedup
-            Designator_Haul_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically designates it via UI
+			CompSpawnSubplant_Transpile.RunNonDestructivePatches(); //fixes bug with royalty spawning subplants
+			Designator_Haul_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically designates it via UI
             Designator_Unforbid_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically unforbids it via UI
-            TimeControls_Patch.RunNonDestructivePatches(); //TODO TRANSPILE - should releave needing TexButton2 class
+            TimeControls_Patch.RunNonDestructivePatches(); //allow speed 4
             ZoneManager_Patch.RunNonDestructivePatches(); //recheck growing zone when upon zone grid add
             Zone_Patch.RunNonDestructivePatches(); //recheck growing zone when upon check haul destination call
             HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches(); //speed up for comfy temperature
             Map_Transpile.RunNonDestructivePatches(); //creates separate thread for skyManager.SkyManagerUpdate();
             Postfix(typeof(SlotGroup), typeof(HaulingCache), "Notify_AddedCell", "NewStockpileCreatedOrMadeUnfull"); //recheck growing zone when upon stockpile zone grid add
 
-            //Complex
             //BattleLog_Transpile.RunNonDestructivePatches(); //if still causing issues, rewrite using ThreadSafeLinkedLists
-            CompSpawnSubplant_Transpile.RunNonDestructivePatches();
             //GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
             //GrammarResolverSimple_Transpile.RunNonDestructivePatches();//reexamine complexity
             HediffSet_Patch.RunNonDestructivePatches();
             PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //reexamine complexity?
             SituationalThoughtHandler_Patch.RunNonDestructivePatches();
             ThingOwnerThing_Transpile.RunNonDestructivePatches();
-            TickList_Patch.RunNonDestructivePatches();
+            TickList_Patch.RunNonDestructivePatches(); //allows multithreaded calls of thing.tick longtick raretick
             WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
             WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
             Pawn_RelationsTracker_Patch.RunNonDestructivePatches();
@@ -815,18 +718,43 @@ namespace RimThreaded
 
         private static void PatchDestructiveFixes()
         {
-            Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
-            AmbientSoundManager_Patch.RunDestructivePatches();
+			//---REQUIRED---
+			TickManager_Patch.RunDestructivePatches(); //Redirects DoSingleTick to RimThreaded
+
+			//---Main-thread-only calls--- thanks Unity...
+			AudioSource_Patch.RunDestructivePatches();
+			AudioSourceMaker_Patch.RunDestructivePatches();
+			ContentFinder_Texture2D_Patch.RunDestructivePatches();
+			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
+			Graphics_Patch.RunDestructivePatches();//Graphics (Giddy-Up and others)
+			GUIStyle_Patch.RunDestructivePatches();
+			LightningBoltMeshMaker_Patch.RunDestructivePatches();
+			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
+			MeshMakerPlanes_Patch.RunDestructivePatches();
+			MeshMakerShadows_Patch.RunDestructivePatches();
+			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
+			SectionLayer_Patch.RunDestructivePatches();
+			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
+			Text_Patch.RunDestructivePatches(); //unity get_CurFontStyle on main thread
+
+			//---Multithreaded Ticking---
+			TradeShip_Patch.RunDestructivePatches(); //allows multithreaded ticking of tradeships
+			WildPlantSpawner_Patch.RunDestructivePatches(); //allows multithreaded icking of WildPlantSpawner
+			WindManager_Patch.RunDestructivePatches();//allows multithreaded icking of WindManager													  
+			WorldComponentUtility_Patch.RunDestructivePatches(); //allows multithreaded icking of WorldComponentUtility
+			WorldObjectsHolder_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
+			WorldPawns_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
+
+
+			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
             AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
-            AudioSource_Patch.RunDestructivePatches();
-            AudioSourceMaker_Patch.RunDestructivePatches();
             Building_Door_Patch.RunDestructivePatches(); //strange bug
             CompCauseGameCondition_Patch.RunDestructivePatches();
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
             DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
             DesignationManager_Patch.RunDestructivePatches(); //added for development build
             DrugAIUtility_Patch.RunDestructivePatches();
-            DynamicDrawManager_Patch.RunDestructivePatches();
+            DynamicDrawManager_Patch.RunDestructivePatches(); //candidate for ThreadedLinkedList?
             FactionManager_Patch.RunDestructivePatches();
             FilthMaker_Patch.RunDestructivePatches();
             GenClosest_Patch.RunDestructivePatches();
@@ -870,64 +798,44 @@ namespace RimThreaded
             RegionLink_Patch.RunDestructivePatches();
             RegionMaker_Patch.RunDestructivePatches();
             ResourceCounter_Patch.RunDestructivePatches();
-            Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-            SampleSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-            SeasonUtility_Patch.RunDestructivePatches(); //performance boost
+			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
             ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
-            SoundSizeAggregator_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
-            SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
             SteadyEnvironmentEffects_Patch.RunDestructivePatches();
             StoryState_Patch.RunDestructivePatches(); //WrapMethodInInstanceLock
-            SubSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-            Sustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-            SustainerAggregatorUtility_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-            SustainerManager_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
             TaleManager_Patch.RunDestructivePatches();
-            Text_Patch.RunDestructivePatches();
-            ThingGrid_Patch.RunDestructivePatches();
+			ThingGrid_Patch.RunDestructivePatches();
             ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
-            TickManager_Patch.RunDestructivePatches();
             TileTemperaturesComp_Patch.RunDestructivePatches(); //TODO - good simple transpile candidate
-            TradeShip_Patch.RunDestructivePatches();
             UniqueIDsManager_Patch.RunDestructivePatches();
             Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
             WealthWatcher_Patch.RunDestructivePatches();
-            WildPlantSpawner_Patch.RunDestructivePatches();
-            WindManager_Patch.RunDestructivePatches();
-            //WorkGiver_GrowerSow_Patch.RunDestructivePatches();
-            WorldComponentUtility_Patch.RunDestructivePatches();
-            WorldObjectsHolder_Patch.RunDestructivePatches();
-            WorldPawns_Patch.RunDestructivePatches(); //todo examine GC optimization
+			//WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 
-            //complex methods that need further review for simplification
-            AttackTargetReservationManager_Patch.RunDestructivePatches();
-            BiomeDef_Patch.RunDestructivePatches();
-            FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
-            JobQueue_Patch.RunDestructivePatches();
-            MapPawns_Patch.RunDestructivePatches(); //TODO: Affects Animal Master Assignment
-            MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
-            Pawn_JobTracker_Patch.RunDestructivePatches();
-            Pawn_Patch.RunDestructivePatches();
-            Region_Patch.RunDestructivePatches();
-            ReservationManager_Patch.RunDestructivePatches();
-            Room_Patch.RunDestructivePatches();
-            SituationalThoughtHandler_Patch.RunDestructivePatches();
-            ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
-
-            //main-thread-only
-            ContentFinder_Texture2D_Patch.RunDestructivePatches();
-			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
-			Graphics_Patch.RunDestructivePatches();//Graphics (Giddy-Up and others)
-			GUIStyle_Patch.RunDestructivePatches();
-			LightningBoltMeshMaker_Patch.RunDestructivePatches();
-			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
-			MeshMakerPlanes_Patch.RunDestructivePatches();
-			MeshMakerShadows_Patch.RunDestructivePatches();
-			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
-			SectionLayer_Patch.RunDestructivePatches();
-			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
-
-			
+			//complex methods that need further review for simplification
+			AttackTargetReservationManager_Patch.RunDestructivePatches();
+			BiomeDef_Patch.RunDestructivePatches();
+			FloodFiller_Patch.RunDestructivePatches();//FloodFiller - inefficient global lock - threadstatics might help do these concurrently?
+			JobQueue_Patch.RunDestructivePatches();
+			MapPawns_Patch.RunDestructivePatches(); //TODO: Affects Animal Master Assignment
+			MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
+			Pawn_JobTracker_Patch.RunDestructivePatches();
+			Pawn_Patch.RunDestructivePatches();
+			Region_Patch.RunDestructivePatches();
+			ReservationManager_Patch.RunDestructivePatches();
+			Room_Patch.RunDestructivePatches();
+			SituationalThoughtHandler_Patch.RunDestructivePatches();
+			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
+															 
+			//-----SOUND-----
+			//AmbientSoundManager_Patch.RunDestructivePatches();
+			//Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			//SampleSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			//SoundSizeAggregator_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
+			//SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
+			//SubSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			//Sustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			//SustainerAggregatorUtility_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			//SustainerManager_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
 		}
 
 		private static void PatchModCompatibility()
@@ -943,173 +851,6 @@ namespace RimThreaded
             PawnRules_Patch.Patch();
             ZombieLand_Patch.Patch();
         }
-
-
-		private static void PatchDevelopmentBuild()
-		{
-			//Development mode patches
-
-			//TimeFrameCountTranspiler Fixes
-			//harmony.Patch(Method(typeof(RimWorld.AlertsReadout), "AlertsReadoutUpdate"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Alert_Critical), "AlertActiveUpdate"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Building_Bed), "ToggleForPrisonersByInterface"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.CompAbilityEffect_Chunkskip), "FindClosestChunks"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.GenWorld), "MouseTile"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.InfestationCellFinder), "DebugDraw"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.LessonAutoActivator), "LessonAutoActivatorUpdate"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.ListerHaulables), "DebugString"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.ListerMergeables), "DebugString"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "DrawPowerGridOverlayThisFrame"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "get_ShouldDrawPowerGrid"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "DrawZonesThisFrame"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.OverlayDrawHandler), "get_ShouldDrawZones"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.SocialCardUtility), "CheckRecache"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Storyteller), "DebugString"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.MouseoverSounds), "SilenceForNextFrame"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.MouseoverSounds), "ResolveFrame"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "<.ctor>b__12_0"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "StartSample"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "<.ctor>b__15_0"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "SustainerUpdate"), transpiler: TimeFrameCountTranspiler);
-			////harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "Maintain"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.CameraDriver), "get_CurrentViewRect"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.CellRenderer), "InitFrame"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.DebugInputLogger), "InputLogOnGUI"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.DesignationDragger), "UpdateDragCellsIfNeeded"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Dialog_Rename), "get_AcceptsInput"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Dialog_Rename), "WasOpenedByHotkey"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.FloatMenuWorld), "DoWindowContents"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GenUI), "GetWidthCached"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GizmoGridDrawer), "get_HeightDrawnRecently"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GizmoGridDrawer), "DrawGizmoGrid"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GUIEventFilterForOSX), "CheckRejectGUIEvent"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GUIEventFilterForOSX), "RejectEvent"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.RealTime), "Update"), transpiler: TimeFrameCountTranspiler);
-			////harmony.Patch(Method(typeof(Verse.Region), "DangerFor"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.RoomGroupTempTracker), "DebugString"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Root), "Update"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.ScreenshotTaker), "Update"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.ScreenshotTaker), "TakeNonSteamShot"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.UIHighlighter), "HighlightTag"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.UIHighlighter), "HighlightOpportunity"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.UIHighlighter), "UIHighlighterUpdate"), transpiler: TimeFrameCountTranspiler);
-			//harmony.Patch(Method(typeof(Verse.UnityGUIBugsFixer), "FixDelta"), transpiler: TimeFrameCountTranspiler);
-
-			//TimeGetTimeTranspiler Fixes
-			//TODO add remaining methods
-			//harmony.Patch(Method(typeof(LetterStack), "ReceiveLetter", new Type[] { typeof(Letter), typeof(string) }), transpiler: TimeGetTimeTranspiler);
-			//harmony.Patch(Method(typeof(AlertBounce), "", new Type[] { typeof(), typeof(string) }), transpiler: TimeGetTimeTranspiler);
-			//harmony.Patch(Method(typeof(Dialog_FormCaravan), "FlashMass", new Type[] { }), transpiler: TimeGetTimeTranspiler);
-
-			//InputGetMousePositionTranspiler Fixes
-			//TODO add remaining methods
-
-			////RealtimeSinceStartupTranspiler
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "CalculateCurInputDollyVect"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldSelectionDrawer), "Notify_Selected"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Alert), "Notify_Started"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.CompProjectileInterceptor), "GetCurrentAlpha_Idle"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.CompProjectileInterceptor), "GetCurrentAlpha_Selected"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Designator_Place), "HandleRotationShortcuts"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.LearningReadout), "LearningReadoutOnGUI"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Lesson), "get_AgeSeconds"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Lesson), "OnActivated"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.OverlayDrawer), "RenderPulsingOverlayInternal"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.PlaceWorker_WatermillGenerator), "DrawGhost"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Screen_Credits), "PreOpen"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Screen_Credits), "WindowUpdate"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.SelectionDrawer), "Notify_Selected"), transpiler: RealtimeSinceStartupTranspiler);
-
-			////harmony.Patch(Method(typeof(RimWorld.SelectionDrawerUtility), "CalculateSelectionBracketPositionsUI"), transpiler: RealtimeSinceStartupTranspiler);
-			////harmony.Patch(Method(typeof(RimWorld.SelectionDrawerUtility), "CalculateSelectionBracketPositionsWorld"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.Sample), "get_AgeRealTime"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Constructor(typeof(Verse.Sound.Sample)), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SampleSustainer), "get_Volume"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SoundParamSource_Perlin), "ValueFor"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SoundParamSource_SourceAge), "ValueFor"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SoundSlotManager), "CanPlayNow"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SoundSlotManager), "Notify_Played"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "<.ctor>b__12_0"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "StartSample"), transpiler: RealtimeSinceStartupTranspiler);
-			////harmony.Patch(Method(typeof(Verse.Sound.SubSustainer), "SubSustainerUpdate"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "get_TimeSinceEnd"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.Sustainer), "End"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.ArenaUtility), "PerformBattleRoyale"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.CameraDriver), "CalculateCurInputDollyVect"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.CameraShaker), "get_ShakeOffset"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.DesignationDragger), "DraggerUpdate"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Dialog_MessageBox), "get_TimeUntilInteractive"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Dialog_NodeTree), "get_InteractiveNow"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Dialog_ResolutionConfirm), "get_TimeUntilRevert"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Constructor(typeof(Verse.Dialog_ResolutionConfirm), Type.EmptyTypes), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GameInfo), "GameInfoOnGUI"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GameInfo), "GameInfoUpdate"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GameplayTipWindow), "DrawContents"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.GenText), "MarchingEllipsis"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.LongEventHandler), "UpdateCurrentEnumeratorEvent"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Mote), "get_AgeSecs"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Mote), "SpawnSetup"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Pulser), "PulseBrightness", new[] { typeof(float), typeof(float) }), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.RealTime), "Update"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Region), "DebugDrawMouseover"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.ScreenFader), "get_CurTime"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.TooltipHandler), "TipRegion", new[] { typeof(Rect), typeof(TipSignal) }), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.TooltipHandler), "DrawActiveTips"), transpiler: RealtimeSinceStartupTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Widgets), "CheckPlayDragSliderSound"), transpiler: RealtimeSinceStartupTranspiler);
-
-			//TranspileComponentTransform Fixes
-			//harmony.Patch(Method(typeof(RimWorld.Planet.DebugTile), "get_DistanceToCamera"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.GenWorldUI), "CurUITileSize"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "get_CurrentRealPosition"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "Update"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraDriver), "ApplyPositionToGameObject"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldCameraManager), "CreateWorldSkyboxCamera"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "get_Position"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "get_Rotation"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "set_Rotation"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "get_LocalPosition"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "set_LocalPosition"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Planet.WorldFeatureTextMesh_Legacy), "Init"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.MusicManagerEntry), "StartPlaying"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.MusicManagerPlay), "MusicUpdate"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.Page_SelectStartingSite), "PostOpen"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.PortraitCameraManager), "CreatePortraitCamera"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(RimWorld.PortraitRenderer), "RenderPortrait"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Constructor(typeof(Verse.Sound.AudioSourcePoolCamera)), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.Sample), "ToString"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(Verse.Sound.SoundParamSource_CameraAltitude), "ValueFor"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(Verse.CameraDriver), "get_CurrentRealPosition"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(Verse.CameraDriver), "ApplyPositionToGameObject"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(Verse.DamageWorker), "ExplosionStart"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(Verse.SkyOverlay), "DrawOverlay"), transpiler: ComponentTransformTranspiler);
-			//harmony.Patch(Method(typeof(Verse.SubcameraDriver), "Init"), transpiler: ComponentTransformTranspiler);
-
-
-			//GameObjectTransformTranspiler
-			//harmony.Patch(Method(typeof(MusicManagerEntry), "StartPlaying"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(MusicManagerPlay), "MusicUpdate"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Constructor(typeof(Verse.Sound.AudioSourcePoolCamera)), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Constructor(typeof(AudioSourcePoolWorld)), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(SampleOneShot), "TryMakeAndPlay"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(SampleSustainer), "TryMakeAndPlay"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(Sustainer), "get_CameraDistanceSquared"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(Sustainer), "UpdateRootObjectPosition"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(Sustainer), "Cleanup"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(CameraDriver), "ApplyPositionToGameObject"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(CameraSwooper), "OffsetCameraFrom"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(GenDebug), "DebugPlaceSphere"), transpiler: GameObjectTransformTranspiler);
-			//harmony.Patch(Method(typeof(SubcameraDriver), "Init"), transpiler: GameObjectTransformTranspiler);
-
-
-			/*
-			//TransformPositionTranspiler
-            harmony.Patch(Method(typeof(WorldCameraDriver), "ApplyPositionToGameObject"), transpiler: TransformPositionTranspiler);
-            harmony.Patch(Method(typeof(PortraitCameraManager), "CreatePortraitCamera"), transpiler: TransformPositionTranspiler);
-            harmony.Patch(Method(typeof(PortraitRenderer), "RenderPortrait"), transpiler: TransformPositionTranspiler);
-            harmony.Patch(Constructor(typeof(AudioSourcePoolWorld)), transpiler: TransformPositionTranspiler);
-            harmony.Patch(Method(typeof(SampleOneShot), "TryMakeAndPlay"), transpiler: TransformPositionTranspiler);
-			*/
-		}
 
 		private static void SimplePool_Patch_RunNonDestructivePatches()
 		{

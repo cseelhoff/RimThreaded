@@ -23,7 +23,7 @@ namespace RimThreaded
 
         public static bool set_targetTexture(Camera __instance, RenderTexture value)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] {
                 SafeActionSetTargetTexture, new object[] { __instance, value } };
@@ -43,7 +43,7 @@ namespace RimThreaded
             ActionRender((Camera)p[0]);
         public static bool Render(Camera __instance)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { SafeActionRender, new object[] { __instance } };
             mainThreadWaitHandle.Set();

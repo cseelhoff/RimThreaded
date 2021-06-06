@@ -16,7 +16,7 @@ namespace RimThreaded
 
         public static bool ToString(UnityEngine.Object __instance, ref string __result)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
             {
                 return true;
             }

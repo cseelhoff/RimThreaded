@@ -20,7 +20,7 @@ namespace RimThreaded
 
 		public static bool MatFrom(ref Material __result, MaterialRequest req)
 		{
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { FuncMatFrom, new object[] { req } };
             mainThreadWaitHandle.Set();

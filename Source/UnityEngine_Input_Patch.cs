@@ -23,7 +23,7 @@ namespace RimThreaded
 
         public static Vector3 get_mousePosition()
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return Input.mousePosition;
             threadInfo.safeFunctionRequest = new object[] { FuncGetMousePosition, new object[] { } };
             mainThreadWaitHandle.Set();

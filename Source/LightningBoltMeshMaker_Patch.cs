@@ -21,7 +21,7 @@ namespace RimThreaded
 
         public static bool NewBoltMesh(ref Mesh __result)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
                 return true;
             threadInfo.safeFunctionRequest = new object[] { FuncLightningBoltMeshMaker, new object[] {  } };
             mainThreadWaitHandle.Set();

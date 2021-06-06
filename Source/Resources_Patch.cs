@@ -14,7 +14,7 @@ namespace RimThreaded
 
         public static UnityEngine.Object Load(string path, Type type)
         {
-            if (!CurrentThread.IsBackground || !allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return Resources.Load(path, type);
             threadInfo.safeFunctionRequest = new object[] { safeFunction, new object[] { path, type } };
             mainThreadWaitHandle.Set();
