@@ -806,7 +806,7 @@ namespace RimThreaded
 			ThingGrid_Patch.RunDestructivePatches();
             ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
             TileTemperaturesComp_Patch.RunDestructivePatches(); //TODO - good simple transpile candidate
-            UniqueIDsManager_Patch.RunDestructivePatches();
+            UniqueIDsManager_Patch.RunDestructivePatches(); // Simple use of Interlocked.Increment
             Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
             WealthWatcher_Patch.RunDestructivePatches();
 			//WorkGiver_GrowerSow_Patch.RunDestructivePatches();
