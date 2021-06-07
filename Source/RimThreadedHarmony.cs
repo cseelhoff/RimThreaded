@@ -743,8 +743,8 @@ namespace RimThreaded
             HediffSet_Patch.RunNonDestructivePatches();
             PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //reexamine complexity?
             SituationalThoughtHandler_Patch.RunNonDestructivePatches();
-            ThingOwnerThing_Transpile.RunNonDestructivePatches();
-            TickList_Patch.RunNonDestructivePatches(); //allows multithreaded calls of thing.tick longtick raretick
+            ThingOwnerThing_Transpile.RunNonDestructivePatches(); //reexamine complexity?
+			TickList_Patch.RunNonDestructivePatches(); //allows multithreaded calls of thing.tick longtick raretick
             WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
             WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
             Pawn_RelationsTracker_Patch.RunNonDestructivePatches();
@@ -771,8 +771,7 @@ namespace RimThreaded
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 			Text_Patch.RunDestructivePatches(); //unity get_CurFontStyle on main thread
 
-			SampleSustainer_Patch.RunDestructivePatches(); // maybe TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
-
+			
 			//---Multithreaded Ticking---
 			TradeShip_Patch.RunDestructivePatches(); //allows multithreaded ticking of tradeships
 			WildPlantSpawner_Patch.RunDestructivePatches(); //allows multithreaded icking of WildPlantSpawner
@@ -861,17 +860,10 @@ namespace RimThreaded
 			Room_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches();
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
-															 
+
 			//-----SOUND-----
-			//AmbientSoundManager_Patch.RunDestructivePatches();
-			//Sample_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-			//SampleSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-			//SoundSizeAggregator_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
-			//SoundStarter_Patch.RunDestructivePatches(); //TODO: low priority, reexamine sound
-			//SubSustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-			//Sustainer_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-			//SustainerAggregatorUtility_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
-			//SustainerManager_Patch.RunDestructivePatches();//TODO: low priority, reexamine sound
+			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
+			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
 		}
 
 		private static void PatchModCompatibility()
