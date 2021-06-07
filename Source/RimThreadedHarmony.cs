@@ -65,19 +65,41 @@ namespace RimThreaded
 			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), "get_transform"));
 			replaceFields.Add(Method(typeof(Component), "get_gameObject"), Method(typeof(Component_Patch), "get_gameObject"));
 			replaceFields.Add(Method(typeof(GameObject), "get_transform"), Method(typeof(GameObject_Patch), "get_transform"));
-			replaceFields.Add(Method(typeof(Transform), "set_parent"), Method(typeof(Transform_Patch), "set_parent"));
-			replaceFields.Add(Method(typeof(Transform), "set_localPosition"), Method(typeof(Transform_Patch), "set_localPosition"));
-			replaceFields.Add(Method(typeof(AudioSource), "set_clip"), Method(typeof(AudioSource_Patch), "set_clip"));
-			replaceFields.Add(Method(typeof(AudioSource), "set_volume"), Method(typeof(AudioSource_Patch), "set_volume"));
-			replaceFields.Add(Method(typeof(AudioSource), "set_pitch"), Method(typeof(AudioSource_Patch), "set_pitch"));
-			replaceFields.Add(Method(typeof(AudioSource), "set_minDistance"), Method(typeof(AudioSource_Patch), "set_minDistance"));
-			replaceFields.Add(Method(typeof(AudioSource), "set_maxDistance"), Method(typeof(AudioSource_Patch), "set_maxDistance"));
-			replaceFields.Add(Method(typeof(AudioSource), "set_spatialBlend"), Method(typeof(AudioSource_Patch), "set_spatialBlend"));
-			replaceFields.Add(Method(typeof(AudioSource), "set_loop"), Method(typeof(AudioSource_Patch), "set_loop"));
-			replaceFields.Add(Method(typeof(AudioSource), "set_mute"), Method(typeof(AudioSource_Patch), "set_mute"));
-			replaceFields.Add(Method(typeof(AudioSource), "Play", Type.EmptyTypes), Method(typeof(AudioSource_Patch), "Play"));
-			replaceFields.Add(Method(typeof(AudioSource), "get_volume"), Method(typeof(AudioSource_Patch), "get_volume"));
+			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes), Method(typeof(GameObject_Patch), "GetComponent"));
+			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes, new Type[] { typeof(AudioReverbFilter) }),
+			//	Method(typeof(GameObject_Patch), "GetComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioReverbFilter) }));
+			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes, new Type[] { typeof(AudioLowPassFilter) }),
+			//	Method(typeof(GameObject_Patch), "GetComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioLowPassFilter) }));
+			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes, new Type[] { typeof(AudioHighPassFilter) }),
+			//	Method(typeof(GameObject_Patch), "GetComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioHighPassFilter) }));
+			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes, new Type[] { typeof(AudioEchoFilter) }),
+			//	Method(typeof(GameObject_Patch), "GetComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioEchoFilter) }));
+			//replaceFields.Add(Method(typeof(GameObject), "AddComponent", Type.EmptyTypes, new Type[] { typeof(AudioReverbFilter) }),
+			//	Method(typeof(GameObject_Patch), "AddComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioReverbFilter) }));
+			//replaceFields.Add(Method(typeof(GameObject), "AddComponent", Type.EmptyTypes, new Type[] { typeof(AudioLowPassFilter) }),
+			//	Method(typeof(GameObject_Patch), "AddComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioLowPassFilter) }));
+			//replaceFields.Add(Method(typeof(GameObject), "AddComponent", Type.EmptyTypes, new Type[] { typeof(AudioHighPassFilter) }),
+			//	Method(typeof(GameObject_Patch), "AddComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioHighPassFilter) }));
+			//replaceFields.Add(Method(typeof(GameObject), "AddComponent", Type.EmptyTypes, new Type[] { typeof(AudioEchoFilter) }),
+			//	Method(typeof(GameObject_Patch), "AddComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioEchoFilter) }));
+			//replaceFields.Add(Method(typeof(Transform), "set_parent"), Method(typeof(Transform_Patch), "set_parent"));
+			//replaceFields.Add(Method(typeof(Transform), "set_localPosition"), Method(typeof(Transform_Patch), "set_localPosition"));
+			//replaceFields.Add(Method(typeof(AudioSource), "set_clip"), Method(typeof(AudioSource_Patch), "set_clip"));
+			//replaceFields.Add(Method(typeof(AudioSource), "set_volume"), Method(typeof(AudioSource_Patch), "set_volume"));
+			//replaceFields.Add(Method(typeof(AudioSource), "set_pitch"), Method(typeof(AudioSource_Patch), "set_pitch"));
+			//replaceFields.Add(Method(typeof(AudioSource), "set_minDistance"), Method(typeof(AudioSource_Patch), "set_minDistance"));
+			//replaceFields.Add(Method(typeof(AudioSource), "set_maxDistance"), Method(typeof(AudioSource_Patch), "set_maxDistance"));
+			//replaceFields.Add(Method(typeof(AudioSource), "set_spatialBlend"), Method(typeof(AudioSource_Patch), "set_spatialBlend"));
+			//replaceFields.Add(Method(typeof(AudioSource), "set_loop"), Method(typeof(AudioSource_Patch), "set_loop"));
+			//replaceFields.Add(Method(typeof(AudioSource), "set_mute"), Method(typeof(AudioSource_Patch), "set_mute"));
+			//replaceFields.Add(Method(typeof(AudioSource), "Play", Type.EmptyTypes), Method(typeof(AudioSource_Patch), "Play"));
+			//replaceFields.Add(Method(typeof(AudioSource), "get_volume"), Method(typeof(AudioSource_Patch), "get_volume"));
 #endif
+			//replaceFields.Add(Method(typeof(AudioLowPassFilter), "set_cutoffFrequency"), Method(typeof(AudioLowPassFilter_Patch), "set_cutoffFrequency"));
+			//replaceFields.Add(Method(typeof(AudioLowPassFilter), "set_lowpassResonanceQ"), Method(typeof(AudioLowPassFilter_Patch), "set_lowpassResonanceQ"));
+			//replaceFields.Add(Method(typeof(AudioHighPassFilter), "set_cutoffFrequency"), Method(typeof(AudioHighPassFilter_Patch), "set_cutoffFrequency"));
+			//replaceFields.Add(Method(typeof(AudioHighPassFilter), "set_highpassResonanceQ"), Method(typeof(AudioHighPassFilter_Patch), "set_highpassResonanceQ"));
+
 		}
 #pragma warning disable 649
 		[Serializable]
@@ -107,8 +129,9 @@ namespace RimThreaded
 			assemblies = (from a in AppDomain.CurrentDomain.GetAssemblies()
 						  where !a.FullName.StartsWith("Microsoft.VisualStudio")
 						  select a).ToList();
-			string fileName = "replacements2.json";
-            string jsonString = File.ReadAllText(fileName);
+			//string replacementsJsonPath = Path.Combine(((Mod)RimThreadedMod).intContent.RootDir, "replacements.json"); 
+
+			string jsonString = File.ReadAllText(RimThreadedMod.replacementsJsonPath);
             replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
 
             //IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
@@ -244,6 +267,16 @@ namespace RimThreaded
                     }
                 }
             }
+
+			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
+			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
+			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
+			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
+
 			Log.Message("RimThreaded Field Replacements Complete.");
 		}
 
@@ -696,7 +729,8 @@ namespace RimThreaded
 			CompSpawnSubplant_Transpile.RunNonDestructivePatches(); //fixes bug with royalty spawning subplants
 			Designator_Haul_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically designates it via UI
             Designator_Unforbid_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically unforbids it via UI
-            TimeControls_Patch.RunNonDestructivePatches(); //allow speed 4
+			PathFinder_Patch.RunNonDestructivePatches(); //simple initialize calcGrid on InitStatusesAndPushStartNode
+			TimeControls_Patch.RunNonDestructivePatches(); //allow speed 4
             ZoneManager_Patch.RunNonDestructivePatches(); //recheck growing zone when upon zone grid add
             Zone_Patch.RunNonDestructivePatches(); //recheck growing zone when upon check haul destination call
             HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches(); //speed up for comfy temperature
@@ -736,6 +770,8 @@ namespace RimThreaded
 			SectionLayer_Patch.RunDestructivePatches();
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 			Text_Patch.RunDestructivePatches(); //unity get_CurFontStyle on main thread
+
+			SampleSustainer_Patch.RunDestructivePatches(); // maybe TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
 
 			//---Multithreaded Ticking---
 			TradeShip_Patch.RunDestructivePatches(); //allows multithreaded ticking of tradeships

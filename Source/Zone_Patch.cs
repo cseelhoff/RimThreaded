@@ -26,7 +26,7 @@ namespace RimThreaded
                     //Log.Message("Adding growing zone cell to awaiting plant cells");
                     foreach (IntVec3 c in zone.cells)
                     {
-                        JumboCellCache.ReregisterObject(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                        PlantSowing_Cache.ReregisterObject(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                     }
                 }
             }

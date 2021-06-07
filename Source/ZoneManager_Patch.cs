@@ -20,7 +20,7 @@ namespace RimThreaded
                 if (zone is Zone_Growing)
                 {
                     //Log.Message("Adding growing zone cell to awaiting plant cells");
-                    JumboCellCache.ReregisterObject(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                    PlantSowing_Cache.ReregisterObject(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                 }
             }
         }

@@ -6,15 +6,19 @@ using Verse;
 using UnityEngine;
 using System.Reflection.Emit;
 using System.Linq;
+using System.IO;
 
 namespace RimThreaded 
 { 
     class RimThreadedMod : Mod
     {
         public static RimThreadedSettings Settings;
+        public static string replacementsJsonPath;
         public RimThreadedMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<RimThreadedSettings>();
+            replacementsJsonPath = Path.Combine(content.RootDir, "replacements.json");
+            //RimThreaded.Start();
         }
         public override void DoSettingsWindowContents(Rect inRect)
         {
@@ -45,45 +49,45 @@ namespace RimThreaded
 
         }
 
-        private string getAllStaticFields()
-        {
-            string result = "";
-            HashSet<FieldInfo> fieldInfos = new HashSet<FieldInfo>();
-            foreach(Type type in Assembly.Load("Assembly-CSharp").GetTypes())
-            {
-                foreach(FieldInfo fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
-                {
-                    fieldInfos.Add(fieldInfo);
-                    //result += type.FullName + " " + fieldInfo.FieldType.Attributes + " " + fieldInfo.Name + "\n";
-                }
-            }
-            foreach (Type type in Assembly.Load("Assembly-CSharp").GetTypes())
-            {
-                foreach (MethodInfo methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
-                {
-                    List<CodeInstruction> codeInstructions = PatchProcessor.GetOriginalInstructions(methodInfo, out ILGenerator iLGenerator);
-                    int i = 0;
-                    while(i < codeInstructions.Count)
-                    {
-                        if(codeInstructions[i].opcode == OpCodes.Ldsfld) {
-                            if (codeInstructions[i + 1].opcode == OpCodes.Call || codeInstructions[i + 1].opcode == OpCodes.Callvirt)
-                            {
-                                MethodInfo instructionMethodInfo = (MethodInfo)codeInstructions[i + 1].operand;
-                                if (instructionMethodInfo.Name.Equals("Clear") && instructionMethodInfo.DeclaringType.FullName.Contains("System.Collections"))
-                                {
-                                    FieldInfo fieldInfo = (FieldInfo)codeInstructions[i].operand;
-                                    Log.Message(fieldInfo.FieldType.Name + " " + fieldInfo.DeclaringType.FullName + "." + fieldInfo.Name);
-                                }
-                            }
-                        }
-                        i++;
-                    }
-                }
-            }
-            MethodBase methodBase = null;
-            methodBase.GetMethodBody().GetILAsByteArray();
-            return result;
-        }
+        //private string getAllStaticFields()
+        //{
+        //    string result = "";
+        //    HashSet<FieldInfo> fieldInfos = new HashSet<FieldInfo>();
+        //    foreach(Type type in Assembly.Load("Assembly-CSharp").GetTypes())
+        //    {
+        //        foreach(FieldInfo fieldInfo in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+        //        {
+        //            fieldInfos.Add(fieldInfo);
+        //            //result += type.FullName + " " + fieldInfo.FieldType.Attributes + " " + fieldInfo.Name + "\n";
+        //        }
+        //    }
+        //    foreach (Type type in Assembly.Load("Assembly-CSharp").GetTypes())
+        //    {
+        //        foreach (MethodInfo methodInfo in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+        //        {
+        //            List<CodeInstruction> codeInstructions = PatchProcessor.GetOriginalInstructions(methodInfo, out ILGenerator iLGenerator);
+        //            int i = 0;
+        //            while(i < codeInstructions.Count)
+        //            {
+        //                if(codeInstructions[i].opcode == OpCodes.Ldsfld) {
+        //                    if (codeInstructions[i + 1].opcode == OpCodes.Call || codeInstructions[i + 1].opcode == OpCodes.Callvirt)
+        //                    {
+        //                        MethodInfo instructionMethodInfo = (MethodInfo)codeInstructions[i + 1].operand;
+        //                        if (instructionMethodInfo.Name.Equals("Clear") && instructionMethodInfo.DeclaringType.FullName.Contains("System.Collections"))
+        //                        {
+        //                            FieldInfo fieldInfo = (FieldInfo)codeInstructions[i].operand;
+        //                            Log.Message(fieldInfo.FieldType.Name + " " + fieldInfo.DeclaringType.FullName + "." + fieldInfo.Name);
+        //                        }
+        //                    }
+        //                }
+        //                i++;
+        //            }
+        //        }
+        //    }
+        //    MethodBase methodBase = null;
+        //    methodBase.GetMethodBody().GetILAsByteArray();
+        //    return result;
+        //}
 
         public static string getPotentialModConflicts()
         {

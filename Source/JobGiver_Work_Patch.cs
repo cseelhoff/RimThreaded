@@ -293,11 +293,11 @@ namespace RimThreaded
                         {
                             if (thing is Building_PlantGrower buildingPlantGrower)
                             {
-                                JumboCellCache.ReregisterObject(map, cell, buildingPlantGrower,
+                                PlantSowing_Cache.ReregisterObject(map, cell, buildingPlantGrower,
                                     WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
 							}
                         }
-						JumboCellCache.ReregisterObject(map, cell, cell, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+						PlantSowing_Cache.ReregisterObject(map, cell, cell, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                     }
 					//HACK - I know. I'm awful.
 					//Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);

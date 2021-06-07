@@ -117,7 +117,7 @@ namespace RimThreaded
 			bool forced = false;
 			Map map = pawn.Map;
 			ZoneManager zoneManager = pawn.Map.zoneManager;
-			foreach (object obj in JumboCellCache.GetClosestActionableObjects(pawn, map, awaitingPlantCellsMapDict))
+			foreach (object obj in PlantSowing_Cache.GetClosestActionableObjects(pawn, map, awaitingPlantCellsMapDict))
 			{
 				
 				if(obj is Building_PlantGrower building_PlantGrower)
@@ -174,7 +174,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("IsForbidden");
 #endif
-				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
@@ -206,7 +206,7 @@ namespace RimThreaded
 #if DEBUG
 					Log.Warning("thing.def == localWantedPlantDef... RemoveObjectFromAwaitingHaulingHashSets");
 #endif
-					JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+					PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 					//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 					return false;
 				}
@@ -282,7 +282,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("AdjacentSowBlocker");
 #endif
-				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
@@ -307,7 +307,7 @@ namespace RimThreaded
 #if DEBUG
 					Log.Warning("!CanReserve");
 #endif
-					JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+					PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 
 					return false;
 				}
@@ -321,7 +321,7 @@ namespace RimThreaded
 #if DEBUG
 					Log.Warning("Plant IsForbidden");
 #endif
-					JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+					PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 
 					return false;
 				}
@@ -333,7 +333,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("EverHaulable");
 #endif
-				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
@@ -342,7 +342,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("CanEverPlantAt_NewTemp");
 #endif
-				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
@@ -359,7 +359,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("!pawn.CanReserve(c");
 #endif
-				JumboCellCache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
 				//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}

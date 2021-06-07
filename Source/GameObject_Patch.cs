@@ -72,6 +72,65 @@ namespace RimThreaded
                 yield return codeInstruction;
             }
         }
+        public static T GetComponent<T>(GameObject __instance)
+        {
+            if (!allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.GetComponent<T>();
+            Func<object[], object> FuncGetComponent = parameters => __instance.GetComponent<T>();
+            threadInfo.safeFunctionRequest = new object[] { FuncGetComponent, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (T)threadInfo.safeFunctionResult;
+        }
+        public static T AddComponent<T>(GameObject __instance) where T : Component
+        {
+            if (!allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.AddComponent<T>();
+            Func<object[], object> FuncAddComponent = parameters => __instance.AddComponent<T>();
+            threadInfo.safeFunctionRequest = new object[] { FuncAddComponent, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (T)threadInfo.safeFunctionResult;
+        }
+        public static AudioReverbFilter GetComponentAudioReverbFilter<AudioReverbFilter>(GameObject __instance)
+        {
+            if (!allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.GetComponent<AudioReverbFilter>();
+            Func<object[], object> FuncGetComponent = parameters => __instance.GetComponent<AudioReverbFilter>();
+            threadInfo.safeFunctionRequest = new object[] { FuncGetComponent, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (AudioReverbFilter)threadInfo.safeFunctionResult;
+        }
+
+        public static AudioLowPassFilter GetComponentAudioLowPassFilter<AudioLowPassFilter>(GameObject __instance)
+        {
+            if (!allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.GetComponent<AudioLowPassFilter>();
+            Func<object[], object> FuncGetComponent = parameters => __instance.GetComponent<AudioLowPassFilter>();
+            threadInfo.safeFunctionRequest = new object[] { FuncGetComponent, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (AudioLowPassFilter)threadInfo.safeFunctionResult;
+        }
+
+        public static AudioHighPassFilter GetComponentAudioHighPassFilter<AudioHighPassFilter>(GameObject __instance)
+        {
+            if (!allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.GetComponent<AudioHighPassFilter>();
+            Func<object[], object> FuncGetComponent = parameters => __instance.GetComponent<AudioHighPassFilter>();
+            threadInfo.safeFunctionRequest = new object[] { FuncGetComponent, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (AudioHighPassFilter)threadInfo.safeFunctionResult;
+        }
+
+        public static AudioEchoFilter GetComponentAudioEchoFilter<AudioEchoFilter>(GameObject __instance)
+        {
+            if (!allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.GetComponent<AudioEchoFilter>();
+            Func<object[], object> FuncGetComponent = parameters => __instance.GetComponent<AudioEchoFilter>();
+            threadInfo.safeFunctionRequest = new object[] { FuncGetComponent, new object[] { } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return (AudioEchoFilter)threadInfo.safeFunctionResult;
+        }
+
+
         public static Transform get_transform(GameObject __instance)
         {
             if (!allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) return __instance.transform;

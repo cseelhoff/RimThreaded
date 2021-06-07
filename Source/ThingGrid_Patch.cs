@@ -54,7 +54,7 @@ namespace RimThreaded
                     }
                     if(t is Building_PlantGrower building_PlantGrower)
                     {
-                        JumboCellCache.ReregisterObject(t.Map, t.Position, t, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                        PlantSowing_Cache.ReregisterObject(t.Map, t.Position, t, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                     }
                     /*
                     if (!thingBillPoints.TryGetValue(t.def, out Dictionary<WorkGiver_Scanner, float> billPointsDict))
@@ -113,12 +113,12 @@ namespace RimThreaded
                         }
                         
                         if(c.GetZone(__instance.map) is Zone_Growing zone)
-                            JumboCellCache.ReregisterObject(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                            PlantSowing_Cache.ReregisterObject(zone.Map, c, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
 
                         foreach (Thing thing2 in newThingList) {
                             if (thing2 is Building_PlantGrower building_PlantGrower)
                             {
-                                JumboCellCache.ReregisterObject(building_PlantGrower.Map, building_PlantGrower.Position,
+                                PlantSowing_Cache.ReregisterObject(building_PlantGrower.Map, building_PlantGrower.Position,
                                     building_PlantGrower, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                             }
                         }

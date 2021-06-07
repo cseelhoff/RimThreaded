@@ -92,6 +92,7 @@ namespace RimThreaded
             monitorThread = new Thread(MonitorThreads) { IsBackground = true };
             monitorThread.Start();
         }
+
         public static void AddNormalTicking(object instance, Action<object> prepare, Action<object> tick)
         {
             Log.Message("Loading TickList: " + instance.ToString());

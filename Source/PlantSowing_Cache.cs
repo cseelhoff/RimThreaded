@@ -7,7 +7,7 @@ using static RimThreaded.Area_Patch;
 
 namespace RimThreaded
 {
-    static class JumboCellCache
+    static class PlantSowing_Cache
     {
 		
 		private static readonly List<int> zoomLevels = new List<int>();

@@ -25,7 +25,7 @@ namespace RimThreaded
         
         public static void InitializeThreadStatics()
         {
-            openList = new FastPriorityQueue<PathFinder.CostNode>(new PathFinder.CostNodeComparer());
+            openList = new FastPriorityQueue<CostNode>(new CostNodeComparer());
             statusOpenValue = 1;
             statusClosedValue = 2;
             disallowedCornerIndices = new List<int>(4);
@@ -38,6 +38,23 @@ namespace RimThreaded
             regionCostCalculatorReplacements.Add(OpCodes.Ldfld, Method(typeof(PathFinder_Patch), "GetRegionCostCalculator"));
             regionCostCalculatorReplacements.Add(OpCodes.Stfld, Method(typeof(PathFinder_Patch), "SetRegionCostCalculator"));
             RimThreadedHarmony.replaceFields.Add(Field(typeof(PathFinder), "regionCostCalculator"), regionCostCalculatorReplacements);
+        }
+
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(PathFinder);
+            Type patched = typeof(PathFinder_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "InitStatusesAndPushStartNode", null, false);
+        }
+
+        public static bool InitStatusesAndPushStartNode(PathFinder __instance, ref int curIndex, IntVec3 start)
+        {
+            int size = __instance.mapSizeX * __instance.mapSizeZ;
+            if (calcGrid == null || calcGrid.Length < size)
+            {
+                calcGrid = new PathFinderNodeFast[size];
+            }
+            return true;
         }
 
         public static RegionCostCalculatorWrapper GetRegionCostCalculator(PathFinder __instance)
