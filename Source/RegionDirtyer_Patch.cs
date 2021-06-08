@@ -1,71 +1,75 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     public class RegionDirtyer_Patch
     {
-        //public static Dictionary<RegionDirtyer, ConcurrentQueue<IntVec3>> dirtyCellsDict = new Dictionary<RegionDirtyer, ConcurrentQueue<IntVec3>>();
+        [ThreadStatic] public static List<Region> regionsToDirty;
         public static Dictionary<RegionDirtyer, List<IntVec3>> dirtyCellsDict = new Dictionary<RegionDirtyer, List<IntVec3>>();
-
-        public static FieldRef<RegionDirtyer, Map> map = FieldRefAccess<RegionDirtyer, Map>("map");
         public static object regionDirtyerLock = new object();
+
+        public static void RunDestructivePatches()
+        {
+            Type original = typeof(RegionDirtyer);
+            Type patched = typeof(RegionDirtyer_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "SetAllClean");
+            RimThreadedHarmony.Prefix(original, patched, "Notify_WalkabilityChanged");
+            RimThreadedHarmony.Prefix(original, patched, "Notify_ThingAffectingRegionsSpawned");
+            RimThreadedHarmony.Prefix(original, patched, "Notify_ThingAffectingRegionsDespawned");
+            RimThreadedHarmony.Prefix(original, patched, "SetAllDirty");
+            RimThreadedHarmony.Prefix(original, patched, "SetRegionDirty");
+        }
 
         public static bool SetAllClean(RegionDirtyer __instance)
         {
             lock (regionDirtyerLock)
             {
                 List<IntVec3> dirtyCells = get_DirtyCells(__instance);
-                //lock (dirtyCells)
-                //{
-                    foreach (IntVec3 dirtyCell in dirtyCells)
-                    {
-                        map(__instance).temperatureCache.ResetCachedCellInfo(dirtyCell);
-                    }
-                    dirtyCells.Clear();
-                //}
+                foreach (IntVec3 dirtyCell in dirtyCells)
+                {
+                    __instance.map.temperatureCache.ResetCachedCellInfo(dirtyCell);
+                }
+                dirtyCellsDict.SetOrAdd(__instance, new List<IntVec3>());
             }
             return false;
         }
 
         public static List<IntVec3> get_DirtyCells(RegionDirtyer __instance)
         {
-            List<IntVec3> dirtyCells;
             lock (regionDirtyerLock)
             {
-                if (!dirtyCellsDict.TryGetValue(__instance, out dirtyCells))
+                if (!dirtyCellsDict.TryGetValue(__instance, out List<IntVec3> dirtyCells))
                 {
-                    dirtyCells = new List<IntVec3>();
-                    //lock(dirtyCellsDict)
-                    //{
-                    dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
-                    //}
+                    lock (regionDirtyerLock)
+                    {
+                        if (!dirtyCellsDict.TryGetValue(__instance, out List<IntVec3> dirtyCells2))
+                        {
+                            dirtyCells2 = new List<IntVec3>();
+                            dirtyCellsDict.SetOrAdd(__instance, dirtyCells2);
+                        }
+                        dirtyCells = dirtyCells2;
+                    }
                 }
+                return dirtyCells;
             }
-            return dirtyCells;
         }
 
         public static bool Notify_WalkabilityChanged(RegionDirtyer __instance, IntVec3 c)
         {
             lock (regionDirtyerLock)
             {
-                List<Region> regionsToDirty = new List<Region>();
-                //regionsToDirty.Clear();
+                regionsToDirty.Clear();
                 for (int i = 0; i < 9; i++)
                 {
                     IntVec3 c2 = c + GenAdj.AdjacentCellsAndInside[i];
-                    if (c2.InBounds(map(__instance)))
+                    if (c2.InBounds(__instance.map))
                     {
-                        Region regionAt_NoRebuild_InvalidAllowed = map(__instance).regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2);
+                        Region regionAt_NoRebuild_InvalidAllowed = __instance.map.regionGrid.GetRegionAt_NoRebuild_InvalidAllowed(c2);
                         if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
                         {
-                            map(__instance).temperatureCache.TryCacheRegionTempInfo(c, regionAt_NoRebuild_InvalidAllowed);
+                            __instance.map.temperatureCache.TryCacheRegionTempInfo(c, regionAt_NoRebuild_InvalidAllowed);
                             regionsToDirty.Add(regionAt_NoRebuild_InvalidAllowed);
                         }
                     }
@@ -78,13 +82,16 @@ namespace RimThreaded
 
                 //regionsToDirty.Clear();
                 List<IntVec3> dirtyCells = get_DirtyCells(__instance);
-                //lock (dirtyCells)
-                //{
-                if (c.Walkable(map(__instance)) && !dirtyCells.Contains(c))
+                if (c.Walkable(__instance.map))
                 {
-                    dirtyCells.Add(c);
+                    lock (regionDirtyerLock)
+                    {
+                        if (!dirtyCells.Contains(c))
+                        {
+                            dirtyCells.Add(c);
+                        }
+                    }
                 }
-                //}
             }
             return false;
         }
@@ -93,8 +100,7 @@ namespace RimThreaded
         {
             lock (regionDirtyerLock)
             {
-                //regionsToDirty.Clear();
-                List<Region> regionsToDirty = new List<Region>();
+                regionsToDirty.Clear();
                 foreach (IntVec3 item in b.OccupiedRect().ExpandedBy(1).ClipInsideMap(b.Map))
                 {
                     Region validRegionAt_NoRebuild = b.Map.regionGrid.GetValidRegionAt_NoRebuild(item);
@@ -110,7 +116,6 @@ namespace RimThreaded
                     SetRegionDirty(__instance, regionsToDirty[i]);
                 }
             }
-            //regionsToDirty.Clear();
             return false;
         }
 
@@ -119,23 +124,22 @@ namespace RimThreaded
         {
             lock (regionDirtyerLock)
             {
-                //regionsToDirty.Clear();
-                List<Region> regionsToDirty = new List<Region>();
-                Region validRegionAt_NoRebuild = map(__instance).regionGrid.GetValidRegionAt_NoRebuild(b.Position);
+                regionsToDirty.Clear();
+                Region validRegionAt_NoRebuild = __instance.map.regionGrid.GetValidRegionAt_NoRebuild(b.Position);
                 if (validRegionAt_NoRebuild != null)
                 {
-                    map(__instance).temperatureCache.TryCacheRegionTempInfo(b.Position, validRegionAt_NoRebuild);
+                    __instance.map.temperatureCache.TryCacheRegionTempInfo(b.Position, validRegionAt_NoRebuild);
                     regionsToDirty.Add(validRegionAt_NoRebuild);
                 }
 
                 foreach (IntVec3 item2 in GenAdj.CellsAdjacent8Way(b))
                 {
-                    if (item2.InBounds(map(__instance)))
+                    if (item2.InBounds(__instance.map))
                     {
-                        Region validRegionAt_NoRebuild2 = map(__instance).regionGrid.GetValidRegionAt_NoRebuild(item2);
+                        Region validRegionAt_NoRebuild2 = __instance.map.regionGrid.GetValidRegionAt_NoRebuild(item2);
                         if (validRegionAt_NoRebuild2 != null)
                         {
-                            map(__instance).temperatureCache.TryCacheRegionTempInfo(item2, validRegionAt_NoRebuild2);
+                            __instance.map.temperatureCache.TryCacheRegionTempInfo(item2, validRegionAt_NoRebuild2);
                             regionsToDirty.Add(validRegionAt_NoRebuild2);
                         }
                     }
@@ -146,47 +150,38 @@ namespace RimThreaded
                     SetRegionDirty(__instance, regionsToDirty[i]);
                 }
 
-                regionsToDirty.Clear();
                 List<IntVec3> dirtyCells = get_DirtyCells(__instance);
-                //lock (dirtyCells)
-                //{
-                    if (b.def.size.x == 1 && b.def.size.z == 1)
-                    {
-                        dirtyCells.Add(b.Position);
-                        return false;
-                    }
+                if (b.def.size.x == 1 && b.def.size.z == 1)
+                {
+                    dirtyCells.Add(b.Position);
+                    return false;
+                }
 
-                    CellRect cellRect = b.OccupiedRect();
-                    for (int j = cellRect.minZ; j <= cellRect.maxZ; j++)
+                CellRect cellRect = b.OccupiedRect();
+                for (int j = cellRect.minZ; j <= cellRect.maxZ; j++)
+                {
+                    for (int k = cellRect.minX; k <= cellRect.maxX; k++)
                     {
-                        for (int k = cellRect.minX; k <= cellRect.maxX; k++)
-                        {
-                            IntVec3 item = new IntVec3(k, 0, j);
-                            dirtyCells.Add(item);
-                        }
+                        IntVec3 item = new IntVec3(k, 0, j);
+                        dirtyCells.Add(item);
                     }
-                //}
+                }
             }
             return false;
         }
 
         public static bool SetAllDirty(RegionDirtyer __instance)
         {
-            List<IntVec3> dirtyCells = new List<IntVec3>();
-
             lock (regionDirtyerLock)
             {
-                //lock (dirtyCells)
-                //{
-                foreach (IntVec3 item in map(__instance))
+                List<IntVec3> dirtyCells = new List<IntVec3>();
+
+                foreach (IntVec3 item in __instance.map)
                 {
                     dirtyCells.Add(item);
                 }
-                //}
-                //lock (dirtyCellsDict) {
-                    dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
-                //}
-                foreach (Region item2 in map(__instance).regionGrid.AllRegions_NoRebuild_InvalidAllowed)
+                dirtyCellsDict.SetOrAdd(__instance, dirtyCells);
+                foreach (Region item2 in __instance.map.regionGrid.AllRegions_NoRebuild_InvalidAllowed)
                 {
                     SetRegionDirty(__instance, item2, addCellsToDirtyCells: false);
                 }
@@ -207,28 +202,27 @@ namespace RimThreaded
 
                 reg.valid = false;
                 reg.Room = null;
-                for (int i = 0; i < reg.links.Count; i++)
+                List<RegionLink> links = reg.links;
+                for (int i = 0; i < links.Count; i++)
                 {
-                    reg.links[i].Deregister(reg);
+                    links[i].Deregister(reg);
                 }
 
-                reg.links.Clear();
+                reg.links = new List<RegionLink>();
                 if (!addCellsToDirtyCells)
                 {
                     return false;
                 }
                 List<IntVec3> dirtyCells = get_DirtyCells(__instance);
-                //lock (dirtyCells)
-                //{
-                    foreach (IntVec3 cell in reg.Cells)
+                foreach (IntVec3 cell in reg.Cells)
+                {
+                    //RegionAndRoomUpdater_Patch.cellsWithNewRegions.Remove(cell);
+                    dirtyCells.Add(cell);
+                    if (DebugViewSettings.drawRegionDirties)
                     {
-                        dirtyCells.Add(cell);
-                        if (DebugViewSettings.drawRegionDirties)
-                        {
-                            map(__instance).debugDrawer.FlashCell(cell);
-                        }
+                        __instance.map.debugDrawer.FlashCell(cell);
                     }
-                //}
+                }
             }
             return false;
         }

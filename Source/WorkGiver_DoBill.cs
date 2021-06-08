@@ -116,8 +116,15 @@ namespace RimThreaded
 			{
 				if (counts[index] == 0f)
 				{
-					counts.RemoveAt(index);
-					defs.RemoveAt(index);
+					lock (this)
+					{
+                        List<float> newCounts = new List<float>(counts);
+						newCounts.RemoveAt(index);
+						counts = newCounts;
+                        List<ThingDef> newDefs = new List<ThingDef>(defs);
+						newDefs.RemoveAt(index);
+						defs = newDefs;
+					}
 				}
 			}
 
@@ -278,6 +285,7 @@ namespace RimThreaded
 
 			RegionProcessor regionProcessor = workGiver_DoBill_RegionProcessor.Get_RegionProcessor; //CHANGE
 			RegionTraverser.BreadthFirstTraverse(rootReg, entryCondition, regionProcessor, 99999);
+
 			//WorkGiver_DoBill.relevantThings.Clear(); REMOVE
 			//WorkGiver_DoBill.newRelevantThings.Clear(); REMOVE
 			//WorkGiver_DoBill.processedThings.Clear(); REMOVE
@@ -292,18 +300,19 @@ namespace RimThreaded
 	  Bill bill,
 	  List<ThingCount> chosen)
 		{
+			RecipeDef recipe = bill.recipe;
 			chosen.Clear();
-			availableThings.Sort((t, t2) => bill.recipe.IngredientValueGetter.ValuePerUnitOf(t2.def).CompareTo(bill.recipe.IngredientValueGetter.ValuePerUnitOf(t.def)));
-			for (int index1 = 0; index1 < bill.recipe.ingredients.Count; ++index1)
+			availableThings.Sort((t, t2) => recipe.IngredientValueGetter.ValuePerUnitOf(t2.def).CompareTo(recipe.IngredientValueGetter.ValuePerUnitOf(t.def)));
+			for (int index1 = 0; index1 < recipe.ingredients.Count; ++index1)
 			{
-				IngredientCount ingredient = bill.recipe.ingredients[index1];
+				IngredientCount ingredient = recipe.ingredients[index1];
 				float baseCount = ingredient.GetBaseCount();
 				for (int index2 = 0; index2 < availableThings.Count; ++index2)
 				{
 					Thing availableThing = availableThings[index2];
 					if (ingredient.filter.Allows(availableThing) && (ingredient.IsFixedIngredient || bill.ingredientFilter.Allows(availableThing)))
 					{
-						float num = bill.recipe.IngredientValueGetter.ValuePerUnitOf(availableThing.def);
+						float num = recipe.IngredientValueGetter.ValuePerUnitOf(availableThing.def);
 						int countToAdd = Mathf.Min(Mathf.CeilToInt(baseCount / num), availableThing.stackCount);
 						ThingCountUtility.AddToList(chosen, availableThing, countToAdd);
 						baseCount -= countToAdd * num;

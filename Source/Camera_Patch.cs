@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Threading;
 using UnityEngine;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreaded;
@@ -10,50 +9,46 @@ namespace RimThreaded
 {
     public class Camera_Patch
     {
-        static readonly MethodInfo methodSet_targetTexture = 
+        static readonly MethodInfo MethodSetTargetTexture =
             Method(typeof(Camera), "set_targetTexture", new Type[] { typeof(RenderTexture) });
 
-        static readonly Action<Camera, RenderTexture> actionSet_targetTexture =
+        static readonly Action<Camera, RenderTexture> ActionSetTargetTexture =
             (Action<Camera, RenderTexture>)Delegate.CreateDelegate
-            (typeof(Action<Camera, RenderTexture>), methodSet_targetTexture);
+            (typeof(Action<Camera, RenderTexture>), MethodSetTargetTexture);
 
-        static readonly Action<object[]> safeActionSet_targetTexture = parameters =>
-            actionSet_targetTexture(
-                (Camera)parameters[0], 
+        static readonly Action<object[]> SafeActionSetTargetTexture = parameters =>
+            ActionSetTargetTexture(
+                (Camera)parameters[0],
                 (RenderTexture)parameters[1]);
 
         public static bool set_targetTexture(Camera __instance, RenderTexture value)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { 
-                    safeActionSet_targetTexture, new object[] { __instance, value } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] {
+                SafeActionSetTargetTexture, new object[] { __instance, value } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return false;
         }
 
-        static MethodInfo methodRender = 
+        static readonly MethodInfo MethodRender =
             Method(typeof(Camera), "Render", new Type[] { });
 
-        static readonly Action<Camera> actionRender =
+        static readonly Action<Camera> ActionRender =
             (Action<Camera>)Delegate.CreateDelegate
-            (typeof(Action<Camera>), methodRender);
+            (typeof(Action<Camera>), MethodRender);
 
-        static readonly Action<object[]> safeActionRender = p =>
-            actionRender((Camera)p[0]);
+        static readonly Action<object[]> SafeActionRender = p =>
+            ActionRender((Camera)p[0]);
         public static bool Render(Camera __instance)
         {
-            if (allThreads2.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
-            {
-                threadInfo.safeFunctionRequest = new object[] { safeActionRender, new object[] { __instance } };
-                mainThreadWaitHandle.Set();
-                threadInfo.eventWaitStart.WaitOne();
-                return false;
-            }
-            return true;
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo)) 
+                return true;
+            threadInfo.safeFunctionRequest = new object[] { SafeActionRender, new object[] { __instance } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            return false;
         }
     }
 }

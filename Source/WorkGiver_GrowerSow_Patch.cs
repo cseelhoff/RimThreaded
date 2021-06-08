@@ -1,20 +1,22 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Verse;
 using Verse.AI;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
     class WorkGiver_GrowerSow_Patch
     {
-        public static ThingDef wantedPlantDef = StaticFieldRefAccess<ThingDef>(typeof(WorkGiver_Grower), "wantedPlantDef");
-        public static string CantSowCavePlantBecauseOfLightTrans = StaticFieldRefAccess<string>(typeof(WorkGiver_GrowerSow), "CantSowCavePlantBecauseOfLightTrans");
-        public static string CantSowCavePlantBecauseUnroofedTrans = StaticFieldRefAccess<string>(typeof(WorkGiver_GrowerSow), "CantSowCavePlantBecauseUnroofedTrans");
+
+        public static readonly Type original = typeof(WorkGiver_GrowerSow);
+        public static readonly Type patched = typeof(WorkGiver_GrowerSow_Patch);
+        public static void RunDestructivePatches()
+        {
+            RimThreadedHarmony.Prefix(original, patched, "JobOnCell"); //WorkGiver_Grower.wantedPlantDef replaced with local var for thread overwrite
+        }
+
+
         public static bool JobOnCell(WorkGiver_GrowerSow __instance, ref Job __result, Pawn pawn, IntVec3 c, bool forced = false)
         {
             Map map = pawn.Map;
@@ -29,15 +31,12 @@ namespace RimThreaded
                 __result = null;
                 return false;
             }
-
-            if (wantedPlantDef == null)
+            ThingDef localWantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(c, map);
+            WorkGiver_GrowerSow.wantedPlantDef = localWantedPlantDef;
+            if (localWantedPlantDef == null)
             {
-                wantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(c, map);
-                if (wantedPlantDef == null)
-                {
-                    __result = null;
-                    return false;
-                }
+                __result = null;
+                return false;
             }
 
             List<Thing> thingList = c.GetThingList(map);
@@ -45,7 +44,7 @@ namespace RimThreaded
             for (int i = 0; i < thingList.Count; i++)
             {
                 Thing thing = thingList[i];
-                if (thing.def == wantedPlantDef)
+                if (thing.def == localWantedPlantDef)
                 {
                     __result = null;
                     return false;
@@ -67,24 +66,24 @@ namespace RimThreaded
                 }
             }
 
-            if (wantedPlantDef.plant.cavePlant)
+            if (localWantedPlantDef.plant.cavePlant)
             {
                 if (!c.Roofed(map))
                 {
-                    JobFailReason.Is(CantSowCavePlantBecauseUnroofedTrans);
+                    JobFailReason.Is(WorkGiver_GrowerSow.CantSowCavePlantBecauseUnroofedTrans);
                     __result = null;
                     return false;
                 }
 
                 if (map.glowGrid.GameGlowAt(c, ignoreCavePlants: true) > 0f)
                 {
-                    JobFailReason.Is(CantSowCavePlantBecauseOfLightTrans);
+                    JobFailReason.Is(WorkGiver_GrowerSow.CantSowCavePlantBecauseOfLightTrans);
                     __result = null;
                     return false;
                 }
             }
 
-            if (wantedPlantDef.plant.interferesWithRoof && c.Roofed(pawn.Map))
+            if (localWantedPlantDef.plant.interferesWithRoof && c.Roofed(pawn.Map))
             {
                 __result = null;
                 return false;
@@ -103,7 +102,7 @@ namespace RimThreaded
                 return false;
             }
 
-            Thing thing2 = PlantUtility.AdjacentSowBlocker(wantedPlantDef, c, map);
+            Thing thing2 = PlantUtility.AdjacentSowBlocker(localWantedPlantDef, c, map);
             if (thing2 != null)
             {
                 Plant plant2 = thing2 as Plant;
@@ -121,11 +120,11 @@ namespace RimThreaded
                 return false;
             }
 
-            ThingDef thingdef = wantedPlantDef;
-            if (thingdef != null && thingdef.plant != null && thingdef.plant.sowMinSkill > 0 && pawn != null && pawn.skills != null && pawn.skills.GetSkill(SkillDefOf.Plants).Level < wantedPlantDef.plant.sowMinSkill)
+            ThingDef thingdef = localWantedPlantDef;
+            if (thingdef != null && thingdef.plant != null && thingdef.plant.sowMinSkill > 0 && pawn != null && pawn.skills != null && pawn.skills.GetSkill(SkillDefOf.Plants).Level < localWantedPlantDef.plant.sowMinSkill)
             {
                 WorkGiver workGiver = __instance;
-                JobFailReason.Is("UnderAllowedSkill".Translate(wantedPlantDef.plant.sowMinSkill), workGiver.def.label);
+                JobFailReason.Is("UnderAllowedSkill".Translate(localWantedPlantDef.plant.sowMinSkill), workGiver.def.label);
                 __result = null;
                 return false;
             }
@@ -137,13 +136,11 @@ namespace RimThreaded
                 {
                     continue;
                 }
-
                 if (!pawn.CanReserve(thing3, 1, -1, null, forced))
                 {
                     __result = null;
                     return false;
                 }
-
                 if (thing3.def.category == ThingCategory.Plant)
                 {
                     if (!thing3.IsForbidden(pawn))
@@ -166,14 +163,14 @@ namespace RimThreaded
                 return false;
             }
 
-            if (!wantedPlantDef.CanEverPlantAt_NewTemp(c, map) || !PlantUtility.GrowthSeasonNow(c, map, forSowing: true) || !pawn.CanReserve(c, 1, -1, null, forced))
+            if (!localWantedPlantDef.CanEverPlantAt_NewTemp(c, map) || !PlantUtility.GrowthSeasonNow(c, map, forSowing: true) || !pawn.CanReserve(c, 1, -1, null, forced))
             {
                 __result = null;
                 return false;
             }
 
             Job job = JobMaker.MakeJob(JobDefOf.Sow, c);
-            job.plantDefToSow = wantedPlantDef;
+            job.plantDefToSow = localWantedPlantDef;
             __result = job;
             return false;
         }

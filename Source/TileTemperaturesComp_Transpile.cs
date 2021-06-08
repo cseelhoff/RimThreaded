@@ -20,14 +20,14 @@ namespace RimThreaded
             LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
             LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
             foreach (CodeInstruction ci in EnterLock(
-                lockObject, lockTaken, loadLockObjectInstructions, instructionsList, ref i))
+                lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
                 yield return ci;
             while (i < instructionsList.Count - 1)
             {
                 yield return instructionsList[i++];
             }
             foreach (CodeInstruction ci in ExitLock(
-                iLGenerator, lockObject, lockTaken, instructionsList, ref i))
+                iLGenerator, lockObject, lockTaken, instructionsList[i]))
                 yield return ci;
             yield return instructionsList[i++];
             

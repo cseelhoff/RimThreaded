@@ -11,10 +11,17 @@ namespace RimThreaded
 {
     public class Map_Transpile
     {
+        public static Dictionary<Map, AutoResetEvent> skyManagerStartEvents = new Dictionary<Map, AutoResetEvent>();
 
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Map);
+            Type patched = typeof(Map_Transpile);
+            RimThreadedHarmony.Transpile(original, patched, "MapUpdate");
+        }
         public static IEnumerable<CodeInstruction> MapUpdate(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            List<CodeInstruction> instructionsList = instructions.ToList<CodeInstruction>();
+            List<CodeInstruction> instructionsList = instructions.ToList();
             int i = 0;
             while (i < instructionsList.Count)
             {
@@ -34,7 +41,7 @@ namespace RimThreaded
                     
                     //yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Map_Patch), "skyManagerStartEvents"));
                     yield return new CodeInstruction(OpCodes.Ldarg_0); //this
-                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Map_Patch), "SkyManagerUpdate2"));
+                    yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Map_Transpile), "SkyManagerUpdate2"));
                     i += 2;
                 }
                 else
@@ -44,5 +51,26 @@ namespace RimThreaded
                 i++;
             }            
         }
+
+        public static void SkyManagerUpdate2(Map __instance)
+        {
+            if (!skyManagerStartEvents.TryGetValue(__instance, out AutoResetEvent skyManagerStartEvent))
+            {
+                skyManagerStartEvent = new AutoResetEvent(false);
+                skyManagerStartEvents.Add(__instance, skyManagerStartEvent);
+                new Thread(() =>
+                {
+                    AutoResetEvent skyManagerStartEvent2 = skyManagerStartEvents[__instance];
+                    SkyManager skyManager = __instance.skyManager;
+                    while (true)
+                    {
+                        skyManagerStartEvent2.WaitOne();
+                        skyManager.SkyManagerUpdate();
+                    }
+                }){IsBackground = true}.Start();
+            }
+            skyManagerStartEvent.Set();
+        }
+
     }
 }

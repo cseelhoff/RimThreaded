@@ -1,21 +1,23 @@
-﻿using HarmonyLib;
+﻿using System;
 using System.Collections.Generic;
-using Verse;
-using System.Reflection;
-using RimWorld;
-using RimWorld.Planet;
-using UnityEngine;
-using System.Reflection.Emit;
 using System.Linq;
-using System;
-using System.Threading;
-using Verse.AI;
+using System.Reflection;
+using System.Reflection.Emit;
+using HarmonyLib;
+using RimWorld;
+using Verse;
 
 namespace RimThreaded
 {
     public class HediffGiver_Hypothermia_Transpile
 	{
-        public static IEnumerable<CodeInstruction> OnIntervalPassed(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		internal static void RunNonDestructivePatches()
+		{
+			Type original = typeof(HediffGiver_Hypothermia);
+			Type patched = typeof(HediffGiver_Hypothermia_Transpile);
+			RimThreadedHarmony.Transpile(original, patched, "OnIntervalPassed");
+		}
+		public static IEnumerable<CodeInstruction> OnIntervalPassed(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
 			LocalBuilder comfortableTemperatureMin = iLGenerator.DeclareLocal(typeof(float));
 			LocalBuilder minTemp = iLGenerator.DeclareLocal(typeof(float));
@@ -60,5 +62,6 @@ namespace RimThreaded
 			}
 
 		}
-	}
+
+    }
 }
