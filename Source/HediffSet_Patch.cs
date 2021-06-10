@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
@@ -14,6 +15,7 @@ namespace RimThreaded
             Type original = typeof(HediffSet);
             Type patched = typeof(HediffSet_Patch);
             RimThreadedHarmony.Prefix(original, patched, "AddDirect");
+            RimThreadedHarmony.Prefix(original, patched, "Clear");
         }
         internal static void RunNonDestructivePatches()
         {
@@ -21,7 +23,12 @@ namespace RimThreaded
             Type patched = typeof(HediffSet_Patch);
             RimThreadedHarmony.Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
         }
-
+        public static bool Clear(HediffSet __instance)
+        {
+            __instance.hediffs = new List<Hediff>();
+            __instance.DirtyCache();
+            return false;
+        }
         public static bool AddDirect(HediffSet __instance, Hediff hediff, DamageInfo? dinfo = null, DamageWorker.DamageResult damageResult = null)
         {
             if (hediff.def == null)

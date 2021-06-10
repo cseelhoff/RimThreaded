@@ -193,6 +193,7 @@ namespace RimThreaded
             Reachability_Patch.InitializeThreadStatics();
             Region_Patch.InitializeThreadStatics();
             RegionTraverser_Patch.InitializeThreadStatics();
+            SituationalThoughtHandler_Patch.InitializeThreadStatics();
             Toils_Ingest_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)
