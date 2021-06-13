@@ -519,7 +519,10 @@ namespace RimThreaded
 			notifiedObjects.Clear();
 			foreach (CodeInstruction codeInstruction in instructions)
             {
-                object operand = codeInstruction.operand;
+#if DEBUG
+				Log.messageCount = 0; //prevents logging to stop from spam
+#endif
+				object operand = codeInstruction.operand;
                 if (operand != null && replaceFields.TryGetValue(operand, out object newObjectInfo))
                 {
                     switch (operand)
@@ -792,7 +795,7 @@ namespace RimThreaded
             DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
             //FilthMaker_Patch.RunDestructivePatches(); replaces a few LINQ queries. possible perf improvement
             //GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
-            GenCollection_Patch.RunDestructivePatches();
+            //GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
             GenSpawn_Patch.RunDestructivePatches();
             GenTemperature_Patch.RunDestructivePatches();
             GlobalControlsUtility_Patch.RunDestructivePatches();
@@ -816,6 +819,7 @@ namespace RimThreaded
             Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
+			PawnPathPool_Patch.RunDestructivePatches();
             PawnUtility_Patch.RunDestructivePatches();
             PawnDestinationReservationManager_Patch.RunDestructivePatches();
             PlayLog_Patch.RunDestructivePatches();
