@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using Verse;
 using System.Reflection;
 using RimWorld;
-using RimWorld.Planet;
 using UnityEngine;
 using System.Reflection.Emit;
 using System.Linq;
 using System;
-using System.Threading;
 using Verse.AI;
 
-namespace RimThreaded
+namespace RimThreaded.Mod_Patches
 {
     public class WorkGiver_ConstructDeliverResources_Transpile
 	{

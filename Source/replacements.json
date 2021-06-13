@@ -722,8 +722,7 @@
             "ClassName": "Verse.Sound.SustainerManager",
             "ThreadStatics": [
                 {
-                    "FieldName": "playingPerDef",
-                    "PatchedClassName": "RimThreaded.SustainerManager_Patch"
+                    "FieldName": "playingPerDef"
                 }
             ]
         },

@@ -58,24 +58,19 @@ namespace RimThreaded
                 Log.Warning("Using an index on ThreadSafeLinkedList will lead to errors!");
                 warningIssuedIndex = true;
             }
-            bool lockTaken = false;
             int i = 0;
-            try
+
+            //ThreadSafeNode<T> lastCheckedNode = null;
+            foreach (ThreadSafeNode<T> threadSafeNode in this)
             {
-                foreach (ThreadSafeNode<T> threadSafeNode in this)
+                if (i == index)
                 {
-                    if (i == index)
-                    {
-                        return threadSafeNode;
-                    }
-                    i++;
+                    return threadSafeNode;
                 }
+                i++;
             }
-            finally
-            {
-                if (lockTaken) spinLock.Exit();
-            }
-            Log.Error("a:" + i + " b:" + index + " c:" + itemCount);
+            //Log.ErrorOnce("index at: " + i + ", last index checked:" + index + ", node count:" + itemCount, 488564);
+            return lastNode;
             throw new ArgumentOutOfRangeException();
         }
 
@@ -99,7 +94,7 @@ namespace RimThreaded
             }
             finally
             {
-                if (lockTaken) spinLock.Exit();
+                if (lockTaken) spinLock.Exit(false);
             }
         }
         public new void Add(T obj)
@@ -123,7 +118,7 @@ namespace RimThreaded
             }
             finally
             {
-                if (lockTaken) spinLock.Exit();
+                if (lockTaken) spinLock.Exit(false);
             }
         }
         public void InsertBefore(ThreadSafeNode<T> nextNode, ThreadSafeNode<T> newNode)
@@ -143,7 +138,7 @@ namespace RimThreaded
             }
             finally
             {
-                if (lockTaken) spinLock.Exit();
+                if (lockTaken) spinLock.Exit(false);
             }
         }
         public new void Insert(int index, T obj)
@@ -153,23 +148,66 @@ namespace RimThreaded
 
         public void InsertNode(int index, ThreadSafeNode<T> newNode)
         {
+            if (!warningIssuedIndex)
+            {
+                Log.Warning("Using an index on ThreadSafeLinkedList will lead to errors!");
+                warningIssuedIndex = true;
+            }
+            int i = 1; //not using 0, since it is doing insertAfter instead of insertBefore
             bool lockTaken = false;
             try
             {
+                ThreadSafeNode<T> newNode_nextNode = null;
+                ThreadSafeNode<T> insertAfterNode_nextNode = null;
                 spinLock.Enter(ref lockTaken);
-                if (itemCount == 0)
+                ThreadSafeNode<T> insertAfterNode = firstNode;
+
+                int index_greater_than_zero = 0; //debugging only
+                if (index <= 0)
                 {
+                    newNode.nextNode = firstNode;
                     firstNode = newNode;
+                }
+                else
+                {
+
+                    index_greater_than_zero = 1; //debugging only
+                    foreach (ThreadSafeNode<T> threadSafeNode in this)
+                    {
+                        insertAfterNode = threadSafeNode;
+                        if (i == index)
+                            break;
+                        i++;
+                    }
+                    newNode.previousNode = insertAfterNode;
+                    index_greater_than_zero = 2; //debugging only
+                    insertAfterNode_nextNode = insertAfterNode.nextNode; //debugging only
+                    if (insertAfterNode_nextNode == null)
+                    {
+                        Log.Error("Never null");
+                    }
+                    newNode.nextNode = insertAfterNode.nextNode;
+                    newNode_nextNode = newNode.nextNode; //debugging only
+                    insertAfterNode.nextNode = newNode;
+
+                }
+                if (index >= itemCount)
+                {
                     lastNode = newNode;
                 }
                 else
                 {
-                    InsertBefore(getNodeAtIndex(index), newNode);
+                    newNode.nextNode.previousNode = newNode;
+                }
+                itemCount++;
+                if (index_greater_than_zero > 3)
+                {
+                    index_greater_than_zero = 3;
                 }
             }
             finally
             {
-                if (lockTaken) spinLock.Exit();
+                if (lockTaken) spinLock.Exit(false);
             }
         }
         public bool RemoveNode(ThreadSafeNode<T> threadSafeNode)
@@ -198,7 +236,7 @@ namespace RimThreaded
             }
             finally
             {
-                if (lockTaken) spinLock.Exit();
+                if (lockTaken) spinLock.Exit(false);
             }
             return true;
         }
@@ -224,15 +262,7 @@ namespace RimThreaded
 
         public new void RemoveAt(int index)
         {
-            bool lockTaken = false;
-            try
-            {
-                RemoveNode(getNodeAtIndex(index));
-            }
-            finally
-            {
-                if (lockTaken) spinLock.Exit();
-            }
+            RemoveNode(getNodeAtIndex(index));
             return;
         }
 
@@ -258,7 +288,7 @@ namespace RimThreaded
             }
             finally
             {
-                if (lockTaken) spinLock.Exit();
+                if (lockTaken) spinLock.Exit(false);
             }
             return true;
         }
@@ -289,7 +319,7 @@ namespace RimThreaded
             }
             finally
             {
-                if (lockTaken) spinLock.Exit();
+                if (lockTaken) spinLock.Exit(false);
             }
         }
 
@@ -373,6 +403,7 @@ namespace RimThreaded
         {
             private readonly ThreadSafeLinkedList<T> list;
             private ThreadSafeNode<T> currentNode;
+            bool firstMove = false;
 
             public ThreadSafeNode<T> Current
             {
@@ -402,18 +433,22 @@ namespace RimThreaded
 
             public bool MoveNext()
             {
-                currentNode = currentNode?.nextNode;
+                if (firstMove)
+                    currentNode = currentNode?.nextNode;
+                firstMove = true;
                 return currentNode != null;
             }
 
             public void Reset()
             {
                 currentNode = list.firstNode;
+                firstMove = false;
             }
             internal Enumerator(ThreadSafeLinkedList<T> threadSafeLinkedList)
             {
                 list = threadSafeLinkedList;
                 currentNode = threadSafeLinkedList.firstNode;
+                firstMove = false;
             }
 
         }
@@ -450,10 +485,20 @@ namespace RimThreaded
     {
         public static void Look1<T>(ref ThreadSafeLinkedList<T> list, string label, LookMode lookMode = LookMode.Undefined, params object[] ctorArgs)
         {
-            Look2(ref list, saveDestroyedThings: false, label, lookMode, ctorArgs);
+            Look(ref list, saveDestroyedThings: false, label, lookMode, ctorArgs);
         }
 
         public static void Look2<T>(ref ThreadSafeLinkedList<T> list, bool saveDestroyedThings, string label, LookMode lookMode = LookMode.Undefined, params object[] ctorArgs)
+        {
+            Look(ref list, saveDestroyedThings: false, label, lookMode, ctorArgs);
+        }
+
+        public static void Look<T>(ref ThreadSafeLinkedList<T> list, string label, LookMode lookMode = LookMode.Undefined, params object[] ctorArgs)
+        {
+            Look2(ref list, saveDestroyedThings: false, label, lookMode, ctorArgs);
+        }
+
+        public static void Look<T>(ref ThreadSafeLinkedList<T> list, bool saveDestroyedThings, string label, LookMode lookMode = LookMode.Undefined, params object[] ctorArgs)
         {
             if (lookMode == LookMode.Undefined && !Scribe_Universal.TryResolveLookMode(typeof(T), out lookMode))
             {

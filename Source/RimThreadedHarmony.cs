@@ -14,6 +14,7 @@ using static HarmonyLib.AccessTools;
 using Verse.AI;
 using System.IO;
 using Newtonsoft.Json;
+using static RimWorld.SituationalThoughtHandler;
 
 namespace RimThreaded
 {
@@ -268,15 +269,20 @@ namespace RimThreaded
                 }
             }
 
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
-
+            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
+            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
+            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
+            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
+			Type pawnType = typeof(Pawn);
+			Type thoughtsType = typeof(CachedSocialThoughts);
+			string removeAllString = nameof(GenCollection.RemoveAll);
+            MethodInfo removeAllGeneric = GetDeclaredMethods(typeof(GenCollection)).First(method => method.Name == removeAllString && method.GetGenericArguments().Count() == 2);
+            MethodInfo removeAllPawnThoughts = removeAllGeneric.MakeGenericMethod(new[] { pawnType, thoughtsType });
+			TranspileFieldReplacements(removeAllPawnThoughts);
 			Log.Message("RimThreaded Field Replacements Complete.");
 		}
 
@@ -519,7 +525,10 @@ namespace RimThreaded
 			notifiedObjects.Clear();
 			foreach (CodeInstruction codeInstruction in instructions)
             {
-                object operand = codeInstruction.operand;
+#if DEBUG
+				Log.messageCount = 0; //prevents logging to stop from spam
+#endif
+				object operand = codeInstruction.operand;
                 if (operand != null && replaceFields.TryGetValue(operand, out object newObjectInfo))
                 {
                     switch (operand)
@@ -734,28 +743,27 @@ namespace RimThreaded
             ZoneManager_Patch.RunNonDestructivePatches(); //recheck growing zone when upon zone grid add
             Zone_Patch.RunNonDestructivePatches(); //recheck growing zone when upon check haul destination call
             HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches(); //speed up for comfy temperature
-            Map_Transpile.RunNonDestructivePatches(); //creates separate thread for skyManager.SkyManagerUpdate();
-            Postfix(typeof(SlotGroup), typeof(HaulingCache), "Notify_AddedCell", "NewStockpileCreatedOrMadeUnfull"); //recheck growing zone when upon stockpile zone grid add
-
+            Map_Transpile.RunNonDestructivePatches(); //creates separate thread for skyManager.SkyManagerUpdate();            
             //BattleLog_Transpile.RunNonDestructivePatches(); //if still causing issues, rewrite using ThreadSafeLinkedLists
             //GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
             //GrammarResolverSimple_Transpile.RunNonDestructivePatches();//reexamine complexity
-            HediffSet_Patch.RunNonDestructivePatches();
-            PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //reexamine complexity?
-            SituationalThoughtHandler_Patch.RunNonDestructivePatches();
+            HediffSet_Patch.RunNonDestructivePatches(); //TODO - replace 270 instances with ThreadSafeLinkedList
             ThingOwnerThing_Transpile.RunNonDestructivePatches(); //reexamine complexity?
 			TickList_Patch.RunNonDestructivePatches(); //allows multithreaded calls of thing.tick longtick raretick
-            WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity
-            WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
-            Pawn_RelationsTracker_Patch.RunNonDestructivePatches();
-        }
+            //WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity Jobs Of Oppurtunity?
+            //WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
+            //Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //transpile not needed with new threadsafe simplepools
+			PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //TODO fix transpile for 1 of 2 methods try inside of try perhaps?
+			Postfix(typeof(SlotGroup), typeof(HaulingCache), "Notify_AddedCell", "NewStockpileCreatedOrMadeUnfull"); //recheck growing zone when upon stockpile zone grid add
 
-        private static void PatchDestructiveFixes()
+		}
+
+		private static void PatchDestructiveFixes()
         {
 			//---REQUIRED---
 			TickManager_Patch.RunDestructivePatches(); //Redirects DoSingleTick to RimThreaded
 
-			//---Main-thread-only calls--- thanks Unity...
+			//---Main-thread-only calls--- TODO - low priority. These can likely be made more uniform
 			AudioSource_Patch.RunDestructivePatches();
 			AudioSourceMaker_Patch.RunDestructivePatches();
 			ContentFinder_Texture2D_Patch.RunDestructivePatches();
@@ -771,8 +779,9 @@ namespace RimThreaded
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 			Text_Patch.RunDestructivePatches(); //unity get_CurFontStyle on main thread
 
-			
+
 			//---Multithreaded Ticking---
+			FactionManager_Patch.RunDestructivePatches(); //allows multithreaded ticking of factions
 			TradeShip_Patch.RunDestructivePatches(); //allows multithreaded ticking of tradeships
 			WildPlantSpawner_Patch.RunDestructivePatches(); //allows multithreaded icking of WildPlantSpawner
 			WindManager_Patch.RunDestructivePatches();//allows multithreaded icking of WindManager													  
@@ -784,16 +793,15 @@ namespace RimThreaded
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
             AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
             Building_Door_Patch.RunDestructivePatches(); //strange bug
-            CompCauseGameCondition_Patch.RunDestructivePatches();
+            CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
             DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
             DesignationManager_Patch.RunDestructivePatches(); //added for development build
-            DrugAIUtility_Patch.RunDestructivePatches();
-            DynamicDrawManager_Patch.RunDestructivePatches(); //candidate for ThreadedLinkedList?
-            FactionManager_Patch.RunDestructivePatches();
-            FilthMaker_Patch.RunDestructivePatches();
-            GenClosest_Patch.RunDestructivePatches();
-            GenCollection_Patch.RunDestructivePatches();
+            DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
+            DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
+            //FilthMaker_Patch.RunDestructivePatches(); replaces a few LINQ queries. possible perf improvement
+            //GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
+            //GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
             GenSpawn_Patch.RunDestructivePatches();
             GenTemperature_Patch.RunDestructivePatches();
             GlobalControlsUtility_Patch.RunDestructivePatches();
@@ -807,16 +815,17 @@ namespace RimThreaded
             LongEventHandler_Patch.RunDestructivePatches();
             Lord_Patch.RunDestructivePatches();
             LordManager_Patch.RunDestructivePatches();
-            LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. TRANSPILE
-            Map_Patch.RunDestructivePatches(); //TODO - discover root cause
+            LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. ThreadSafeLinkedList
+			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
             MaterialPool_Patch.RunDestructivePatches();
             MemoryThoughtHandler_Patch.RunDestructivePatches();
-            Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO re-add transpile
+            Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
             Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
             Pawn_PlayerSettings_Patch.RunDestructivePatches();
             Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
+			PawnPathPool_Patch.RunDestructivePatches();
             PawnUtility_Patch.RunDestructivePatches();
             PawnDestinationReservationManager_Patch.RunDestructivePatches();
             PlayLog_Patch.RunDestructivePatches();
@@ -858,12 +867,13 @@ namespace RimThreaded
 			Region_Patch.RunDestructivePatches();
 			ReservationManager_Patch.RunDestructivePatches();
 			Room_Patch.RunDestructivePatches();
-			SituationalThoughtHandler_Patch.RunDestructivePatches();
+			SituationalThoughtHandler_Patch.RunDestructivePatches(); //TODO replace cachedThoughts with ThreadSafeLinkedList
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
 
 			//-----SOUND-----
 			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
 			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
+			SustainerManager_Patch.RunDestructivePatches();
 		}
 
 		private static void PatchModCompatibility()

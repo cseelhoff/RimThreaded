@@ -139,6 +139,9 @@ namespace RimThreaded
                         //}
                         foreach (Patch patch in patches.Transpilers)
                         {
+                            if (!headerPrinted)
+                                modsText += modsText1;
+                            headerPrinted = true;
                             //Settings.modsText += "method: " + patch.PatchMethod + " - ";
                             modsText += "  owner: " + patch.owner + " - ";
                             modsText += "  priority: " + patch.priority + "\n";
