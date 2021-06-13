@@ -9,13 +9,20 @@ namespace RimThreaded
 
     public class HediffSet_Patch
     {
-
+        [ThreadStatic] public static Queue<BodyPartRecord> missingPartsCommonAncestorsQueue;
+        
+        internal static void InitializeThreadStatics()
+        {
+            missingPartsCommonAncestorsQueue = new Queue<BodyPartRecord>();
+        }
+        
         internal static void RunDestructivePatches()
         {
             Type original = typeof(HediffSet);
             Type patched = typeof(HediffSet_Patch);
             RimThreadedHarmony.Prefix(original, patched, "AddDirect");
             RimThreadedHarmony.Prefix(original, patched, "Clear");
+            RimThreadedHarmony.Prefix(original, patched, "CacheMissingPartsCommonAncestors");
         }
         internal static void RunNonDestructivePatches()
         {
@@ -23,6 +30,34 @@ namespace RimThreaded
             Type patched = typeof(HediffSet_Patch);
             RimThreadedHarmony.Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
         }
+        public static bool CacheMissingPartsCommonAncestors(HediffSet __instance)
+        {
+            if (__instance.cachedMissingPartsCommonAncestors == null)
+                __instance.cachedMissingPartsCommonAncestors = new List<Hediff_MissingPart>();
+            else
+                __instance.cachedMissingPartsCommonAncestors.Clear();
+            missingPartsCommonAncestorsQueue.Clear();
+            missingPartsCommonAncestorsQueue.Enqueue(__instance.pawn.def.race.body.corePart);
+            while (missingPartsCommonAncestorsQueue.Count != 0)
+            {
+                BodyPartRecord node = missingPartsCommonAncestorsQueue.Dequeue();
+                if (!__instance.PartOrAnyAncestorHasDirectlyAddedParts(node))
+                {
+                    Hediff_MissingPart hediffMissingPart = __instance.GetHediffs<Hediff_MissingPart>().Where<Hediff_MissingPart>((Func<Hediff_MissingPart, bool>)(x => x.Part == node)).FirstOrDefault<Hediff_MissingPart>();
+                    if (hediffMissingPart != null)
+                    {
+                        __instance.cachedMissingPartsCommonAncestors.Add(hediffMissingPart);
+                    }
+                    else
+                    {
+                        for (int index = 0; index < node.parts.Count; ++index)
+                            missingPartsCommonAncestorsQueue.Enqueue(node.parts[index]);
+                    }
+                }
+            }
+            return false;
+        }
+
         public static bool Clear(HediffSet __instance)
         {
             __instance.hediffs = new List<Hediff>();

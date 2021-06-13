@@ -16,7 +16,7 @@ namespace RimThreaded
         {
             Type original = typeof(Region);
             Type patched = typeof(Region_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "DangerFor");
+            RimThreadedHarmony.Prefix(original, patched, nameof(DangerFor));
             RimThreadedHarmony.Prefix(original, patched, "get_Room");
         }
 
@@ -102,10 +102,14 @@ namespace RimThreaded
                     }
                     if (!Region.cachedSafeTemperatureRanges.TryGetValue(p, out floatRange))
                     {
-                        floatRange = p.SafeTemperatureRange();
                         lock (Region.cachedSafeTemperatureRanges)
                         {
-                            Region.cachedSafeTemperatureRanges.Add(p, floatRange);
+                            if (!Region.cachedSafeTemperatureRanges.TryGetValue(p, out FloatRange floatRange2))
+                            {
+                                floatRange2 = p.SafeTemperatureRange();
+                                Region.cachedSafeTemperatureRanges.Add(p, floatRange2);
+                            }
+                            floatRange = floatRange2;
                         }
                     }
                 }

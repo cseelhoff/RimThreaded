@@ -14,6 +14,7 @@ using static HarmonyLib.AccessTools;
 using Verse.AI;
 using System.IO;
 using Newtonsoft.Json;
+using static RimWorld.SituationalThoughtHandler;
 
 namespace RimThreaded
 {
@@ -268,15 +269,20 @@ namespace RimThreaded
                 }
             }
 
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
-
+            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
+            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
+            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
+            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
+			Type pawnType = typeof(Pawn);
+			Type thoughtsType = typeof(CachedSocialThoughts);
+			string removeAllString = nameof(GenCollection.RemoveAll);
+            MethodInfo removeAllGeneric = GetDeclaredMethods(typeof(GenCollection)).First(method => method.Name == removeAllString && method.GetGenericArguments().Count() == 2);
+            MethodInfo removeAllPawnThoughts = removeAllGeneric.MakeGenericMethod(new[] { pawnType, thoughtsType });
+			TranspileFieldReplacements(removeAllPawnThoughts);
 			Log.Message("RimThreaded Field Replacements Complete.");
 		}
 
@@ -867,6 +873,7 @@ namespace RimThreaded
 			//-----SOUND-----
 			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
 			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
+			SustainerManager_Patch.RunDestructivePatches();
 		}
 
 		private static void PatchModCompatibility()
