@@ -767,6 +767,7 @@ namespace RimThreaded
 			AudioSource_Patch.RunDestructivePatches();
 			AudioSourceMaker_Patch.RunDestructivePatches();
 			ContentFinder_Texture2D_Patch.RunDestructivePatches();
+			GenDraw_Patch.RunDestructivePatches(); // DrawMeshNowOrLater (HotSprings and Kijin Race)
 			GraphicDatabaseHeadRecords_Patch.RunDestructivePatches();
 			Graphics_Patch.RunDestructivePatches();//Graphics (Giddy-Up and others)
 			GUIStyle_Patch.RunDestructivePatches();
