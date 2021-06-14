@@ -196,6 +196,7 @@ namespace RimThreaded
             Region_Patch.InitializeThreadStatics();
             RegionTraverser_Patch.InitializeThreadStatics();
             SituationalThoughtHandler_Patch.InitializeThreadStatics();
+            SustainerManager_Patch.InitializeThreadStatics();
             Toils_Ingest_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)

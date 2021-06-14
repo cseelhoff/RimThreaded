@@ -53,6 +53,7 @@ namespace RimThreaded
         private static void AddAdditionalReplacements()
         {
 			SimplePool_Patch_RunNonDestructivePatches();
+			FullPool_Patch_RunNonDestructivePatches();
 			Dijkstra_Patch_RunNonDestructivePatches();
 			PathFinder_Patch.AddFieldReplacements();
 			Region_Patch.AddFieldReplacements();
@@ -773,6 +774,7 @@ namespace RimThreaded
 			GUIStyle_Patch.RunDestructivePatches();
 			LightningBoltMeshMaker_Patch.RunDestructivePatches();
 			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
+			MaterialPool_Patch.RunDestructivePatches();
 			MeshMakerPlanes_Patch.RunDestructivePatches();
 			MeshMakerShadows_Patch.RunDestructivePatches();
 			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
@@ -793,6 +795,7 @@ namespace RimThreaded
 
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
             AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
+			Battle_Patch.RunDestructivePatches(); //added lock for battle - could use linkedlist
             Building_Door_Patch.RunDestructivePatches(); //strange bug
             CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
@@ -803,22 +806,21 @@ namespace RimThreaded
             //FilthMaker_Patch.RunDestructivePatches(); replaces a few LINQ queries. possible perf improvement
             //GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
             //GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
-            GenSpawn_Patch.RunDestructivePatches();
+            GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
             GenTemperature_Patch.RunDestructivePatches();
-            GlobalControlsUtility_Patch.RunDestructivePatches();
+            GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
             //GrammarResolver_Patch.RunDestructivePatches();
-            HediffGiver_Heat_Patch.RunDestructivePatches();
+            HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
             HediffSet_Patch.RunDestructivePatches();
             ImmunityHandler_Patch.RunDestructivePatches();
             ListerThings_Patch.RunDestructivePatches();
             JobGiver_Work_Patch.RunDestructivePatches();
             JobMaker_Patch.RunDestructivePatches();
-            LongEventHandler_Patch.RunDestructivePatches();
+            LongEventHandler_Patch.RunDestructivePatches(); //TODO - could use field replacement for conncurrentqueue
             Lord_Patch.RunDestructivePatches();
             LordManager_Patch.RunDestructivePatches();
             LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. ThreadSafeLinkedList
 			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
-            MaterialPool_Patch.RunDestructivePatches();
             MemoryThoughtHandler_Patch.RunDestructivePatches();
             Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
             Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
@@ -826,7 +828,7 @@ namespace RimThreaded
             Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
-			PawnPathPool_Patch.RunDestructivePatches();
+			PawnPathPool_Patch.RunDestructivePatches(); //removed leak check based on map size, since pool is now a threadstatic
             PawnUtility_Patch.RunDestructivePatches();
             PawnDestinationReservationManager_Patch.RunDestructivePatches();
             PlayLog_Patch.RunDestructivePatches();
@@ -873,6 +875,7 @@ namespace RimThreaded
 
 			//-----SOUND-----
 			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
+			SoundSizeAggregator_Patch.RunDestructivePatches();
 			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
 			SustainerManager_Patch.RunDestructivePatches();
 		}
@@ -890,7 +893,16 @@ namespace RimThreaded
             PawnRules_Patch.Patch();
             ZombieLand_Patch.Patch();
         }
+		private static void FullPool_Patch_RunNonDestructivePatches()
+		{
+			Type original = typeof(FullPool<PawnStatusEffecters.LiveEffecter>);
+			Type patched = typeof(FullPool_Patch<PawnStatusEffecters.LiveEffecter>);
+			replaceFields.Add(Method(original, "Get"),
+				Method(patched, "Get"));
+			replaceFields.Add(Method(original, "Return"),
+				Method(patched, "Return"));
 
+		}
 		private static void SimplePool_Patch_RunNonDestructivePatches()
 		{
 			replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Get"),
@@ -955,7 +967,7 @@ namespace RimThreaded
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "Return"));
 			replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "get_FreeItemsCount"),
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "get_FreeItemsCount"));
-
+			
 			replaceFields.Add(Method(typeof(SimplePool<Job>), "Get"),
 				Method(typeof(SimplePool_Patch<Job>), "Get"));
 			replaceFields.Add(Method(typeof(SimplePool<Job>), "Return"),

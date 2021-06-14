@@ -48,6 +48,10 @@ namespace RimThreaded
 			int zoomLevel;
 			//---START--- For plant sowing
 			ThingDef localWantedPlantDef = WorkGiver_Grower.CalculateWantedPlantDef(location, map);
+			if (localWantedPlantDef == null)
+			{
+				return;
+			}
 			List<Thing> thingList = location.GetThingList(map);
 			for (int i = 0; i < thingList.Count; i++)
 			{
