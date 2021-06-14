@@ -53,6 +53,7 @@ namespace RimThreaded
         private static void AddAdditionalReplacements()
         {
 			SimplePool_Patch_RunNonDestructivePatches();
+			FullPool_Patch_RunNonDestructivePatches();
 			Dijkstra_Patch_RunNonDestructivePatches();
 			PathFinder_Patch.AddFieldReplacements();
 			Region_Patch.AddFieldReplacements();
@@ -873,6 +874,7 @@ namespace RimThreaded
 
 			//-----SOUND-----
 			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
+			SoundSizeAggregator_Patch.RunDestructivePatches();
 			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
 			SustainerManager_Patch.RunDestructivePatches();
 		}
@@ -890,7 +892,18 @@ namespace RimThreaded
             PawnRules_Patch.Patch();
             ZombieLand_Patch.Patch();
         }
+		private static void FullPool_Patch_RunNonDestructivePatches()
+		{
+			Type original = typeof(FullPool<PawnStatusEffecters.LiveEffecter>);
+			Type patched = typeof(FullPool_Patch<PawnStatusEffecters.LiveEffecter>);
+			replaceFields.Add(Method(original, nameof(FullPool<PawnStatusEffecters.LiveEffecter>.Get)),
+				Method(patched, nameof(FullPool_Patch<PawnStatusEffecters.LiveEffecter>.Get)));
+			replaceFields.Add(Method(original, nameof(FullPool<PawnStatusEffecters.LiveEffecter>.Return)),
+				Method(patched, nameof(FullPool_Patch<PawnStatusEffecters.LiveEffecter>.Return)));
+			replaceFields.Add(Method(original, "get_FreeItemsCount"),
+				Method(patched, "get_FreeItemsCount"));
 
+		}
 		private static void SimplePool_Patch_RunNonDestructivePatches()
 		{
 			replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Get"),
@@ -955,7 +968,7 @@ namespace RimThreaded
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "Return"));
 			replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "get_FreeItemsCount"),
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "get_FreeItemsCount"));
-
+			
 			replaceFields.Add(Method(typeof(SimplePool<Job>), "Get"),
 				Method(typeof(SimplePool_Patch<Job>), "Get"));
 			replaceFields.Add(Method(typeof(SimplePool<Job>), "Return"),

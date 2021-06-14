@@ -722,7 +722,9 @@
             "ClassName": "Verse.Sound.SustainerManager",
             "ThreadStatics": [
                 {
-                    "FieldName": "playingPerDef"
+                    "FieldName": "playingPerDef",
+                    "PatchedClassName": "RimThreaded.SustainerManager_Patch",
+                    "SelfInitialized": true
                 }
             ]
         },
@@ -931,6 +933,29 @@
             "ThreadStatics": [
                 {
                     "FieldName": "paths"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.Grammar.GrammarResolver",
+            "ThreadStatics": [
+                {
+                    "FieldName": "rules"
+                },
+                {
+                    "FieldName": "rulePool"
+                },
+                {
+                    "FieldName": "loopCount"
+                },
+                {
+                    "FieldName": "logSbTrace"
+                },
+                {
+                    "FieldName": "logSbMid"
+                },
+                {
+                    "FieldName": "logSbRules"
                 }
             ]
         }
