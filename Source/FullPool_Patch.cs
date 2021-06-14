@@ -7,8 +7,6 @@ namespace RimThreaded
     {
         private static readonly ConcurrentStack<T> FreeItems = new ConcurrentStack<T>();
 
-        public static int FreeItemsCount => FreeItems.Count;
-
         public static T Get()
         {
             return !FreeItems.TryPop(out T freeItem) ? new T() : freeItem;

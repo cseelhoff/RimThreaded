@@ -896,12 +896,10 @@ namespace RimThreaded
 		{
 			Type original = typeof(FullPool<PawnStatusEffecters.LiveEffecter>);
 			Type patched = typeof(FullPool_Patch<PawnStatusEffecters.LiveEffecter>);
-			replaceFields.Add(Method(original, nameof(FullPool<PawnStatusEffecters.LiveEffecter>.Get)),
-				Method(patched, nameof(FullPool_Patch<PawnStatusEffecters.LiveEffecter>.Get)));
-			replaceFields.Add(Method(original, nameof(FullPool<PawnStatusEffecters.LiveEffecter>.Return)),
-				Method(patched, nameof(FullPool_Patch<PawnStatusEffecters.LiveEffecter>.Return)));
-			replaceFields.Add(Method(original, "get_FreeItemsCount"),
-				Method(patched, "get_FreeItemsCount"));
+			replaceFields.Add(Method(original, "Get"),
+				Method(patched, "Get"));
+			replaceFields.Add(Method(original, "Return"),
+				Method(patched, "Return"));
 
 		}
 		private static void SimplePool_Patch_RunNonDestructivePatches()

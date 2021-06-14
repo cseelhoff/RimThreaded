@@ -30,6 +30,22 @@ namespace RimThreaded
             Type patched = typeof(HediffSet_Patch);
             RimThreadedHarmony.Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
         }
+
+        public static bool PartIsMissing(HediffSet __instance, ref bool __result, BodyPartRecord part)
+        {
+            List<Hediff> hediffsSnapshot = __instance.hediffs;
+            for (int index = 0; index < hediffsSnapshot.Count; ++index)
+            {
+                if (hediffsSnapshot[index].Part == part && hediffsSnapshot[index] is Hediff_MissingPart)
+                {
+                    __result = true;
+                    return false;
+                }
+            }
+            __result = false;
+            return false;
+        }
+
         public static bool CacheMissingPartsCommonAncestors(HediffSet __instance)
         {
             if (__instance.cachedMissingPartsCommonAncestors == null)
@@ -81,29 +97,29 @@ namespace RimThreaded
             hediff.ageTicks = 0;
             hediff.pawn = __instance.pawn;
             bool flag = false;
-            for (int i = 0; i < __instance.hediffs.Count; i++)
+            lock (__instance)
             {
-                if (__instance.hediffs[i].TryMergeWith(hediff))
+                for (int i = 0; i < __instance.hediffs.Count; i++)
                 {
-                    flag = true;
+                    if (__instance.hediffs[i].TryMergeWith(hediff))
+                    {
+                        flag = true;
+                    }
                 }
-            }
 
-            if (!flag)
-            {
-                lock (__instance)
+                if (!flag)
                 {
                     //List<Hediff> newHediffs = new List<Hediff>(__instance.hediffs) { hediff };
                     //__instance.hediffs = newHediffs;
                     __instance.hediffs.Add(hediff);
-                }
-                hediff.PostAdd(dinfo);
-                if (__instance.pawn.needs != null && __instance.pawn.needs.mood != null)
-                {
-                    __instance.pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
+
+                    hediff.PostAdd(dinfo);
+                    if (__instance.pawn.needs != null && __instance.pawn.needs.mood != null)
+                    {
+                        __instance.pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
+                    }
                 }
             }
-
             bool flag2 = hediff is Hediff_MissingPart;
             if (!(hediff is Hediff_MissingPart) && hediff.Part != null && hediff.Part != __instance.pawn.RaceProps.body.corePart && __instance.GetPartHealth(hediff.Part) == 0f && hediff.Part != __instance.pawn.RaceProps.body.corePart)
             {
