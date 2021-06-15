@@ -745,7 +745,7 @@ namespace RimThreaded
             Zone_Patch.RunNonDestructivePatches(); //recheck growing zone when upon check haul destination call
             HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches(); //speed up for comfy temperature
             Map_Transpile.RunNonDestructivePatches(); //creates separate thread for skyManager.SkyManagerUpdate();            
-            //BattleLog_Transpile.RunNonDestructivePatches(); //if still causing issues, rewrite using ThreadSafeLinkedLists
+            BattleLog_Transpile.RunNonDestructivePatches(); //if still causing issues, rewrite using ThreadSafeLinkedLists
             //GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
             //GrammarResolverSimple_Transpile.RunNonDestructivePatches();//reexamine complexity
             HediffSet_Patch.RunNonDestructivePatches(); //TODO - replace 270 instances with ThreadSafeLinkedList

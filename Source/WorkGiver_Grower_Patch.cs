@@ -11,7 +11,7 @@ namespace RimThreaded
 	{
 		[ThreadStatic] public static ThingDef wantedPlantDef;
 
-		public static Dictionary<Map, List<HashSet<object>[]>> awaitingPlantCellsMapDict = new Dictionary<Map, List<HashSet<object>[]>>();
+		public static Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingPlantCellsMapDict = new Dictionary<Map, List<HashSet<IntVec3>[]>>();
 
 		public static bool PotentialWorkCellsGlobal(WorkGiver_Grower __instance, ref IEnumerable<IntVec3> __result, Pawn pawn)
 		{
@@ -117,51 +117,51 @@ namespace RimThreaded
 			bool forced = false;
 			Map map = pawn.Map;
 			ZoneManager zoneManager = pawn.Map.zoneManager;
-			foreach (object obj in PlantSowing_Cache.GetClosestActionableObjects(pawn, map, awaitingPlantCellsMapDict))
+			foreach (IntVec3 actionableLocation in PlantSowing_Cache.GetClosestActionableLocations(pawn, map, awaitingPlantCellsMapDict))
 			{
-				
-				if(obj is Building_PlantGrower building_PlantGrower)
-                {
-					if (building_PlantGrower == null || !workGiver_Grower.ExtraRequirements(building_PlantGrower, pawn) 
-						|| building_PlantGrower.IsForbidden(pawn) 
-						|| !pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, maxDanger)
-						//|| building_PlantGrower.IsBurning()
-						)
+                List<Thing> thingsAtLocation = GridsUtility.GetThingList(actionableLocation, map);
+				foreach (Thing thingAtLocation in thingsAtLocation) {
+					if (thingAtLocation is Building_PlantGrower building_PlantGrower)
 					{
-						continue;
-					}
+						if (building_PlantGrower == null || !workGiver_Grower.ExtraRequirements(building_PlantGrower, pawn)
+							|| building_PlantGrower.IsForbidden(pawn)
+							|| !pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, maxDanger)
+							//|| building_PlantGrower.IsBurning()
+							)
+						{
+							continue;
+						}
 
-					foreach (IntVec3 item in building_PlantGrower.OccupiedRect())
-					{
-						return item; //TODO ADD check
+						//foreach (IntVec3 item in building_PlantGrower.OccupiedRect())
+						//{
+						//return item; //TODO ADD check
+						//}
+						return actionableLocation;
 					}
 				}
-				else  if (obj is IntVec3 c)
-				
+				if (!(zoneManager.ZoneAt(actionableLocation) is Zone_Growing growZone))
 				{
-					if (!(zoneManager.ZoneAt(c) is Zone_Growing growZone))
-					{
-						continue;
-					}
-					if (!workGiver_Grower.ExtraRequirements(growZone, pawn))
-					{
-						continue;
-					}
-					if (!JobOnCellTest(workGiver_Grower.def, pawn, c, forced))
-					{
-						continue;
-					}
-					//!growZone.ContainsStaticFire && 
-					if (!workGiver_Grower.HasJobOnCell(pawn, c))
-					{
-						continue;
-					}
-					if (!pawn.CanReach(c, PathEndMode.OnCell, maxDanger))
-					{
-						continue;
-					}
-					return c;
+					continue;
 				}
+				if (!workGiver_Grower.ExtraRequirements(growZone, pawn))
+				{
+					continue;
+				}
+				if (!JobOnCellTest(workGiver_Grower.def, pawn, actionableLocation, forced))
+				{
+					continue;
+				}
+				//!growZone.ContainsStaticFire && 
+				if (!workGiver_Grower.HasJobOnCell(pawn, actionableLocation))
+				{
+					continue;
+				}
+				if (!pawn.CanReach(actionableLocation, PathEndMode.OnCell, maxDanger))
+				{
+					continue;
+				}
+				return actionableLocation;
+				
 			}
 			//wantedPlantDef = null;
 			return IntVec3.Invalid;
@@ -174,7 +174,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("IsForbidden");
 #endif
-				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
@@ -206,7 +206,7 @@ namespace RimThreaded
 #if DEBUG
 					Log.Warning("thing.def == localWantedPlantDef... RemoveObjectFromAwaitingHaulingHashSets");
 #endif
-					PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+					PlantSowing_Cache.ReregisterObject(map, c, awaitingPlantCellsMapDict);
 					//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 					return false;
 				}
@@ -282,7 +282,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("AdjacentSowBlocker");
 #endif
-				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
@@ -307,7 +307,7 @@ namespace RimThreaded
 #if DEBUG
 					Log.Warning("!CanReserve");
 #endif
-					PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+					PlantSowing_Cache.ReregisterObject(map, c, awaitingPlantCellsMapDict);
 
 					return false;
 				}
@@ -321,7 +321,7 @@ namespace RimThreaded
 #if DEBUG
 					Log.Warning("Plant IsForbidden");
 #endif
-					PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+					PlantSowing_Cache.ReregisterObject(map, c, awaitingPlantCellsMapDict);
 
 					return false;
 				}
@@ -333,7 +333,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("EverHaulable");
 #endif
-				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
@@ -342,7 +342,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("CanEverPlantAt_NewTemp");
 #endif
-				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, awaitingPlantCellsMapDict);
 				return false;
 			}
 
@@ -359,7 +359,7 @@ namespace RimThreaded
 #if DEBUG
 				Log.Warning("!pawn.CanReserve(c");
 #endif
-				PlantSowing_Cache.ReregisterObject(map, c, c, awaitingPlantCellsMapDict);
+				PlantSowing_Cache.ReregisterObject(map, c, awaitingPlantCellsMapDict);
 				//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
 				return false;
 			}
