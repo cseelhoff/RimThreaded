@@ -12,7 +12,7 @@ namespace RimThreaded
             Type original = typeof(UnityEngine.Object);
             Type patched = typeof(UnityEngine_Object_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(ToString), new Type[] { });
-            RimThreadedHarmony.Prefix(original, patched, nameof(Destroy), new Type[] { });
+            RimThreadedHarmony.Prefix(original, patched, nameof(Destroy), new Type[] { typeof(UnityEngine.Object) });
         }
 
         public static bool ToString(UnityEngine.Object __instance, ref string __result)
