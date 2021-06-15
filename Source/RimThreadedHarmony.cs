@@ -797,7 +797,8 @@ namespace RimThreaded
             AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			Battle_Patch.RunDestructivePatches(); //added lock for battle - could use linkedlist
             Building_Door_Patch.RunDestructivePatches(); //strange bug
-            CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
+			Building_PlantGrower_Patch.RunNonDestructivePatches();
+			CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
             DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
             DesignationManager_Patch.RunDestructivePatches(); //added for development build
@@ -856,6 +857,7 @@ namespace RimThreaded
             UniqueIDsManager_Patch.RunDestructivePatches(); // Simple use of Interlocked.Increment
             Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
             WealthWatcher_Patch.RunDestructivePatches();
+			Zone_Growing_Patch.RunNonDestructivePatches();
 			//WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 
 			//complex methods that need further review for simplification
