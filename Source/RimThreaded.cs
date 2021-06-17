@@ -189,6 +189,7 @@ namespace RimThreaded
             Dijkstra_Patch<Region>.InitializeThreadStatics();
             Dijkstra_Patch<int>.InitializeThreadStatics();
             GenTemperature_Patch.InitializeThreadStatics();
+            HaulingCache.InitializeThreadStatics();
             HediffSet_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             PawnPathPool_Patch.InitializeThreadStatics();

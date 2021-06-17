@@ -738,7 +738,7 @@ namespace RimThreaded
             Area_Patch.RunNonDestructivePatches(); //added for sowing area speedup
 			CompSpawnSubplant_Transpile.RunNonDestructivePatches(); //fixes bug with royalty spawning subplants
 			Designator_Haul_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically designates it via UI
-            Designator_Unforbid_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically unforbids it via UI
+			CompForbiddable_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically unforbids it via UI
 			PathFinder_Patch.RunNonDestructivePatches(); //simple initialize calcGrid on InitStatusesAndPushStartNode
 			TimeControls_Patch.RunNonDestructivePatches(); //allow speed 4
             ZoneManager_Patch.RunNonDestructivePatches(); //recheck growing zone when upon zone grid add

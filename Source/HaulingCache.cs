@@ -20,6 +20,11 @@ namespace RimThreaded
 												   // Map, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
 		[ThreadStatic] private static HashSet<Thing> retrunedThings;
 
+		internal static void InitializeThreadStatics()
+        {
+			retrunedThings = new HashSet<Thing>();
+		}
+
 		private static int getJumboCellWidth(int zoomLevel)
         {
 			if (zoomLevels.Count <= zoomLevel)
@@ -36,11 +41,24 @@ namespace RimThreaded
 		}
 
 		public static void RegisterHaulableItem(Thing haulableThing) {
-			if(haulableThing.IsForbidden(Faction.OfPlayer))
+			if (haulableThing.IsForbidden(Faction.OfPlayer))
             {
 				return;
             }
 			Map map = haulableThing.Map;
+
+			//---SHOULD HELP WITH NOT HAULING ROCK CHUNKS---
+			if(!haulableThing.def.EverHaulable)
+            {
+				return;
+            }
+			if (!haulableThing.def.alwaysHaulable && (map.designationManager.DesignationOn(haulableThing, DesignationDefOf.Haul) == null))
+            {
+				return;
+            }
+			//---SHOULD HELP WITH NOT HAULING ROCK CHUNKS---
+
+
 			int num = haulableThing.stackCount;
 			int maxPawns = 1;
 			if (map.physicalInteractionReservationManager.IsReserved(haulableThing))
@@ -102,11 +120,11 @@ namespace RimThreaded
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;
 
+			List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
 			zoomLevel = 0;
 			do
 			{
 				jumboCellWidth = getJumboCellWidth(zoomLevel);
-				List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
 				HashSet<Thing>[] awaitingHaulingGrid = awaitingHaulingZoomLevels[zoomLevel];
 				int jumboCellIndex = CellToIndexCustom(haulableThing.Position, mapSizeX, jumboCellWidth);
 				HashSet<Thing> hashset = awaitingHaulingGrid[jumboCellIndex];
@@ -120,7 +138,7 @@ namespace RimThreaded
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}
 
-		private static void RemoveThingToAwaitingHaulingHashSets(Thing haulableThing)
+		private static void RemoveThingFromAwaitingHaulingHashSets(Thing haulableThing)
 		{
 			int jumboCellWidth;
 			Map map = haulableThing.Map;
@@ -168,7 +186,7 @@ namespace RimThreaded
 		{
 			int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
 			getWaitingForZoneBetterThan(haulableThing.Map)[storagePriority].Remove(haulableThing);
-			RemoveThingToAwaitingHaulingHashSets(haulableThing);
+			RemoveThingFromAwaitingHaulingHashSets(haulableThing);
 		}
 		private static HashSet<Thing>[] getWaitingForZoneBetterThan(Map map)
         {
@@ -219,13 +237,7 @@ namespace RimThreaded
 			int cellIndex;
 			int mapSizeX = map.Size.x;
 			HashSet<Thing> thingsAtCellCopy;
-			if(retrunedThings == null)
-            {
-				retrunedThings = new HashSet<Thing>();
-			} else
-            {
-				retrunedThings.Clear();
-			}
+			retrunedThings.Clear(); //hashset used to ensure same item is not retured twice
 
 			List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
 			IntVec3 position = pawn.Position;

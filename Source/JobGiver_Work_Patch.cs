@@ -141,17 +141,21 @@ namespace RimThreaded
 								)
 								{
 									//ClosestThingReachable2 checks validator before CanReach
+#if DEBUG
 									DateTime startTime = DateTime.Now;
+#endif
 
 									//long
 									thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 
+#if DEBUG
 									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 100)
 									{
 										Log.Warning("HaulingCache.ClosestThingReachable Took over 100ms for HaulGeneral: " + workGiver.def.defName);
 										Log.Warning(scanner.PotentialWorkThingRequest.ToString());
 										Log.Warning(validator.ToString());
 									}
+#endif
 								}
 								/*
 								else if(
@@ -177,13 +181,17 @@ namespace RimThreaded
 								*/
 								else
                                 {
+#if DEBUG
 									DateTime startTime = DateTime.Now;
+#endif
 									//long
 									thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+#if DEBUG
 									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
 									{
 										Log.Warning("ClosestThingReachable Took over 200ms for workGiver: " + workGiver.def.defName);
 									}
+#endif
 								}
 							}
 							if (thing != null)
