@@ -35,6 +35,6 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 2.3.6  
+Version 2.3.7  
 -New version reworked many aspects to improve mod compatibility  
 

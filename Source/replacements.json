@@ -958,6 +958,17 @@
                     "FieldName": "logSbRules"
                 }
             ]
+        },
+        {
+            "ClassName": "RimWorld.ShipUtility",
+            "ThreadStatics": [
+                {
+                    "FieldName": "closedSet"
+                },
+                {
+                    "FieldName": "openSet"
+                }
+            ]
         }
     ]
 }
