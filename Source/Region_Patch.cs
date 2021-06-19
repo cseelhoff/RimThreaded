@@ -12,6 +12,8 @@ namespace RimThreaded
     {
 
         [ThreadStatic] public static Dictionary<Region, uint[]> regionClosedIndex; //newly defined
+        public static object cachedSafeTemperatureRange = new object();
+
         internal static void RunDestructivePatches()
         {
             Type original = typeof(Region);
@@ -94,7 +96,7 @@ namespace RimThreaded
                 {
                     if (Region.cachedSafeTemperatureRangesForFrame != Time_Patch.get_frameCount())
                     {
-                        lock (Region.cachedSafeTemperatureRanges)
+                        lock (cachedSafeTemperatureRange)
                         {
                             Region.cachedSafeTemperatureRanges = new Dictionary<Pawn, FloatRange>();
                         }
@@ -102,7 +104,7 @@ namespace RimThreaded
                     }
                     if (!Region.cachedSafeTemperatureRanges.TryGetValue(p, out floatRange))
                     {
-                        lock (Region.cachedSafeTemperatureRanges)
+                        lock (cachedSafeTemperatureRange)
                         {
                             if (!Region.cachedSafeTemperatureRanges.TryGetValue(p, out FloatRange floatRange2))
                             {

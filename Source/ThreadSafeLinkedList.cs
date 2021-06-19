@@ -515,8 +515,9 @@ namespace RimThreaded
                             Scribe.saver.WriteAttribute("IsNull", "True");
                             return;
                         }
-                        foreach (T item8 in list)
+                        foreach (ThreadSafeNode<T> item8node in list)
                         {
+                            T item8 = item8node.value;
                             switch (lookMode)
                             {
                                 case LookMode.Value:
