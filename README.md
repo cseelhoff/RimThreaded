@@ -7,6 +7,9 @@ https://discord.gg/3JJuWK8
 WIKI (including MOD COMPATIBILITY):
 https://github.com/cseelhoff/RimThreaded/wiki
 
+MOD COMPATIBILITY:
+https://github.com/cseelhoff/RimThreaded/wiki/Mod-Compatibility
+
 SETTINGS: 
 The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
 
@@ -35,6 +38,9 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 2.3.8  
--New version reworked many aspects to improve mod compatibility  
-
+Version 2.3.9 - Episode V - The Threads Strike Back  
+-New RimThreaded 2.0 was rewritten from the ground up  
+-Major performance increases. Some saved games with 700+ pawns went from 1-2TPS to 20-40TPS  
+-Major mod compatibility improvements. Over 1000 mods have been tested and are now compatible, including CE, SOS2, and ZombieLand!  
+-Only 7 mods remain as known incompatible. https://github.com/cseelhoff/RimThreaded/wiki/Mod-Compatibility  
+-New logo! Thanks Raccoononi!  
