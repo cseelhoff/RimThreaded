@@ -101,7 +101,7 @@ namespace RimThreaded
 			//replaceFields.Add(Method(typeof(AudioLowPassFilter), "set_lowpassResonanceQ"), Method(typeof(AudioLowPassFilter_Patch), "set_lowpassResonanceQ"));
 			//replaceFields.Add(Method(typeof(AudioHighPassFilter), "set_cutoffFrequency"), Method(typeof(AudioHighPassFilter_Patch), "set_cutoffFrequency"));
 			//replaceFields.Add(Method(typeof(AudioHighPassFilter), "set_highpassResonanceQ"), Method(typeof(AudioHighPassFilter_Patch), "set_highpassResonanceQ"));
-
+			replaceFields.Add(Method(typeof(MeshMakerPlanes), "NewPlaneMesh", new Type[] { typeof(Vector2), typeof(bool), typeof(bool), typeof(bool) }), Method(typeof(MeshMakerPlanes_Patch), "NewPlaneMesh"));
 		}
 #pragma warning disable 649
 		[Serializable]
@@ -755,6 +755,7 @@ namespace RimThreaded
             //WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
             //Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //transpile not needed with new threadsafe simplepools
 			PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //TODO fix transpile for 1 of 2 methods try inside of try perhaps?
+			Zone_Growing_Patch.RunNonDestructivePatches();
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), "Notify_AddedCell", "NewStockpileCreatedOrMadeUnfull"); //recheck growing zone when upon stockpile zone grid add
 
 		}
@@ -816,7 +817,7 @@ namespace RimThreaded
             ImmunityHandler_Patch.RunDestructivePatches();
             ListerThings_Patch.RunDestructivePatches();
             JobGiver_Work_Patch.RunDestructivePatches();
-            JobMaker_Patch.RunDestructivePatches();
+            //JobMaker_Patch.RunDestructivePatches(); should be fixed by the simplepool patch
             LongEventHandler_Patch.RunDestructivePatches(); //TODO - could use field replacement for conncurrentqueue
             Lord_Patch.RunDestructivePatches();
             LordManager_Patch.RunDestructivePatches();
@@ -857,7 +858,6 @@ namespace RimThreaded
             UniqueIDsManager_Patch.RunDestructivePatches(); // Simple use of Interlocked.Increment
             Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
             WealthWatcher_Patch.RunDestructivePatches();
-			Zone_Growing_Patch.RunNonDestructivePatches();
 			//WorkGiver_GrowerSow_Patch.RunDestructivePatches();
 
 			//complex methods that need further review for simplification
@@ -892,7 +892,8 @@ namespace RimThreaded
             GiddyUpCore_Patch.Patch();
             Hospitality_Patch.Patch();
             JobsOfOppurtunity_Patch.Patch();
-            PawnRules_Patch.Patch();
+			MapReroll_Patch.Patch();
+			PawnRules_Patch.Patch();
             ZombieLand_Patch.Patch();
         }
 		private static void FullPool_Patch_RunNonDestructivePatches()

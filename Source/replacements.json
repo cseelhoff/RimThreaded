@@ -118,15 +118,6 @@
             ]
         },
         {
-            "ClassName": "RimWorld.CompCauseGameCondition",
-            "ThreadStatics": [
-                {
-                    "FieldName": "tmpDeadConditionMaps",
-                    "PatchedClassName": "RimThreaded.CompCauseGameCondition_Patch"
-                }
-            ]
-        },
-        {
             "ClassName": "Verse.DamageWorker",
             "ThreadStatics": [
                 {
@@ -600,23 +591,6 @@
             ]
         },
         {
-            "ClassName": "Verse.Reachability",
-            "ThreadStatics": [
-                {
-                    "FieldName": "openQueue",
-                    "PatchedClassName": "RimThreaded.Reachability_Patch"
-                },
-                {
-                    "FieldName": "destRegions",
-                    "PatchedClassName": "RimThreaded.Reachability_Patch"
-                },
-                {
-                    "FieldName": "startingRegions",
-                    "PatchedClassName": "RimThreaded.Reachability_Patch"
-                }
-            ]
-        },
-        {
             "ClassName": "Verse.ReachabilityCache",
             "ThreadStatics": [
                 {
@@ -632,12 +606,7 @@
                     "FieldName": "tmpVisitedRooms"
                 },
                 {
-                    "FieldName": "tmpRoomStack",
-                    "PatchedClassName": "RimThreaded.RegionAndRoomUpdater_Patch"
-                },
-                {
-                    "FieldName": "working",
-                    "PatchedClassName": "RimThreaded.RegionAndRoomUpdater_Patch"
+                    "FieldName": "tmpRoomStack"
                 }
             ]
         },
@@ -652,15 +621,6 @@
                 },
                 {
                     "FieldName": "tmpCellIndices"
-                }
-            ]
-        },
-        {
-            "ClassName": "Verse.RegionDirtyer",
-            "ThreadStatics": [
-                {
-                    "FieldName": "regionsToDirty",
-                    "PatchedClassName": "RimThreaded.RegionDirtyer_Patch"
                 }
             ]
         },
@@ -887,25 +847,22 @@
             ]
         },
         {
-            "ClassName": "RimWorld.Planet.WorldPawns",
-            "ThreadStatics": [
-                {
-                    "FieldName": "tmpPawnsToRemove",
-                    "PatchedClassName": "RimThreaded.WorldPawns_Patch"
-                }
-            ]
-        },
-        {
             "ClassName": "RimWorld.Planet.World",
             "ThreadStatics": [
                 {
-                    "FieldName": "tmpNaturalRockDefs"
+                    "FieldName": "tmpNaturalRockDefs",
+                    "PatchedClassName": "RimThreaded.World_Patch",
+                    "SelfInitialized": true
                 },
                 {
-                    "FieldName": "tmpOceanDirs"
+                    "FieldName": "tmpOceanDirs",
+                    "PatchedClassName": "RimThreaded.World_Patch",
+                    "SelfInitialized": true
                 },
                 {
-                    "FieldName": "tmpNeighbors"
+                    "FieldName": "tmpNeighbors",
+                    "PatchedClassName": "RimThreaded.World_Patch",
+                    "SelfInitialized": true
                 }
             ]
         },
@@ -925,14 +882,6 @@
                 },
                 {
                     "FieldName": "tmpShipLandingAreas"
-                }
-            ]
-        },
-        {
-            "ClassName": "Verse.AI.PawnPathPool",
-            "ThreadStatics": [
-                {
-                    "FieldName": "paths"
                 }
             ]
         },

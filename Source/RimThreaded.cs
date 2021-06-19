@@ -195,10 +195,14 @@ namespace RimThreaded
             PawnPathPool_Patch.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
             Region_Patch.InitializeThreadStatics();
+            //RegionAndRoomUpdater_Patch.InitializeThreadStatics();
+            RegionDirtyer_Patch.InitializeThreadStatics();
             RegionTraverser_Patch.InitializeThreadStatics();
             SituationalThoughtHandler_Patch.InitializeThreadStatics();
             SustainerManager_Patch.InitializeThreadStatics();
             Toils_Ingest_Patch.InitializeThreadStatics();
+            World_Patch.InitializeThreadStatics();
+            WorldPawns_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)
         {

@@ -8,11 +8,12 @@ namespace RimThreaded
 
     public class RegionAndRoomUpdater_Patch
     {
-        [ThreadStatic] public static Stack<Room> tmpRoomStack;
         [ThreadStatic] public static bool working;
+        [ThreadStatic] public static HashSet<Room> tmpVisitedRooms;
 
         static readonly Type original = typeof(RegionAndRoomUpdater);
         static readonly Type patched = typeof(RegionAndRoomUpdater_Patch);
+
 
         internal static void RunDestructivePatches()
         {
@@ -93,7 +94,7 @@ namespace RimThreaded
             int numRegionGroups = __instance.CombineNewRegionsIntoContiguousGroups(); //CombineNewRegionsIntoContiguousGroups2(__instance);
             //actionCreateOrAttachToExistingRooms(__instance, numRegionGroups); //CreateOrAttachToExistingRooms2(__instance, numRegionGroups);
             CreateOrAttachToExistingRooms2(__instance, numRegionGroups);
-            int numRoomGroups = CombineNewAndReusedRoomsIntoContiguousGroups2(__instance);
+            int numRoomGroups = __instance.CombineNewAndReusedRoomsIntoContiguousGroups();
             __instance.CreateOrAttachToExistingRoomGroups(numRoomGroups); //CreateOrAttachToExistingRoomGroups2(__instance, numRoomGroups);
             __instance.NotifyAffectedRoomsAndRoomGroupsAndUpdateTemperature(); //NotifyAffectedRoomsAndRoomGroupsAndUpdateTemperature2(__instance);
         }
@@ -146,47 +147,6 @@ namespace RimThreaded
                 }
             }
         }
-        private static int CombineNewAndReusedRoomsIntoContiguousGroups2(RegionAndRoomUpdater __instance)
-        {
-            int num = 0;
-            foreach (Room reusedOldRoom in __instance.reusedOldRooms)
-            {
-                reusedOldRoom.newOrReusedRoomGroupIndex = -1;
-            }
-            if (tmpRoomStack == null)
-            {
-                tmpRoomStack = new Stack<Room>();
-            }
-            else
-            {
-                tmpRoomStack.Clear();
-            }
-            
-            foreach (Room item in __instance.reusedOldRooms.Concat(__instance.newRooms))
-            {
-                if (item.newOrReusedRoomGroupIndex < 0)
-                {
-                    tmpRoomStack.Clear();
-                    tmpRoomStack.Push(item);
-                    item.newOrReusedRoomGroupIndex = num;
-                    while (tmpRoomStack.Count != 0)
-                    {
-                        Room room = tmpRoomStack.Pop();
-                        foreach (Room neighbor in room.Neighbors)
-                        {
-                            if (neighbor.newOrReusedRoomGroupIndex < 0 && __instance.ShouldBeInTheSameRoomGroup(room, neighbor))
-                            {
-                                neighbor.newOrReusedRoomGroupIndex = num;
-                                tmpRoomStack.Push(neighbor);
-                            }
-                        }
-                    }
-                    num++;
-                }
-            }
-            return num;
-        }
-
         private static Room FindCurrentRegionGroupNeighborWithMostRegions2(RegionAndRoomUpdater __instance, out bool multipleOldNeighborRooms)
         {
             multipleOldNeighborRooms = false;
@@ -231,7 +191,6 @@ namespace RimThreaded
             }
             return room;
         }
-
 
 
     }
