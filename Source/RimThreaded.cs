@@ -194,6 +194,7 @@ namespace RimThreaded
             PathFinder_Patch.InitializeThreadStatics();
             PawnPathPool_Patch.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
+            ReachabilityCache_Patch.InitializeThreadStatics();
             Region_Patch.InitializeThreadStatics();
             //RegionAndRoomUpdater_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();

@@ -591,14 +591,6 @@
             ]
         },
         {
-            "ClassName": "Verse.ReachabilityCache",
-            "ThreadStatics": [
-                {
-                    "FieldName": "tmpCachedEntries"
-                }
-            ]
-        },
-        {
             "ClassName": "Verse.RegionAndRoomUpdater",
             "ThreadStatics": [
                 {
