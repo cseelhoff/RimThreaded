@@ -201,25 +201,40 @@ namespace RimThreaded
 			}
 			return waitingForZoneBetterThan;
 		}
+
+		public static void Notify_AddedCell(SlotGroup __instance, IntVec3 c)
+		{
+			NewStockpileCreatedOrMadeUnfull(__instance);
+		}
+
+		public static void Notify_SlotGroupChanged(ListerHaulables __instance, SlotGroup sg)
+		{
+			NewStockpileCreatedOrMadeUnfull(sg);
+		}
+
+
 		public static void NewStockpileCreatedOrMadeUnfull(SlotGroup __instance)
         {
-			Map map = __instance.parent.Map;
-			int storagePriorityCount = Enum.GetValues(typeof(StoragePriority)).Length;
-			HashSet<Thing>[] waitingForZoneBetterThanArray = getWaitingForZoneBetterThan(map);
-            StorageSettings settings = __instance.Settings;
+			if (Current.ProgramState == ProgramState.Playing)
+			{
+				Map map = __instance.parent.Map;
+				int storagePriorityCount = Enum.GetValues(typeof(StoragePriority)).Length;
+				HashSet<Thing>[] waitingForZoneBetterThanArray = getWaitingForZoneBetterThan(map);
+				StorageSettings settings = __instance.Settings;
 
-			for (int i = (int)settings.Priority; i < storagePriorityCount; i++)
-            {
-                HashSet<Thing> waitingThings = waitingForZoneBetterThanArray[i];
-                HashSet<Thing> waitingThingsCopy = new HashSet<Thing>(waitingThings);
-				foreach(Thing waitingThing in waitingThingsCopy)
-                {
-					if(settings.AllowedToAccept(waitingThing))
-                    {
-						waitingThings.Remove(waitingThing);
-						RegisterHaulableItem(waitingThing);
+				for (int i = (int)settings.Priority; i >= 0; i--)
+				{
+					HashSet<Thing> waitingThings = waitingForZoneBetterThanArray[i];
+					HashSet<Thing> waitingThingsCopy = new HashSet<Thing>(waitingThings);
+					foreach (Thing waitingThing in waitingThingsCopy)
+					{
+						if (settings.AllowedToAccept(waitingThing))
+						{
+							waitingThings.Remove(waitingThing);
+							RegisterHaulableItem(waitingThing);
+						}
 					}
-                }
+				}
 			}
 		}
 

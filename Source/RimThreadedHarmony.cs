@@ -756,8 +756,8 @@ namespace RimThreaded
             //Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //transpile not needed with new threadsafe simplepools
 			PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //TODO fix transpile for 1 of 2 methods try inside of try perhaps?
 			Zone_Growing_Patch.RunNonDestructivePatches();
-			Postfix(typeof(SlotGroup), typeof(HaulingCache), "Notify_AddedCell", "NewStockpileCreatedOrMadeUnfull"); //recheck growing zone when upon stockpile zone grid add
-
+			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
+			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
 		}
 
 		private static void PatchDestructiveFixes()
