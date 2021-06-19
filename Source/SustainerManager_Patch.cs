@@ -20,7 +20,7 @@ namespace RimThreaded
             Type patched = typeof(SustainerManager_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(RegisterSustainer));
             RimThreadedHarmony.Prefix(original, patched, nameof(DeregisterSustainer));
-            RimThreadedHarmony.Prefix(original, patched, nameof(UpdateAllSustainerScopes));
+            //RimThreadedHarmony.Prefix(original, patched, nameof(UpdateAllSustainerScopes));
         }
 
         public static bool RegisterSustainer(SustainerManager __instance, Sustainer newSustainer)

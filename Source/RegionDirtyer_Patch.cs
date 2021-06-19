@@ -10,6 +10,11 @@ namespace RimThreaded
         public static Dictionary<RegionDirtyer, List<IntVec3>> dirtyCellsDict = new Dictionary<RegionDirtyer, List<IntVec3>>();
         public static object regionDirtyerLock = new object();
 
+        internal static void InitializeThreadStatics()
+        {
+            regionsToDirty = new List<Region>();
+        }
+
         public static void RunDestructivePatches()
         {
             Type original = typeof(RegionDirtyer);
