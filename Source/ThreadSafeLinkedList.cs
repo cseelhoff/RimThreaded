@@ -325,11 +325,6 @@ namespace RimThreaded
 
         public new bool Contains(T item)
         {
-            if (!warningIssuedRemove)
-            {
-                Log.Warning("Calling ThreadSafeLinkedList.Contains(T item) is not optimal. ThreadSafeLinkedList.getFirstNodeContaining(T item) or writing a custom Enumeration loop is preferred.");
-                warningIssuedRemove = true;
-            }
             foreach (ThreadSafeNode<T> threadSafeNode in this)
             {
                 if (threadSafeNode.value.Equals(item))

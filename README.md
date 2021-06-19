@@ -38,6 +38,9 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 2.3.10 - Tatooine Moisture Farm  
+-Optimized Performance for Harvesting Job  
+
 Version 2.3.9 - Episode V - The Threads Strike Back  
 -New RimThreaded 2.0 was rewritten from the ground up  
 -Major performance increases. Some saved games with 700+ pawns went from 1-2TPS to 20-40TPS  

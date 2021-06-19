@@ -74,7 +74,7 @@ namespace RimThreaded
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Disable thread/worker limit (debugging):", ref disablelimits);
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Disable slowdown on combat:", ref disableforcedslowdowns);
             Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText, ref scrollPos);
-            Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText2, ref scrollPos2);
+            //Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText2, ref scrollPos2);
             listing_Standard.EndScrollView(ref viewRect);
             scrollViewHeight = viewRect.height;
         }

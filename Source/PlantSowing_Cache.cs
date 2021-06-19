@@ -1,19 +1,15 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Verse;
 using static RimThreaded.Area_Patch;
+using static RimThreaded.JumboCell;
 
 namespace RimThreaded
 {
     static class PlantSowing_Cache
     {
-		
-		private static readonly List<int> zoomLevels = new List<int>();
-		private const float ZOOM_MULTIPLIER = 1.5f;
 		[ThreadStatic] private static HashSet<IntVec3> retrunedThings;
-		public static object cache_lock = new object();
 
 		public static void ReregisterObject(Map map, IntVec3 location, Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict)
         {			
@@ -169,41 +165,6 @@ namespace RimThreaded
 
 		}
 
-		private static int getJumboCellWidth(int zoomLevel)
-		{
-			if (zoomLevels.Count <= zoomLevel)
-			{
-				int lastZoomLevel = 1;
-				for (int i = zoomLevels.Count; i <= zoomLevel; i++)
-				{
-					if (i > 0)
-						lastZoomLevel = zoomLevels[i - 1];
-					zoomLevels.Add(Mathf.CeilToInt(lastZoomLevel * ZOOM_MULTIPLIER));
-				}
-			}
-			return zoomLevels[zoomLevel];
-		}
-
-		private static int CellToIndexCustom(IntVec3 position, int mapSizeX, int jumboCellWidth)
-		{
-			int XposInJumboCell = position.x / jumboCellWidth;
-			int ZposInJumboCell = position.z / jumboCellWidth;
-			int jumboCellColumnsInMap = GetJumboCellColumnsInMap(mapSizeX, jumboCellWidth);
-			return CellToIndexCustom(XposInJumboCell, ZposInJumboCell, jumboCellColumnsInMap);
-		}
-		private static int CellToIndexCustom(int XposOfJumboCell, int ZposOfJumboCell, int jumboCellColumnsInMap)
-		{
-			return (jumboCellColumnsInMap * ZposOfJumboCell) + XposOfJumboCell;
-		}
-		private static int GetJumboCellColumnsInMap(int mapSizeX, int jumboCellWidth)
-		{
-			return Mathf.CeilToInt(mapSizeX / (float)jumboCellWidth);
-		}
-		private static int NumGridCellsCustom(int mapSizeX, int mapSizeZ, int jumboCellWidth)
-		{
-			return GetJumboCellColumnsInMap(mapSizeX, jumboCellWidth) * Mathf.CeilToInt(mapSizeZ / (float)jumboCellWidth);
-		}
-
 		public static IEnumerable<IntVec3> GetClosestActionableLocations(Pawn pawn, Map map, Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict)
 		{
 			int jumboCellWidth;
@@ -234,7 +195,7 @@ namespace RimThreaded
 				ZposOfJumboCell = position.z / jumboCellWidth; //assuming square map
 				if (zoomLevel == 0)
 				{
-					cellIndex = CellToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
+					cellIndex = CellXZToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
 					HashSet<IntVec3> objectsAtCell = objectsGrid[cellIndex];
 					if (objectsAtCell != null && objectsAtCell.Count > 0)
 					{
@@ -256,7 +217,7 @@ namespace RimThreaded
 					int newZposOfJumboCell = ZposOfJumboCell + offset.z;
 					if (newXposOfJumboCell >= 0 && newXposOfJumboCell < jumboCellColumnsInMap && newZposOfJumboCell >= 0 && newZposOfJumboCell < jumboCellColumnsInMap)
 					{ //assuming square map
-						HashSet<IntVec3> thingsAtCell = objectsGrid[CellToIndexCustom(newXposOfJumboCell, newZposOfJumboCell, jumboCellColumnsInMap)];
+						HashSet<IntVec3> thingsAtCell = objectsGrid[CellXZToIndexCustom(newXposOfJumboCell, newZposOfJumboCell, jumboCellColumnsInMap)];
 						if (thingsAtCell != null && thingsAtCell.Count > 0)
 						{
 							objectsAtCellCopy = new HashSet<IntVec3>(thingsAtCell);
@@ -278,33 +239,5 @@ namespace RimThreaded
 			}
 		}
 
-		private static IEnumerable<IntVec3> GetOffsetOrder(IntVec3 position, int zoomLevel, Range2D scannedRange, Range2D areaRange)
-		{
-			//TODO optimize direction to scan first
-			if (scannedRange.maxZ < areaRange.maxZ)
-				yield return IntVec3.North;
-
-			if (scannedRange.maxZ < areaRange.maxZ && scannedRange.maxX < areaRange.maxX)
-				yield return IntVec3.NorthEast;
-
-			if (scannedRange.maxX < areaRange.maxX)
-				yield return IntVec3.East;
-
-			if (scannedRange.minZ > areaRange.minZ && scannedRange.maxX < areaRange.maxX)
-				yield return IntVec3.SouthEast;
-
-			if (scannedRange.minZ > areaRange.minZ)
-				yield return IntVec3.South;
-
-			if (scannedRange.minZ > areaRange.minZ && scannedRange.minX > areaRange.minX)
-				yield return IntVec3.SouthWest;
-
-			if (scannedRange.maxX < areaRange.maxX)
-				yield return IntVec3.West;
-
-			if (scannedRange.maxZ < areaRange.maxZ && scannedRange.minX > areaRange.minX)
-				yield return IntVec3.NorthWest;
-
-		}
 	}
 }
