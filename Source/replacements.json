@@ -594,8 +594,7 @@
             "ClassName": "Verse.ReachabilityCache",
             "ThreadStatics": [
                 {
-                    "FieldName": "tmpCachedEntries",
-                    "PatchedClassName": "RimThreaded.ReachabilityCache_Patch"
+                    "FieldName": "tmpCachedEntries"
                 }
             ]
         },
