@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using System.Collections.Generic;
 using Verse;
 using static RimThreaded.Area_Patch;
@@ -8,10 +9,7 @@ namespace RimThreaded
 {
     class PlantHarvest_Cache
 	{
-		private static readonly List<int> zoomLevels = new List<int>();
-		private const float ZOOM_MULTIPLIER = 1.5f;
 		[ThreadStatic] private static HashSet<IntVec3> retrunedThings;
-		public static object cache_lock = new object();
 
 		public static IEnumerable<IntVec3> GetClosestActionableLocations(Pawn pawn, Map map, Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict)
 		{
@@ -43,7 +41,7 @@ namespace RimThreaded
 				ZposOfJumboCell = position.z / jumboCellWidth; //assuming square map
 				if (zoomLevel == 0)
 				{
-					cellIndex = CellToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
+					cellIndex = CellXZToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
 					HashSet<IntVec3> objectsAtCell = objectsGrid[cellIndex];
 					if (objectsAtCell != null && objectsAtCell.Count > 0)
 					{
@@ -65,7 +63,7 @@ namespace RimThreaded
 					int newZposOfJumboCell = ZposOfJumboCell + offset.z;
 					if (newXposOfJumboCell >= 0 && newXposOfJumboCell < jumboCellColumnsInMap && newZposOfJumboCell >= 0 && newZposOfJumboCell < jumboCellColumnsInMap)
 					{ //assuming square map
-						HashSet<IntVec3> thingsAtCell = objectsGrid[CellToIndexCustom(newXposOfJumboCell, newZposOfJumboCell, jumboCellColumnsInMap)];
+						HashSet<IntVec3> thingsAtCell = objectsGrid[CellXZToIndexCustom(newXposOfJumboCell, newZposOfJumboCell, jumboCellColumnsInMap)];
 						if (thingsAtCell != null && thingsAtCell.Count > 0)
 						{
 							objectsAtCellCopy = new HashSet<IntVec3>(thingsAtCell);
@@ -94,7 +92,7 @@ namespace RimThreaded
 				{
 					if (!awaitingActionMapDict.TryGetValue(map, out List<HashSet<IntVec3>[]> awaitingActionsZoomLevels2))
 					{
-						Log.Message("Caching Plant Cells...");
+						Log.Message("RimThreaded is caching Harvest Plant Cells...");
 						awaitingActionsZoomLevels2 = new List<HashSet<IntVec3>[]>();
 						int mapSizeX = map.Size.x;
 						int mapSizeZ = map.Size.z;
@@ -125,5 +123,37 @@ namespace RimThreaded
 			return awaitingActionsZoomLevels;
 
 		}
+		public static void AddObjectToActionableObjects(Map map, IntVec3 location, List<HashSet<IntVec3>[]> awaitingActionZoomLevels)
+		{
+			int jumboCellWidth;
+			int mapSizeX = map.Size.x;
+			int mapSizeZ = map.Size.z;
+			int zoomLevel;
+			//---START--- For plant Harvest
+			//WorkGiver_GrowerHarvest.HasJobOnCell
+			Plant plant = location.GetPlant(map);
+			bool hasJobOnCell = plant != null && !plant.IsForbidden(Faction.OfPlayer) && (plant.HarvestableNow && plant.LifeStage == PlantLifeStage.Mature) && (plant.CanYieldNow() && !map.physicalInteractionReservationManager.IsReserved(location));
+			if (!hasJobOnCell)
+				return;
+			//---END--
+
+			zoomLevel = 0;
+			do
+			{
+				jumboCellWidth = getJumboCellWidth(zoomLevel);
+				HashSet<IntVec3>[] awaitingActionGrid = awaitingActionZoomLevels[zoomLevel];
+				int jumboCellIndex = CellToIndexCustom(location, mapSizeX, jumboCellWidth);
+				HashSet<IntVec3> hashset = awaitingActionGrid[jumboCellIndex];
+				if (hashset == null)
+				{
+					hashset = new HashSet<IntVec3>();
+					awaitingActionGrid[jumboCellIndex] = hashset;
+				}
+				hashset.Add(location);
+				zoomLevel++;
+			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
+		}
+
 	}
+
 }

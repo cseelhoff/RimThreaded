@@ -40,10 +40,10 @@ namespace RimThreaded
 				{
 					continue;
 				}
-				if (!JobOnCellTest(workGiver_GrowerHarvest, pawn, actionableLocation, forced))
-				{
-					continue;
-				}
+				//if (!JobOnCellTest(workGiver_GrowerHarvest, pawn, actionableLocation, forced))
+				//{
+				//	continue;
+				//}
 				if (!workGiver_GrowerHarvest.HasJobOnCell(pawn, actionableLocation))
 				{
 					continue;
@@ -57,18 +57,18 @@ namespace RimThreaded
 			}
 			return IntVec3.Invalid;
 		}
-		public static bool JobOnCellTest(WorkGiver_GrowerHarvest workGiver_GrowerHarvest, Pawn pawn, IntVec3 c, bool forced = false)
-		{
-			Map map = pawn.Map;
-			if (workGiver_GrowerHarvest.HasJobOnCell(pawn, c, false))
-			{
-				Plant plant = c.GetPlant(map);
-				if (!(plant.def == WorkGiver_Grower.CalculateWantedPlantDef(c, map)))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
+		//public static bool JobOnCellTest(WorkGiver_GrowerHarvest workGiver_GrowerHarvest, Pawn pawn, IntVec3 c, bool forced = false)
+		//{
+		//	Map map = pawn.Map;
+		//	if (workGiver_GrowerHarvest.HasJobOnCell(pawn, c, false))
+		//	{
+		//		Plant plant = c.GetPlant(map);
+		//		if (!(plant.def == WorkGiver_Grower.CalculateWantedPlantDef(c, map)))
+		//		{
+		//			return true;
+		//		}
+		//	}
+		//	return false;
+		//}
 	}
 }

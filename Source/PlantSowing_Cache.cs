@@ -133,7 +133,7 @@ namespace RimThreaded
 				{
 					if (!awaitingActionMapDict.TryGetValue(map, out List<HashSet<IntVec3>[]> awaitingActionsZoomLevels2))
 					{
-						Log.Message("Caching Plant Cells...");
+						Log.Message("RimThreaded is caching Sowing Plant Cells...");
 						awaitingActionsZoomLevels2 = new List<HashSet<IntVec3>[]>();
 						int mapSizeX = map.Size.x;
 						int mapSizeZ = map.Size.z;
