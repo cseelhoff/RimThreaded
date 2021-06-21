@@ -38,7 +38,7 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 2.3.10 - Tatooine Moisture Farm  
+Version 2.4.0 - Tatooine Moisture Farm  
 -Optimized Performance for Harvesting Job  
 
 Version 2.3.9 - Episode V - The Threads Strike Back  
