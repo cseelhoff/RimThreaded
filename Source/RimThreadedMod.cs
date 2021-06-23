@@ -27,7 +27,7 @@ namespace RimThreaded
                 Settings.modsText = "Potential RimThreaded mod conflicts :\n";
                 Settings.modsText += getPotentialModConflicts();
 
-                Settings.modsText2 = "For future use... \n";
+                //Settings.modsText2 = "For future use... \n";
                 //Settings.modsText2 += getAllStaticFields();
 
                 //string path = "hmodText.txt";

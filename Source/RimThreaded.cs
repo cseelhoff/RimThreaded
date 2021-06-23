@@ -7,6 +7,7 @@ using Verse.Sound;
 using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
+using UnityEngine;
 
 namespace RimThreaded
 {
@@ -184,6 +185,7 @@ namespace RimThreaded
         }
         public static void InitializeAllThreadStatics()
         {
+            CellFinder_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             Dijkstra_Patch<IntVec3>.InitializeThreadStatics();
             Dijkstra_Patch<Region>.InitializeThreadStatics();
@@ -416,8 +418,10 @@ namespace RimThreaded
             }
         }
 
+        public static int frameCount = 0;
         public static void MainThreadWaitLoop(TickManager tickManager)
         {
+            frameCount = Time.frameCount;
             callingTickManager = tickManager;
             allWorkerThreadsFinished = false;
             monitorThreadWaitHandle.Set();

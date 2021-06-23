@@ -61,13 +61,15 @@ namespace RimThreaded
             int i = 0;
 
             //ThreadSafeNode<T> lastCheckedNode = null;
-            foreach (ThreadSafeNode<T> threadSafeNode in this)
+            ThreadSafeNode<T> currentNode = firstNode;
+            while (currentNode != null)
             {
                 if (i == index)
                 {
-                    return threadSafeNode;
+                    return currentNode;
                 }
                 i++;
+                currentNode = currentNode.nextNode;
             }
             //Log.ErrorOnce("index at: " + i + ", last index checked:" + index + ", node count:" + itemCount, 488564);
             return lastNode;
@@ -157,12 +159,10 @@ namespace RimThreaded
             bool lockTaken = false;
             try
             {
-                ThreadSafeNode<T> newNode_nextNode = null;
                 ThreadSafeNode<T> insertAfterNode_nextNode = null;
                 spinLock.Enter(ref lockTaken);
                 ThreadSafeNode<T> insertAfterNode = firstNode;
 
-                int index_greater_than_zero = 0; //debugging only
                 if (index <= 0)
                 {
                     newNode.nextNode = firstNode;
@@ -170,8 +170,6 @@ namespace RimThreaded
                 }
                 else
                 {
-
-                    index_greater_than_zero = 1; //debugging only
                     foreach (ThreadSafeNode<T> threadSafeNode in this)
                     {
                         insertAfterNode = threadSafeNode;
@@ -180,14 +178,11 @@ namespace RimThreaded
                         i++;
                     }
                     newNode.previousNode = insertAfterNode;
-                    index_greater_than_zero = 2; //debugging only
-                    insertAfterNode_nextNode = insertAfterNode.nextNode; //debugging only
                     if (insertAfterNode_nextNode == null)
                     {
                         Log.Error("Never null");
                     }
                     newNode.nextNode = insertAfterNode.nextNode;
-                    newNode_nextNode = newNode.nextNode; //debugging only
                     insertAfterNode.nextNode = newNode;
 
                 }
@@ -200,10 +195,6 @@ namespace RimThreaded
                     newNode.nextNode.previousNode = newNode;
                 }
                 itemCount++;
-                if (index_greater_than_zero > 3)
-                {
-                    index_greater_than_zero = 3;
-                }
             }
             finally
             {
@@ -249,9 +240,9 @@ namespace RimThreaded
                 warningIssuedIndex = true;
             }
             int i = 0;
-            foreach (ThreadSafeNode<T> threadSafeNode in this)
+            foreach (T threadSafeNodeValue in this)
             {
-                if (threadSafeNode.value.Equals(item))
+                if (threadSafeNodeValue.Equals(item))
                 {
                     return i;
                 }
@@ -273,22 +264,15 @@ namespace RimThreaded
                 Log.Warning("Calling ThreadSafeLinkedList.Remove(T) is not optimal and will remove the first occurance. ThreadSafeLinkedList.RemoveNode(ThreadSafeNode<T>) is preferred.");
                 warningIssuedRemove = true;
             }
-            bool lockTaken = false;
-            try
+            ThreadSafeNode<T> currentNode = firstNode;
+            while (currentNode != null)
             {
-                spinLock.Enter(ref lockTaken);
-                foreach (ThreadSafeNode<T> threadSafeNode in this)
+                if (currentNode.value.Equals(item))
                 {
-                    if (threadSafeNode.value.Equals(item))
-                    {
-                        itemCount--;
-                        RemoveNode(threadSafeNode);
-                    }
+                    itemCount--;
+                    RemoveNode(currentNode);
                 }
-            }
-            finally
-            {
-                if (lockTaken) spinLock.Exit(false);
+                currentNode = currentNode.nextNode;
             }
             return true;
         }
@@ -296,13 +280,15 @@ namespace RimThreaded
         public new int RemoveAll(Predicate<T> predicate)
         {
             int totalRemoved = 0;
-            foreach (ThreadSafeNode<T> threadSafeNode in this)
+            ThreadSafeNode<T> currentNode = firstNode;
+            while (currentNode != null)
             {
-                if (predicate(threadSafeNode.value))
+                if (predicate(currentNode.value))
                 {
-                    RemoveNode(threadSafeNode);
+                    RemoveNode(currentNode);
                     totalRemoved++;
                 }
+                currentNode = currentNode.nextNode;
             }
             return totalRemoved;
         }
@@ -325,14 +311,9 @@ namespace RimThreaded
 
         public new bool Contains(T item)
         {
-            if (!warningIssuedRemove)
+            foreach (T threadSafeNodeValue in this)
             {
-                Log.Warning("Calling ThreadSafeLinkedList.Contains(T item) is not optimal. ThreadSafeLinkedList.getFirstNodeContaining(T item) or writing a custom Enumeration loop is preferred.");
-                warningIssuedRemove = true;
-            }
-            foreach (ThreadSafeNode<T> threadSafeNode in this)
-            {
-                if (threadSafeNode.value.Equals(item))
+                if (threadSafeNodeValue.Equals(item))
                 {
                     return true;
                 }
@@ -341,24 +322,28 @@ namespace RimThreaded
         }
         public ThreadSafeNode<T> getFirstNodeContaining(T item)
         {
-            foreach (ThreadSafeNode<T> threadSafeNode in this)
+            ThreadSafeNode<T> currentNode = firstNode;
+            while (currentNode != null)
             {
-                if (threadSafeNode.value.Equals(item))
+                if (currentNode.value.Equals(item))
                 {
-                    return threadSafeNode;
+                    return currentNode;
                 }
+                currentNode = currentNode.nextNode;
             }
             return null;
         }
 
         public bool ContainsNode(ThreadSafeNode<T> node)
         {
-            foreach (ThreadSafeNode<T> threadSafeNode in this)
-            {
-                if (threadSafeNode.Equals(node))
+            ThreadSafeNode<T> currentNode = firstNode;
+            while(currentNode != null)
+            { 
+                if (currentNode.Equals(node))
                 {
                     return true;
                 }
+                currentNode = currentNode.nextNode;
             }
             return false;
         }
@@ -366,10 +351,10 @@ namespace RimThreaded
         public new void CopyTo(T[] array, int arrayIndex)
         {
             int i = 0;
-            foreach (ThreadSafeNode<T> threadSafeNode in this)
+            foreach (T threadSafeNodeValue in this)
             {
                 if (i >= arrayIndex)
-                    array[i - arrayIndex] = threadSafeNode.value;
+                    array[i - arrayIndex] = threadSafeNodeValue;
                 i++;
             };
         }
@@ -377,9 +362,9 @@ namespace RimThreaded
         public List<T> ToList()
         {
             List<T> newList = new List<T>();
-            foreach (ThreadSafeNode<T> threadSafeNode in this)
+            foreach (T threadSafeNodeValue in this)
             {
-                newList.Add(threadSafeNode.value);
+                newList.Add(threadSafeNodeValue);
             }
             return newList;
         }
@@ -405,13 +390,13 @@ namespace RimThreaded
             private ThreadSafeNode<T> currentNode;
             bool firstMove = false;
 
-            public ThreadSafeNode<T> Current
+            public T Current
             {
                 get
                 {
                     if (currentNode == null) throw new InvalidOperationException("Enumerator Ended");
 
-                    return currentNode;
+                    return currentNode.value;
                 }
             }
 
@@ -420,11 +405,11 @@ namespace RimThreaded
                 get
                 {
                     if (currentNode == null) throw new InvalidOperationException("Enumerator Ended");
-                    return currentNode;
+                    return currentNode.value;
                 }
             }
 
-            T IEnumerator<T>.Current => Current.value;
+            //T IEnumerator<T>.Current => Current.value;
 
             public void Dispose()
             {
@@ -450,7 +435,6 @@ namespace RimThreaded
                 currentNode = threadSafeLinkedList.firstNode;
                 firstMove = false;
             }
-
         }
 
     }
@@ -515,9 +499,8 @@ namespace RimThreaded
                             Scribe.saver.WriteAttribute("IsNull", "True");
                             return;
                         }
-                        foreach (ThreadSafeNode<T> item8node in list)
+                        foreach (T item8 in list)
                         {
-                            T item8 = item8node.value;
                             switch (lookMode)
                             {
                                 case LookMode.Value:

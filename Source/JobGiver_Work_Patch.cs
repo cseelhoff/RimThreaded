@@ -17,6 +17,9 @@ namespace RimThreaded
 		}
         public static bool TryIssueJobPackage(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
 		{
+#if DEBUG
+			DateTime startTime = DateTime.Now;
+#endif
 			if (__instance.emergency && pawn.mindState.priorityWork.IsPrioritized)
 			{
 				List<WorkGiverDef> workGiversByPriority = pawn.mindState.priorityWork.WorkGiver.workType.workGiversByPriority;
@@ -125,37 +128,15 @@ namespace RimThreaded
 									workGiver.def.defName.Equals("DoBillsMakeApparel")
 								)
 								{
-									//ClosestThingReachable2 checks validator before CanReach
-									DateTime startTime = DateTime.Now;
-
 									//long
 									thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-
-									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
-									{
-										Log.Warning("ClosestThingReachable2 Took over 200ms for workGiver: " + workGiver.def.defName);
-									}
 								}
 								else if (
 								   workGiver.def.defName.Equals("HaulGeneral")
 								)
 								{
-									//ClosestThingReachable2 checks validator before CanReach
-#if DEBUG
-									DateTime startTime = DateTime.Now;
-#endif
-
 									//long
 									thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-
-#if DEBUG
-									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 100)
-									{
-										Log.Warning("HaulingCache.ClosestThingReachable Took over 100ms for HaulGeneral: " + workGiver.def.defName);
-										Log.Warning(scanner.PotentialWorkThingRequest.ToString());
-										Log.Warning(validator.ToString());
-									}
-#endif
 								}
 								/*
 								else if(
@@ -180,18 +161,9 @@ namespace RimThreaded
 								}
 								*/
 								else
-                                {
-#if DEBUG
-									DateTime startTime = DateTime.Now;
-#endif
+								{
 									//long
 									thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-#if DEBUG
-									if (DateTime.Now.Subtract(startTime).TotalMilliseconds > 200)
-									{
-										Log.Warning("ClosestThingReachable Took over 200ms for workGiver: " + workGiver.def.defName);
-									}
-#endif
 								}
 							}
 							if (thing != null)
@@ -214,7 +186,6 @@ namespace RimThreaded
 								//RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell = 0;
 
 								//thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-
 								IntVec3 bestCell = WorkGiver_Grower_Patch.ClosestLocationReachable(workGiver_Grower, pawn);
 								//Log.Message(bestCell.ToString());
 								if (bestCell.IsValid)
@@ -223,6 +194,33 @@ namespace RimThreaded
 									scannerWhoProvidedTarget = scanner;
 								}
 								//Log.Message(RimThreaded.WorkGiver_GrowerSow_Patch_JobOnCell.ToString());
+							}
+							else if(scanner is WorkGiver_GrowerHarvest workGiver_GrowerHarvest)
+                            {
+								IntVec3 bestCell = WorkGiver_GrowerHarvest_Patch.ClosestLocationReachable(workGiver_GrowerHarvest, pawn);
+								if (bestCell.IsValid)
+								{
+									bestTargetOfLastPriority = new TargetInfo(bestCell, pawn.Map);
+									scannerWhoProvidedTarget = scanner;
+								}
+								/*
+								enumerable4 = workGiver_GrowerHarvest.PotentialWorkCellsGlobal(pawn);
+								IList<IntVec3> list2;
+								if ((list2 = (enumerable4 as IList<IntVec3>)) != null)
+								{
+									for (int k = 0; k < list2.Count; k++)
+									{
+										ProcessCell(list2[k]);
+									}
+								}
+								else
+								{
+									foreach (IntVec3 item in enumerable4)
+									{
+										ProcessCell(item);
+									}
+								}
+								*/
 							}
 							else
 							{
@@ -312,6 +310,18 @@ namespace RimThreaded
 					Log.Warning(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."));
 				}
 				num = workGiver.def.priorityInType;
+
+#if DEBUG
+				int milli99 = (int)DateTime.Now.Subtract(startTime).TotalMilliseconds;
+				if (milli99 > 300)
+				{
+					Log.Warning("99 JobGiver_Work.TryIssueJobPackage Took over " + milli99.ToString() + "ms for workGiver: " + workGiver.def.defName);
+					//Log.Warning(scanner.PotentialWorkThingRequest.ToString());
+					//Log.Warning(validator.ToString());
+				}
+#endif
+
+
 			}
 			__result = ThinkResult.NoJob;
 			return false;

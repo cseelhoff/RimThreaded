@@ -262,7 +262,6 @@ namespace RimThreaded
                     cache.AddCachedResult(startingRegionsParam[l].Room, destRegionsParam[m].Room, traverseParams, reachable: false);
                 }
             }
-
             return false;
         }
 

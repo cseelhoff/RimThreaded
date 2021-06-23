@@ -38,6 +38,11 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 2.4.1 - Tatooine Moisture Farm  
+-Optimized Performance for Harvesting Job  
+-Fixed Caravan not being able to leave map bug #564  
+-Fixed issue with multiple trade ships arriving concurrently  
+
 Version 2.3.9 - Episode V - The Threads Strike Back  
 -New RimThreaded 2.0 was rewritten from the ground up  
 -Major performance increases. Some saved games with 700+ pawns went from 1-2TPS to 20-40TPS  

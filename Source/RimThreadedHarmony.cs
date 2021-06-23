@@ -217,13 +217,13 @@ namespace RimThreaded
 					}
 					il.Emit(OpCodes.Ret);
 					Type newFieldType = tb.CreateType();
-					//Directory.SetCurrentDirectory("C:\\STUFF");
 					MethodInfo mb2 = Method(newFieldType, "InitializeThreadStatics");
 					HarmonyMethod pf = new HarmonyMethod(mb2);
 					harmony.Patch(initializer, postfix: pf);
 				}
             }
 #if DEBUG
+			//Directory.SetCurrentDirectory("C:\\STUFF");
 			ab.Save(aName.Name + ".dll");
 #endif
 		}
@@ -649,7 +649,7 @@ namespace RimThreaded
 		}
 
 
-		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "ReplaceFieldsTranspiler"));
+		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), nameof(ReplaceFieldsTranspiler)));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
         public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
 		public static void TranspileFieldReplacements(MethodBase original)
@@ -833,6 +833,7 @@ namespace RimThreaded
 			PawnPathPool_Patch.RunDestructivePatches(); //removed leak check based on map size, since pool is now a threadstatic
             PawnUtility_Patch.RunDestructivePatches();
             PawnDestinationReservationManager_Patch.RunDestructivePatches();
+			Plant_Patch.RunNonDestructivePatches();
             PlayLog_Patch.RunDestructivePatches();
             PortraitRenderer_Patch.RunDestructivePatches();
             PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
