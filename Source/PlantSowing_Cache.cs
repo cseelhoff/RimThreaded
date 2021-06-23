@@ -11,6 +11,8 @@ namespace RimThreaded
     {
 		[ThreadStatic] private static HashSet<IntVec3> retrunedThings;
 
+		public static Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingHarvestCellsMapDict = new Dictionary<Map, List<HashSet<IntVec3>[]>>();
+
 		public static void ReregisterObject(Map map, IntVec3 location, Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict)
         {			
 			List<HashSet<IntVec3>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);

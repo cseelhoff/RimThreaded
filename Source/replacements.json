@@ -98,7 +98,9 @@
                     "FieldName": "mapEdgeCellsSize"
                 },
                 {
-                    "FieldName": "mapSingleEdgeCells"
+                    "FieldName": "mapSingleEdgeCells",                    
+                    "PatchedClassName": "RimThreaded.CellFinder_Patch",
+                    "SelfInitialized": true
                 },
                 {
                     "FieldName": "mapSingleEdgeCellsSize"
@@ -907,6 +909,14 @@
                 },
                 {
                     "FieldName": "openSet"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.ThingSetMaker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "thingsBeingGeneratedNow"
                 }
             ]
         }

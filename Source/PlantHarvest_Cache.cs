@@ -10,6 +10,31 @@ namespace RimThreaded
     class PlantHarvest_Cache
 	{
 		[ThreadStatic] private static HashSet<IntVec3> retrunedThings;
+		public static void ReregisterObject(Map map, IntVec3 location, Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict)
+		{
+			List<HashSet<IntVec3>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);
+			RemoveObjectFromAwaitingActionHashSets(map, location, awaitingActionZoomLevels);
+			AddObjectToActionableObjects(map, location, awaitingActionZoomLevels);
+		}
+		public static void RemoveObjectFromAwaitingActionHashSets(Map map, IntVec3 location, List<HashSet<IntVec3>[]> awaitingActionZoomLevels)
+		{
+			int jumboCellWidth;
+			int mapSizeX = map.Size.x;
+			int mapSizeZ = map.Size.z;
+			int zoomLevel;
+			zoomLevel = 0;
+			do
+			{
+				jumboCellWidth = getJumboCellWidth(zoomLevel);
+				int cellIndex = CellToIndexCustom(location, mapSizeX, jumboCellWidth);
+				HashSet<IntVec3> hashset = awaitingActionZoomLevels[zoomLevel][cellIndex];
+				if (hashset != null)
+				{
+					hashset.Remove(location);
+				}
+				zoomLevel++;
+			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
+		}
 
 		public static IEnumerable<IntVec3> GetClosestActionableLocations(Pawn pawn, Map map, Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict)
 		{

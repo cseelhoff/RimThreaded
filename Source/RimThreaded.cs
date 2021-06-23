@@ -185,6 +185,7 @@ namespace RimThreaded
         }
         public static void InitializeAllThreadStatics()
         {
+            CellFinder_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             Dijkstra_Patch<IntVec3>.InitializeThreadStatics();
             Dijkstra_Patch<Region>.InitializeThreadStatics();

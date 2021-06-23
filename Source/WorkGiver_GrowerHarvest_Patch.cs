@@ -12,7 +12,7 @@ namespace RimThreaded
 		internal static IntVec3 ClosestLocationReachable(WorkGiver_GrowerHarvest workGiver_GrowerHarvest, Pawn pawn)
 		{
 			Danger maxDanger = pawn.NormalMaxDanger();
-			bool forced = false;
+			//bool forced = false;
 			Map map = pawn.Map;
 			ZoneManager zoneManager = pawn.Map.zoneManager;
 			foreach (IntVec3 actionableLocation in PlantHarvest_Cache.GetClosestActionableLocations(pawn, map, awaitingHarvestCellsMapDict))

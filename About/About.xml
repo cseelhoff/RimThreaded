@@ -10,8 +10,10 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.4.0 - Tatooine Moisture Farm
+    Version 2.4.1 - Tatooine Moisture Farm
     -Optimized Performance for Harvesting Job
+    -Fixed Caravan not being able to leave map bug #564
+    -Fixed issue with multiple trade ships arriving concurrently
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
