@@ -7,15 +7,13 @@ namespace RimThreaded
 {
     class WorkGiver_GrowerHarvest_Patch
     {
-		public static Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingHarvestCellsMapDict = new Dictionary<Map, List<HashSet<IntVec3>[]>>();
-
 		internal static IntVec3 ClosestLocationReachable(WorkGiver_GrowerHarvest workGiver_GrowerHarvest, Pawn pawn)
 		{
 			Danger maxDanger = pawn.NormalMaxDanger();
 			//bool forced = false;
 			Map map = pawn.Map;
 			ZoneManager zoneManager = pawn.Map.zoneManager;
-			foreach (IntVec3 actionableLocation in PlantHarvest_Cache.GetClosestActionableLocations(pawn, map, awaitingHarvestCellsMapDict))
+			foreach (IntVec3 actionableLocation in PlantHarvest_Cache.GetClosestActionableLocations(pawn, map, PlantHarvest_Cache.awaitingHarvestCellsMapDict))
 			{
 				List<Thing> thingsAtLocation = GridsUtility.GetThingList(actionableLocation, map);
 				foreach (Thing thingAtLocation in thingsAtLocation)
@@ -46,6 +44,7 @@ namespace RimThreaded
 				//}
 				if (!workGiver_GrowerHarvest.HasJobOnCell(pawn, actionableLocation))
 				{
+					PlantHarvest_Cache.ReregisterObject(pawn.Map, actionableLocation, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
 					continue;
 				}
 				if (!pawn.CanReach(actionableLocation, PathEndMode.OnCell, maxDanger))

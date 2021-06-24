@@ -14,8 +14,8 @@ namespace RimThreaded
 
         public static void set_Growth(Plant __instance, float value)
         {
-            if (__instance.HarvestableNow)
-                PlantHarvest_Cache.ReregisterObject(__instance.Map, __instance.Position, PlantSowing_Cache.awaitingHarvestCellsMapDict);
+            if (__instance.Map != null && __instance.LifeStage == PlantLifeStage.Mature)
+                PlantHarvest_Cache.ReregisterObject(__instance.Map, __instance.Position, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
         }
     }
 }

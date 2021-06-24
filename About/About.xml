@@ -10,10 +10,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.4.1 - Tatooine Moisture Farm
-    -Optimized Performance for Harvesting Job
-    -Fixed Caravan not being able to leave map bug #564
-    -Fixed issue with multiple trade ships arriving concurrently
+    Version 2.4.2 - The Lost Ewok Farmer
+    -Fixed bug with Trees not spawning
+    -Fixed bug with colonists not harvesting mature crops
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
@@ -69,5 +68,6 @@
     <li>pyrce.terrain.movement.modkit</li>
     <li>mlie.prisonerarena</li>
     <li>rwmt.Multiplayer</li>
+    <li>zetrith.prepatcher</li>
   </incompatibleWith>
 </ModMetaData>

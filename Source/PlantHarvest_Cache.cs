@@ -10,6 +10,8 @@ namespace RimThreaded
     class PlantHarvest_Cache
 	{
 		[ThreadStatic] private static HashSet<IntVec3> retrunedThings;
+
+		public static Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingHarvestCellsMapDict = new Dictionary<Map, List<HashSet<IntVec3>[]>>();
 		public static void ReregisterObject(Map map, IntVec3 location, Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict)
 		{
 			List<HashSet<IntVec3>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(awaitingActionMapDict, map);
@@ -66,7 +68,7 @@ namespace RimThreaded
 				ZposOfJumboCell = position.z / jumboCellWidth; //assuming square map
 				if (zoomLevel == 0)
 				{
-					cellIndex = CellXZToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
+					cellIndex = CellXZToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellColumnsInMap);
 					HashSet<IntVec3> objectsAtCell = objectsGrid[cellIndex];
 					if (objectsAtCell != null && objectsAtCell.Count > 0)
 					{
