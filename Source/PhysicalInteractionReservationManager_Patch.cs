@@ -63,6 +63,7 @@ namespace RimThreaded
                     {
                         if (pawnToJob.TryRemove(claimant, out _))
                         {
+                            PlantHarvest_Cache.ReregisterObject(claimant.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
                             /*
                             if (pawnToJob.Count == 0)
                             {
@@ -137,6 +138,8 @@ namespace RimThreaded
                 instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
 
             targetToPawnToJob.TryRemove(target, out _);
+            if(target !=null && target.Thing !=null && target.Thing.Map != null)
+                PlantHarvest_Cache.ReregisterObject(target.Thing.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
             return false;
         }
 
@@ -155,6 +158,7 @@ namespace RimThreaded
                         {
                             pawnToJob.TryRemove(claimant, out _);
                             targetToPawnToJob.TryRemove(key, out _);
+                            PlantHarvest_Cache.ReregisterObject(claimant.Map, key.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
                         }
                     }                    
                 }
@@ -175,6 +179,7 @@ namespace RimThreaded
                 {
                     pawnToJob.TryRemove(claimant, out _);
                     targetToPawnToJob.TryRemove(key, out _);
+                    PlantHarvest_Cache.ReregisterObject(claimant.Map, key.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
                 }
             }
             return false;

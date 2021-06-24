@@ -11,7 +11,7 @@ namespace RimThreaded
 		{
 			Type original = typeof(PlayLog);
 			Type patched = typeof(PlayLog_Patch);
-			//RimThreadedHarmony.Prefix(original, patched, "Add");
+			RimThreadedHarmony.Prefix(original, patched, "Add");
 			RimThreadedHarmony.Prefix(original, patched, "RemoveEntry");
 			//RimThreadedHarmony.Prefix(original, patched, "AnyEntryConcerns");
 		}

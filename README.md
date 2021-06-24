@@ -38,6 +38,10 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 2.4.2 - The Lost Ewok Farmer
+-Fixed bug with Trees not spawning  
+-Fixed bug with colonists not harvesting mature crops  
+
 Version 2.4.1 - Tatooine Moisture Farm  
 -Optimized Performance for Harvesting Job  
 -Fixed Caravan not being able to leave map bug #564  
