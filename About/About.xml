@@ -62,6 +62,7 @@
   </modDependencies>
   <incompatibleWith>
     <li>krkr.rocketman</li>
+    <li>qarsoonmeel.dreamersdream</li>
     <li>jecrell.doorsexpanded</li>
     <li>tachyonite.pawnmorpherpublic</li>
     <li>vanillaexpanded.vee</li>
