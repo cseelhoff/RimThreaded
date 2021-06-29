@@ -10,8 +10,8 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.4.3 - A long long time ago, in a galaxy with working plant harvesting...
-    -Fixed another bug with colonists not harvesting mature crops
+    Version 2.4.4 - A long long time ago, in a galaxy with working plant harvesting...
+    -Optimized PhysicalInteractionReservationManager
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 

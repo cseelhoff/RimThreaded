@@ -38,10 +38,13 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 2.4.4 - Free Wookie Hugs
+-Optimized PhysicalInteractionReservationManager_Patch
+
 Version 2.4.3 - A long long time ago, in a galaxy with working plant harvesting...  
 -Fixed another bug with colonists not harvesting mature crops  
 
-Version 2.4.2 - The Lost Ewok Farmer
+Version 2.4.2 - The Lost Ewok Farmer  
 -Fixed bug with Trees not spawning  
 -Fixed bug with colonists not harvesting mature crops  
 
