@@ -654,8 +654,15 @@ namespace RimThreaded
         public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
 		public static void TranspileFieldReplacements(MethodBase original)
 		{
+#if DEBUG
 			Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
+#else
+			if (Prefs.LogVerbose)
+			{
+				Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
+			}
 			harmony.Patch(original, transpiler: replaceFieldsHarmonyTranspiler);
+#endif
 		}
 
 		public static void TranspileLockAdd3(Type original, string methodName, Type[] origType = null)
