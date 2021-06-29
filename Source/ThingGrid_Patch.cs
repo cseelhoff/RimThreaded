@@ -12,7 +12,7 @@ namespace RimThreaded
             new Dictionary<Map, Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>>();
         // Map, Scanner, points, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
         public static Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>> thingBillPoints = new Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>>();
-
+        
         private static int CellToIndexCustom(IntVec3 c, int mapSizeX, int cellSize)
         {
             return (mapSizeX * c.z + c.x) / cellSize;
@@ -48,17 +48,18 @@ namespace RimThreaded
                 lock (__instance)
                 {
                     __instance.thingGrid[index].Add(t);
-                    if (t.def.EverHaulable)
+                }
+                if (t.def.EverHaulable)
+                {
+                    HaulingCache.RegisterHaulableItem(t);
+                }
+                if(t is Building_PlantGrower building_PlantGrower)
+                {
+                    foreach (IntVec3 plantableLocation in building_PlantGrower.OccupiedRect())
                     {
-                        HaulingCache.RegisterHaulableItem(t);
+                        PlantSowing_Cache.ReregisterObject(t.Map, plantableLocation, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                     }
-                    if(t is Building_PlantGrower building_PlantGrower)
-                    {
-                        foreach (IntVec3 plantableLocation in building_PlantGrower.OccupiedRect())
-                        {
-                            PlantSowing_Cache.ReregisterObject(t.Map, plantableLocation, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
-                        }
-                    }
+                }
                     /*
                     if (!thingBillPoints.TryGetValue(t.def, out Dictionary<WorkGiver_Scanner, float> billPointsDict))
                     {
@@ -82,7 +83,7 @@ namespace RimThreaded
                         } while (power2 < mapSizeX || power2 < mapSizeZ);
                     }
                     */
-                }
+                //}
             }
             return false;
         }
@@ -99,34 +100,42 @@ namespace RimThreaded
             int index = this_map.cellIndices.CellToIndex(c);
             List<Thing>[] thingGridInstance = __instance.thingGrid;
             List<Thing> thingList = thingGridInstance[index];
+            List<Thing> newThingList = null;
             if (thingList.Contains(t))
             {
+                bool found = false;
                 lock (__instance)
                 {
                     thingList = thingGridInstance[index];
                     if (thingList.Contains(t))
                     {
-                        List<Thing> newThingList = new List<Thing>(thingList);
+                        found = true;
+                        newThingList = new List<Thing>(thingList);
                         newThingList.Remove(t);
                         thingGridInstance[index] = newThingList;
+                    }
+                }
+                if (found)
+                {
+                    if (t.def.EverHaulable)
+                    {
+                        HaulingCache.DeregisterHaulableItem(t);
+                    }
 
-                        if (t.def.EverHaulable)
+                    if (c.GetZone(__instance.map) is Zone_Growing zone)
+                        PlantSowing_Cache.ReregisterObject(zone.Map, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+
+                    foreach (Thing thing2 in newThingList)
+                    {
+                        if (thing2 is Building_PlantGrower building_PlantGrower)
                         {
-                            HaulingCache.DeregisterHaulableItem(t);
-                        }
-                        
-                        if(c.GetZone(__instance.map) is Zone_Growing zone)
-                            PlantSowing_Cache.ReregisterObject(zone.Map, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
-
-                        foreach (Thing thing2 in newThingList) {
-                            if (thing2 is Building_PlantGrower building_PlantGrower)
+                            foreach (IntVec3 plantableLocation in building_PlantGrower.OccupiedRect())
                             {
-                                foreach (IntVec3 plantableLocation in building_PlantGrower.OccupiedRect())
-                                {
-                                    PlantSowing_Cache.ReregisterObject(building_PlantGrower.Map, plantableLocation, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
-                                }
+                                PlantSowing_Cache.ReregisterObject(building_PlantGrower.Map, plantableLocation, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                             }
                         }
+                    }
+                }
                         /*
                         int mapSizeX = this_map.Size.x;
                         int mapSizeZ = this_map.Size.z;
@@ -155,8 +164,8 @@ namespace RimThreaded
                             } while (power2 < mapSizeX || power2 < mapSizeZ);
                         }
                         */
-                    }
-                }
+                    //}
+                //}
             }
 
             return false;

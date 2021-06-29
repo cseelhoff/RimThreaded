@@ -204,21 +204,25 @@ namespace RimThreaded
 
 		public static void Notify_AddedCell(SlotGroup __instance, IntVec3 c)
 		{
-			NewStockpileCreatedOrMadeUnfull(__instance);
+			Map map = __instance.parent.Map;
+			NewStockpileCreatedOrMadeUnfull(__instance, map);
 		}
 
 		public static void Notify_SlotGroupChanged(ListerHaulables __instance, SlotGroup sg)
 		{
-			NewStockpileCreatedOrMadeUnfull(sg);
+			Map map = __instance.map;
+			if(map == null) 
+				map = sg.parent.Map;
+			NewStockpileCreatedOrMadeUnfull(sg, map);
 		}
 
 
-		public static void NewStockpileCreatedOrMadeUnfull(SlotGroup __instance)
+		public static void NewStockpileCreatedOrMadeUnfull(SlotGroup __instance, Map map)
         {
 			if (Current.ProgramState == ProgramState.Playing)
 			{
-				Map map = __instance.parent.Map;
-				int storagePriorityCount = Enum.GetValues(typeof(StoragePriority)).Length;
+				//Map map = __instance.parent.Map;
+				//int storagePriorityCount = Enum.GetValues(typeof(StoragePriority)).Length;
 				HashSet<Thing>[] waitingForZoneBetterThanArray = getWaitingForZoneBetterThan(map);
 				StorageSettings settings = __instance.Settings;
 

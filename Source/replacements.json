@@ -237,6 +237,35 @@
             ]
         },
         {
+            "ClassName": "Verse.GrammarResolverSimple",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpResultBuffer"
+                },
+                {
+                    "FieldName": "tmpSymbolBuffer"
+                },
+                {
+                    "FieldName": "tmpSymbolBuffer_objectLabel"
+                },
+                {
+                    "FieldName": "tmpSymbolBuffer_subSymbol"
+                },
+                {
+                    "FieldName": "tmpSymbolBuffer_args"
+                },
+                {
+                    "FieldName": "tmpArgsLabels"
+                },
+                {
+                    "FieldName": "tmpArgsObjects"
+                },
+                {
+                    "FieldName": "tmpArg"
+                }
+            ]
+        },
+        {
             "ClassName": "Verse.AI.HaulAIUtility",
             "ThreadStatics": [
                 {
@@ -917,6 +946,38 @@
             "ThreadStatics": [
                 {
                     "FieldName": "thingsBeingGeneratedNow"
+                }
+            ]
+        },
+        {
+            "ClassName": "Verse.ColoredText",
+            "ThreadStatics": [
+                {
+                    "FieldName": "resultBuffer"
+                },
+                {
+                    "FieldName": "tagBuffer"
+                },
+                {
+                    "FieldName": "argBuffer"
+                },
+                {
+                    "FieldName": "cache"
+                },
+                {
+                    "FieldName": "capStage"
+                },
+                {
+                    "FieldName": "DaysRegex"
+                },
+                {
+                    "FieldName": "HoursRegex"
+                },
+                {
+                    "FieldName": "SecondsRegex"
+                },
+                {
+                    "FieldName": "ColonistCountRegex"
                 }
             ]
         }

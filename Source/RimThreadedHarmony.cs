@@ -57,16 +57,16 @@ namespace RimThreaded
 			Dijkstra_Patch_RunNonDestructivePatches();
 			PathFinder_Patch.AddFieldReplacements();
 			Region_Patch.AddFieldReplacements();
-			replaceFields.Add(Method(typeof(Time), "get_realtimeSinceStartup"), Method(typeof(Time_Patch), "get_realtimeSinceStartup"));
+			replaceFields.Add(Method(typeof(Time), "get_realtimeSinceStartup"), Method(typeof(Time_Patch), nameof(Time_Patch.get_realtimeSinceStartup)));
 #if DEBUG
 			Material_Patch.RunDestructivePatches();
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
-			replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), "get_frameCount"));
-			replaceFields.Add(Method(typeof(Time), "get_time"), Method(typeof(Time_Patch), "get_time"));
-			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), "get_transform"));
-			replaceFields.Add(Method(typeof(Component), "get_gameObject"), Method(typeof(Component_Patch), "get_gameObject"));
-			replaceFields.Add(Method(typeof(GameObject), "get_transform"), Method(typeof(GameObject_Patch), "get_transform"));
+			replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), nameof(Time_Patch.get_frameCount)));
+			replaceFields.Add(Method(typeof(Time), "get_time"), Method(typeof(Time_Patch), nameof(Time_Patch.get_time)));
+			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), nameof(Component_Patch.get_transform)));
+			replaceFields.Add(Method(typeof(Component), "get_gameObject"), Method(typeof(Component_Patch), nameof(Component_Patch.get_gameObject)));
+			replaceFields.Add(Method(typeof(GameObject), "get_transform"), Method(typeof(GameObject_Patch), nameof(Component_Patch.get_transform)));
 			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes), Method(typeof(GameObject_Patch), "GetComponent"));
 			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes, new Type[] { typeof(AudioReverbFilter) }),
 			//	Method(typeof(GameObject_Patch), "GetComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioReverbFilter) }));
@@ -661,8 +661,8 @@ namespace RimThreaded
 			{
 				Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
 			}
-			harmony.Patch(original, transpiler: replaceFieldsHarmonyTranspiler);
 #endif
+			harmony.Patch(original, transpiler: replaceFieldsHarmonyTranspiler);
 		}
 
 		public static void TranspileLockAdd3(Type original, string methodName, Type[] origType = null)
@@ -763,6 +763,8 @@ namespace RimThreaded
             //Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //transpile not needed with new threadsafe simplepools
 			PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //TODO fix transpile for 1 of 2 methods try inside of try perhaps?
 			Zone_Growing_Patch.RunNonDestructivePatches();
+			CellFinder_Patch.RunNonDestructivePatches(); //explosion fix
+			GenGrid_Patch.RunNonDestructivePatches(); //explosion fix
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
 		}
@@ -813,6 +815,7 @@ namespace RimThreaded
             DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
             DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
             //FilthMaker_Patch.RunDestructivePatches(); replaces a few LINQ queries. possible perf improvement
+			FireUtility_Patch.RunDestructivePatches();
             //GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
             //GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
             GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
