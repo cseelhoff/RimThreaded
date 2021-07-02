@@ -84,6 +84,7 @@ namespace RimThreaded
             public Thread thread;
             public object[] safeFunctionRequest;
             public object safeFunctionResult;
+            public String caller;
         }
         static RimThreaded()
         {
@@ -466,6 +467,10 @@ namespace RimThreaded
                         break;
                     case Action<object[]> safeAction:
                         safeAction(parameters);
+                        break;
+                    // Getter without param for static Properties
+                    case Func<object> safeFunction:
+                        threadInfo.safeFunctionResult = safeFunction();
                         break;
                     default:
                         Log.Error("First parameter of thread-safe function request was not an action or function");
