@@ -84,7 +84,6 @@ namespace RimThreaded
             public Thread thread;
             public object[] safeFunctionRequest;
             public object safeFunctionResult;
-            public String caller;
         }
         static RimThreaded()
         {

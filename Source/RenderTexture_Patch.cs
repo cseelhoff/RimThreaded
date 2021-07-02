@@ -99,7 +99,6 @@ namespace RimThreaded
             if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
                 return true;
 
-            threadInfo.caller = "RenderTexture_Patch::get_active";
             threadInfo.safeFunctionRequest = new object[] { FuncGetActive2, new object[] { } };
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
