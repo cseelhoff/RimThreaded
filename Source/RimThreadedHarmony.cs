@@ -131,9 +131,9 @@ namespace RimThreaded
 			assemblies = (from a in AppDomain.CurrentDomain.GetAssemblies()
 						  where !a.FullName.StartsWith("Microsoft.VisualStudio")
 						  select a).ToList();
-			//string replacementsJsonPath = Path.Combine(((Mod)RimThreadedMod).intContent.RootDir, "replacements.json"); 
+			//string replacementsCachepath = Path.Combine(((Mod)RimThreadedMod).intContent.RootDir, "replacements.json"); 
 
-			string jsonString = File.ReadAllText(RimThreadedMod.replacementsJsonPath);
+			string jsonString = File.ReadAllText(RimThreadedMod.replacementsJsonpath);
             replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
 
             //IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
@@ -231,54 +231,113 @@ namespace RimThreaded
 		public static HashSet<string> fieldFullNames = new HashSet<string>();
 		public static HashSet<string> allStaticFieldNames = new HashSet<string>();
 		//public static bool intializersReady = false;
-		private static void ApplyFieldReplacements()
+		private static void ApplyFieldReplacements() /* TODO: BUILDING A CACHE FOR EVERY DDL */
         {
-            foreach (Assembly assembly in assemblies)
+			List<MethodBase> MethodsFromCache = new List<MethodBase>();
+			foreach (Assembly assembly in assemblies)
             {
-                if (assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
-				{
-					Type[] types = GetTypesFromAssembly(assembly);
-					foreach (Type type in types)
+                if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache, replaceFields))
+                {
+					foreach (MethodBase method in MethodsFromCache)
                     {
-						List<MethodBase> allMethods = new List<MethodBase>();
-						allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));
-						allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
+						Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
+						TranspileFieldReplacements(method);
+						//Log.Message("Transpiling from cache:");
+					}
+                }
+                else
+                {
+					if (assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+					{
+						// IF CACHE EXISTS FOR SPECIFIC ASSEMBLY GET FROM CACHE ELSE PASS
+						Type[] types = GetTypesFromAssembly(assembly);
+						foreach (Type type in types)
+						{
+							List<MethodBase> allMethods = new List<MethodBase>();
+							allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));//==all??
+							allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
 
-						foreach (MethodBase method in allMethods)
-                        {
-							if (method.IsDeclaredMember())
+							foreach (MethodBase method in allMethods)
 							{
-								try {
-									IEnumerable<KeyValuePair<OpCode, object>> codeInstructions = PatchProcessor.ReadMethodBody(method);
-									foreach (KeyValuePair<OpCode, object> codeInstruction in codeInstructions)
+								if (method.IsDeclaredMember())
+								{
+									try
 									{
-										if (codeInstruction.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
+										IEnumerable<KeyValuePair<OpCode, object>> codeInstructions = PatchProcessor.ReadMethodBody(method);
+										foreach (KeyValuePair<OpCode, object> codeInstruction in codeInstructions)
 										{
-											TranspileFieldReplacements(method);
-											break;
-										}
-										if (codeInstruction.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
-										{
-											TranspileFieldReplacements(method);
-											break;
+											if (codeInstruction.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
+											{
+												AssemblyCache.AddToCache(assembly.ManifestModule.ModuleVersionId.ToString(), method, type);
+												TranspileFieldReplacements(method);
+												break;
+											}
+											if (codeInstruction.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
+											{
+												AssemblyCache.AddToCache(assembly.ManifestModule.ModuleVersionId.ToString(), method , type);
+												TranspileFieldReplacements(method);
+												break;
+											}
 										}
 									}
-								} catch(NotSupportedException) {}
+									catch (NotSupportedException) { }
+								}
 							}
-                        }
-                    }
-                }
-            }
+						}
+						AssemblyCache.SaveJson();
+					}
+				}
+			}
+			
+				/*foreach (Assembly assembly in assemblies)
+				{
+					if (assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+					{
+						// IF CACHE EXISTS FOR SPECIFIC ASSEMBLY GET FROM CACHE ELSE PASS
+						Type[] types = GetTypesFromAssembly(assembly);
+						foreach (Type type in types)
+						{
+							List<MethodBase> allMethods = new List<MethodBase>();
+							allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));
+							allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
 
-            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
-            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
-            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
-            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
-			Type pawnType = typeof(Pawn);
+							foreach (MethodBase method in allMethods)
+							{
+								if (method.IsDeclaredMember())
+								{
+									try {
+										IEnumerable<KeyValuePair<OpCode, object>> codeInstructions = PatchProcessor.ReadMethodBody(method);
+										foreach (KeyValuePair<OpCode, object> codeInstruction in codeInstructions)
+										{
+											if (codeInstruction.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
+											{
+												//ADD TO CACHE ASSEMBLY -> List<MethodBase>
+												TranspileFieldReplacements(method);
+												break;
+											}
+											if (codeInstruction.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
+											{
+												//ADD TO CACHE
+												TranspileFieldReplacements(method);
+												break;
+											}
+										}
+									} catch(NotSupportedException) {}
+								}
+							}
+						}
+					}
+				}*/
+
+				//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+				//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
+				//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+				//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
+				//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+				//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
+				//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+				//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
+				Type pawnType = typeof(Pawn);
 			Type thoughtsType = typeof(CachedSocialThoughts);
 			string removeAllString = nameof(GenCollection.RemoveAll);
             MethodInfo removeAllGeneric = GetDeclaredMethods(typeof(GenCollection)).First(method => method.Name == removeAllString && method.GetGenericArguments().Count() == 2);
@@ -657,7 +716,6 @@ namespace RimThreaded
 			Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
 			harmony.Patch(original, transpiler: replaceFieldsHarmonyTranspiler);
 		}
-
 		public static void TranspileLockAdd3(Type original, string methodName, Type[] origType = null)
 		{
 			harmony.Patch(Method(original, methodName, origType), transpiler: add3Transpiler);
