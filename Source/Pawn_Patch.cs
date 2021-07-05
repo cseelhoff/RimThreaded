@@ -17,8 +17,17 @@ namespace RimThreaded
         {
             Type original = typeof(Pawn);
             Type patched = typeof(Pawn_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "Destroy"); //causes strange crash to desktop without error log
-            RimThreadedHarmony.Prefix(original, patched, "VerifyReservations");
+            RimThreadedHarmony.Prefix(original, patched, nameof(Destroy)); //causes strange crash to desktop without error log
+            RimThreadedHarmony.Prefix(original, patched, nameof(VerifyReservations));
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_Inspired));
+        }
+
+
+        public static bool get_Inspired(Pawn __instance, ref bool __result)
+        {
+            Pawn_MindState mindState = __instance.mindState;
+            __result = !__instance.Dead && mindState != null && mindState.inspirationHandler.Inspired;
+            return false;
         }
 
         public static bool Destroy(Pawn __instance, DestroyMode mode = DestroyMode.Vanish)

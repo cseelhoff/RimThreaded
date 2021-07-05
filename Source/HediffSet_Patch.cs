@@ -20,23 +20,42 @@ namespace RimThreaded
         {
             Type original = typeof(HediffSet);
             Type patched = typeof(HediffSet_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "AddDirect");
-            RimThreadedHarmony.Prefix(original, patched, "Clear");
-            RimThreadedHarmony.Prefix(original, patched, "CacheMissingPartsCommonAncestors");
+            RimThreadedHarmony.Prefix(original, patched, nameof(AddDirect));
+            RimThreadedHarmony.Prefix(original, patched, nameof(Clear));
+            RimThreadedHarmony.Prefix(original, patched, nameof(CacheMissingPartsCommonAncestors));
+            RimThreadedHarmony.Prefix(original, patched, nameof(HasDirectlyAddedPartFor));
+            RimThreadedHarmony.Prefix(original, patched, nameof(PartIsMissing));
         }
         internal static void RunNonDestructivePatches()
         {
             Type original = typeof(HediffSet);
             Type patched = typeof(HediffSet_Patch);
-            RimThreadedHarmony.Postfix(original, patched, "DirtyCache", "DirtyCacheSetInvisbility");
+            RimThreadedHarmony.Postfix(original, patched, "DirtyCache", nameof(DirtyCacheSetInvisbility));
         }
 
         public static bool PartIsMissing(HediffSet __instance, ref bool __result, BodyPartRecord part)
         {
-            List<Hediff> hediffsSnapshot = __instance.hediffs;
-            for (int index = 0; index < hediffsSnapshot.Count; ++index)
+            List<Hediff> hediffs = __instance.hediffs;
+            for (int index = 0; index < hediffs.Count; ++index)
             {
-                if (hediffsSnapshot[index].Part == part && hediffsSnapshot[index] is Hediff_MissingPart)
+                Hediff hediff = hediffs[index];
+                if (hediff != null && hediff.Part == part && hediff is Hediff_MissingPart)
+                {
+                    __result = true;
+                    return false;
+                }
+            }
+            __result = false;
+            return false;
+        }
+
+        public static bool HasDirectlyAddedPartFor(HediffSet __instance, ref bool __result, BodyPartRecord part)
+        {
+            List<Hediff> hediffs = __instance.hediffs;
+            for (int index = 0; index < hediffs.Count; ++index)
+            {
+                Hediff hediff = hediffs[index];
+                if (hediff != null && hediff.Part == part && hediff is Hediff_AddedPart)
                 {
                     __result = true;
                     return false;

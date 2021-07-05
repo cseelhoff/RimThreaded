@@ -765,6 +765,7 @@ namespace RimThreaded
 			Zone_Growing_Patch.RunNonDestructivePatches();
 			CellFinder_Patch.RunNonDestructivePatches(); //explosion fix
 			GenGrid_Patch.RunNonDestructivePatches(); //explosion fix
+			ThinkNode_JoinVoluntarilyJoinableLord_Patch.RunDestructivePatches(); //explosion fix
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
 		}
@@ -802,7 +803,7 @@ namespace RimThreaded
 			WorldObjectsHolder_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
 			WorldPawns_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
 
-
+			Archive_Patch.RunDestructivePatches(); //explosions fix
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
             AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			Battle_Patch.RunDestructivePatches(); //added lock for battle - could use linkedlist
@@ -810,7 +811,8 @@ namespace RimThreaded
 			Building_PlantGrower_Patch.RunNonDestructivePatches();
 			CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
-            DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
+			Corpse_Patch.RunDestructivePatches(); //explosions fix
+			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
             DesignationManager_Patch.RunDestructivePatches(); //added for development build
             DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
             DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
@@ -826,15 +828,18 @@ namespace RimThreaded
             HediffSet_Patch.RunDestructivePatches();
             ImmunityHandler_Patch.RunDestructivePatches();
             ListerThings_Patch.RunDestructivePatches();
-            JobGiver_Work_Patch.RunDestructivePatches();
-            //JobMaker_Patch.RunDestructivePatches(); should be fixed by the simplepool patch
-            LongEventHandler_Patch.RunDestructivePatches(); //TODO - could use field replacement for conncurrentqueue
+			JobGiver_ExitMap_Patch.RunDestructivePatches(); //explosions fix
+			JobGiver_Work_Patch.RunDestructivePatches();
+			JobGiver_WanderNearDutyLocation_Patch.RunDestructivePatches();
+			//JobMaker_Patch.RunDestructivePatches(); should be fixed by the simplepool patch
+			LongEventHandler_Patch.RunDestructivePatches(); //TODO - could use field replacement for conncurrentqueue
             Lord_Patch.RunDestructivePatches();
             LordManager_Patch.RunDestructivePatches();
             LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. ThreadSafeLinkedList
 			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
             MemoryThoughtHandler_Patch.RunDestructivePatches();
-            Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
+			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix
+			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
             Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
             Pawn_PlayerSettings_Patch.RunDestructivePatches();
             Pawn_RelationsTracker_Patch.RunDestructivePatches();
@@ -858,13 +863,15 @@ namespace RimThreaded
             RegionLink_Patch.RunDestructivePatches();
             RegionMaker_Patch.RunDestructivePatches();
             ResourceCounter_Patch.RunDestructivePatches();
+			RulePackDef_Patch.RunDestructivePatches(); //explosions fix - grammar
 			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
             ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
             SteadyEnvironmentEffects_Patch.RunDestructivePatches();
             StoryState_Patch.RunDestructivePatches(); //WrapMethodInInstanceLock
             TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
-            ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
+			Thing_Patch.RunDestructivePatches();
+			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
             TileTemperaturesComp_Patch.RunDestructivePatches(); //TODO - good simple transpile candidate
             UniqueIDsManager_Patch.RunDestructivePatches(); // Simple use of Interlocked.Increment
             Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?

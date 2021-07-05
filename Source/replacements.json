@@ -968,16 +968,47 @@
                     "FieldName": "capStage"
                 },
                 {
-                    "FieldName": "DaysRegex"
+                    "FieldName": "DaysRegex",
+                    "PatchedClassName": "RimThreaded.ColoredText_Patch",
+                    "SelfInitialized": true
                 },
                 {
-                    "FieldName": "HoursRegex"
+                    "FieldName": "HoursRegex",
+                    "PatchedClassName": "RimThreaded.ColoredText_Patch",
+                    "SelfInitialized": true
                 },
                 {
-                    "FieldName": "SecondsRegex"
+                    "FieldName": "SecondsRegex",
+                    "PatchedClassName": "RimThreaded.ColoredText_Patch",
+                    "SelfInitialized": true
                 },
                 {
-                    "FieldName": "ColonistCountRegex"
+                    "FieldName": "ColonistCountRegex",
+                    "PatchedClassName": "RimThreaded.ColoredText_Patch",
+                    "SelfInitialized": true
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.Pawn_ApparelTracker",
+            "ThreadStatics": [
+                {
+                    "FieldName": "tmpApparel",
+                    "PatchedClassName": "RimThreaded.Pawn_ApparelTracker_Patch",
+                },
+                {
+                    "FieldName": "tmpApparelList"
+                }
+            ]
+        },
+        {
+            "ClassName": "RimWorld.RoomStatWorker_Beauty",
+            "ThreadStatics": [
+                {
+                    "FieldName": "countedThings"
+                },
+                {
+                    "FieldName": "countedAdjCells"
                 }
             ]
         }

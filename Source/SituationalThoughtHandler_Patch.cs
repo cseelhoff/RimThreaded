@@ -84,11 +84,17 @@ namespace RimThreaded
         {
             try
             {
-                CachedSocialThoughts cachedSocialThoughts;
-                if (!__instance.cachedSocialThoughts.TryGetValue(otherPawn, out cachedSocialThoughts))
+                if (!__instance.cachedSocialThoughts.TryGetValue(otherPawn, out CachedSocialThoughts cachedSocialThoughts))
                 {
-                    cachedSocialThoughts = new CachedSocialThoughts();
-                    __instance.cachedSocialThoughts.Add(otherPawn, cachedSocialThoughts);
+                    lock (__instance.cachedSocialThoughts)
+                    {
+                        if (!__instance.cachedSocialThoughts.TryGetValue(otherPawn, out CachedSocialThoughts cachedSocialThoughts2))
+                        {
+                            cachedSocialThoughts2 = new CachedSocialThoughts();
+                            __instance.cachedSocialThoughts.Add(otherPawn, cachedSocialThoughts2);
+                        }
+                        cachedSocialThoughts = cachedSocialThoughts2;
+                    }
                 }
                 if (!cachedSocialThoughts.ShouldRecalculateState)
                     return false;

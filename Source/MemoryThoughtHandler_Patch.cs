@@ -12,10 +12,38 @@ namespace RimThreaded
         {
             Type original = typeof(MemoryThoughtHandler);
             Type patched = typeof(MemoryThoughtHandler_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "RemoveMemory");
-            //RimThreadedHarmony.Prefix(original, patched, "TryGainMemory", new Type[] { typeof(Thought_Memory), typeof(Pawn) });
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemoveMemory));
+            RimThreadedHarmony.Prefix(original, patched, nameof(NumMemoriesOfDef));
+            RimThreadedHarmony.Prefix(original, patched, nameof(NumMemoriesInGroup));
+            RimThreadedHarmony.Prefix(original, patched, "TryGainMemory", new Type[] { typeof(Thought_Memory), typeof(Pawn) });
         }
 
+        public static bool NumMemoriesOfDef(MemoryThoughtHandler __instance, ref int __result, ThoughtDef def)
+        {
+            int num = 0;
+            List<Thought_Memory> memories = __instance.memories;
+            for (int index = 0; index < memories.Count; ++index)
+            {
+                Thought_Memory memory = memories[index];
+                if (memory != null && memory.def == def)
+                    ++num;
+            }
+            __result = num;
+            return false;
+        }
+        public static bool NumMemoriesInGroup(MemoryThoughtHandler __instance, ref int __result, Thought_Memory group)
+        {
+            int num = 0;
+            List<Thought_Memory> memories = __instance.memories;
+            for (int index = 0; index < memories.Count; ++index)
+            {
+                Thought_Memory memory = memories[index];
+                if (memory != null && memory.GroupsWith((Thought)group))
+                    ++num;
+            }
+            __result = num;
+            return false;
+        }
         public static bool RemoveMemory(MemoryThoughtHandler __instance, Thought_Memory th)
         {
             lock (__instance)

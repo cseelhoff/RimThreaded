@@ -40,13 +40,18 @@ namespace RimThreaded
 			return zoomLevels[zoomLevel];
 		}
 
-		public static void RegisterHaulableItem(Thing haulableThing) {
+		public static void RegisterHaulableItem(Thing haulableThing)
+		{
+			Map map = haulableThing.Map;
+			if (map == null)
+			{
+				return;
+			}
+
 			if (haulableThing.IsForbidden(Faction.OfPlayer))
             {
 				return;
             }
-			Map map = haulableThing.Map;
-
 			//---SHOULD HELP WITH NOT HAULING ROCK CHUNKS---
 			if(!haulableThing.def.EverHaulable)
             {
@@ -164,19 +169,26 @@ namespace RimThreaded
 		{
 			if (!awaitingHaulingMapDict.TryGetValue(map, out List<HashSet<Thing>[]> awaitingHaulingZoomLevels))
 			{
-				awaitingHaulingZoomLevels = new List<HashSet<Thing>[]>();
-				int mapSizeX = map.Size.x;
-				int mapSizeZ = map.Size.z;
-				int jumboCellWidth;
-				int zoomLevel = 0;
-				do
+				lock (awaitingHaulingMapDict)
 				{
-					jumboCellWidth = getJumboCellWidth(zoomLevel);
-					int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, jumboCellWidth);
-					awaitingHaulingZoomLevels.Add(new HashSet<Thing>[numGridCells]);
-					zoomLevel++;
-				} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
-				awaitingHaulingMapDict[map] = awaitingHaulingZoomLevels;
+					if (!awaitingHaulingMapDict.TryGetValue(map, out List<HashSet<Thing>[]> awaitingHaulingZoomLevels2))
+					{
+						awaitingHaulingZoomLevels2 = new List<HashSet<Thing>[]>();
+						int mapSizeX = map.Size.x;
+						int mapSizeZ = map.Size.z;
+						int jumboCellWidth;
+						int zoomLevel = 0;
+						do
+						{
+							jumboCellWidth = getJumboCellWidth(zoomLevel);
+							int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, jumboCellWidth);
+							awaitingHaulingZoomLevels2.Add(new HashSet<Thing>[numGridCells]);
+							zoomLevel++;
+						} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
+						awaitingHaulingMapDict[map] = awaitingHaulingZoomLevels2;
+					}
+					awaitingHaulingZoomLevels = awaitingHaulingZoomLevels2;
+				}
 			}
 			return awaitingHaulingZoomLevels;
 		}
@@ -184,9 +196,13 @@ namespace RimThreaded
 
 		public static void DeregisterHaulableItem(Thing haulableThing)
 		{
-			int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
-			getWaitingForZoneBetterThan(haulableThing.Map)[storagePriority].Remove(haulableThing);
-			RemoveThingFromAwaitingHaulingHashSets(haulableThing);
+			Map map = haulableThing.Map;
+			if (map != null)
+			{
+				int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
+				getWaitingForZoneBetterThan(map)[storagePriority].Remove(haulableThing);
+				RemoveThingFromAwaitingHaulingHashSets(haulableThing);
+			}
 		}
 		private static HashSet<Thing>[] getWaitingForZoneBetterThan(Map map)
         {

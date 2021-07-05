@@ -125,8 +125,9 @@ namespace RimThreaded
                     if (c.GetZone(__instance.map) is Zone_Growing zone)
                         PlantSowing_Cache.ReregisterObject(zone.Map, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
 
-                    foreach (Thing thing2 in newThingList)
+                    for (int i = newThingList.Count - 1; i >= 0; i--)
                     {
+                        Thing thing2 = newThingList[i];
                         if (thing2 is Building_PlantGrower building_PlantGrower)
                         {
                             foreach (IntVec3 plantableLocation in building_PlantGrower.OccupiedRect())
