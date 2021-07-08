@@ -422,7 +422,7 @@ namespace RimThreaded
 			{
 				if (maxPawns > 1 && stackCount == -1)
 				{
-					Log.ErrorOnce("Reserving with maxPawns > 1 and stackCount = All; this will not have a useful effect (suppressing future warnings)", 83269, false);
+					Log.ErrorOnce("Reserving with maxPawns > 1 and stackCount = All; this will not have a useful effect (suppressing future warnings)", 83269);
 				}
 
 				if (job == null)
@@ -547,7 +547,7 @@ namespace RimThreaded
 				}
 			}
 			if (reservation1 == null && !target.ThingDestroyed)
-				Log.Warning("Tried to release " + target + " that wasn't reserved by " + claimant + ".", false);
+				Log.Warning("Tried to release " + target + " that wasn't reserved by " + claimant + ".");
 			else
 			{
 				lock (__instance)

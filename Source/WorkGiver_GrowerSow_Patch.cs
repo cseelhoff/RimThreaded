@@ -163,7 +163,7 @@ namespace RimThreaded
                 return false;
             }
 
-            if (!localWantedPlantDef.CanEverPlantAt_NewTemp(c, map) || !PlantUtility.GrowthSeasonNow(c, map, forSowing: true) || !pawn.CanReserve(c, 1, -1, null, forced))
+            if (!localWantedPlantDef.CanEverPlantAt(c, map) || !PlantUtility.GrowthSeasonNow(c, map, forSowing: true) || !pawn.CanReserve(c, 1, -1, null, forced))
             {
                 __result = null;
                 return false;

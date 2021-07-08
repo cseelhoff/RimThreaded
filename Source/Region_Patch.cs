@@ -19,7 +19,7 @@ namespace RimThreaded
             Type original = typeof(Region);
             Type patched = typeof(Region_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(DangerFor));
-            RimThreadedHarmony.Prefix(original, patched, "get_Room");
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_District));
         }
 
         internal static void InitializeThreadStatics()
@@ -48,11 +48,11 @@ namespace RimThreaded
             RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), regionTraverserReplacements);
         }
 
-        public static bool get_Room(Region __instance, ref Room __result)
+        public static bool get_District(Region __instance, ref District __result)
         {
             lock (RegionDirtyer_Patch.regionDirtyerLock)
             {
-                __result = __instance.roomInt;
+                __result = __instance.districtInt;
                 return false;
             }
         }
@@ -83,14 +83,14 @@ namespace RimThreaded
             }
             Danger danger = Danger.Unspecified;
             Room room = __instance.Room;
-            RoomGroup group = null;
+            District district = null;
             if (room != null)
             {
-                group = room.Group;
+                district = __instance.District;
             }
-            if (room != null && group != null)
+            if (room != null && district != null)
             {
-                float temperature = group.Temperature;
+                float temperature = room.Temperature;
                 FloatRange floatRange;
                 if (Current.ProgramState == ProgramState.Playing)
                 {

@@ -811,7 +811,6 @@ namespace RimThreaded
 			Building_PlantGrower_Patch.RunNonDestructivePatches();
 			CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
-			Corpse_Patch.RunDestructivePatches(); //explosions fix
 			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
             DesignationManager_Patch.RunDestructivePatches(); //added for development build
             DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
@@ -850,7 +849,6 @@ namespace RimThreaded
             PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			Plant_Patch.RunNonDestructivePatches();
             PlayLog_Patch.RunDestructivePatches();
-            PortraitRenderer_Patch.RunDestructivePatches();
             PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
             Rand_Patch.RunDestructivePatches(); //Simple
             Reachability_Patch.RunDestructivePatches();

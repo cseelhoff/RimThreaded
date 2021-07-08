@@ -15,7 +15,7 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(RemoveMemory));
             RimThreadedHarmony.Prefix(original, patched, nameof(NumMemoriesOfDef));
             RimThreadedHarmony.Prefix(original, patched, nameof(NumMemoriesInGroup));
-            RimThreadedHarmony.Prefix(original, patched, "TryGainMemory", new Type[] { typeof(Thought_Memory), typeof(Pawn) });
+            RimThreadedHarmony.Prefix(original, patched, nameof(TryGainMemory), new Type[] { typeof(Thought_Memory), typeof(Pawn) });
         }
 
         public static bool NumMemoriesOfDef(MemoryThoughtHandler __instance, ref int __result, ThoughtDef def)
@@ -63,7 +63,7 @@ namespace RimThreaded
 
         public static bool TryGainMemory(MemoryThoughtHandler __instance, Thought_Memory newThought, Pawn otherPawn = null)
         {
-            if (!ThoughtUtility.CanGetThought_NewTemp(__instance.pawn, newThought.def))
+            if (!ThoughtUtility.CanGetThought(__instance.pawn, newThought.def))
             {
                 return false;
             }

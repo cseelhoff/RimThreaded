@@ -8,7 +8,7 @@ namespace RimThreaded
 
 	public class GenTemperature_Patch
     {
-		[ThreadStatic] public static RoomGroup[] beqRoomGroups;
+		[ThreadStatic] public static Room[] beqRooms;
 
 		public static Dictionary<int, float> SeasonalShiftAmplitudeCache = new Dictionary<int, float>();
 		public static Dictionary<int, float> tileTemperature = new Dictionary<int, float>();
@@ -19,7 +19,7 @@ namespace RimThreaded
         private static WorldGrid worldGrid;
 		public static void InitializeThreadStatics()
         {
-			beqRoomGroups = new RoomGroup[4];
+			beqRooms = new Room[4];
 		}
 
 		public static void RunDestructivePatches()

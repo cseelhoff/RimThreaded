@@ -92,7 +92,7 @@ namespace RimThreaded
                 Map map = newDes.target.HasThing ? newDes.target.Thing.Map : __instance.map;
                 if (map == null)
                     return false;
-                MoteMaker.ThrowMetaPuffs(newDes.target.ToTargetInfo(map));
+                FleckMaker.ThrowMetaPuffs(newDes.target.ToTargetInfo(map));
             }
             return false;
         }

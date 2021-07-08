@@ -20,7 +20,7 @@ namespace RimThreaded
         {
             if (t.def.drawerType == DrawerType.None) return false;
             if (__instance.drawingNow)
-                Log.Warning("Cannot register drawable " + t + " while drawing is in progress. Things shouldn't be spawned in Draw methods.", false);
+                Log.Warning("Cannot register drawable " + t + " while drawing is in progress. Things shouldn't be spawned in Draw methods.");
             lock (__instance)
             {
                 __instance.drawThings.Add(t);
@@ -32,7 +32,7 @@ namespace RimThreaded
         {
             if (t.def.drawerType == DrawerType.None) return false;
             if (__instance.drawingNow)
-                Log.Warning("Cannot deregister drawable " + t + " while drawing is in progress. Things shouldn't be despawned in Draw methods.", false);
+                Log.Warning("Cannot deregister drawable " + t + " while drawing is in progress. Things shouldn't be despawned in Draw methods.");
             lock (__instance)
             {
                 HashSet<Thing> newDrawThings = new HashSet<Thing>(__instance.drawThings);

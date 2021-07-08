@@ -206,7 +206,7 @@ namespace RimThreaded
                 }
 
                 reg.valid = false;
-                reg.Room = null;
+                reg.District = null;
                 List<RegionLink> links = reg.links;
                 for (int i = 0; i < links.Count; i++)
                 {

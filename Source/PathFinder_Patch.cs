@@ -105,7 +105,7 @@ namespace RimThreaded
 
             if (traverseParms.mode == TraverseMode.ByPawn)
             {
-                if (!pawn.CanReach(dest, peMode, Danger.Deadly, traverseParms.canBash, traverseParms.mode))
+                if (!pawn.CanReach(dest, peMode, Danger.Deadly, traverseParms.canBashDoors, traverseParms.canBashFences, traverseParms.mode))
                 {
                     __result = PawnPath.NotFound;
                     return false;
@@ -119,7 +119,8 @@ namespace RimThreaded
 
             __instance.PfProfilerBeginSample(string.Concat("FindPath for ", pawn, " from ", start, " to ", dest, dest.HasThing ? (" at " + dest.Cell) : ""));
             __instance.cellIndices = __instance.map.cellIndices;
-            __instance.pathGrid = __instance.map.pathGrid;
+            __instance.pathingContext = __instance.map.pathing.For(traverseParms);
+            __instance.pathGrid = __instance.pathingContext.pathGrid;
             __instance.edificeGrid = __instance.map.edificeGrid.InnerArray;
             __instance.blueprintGrid = __instance.map.blueprintGrid.InnerArray;
             int x = dest.Cell.x;
@@ -132,7 +133,7 @@ namespace RimThreaded
             bool flag3 = !flag;
             CellRect destinationRect = __instance.CalculateDestinationRect(dest, peMode);
             bool flag4 = destinationRect.Width == 1 && destinationRect.Height == 1;
-            int[] array = __instance.map.pathGrid.pathGrid;
+            int[] array = __instance.pathGrid.pathGrid;
             TerrainDef[] topGrid = __instance.map.terrainGrid.topGrid;
             EdificeGrid edificeGrid = __instance.map.edificeGrid;
             int num2 = 0;
@@ -159,7 +160,7 @@ namespace RimThreaded
                 num8 = 13;
                 num9 = 18;
             }
-            __instance.CalculateAndAddDisallowedCorners(traverseParms, peMode, destinationRect);
+            __instance.CalculateAndAddDisallowedCorners(peMode, destinationRect);
             __instance.InitStatusesAndPushStartNode(ref curIndex, start);
             while (true)
             {
@@ -267,7 +268,7 @@ namespace RimThreaded
                     switch (i)
                     {
                         case 4:
-                            if (PathFinder.BlocksDiagonalMovement(curIndex - __instance.mapSizeX, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex - __instance.mapSizeX))
                             {
                                 if (flag7)
                                 {
@@ -277,7 +278,7 @@ namespace RimThreaded
                                 num15 += 70;
                             }
 
-                            if (PathFinder.BlocksDiagonalMovement(curIndex + 1, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex + 1))
                             {
                                 if (flag7)
                                 {
@@ -289,7 +290,7 @@ namespace RimThreaded
 
                             break;
                         case 5:
-                            if (PathFinder.BlocksDiagonalMovement(curIndex + __instance.mapSizeX, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex + __instance.mapSizeX))
                             {
                                 if (flag7)
                                 {
@@ -299,7 +300,7 @@ namespace RimThreaded
                                 num15 += 70;
                             }
 
-                            if (PathFinder.BlocksDiagonalMovement(curIndex + 1, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex + 1))
                             {
                                 if (flag7)
                                 {
@@ -311,7 +312,7 @@ namespace RimThreaded
 
                             break;
                         case 6:
-                            if (PathFinder.BlocksDiagonalMovement(curIndex + __instance.mapSizeX, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex + __instance.mapSizeX))
                             {
                                 if (flag7)
                                 {
@@ -321,7 +322,7 @@ namespace RimThreaded
                                 num15 += 70;
                             }
 
-                            if (PathFinder.BlocksDiagonalMovement(curIndex - 1, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex - 1))
                             {
                                 if (flag7)
                                 {
@@ -333,7 +334,7 @@ namespace RimThreaded
 
                             break;
                         case 7:
-                            if (PathFinder.BlocksDiagonalMovement(curIndex - __instance.mapSizeX, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex - __instance.mapSizeX))
                             {
                                 if (flag7)
                                 {
@@ -343,7 +344,7 @@ namespace RimThreaded
                                 num15 += 70;
                             }
 
-                            if (PathFinder.BlocksDiagonalMovement(curIndex - 1, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex - 1))
                             {
                                 if (flag7)
                                 {

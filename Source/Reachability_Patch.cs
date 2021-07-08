@@ -25,7 +25,7 @@ namespace RimThreaded
         {
             Type original = typeof(Reachability);
             Type patched = typeof(Reachability_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "CanReach", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
+            RimThreadedHarmony.Prefix(original, patched, nameof(CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
         }
 
         private static void QueueNewOpenRegion(Region region, Queue<Region> openQueueParam, HashSet<Region> regionsReached)
@@ -98,8 +98,8 @@ namespace RimThreaded
 
             if ((peMode == PathEndMode.OnCell || peMode == PathEndMode.Touch || peMode == PathEndMode.ClosestTouch) && traverseParams.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParams.mode != TraverseMode.PassAllDestroyableThingsNotWater)
             {
-                Room room = RegionAndRoomQuery.RoomAtFast(start, map);
-                if (room != null && room == RegionAndRoomQuery.RoomAtFast(dest.Cell, map))
+                District district = RegionAndRoomQuery.DistirctAtFast(start, map);
+                if (district != null && district == RegionAndRoomQuery.DistirctAtFast(dest.Cell, map))
                 {
                     __result = true;
                     return false;
@@ -120,10 +120,11 @@ namespace RimThreaded
             }
 
             dest = (LocalTargetInfo)GenPath.ResolvePathMode(traverseParams.pawn, dest.ToTargetInfo(map), ref peMode);
+            //working = true;
             try
             {
-                __instance.pathGrid = map.pathGrid;
-                PathGrid pathGrid = map.pathGrid;
+                __instance.pathGrid = map.pathing.For(traverseParams).pathGrid;
+                PathGrid pathGrid = __instance.pathGrid;
                 __instance.regionGrid = map.regionGrid;
                 RegionGrid regionGrid = map.regionGrid;
 
@@ -188,6 +189,7 @@ namespace RimThreaded
             }
             finally
             {
+                //working = false;
             }
         }
 
@@ -204,7 +206,7 @@ namespace RimThreaded
                         return BoolUnknown.True;
                     }
 
-                    switch (cache.CachedResultFor(startingRegionsParams[i].Room, destRegionsParams[j].Room, traverseParams))
+                    switch (cache.CachedResultFor(startingRegionsParams[i].District, destRegionsParams[j].District, traverseParams))
                     {
                         case BoolUnknown.True:
                             return BoolUnknown.True;
@@ -245,7 +247,7 @@ namespace RimThreaded
                         {
                             for (int k = 0; k < startingRegionsParam.Count; k++)
                             {
-                                cache.AddCachedResult(startingRegionsParam[k].Room, region2.Room, traverseParams, reachable: true);
+                                cache.AddCachedResult(startingRegionsParam[k].District, region2.District, traverseParams, reachable: true);
                             }
 
                             return true;
@@ -259,7 +261,7 @@ namespace RimThreaded
             {
                 for (int m = 0; m < destRegionsParam.Count; m++)
                 {
-                    cache.AddCachedResult(startingRegionsParam[l].Room, destRegionsParam[m].Room, traverseParams, reachable: false);
+                    cache.AddCachedResult(startingRegionsParam[l].District, destRegionsParam[m].District, traverseParams, reachable: false);
                 }
             }
             return false;

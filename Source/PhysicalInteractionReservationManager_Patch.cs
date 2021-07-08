@@ -111,21 +111,21 @@ namespace RimThreaded
                             }
                             else
                             {
-                                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.", false);
+                                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.");
                             }
                         } else
                         {
-                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.", false);
+                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.");
                         }
                     }
                     else
                     {
-                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.", false);
+                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.");
                     }
                 }
                 else
                 {
-                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.", false);
+                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.");
                 }
                 if (instancePawnToTargetToJob.TryGetValue(__instance, out Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>> pawnToTargetToJob))
                 {
@@ -141,22 +141,22 @@ namespace RimThreaded
                             }
                             else
                             {
-                                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.", false);
+                                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.");
                             }
                         }
                         else
                         {
-                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.", false);
+                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.");
                         }
                     }
                     else
                     {
-                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.", false);
+                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.");
                     }
                 }
                 else
                 {
-                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.", false);
+                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.");
                 }
             }
             return false;

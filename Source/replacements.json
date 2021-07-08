@@ -153,9 +153,6 @@
             "ClassName": "RimWorld.FoodUtility",
             "ThreadStatics": [
                 {
-                    "FieldName": "bestFoodSourceOnMap_minNutrition_NewTemp"
-                },
-                {
                     "FieldName": "filtered"
                 },
                 {
@@ -208,10 +205,10 @@
             "ClassName": "Verse.GenTemperature",
             "ThreadStatics": [
                 {
-                    "FieldName": "neighRoomGroups"
+                    "FieldName": "neighRooms"
                 },
                 {
-                    "FieldName": "beqRoomGroups",
+                    "FieldName": "beqRooms",
                     "PatchedClassName": "RimThreaded.GenTemperature_Patch",
                     "SelfInitialized": true
                 }
@@ -337,15 +334,6 @@
                 },
                 {
                     "FieldName": "wornApparelScores"
-                },
-                {
-                    "FieldName": "tmpBodyPartGroupsWithRequirement"
-                },
-                {
-                    "FieldName": "tmpAllowedApparels"
-                },
-                {
-                    "FieldName": "tmpRequiredApparels"
                 }
             ]
         },
@@ -392,14 +380,6 @@
                 },
                 {
                     "FieldName": "spawnedPawnsWhoShouldHaveInventoryUnloadedResult"
-                }
-            ]
-        },
-        {
-            "ClassName": "Verse.MapTemperature",
-            "ThreadStatics": [
-                {
-                    "FieldName": "fastProcessedRoomGroups"
                 }
             ]
         },
@@ -624,12 +604,12 @@
         {
             "ClassName": "Verse.RegionAndRoomUpdater",
             "ThreadStatics": [
-                {
-                    "FieldName": "tmpVisitedRooms"
-                },
-                {
-                    "FieldName": "tmpRoomStack"
-                }
+              {
+                "FieldName": "tmpVisitedDistricts"
+              },
+              {
+                "FieldName": "tmpDistrictStack"
+              }
             ]
         },
         {
@@ -685,12 +665,6 @@
                 },
                 {
                     "FieldName": "uniqueContainedThings"
-                },
-                {
-                    "FieldName": "uniqueNeighborsSet"
-                },
-                {
-                    "FieldName": "uniqueNeighbors"
                 },
                 {
                     "FieldName": "uniqueContainedThingsOfDef"

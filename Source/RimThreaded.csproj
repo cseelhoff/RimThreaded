@@ -11,15 +11,15 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net472</TargetFramework>
-		<Version>2.4.4</Version>
+		<Version>2.5.0</Version>
 		<Copyright>Copyright ©  2021</Copyright>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <AssemblyVersion>2.4.4.0</AssemblyVersion>
+    <AssemblyVersion>2.5.0.0</AssemblyVersion>
     <Authors>Caleb Seelhoff</Authors>
-    <FileVersion>2.4.4.0</FileVersion>
+    <FileVersion>2.5.0.0</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,15 +49,39 @@
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.2.2905" GeneratePathProperty="true" />
-		<PackageReference Include="Lib.Harmony" Version="2.0.4" ExcludeAssets="runtime" />
+		<PackageReference Include="Lib.Harmony" Version="2.1.0" ExcludeAssets="runtime" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="5.0.2" />
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
 		<PackageReference Include="Unity.Newtonsoft.Json" Version="7.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>bin\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
   <Target Name="MyCode" BeforeTargets="UpdateReferences">
 		<PropertyGroup>
@@ -83,4 +107,54 @@
 			<Reference Remove="$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll" />
 		</ItemGroup>
 	</Target>
+  	<ItemGroup>
+  	  <Reference Update="mscorlib">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Core">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Data">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Drawing">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.IO.Compression.FileSystem">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Numerics">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Runtime.Serialization">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Xml">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Xml.Linq">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
 </Project>

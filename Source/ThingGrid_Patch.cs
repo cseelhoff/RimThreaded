@@ -35,7 +35,7 @@ namespace RimThreaded
             Map this_map = __instance.map;
             if (!c.InBounds(this_map))
             {
-                Log.Warning(t.ToString() + " tried to register out of bounds at " + c + ". Destroying.", false);
+                Log.Warning(t.ToString() + " tried to register out of bounds at " + c + ". Destroying.");
                 t.Destroy(DestroyMode.Vanish);
             }
             else
@@ -93,7 +93,7 @@ namespace RimThreaded
             Map this_map = __instance.map;
             if (!c.InBounds(this_map))
             {
-                Log.Error(t.ToString() + " tried to de-register out of bounds at " + c, false);
+                Log.Error(t.ToString() + " tried to de-register out of bounds at " + c);
                 return false;
             }
 

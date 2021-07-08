@@ -51,7 +51,7 @@ namespace RimThreaded
             job1.failIfCantJoinOrCreateCaravan = __instance.failIfCantJoinOrCreateCaravan;
             job1.locomotionUrgency = PawnUtility.ResolveLocomotion(pawn, __instance.defaultLocomotion, LocomotionUrgency.Jog);
             job1.expiryInterval = __instance.jobMaxDuration;
-            job1.canBash = __instance.canBash;
+            job1.canBashDoors = __instance.canBash;
             __result = job1;
             return false;
         }

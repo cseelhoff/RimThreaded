@@ -57,7 +57,7 @@ namespace RimThreaded
         {
             Listing_Standard listing_Standard = new Listing_Standard();
             Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, scrollViewHeight);
-            listing_Standard.BeginScrollView(inRect, ref scrollPosition, ref viewRect);
+            listing_Standard.Begin(inRect);
             Widgets.Label(listing_Standard.GetRect(25f), "Total worker threads (recommendation 1-2 per CPU core):");
             Widgets.IntEntry(listing_Standard.GetRect(37f), ref maxThreads, ref maxThreadsBuffer);
             Widgets.Label(listing_Standard.GetRect(25f), "Timeout (in miliseconds) waiting for threads (default: 8000):");
@@ -75,7 +75,7 @@ namespace RimThreaded
             Widgets.CheckboxLabeled(listing_Standard.GetRect(27f), "Disable slowdown on combat:", ref disableforcedslowdowns);
             Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText, ref scrollPos);
             //Widgets.TextAreaScrollable(listing_Standard.GetRect(300f), modsText2, ref scrollPos2);
-            listing_Standard.EndScrollView(ref viewRect);
+            listing_Standard.End();
             scrollViewHeight = viewRect.height;
         }
     }

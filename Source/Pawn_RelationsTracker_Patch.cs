@@ -169,12 +169,21 @@ namespace RimThreaded
         }
         public static void RemoveMySpouseMarriageRelatedThoughts(Pawn_RelationsTracker __instance)
         {
-            Pawn spouse = __instance.pawn.GetSpouse();
-            if (spouse == null || spouse.Dead || spouse.needs.mood == null)
-                return;
-            MemoryThoughtHandler memories = spouse.needs.mood.thoughts.memories;
-            memories.RemoveMemoriesOfDef(ThoughtDefOf.GotMarried);
-            memories.RemoveMemoriesOfDef(ThoughtDefOf.HoneymoonPhase);
+            foreach (Pawn spouse in __instance.pawn.GetSpouses(includeDead: false))
+            {
+
+                if (spouse == null || spouse.Dead)
+                    continue;
+                Need_Mood mood = spouse.needs.mood;
+                if (mood == null)
+                    continue;
+                if (mood != null)
+                {
+                    MemoryThoughtHandler memories = mood.thoughts.memories;
+                    memories.RemoveMemoriesOfDef(ThoughtDefOf.GotMarried);
+                    memories.RemoveMemoriesOfDef(ThoughtDefOf.HoneymoonPhase);
+                }
+            }
         }
         public static bool get_FamilyByBlood(Pawn_RelationsTracker __instance, ref IEnumerable<Pawn> __result)
         {

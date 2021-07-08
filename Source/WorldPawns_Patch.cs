@@ -54,7 +54,7 @@ namespace RimThreaded
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorOnce("Exception ticking mothballed world pawn. Suppressing further errors. " + ex, p.thingIDNumber ^ 1535437893, false);
+                    Log.ErrorOnce("Exception ticking mothballed world pawn. Suppressing further errors. " + ex, p.thingIDNumber ^ 1535437893);
                 }
             }
             lock (__instance.pawnsAlive)
@@ -93,12 +93,12 @@ namespace RimThreaded
             {
                 if (pawn == null)
                 {
-                    Log.ErrorOnce("Dead null world pawn detected, discarding.", 94424128, false);
+                    Log.ErrorOnce("Dead null world pawn detected, discarding.", 94424128);
                     tmpPawnsToRemove.Add(pawn);
                 }
                 else if (pawn.Discarded)
                 {
-                    Log.Error("World pawn " + pawn + " has been discarded while still being a world pawn. This should never happen, because discard destroy mode means that the pawn is no longer managed by anything. Pawn should have been removed from the world first.", false);
+                    Log.Error("World pawn " + pawn + " has been discarded while still being a world pawn. This should never happen, because discard destroy mode means that the pawn is no longer managed by anything. Pawn should have been removed from the world first.");
                     tmpPawnsToRemove.Add(pawn);
                 }
             }
@@ -115,7 +115,7 @@ namespace RimThreaded
             }
             catch (Exception ex)
             {
-                Log.Error("Error in WorldPawnGCTick(): " + ex, false);
+                Log.Error("Error in WorldPawnGCTick(): " + ex);
             }
             
             return false;
@@ -151,7 +151,7 @@ namespace RimThreaded
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 1148571423, false);
+                    Log.ErrorOnce("Exception ticking world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 1148571423);
                 }
                 try
                 {
@@ -160,7 +160,7 @@ namespace RimThreaded
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 8765780, false);
+                    Log.ErrorOnce("Exception tending to a world pawn " + pawn.ToStringSafe() + ". Suppressing further errors. " + ex, pawn.thingIDNumber ^ 8765780);
                 }
             }
         }

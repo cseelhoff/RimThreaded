@@ -111,53 +111,5 @@ namespace RimThreaded
             }
         }
 
-        public static bool TakeDamage(Thing __instance, ref DamageWorker.DamageResult __result, DamageInfo dinfo)
-        {
-            if (__instance.Destroyed)
-            {
-                __result = new DamageWorker.DamageResult();
-                return false;
-            }
-            if ((double)dinfo.Amount == 0.0)
-            {
-                __result = new DamageWorker.DamageResult();
-                return false;
-            }
-            if (__instance.def.damageMultipliers != null)
-            {
-                for (int index = 0; index < __instance.def.damageMultipliers.Count; ++index)
-                {
-                    if (__instance.def.damageMultipliers[index].damageDef == dinfo.Def)
-                    {
-                        int num = Mathf.RoundToInt(dinfo.Amount * __instance.def.damageMultipliers[index].multiplier);
-                        dinfo.SetAmount((float)num);
-                    }
-                }
-            }
-            bool absorbed;
-            __instance.PreApplyDamage(ref dinfo, out absorbed);
-            if (absorbed)
-            {
-                __result = new DamageWorker.DamageResult();
-                return false;
-            }
-            bool anyParentSpawned = __instance.SpawnedOrAnyParentSpawned;
-            Map mapHeld = __instance.MapHeld;
-            DamageWorker.DamageResult damageResult = dinfo.Def.Worker.Apply(dinfo, __instance);
-            if (dinfo.Def.harmsHealth & anyParentSpawned && mapHeld != null) //changed && mapHeld != null
-                mapHeld.damageWatcher.Notify_DamageTaken(__instance, damageResult.totalDamageDealt);
-            if (dinfo.Def.ExternalViolenceFor(__instance))
-            {
-                GenLeaving.DropFilthDueToDamage(__instance, damageResult.totalDamageDealt);
-                if (dinfo.Instigator != null && dinfo.Instigator is Pawn instigator2)
-                {
-                    instigator2.records.AddTo(RecordDefOf.DamageDealt, damageResult.totalDamageDealt);
-                    instigator2.records.AccumulateStoryEvent(StoryEventDefOf.DamageDealt);
-                }
-            }
-            __instance.PostApplyDamage(dinfo, damageResult.totalDamageDealt);
-            __result = damageResult;
-            return false;
-        }
     }
 }
