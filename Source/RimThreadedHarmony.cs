@@ -137,6 +137,7 @@ namespace RimThreaded
             //string replacementsJsonPath = Path.Combine(((Mod)RimThreadedMod).intContent.RootDir, "replacements.json"); 
 
             string jsonString = File.ReadAllText(RimThreadedMod.replacementsJsonPath);
+
             replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
 
             //IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
@@ -235,8 +236,10 @@ namespace RimThreaded
         public static HashSet<string> allStaticFieldNames = new HashSet<string>();
         //public static bool intializersReady = false;
         private static void ApplyFieldReplacements()
+
         {
-            foreach (Assembly assembly in assemblies)
+			List<MethodBase> MethodsFromCache = new List<MethodBase>();
+			foreach (Assembly assembly in assemblies)
             {
                 bool validDll = assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll")
                     || assembly.ManifestModule.ScopeName.Equals("ArenaBell.dll");
@@ -289,6 +292,7 @@ namespace RimThreaded
             Type pawnType = typeof(Pawn);
             Type thoughtsType = typeof(CachedSocialThoughts);
             string removeAllString = nameof(GenCollection.RemoveAll);
+
             MethodInfo removeAllGeneric = GetDeclaredMethods(typeof(GenCollection)).First(method => method.Name == removeAllString && method.GetGenericArguments().Count() == 2);
             MethodInfo removeAllPawnThoughts = removeAllGeneric.MakeGenericMethod(new[] { pawnType, thoughtsType });
             TranspileFieldReplacements(removeAllPawnThoughts);
@@ -721,6 +725,7 @@ namespace RimThreaded
                 after = harmonyAfter
             };
             try
+
             {
                 harmony.Patch(oMethod, transpiler: transpilerMethod);
             }
