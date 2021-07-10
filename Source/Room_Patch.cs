@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace RimThreaded
@@ -16,7 +17,28 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, nameof(AddDistrict));
 			RimThreadedHarmony.Prefix(original, patched, nameof(RemoveDistrict));
 			RimThreadedHarmony.Prefix(original, patched, nameof(Notify_RoofChanged));
-			
+			RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
+		}
+		public static bool UpdateRoomStatsAndRole(Room __instance)
+		{
+			lock (__instance)
+			{
+				__instance.statsAndRoleDirty = false;
+				if (__instance.ProperRoom && __instance.RegionCount <= 36)
+				{
+					if (__instance.stats == null)
+						__instance.stats = new DefMap<RoomStatDef, float>();
+					foreach (RoomStatDef def in (IEnumerable<RoomStatDef>)DefDatabase<RoomStatDef>.AllDefs.OrderByDescending<RoomStatDef, float>((Func<RoomStatDef, float>)(x => x.updatePriority)))
+						__instance.stats[def] = def.Worker.GetScore(__instance);
+				__instance.role = DefDatabase<RoomRoleDef>.AllDefs.MaxBy((Func<RoomRoleDef, float>)(x => x.Worker.GetScore(__instance)));
+				}
+				else
+				{
+					__instance.stats = null;
+					__instance.role = RoomRoleDefOf.None;
+				}
+			}
+			return false;
 		}
 
 		public static bool AddDistrict(Room __instance, District district)
@@ -62,14 +84,14 @@ namespace RimThreaded
 				newDistrictList.Remove(district);
 				__instance.districts = newDistrictList;
 
-				if (__instance.districts.Count == 0)
+				if (newDistrictList.Count == 0)
 				{
 
-					lock (__instance.Map.regionGrid) //ADDED
+					lock (map.regionGrid) //ADDED
 					{
-						List<Room> newAllRooms = new List<Room>(__instance.Map.regionGrid.allRooms);
+						List<Room> newAllRooms = new List<Room>(map.regionGrid.allRooms);
 						newAllRooms.Remove(__instance);
-						__instance.Map.regionGrid.allRooms = newAllRooms;
+						map.regionGrid.allRooms = newAllRooms;
 					}
 				}
 

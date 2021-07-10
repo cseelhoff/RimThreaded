@@ -14,10 +14,66 @@ namespace RimThreaded
             Type original = typeof(Thing);
             Type patched = typeof(Thing_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
+            RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
             RimThreadedHarmony.Postfix(original, patched, nameof(SpawnSetup));
             //RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
         }
+        public static bool TakeDamage(Thing __instance, ref DamageWorker.DamageResult __result, DamageInfo dinfo)
+        {
+            //---START change---
+            Map mapHeld = __instance.MapHeld; //moved
+            if (mapHeld == null)
+            {
+                __result = new DamageWorker.DamageResult();
+                return false;
+            }
+            //---END change---
 
+            if (__instance.Destroyed)
+            {
+                __result = new DamageWorker.DamageResult();
+                return false;
+            }
+            if ((double)dinfo.Amount == 0.0)
+            {
+                __result = new DamageWorker.DamageResult();
+                return false;
+            }
+            if (__instance.def.damageMultipliers != null)
+            {
+                for (int index = 0; index < __instance.def.damageMultipliers.Count; ++index)
+                {
+                    if (__instance.def.damageMultipliers[index].damageDef == dinfo.Def)
+                    {
+                        int num = Mathf.RoundToInt(dinfo.Amount * __instance.def.damageMultipliers[index].multiplier);
+                        dinfo.SetAmount((float)num);
+                    }
+                }
+            }
+            bool absorbed;
+            __instance.PreApplyDamage(ref dinfo, out absorbed);
+            if (absorbed)
+            {
+                __result = new DamageWorker.DamageResult();
+                return false;
+            }
+            bool anyParentSpawned = __instance.SpawnedOrAnyParentSpawned;
+
+            // Map mapHeld = __instance.MapHeld; //moved
+            DamageWorker.DamageResult damageResult = dinfo.Def.Worker.Apply(dinfo, __instance);
+            if (dinfo.Def.harmsHealth & anyParentSpawned)
+                mapHeld.damageWatcher.Notify_DamageTaken(__instance, damageResult.totalDamageDealt);
+            if (dinfo.Def.ExternalViolenceFor(__instance))
+            {
+                if (dinfo.SpawnFilth)
+                    GenLeaving.DropFilthDueToDamage(__instance, damageResult.totalDamageDealt);
+                if (dinfo.Instigator != null && dinfo.Instigator is Pawn instigator2)
+                    instigator2.records.AddTo(RecordDefOf.DamageDealt, damageResult.totalDamageDealt);
+            }
+            __instance.PostApplyDamage(dinfo, damageResult.totalDamageDealt);
+            __result = damageResult;
+            return false;
+        }
         //public static bool DeSpawn(Thing __instance, DestroyMode mode = DestroyMode.Vanish)
         //{
         //    if (__instance.Destroyed)

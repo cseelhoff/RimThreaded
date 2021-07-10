@@ -756,7 +756,7 @@ namespace RimThreaded
             //GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
             //GrammarResolverSimple_Transpile.RunNonDestructivePatches();//reexamine complexity
             HediffSet_Patch.RunNonDestructivePatches(); //TODO - replace 270 instances with ThreadSafeLinkedList
-            ThingOwnerThing_Transpile.RunNonDestructivePatches(); //reexamine complexity?
+            ThingOwnerThing_Patch.RunNonDestructivePatches(); //reexamine complexity?
 			TickList_Patch.RunNonDestructivePatches(); //allows multithreaded calls of thing.tick longtick raretick
             //WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity Jobs Of Oppurtunity?
             //WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
@@ -766,6 +766,8 @@ namespace RimThreaded
 			CellFinder_Patch.RunNonDestructivePatches(); //explosion fix
 			GenGrid_Patch.RunNonDestructivePatches(); //explosion fix
 			ThinkNode_JoinVoluntarilyJoinableLord_Patch.RunDestructivePatches(); //explosion fix
+			Corpse_Patch.RunNonDestructivePatches(); // 1.3 explosion fix
+
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
 		}
@@ -787,7 +789,8 @@ namespace RimThreaded
 			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
 			MaterialPool_Patch.RunDestructivePatches();
 			MeshMakerPlanes_Patch.RunDestructivePatches();
-			MeshMakerShadows_Patch.RunDestructivePatches();
+			MeshMakerShadows_Patch.RunDestructivePatches(); 
+			MoteBubble_Patch.RunDestructivePatches(); //initial 1.3 patch (MaterialPropertyBlock) - main thread UnityEngine.MaterialPropertyBlock
 			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
 			SectionLayer_Patch.RunDestructivePatches();
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
@@ -813,19 +816,23 @@ namespace RimThreaded
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
 			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
             DesignationManager_Patch.RunDestructivePatches(); //added for development build
-            DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
+			DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
             DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
             //FilthMaker_Patch.RunDestructivePatches(); replaces a few LINQ queries. possible perf improvement
 			FireUtility_Patch.RunDestructivePatches();
-            //GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
-            //GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
-            GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
+			FleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
+			FleckSystemBaseTFleck_Patch.RunDestructivePatches(); // 1.3 explosion fix
+			//GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
+			//GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
+			GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
             GenTemperature_Patch.RunDestructivePatches();
             GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
-            //GrammarResolver_Patch.RunDestructivePatches();
-            HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
+			GoodwillSituationManager_Patch.RunDestructivePatches(); //initial 1.3 patch
+			//GrammarResolver_Patch.RunDestructivePatches();
+			HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
             HediffSet_Patch.RunDestructivePatches();
-            ImmunityHandler_Patch.RunDestructivePatches();
+			HistoryEventsManager_Patch.RunDestructivePatches(); // 1.3 explosion fix
+			ImmunityHandler_Patch.RunDestructivePatches();
             ListerThings_Patch.RunDestructivePatches();
 			JobGiver_ExitMap_Patch.RunDestructivePatches(); //explosions fix
 			JobGiver_Work_Patch.RunDestructivePatches();
@@ -875,6 +882,7 @@ namespace RimThreaded
             Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
             WealthWatcher_Patch.RunDestructivePatches();
 			//WorkGiver_GrowerSow_Patch.RunDestructivePatches();
+			
 
 			//complex methods that need further review for simplification
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
