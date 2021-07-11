@@ -40,7 +40,9 @@ namespace RimThreaded
 			PatchDestructiveFixes();
 			PatchNonDestructiveFixes();
 			PatchModCompatibility();
-
+#if DEBUG
+			RimThreadedMod.exportTranspiledMethods();
+#endif
 			Log.Message("RimThreaded patching is complete.");
 
 			string potentialConflicts = RimThreadedMod.getPotentialModConflicts();
