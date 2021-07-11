@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using UnityEngine;
 using Verse;
 using static HarmonyLib.AccessTools;
 
@@ -16,6 +17,12 @@ namespace RimThreaded
             Type original = typeof(Corpse);
             Type patched = typeof(Corpse_Patch);
             RimThreadedHarmony.Transpile(original, patched, nameof(SpawnSetup));
+        }
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Corpse);
+            Type patched = typeof(Corpse_Patch);
+            RimThreadedHarmony.Prefix(original, patched, nameof(DrawAt));
         }
         public static IEnumerable<CodeInstruction> SpawnSetup(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
@@ -45,5 +52,14 @@ namespace RimThreaded
             InnerPawn.Rotation = Rot4.South;
             __instance.NotifyColonistBar();
         }
+        public static bool DrawAt(Corpse __instance, Vector3 drawLoc, bool flip = false)
+        {
+            Pawn InnerPawn = __instance.InnerPawn;
+            if (InnerPawn == null)
+                return false;
+            InnerPawn.Drawer.renderer.RenderPawnAt(drawLoc);
+            return false;
+        }
+
     }
 }

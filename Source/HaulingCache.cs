@@ -107,7 +107,7 @@ namespace RimThreaded
 			}
 
 			int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
-			if (StoreUtility.TryFindBestBetterStoreCellFor(haulableThing, null, map, StoreUtility.CurrentStoragePriorityOf(haulableThing), null, out _, false) && //fast check
+			if (TryFindBestBetterStoreCellFor(haulableThing, null, map, StoreUtility.CurrentStoragePriorityOf(haulableThing), null, out _, false) && //fast check
 				HaulToStorageJobTest(haulableThing)) { //slower check
 				AddThingToAwaitingHaulingHashSets(haulableThing);
 			} else
@@ -115,6 +115,75 @@ namespace RimThreaded
 				getWaitingForZoneBetterThan(map)[storagePriority].Add(haulableThing);
 			}
 			
+		}
+
+		public static bool TryFindBestBetterStoreCellFor(
+		  Thing t,
+		  Pawn carrier,
+		  Map map,
+		  StoragePriority currentPriority,
+		  Faction faction,
+		  out IntVec3 foundCell,
+		  bool needAccurateResult = true)
+		{
+			List<SlotGroup> listInPriorityOrder = map.haulDestinationManager.AllGroupsListInPriorityOrder;
+			if (listInPriorityOrder.Count == 0)
+			{
+				foundCell = IntVec3.Invalid;
+				return false;
+			}
+			StoragePriority foundPriority = currentPriority;
+			float maxValue = (float)int.MaxValue;
+			IntVec3 invalid = IntVec3.Invalid;
+			int count = listInPriorityOrder.Count;
+			for (int index = 0; index < count; ++index)
+			{
+				SlotGroup slotGroup = listInPriorityOrder[index];
+				StoragePriority priority = slotGroup.Settings.Priority;
+				if (priority >= foundPriority && priority > currentPriority)
+					TryFindBestBetterStoreCellForWorker(t, carrier, map, faction, slotGroup, needAccurateResult, 
+						ref invalid, ref maxValue, ref foundPriority);  //changed
+				else
+					break;
+			}
+			if (!invalid.IsValid)
+			{
+				foundCell = IntVec3.Invalid;
+				return false;
+			}
+			foundCell = invalid;
+			return true;
+		}
+		private static void TryFindBestBetterStoreCellForWorker(
+		  Thing t,
+		  Pawn carrier,
+		  Map map,
+		  Faction faction,
+		  SlotGroup slotGroup,
+		  bool needAccurateResult,
+		  ref IntVec3 closestSlot,
+		  ref float closestDistSquared,
+		  ref StoragePriority foundPriority)
+		{
+			if (slotGroup == null || !slotGroup.parent.Accepts(t))
+				return;
+			IntVec3 intVec3 = t.PositionHeld; //changed
+			List<IntVec3> cellsList = slotGroup.CellsList;
+			int count = cellsList.Count;
+			int num = !needAccurateResult ? 0 : Mathf.FloorToInt((float)count * Rand.Range(0.005f, 0.018f));
+			for (int index = 0; index < count; ++index)
+			{
+				IntVec3 c = cellsList[index];
+				float horizontalSquared = (float)(intVec3 - c).LengthHorizontalSquared;
+				if ((double)horizontalSquared <= (double)closestDistSquared && StoreUtility.IsGoodStoreCell(c, map, t, carrier, faction))
+				{
+					closestSlot = c;
+					closestDistSquared = horizontalSquared;
+					foundPriority = slotGroup.Settings.Priority;
+					if (index >= num)
+						break;
+				}
+			}
 		}
 
 		private static void AddThingToAwaitingHaulingHashSets(Thing haulableThing)

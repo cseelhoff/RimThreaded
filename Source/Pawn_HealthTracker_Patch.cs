@@ -19,6 +19,14 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(CheckPredicateAfterAddingHediff));
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_Resurrected));
             RimThreadedHarmony.Prefix(original, patched, nameof(HealthTick));
+            RimThreadedHarmony.Prefix(original, patched, nameof(SetDead)); //optional warning instead of error
+        }
+        public static bool SetDead(Pawn_HealthTracker __instance)
+        {
+            if (__instance.Dead)
+                Log.Warning(__instance.pawn.ToString() + " set dead while already dead."); //changed
+            __instance.healthState = PawnHealthState.Dead;
+            return false;
         }
 
         public static bool RemoveHediff(Pawn_HealthTracker __instance, Hediff hediff)

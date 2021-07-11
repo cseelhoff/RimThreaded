@@ -17,7 +17,7 @@ namespace RimThreaded
         public RimThreadedMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<RimThreadedSettings>();
-            replacementsJsonPath = Path.Combine(content.RootDir, "replacements.json");
+            replacementsJsonPath = Path.Combine(content.RootDir, "1.3", "replacements.json");
             //RimThreaded.Start();
         }
         public override void DoSettingsWindowContents(Rect inRect)

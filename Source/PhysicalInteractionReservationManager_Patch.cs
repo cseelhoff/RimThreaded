@@ -242,7 +242,7 @@ namespace RimThreaded
                 {
                     lock (__instance)
                     {
-                        foreach (KeyValuePair<LocalTargetInfo, Job> kvp in targetToJob)
+                        foreach (KeyValuePair<LocalTargetInfo, Job> kvp in targetToJob.ToList())
                         {
                             if (kvp.Value == job)
                             {

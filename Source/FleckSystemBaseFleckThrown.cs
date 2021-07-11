@@ -3,17 +3,17 @@ using Verse;
 
 namespace RimThreaded
 {
-    class FleckSystemBaseTFleck_Patch
+    class FleckSystemBaseFleckThrown_Patch
     {
         internal static void RunDestructivePatches()
         {
-            Type original = typeof(FleckSystemBase<FleckStatic>);
-            Type patched = typeof(FleckSystemBaseTFleck_Patch);
+            Type original = typeof(FleckSystemBase<FleckThrown>);
+            Type patched = typeof(FleckSystemBaseFleckThrown_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(CreateFleck));
         }
-        public static bool CreateFleck(FleckSystemBase<FleckStatic> __instance, FleckCreationData creationData)
+        public static bool CreateFleck(FleckSystemBase<FleckThrown> __instance, FleckCreationData creationData)
         {
-            FleckStatic fleck = new FleckStatic();
+            FleckThrown fleck = new FleckThrown();
             fleck.Setup(creationData);
             if (creationData.def.realTime) {
                 lock (__instance.dataGametime)

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using RimWorld;
+using Verse;
 
 namespace RimThreaded
 {
@@ -21,7 +23,6 @@ namespace RimThreaded
 			{
 				try
 				{
-					//poweron = pc.PowerOn;
 					poweron = pc.PowerOn;
 				}
 				catch (NullReferenceException) { }
@@ -29,6 +30,5 @@ namespace RimThreaded
 			__result = poweron;
 			return false;
 		}
-
-    }
+	}
 }

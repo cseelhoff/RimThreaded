@@ -11,11 +11,32 @@ namespace RimThreaded
         {
             Type original = typeof(DesignationManager);
             Type patched = typeof(DesignationManager_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "RemoveDesignation");
-            RimThreadedHarmony.Prefix(original, patched, "RemoveAllDesignationsOn");
-            RimThreadedHarmony.Prefix(original, patched, "RemoveAllDesignationsOfDef");
-            RimThreadedHarmony.Prefix(original, patched, "AddDesignation");
-            RimThreadedHarmony.Prefix(original, patched, "SpawnedDesignationsOfDef");
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemoveDesignation));
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemoveAllDesignationsOn));
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemoveAllDesignationsOfDef));
+            RimThreadedHarmony.Prefix(original, patched, nameof(AddDesignation));
+            RimThreadedHarmony.Prefix(original, patched, nameof(SpawnedDesignationsOfDef));
+            RimThreadedHarmony.Prefix(original, patched, nameof(DesignationOn), 
+                new Type[] { typeof(Thing), typeof(DesignationDef) }, false); //weird CanBeBuried CanExtractSkull Ideology requirement is null
+        }
+
+        public static bool DesignationOn(DesignationManager __instance, ref Designation __result, Thing t, DesignationDef def)
+        {
+            if(def == null)  //weird CanBeBuried CanExtractSkull Ideology requirement is null
+            {
+                for (int index = 0; index < __instance.allDesignations.Count; ++index)
+                {
+                    Designation allDesignation = __instance.allDesignations[index];
+                    if (allDesignation.target.Thing == t && allDesignation.def == def)
+                    {
+                        __result = allDesignation;
+                        return false;
+                    }
+                }
+                __result = null;
+                return false;
+            }
+            return true;
         }
 
         public static bool RemoveDesignation(DesignationManager __instance, Designation des)

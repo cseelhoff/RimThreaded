@@ -814,14 +814,19 @@ namespace RimThreaded
 			Building_PlantGrower_Patch.RunNonDestructivePatches();
 			CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
+			Corpse_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
             DesignationManager_Patch.RunDestructivePatches(); //added for development build
+			District_Patch.RunDestructivePatches(); // 1.3 fix for cachedOpenRoofState null ref - TODO - optimize locks
 			DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
             DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
             //FilthMaker_Patch.RunDestructivePatches(); replaces a few LINQ queries. possible perf improvement
 			FireUtility_Patch.RunDestructivePatches();
 			FleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
-			FleckSystemBaseTFleck_Patch.RunDestructivePatches(); // 1.3 explosion fix
+			FleckSystemBaseFleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
+			FleckSystemBaseFleckThrown_Patch.RunDestructivePatches(); // 1.3 explosion fix
+			FoodUtility_Patch.RunDestructivePatches(); //1.3 GetMeatSourceCategory Human from NutrientPasteDispenser
+
 			//GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
 			//GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
 			GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
@@ -833,10 +838,11 @@ namespace RimThreaded
             HediffSet_Patch.RunDestructivePatches();
 			HistoryEventsManager_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			ImmunityHandler_Patch.RunDestructivePatches();
-            ListerThings_Patch.RunDestructivePatches();
 			JobGiver_ExitMap_Patch.RunDestructivePatches(); //explosions fix
 			JobGiver_Work_Patch.RunDestructivePatches();
 			JobGiver_WanderNearDutyLocation_Patch.RunDestructivePatches();
+			ListerBuildingsRepairable_Patch.RunDestructivePatches();// 1.3 explosion fix
+			ListerThings_Patch.RunDestructivePatches();
 			//JobMaker_Patch.RunDestructivePatches(); should be fixed by the simplepool patch
 			LongEventHandler_Patch.RunDestructivePatches(); //TODO - could use field replacement for conncurrentqueue
             Lord_Patch.RunDestructivePatches();
@@ -844,6 +850,7 @@ namespace RimThreaded
             LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. ThreadSafeLinkedList
 			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
             MemoryThoughtHandler_Patch.RunDestructivePatches();
+			Messages_Patch.RunDestructivePatches();// 1.3 explosion fix
 			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix
 			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
             Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
