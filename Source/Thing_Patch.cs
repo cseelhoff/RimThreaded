@@ -16,6 +16,7 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
             RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
             RimThreadedHarmony.Postfix(original, patched, nameof(SpawnSetup));
+            //RimThreadedHarmony.Postfix(original, patched, nameof(DeSpawn));
             //RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
         }
         public static bool TakeDamage(Thing __instance, ref DamageWorker.DamageResult __result, DamageInfo dinfo)
@@ -85,7 +86,9 @@ namespace RimThreaded
         //    else
         //    {
         //        Map map = __instance.Map;
+        //        map.overlayDrawer.DisposeHandle(__instance);
         //        RegionListersUpdater.DeregisterInRegions(__instance, map);
+        //        ThingOwner newSpawnedThings = map.spawnedThings;
         //        map.spawnedThings.Remove(__instance);
         //        map.listerThings.Remove(__instance);
         //        map.thingGrid.Deregister(__instance);
@@ -93,7 +96,7 @@ namespace RimThreaded
         //        if (__instance.def.receivesSignals)
         //            Find.SignalManager.DeregisterReceiver((ISignalReceiver)__instance);
         //        map.tooltipGiverList.Notify_ThingDespawned(__instance);
-        //        if (__instance.def.graphicData != null && __instance.def.graphicData.Linked)
+        //        if (__instance.def.CanAffectLinker)
         //        {
         //            map.linkGrid.Notify_LinkerCreatedOrDestroyed(__instance);
         //            map.mapDrawer.MapMeshDirty(__instance.Position, MapMeshFlag.Things, true, false);
@@ -111,7 +114,7 @@ namespace RimThreaded
         //        if (__instance.def.AffectsRegions)
         //            map.regionDirtyer.Notify_ThingAffectingRegionsDespawned(__instance);
         //        if (__instance.def.pathCost != 0 || __instance.def.passability == Traversability.Impassable)
-        //            map.pathGrid.RecalculatePerceivedPathCostUnderThing(__instance);
+        //            map.pathing.RecalculatePerceivedPathCostUnderThing(__instance);
         //        if (__instance.def.AffectsReachability)
         //            map.reachability.ClearCache();
         //        Find.TickManager.DeRegisterAllTickabilityFor(__instance);
@@ -136,6 +139,7 @@ namespace RimThreaded
         //        }
         //        QuestUtility.SendQuestTargetSignals(__instance.questTags, "Despawned", __instance.Named("SUBJECT"));
         //    }
+        //    return false;
         //}
 
         public static bool get_Map(Thing __instance, ref Map __result)

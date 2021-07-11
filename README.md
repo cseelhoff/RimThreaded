@@ -38,7 +38,8 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 2.4.4 - Free Wookie Hugs
+Version 2.5.2 - Free Wookie Hugs
+-RimWorld 1.3 Compatibility added
 -Optimized PhysicalInteractionReservationManager_Patch
 
 Version 2.4.3 - A long long time ago, in a galaxy with working plant harvesting...  

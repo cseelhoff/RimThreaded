@@ -112,7 +112,11 @@ namespace RimThreaded
 				AddThingToAwaitingHaulingHashSets(haulableThing);
 			} else
 			{
-				getWaitingForZoneBetterThan(map)[storagePriority].Add(haulableThing);
+                HashSet<Thing> things = getWaitingForZoneBetterThan(map)[storagePriority];
+				lock (things)
+				{
+					things.Add(haulableThing);
+				}
 			}
 			
 		}
@@ -228,7 +232,9 @@ namespace RimThreaded
 				HashSet<Thing> hashset = awaitingHaulingZoomLevels[zoomLevel][cellIndex];
 				if (hashset != null)
 				{
-					hashset.Remove(haulableThing);
+                    HashSet<Thing> newHashSet = new HashSet<Thing>(hashset);
+					newHashSet.Remove(haulableThing);
+					awaitingHaulingZoomLevels[zoomLevel][cellIndex] = newHashSet;
 				}
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);

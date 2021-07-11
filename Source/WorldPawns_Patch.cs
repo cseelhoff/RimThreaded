@@ -22,8 +22,101 @@ namespace RimThreaded
         {
             Type original = typeof(WorldPawns);
             Type patched = typeof(WorldPawns_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "WorldPawnsTick");
-            RimThreadedHarmony.Prefix(original, patched, "get_AllPawnsAlive");
+            RimThreadedHarmony.Prefix(original, patched, nameof(WorldPawnsTick));
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_AllPawnsAlive));
+            RimThreadedHarmony.Prefix(original, patched, nameof(AddPawn));
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemovePawn));
+            RimThreadedHarmony.Prefix(original, patched, nameof(Notify_PawnDestroyed));
+        }
+        public static bool Notify_PawnDestroyed(WorldPawns __instance, Pawn p)
+        {
+            lock (__instance)
+            {
+                if (!__instance.pawnsAlive.Contains(p) && !__instance.pawnsMothballed.Contains(p))
+                    return false;
+
+                HashSet<Pawn> newPawnsAlive = new HashSet<Pawn>(__instance.pawnsAlive);
+                newPawnsAlive.Remove(p);
+                __instance.pawnsAlive = newPawnsAlive;
+
+                HashSet<Pawn> newPawnsMothballed = new HashSet<Pawn>(__instance.pawnsMothballed);
+                newPawnsMothballed.Remove(p);
+                __instance.pawnsMothballed = newPawnsMothballed;
+
+                __instance.pawnsDead.Add(p);
+            }
+            return false;
+        }
+        public static bool RemovePawn(WorldPawns __instance, Pawn p)
+        {
+            lock (__instance)
+            {
+                if (!__instance.Contains(p))
+                    Log.Error("Tried to remove pawn " + (object)p + " from " + (object)__instance.GetType() + ", but it's not here.");
+                __instance.gc.CancelGCPass();
+                if (__instance.pawnsMothballed.Contains(p))
+                {
+                    if (Find.TickManager.TicksGame % 15000 != 0)
+                    {
+                        try
+                        {
+                            p.TickMothballed(Find.TickManager.TicksGame % 15000);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("Exception ticking mothballed world pawn (just before removing): " + (object)ex);
+                        }
+                    }
+                }
+                HashSet<Pawn> newPawnsAlive = new HashSet<Pawn>(__instance.pawnsAlive);
+                newPawnsAlive.Remove(p);
+                __instance.pawnsAlive = newPawnsAlive;
+
+                HashSet<Pawn> newPawnsMothballed = new HashSet<Pawn>(__instance.pawnsMothballed);
+                newPawnsMothballed.Remove(p);
+                __instance.pawnsMothballed = newPawnsMothballed;
+
+                HashSet<Pawn> newPawnsDead = new HashSet<Pawn>(__instance.pawnsDead);
+                newPawnsDead.Remove(p);
+                __instance.pawnsDead = newPawnsDead;
+
+                HashSet<Pawn> newPawnsForcefullyKeptAsWorldPawns = new HashSet<Pawn>(__instance.pawnsForcefullyKeptAsWorldPawns);
+                newPawnsDead.Remove(p);
+                __instance.pawnsForcefullyKeptAsWorldPawns = newPawnsForcefullyKeptAsWorldPawns;
+
+                p.becameWorldPawnTickAbs = -1;
+            }
+            return false;
+        }
+        public static bool AddPawn(WorldPawns __instance, Pawn p)
+        {
+            lock (__instance)
+            {
+                __instance.gc.CancelGCPass();
+                if (p.Dead || p.Destroyed)
+                {
+                    __instance.pawnsDead.Add(p);
+                }
+                else
+                {
+                    try
+                    {
+                        int num = 0;
+                        while (__instance.ShouldAutoTendTo(p) && num < 30)
+                        {
+                            TendUtility.DoTend(null, p, null);
+                            num++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.ErrorOnce("Exception tending to a world pawn " + p.ToStringSafe() + ". Suppressing further errors. " + ex, p.thingIDNumber ^ 0x85C154);
+                    }
+                    __instance.pawnsAlive.Add(p);
+                }
+                p.Notify_PassedToWorld();
+            }
+            return false;
         }
 
         //ThreadSafety: Return a new list, instead of an instance field (allPawnsAliveResult)

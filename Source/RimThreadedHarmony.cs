@@ -807,10 +807,13 @@ namespace RimThreaded
 			WorldPawns_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
 
 			Archive_Patch.RunDestructivePatches(); //explosions fix
+			Alert_ColonistLeftUnburied_Patch.RunDestructivePatches(); //1.3 explosions fix
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
             AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			Battle_Patch.RunDestructivePatches(); //added lock for battle - could use linkedlist
-            Building_Door_Patch.RunDestructivePatches(); //strange bug
+			BeautyUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix null ref
+
+			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			Building_PlantGrower_Patch.RunNonDestructivePatches();
 			CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
             CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
@@ -829,6 +832,7 @@ namespace RimThreaded
 
 			//GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
 			//GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
+			GenPlace_Patch.RunDestructivePatches(); // 1.3 TryPlaceThing null thing after kill
 			GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
             GenTemperature_Patch.RunDestructivePatches();
             GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
@@ -838,6 +842,7 @@ namespace RimThreaded
             HediffSet_Patch.RunDestructivePatches();
 			HistoryEventsManager_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			ImmunityHandler_Patch.RunDestructivePatches();
+			JobDriver_TendPatient_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			JobGiver_ExitMap_Patch.RunDestructivePatches(); //explosions fix
 			JobGiver_Work_Patch.RunDestructivePatches();
 			JobGiver_WanderNearDutyLocation_Patch.RunDestructivePatches();
@@ -854,7 +859,8 @@ namespace RimThreaded
 			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix
 			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
             Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
-            Pawn_PlayerSettings_Patch.RunDestructivePatches();
+			Pawn_PathFollower_Patch.RunDestructivePatches(); // 1.3 null ref pawn?.jobs?.curDriver?.locomotionUrgencySameAs
+			Pawn_PlayerSettings_Patch.RunDestructivePatches();
             Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
