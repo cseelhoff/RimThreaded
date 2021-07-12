@@ -165,9 +165,6 @@ namespace RimThreaded
                 int transpiledCount = patches.Transpilers.Count;
                 if (transpiledCount > 0)
                 {
-                    string nameSpace = originalMethod.DeclaringType.Namespace + "\n";
-                    string methodName1 = originalMethod.DeclaringType.Name + "\n";
-                    string methodName2 = originalMethod.Name + "\n";
                     if (originalMethod is MethodInfo methodInfo) // add support for constructors as well
                     {
                         Type returnType = methodInfo.ReturnType;
@@ -231,7 +228,7 @@ namespace RimThreaded
                             LocalBuilder localBuilderOrdered = localBuildersOrdered[i];
                             if (localBuilderOrdered == null)
                             {
-                                il.DeclareLocal(typeof(int));
+                                il.DeclareLocal(typeof(object));
                             }
                             else
                             {
@@ -363,9 +360,6 @@ namespace RimThreaded
 
                         }
                     }
-                    //il.Emit(OpCodes.Ret, false);
-                    //MethodInfo mb2 = Method(newFieldType, "InitializeThreadStatics");
-                    //HarmonyMethod pf = new HarmonyMethod(mb2);
                 }
             }
             foreach (KeyValuePair<string, TypeBuilder> tb in typeBuilders)
@@ -373,8 +367,10 @@ namespace RimThreaded
                 tb.Value.CreateType();
             }
             ab.Save(aName.Name + ".dll");
-            Assembly assem = Assembly.Load(aName.Name + ".dll");
+            
 
+            //ReImport DLL and create detour
+            Assembly.Load(aName.Name + ".dll");
             foreach (MethodBase originalMethod in originalMethods)
             {
                 Patches patches = Harmony.GetPatchInfo(originalMethod);
@@ -383,14 +379,23 @@ namespace RimThreaded
                 {
                     if (originalMethod is MethodInfo methodInfo) // add support for constructors as well
                     {
-                        RimThreadedHarmony.Transpile(methodInfo.DeclaringType, typeof(RimThreadedMod), nameof(callTranspiled));
+                        Type transpiledType = TypeByName(originalMethod.DeclaringType.FullName + "_Transpiled");
+                        ParameterInfo[] parameterInfos = methodInfo.GetParameters();
+                        List<Type> types = new List<Type>();
+
+                        if (!methodInfo.Attributes.HasFlag(MethodAttributes.Static))
+                        {
+                            types.Add(methodInfo.DeclaringType);
+                        }
+                        foreach (ParameterInfo parameterInfo in parameterInfos)
+                        {
+                            types.Add(parameterInfo.ParameterType);
+                        }
+                        MethodInfo replacement = Method(transpiledType, originalMethod.Name, types.ToArray());
+                        Memory.DetourMethod(originalMethod, replacement);
                     }
                 }
             }
-        }
-        public static IEnumerable<CodeInstruction> callTranspiled(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
-        {
-            
         }
 
         public override string SettingsCategory()

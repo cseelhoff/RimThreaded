@@ -41,7 +41,7 @@ namespace RimThreaded
 			PatchNonDestructiveFixes();
 			PatchModCompatibility();
 #if DEBUG
-			RimThreadedMod.exportTranspiledMethods();
+			//RimThreadedMod.exportTranspiledMethods();
 #endif
 			Log.Message("RimThreaded patching is complete.");
 
