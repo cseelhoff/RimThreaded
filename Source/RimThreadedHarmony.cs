@@ -41,7 +41,7 @@ namespace RimThreaded
 			PatchNonDestructiveFixes();
 			PatchModCompatibility();
 #if DEBUG
-			//RimThreadedMod.exportTranspiledMethods();
+			RimThreadedMod.exportTranspiledMethods();
 #endif
 			Log.Message("RimThreaded patching is complete.");
 
@@ -858,6 +858,7 @@ namespace RimThreaded
 			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
             MemoryThoughtHandler_Patch.RunDestructivePatches();
 			Messages_Patch.RunDestructivePatches();// 1.3 explosion fix
+			OverlayDrawer_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix
 			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
             Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed

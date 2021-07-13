@@ -8,6 +8,8 @@ using System.Reflection.Emit;
 using System.Linq;
 using System.IO;
 using static HarmonyLib.AccessTools;
+using System.Security.Permissions;
+using System.Security;
 
 namespace RimThreaded 
 { 
@@ -155,8 +157,26 @@ namespace RimThreaded
         public static void exportTranspiledMethods()
         {
             AssemblyName aName = new AssemblyName("RimWorldTranspiles");
+            //PermissionSet requiredPermission = new PermissionSet(PermissionState.Unrestricted);
             AssemblyBuilder ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
+            ConstructorInfo Constructor2 = typeof(SecurityPermissionAttribute).GetConstructors()[0];
+            SecurityAction requestMinimum = SecurityAction.RequestMinimum;
+            PropertyInfo skipVerificationProperty = Property(typeof(SecurityPermissionAttribute), "SkipVerification");
+            CustomAttributeBuilder sv2 = new CustomAttributeBuilder(Constructor2, new object[] { requestMinimum }, 
+                new PropertyInfo[] { skipVerificationProperty }, new object[] { true });            
+            ab.SetCustomAttribute(sv2);
+
+            //System.Security.AllowPartiallyTrustedCallersAttribute Att = new System.Security.AllowPartiallyTrustedCallersAttribute();            
+            //ConstructorInfo Constructor1 = Att.GetType().GetConstructors()[0];
+            //object[] ObjectArray1 = new object[0];
+            //CustomAttributeBuilder AttribBuilder1 = new CustomAttributeBuilder(Constructor1, ObjectArray1);
+            //ab.SetCustomAttribute(AttribBuilder1);
             ModuleBuilder modBuilder = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
+            UnverifiableCodeAttribute ModAtt = new System.Security.UnverifiableCodeAttribute();
+            ConstructorInfo Constructor = ModAtt.GetType().GetConstructors()[0];
+            object[] ObjectArray = new object[0];
+            CustomAttributeBuilder ModAttribBuilder = new CustomAttributeBuilder(Constructor, ObjectArray);
+            modBuilder.SetCustomAttribute(ModAttribBuilder);
             Dictionary<string, TypeBuilder> typeBuilders = new Dictionary<string, TypeBuilder>();
             IEnumerable<MethodBase> originalMethods = Harmony.GetAllPatchedMethods();
             foreach (MethodBase originalMethod in originalMethods)
@@ -211,31 +231,43 @@ namespace RimThreaded
                         ILGenerator il = mb.GetILGenerator();
                         List<CodeInstruction> currentInstructions = PatchProcessor.GetCurrentInstructions(originalMethod);
                         Dictionary<Label, Label> labels = new Dictionary<Label, Label>();
+
+                        MethodBody methodBody = methodInfo.GetMethodBody();
+                        IList<LocalVariableInfo> localvars = methodBody.LocalVariables;
                         LocalBuilder[] localBuildersOrdered = new LocalBuilder[255];
-                        int localBuildersOrderedMax = 0;
-                        foreach (CodeInstruction currentInstruction in currentInstructions)
+                        foreach (LocalVariableInfo localVar in localvars)
                         {
-                            object operand = currentInstruction.operand;
-                            if (operand is LocalBuilder localBuilder)
-                            {
-                                localBuildersOrdered[localBuilder.LocalIndex] = localBuilder;
-                                localBuildersOrderedMax = Math.Max(localBuildersOrderedMax, localBuilder.LocalIndex);
-                            }
+                            Type type = localVar.LocalType;
+                            LocalBuilder newLocalBuilder = il.DeclareLocal(type);
+                            localBuildersOrdered[localVar.LocalIndex] = newLocalBuilder;
                         }
-                        Dictionary<LocalBuilder, LocalBuilder> localBuilders = new Dictionary<LocalBuilder, LocalBuilder>();
-                        for (int i = 0; i <= localBuildersOrderedMax; i++)
-                        {
-                            LocalBuilder localBuilderOrdered = localBuildersOrdered[i];
-                            if (localBuilderOrdered == null)
-                            {
-                                il.DeclareLocal(typeof(object));
-                            }
-                            else
-                            {
-                                LocalBuilder newLocalBuilder = il.DeclareLocal(localBuilderOrdered.LocalType);
-                                localBuilders.Add(localBuilderOrdered, newLocalBuilder);
-                            }
-                        }
+
+                        //LocalBuilder[] localBuildersOrdered = new LocalBuilder[255];                        
+                        //int localBuildersOrderedMax = 0;
+                        //foreach (CodeInstruction currentInstruction in currentInstructions)
+                        //{
+                        //    object operand = currentInstruction.operand;
+                        //    if (operand is LocalBuilder localBuilder)
+                        //    {
+                        //        localBuildersOrdered[localBuilder.LocalIndex] = localBuilder;
+                        //        localBuildersOrderedMax = Math.Max(localBuildersOrderedMax, localBuilder.LocalIndex);
+                        //    }
+                        //}
+                        //Dictionary<LocalBuilder, LocalBuilder> localBuilders = new Dictionary<LocalBuilder, LocalBuilder>();
+                        //for (int i = 0; i <= localBuildersOrderedMax; i++)
+                        //{
+                        //    LocalBuilder localBuilderOrdered = localBuildersOrdered[i];
+                        //    if (localBuilderOrdered == null)
+                        //    {
+                        //        il.DeclareLocal(typeof(object));
+                        //    }
+                        //    else
+                        //    {
+                        //        LocalBuilder newLocalBuilder = il.DeclareLocal(localBuilderOrdered.LocalType);
+                        //        localBuilders.Add(localBuilderOrdered, newLocalBuilder);
+                        //    }
+                        //}
+
                         foreach (CodeInstruction currentInstruction in currentInstructions)
                         {
                             foreach (Label label in currentInstruction.labels)
@@ -348,7 +380,7 @@ namespace RimThreaded
                                     }
                                 case LocalBuilder operandCasted:
                                     {
-                                        il.Emit(opcode, localBuilders[operandCasted]);
+                                        il.Emit(opcode, localBuildersOrdered[operandCasted.LocalIndex]);
                                         break;
                                     }
                                 default:
@@ -364,13 +396,14 @@ namespace RimThreaded
             }
             foreach (KeyValuePair<string, TypeBuilder> tb in typeBuilders)
             {
+                
                 tb.Value.CreateType();
             }
             ab.Save(aName.Name + ".dll");
             
 
             //ReImport DLL and create detour
-            Assembly.Load(aName.Name + ".dll");
+            Assembly.UnsafeLoadFrom(aName.Name + ".dll");
             foreach (MethodBase originalMethod in originalMethods)
             {
                 Patches patches = Harmony.GetPatchInfo(originalMethod);

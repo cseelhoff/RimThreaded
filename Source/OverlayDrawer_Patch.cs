@@ -1,11 +1,18 @@
 ﻿using RimWorld;
+using System;
 using Verse;
 
 namespace RimThreaded
 {
     class OverlayDrawer_Patch
     {
-
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(OverlayDrawer);
+            Type patched = typeof(OverlayDrawer_Patch);
+            RimThreadedHarmony.Prefix(original, patched, nameof(GetOverlaysHandle));
+            RimThreadedHarmony.Prefix(original, patched, nameof(DisposeHandle));
+        }
         public static bool GetOverlaysHandle(OverlayDrawer __instance, ref ThingOverlaysHandle __result, Thing thing)
         {
             if (!thing.Spawned)
