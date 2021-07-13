@@ -208,7 +208,7 @@ namespace RimThreaded
                             types.Add(parameterInfo.ParameterType);
                         }
                         MethodBuilder mb = tb.DefineMethod(originalMethod.Name, MethodAttributes.Public | MethodAttributes.Static, returnType, types.ToArray());
-
+                        
                         if (!methodInfo.Attributes.HasFlag(MethodAttributes.Static))
                         {
                             ParameterAttributes pa = new ParameterAttributes();
@@ -241,6 +241,7 @@ namespace RimThreaded
                             LocalBuilder newLocalBuilder = il.DeclareLocal(type);
                             localBuildersOrdered[localVar.LocalIndex] = newLocalBuilder;
                         }
+                        IList<ExceptionHandlingClause> exceptionHandlingClauses = methodBody.ExceptionHandlingClauses;
 
                         //LocalBuilder[] localBuildersOrdered = new LocalBuilder[255];                        
                         //int localBuildersOrderedMax = 0;
@@ -267,7 +268,6 @@ namespace RimThreaded
                         //        localBuilders.Add(localBuilderOrdered, newLocalBuilder);
                         //    }
                         //}
-
                         foreach (CodeInstruction currentInstruction in currentInstructions)
                         {
                             foreach (Label label in currentInstruction.labels)
@@ -279,6 +279,32 @@ namespace RimThreaded
                                 }
                                 il.MarkLabel(translatedLabel);
                             }
+
+                            int i = il.ILOffset;
+                            foreach (ExceptionHandlingClause Clause in exceptionHandlingClauses)
+                            {
+                                if (Clause.Flags != ExceptionHandlingClauseOptions.Clause &&
+                                   Clause.Flags != ExceptionHandlingClauseOptions.Finally)
+                                    continue;
+
+                                // Look for an ending of an exception block first!
+                                if (Clause.HandlerOffset + Clause.HandlerLength == i)
+                                    il.EndExceptionBlock();
+
+                                // If this marks the beginning of a try block, emit that
+                                if (Clause.TryOffset == i)
+                                    il.BeginExceptionBlock();
+
+                                // Also check for the beginning of a catch block
+                                if (Clause.HandlerOffset == i && Clause.Flags == ExceptionHandlingClauseOptions.Clause)
+                                    il.BeginCatchBlock(Clause.CatchType);
+
+                                // Lastly, check for a finally block
+                                if (Clause.HandlerOffset == i && Clause.Flags == ExceptionHandlingClauseOptions.Finally)
+                                    il.BeginFinallyBlock();
+                            }
+
+
                             OpCode opcode = currentInstruction.opcode;
                             object operand = currentInstruction.operand;
                             switch (operand)
@@ -389,7 +415,6 @@ namespace RimThreaded
                                         break;
                                     }
                             }
-
                         }
                     }
                 }
