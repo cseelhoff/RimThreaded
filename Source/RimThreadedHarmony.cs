@@ -834,7 +834,9 @@ namespace RimThreaded
 
 			//GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
 			//GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
-			GenPlace_Patch.RunDestructivePatches(); // 1.3 TryPlaceThing null thing after kill
+			
+			//GenPlace_Patch.RunDestructivePatches(); // 1.3 TryPlaceThing null thing after kill
+			
 			GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
             GenTemperature_Patch.RunDestructivePatches();
             GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
@@ -853,7 +855,7 @@ namespace RimThreaded
 			//JobMaker_Patch.RunDestructivePatches(); should be fixed by the simplepool patch
 			LongEventHandler_Patch.RunDestructivePatches(); //TODO - could use field replacement for conncurrentqueue
             Lord_Patch.RunDestructivePatches();
-            LordManager_Patch.RunDestructivePatches();
+			LordManager_Patch.RunDestructivePatches();
             LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. ThreadSafeLinkedList
 			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
             MemoryThoughtHandler_Patch.RunDestructivePatches();
@@ -881,7 +883,7 @@ namespace RimThreaded
             RegionAndRoomUpdater_Patch.RunDestructivePatches();
             RegionDirtyer_Patch.RunDestructivePatches();
             RegionGrid_Patch.RunDestructivePatches();
-            RegionLink_Patch.RunDestructivePatches();
+			RegionLink_Patch.RunDestructivePatches();
             RegionMaker_Patch.RunDestructivePatches();
             ResourceCounter_Patch.RunDestructivePatches();
 			RulePackDef_Patch.RunDestructivePatches(); //explosions fix - grammar
@@ -920,6 +922,7 @@ namespace RimThreaded
 			SoundSizeAggregator_Patch.RunDestructivePatches();
 			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
 			SustainerManager_Patch.RunDestructivePatches();
+			Sustainer_Patch.RunNonDestructivePatches();
 		}
 
 		private static void PatchModCompatibility()

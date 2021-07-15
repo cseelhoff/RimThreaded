@@ -13,9 +13,9 @@ namespace RimThreaded
         {
             Type original = typeof(Thing);
             Type patched = typeof(Thing_Patch);
-            RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
+            //RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
             RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
-            RimThreadedHarmony.Postfix(original, patched, nameof(SpawnSetup));
+            //RimThreadedHarmony.Postfix(original, patched, nameof(SpawnSetup));
             //RimThreadedHarmony.Postfix(original, patched, nameof(DeSpawn));
             //RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
         }

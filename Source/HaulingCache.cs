@@ -220,6 +220,8 @@ namespace RimThreaded
 		{
 			int jumboCellWidth;
 			Map map = haulableThing.Map;
+			if (map == null)
+				return; //not optimal
 			int mapSizeX = map.Size.x;
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;

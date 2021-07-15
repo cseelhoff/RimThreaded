@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "..\..\..\..\..\..\RimWorld137865\Assembly-CSharp\Assembly-CSharp.csproj", "{315A6D31-83FE-4CFC-9690-6FF1F9F04661}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,14 @@ Global
 		{FC5437E9-4CA5-4DEF-BA34-3D809C44EA8E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FC5437E9-4CA5-4DEF-BA34-3D809C44EA8E}.Release|x64.ActiveCfg = Release|Any CPU
 		{FC5437E9-4CA5-4DEF-BA34-3D809C44EA8E}.Release|x64.Build.0 = Release|Any CPU
+		{315A6D31-83FE-4CFC-9690-6FF1F9F04661}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{315A6D31-83FE-4CFC-9690-6FF1F9F04661}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{315A6D31-83FE-4CFC-9690-6FF1F9F04661}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{315A6D31-83FE-4CFC-9690-6FF1F9F04661}.Debug|x64.Build.0 = Debug|Any CPU
+		{315A6D31-83FE-4CFC-9690-6FF1F9F04661}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{315A6D31-83FE-4CFC-9690-6FF1F9F04661}.Release|Any CPU.Build.0 = Release|Any CPU
+		{315A6D31-83FE-4CFC-9690-6FF1F9F04661}.Release|x64.ActiveCfg = Release|Any CPU
+		{315A6D31-83FE-4CFC-9690-6FF1F9F04661}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
