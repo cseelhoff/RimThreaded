@@ -183,238 +183,291 @@ namespace RimThreaded
             {
                 Patches patches = Harmony.GetPatchInfo(originalMethod);
                 int transpiledCount = patches.Transpilers.Count;
-                if (transpiledCount > 0)
+                if (transpiledCount == 0)
+                    continue;
+                if (originalMethod is MethodInfo methodInfo) // add support for constructors as well
                 {
-                    if (originalMethod is MethodInfo methodInfo) // add support for constructors as well
+                    Type returnType = methodInfo.ReturnType;
+                    string typeTranspiled = originalMethod.DeclaringType.FullName + "_Transpiled";
+                    if (!typeBuilders.TryGetValue(typeTranspiled, out TypeBuilder tb))
                     {
-                        Type returnType = methodInfo.ReturnType;
-                        string typeTranspiled = originalMethod.DeclaringType.FullName + "_Transpiled";
-                        if (!typeBuilders.TryGetValue(typeTranspiled, out TypeBuilder tb))
-                        {
-                            tb = modBuilder.DefineType(typeTranspiled, TypeAttributes.Public);
-                            typeBuilders[typeTranspiled] = tb;
-                        }
-                        ParameterInfo[] parameterInfos = methodInfo.GetParameters();
-                        List<Type> types = new List<Type>();
+                        tb = modBuilder.DefineType(typeTranspiled, TypeAttributes.Public);
+                        typeBuilders[typeTranspiled] = tb;
+                    }
+                    ParameterInfo[] parameterInfos = methodInfo.GetParameters();
+                    List<Type> types = new List<Type>();
 
-                        int parameterOffset = 1;
-                        if (!methodInfo.Attributes.HasFlag(MethodAttributes.Static))
-                        {
-                            types.Add(methodInfo.DeclaringType);
-                            parameterOffset = 2;
-                        }
-                        foreach (ParameterInfo parameterInfo in parameterInfos)
-                        {
-                            types.Add(parameterInfo.ParameterType);
-                        }
-                        MethodBuilder mb = tb.DefineMethod(originalMethod.Name, MethodAttributes.Public | MethodAttributes.Static, returnType, types.ToArray());
-                        
-                        if (!methodInfo.Attributes.HasFlag(MethodAttributes.Static))
-                        {
-                            ParameterAttributes pa = new ParameterAttributes();
-                            ParameterBuilder pb = mb.DefineParameter(1, pa, methodInfo.DeclaringType.Name);
-                        }
+                    int parameterOffset = 1;
+                    if (!methodInfo.Attributes.HasFlag(MethodAttributes.Static))
+                    {
+                        types.Add(methodInfo.DeclaringType);
+                        parameterOffset = 2;
+                    }
+                    foreach (ParameterInfo parameterInfo in parameterInfos)
+                    {
+                        types.Add(parameterInfo.ParameterType);
+                    }
+                    MethodBuilder mb = tb.DefineMethod(originalMethod.Name, MethodAttributes.Public | MethodAttributes.Static, returnType, types.ToArray());
+                    if (typeTranspiled.Equals("Verse.PawnGenerator_Transpiled") && !originalMethod.Name.Equals(""))
+                        Log.Message(originalMethod.Name);
+                    if (!methodInfo.Attributes.HasFlag(MethodAttributes.Static))
+                    {
+                        ParameterAttributes pa = new ParameterAttributes();
+                        ParameterBuilder pb = mb.DefineParameter(1, pa, methodInfo.DeclaringType.Name);
+                    }
 
-                        foreach (ParameterInfo parameterInfo in parameterInfos)
-                        {
-                            ParameterAttributes pa = new ParameterAttributes();
-                            if (parameterInfo.IsOut) pa |= ParameterAttributes.Out;
-                            if (parameterInfo.IsIn) pa |= ParameterAttributes.In;
-                            if (parameterInfo.IsLcid) pa |= ParameterAttributes.Lcid;
-                            if (parameterInfo.IsOptional) pa |= ParameterAttributes.Optional;
-                            if (parameterInfo.IsRetval) pa |= ParameterAttributes.Retval;
-                            if (parameterInfo.HasDefaultValue) pa |= ParameterAttributes.HasDefault;
-                            ParameterBuilder pb = mb.DefineParameter(parameterInfo.Position + parameterOffset, pa, parameterInfo.Name);
-                            if (parameterInfo.HasDefaultValue && parameterInfo.DefaultValue != null)
-                                pb.SetConstant(parameterInfo.DefaultValue);
-                        }
-                        ILGenerator il = mb.GetILGenerator();
-                        List<CodeInstruction> currentInstructions = PatchProcessor.GetCurrentInstructions(originalMethod);
-                        Dictionary<Label, Label> labels = new Dictionary<Label, Label>();
+                    foreach (ParameterInfo parameterInfo in parameterInfos)
+                    {
+                        ParameterAttributes pa = new ParameterAttributes();
+                        if (parameterInfo.IsOut) pa |= ParameterAttributes.Out;
+                        if (parameterInfo.IsIn) pa |= ParameterAttributes.In;
+                        if (parameterInfo.IsLcid) pa |= ParameterAttributes.Lcid;
+                        if (parameterInfo.IsOptional) pa |= ParameterAttributes.Optional;
+                        if (parameterInfo.IsRetval) pa |= ParameterAttributes.Retval;
+                        if (parameterInfo.HasDefaultValue) pa |= ParameterAttributes.HasDefault;
+                        ParameterBuilder pb = mb.DefineParameter(parameterInfo.Position + parameterOffset, pa, parameterInfo.Name);
+                        if (parameterInfo.HasDefaultValue && parameterInfo.DefaultValue != null)
+                            pb.SetConstant(parameterInfo.DefaultValue);
+                    }
+                    ILGenerator il = mb.GetILGenerator();
 
-                        MethodBody methodBody = methodInfo.GetMethodBody();
-                        IList<LocalVariableInfo> localvars = methodBody.LocalVariables;
-                        LocalBuilder[] localBuildersOrdered = new LocalBuilder[255];
-                        foreach (LocalVariableInfo localVar in localvars)
-                        {
-                            Type type = localVar.LocalType;
-                            LocalBuilder newLocalBuilder = il.DeclareLocal(type);
-                            localBuildersOrdered[localVar.LocalIndex] = newLocalBuilder;
-                        }
-                        IList<ExceptionHandlingClause> exceptionHandlingClauses = methodBody.ExceptionHandlingClauses;
+                    //MethodCopier methodCopier = new MethodCopier(originalMethod, il);
+                    //List<Label> endLabels = new List<Label>();
+                    //_ = methodCopier.Finalize(null, endLabels, out var hasReturnCode);
 
-                        //LocalBuilder[] localBuildersOrdered = new LocalBuilder[255];                        
-                        //int localBuildersOrderedMax = 0;
-                        //foreach (CodeInstruction currentInstruction in currentInstructions)
-                        //{
-                        //    object operand = currentInstruction.operand;
-                        //    if (operand is LocalBuilder localBuilder)
-                        //    {
-                        //        localBuildersOrdered[localBuilder.LocalIndex] = localBuilder;
-                        //        localBuildersOrderedMax = Math.Max(localBuildersOrderedMax, localBuilder.LocalIndex);
-                        //    }
-                        //}
-                        //Dictionary<LocalBuilder, LocalBuilder> localBuilders = new Dictionary<LocalBuilder, LocalBuilder>();
-                        //for (int i = 0; i <= localBuildersOrderedMax; i++)
-                        //{
-                        //    LocalBuilder localBuilderOrdered = localBuildersOrdered[i];
-                        //    if (localBuilderOrdered == null)
-                        //    {
-                        //        il.DeclareLocal(typeof(object));
-                        //    }
-                        //    else
-                        //    {
-                        //        LocalBuilder newLocalBuilder = il.DeclareLocal(localBuilderOrdered.LocalType);
-                        //        localBuilders.Add(localBuilderOrdered, newLocalBuilder);
-                        //    }
-                        //}
-                        foreach (CodeInstruction currentInstruction in currentInstructions)
+                    List<CodeInstruction> currentInstructions = PatchProcessor.GetCurrentInstructions(originalMethod);
+                    Dictionary<Label, Label> labels = new Dictionary<Label, Label>();
+
+                    MethodBody methodBody = methodInfo.GetMethodBody();
+                    IList<LocalVariableInfo> localvars = methodBody.LocalVariables;
+                    LocalBuilder[] localBuildersOrdered = new LocalBuilder[255];
+                    foreach (LocalVariableInfo localVar in localvars)
+                    {
+                        Type type = localVar.LocalType;
+                        LocalBuilder newLocalBuilder = il.DeclareLocal(type);
+                        localBuildersOrdered[localVar.LocalIndex] = newLocalBuilder;
+                    }
+                    IList<ExceptionHandlingClause> exceptionHandlingClauses = methodBody.ExceptionHandlingClauses;
+
+                    //LocalBuilder[] localBuildersOrdered = new LocalBuilder[255];                        
+                    //int localBuildersOrderedMax = 0;
+                    //foreach (CodeInstruction currentInstruction in currentInstructions)
+                    //{
+                    //    object operand = currentInstruction.operand;
+                    //    if (operand is LocalBuilder localBuilder)
+                    //    {
+                    //        localBuildersOrdered[localBuilder.LocalIndex] = localBuilder;
+                    //        localBuildersOrderedMax = Math.Max(localBuildersOrderedMax, localBuilder.LocalIndex);
+                    //    }
+                    //}
+                    //Dictionary<LocalBuilder, LocalBuilder> localBuilders = new Dictionary<LocalBuilder, LocalBuilder>();
+                    //for (int i = 0; i <= localBuildersOrderedMax; i++)
+                    //{
+                    //    LocalBuilder localBuilderOrdered = localBuildersOrdered[i];
+                    //    if (localBuilderOrdered == null)
+                    //    {
+                    //        il.DeclareLocal(typeof(object));
+                    //    }
+                    //    else
+                    //    {
+                    //        LocalBuilder newLocalBuilder = il.DeclareLocal(localBuilderOrdered.LocalType);
+                    //        localBuilders.Add(localBuilderOrdered, newLocalBuilder);
+                    //    }
+                    //}
+                    
+                    foreach (CodeInstruction currentInstruction in currentInstructions)
+                    {
+                        bool endFinally = false;
+                        foreach (Label label in currentInstruction.labels)
                         {
-                            foreach (Label label in currentInstruction.labels)
+                            if (!labels.TryGetValue(label, out Label translatedLabel))
                             {
-                                if (!labels.TryGetValue(label, out Label translatedLabel))
-                                {
-                                    translatedLabel = il.DefineLabel();
-                                    labels[label] = translatedLabel;
-                                }
-                                il.MarkLabel(translatedLabel);
+                                translatedLabel = il.DefineLabel();
+                                labels[label] = translatedLabel;
                             }
+                            il.MarkLabel(translatedLabel);
+                        }
 
-                            int i = il.ILOffset;
-                            foreach (ExceptionHandlingClause Clause in exceptionHandlingClauses)
-                            {
-                                if (Clause.Flags != ExceptionHandlingClauseOptions.Clause &&
-                                   Clause.Flags != ExceptionHandlingClauseOptions.Finally)
-                                    continue;
+                        //int i = il.ILOffset;
+                        //foreach (ExceptionHandlingClause Clause in exceptionHandlingClauses)
+                        //{
+                        //    if (Clause.Flags != ExceptionHandlingClauseOptions.Clause &&
+                        //       Clause.Flags != ExceptionHandlingClauseOptions.Finally)
+                        //        continue;
 
-                                // Look for an ending of an exception block first!
-                                if (Clause.HandlerOffset + Clause.HandlerLength == i)
-                                    il.EndExceptionBlock();
+                        //    // Look for an ending of an exception block first!
+                        //    if (Clause.HandlerOffset + Clause.HandlerLength == i)
+                        //        il.EndExceptionBlock();
 
-                                // If this marks the beginning of a try block, emit that
-                                if (Clause.TryOffset == i)
-                                    il.BeginExceptionBlock();
+                        //    // If this marks the beginning of a try block, emit that
+                        //    if (Clause.TryOffset == i)
+                        //        il.BeginExceptionBlock();
 
-                                // Also check for the beginning of a catch block
-                                if (Clause.HandlerOffset == i && Clause.Flags == ExceptionHandlingClauseOptions.Clause)
-                                    il.BeginCatchBlock(Clause.CatchType);
+                        //    // Also check for the beginning of a catch block
+                        //    if (Clause.HandlerOffset == i && Clause.Flags == ExceptionHandlingClauseOptions.Clause)
+                        //        il.BeginCatchBlock(Clause.CatchType);
 
-                                // Lastly, check for a finally block
-                                if (Clause.HandlerOffset == i && Clause.Flags == ExceptionHandlingClauseOptions.Finally)
-                                    il.BeginFinallyBlock();
-                            }
+                        //    // Lastly, check for a finally block
+                        //    if (Clause.HandlerOffset == i && Clause.Flags == ExceptionHandlingClauseOptions.Finally)
+                        //        il.BeginFinallyBlock();
+                        //}
 
-
-                            OpCode opcode = currentInstruction.opcode;
-                            object operand = currentInstruction.operand;
-                            switch (operand)
-                            {
-                                case null:
+                        foreach (ExceptionBlock block in currentInstruction.blocks)
+                        {
+                            switch (block.blockType) {
+                                case ExceptionBlockType.BeginExceptionBlock:
                                     {
-                                        il.Emit(opcode);
+                                        il.BeginExceptionBlock();
                                         break;
                                     }
-                                case byte operandCasted:
+                                case ExceptionBlockType.BeginCatchBlock:
                                     {
-                                        il.Emit(opcode, operandCasted);
+                                        il.BeginCatchBlock(block.catchType);
                                         break;
                                     }
-                                case sbyte operandCasted:
+                                case ExceptionBlockType.BeginExceptFilterBlock:
                                     {
-                                        il.Emit(opcode, operandCasted);
+                                        il.BeginExceptFilterBlock();
                                         break;
                                     }
-                                case short operandCasted:
+                                case ExceptionBlockType.BeginFaultBlock:
                                     {
-                                        il.Emit(opcode, operandCasted);
+                                        il.BeginFaultBlock();
                                         break;
                                     }
-                                case int operandCasted:
+                                case ExceptionBlockType.BeginFinallyBlock:
                                     {
-                                        il.Emit(opcode, operandCasted);
+                                        il.BeginFinallyBlock();
                                         break;
                                     }
-                                case MethodInfo operandCasted:
+                                case ExceptionBlockType.EndExceptionBlock:
                                     {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case SignatureHelper operandCasted:
-                                    {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case ConstructorInfo operandCasted:
-                                    {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case Type operandCasted:
-                                    {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case long operandCasted:
-                                    {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case float operandCasted:
-                                    {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case double operandCasted:
-                                    {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case Label operandCasted:
-                                    {
-                                        if (!labels.TryGetValue(operandCasted, out Label translatedLabel))
-                                        {
-                                            translatedLabel = il.DefineLabel();
-                                            labels[operandCasted] = translatedLabel;
-                                        }
-                                        il.Emit(opcode, translatedLabel);
-                                        break;
-                                    }
-                                case Label[] operandCasted:
-                                    {
-                                        List<Label> newLabels = new List<Label>();
-                                        foreach (Label operandCasted1 in operandCasted)
-                                        {
-                                            if (!labels.TryGetValue(operandCasted1, out Label translatedLabel))
-                                            {
-                                                translatedLabel = il.DefineLabel();
-                                                labels[operandCasted1] = translatedLabel;
-                                            }
-                                            newLabels.Add(translatedLabel);
-                                        }
-                                        il.Emit(opcode, newLabels.ToArray());
-                                        break;
-                                    }
-                                case FieldInfo operandCasted:
-                                    {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case string operandCasted:
-                                    {
-                                        il.Emit(opcode, operandCasted);
-                                        break;
-                                    }
-                                case LocalBuilder operandCasted:
-                                    {
-                                        il.Emit(opcode, localBuildersOrdered[operandCasted.LocalIndex]);
+                                        //il.EndExceptionBlock();
+                                        endFinally = true;
                                         break;
                                     }
                                 default:
                                     {
-                                        Log.Error("UNKNOWN OPERAND");
+                                        Log.Error("Unknown ExceptionBlock");
                                         break;
                                     }
                             }
+                        }
+
+                        OpCode opcode = currentInstruction.opcode;
+                        object operand = currentInstruction.operand;
+                        switch (operand)
+                        {
+                            case null:
+                                {
+                                    il.Emit(opcode);
+                                    break;
+                                }
+                            case byte operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case sbyte operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case short operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case int operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case MethodInfo operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case SignatureHelper operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case ConstructorInfo operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case Type operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case long operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case float operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case double operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case Label operandCasted:
+                                {
+                                    if (!labels.TryGetValue(operandCasted, out Label translatedLabel))
+                                    {
+                                        translatedLabel = il.DefineLabel();
+                                        labels[operandCasted] = translatedLabel;
+                                    }
+                                    il.Emit(opcode, translatedLabel);
+                                    break;
+                                }
+                            case Label[] operandCasted:
+                                {
+                                    List<Label> newLabels = new List<Label>();
+                                    foreach (Label operandCasted1 in operandCasted)
+                                    {
+                                        if (!labels.TryGetValue(operandCasted1, out Label translatedLabel))
+                                        {
+                                            translatedLabel = il.DefineLabel();
+                                            labels[operandCasted1] = translatedLabel;
+                                        }
+                                        newLabels.Add(translatedLabel);
+                                    }
+                                    il.Emit(opcode, newLabels.ToArray());
+                                    break;
+                                }
+                            case FieldInfo operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case string operandCasted:
+                                {
+                                    il.Emit(opcode, operandCasted);
+                                    break;
+                                }
+                            case LocalBuilder operandCasted:
+                                {
+                                    il.Emit(opcode, localBuildersOrdered[operandCasted.LocalIndex]);
+                                    break;
+                                }
+                            default:
+                                {
+                                    Log.Error("UNKNOWN OPERAND");
+                                    break;
+                                }
+                        }
+                        if (endFinally)
+                        {
+                            il.EndExceptionBlock();
+                            //endFinally = true;
                         }
                     }
                 }
@@ -425,10 +478,17 @@ namespace RimThreaded
                 tb.Value.CreateType();
             }
             ab.Save(aName.Name + ".dll");
-            
+
 
             //ReImport DLL and create detour
-            Assembly.UnsafeLoadFrom(aName.Name + ".dll");
+            Assembly loadedAssembly = Assembly.UnsafeLoadFrom(aName.Name + ".dll");
+            IEnumerable<TypeInfo> transpiledTypes = loadedAssembly.DefinedTypes;
+            Dictionary<string, Type> tTypeDictionary = new Dictionary<string, Type>();
+            foreach (TypeInfo transpiledType in transpiledTypes)
+            {
+                tTypeDictionary.Add(transpiledType.FullName, transpiledType.AsType());
+            }
+
             foreach (MethodBase originalMethod in originalMethods)
             {
                 Patches patches = Harmony.GetPatchInfo(originalMethod);
@@ -437,7 +497,7 @@ namespace RimThreaded
                 {
                     if (originalMethod is MethodInfo methodInfo) // add support for constructors as well
                     {
-                        Type transpiledType = TypeByName(originalMethod.DeclaringType.FullName + "_Transpiled");
+                        Type transpiledType = tTypeDictionary[originalMethod.DeclaringType.FullName + "_Transpiled"];
                         ParameterInfo[] parameterInfos = methodInfo.GetParameters();
                         List<Type> types = new List<Type>();
 
