@@ -1004,6 +1004,20 @@
           "FieldName": "tmpExistingLovePartners"
         }
       ]
+    },
+    {
+      "ClassName": "Verse.BuildingsDamageSectionLayerUtility",
+      "ThreadStatics": [
+        {
+          "FieldName": "availableOverlays"
+        },
+        {
+          "FieldName": "overlaysWorkingList"
+        },
+        {
+          "FieldName": "overlays"
+        }
+      ]
     }
   ]
 }

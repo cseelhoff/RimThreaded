@@ -13,12 +13,12 @@ namespace RimThreaded
         {
             Type original = typeof(ReachabilityCache);
             Type patched = typeof(ReachabilityCache_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "get_Count");
-            RimThreadedHarmony.Prefix(original, patched, "CachedResultFor");
-            RimThreadedHarmony.Prefix(original, patched, "AddCachedResult");
-            RimThreadedHarmony.Prefix(original, patched, "Clear");
-            RimThreadedHarmony.Prefix(original, patched, "ClearFor");
-            RimThreadedHarmony.Prefix(original, patched, "ClearForHostile");
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_Count));
+            RimThreadedHarmony.Prefix(original, patched, nameof(CachedResultFor));
+            RimThreadedHarmony.Prefix(original, patched, nameof(AddCachedResult));
+            RimThreadedHarmony.Prefix(original, patched, nameof(Clear));
+            RimThreadedHarmony.Prefix(original, patched, nameof(ClearFor));
+            RimThreadedHarmony.Prefix(original, patched, nameof(ClearForHostile));
         }
 
         internal static void InitializeThreadStatics()
@@ -48,7 +48,7 @@ namespace RimThreaded
             return cacheDict;
         }
 
-        public static bool CachedResultFor(ReachabilityCache __instance, ref BoolUnknown __result, Room A, Room B, TraverseParms traverseParams)
+        public static bool CachedResultFor(ReachabilityCache __instance, ref BoolUnknown __result, District A, District B, TraverseParms traverseParams)
         {
             Dictionary<ReachabilityCache.CachedEntry, bool> cacheDict = getCacheDict(__instance);
             lock (cacheDict)
@@ -67,8 +67,10 @@ namespace RimThreaded
             __result = BoolUnknown.Unknown;
             return false;
         }
-        public static bool AddCachedResult(ReachabilityCache __instance, Room A, Room B, TraverseParms traverseParams, bool reachable)
+        public static bool AddCachedResult(ReachabilityCache __instance, District A, District B, TraverseParms traverseParams, bool reachable)
         {
+            if (A == null || B == null)
+                return false;
             ReachabilityCache.CachedEntry key = new ReachabilityCache.CachedEntry(A.ID, B.ID, traverseParams);
             Dictionary<ReachabilityCache.CachedEntry, bool> cacheDict = getCacheDict(__instance);
             if (!cacheDict.ContainsKey(key))

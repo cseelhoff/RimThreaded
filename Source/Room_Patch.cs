@@ -26,11 +26,13 @@ namespace RimThreaded
 				__instance.statsAndRoleDirty = false;
 				if (__instance.ProperRoom && __instance.RegionCount <= 36)
 				{
-					if (__instance.stats == null)
-						__instance.stats = new DefMap<RoomStatDef, float>();
-					foreach (RoomStatDef def in (IEnumerable<RoomStatDef>)DefDatabase<RoomStatDef>.AllDefs.OrderByDescending<RoomStatDef, float>((Func<RoomStatDef, float>)(x => x.updatePriority)))
-						__instance.stats[def] = def.Worker.GetScore(__instance);
-				__instance.role = DefDatabase<RoomRoleDef>.AllDefs.MaxBy((Func<RoomRoleDef, float>)(x => x.Worker.GetScore(__instance)));
+                    DefMap<RoomStatDef, float> stats = __instance.stats;
+					if (stats == null)
+						stats = new DefMap<RoomStatDef, float>();
+					foreach (RoomStatDef def in DefDatabase<RoomStatDef>.AllDefs.OrderByDescending(x => x.updatePriority))
+						stats[def] = def.Worker.GetScore(__instance);
+					__instance.role = DefDatabase<RoomRoleDef>.AllDefs.MaxBy(x => x.Worker.GetScore(__instance));
+					__instance.stats = stats;
 				}
 				else
 				{

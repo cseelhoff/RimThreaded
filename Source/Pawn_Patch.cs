@@ -20,8 +20,16 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(Destroy)); //causes strange crash to desktop without error log
             RimThreadedHarmony.Prefix(original, patched, nameof(VerifyReservations));
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Inspired));
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_InAggroMentalState));
         }
 
+
+        public static bool get_InAggroMentalState(Pawn __instance, ref bool __result)
+        {
+            Pawn_MindState mindState = __instance.mindState;
+            __result = !__instance.Dead && mindState.mentalStateHandler.InMentalState && mindState.mentalStateHandler.CurStateDef.IsAggro;
+            return false;
+        }
 
         public static bool get_Inspired(Pawn __instance, ref bool __result)
         {

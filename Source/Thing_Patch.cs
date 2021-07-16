@@ -13,7 +13,7 @@ namespace RimThreaded
         {
             Type original = typeof(Thing);
             Type patched = typeof(Thing_Patch);
-            //RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
             RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
             //RimThreadedHarmony.Postfix(original, patched, nameof(SpawnSetup));
             //RimThreadedHarmony.Postfix(original, patched, nameof(DeSpawn));
@@ -145,18 +145,19 @@ namespace RimThreaded
         public static bool get_Map(Thing __instance, ref Map __result)
         {
             __result = null;
-            if (__instance.mapIndexOrState >= 0)
-                __result = Find.Maps[__instance.mapIndexOrState];
-            else
-            {
-                lock (lastMapIndex)
-                {
-                    if (lastMapIndex.TryGetValue(__instance, out sbyte lastIndex))
-                    {
-                        __result = Find.Maps[lastIndex];
-                    }
-                }
-            }
+            int mapIndexOrState = __instance.mapIndexOrState;
+            if (mapIndexOrState >= 0)
+                __result = Find.Maps[mapIndexOrState];
+            //else
+            //{
+            //    lock (lastMapIndex)
+            //    {
+            //        if (lastMapIndex.TryGetValue(__instance, out sbyte lastIndex))
+            //        {
+            //            __result = Find.Maps[lastIndex];
+            //        }
+            //    }
+            //}
             return false;
         }
 

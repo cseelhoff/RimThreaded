@@ -26,8 +26,8 @@ namespace RimThreaded
         {
             Type original = typeof(ThingGrid);
             Type patched = typeof(ThingGrid_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "RegisterInCell");
-            RimThreadedHarmony.Prefix(original, patched, "DeregisterInCell");
+            RimThreadedHarmony.Prefix(original, patched, nameof(RegisterInCell));
+            RimThreadedHarmony.Prefix(original, patched, nameof(DeregisterInCell));
         }
 
         public static bool RegisterInCell(ThingGrid __instance, Thing t, IntVec3 c)

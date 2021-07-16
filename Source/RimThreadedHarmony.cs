@@ -769,6 +769,7 @@ namespace RimThreaded
 			GenGrid_Patch.RunNonDestructivePatches(); //explosion fix
 			ThinkNode_JoinVoluntarilyJoinableLord_Patch.RunDestructivePatches(); //explosion fix
 			Corpse_Patch.RunNonDestructivePatches(); // 1.3 explosion fix
+			RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix
 
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
@@ -825,7 +826,7 @@ namespace RimThreaded
 			District_Patch.RunDestructivePatches(); // 1.3 fix for cachedOpenRoofState null ref - TODO - optimize locks
 			DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
             DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
-            //FilthMaker_Patch.RunDestructivePatches(); replaces a few LINQ queries. possible perf improvement
+            FilthMaker_Patch.RunDestructivePatches(); //replacing a few LINQ queries could possibly improve perf 
 			FireUtility_Patch.RunDestructivePatches();
 			FleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			FleckSystemBaseFleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
@@ -841,7 +842,10 @@ namespace RimThreaded
             GenTemperature_Patch.RunDestructivePatches();
             GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
 			GoodwillSituationManager_Patch.RunDestructivePatches(); //initial 1.3 patch
+			GridsUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix
+														
 			//GrammarResolver_Patch.RunDestructivePatches();
+
 			HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
             HediffSet_Patch.RunDestructivePatches();
 			HistoryEventsManager_Patch.RunDestructivePatches(); // 1.3 explosion fix
@@ -890,12 +894,15 @@ namespace RimThreaded
 			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
             ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
             SteadyEnvironmentEffects_Patch.RunDestructivePatches();
-            StoryState_Patch.RunDestructivePatches(); //WrapMethodInInstanceLock
+			StoreUtility_Patch.RunDestructivePatches(); // 1.3 explosion
+			StoryState_Patch.RunDestructivePatches(); //WrapMethodInInstanceLock
             TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
 			Thing_Patch.RunDestructivePatches();
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
-            TileTemperaturesComp_Patch.RunDestructivePatches(); //TODO - good simple transpile candidate
+			ThinkNode_ForbidOutsideFlagRadius_Patch.RunDestructivePatches(); //base method override is double destructive 
+
+			TileTemperaturesComp_Patch.RunDestructivePatches(); //TODO - good simple transpile candidate
             UniqueIDsManager_Patch.RunDestructivePatches(); // Simple use of Interlocked.Increment
             Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
             WealthWatcher_Patch.RunDestructivePatches();
