@@ -917,7 +917,7 @@ namespace RimThreaded
 			MapPawns_Patch.RunDestructivePatches(); //TODO: Affects Animal Master Assignment
 			MeditationFocusTypeAvailabilityCache_Patch.RunDestructivePatches();
 			Pawn_JobTracker_Patch.RunDestructivePatches();
-			Pawn_Patch.RunDestructivePatches();
+			Pawn_Patch.RunDestructivePatches(); // 1) causes strange crash to desktop without error log. 2) not efficient base replacement for PostApplyDamage 
 			Region_Patch.RunDestructivePatches();
 			ReservationManager_Patch.RunDestructivePatches();
 			Room_Patch.RunDestructivePatches();

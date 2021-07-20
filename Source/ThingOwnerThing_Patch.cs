@@ -12,7 +12,7 @@ namespace RimThreaded
     {
         internal static void RunNonDestructivePatches()
         {
-            Type original = typeof(ThingOwner<Thing>);
+            Type original = typeof(ThingOwner<Thing>); 
             Type patched = typeof(ThingOwnerThing_Patch);
             RimThreadedHarmony.TranspileLockAdd3(original, "TryAdd", new Type[] { typeof(Thing), typeof(bool) });
             RimThreadedHarmony.Transpile(original, patched, "Remove");
