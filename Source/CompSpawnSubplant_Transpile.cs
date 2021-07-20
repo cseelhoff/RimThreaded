@@ -28,7 +28,9 @@ namespace RimThreaded
         {
             Type original = typeof(CompSpawnSubplant);
             Type patched = typeof(CompSpawnSubplant_Transpile);
+#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(AddProgress));
+#endif
 			RimThreadedHarmony.Prefix(original, patched, nameof(TryGrowSubplants));
         }
 
@@ -115,6 +117,7 @@ namespace RimThreaded
 
 
 
+#if RW13
         public static bool AddProgress(CompSpawnSubplant __instance, float progress, bool ignoreMultiplier = false)
         {
             if (!ModLister.RoyaltyInstalled)
@@ -136,7 +139,7 @@ namespace RimThreaded
 
             return false;
         }
-
+#endif
         public static bool TryGrowSubplants(CompSpawnSubplant __instance)
         {
             while (__instance.progressToNextSubplant >= 1f)

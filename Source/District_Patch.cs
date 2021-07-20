@@ -9,13 +9,16 @@ namespace RimThreaded
 
         internal static void RunDestructivePatches()
         {
+#if RW13
             Type original = typeof(District);
             Type patched = typeof(District_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(RemoveRegion));
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_RoofChanged));
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_RoomShapeOrContainedBedsChanged));
             RimThreadedHarmony.Prefix(original, patched, nameof(OpenRoofCountStopAt));
+#endif
         }
+#if RW13
         public static bool RemoveRegion(District __instance, Region r)
         {
             lock (__instance) //added
@@ -89,5 +92,6 @@ namespace RimThreaded
             return false;
         }
 
+#endif
     }
 }

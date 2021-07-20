@@ -74,6 +74,7 @@ namespace RimThreaded
             return;
         }
 
+#if RW13
         public static bool FindPath(PathFinder __instance, ref PawnPath __result, IntVec3 start, LocalTargetInfo dest, TraverseParms traverseParms, PathEndMode peMode = PathEndMode.OnCell)
         {
             if (DebugSettings.pathThroughWalls)
@@ -485,7 +486,7 @@ namespace RimThreaded
             __result = PawnPath.NotFound;
             return false;
         }
-
+#endif
 
         static readonly Type costNodeType = TypeByName("Verse.AI.PathFinder+CostNode");
         static readonly Type icomparerCostNodeType1 = typeof(IComparer<>).MakeGenericType(costNodeType);

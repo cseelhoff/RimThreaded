@@ -14,8 +14,10 @@ namespace RimThreaded
             Type original = typeof(ReachabilityCache);
             Type patched = typeof(ReachabilityCache_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Count));
+#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(CachedResultFor));
             RimThreadedHarmony.Prefix(original, patched, nameof(AddCachedResult));
+#endif
             RimThreadedHarmony.Prefix(original, patched, nameof(Clear));
             RimThreadedHarmony.Prefix(original, patched, nameof(ClearFor));
             RimThreadedHarmony.Prefix(original, patched, nameof(ClearForHostile));
@@ -48,6 +50,7 @@ namespace RimThreaded
             return cacheDict;
         }
 
+#if RW13
         public static bool CachedResultFor(ReachabilityCache __instance, ref BoolUnknown __result, District A, District B, TraverseParms traverseParams)
         {
             Dictionary<ReachabilityCache.CachedEntry, bool> cacheDict = getCacheDict(__instance);
@@ -85,7 +88,8 @@ namespace RimThreaded
             }
             return false;
         }
-
+        
+#endif
         public static bool Clear(ReachabilityCache __instance)
         {
             Dictionary<ReachabilityCache.CachedEntry, bool> cacheDict = getCacheDict(__instance);
@@ -95,7 +99,6 @@ namespace RimThreaded
             }
             return false;
         }
-
         public static bool ClearFor(ReachabilityCache __instance, Pawn p)
         {
             tmpCachedEntries.Clear();

@@ -14,8 +14,12 @@ namespace RimThreaded
         {
             Type original = typeof(Alert_ColonistLeftUnburied);
             Type patched = typeof(Alert_ColonistLeftUnburied_Patch);
+#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(IsCorpseOfColonist));
+#endif
         }
+
+#if RW13
         public static bool IsCorpseOfColonist(ref bool __result, Corpse corpse)
         {
             if (corpse == null)
@@ -44,6 +48,6 @@ namespace RimThreaded
             __result = InnerPawn.Faction == Faction.OfPlayer && race.Humanlike && (!InnerPawn.IsQuestLodger() && !InnerPawn.IsSlave) && !corpse.IsInAnyStorage();
             return false;
         }
-
+#endif
     }
 }

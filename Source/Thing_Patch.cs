@@ -14,11 +14,15 @@ namespace RimThreaded
             Type original = typeof(Thing);
             Type patched = typeof(Thing_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
+#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
+#endif
             //RimThreadedHarmony.Postfix(original, patched, nameof(SpawnSetup));
             //RimThreadedHarmony.Postfix(original, patched, nameof(DeSpawn));
             //RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
         }
+
+#if RW13
         public static bool TakeDamage(Thing __instance, ref DamageWorker.DamageResult __result, DamageInfo dinfo)
         {
             //---START change---
@@ -75,6 +79,8 @@ namespace RimThreaded
             __result = damageResult;
             return false;
         }
+        
+#endif
         //public static bool DeSpawn(Thing __instance, DestroyMode mode = DestroyMode.Vanish)
         //{
         //    if (__instance.Destroyed)

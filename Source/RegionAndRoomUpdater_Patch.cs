@@ -17,11 +17,14 @@ namespace RimThreaded
 
         internal static void RunDestructivePatches()
         {
+#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(TryRebuildDirtyRegionsAndRooms));
+#endif
         }
 
         public static HashSet<IntVec3> cellsWithNewRegions = new HashSet<IntVec3>();
         public static List<Region> regionsToReDirty = new List<Region>();
+#if RW13
         public static bool TryRebuildDirtyRegionsAndRooms(RegionAndRoomUpdater __instance)
         {
             if (!__instance.Enabled || working) return false;
@@ -82,7 +85,7 @@ namespace RimThreaded
                 }
             }
         }
-
+#endif
 
 
     }

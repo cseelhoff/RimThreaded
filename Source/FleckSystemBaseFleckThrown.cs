@@ -7,10 +7,13 @@ namespace RimThreaded
     {
         internal static void RunDestructivePatches()
         {
+#if RW13
             Type original = typeof(FleckSystemBase<FleckThrown>);
             Type patched = typeof(FleckSystemBaseFleckThrown_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(CreateFleck));
+#endif
         }
+#if RW13
         public static bool CreateFleck(FleckSystemBase<FleckThrown> __instance, FleckCreationData creationData)
         {
             FleckThrown fleck = new FleckThrown();
@@ -29,5 +32,6 @@ namespace RimThreaded
             }
             return false;
         }
+#endif
     }
 }

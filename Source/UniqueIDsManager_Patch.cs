@@ -12,8 +12,11 @@ namespace RimThreaded
         {
             Type original = typeof(UniqueIDsManager);
             Type patched = typeof(UniqueIDsManager_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetNextID");
+#if RW13
+            RimThreadedHarmony.Prefix(original, patched, nameof(GetNextID));
+#endif
         }
+#if RW13
         public static bool GetNextID(ref int __result, ref int nextID)
         {
             if (Scribe.mode == LoadSaveMode.LoadingVars && !Find.UniqueIDsManager.wasLoaded)
@@ -39,6 +42,6 @@ namespace RimThreaded
             __result = result;
             return false;
         }
-
+#endif
     }
 }

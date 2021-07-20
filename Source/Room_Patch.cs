@@ -14,11 +14,14 @@ namespace RimThreaded
 		{
 			Type original = typeof(Room);
 			Type patched = typeof(Room_Patch);
+#if RW13
 			RimThreadedHarmony.Prefix(original, patched, nameof(AddDistrict));
 			RimThreadedHarmony.Prefix(original, patched, nameof(RemoveDistrict));
 			RimThreadedHarmony.Prefix(original, patched, nameof(Notify_RoofChanged));
 			RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
+#endif
 		}
+#if RW13
 		public static bool UpdateRoomStatsAndRole(Room __instance)
 		{
 			lock (__instance)
@@ -110,5 +113,7 @@ namespace RimThreaded
 			}
 			return false;
 		}
+#endif
+
 	}
 }

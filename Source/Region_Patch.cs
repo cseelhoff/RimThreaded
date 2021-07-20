@@ -18,8 +18,10 @@ namespace RimThreaded
         {
             Type original = typeof(Region);
             Type patched = typeof(Region_Patch);
+#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(DangerFor));
             RimThreadedHarmony.Prefix(original, patched, nameof(get_District));
+#endif
         }
 
         internal static void InitializeThreadStatics()
@@ -48,6 +50,8 @@ namespace RimThreaded
             RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), regionTraverserReplacements);
         }
 
+
+#if RW13
         public static bool get_District(Region __instance, ref District __result)
         {
             lock (RegionDirtyer_Patch.regionDirtyerLock)
@@ -129,6 +133,7 @@ namespace RimThreaded
             __result = danger;
             return false;
         }
-
+        
+#endif
     }
 }

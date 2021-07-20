@@ -25,7 +25,9 @@ namespace RimThreaded
         {
             Type original = typeof(Reachability);
             Type patched = typeof(Reachability_Patch);
+#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
+#endif
         }
 
         private static void QueueNewOpenRegion(Region region, Queue<Region> openQueueParam, HashSet<Region> regionsReached)
@@ -47,6 +49,7 @@ namespace RimThreaded
 
         }
 
+#if RW13
         public static bool CanReach(Reachability __instance, ref bool __result, IntVec3 start, LocalTargetInfo dest, PathEndMode peMode, TraverseParms traverseParams)
         {
             Map map = __instance.map;
@@ -192,7 +195,6 @@ namespace RimThreaded
                 //working = false;
             }
         }
-
         private static BoolUnknown GetCachedResult(Reachability __instance, TraverseParms traverseParams, List<Region> startingRegionsParams, List<Region> destRegionsParams)
         {
             bool flag = false;
@@ -224,7 +226,7 @@ namespace RimThreaded
 
             return BoolUnknown.Unknown;
         }
-
+        
         private static bool CheckRegionBasedReachability(Reachability __instance, TraverseParms traverseParams, Queue<Region> openQueueParam, 
             HashSet<Region> regionsReached, List<Region> startingRegionsParam, List<Region> destRegionsParam)
         {
@@ -266,7 +268,8 @@ namespace RimThreaded
             }
             return false;
         }
-
+        
+#endif
         private static void DetermineStartRegions(Map map, IntVec3 start, List<Region> startingRegionsParam, PathGrid pathGrid,
             RegionGrid regionGrid, Queue<Region> openQueueParam, HashSet<Region> regionsReached)
         {

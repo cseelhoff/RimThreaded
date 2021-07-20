@@ -134,7 +134,9 @@ namespace RimThreaded
                 if (!potentiallyRelatedPawn.Dead && potentiallyRelatedPawn.needs.mood != null)
                     potentiallyRelatedPawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
             }
+#if RW13
             RemoveMySpouseMarriageRelatedThoughts(__instance);
+#endif
             if (__instance.everSeenByPlayer && !PawnGenerator.IsBeingGenerated(__instance.pawn) && !__instance.pawn.RaceProps.Animal)
                 AffectBondedAnimalsOnMyDeath(__instance);
             __instance.Notify_FailedRescueQuest();
@@ -167,6 +169,8 @@ namespace RimThreaded
                 Messages.Message("MessageBondedAnimalsMentalBreak".Translate(num1, __instance.pawn.LabelShort, __instance.pawn.Named("HUMAN")), pawn2, MessageTypeDefOf.ThreatSmall, true);
             }
         }
+
+#if RW13
         public static void RemoveMySpouseMarriageRelatedThoughts(Pawn_RelationsTracker __instance)
         {
             foreach (Pawn spouse in __instance.pawn.GetSpouses(includeDead: false))
@@ -185,6 +189,7 @@ namespace RimThreaded
                 }
             }
         }
+#endif
         public static bool get_FamilyByBlood(Pawn_RelationsTracker __instance, ref IEnumerable<Pawn> __result)
         {
             if (!__instance.canCacheFamilyByBlood)
