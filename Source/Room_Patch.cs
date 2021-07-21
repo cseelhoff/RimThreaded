@@ -17,17 +17,21 @@ namespace RimThreaded
 #if RW13
 			RimThreadedHarmony.Prefix(original, patched, nameof(AddDistrict));
 			RimThreadedHarmony.Prefix(original, patched, nameof(RemoveDistrict));
+#endif
 			RimThreadedHarmony.Prefix(original, patched, nameof(Notify_RoofChanged));
 			RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
-#endif
 		}
-#if RW13
 		public static bool UpdateRoomStatsAndRole(Room __instance)
 		{
 			lock (__instance)
 			{
 				__instance.statsAndRoleDirty = false;
+#if RW12
+				if (!__instance.TouchesMapEdge && __instance.RegionType == RegionType.Normal && __instance.regions.Count <= 36)
+#endif
+#if RW13
 				if (__instance.ProperRoom && __instance.RegionCount <= 36)
+#endif
 				{
                     DefMap<RoomStatDef, float> stats = __instance.stats;
 					if (stats == null)
@@ -46,6 +50,7 @@ namespace RimThreaded
 			return false;
 		}
 
+#if RW13
 		public static bool AddDistrict(Room __instance, District district)
 		{
 			bool newRoom = false; //ADDED
@@ -103,17 +108,24 @@ namespace RimThreaded
 				__instance.statsAndRoleDirty = true;
 			}
 			return false;
-		}
+		}		
+#endif
 		public static bool Notify_RoofChanged(Room __instance)
 		{
 			lock (__instance)
 			{
 				__instance.cachedOpenRoofCount = -1;
+#if RW12
+
+				__instance.cachedOpenRoofState = null;
+				__instance.Group.Notify_RoofChanged();
+#endif
+#if RW13
 				__instance.tempTracker.RoofChanged();
+#endif
 			}
 			return false;
 		}
-#endif
 
 	}
 }

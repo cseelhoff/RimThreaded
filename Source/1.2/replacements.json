@@ -153,6 +153,9 @@
       "ClassName": "RimWorld.FoodUtility",
       "ThreadStatics": [
         {
+          "FieldName": "bestFoodSourceOnMap_minNutrition_NewTemp"
+        },
+        {
           "FieldName": "filtered"
         },
         {
@@ -205,10 +208,10 @@
       "ClassName": "Verse.GenTemperature",
       "ThreadStatics": [
         {
-          "FieldName": "neighRooms"
+          "FieldName": "neighRoomGroups"
         },
         {
-          "FieldName": "beqRooms",
+          "FieldName": "beqRoomGroups",
           "PatchedClassName": "RimThreaded.GenTemperature_Patch",
           "SelfInitialized": true
         }
@@ -342,9 +345,6 @@
       "ThreadStatics": [
         {
           "FieldName": "tmpLowercase"
-        },
-        {
-          "FieldName": "lookupTables"
         }
       ]
     },
@@ -383,6 +383,14 @@
         },
         {
           "FieldName": "spawnedPawnsWhoShouldHaveInventoryUnloadedResult"
+        }
+      ]
+    },
+    {
+      "ClassName": "Verse.MapTemperature",
+      "ThreadStatics": [
+        {
+          "FieldName": "fastProcessedRoomGroups"
         }
       ]
     },
@@ -608,10 +616,10 @@
       "ClassName": "Verse.RegionAndRoomUpdater",
       "ThreadStatics": [
         {
-          "FieldName": "tmpVisitedDistricts"
+          "FieldName": "tmpVisitedRooms"
         },
         {
-          "FieldName": "tmpDistrictStack"
+          "FieldName": "tmpRoomStack"
         }
       ]
     },
@@ -670,13 +678,16 @@
           "FieldName": "uniqueContainedThings"
         },
         {
+          "FieldName": "uniqueNeighborsSet"
+        },
+        {
+          "FieldName": "uniqueNeighbors"
+        },
+        {
           "FieldName": "uniqueContainedThingsOfDef"
         },
         {
           "FieldName": "fields"
-        },
-        {
-          "FieldName": "tmpRegions"
         }
       ]
     },
@@ -974,34 +985,6 @@
         },
         {
           "FieldName": "countedAdjCells"
-        }
-      ]
-    },
-    {
-      "ClassName": "RimWorld.SpouseRelationUtility",
-      "ThreadStatics": [
-        {
-          "FieldName": "tmpSpouses"
-        },
-        {
-          "FieldName": "tmpLoveRelations"
-        },
-        {
-          "FieldName": "tmpMarriageClusterPawns"
-        },
-        {
-          "FieldName": "tmpStack"
-        },
-        {
-          "FieldName": "tmpDivorcedPawnNames"
-        }
-      ]
-    },
-    {
-      "ClassName": "RimWorld.LovePartnerRelationUtility",
-      "ThreadStatics": [
-        {
-          "FieldName": "tmpExistingLovePartners"
         }
       ]
     },

@@ -11,9 +11,10 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.5.3 - Free Wookie Hugs
+    Version 2.5.5 - Free Wookie Hugs
     -RimWorld 1.3 Compatibility added
     -Optimized PhysicalInteractionReservationManager_Patch
+    -Fixed many null reference bugs found during explosions
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 

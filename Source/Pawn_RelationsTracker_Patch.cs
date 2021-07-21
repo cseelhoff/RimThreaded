@@ -134,9 +134,7 @@ namespace RimThreaded
                 if (!potentiallyRelatedPawn.Dead && potentiallyRelatedPawn.needs.mood != null)
                     potentiallyRelatedPawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
             }
-#if RW13
             RemoveMySpouseMarriageRelatedThoughts(__instance);
-#endif
             if (__instance.everSeenByPlayer && !PawnGenerator.IsBeingGenerated(__instance.pawn) && !__instance.pawn.RaceProps.Animal)
                 AffectBondedAnimalsOnMyDeath(__instance);
             __instance.Notify_FailedRescueQuest();
@@ -170,9 +168,17 @@ namespace RimThreaded
             }
         }
 
-#if RW13
         public static void RemoveMySpouseMarriageRelatedThoughts(Pawn_RelationsTracker __instance)
         {
+#if RW12
+            Pawn spouse = __instance.pawn.GetSpouse();
+            if (spouse == null || spouse.Dead || spouse.needs.mood == null)
+                return;
+            MemoryThoughtHandler memories = spouse.needs.mood.thoughts.memories;
+            memories.RemoveMemoriesOfDef(ThoughtDefOf.GotMarried);
+            memories.RemoveMemoriesOfDef(ThoughtDefOf.HoneymoonPhase);
+#endif
+#if RW13
             foreach (Pawn spouse in __instance.pawn.GetSpouses(includeDead: false))
             {
 
@@ -188,8 +194,8 @@ namespace RimThreaded
                     memories.RemoveMemoriesOfDef(ThoughtDefOf.HoneymoonPhase);
                 }
             }
-        }
 #endif
+        }
         public static bool get_FamilyByBlood(Pawn_RelationsTracker __instance, ref IEnumerable<Pawn> __result)
         {
             if (!__instance.canCacheFamilyByBlood)

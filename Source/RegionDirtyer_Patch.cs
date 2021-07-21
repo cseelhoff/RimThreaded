@@ -20,13 +20,11 @@ namespace RimThreaded
             Type original = typeof(RegionDirtyer);
             Type patched = typeof(RegionDirtyer_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(SetAllClean));
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_WalkabilityChanged));
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_ThingAffectingRegionsSpawned));
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_ThingAffectingRegionsDespawned));
             RimThreadedHarmony.Prefix(original, patched, nameof(SetAllDirty));
             RimThreadedHarmony.Prefix(original, patched, nameof(SetRegionDirty));
-#endif
         }
 
         public static bool SetAllClean(RegionDirtyer __instance)
@@ -63,7 +61,6 @@ namespace RimThreaded
             }
         }
 
-#if RW13
         public static bool Notify_WalkabilityChanged(RegionDirtyer __instance, IntVec3 c)
         {
             lock (regionDirtyerLock)
@@ -208,7 +205,12 @@ namespace RimThreaded
                 }
 
                 reg.valid = false;
+#if RW12
+                reg.Room = null;
+#endif
+#if RW13
                 reg.District = null;
+#endif
                 List<RegionLink> links = reg.links;
                 for (int i = 0; i < links.Count; i++)
                 {
@@ -233,6 +235,5 @@ namespace RimThreaded
             }
             return false;
         }
-#endif
     }
 }

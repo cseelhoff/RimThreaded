@@ -14,9 +14,7 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(RemoveDesignation));
             RimThreadedHarmony.Prefix(original, patched, nameof(RemoveAllDesignationsOn));
             RimThreadedHarmony.Prefix(original, patched, nameof(RemoveAllDesignationsOfDef));
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(AddDesignation));
-#endif
             RimThreadedHarmony.Prefix(original, patched, nameof(SpawnedDesignationsOfDef));
             RimThreadedHarmony.Prefix(original, patched, nameof(DesignationOn), 
                 new Type[] { typeof(Thing), typeof(DesignationDef) }, false); //weird CanBeBuried CanExtractSkull Ideology requirement is null
@@ -94,7 +92,6 @@ namespace RimThreaded
             return false;
         }
 
-#if RW13
         public static bool AddDesignation(DesignationManager __instance, Designation newDes)
         {
             if (newDes.def.targetType == TargetType.Cell && __instance.DesignationAt(newDes.target.Cell, newDes.def) != null)
@@ -117,12 +114,16 @@ namespace RimThreaded
                 Map map = newDes.target.HasThing ? newDes.target.Thing.Map : __instance.map;
                 if (map == null)
                     return false;
+#if RW12
+                MoteMaker.ThrowMetaPuffs(newDes.target.ToTargetInfo(map));
+#endif
+#if RW13
                 FleckMaker.ThrowMetaPuffs(newDes.target.ToTargetInfo(map));
+#endif
             }
             return false;
         }
-#endif
-        public static bool SpawnedDesignationsOfDef(DesignationManager __instance, ref IEnumerable<Designation> __result,
+                public static bool SpawnedDesignationsOfDef(DesignationManager __instance, ref IEnumerable<Designation> __result,
             DesignationDef def)
         {
             __result = SpawnedDesignationsOfDefEnumerable(__instance, def);

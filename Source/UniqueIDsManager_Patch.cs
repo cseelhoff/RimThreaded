@@ -12,14 +12,16 @@ namespace RimThreaded
         {
             Type original = typeof(UniqueIDsManager);
             Type patched = typeof(UniqueIDsManager_Patch);
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(GetNextID));
-#endif
         }
-#if RW13
         public static bool GetNextID(ref int __result, ref int nextID)
         {
-            if (Scribe.mode == LoadSaveMode.LoadingVars && !Find.UniqueIDsManager.wasLoaded)
+#if RW12
+            if (Scribe.mode == LoadSaveMode.Saving || Scribe.mode == LoadSaveMode.LoadingVars)
+#endif
+#if RW13
+                if (Scribe.mode == LoadSaveMode.LoadingVars && !Find.UniqueIDsManager.wasLoaded)
+#endif
             {
                 Log.Warning("Getting next unique ID during LoadingVars before UniqueIDsManager was loaded. Assigning a random value.");
                 __result = Rand.Int;
@@ -42,6 +44,5 @@ namespace RimThreaded
             __result = result;
             return false;
         }
-#endif
     }
 }

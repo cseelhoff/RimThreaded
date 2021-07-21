@@ -14,15 +14,12 @@ namespace RimThreaded
             Type original = typeof(Thing);
             Type patched = typeof(Thing_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
-#endif
             //RimThreadedHarmony.Postfix(original, patched, nameof(SpawnSetup));
             //RimThreadedHarmony.Postfix(original, patched, nameof(DeSpawn));
             //RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
         }
 
-#if RW13
         public static bool TakeDamage(Thing __instance, ref DamageWorker.DamageResult __result, DamageInfo dinfo)
         {
             //---START change---
@@ -70,17 +67,26 @@ namespace RimThreaded
                 mapHeld.damageWatcher.Notify_DamageTaken(__instance, damageResult.totalDamageDealt);
             if (dinfo.Def.ExternalViolenceFor(__instance))
             {
+#if RW13
                 if (dinfo.SpawnFilth)
-                    GenLeaving.DropFilthDueToDamage(__instance, damageResult.totalDamageDealt);
+#endif
+                GenLeaving.DropFilthDueToDamage(__instance, damageResult.totalDamageDealt);
                 if (dinfo.Instigator != null && dinfo.Instigator is Pawn instigator2)
-                    instigator2.records.AddTo(RecordDefOf.DamageDealt, damageResult.totalDamageDealt);
+                {
+                    if (instigator2 != null)
+                    {
+                        instigator2.records.AddTo(RecordDefOf.DamageDealt, damageResult.totalDamageDealt);
+#if RW12
+                        instigator2.records.AccumulateStoryEvent(StoryEventDefOf.DamageDealt);
+#endif
+                    }
+                }
             }
             __instance.PostApplyDamage(dinfo, damageResult.totalDamageDealt);
             __result = damageResult;
             return false;
         }
         
-#endif
         //public static bool DeSpawn(Thing __instance, DestroyMode mode = DestroyMode.Vanish)
         //{
         //    if (__instance.Destroyed)
