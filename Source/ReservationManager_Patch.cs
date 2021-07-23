@@ -21,22 +21,22 @@ namespace RimThreaded
 		{
 			Type original = typeof(ReservationManager);
 			Type patched = typeof(ReservationManager_Patch);
-			RimThreadedHarmony.Prefix(original, patched, "CanReserve");
-			RimThreadedHarmony.Prefix(original, patched, "CanReserveStack");
-			RimThreadedHarmony.Prefix(original, patched, "Reserve");
-			RimThreadedHarmony.Prefix(original, patched, "Release");
-			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllForTarget");
-			RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
-			RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
-			RimThreadedHarmony.Prefix(original, patched, "FirstReservationFor");
-			RimThreadedHarmony.Prefix(original, patched, "IsReservedByAnyoneOf");
-			RimThreadedHarmony.Prefix(original, patched, "FirstRespectedReserver");
-			RimThreadedHarmony.Prefix(original, patched, "ReservedBy", new Type[] { typeof(LocalTargetInfo), typeof(Pawn), typeof(Job) });
+			RimThreadedHarmony.Prefix(original, patched, nameof(CanReserve));
+			RimThreadedHarmony.Prefix(original, patched, nameof(CanReserveStack));
+			RimThreadedHarmony.Prefix(original, patched, nameof(Reserve));
+			RimThreadedHarmony.Prefix(original, patched, nameof(Release));
+			RimThreadedHarmony.Prefix(original, patched, nameof(ReleaseAllForTarget));
+			RimThreadedHarmony.Prefix(original, patched, nameof(ReleaseClaimedBy));
+			RimThreadedHarmony.Prefix(original, patched, nameof(ReleaseAllClaimedBy));
+			RimThreadedHarmony.Prefix(original, patched, nameof(FirstReservationFor));
+			RimThreadedHarmony.Prefix(original, patched, nameof(IsReservedByAnyoneOf));
+			RimThreadedHarmony.Prefix(original, patched, nameof(FirstRespectedReserver));
+			RimThreadedHarmony.Prefix(original, patched, nameof(ReservedBy), new Type[] { typeof(LocalTargetInfo), typeof(Pawn), typeof(Job) });
 			//RimThreadedHarmony.Prefix(original, patched, "ReservedByJobDriver_TakeToBed"); //TODO FIX!
-			RimThreadedHarmony.Prefix(original, patched, "AllReservedThings");
-			RimThreadedHarmony.Prefix(original, patched, "DebugString");
-			RimThreadedHarmony.Prefix(original, patched, "DebugDrawReservations");
-			RimThreadedHarmony.Prefix(original, patched, "ExposeData");
+			RimThreadedHarmony.Prefix(original, patched, nameof(AllReservedThings));
+			RimThreadedHarmony.Prefix(original, patched, nameof(DebugString));
+			RimThreadedHarmony.Prefix(original, patched, nameof(DebugDrawReservations));
+			RimThreadedHarmony.Prefix(original, patched, nameof(ExposeData));
 
 			//RimThreadedHarmony.Postfix(original, patched, "Release", "PostRelease");
 			//RimThreadedHarmony.Postfix(original, patched, "Release", "PostReleaseAllForTarget");

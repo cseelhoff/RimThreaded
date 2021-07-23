@@ -799,7 +799,6 @@ namespace RimThreaded
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 			Text_Patch.RunDestructivePatches(); //unity get_CurFontStyle on main thread
 
-
 			//---Multithreaded Ticking---
 			FactionManager_Patch.RunDestructivePatches(); //allows multithreaded ticking of factions
 			TradeShip_Patch.RunDestructivePatches(); //allows multithreaded ticking of tradeships
@@ -842,10 +841,10 @@ namespace RimThreaded
             GenTemperature_Patch.RunDestructivePatches();
             GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
 			GoodwillSituationManager_Patch.RunDestructivePatches(); //initial 1.3 patch
+			GoodwillSituationWorker_MemeCompatibility_Patch.RunDestructivePatches(); //initial 1.3 patch
 			GridsUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix
 														
 			//GrammarResolver_Patch.RunDestructivePatches();
-
 			HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
             HediffSet_Patch.RunDestructivePatches();
 			HistoryEventsManager_Patch.RunDestructivePatches(); // 1.3 explosion fix
@@ -877,7 +876,7 @@ namespace RimThreaded
             PawnUtility_Patch.RunDestructivePatches();
             PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			Plant_Patch.RunNonDestructivePatches();
-            PlayLog_Patch.RunDestructivePatches();
+			PlayLog_Patch.RunDestructivePatches();
             PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
             Rand_Patch.RunDestructivePatches(); //Simple
             Reachability_Patch.RunDestructivePatches();
@@ -886,7 +885,7 @@ namespace RimThreaded
             RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
             RegionAndRoomUpdater_Patch.RunDestructivePatches();
             RegionDirtyer_Patch.RunDestructivePatches();
-            RegionGrid_Patch.RunDestructivePatches();
+			RegionGrid_Patch.RunDestructivePatches();
 			RegionLink_Patch.RunDestructivePatches();
             RegionMaker_Patch.RunDestructivePatches();
             ResourceCounter_Patch.RunDestructivePatches();
@@ -923,7 +922,6 @@ namespace RimThreaded
 			Room_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches(); //TODO replace cachedThoughts with ThreadSafeLinkedList
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
-
 			//-----SOUND-----
 			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
 			SoundSizeAggregator_Patch.RunDestructivePatches();

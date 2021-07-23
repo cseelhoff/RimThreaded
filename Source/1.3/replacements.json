@@ -1018,6 +1018,17 @@
           "FieldName": "overlays"
         }
       ]
+    },
+    {
+      "ClassName": "RimWorld.IdeoUtility",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpCheckRooms"
+        },
+        {
+          "FieldName": "tmpTreeSightings"
+        }
+      ]
     }
   ]
 }
