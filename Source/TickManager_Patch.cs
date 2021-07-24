@@ -10,8 +10,8 @@ namespace RimThreaded
         {
             Type original = typeof(TickManager);
             Type patched = typeof(TickManager_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "DoSingleTick");
-            RimThreadedHarmony.Prefix(original, patched, "get_TickRateMultiplier");
+            RimThreadedHarmony.Prefix(original, patched, nameof(DoSingleTick));
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_TickRateMultiplier));
         }
 
         public static bool DoSingleTick(TickManager __instance)

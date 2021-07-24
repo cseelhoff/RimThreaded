@@ -38,10 +38,13 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 2.5.6 - Free Wookie Hugs
--RimWorld 1.3 Compatibility added
--Optimized PhysicalInteractionReservationManager_Patch
--Fixed many null reference bugs found during explosions
+Version 2.5.7 - Remove All Dark Thoughts  
+-Fixed bug in RemoveAll_Pawn_CachedSocialThoughts  
+
+Version 2.5.6 - Free Wookie Hugs  
+-RimWorld 1.3 Compatibility added  
+-Optimized PhysicalInteractionReservationManager_Patch  
+-Fixed many null reference bugs found during explosions  
 
 Version 2.4.3 - A long long time ago, in a galaxy with working plant harvesting...  
 -Fixed another bug with colonists not harvesting mature crops  

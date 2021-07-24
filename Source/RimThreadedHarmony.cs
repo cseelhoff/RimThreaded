@@ -285,7 +285,10 @@ namespace RimThreaded
 			string removeAllString = nameof(GenCollection.RemoveAll);
             MethodInfo removeAllGeneric = GetDeclaredMethods(typeof(GenCollection)).First(method => method.Name == removeAllString && method.GetGenericArguments().Count() == 2);
             MethodInfo removeAllPawnThoughts = removeAllGeneric.MakeGenericMethod(new[] { pawnType, thoughtsType });
-			TranspileFieldReplacements(removeAllPawnThoughts);
+			//TranspileFieldReplacements(removeAllPawnThoughts); not sure why transpile causes error
+			Type genCollection_Patched = typeof(GenCollection_Patch);
+			MethodInfo patchedRemoveAll_Pawn_CachedSocialThoughts = genCollection_Patched.GetMethod(nameof(GenCollection_Patch.RemoveAll_Pawn_CachedSocialThoughts));
+			harmony.Patch(removeAllPawnThoughts, prefix: new HarmonyMethod(patchedRemoveAll_Pawn_CachedSocialThoughts));
 			Log.Message("RimThreaded Field Replacements Complete.");
 		}
 
@@ -658,6 +661,10 @@ namespace RimThreaded
 		{
 #if DEBUG
 			Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
+			if(original.Name.Equals("RemoveAll"))
+            {
+				Log.Message("RemoveAll");
+            }
 #else
 			if (Prefs.LogVerbose)
 			{
