@@ -209,9 +209,15 @@ namespace RimThreaded
 				if (hashset == null)
 				{
 					hashset = new HashSet<Thing>();
-					awaitingHaulingGrid[jumboCellIndex] = hashset;
+					lock (awaitingHaulingGrid)
+					{
+						awaitingHaulingGrid[jumboCellIndex] = hashset;
+					}
 				}
-				hashset.Add(haulableThing);
+				lock (hashset)
+				{
+					hashset.Add(haulableThing);
+				}
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}
@@ -327,7 +333,10 @@ namespace RimThreaded
 					{
 						if (settings.AllowedToAccept(waitingThing))
 						{
-							waitingThings.Remove(waitingThing);
+							lock (waitingThings)
+							{
+								waitingThings.Remove(waitingThing);
+							}
 							RegisterHaulableItem(waitingThing);
 						}
 					}

@@ -14,6 +14,12 @@ namespace RimThreaded
 		{
 			Type original = typeof(Room);
 			Type patched = typeof(Room_Patch);
+
+#if RW12
+			RimThreadedHarmony.Prefix(original, patched, nameof(OpenRoofCountStopAt));
+			RimThreadedHarmony.Prefix(original, patched, nameof(RemoveRegion));
+			RimThreadedHarmony.Prefix(original, patched, nameof(Notify_ContainedThingSpawnedOrDespawned));
+#endif
 #if RW13
 			RimThreadedHarmony.Prefix(original, patched, nameof(AddDistrict));
 			RimThreadedHarmony.Prefix(original, patched, nameof(RemoveDistrict));
@@ -21,6 +27,103 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, nameof(Notify_RoofChanged));
 			RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
 		}
+		public static bool Notify_ContainedThingSpawnedOrDespawned(Room __instance, Thing th)
+		{
+			if (th.def.category == ThingCategory.Mote || th.def.category == ThingCategory.Projectile || th.def.category == ThingCategory.Ethereal || th.def.category == ThingCategory.Pawn)
+			{
+				return false;
+			}
+
+			if (__instance.IsDoorway)
+			{
+				Region regions0 = __instance.Regions[0];
+				for (int i = 0; i < regions0.links.Count; i++)
+				{
+					Region otherRegion = regions0.links[i].GetOtherRegion(regions0);
+					if (otherRegion != null && !otherRegion.IsDoorway)
+					{
+						Room room = otherRegion.Room;
+						if(room != null)
+							otherRegion.Room.Notify_ContainedThingSpawnedOrDespawned(th);
+					}
+				}
+			}
+
+			__instance.statsAndRoleDirty = true;
+			return false;
+		}
+#if RW12
+		public static bool OpenRoofCountStopAt(Room __instance, ref int __result, int threshold)
+		{
+			//IEnumerator<IntVec3> cachedOpenRoofState2 = __instance.Cells.GetEnumerator();
+			//int cachedOpenRoofCount2 = -1;
+			lock (__instance)
+			{
+				if (__instance.cachedOpenRoofCount == -1 && __instance.cachedOpenRoofState == null)
+				{
+					__instance.cachedOpenRoofCount = 0;
+					__instance.cachedOpenRoofState = __instance.Cells.GetEnumerator();
+				}
+				if (__instance.cachedOpenRoofCount < threshold && __instance.cachedOpenRoofState != null)
+				{
+					RoofGrid roofGrid = __instance.Map.roofGrid;
+					if (null != roofGrid)
+					{
+						while (__instance.cachedOpenRoofCount < threshold && __instance.cachedOpenRoofState.MoveNext())
+						{
+							IntVec3 currentRoofState = __instance.cachedOpenRoofState.Current;
+							if (null != currentRoofState)
+							{
+								if (!roofGrid.Roofed(currentRoofState))
+								{
+									__instance.cachedOpenRoofCount++;
+								}
+							}
+						}
+						if (__instance.cachedOpenRoofCount < threshold)
+						{
+							__instance.cachedOpenRoofState = null;
+						}
+					}
+				}
+				__result = __instance.cachedOpenRoofCount;
+			}
+			return false;
+		}
+		public static bool RemoveRegion(Room __instance, Region r)
+		{
+			lock (__instance.Regions) //ADDED
+			{
+				if (!__instance.Regions.Contains(r))
+				{
+					Log.Error("Tried to remove region from Room but this region is not here. region=" + r + ", room=" + __instance);
+					return false;
+				}
+				List<Region> newRegionList = new List<Region>(__instance.Regions);
+				newRegionList.Remove(r);
+				__instance.regions = newRegionList;
+				if (r.touchesMapEdge)
+				{
+					__instance.numRegionsTouchingMapEdge--;
+				}
+
+				if (__instance.Regions.Count == 0)
+				{
+					__instance.Group = null;
+					__instance.cachedOpenRoofCount = -1;
+					__instance.cachedOpenRoofState = null;
+					__instance.statsAndRoleDirty = true;
+					lock (__instance.Map.regionGrid) //ADDED
+					{
+						List<Room> newAllRooms = new List<Room>(__instance.Map.regionGrid.allRooms);
+						newAllRooms.Remove(__instance);
+						__instance.Map.regionGrid.allRooms = newAllRooms;
+					}
+				}
+			}
+			return false;
+		}
+#endif
 		public static bool UpdateRoomStatsAndRole(Room __instance)
 		{
 			lock (__instance)

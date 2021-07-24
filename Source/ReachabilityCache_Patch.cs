@@ -54,6 +54,8 @@ namespace RimThreaded
         public static bool CachedResultFor(ReachabilityCache __instance, ref BoolUnknown __result, District A, District B, TraverseParms traverseParams)
 #endif
         {
+            if (A == null || B == null)
+                return false;
             Dictionary<ReachabilityCache.CachedEntry, bool> cacheDict = getCacheDict(__instance);
             lock (cacheDict)
             {

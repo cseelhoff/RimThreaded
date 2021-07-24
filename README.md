@@ -38,7 +38,7 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
-Version 2.5.5 - Free Wookie Hugs
+Version 2.5.6 - Free Wookie Hugs
 -RimWorld 1.3 Compatibility added
 -Optimized PhysicalInteractionReservationManager_Patch
 -Fixed many null reference bugs found during explosions

@@ -769,7 +769,7 @@ namespace RimThreaded
 			GenGrid_Patch.RunNonDestructivePatches(); //explosion fix
 			ThinkNode_JoinVoluntarilyJoinableLord_Patch.RunDestructivePatches(); //explosion fix
 			Corpse_Patch.RunNonDestructivePatches(); // 1.3 explosion fix
-			RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix
+			//RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix - not sure why this causes bug with sleeping
 
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
@@ -889,6 +889,7 @@ namespace RimThreaded
 			RegionLink_Patch.RunDestructivePatches();
             RegionMaker_Patch.RunDestructivePatches();
             ResourceCounter_Patch.RunDestructivePatches();
+			RoofGrid_Patch.RunDestructivePatches(); // possibly for 1.2 only. oberved via tourture test
 			RulePackDef_Patch.RunDestructivePatches(); //explosions fix - grammar
 			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
             ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in

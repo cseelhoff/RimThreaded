@@ -1029,6 +1029,14 @@
           "FieldName": "tmpTreeSightings"
         }
       ]
+    },
+    {
+      "ClassName": "RimWorld.Need_RoomSize",
+      "ThreadStatics": [
+        {
+          "FieldName": "tempScanRooms"
+        }
+      ]
     }
   ]
 }

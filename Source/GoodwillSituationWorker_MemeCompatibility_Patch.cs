@@ -7,9 +7,9 @@ namespace RimThreaded
     {
         public static void RunDestructivePatches()
         {
+#if RW13
             Type original = typeof(GoodwillSituationWorker_MemeCompatibility);
             Type patched = typeof(GoodwillSituationWorker_MemeCompatibility_Patch);
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(Applies), new Type[] { typeof(Faction), typeof(Faction) });
 #endif
         }
