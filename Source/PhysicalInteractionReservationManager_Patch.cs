@@ -9,89 +9,155 @@ namespace RimThreaded
 {
     public class PhysicalInteractionReservationManager_Patch
     {
-        public static ConcurrentDictionary<PhysicalInteractionReservationManager, ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>> instanceTargetToPawnToJob = new ConcurrentDictionary<PhysicalInteractionReservationManager, ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>>();
+        public static Dictionary<PhysicalInteractionReservationManager, Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>>> instanceTargetToPawnToJob = new Dictionary<PhysicalInteractionReservationManager, Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>>>();
+        public static Dictionary<PhysicalInteractionReservationManager, Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>>> instancePawnToTargetToJob = new Dictionary<PhysicalInteractionReservationManager, Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>>>();
 
         public static void RunDestructivePatches()
         {
             Type original = typeof(PhysicalInteractionReservationManager);
             Type patched = typeof(PhysicalInteractionReservationManager_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "IsReservedBy");
-            RimThreadedHarmony.Prefix(original, patched, "Reserve");
-            RimThreadedHarmony.Prefix(original, patched, "Release");
-            RimThreadedHarmony.Prefix(original, patched, "FirstReserverOf");
-            RimThreadedHarmony.Prefix(original, patched, "FirstReservationFor");
-            RimThreadedHarmony.Prefix(original, patched, "ReleaseAllForTarget");
-            RimThreadedHarmony.Prefix(original, patched, "ReleaseClaimedBy");
-            RimThreadedHarmony.Prefix(original, patched, "ReleaseAllClaimedBy");
+            RimThreadedHarmony.Prefix(original, patched, nameof(IsReservedBy));
+            RimThreadedHarmony.Prefix(original, patched, nameof(Reserve));
+            RimThreadedHarmony.Prefix(original, patched, nameof(Release));
+            RimThreadedHarmony.Prefix(original, patched, nameof(FirstReserverOf));
+            RimThreadedHarmony.Prefix(original, patched, nameof(FirstReservationFor));
+            RimThreadedHarmony.Prefix(original, patched, nameof(ReleaseAllForTarget));
+            RimThreadedHarmony.Prefix(original, patched, nameof(ReleaseClaimedBy));
+            RimThreadedHarmony.Prefix(original, patched, nameof(ReleaseAllClaimedBy));
         }
+
 
         public static bool IsReservedBy(PhysicalInteractionReservationManager __instance, ref bool __result, Pawn claimant, LocalTargetInfo target)
         {
             __result = false;
-            ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob = 
-                instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
-            if (targetToPawnToJob.TryGetValue(target, out ConcurrentDictionary<Pawn, Job> pawnToJob))
-                __result = pawnToJob.ContainsKey(claimant);
-
-            return __result;            
+            if (instanceTargetToPawnToJob.TryGetValue(__instance, out Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>> targetToPawnToJob))
+            {
+                if (targetToPawnToJob.TryGetValue(target, out Dictionary<Pawn, Job> pawnToJob))
+                    __result = pawnToJob.ContainsKey(claimant);
+            }
+            return false;
         }
 
         public static bool Reserve(PhysicalInteractionReservationManager __instance, Pawn claimant, Job job, LocalTargetInfo target)
         {
-            ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob =
-                instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
-
-            ConcurrentDictionary<Pawn, Job> pawnToJob = targetToPawnToJob.GetOrAdd(target, new ConcurrentDictionary<Pawn, Job>());
-
-            if (!pawnToJob.TryAdd(claimant, job))
+            if (!instanceTargetToPawnToJob.TryGetValue(__instance, out Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>> targetToPawnToJob))
             {
-                Log.Warning(claimant.ToString() + " tried to reserve job " + job.ToString() + " on target " + target + ", but it's already reserved by him.", false);
-            } 
+                lock (__instance)
+                {
+                    if (!instanceTargetToPawnToJob.TryGetValue(__instance, out Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>> targetToPawnToJob2))
+                    {
+                        targetToPawnToJob2 = new Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>>();
+                        instanceTargetToPawnToJob.Add(__instance, targetToPawnToJob2);
+                    }
+                    targetToPawnToJob = targetToPawnToJob2;
+                }
+            }
+            if (!targetToPawnToJob.TryGetValue(target, out Dictionary<Pawn, Job> pawnToJob))
+            {
+                lock (__instance)
+                {
+                    if (!targetToPawnToJob.TryGetValue(target, out Dictionary<Pawn, Job> pawnToJob2))
+                    {
+                        pawnToJob2 = new Dictionary<Pawn, Job>();
+                        targetToPawnToJob.Add(target, pawnToJob2);
+                    }
+                    pawnToJob = pawnToJob2;
+                }
+            }
+            if (!instancePawnToTargetToJob.TryGetValue(__instance, out Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>> pawnToTargetToJob))
+            {
+                lock (__instance)
+                {
+                    if (!instancePawnToTargetToJob.TryGetValue(__instance, out Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>> pawnToTargetToJob2))
+                    {
+                        pawnToTargetToJob2 = new Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>>();
+                        instancePawnToTargetToJob.Add(__instance, pawnToTargetToJob2);
+                    }
+                    pawnToTargetToJob = pawnToTargetToJob2;
+                }
+            }
+            if (!pawnToTargetToJob.TryGetValue(claimant, out Dictionary<LocalTargetInfo, Job> targetToJob))
+            {
+                lock (__instance)
+                {
+                    if (!pawnToTargetToJob.TryGetValue(claimant, out Dictionary<LocalTargetInfo, Job> targetToJob2))
+                    {
+                        targetToJob2 = new Dictionary<LocalTargetInfo, Job>();
+                        pawnToTargetToJob.Add(claimant, targetToJob2);
+                    }
+                    targetToJob = targetToJob2;
+                }
+            }
+
+            lock (__instance) {
+                pawnToJob.Add(claimant, job);
+                targetToJob.Add(target, job);
+            }
             return false;
         }
 
         public static bool Release(PhysicalInteractionReservationManager __instance, Pawn claimant, Job job, LocalTargetInfo target)
         {
-            ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob =
-                instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
-
-            if (targetToPawnToJob.TryGetValue(target, out ConcurrentDictionary<Pawn, Job> pawnToJob))
+            bool plantReregistered = false;
+            lock (__instance)
             {
-                if (pawnToJob.TryGetValue(claimant, out Job outJob))
-                {
-                    if (outJob == job)
-                    {
-                        if (pawnToJob.TryRemove(claimant, out _))
-                        {
-                            PlantHarvest_Cache.ReregisterObject(claimant.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
-                            /*
-                            if (pawnToJob.Count == 0)
-                            {
-                                if (!targetToPawnToJob.TryRemove(target, out _))
-                                {
-                                    Log.Warning("Failed to release target " + (object)target + ", from targetToPawnToJob Dictionary.", false);
-                                }
+                if (instanceTargetToPawnToJob.TryGetValue(__instance, out Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>> targetToPawnToJob)) {
+                    if (targetToPawnToJob.TryGetValue(target, out Dictionary<Pawn, Job> pawnToJob)) {
+                        if (pawnToJob.TryGetValue(claimant, out Job outJob)) {
+                            if (outJob == job) {
+                                pawnToJob.Remove(claimant);
+                                plantReregistered = true;
+                                PlantHarvest_Cache.ReregisterObject(claimant.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
                             }
-                            */
-                        }
-                        else
+                            else
+                            {
+                                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.");
+                            }
+                        } else
                         {
-                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but it failed.", false);
+                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.");
                         }
                     }
                     else
                     {
-                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.", false);
+                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.");
                     }
                 }
                 else
                 {
-                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.", false);
+                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.");
                 }
-            }
-            else
-            {
-                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.", false);
+                if (instancePawnToTargetToJob.TryGetValue(__instance, out Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>> pawnToTargetToJob))
+                {
+                    if (pawnToTargetToJob.TryGetValue(claimant, out Dictionary<LocalTargetInfo, Job> targetToJob))
+                    {
+                        if (targetToJob.TryGetValue(target, out Job outJob2))
+                        {
+                            if (outJob2 == job)
+                            {
+                                bool targetToJobResult = targetToJob.Remove(target);
+                                if (!plantReregistered)
+                                    PlantHarvest_Cache.ReregisterObject(claimant.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                            }
+                            else
+                            {
+                                Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.");
+                            }
+                        }
+                        else
+                        {
+                            Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but job was different.");
+                        }
+                    }
+                    else
+                    {
+                        Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but claimant was not found.");
+                    }
+                }
+                else
+                {
+                    Log.Warning(claimant.ToString() + " tried to release reservation on target " + target + ", but target had no physical reservations.");
+                }
             }
             return false;
         }
@@ -100,16 +166,17 @@ namespace RimThreaded
         public static bool FirstReserverOf(PhysicalInteractionReservationManager __instance, ref Pawn __result, LocalTargetInfo target)
         {
             __result = null;
-            ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob =
-                instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
-
-            if (targetToPawnToJob.TryGetValue(target, out ConcurrentDictionary<Pawn, Job> pawnToJob) && pawnToJob.Count > 0)
+            if (instanceTargetToPawnToJob.TryGetValue(__instance, out Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>> targetToPawnToJob))
             {
-                try
+                if (targetToPawnToJob.TryGetValue(target, out Dictionary<Pawn, Job> pawnToJob) && pawnToJob.Count > 0)
                 {
-                    __result = pawnToJob.First().Key;
-                } catch (InvalidOperationException)
-                {
+                    try
+                    {
+                        __result = pawnToJob.First().Key;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                    }
                 }
             }
             return false;
@@ -117,16 +184,18 @@ namespace RimThreaded
 
         public static bool FirstReservationFor(PhysicalInteractionReservationManager __instance, ref LocalTargetInfo __result, Pawn claimant)
         {
-            ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob =
-                instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
-
             __result = LocalTargetInfo.Invalid;
-            foreach (KeyValuePair<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> pair in targetToPawnToJob)
+            if (instancePawnToTargetToJob.TryGetValue(__instance, out Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>> pawnToTargetToJob))
             {
-                if(pair.Value.ContainsKey(claimant))
+                if (pawnToTargetToJob.TryGetValue(claimant, out Dictionary<LocalTargetInfo, Job> targetToJob) && targetToJob.Count > 0)
                 {
-                    __result = pair.Key;
-                    break;
+                    try
+                    {
+                        __result = targetToJob.First().Key;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                    }
                 }
             }
             return false;
@@ -134,33 +203,68 @@ namespace RimThreaded
 
         public static bool ReleaseAllForTarget(PhysicalInteractionReservationManager __instance, LocalTargetInfo target)
         {
-            ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob =
-                instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
-
-            targetToPawnToJob.TryRemove(target, out _);
-            if(target !=null && target.Thing !=null && target.Thing.Map != null)
-                PlantHarvest_Cache.ReregisterObject(target.Thing.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+            if (instanceTargetToPawnToJob.TryGetValue(__instance, out Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>> targetToPawnToJob))
+            {
+                if (targetToPawnToJob.TryGetValue(target, out _))
+                {
+                    lock (__instance)
+                    {
+                        if (targetToPawnToJob.TryGetValue(target, out Dictionary<Pawn, Job> pawnToJob))
+                        {
+                            foreach (KeyValuePair<Pawn, Job> kvp in pawnToJob) {
+                                if (instancePawnToTargetToJob.TryGetValue(__instance, out Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>> pawnToTargetToJob))
+                                {
+                                    Pawn pawn = kvp.Key;
+                                    if (pawnToTargetToJob.TryGetValue(pawn, out Dictionary<LocalTargetInfo, Job> targetToJob))
+                                    {
+                                        if (targetToJob.TryGetValue(target, out _))
+                                        {
+                                            targetToJob.Remove(target);
+                                        }
+                                    }
+                                }
+                            }
+                            targetToPawnToJob.Remove(target);
+                            if (target != null && target.Thing != null && target.Thing.Map != null)
+                                PlantHarvest_Cache.ReregisterObject(target.Thing.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                        }
+                    }
+                }
+            }
             return false;
         }
 
         public static bool ReleaseClaimedBy(PhysicalInteractionReservationManager __instance, Pawn claimant, Job job)
         {
-            ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob =
-                instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
-
-            foreach (LocalTargetInfo key in targetToPawnToJob.Keys.ToList())
+            if (instancePawnToTargetToJob.TryGetValue(__instance, out Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>> pawnToTargetToJob))
             {
-                if (targetToPawnToJob.TryGetValue(key, out ConcurrentDictionary<Pawn, Job> pawnToJob))
+                if (pawnToTargetToJob.TryGetValue(claimant, out Dictionary<LocalTargetInfo, Job> targetToJob) && targetToJob.Count > 0)
                 {
-                    if (pawnToJob.TryGetValue(claimant, out Job outJob))
+                    lock (__instance)
                     {
-                        if (job == outJob)
+                        foreach (KeyValuePair<LocalTargetInfo, Job> kvp in targetToJob.ToList())
                         {
-                            pawnToJob.TryRemove(claimant, out _);
-                            targetToPawnToJob.TryRemove(key, out _);
-                            PlantHarvest_Cache.ReregisterObject(claimant.Map, key.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                            if (kvp.Value == job)
+                            {
+                                LocalTargetInfo localTargetInfo = kvp.Key;
+                                if (instanceTargetToPawnToJob.TryGetValue(__instance, out Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>> targetToPawnToJob))
+                                {
+                                    if (targetToPawnToJob.TryGetValue(localTargetInfo, out Dictionary<Pawn, Job> pawnToJob))
+                                    {
+                                        if (pawnToJob.TryGetValue(claimant, out Job job2))
+                                        {
+                                            if (job == job2)
+                                            {
+                                                pawnToJob.Remove(claimant);
+                                            }
+                                        }
+                                    }
+                                }
+                                targetToJob.Remove(localTargetInfo);
+                                PlantHarvest_Cache.ReregisterObject(claimant.Map, localTargetInfo.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                            }
                         }
-                    }                    
+                    }
                 }
             }
             
@@ -169,17 +273,29 @@ namespace RimThreaded
 
         public static bool ReleaseAllClaimedBy(PhysicalInteractionReservationManager __instance, Pawn claimant)
         {
-            ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>> targetToPawnToJob =
-                instanceTargetToPawnToJob.GetOrAdd(__instance, new ConcurrentDictionary<LocalTargetInfo, ConcurrentDictionary<Pawn, Job>>());
-
-            foreach (LocalTargetInfo key in targetToPawnToJob.Keys.ToList())
+            if (instancePawnToTargetToJob.TryGetValue(__instance, out Dictionary<Pawn, Dictionary<LocalTargetInfo, Job>> pawnToTargetToJob))
             {
-                targetToPawnToJob.TryGetValue(key, out ConcurrentDictionary<Pawn, Job> pawnToJob);
-                if (pawnToJob.ContainsKey(claimant))
+                if (pawnToTargetToJob.TryGetValue(claimant, out Dictionary<LocalTargetInfo, Job> targetToJob) && targetToJob.Count > 0)
                 {
-                    pawnToJob.TryRemove(claimant, out _);
-                    targetToPawnToJob.TryRemove(key, out _);
-                    PlantHarvest_Cache.ReregisterObject(claimant.Map, key.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                    lock (__instance)
+                    {
+                        foreach (KeyValuePair<LocalTargetInfo, Job> kvp in targetToJob)
+                        {
+                            LocalTargetInfo localTargetInfo = kvp.Key;
+                            if (instanceTargetToPawnToJob.TryGetValue(__instance, out Dictionary<LocalTargetInfo, Dictionary<Pawn, Job>> targetToPawnToJob))
+                            {
+                                if (targetToPawnToJob.TryGetValue(localTargetInfo, out Dictionary<Pawn, Job> pawnToJob))
+                                {
+                                    if (pawnToJob.TryGetValue(claimant, out _))
+                                    {
+                                        pawnToJob.Remove(claimant);
+                                        PlantHarvest_Cache.ReregisterObject(claimant.Map, localTargetInfo.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                                    }
+                                }
+                            }
+                        }
+                        pawnToTargetToJob.Remove(claimant);
+                    }
                 }
             }
             return false;

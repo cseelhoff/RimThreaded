@@ -11,11 +11,32 @@ namespace RimThreaded
         {
             Type original = typeof(DesignationManager);
             Type patched = typeof(DesignationManager_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "RemoveDesignation");
-            RimThreadedHarmony.Prefix(original, patched, "RemoveAllDesignationsOn");
-            RimThreadedHarmony.Prefix(original, patched, "RemoveAllDesignationsOfDef");
-            RimThreadedHarmony.Prefix(original, patched, "AddDesignation");
-            RimThreadedHarmony.Prefix(original, patched, "SpawnedDesignationsOfDef");
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemoveDesignation));
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemoveAllDesignationsOn));
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemoveAllDesignationsOfDef));
+            RimThreadedHarmony.Prefix(original, patched, nameof(AddDesignation));
+            RimThreadedHarmony.Prefix(original, patched, nameof(SpawnedDesignationsOfDef));
+            RimThreadedHarmony.Prefix(original, patched, nameof(DesignationOn), 
+                new Type[] { typeof(Thing), typeof(DesignationDef) }, false); //weird CanBeBuried CanExtractSkull Ideology requirement is null
+        }
+
+        public static bool DesignationOn(DesignationManager __instance, ref Designation __result, Thing t, DesignationDef def)
+        {
+            if(def == null)  //weird CanBeBuried CanExtractSkull Ideology requirement is null
+            {
+                for (int index = 0; index < __instance.allDesignations.Count; ++index)
+                {
+                    Designation allDesignation = __instance.allDesignations[index];
+                    if (allDesignation.target.Thing == t && allDesignation.def == def)
+                    {
+                        __result = allDesignation;
+                        return false;
+                    }
+                }
+                __result = null;
+                return false;
+            }
+            return true;
         }
 
         public static bool RemoveDesignation(DesignationManager __instance, Designation des)
@@ -70,6 +91,7 @@ namespace RimThreaded
 
             return false;
         }
+
         public static bool AddDesignation(DesignationManager __instance, Designation newDes)
         {
             if (newDes.def.targetType == TargetType.Cell && __instance.DesignationAt(newDes.target.Cell, newDes.def) != null)
@@ -92,12 +114,16 @@ namespace RimThreaded
                 Map map = newDes.target.HasThing ? newDes.target.Thing.Map : __instance.map;
                 if (map == null)
                     return false;
+#if RW12
                 MoteMaker.ThrowMetaPuffs(newDes.target.ToTargetInfo(map));
+#endif
+#if RW13
+                FleckMaker.ThrowMetaPuffs(newDes.target.ToTargetInfo(map));
+#endif
             }
             return false;
         }
-
-        public static bool SpawnedDesignationsOfDef(DesignationManager __instance, ref IEnumerable<Designation> __result,
+                public static bool SpawnedDesignationsOfDef(DesignationManager __instance, ref IEnumerable<Designation> __result,
             DesignationDef def)
         {
             __result = SpawnedDesignationsOfDefEnumerable(__instance, def);

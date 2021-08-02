@@ -152,6 +152,11 @@ namespace RimThreaded
             {
                 prepareAction = Map_Patch.MapsPostTickPrepare,
                 tickAction = Map_Patch.MapPostListTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
+                tickAction = TransportShipManager_Patch.ShipObjectsTick
             }
         };
         public static void RestartAllWorkerThreads()
@@ -186,6 +191,7 @@ namespace RimThreaded
         public static void InitializeAllThreadStatics()
         {
             CellFinder_Patch.InitializeThreadStatics();
+            ColoredText_Patch.InitializeThreadStatics();
             CompCauseGameCondition_Patch.InitializeThreadStatics();
             Dijkstra_Patch<IntVec3>.InitializeThreadStatics();
             Dijkstra_Patch<Region>.InitializeThreadStatics();
@@ -466,10 +472,6 @@ namespace RimThreaded
                         break;
                     case Action<object[]> safeAction:
                         safeAction(parameters);
-                        break;
-                    // Getter without param for static Properties
-                    case Func<object> safeFunction:
-                        threadInfo.safeFunctionResult = safeFunction();
                         break;
                     default:
                         Log.Error("First parameter of thread-safe function request was not an action or function");

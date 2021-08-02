@@ -17,8 +17,58 @@ namespace RimThreaded
         {
             Type original = typeof(Pawn);
             Type patched = typeof(Pawn_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "Destroy"); //causes strange crash to desktop without error log
-            RimThreadedHarmony.Prefix(original, patched, "VerifyReservations");
+            RimThreadedHarmony.Prefix(original, patched, nameof(Destroy)); //causes strange crash to desktop without error log
+            RimThreadedHarmony.Prefix(original, patched, nameof(VerifyReservations));
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_Inspired));
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_InAggroMentalState));
+            RimThreadedHarmony.Prefix(original, patched, nameof(PostApplyDamage)); // not efficient base replacement
+        }
+
+
+        public static bool PostApplyDamage(Pawn __instance, DamageInfo dinfo, float totalDamageDealt)
+        {
+            ThingWithCompsPostApplyDamage(__instance, dinfo, totalDamageDealt);
+            if (dinfo.Def.ExternalViolenceFor(__instance))
+                __instance.records.AddTo(RecordDefOf.DamageTaken, totalDamageDealt);
+            if (dinfo.Def.makesBlood && !dinfo.InstantPermanentInjury && (totalDamageDealt > 0.0 && Rand.Chance(0.5f)))
+                __instance.health.DropBloodFilth();
+            __instance.health.PostApplyDamage(dinfo, totalDamageDealt);
+            if (__instance.Dead)
+                return false;
+            __instance.mindState.Notify_DamageTaken(dinfo);
+            return false;
+        }
+
+        public static void ThingWithCompsPostApplyDamage(ThingWithComps __instance, DamageInfo dinfo, float totalDamageDealt)
+        {
+            ThingPostApplyDamage(__instance, dinfo, totalDamageDealt);
+            List<ThingComp> comps = __instance.comps;
+            if (comps == null)
+                return;
+            for (int index = 0; index < comps.Count; ++index)
+            {
+                ThingComp thingComp = comps[index];
+                if (thingComp == null)
+                    continue;
+                thingComp.PostPostApplyDamage(dinfo, totalDamageDealt);
+            }
+        }
+        public static void ThingPostApplyDamage(Thing __instance, DamageInfo dinfo, float totalDamageDealt)
+        {
+        }
+
+        public static bool get_InAggroMentalState(Pawn __instance, ref bool __result)
+        {
+            Pawn_MindState mindState = __instance.mindState;
+            __result = !__instance.Dead && mindState.mentalStateHandler.InMentalState && mindState.mentalStateHandler.CurStateDef.IsAggro;
+            return false;
+        }
+
+        public static bool get_Inspired(Pawn __instance, ref bool __result)
+        {
+            Pawn_MindState mindState = __instance.mindState;
+            __result = !__instance.Dead && mindState != null && mindState.inspirationHandler.Inspired;
+            return false;
         }
 
         public static bool Destroy(Pawn __instance, DestroyMode mode = DestroyMode.Vanish)

@@ -24,7 +24,7 @@ namespace RimThreaded
             lock(__instance)
             {
                 if (__instance.working)
-                    Log.Error("Nested FloodFill calls are not allowed. This will cause bugs.", false);
+                    Log.Error("Nested FloodFill calls are not allowed. This will cause bugs.");
                 __instance.working = true;
                 __instance.ClearVisited();
                 if (rememberParents && __instance.parentGrid == null)
@@ -104,7 +104,7 @@ namespace RimThreaded
                                 }
 
                                 if (__instance.openSet.Count <= area) continue;
-                                Log.Error("Overflow on flood fill (>" + area + " cells). Make sure we're not flooding over the same area after we check it.", false);
+                                Log.Error("Overflow on flood fill (>" + area + " cells). Make sure we're not flooding over the same area after we check it.");
                                 __instance.working = false;
                                 return false;
                             }

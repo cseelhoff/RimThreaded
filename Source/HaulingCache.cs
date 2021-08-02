@@ -40,13 +40,18 @@ namespace RimThreaded
 			return zoomLevels[zoomLevel];
 		}
 
-		public static void RegisterHaulableItem(Thing haulableThing) {
+		public static void RegisterHaulableItem(Thing haulableThing)
+		{
+			Map map = haulableThing.Map;
+			if (map == null)
+			{
+				return;
+			}
+
 			if (haulableThing.IsForbidden(Faction.OfPlayer))
             {
 				return;
             }
-			Map map = haulableThing.Map;
-
 			//---SHOULD HELP WITH NOT HAULING ROCK CHUNKS---
 			if(!haulableThing.def.EverHaulable)
             {
@@ -102,14 +107,87 @@ namespace RimThreaded
 			}
 
 			int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
-			if (StoreUtility.TryFindBestBetterStoreCellFor(haulableThing, null, map, StoreUtility.CurrentStoragePriorityOf(haulableThing), null, out _, false) && //fast check
+			if (TryFindBestBetterStoreCellFor(haulableThing, null, map, StoreUtility.CurrentStoragePriorityOf(haulableThing), null, out _, false) && //fast check
 				HaulToStorageJobTest(haulableThing)) { //slower check
 				AddThingToAwaitingHaulingHashSets(haulableThing);
 			} else
 			{
-				getWaitingForZoneBetterThan(map)[storagePriority].Add(haulableThing);
+                HashSet<Thing> things = getWaitingForZoneBetterThan(map)[storagePriority];
+				lock (things)
+				{
+					things.Add(haulableThing);
+				}
 			}
 			
+		}
+
+		public static bool TryFindBestBetterStoreCellFor(
+		  Thing t,
+		  Pawn carrier,
+		  Map map,
+		  StoragePriority currentPriority,
+		  Faction faction,
+		  out IntVec3 foundCell,
+		  bool needAccurateResult = true)
+		{
+			List<SlotGroup> listInPriorityOrder = map.haulDestinationManager.AllGroupsListInPriorityOrder;
+			if (listInPriorityOrder.Count == 0)
+			{
+				foundCell = IntVec3.Invalid;
+				return false;
+			}
+			StoragePriority foundPriority = currentPriority;
+			float maxValue = (float)int.MaxValue;
+			IntVec3 invalid = IntVec3.Invalid;
+			int count = listInPriorityOrder.Count;
+			for (int index = 0; index < count; ++index)
+			{
+				SlotGroup slotGroup = listInPriorityOrder[index];
+				StoragePriority priority = slotGroup.Settings.Priority;
+				if (priority >= foundPriority && priority > currentPriority)
+					TryFindBestBetterStoreCellForWorker(t, carrier, map, faction, slotGroup, needAccurateResult, 
+						ref invalid, ref maxValue, ref foundPriority);  //changed
+				else
+					break;
+			}
+			if (!invalid.IsValid)
+			{
+				foundCell = IntVec3.Invalid;
+				return false;
+			}
+			foundCell = invalid;
+			return true;
+		}
+		private static void TryFindBestBetterStoreCellForWorker(
+		  Thing t,
+		  Pawn carrier,
+		  Map map,
+		  Faction faction,
+		  SlotGroup slotGroup,
+		  bool needAccurateResult,
+		  ref IntVec3 closestSlot,
+		  ref float closestDistSquared,
+		  ref StoragePriority foundPriority)
+		{
+			if (slotGroup == null || !slotGroup.parent.Accepts(t))
+				return;
+			IntVec3 intVec3 = t.PositionHeld; //changed
+			List<IntVec3> cellsList = slotGroup.CellsList;
+			int count = cellsList.Count;
+			int num = !needAccurateResult ? 0 : Mathf.FloorToInt((float)count * Rand.Range(0.005f, 0.018f));
+			for (int index = 0; index < count; ++index)
+			{
+				IntVec3 c = cellsList[index];
+				float horizontalSquared = (float)(intVec3 - c).LengthHorizontalSquared;
+				if ((double)horizontalSquared <= (double)closestDistSquared && StoreUtility.IsGoodStoreCell(c, map, t, carrier, faction))
+				{
+					closestSlot = c;
+					closestDistSquared = horizontalSquared;
+					foundPriority = slotGroup.Settings.Priority;
+					if (index >= num)
+						break;
+				}
+			}
 		}
 
 		private static void AddThingToAwaitingHaulingHashSets(Thing haulableThing)
@@ -131,9 +209,15 @@ namespace RimThreaded
 				if (hashset == null)
 				{
 					hashset = new HashSet<Thing>();
-					awaitingHaulingGrid[jumboCellIndex] = hashset;
+					lock (awaitingHaulingGrid)
+					{
+						awaitingHaulingGrid[jumboCellIndex] = hashset;
+					}
 				}
-				hashset.Add(haulableThing);
+				lock (hashset)
+				{
+					hashset.Add(haulableThing);
+				}
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}
@@ -142,6 +226,8 @@ namespace RimThreaded
 		{
 			int jumboCellWidth;
 			Map map = haulableThing.Map;
+			if (map == null)
+				return; //not optimal
 			int mapSizeX = map.Size.x;
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;
@@ -154,7 +240,9 @@ namespace RimThreaded
 				HashSet<Thing> hashset = awaitingHaulingZoomLevels[zoomLevel][cellIndex];
 				if (hashset != null)
 				{
-					hashset.Remove(haulableThing);
+                    HashSet<Thing> newHashSet = new HashSet<Thing>(hashset);
+					newHashSet.Remove(haulableThing);
+					awaitingHaulingZoomLevels[zoomLevel][cellIndex] = newHashSet;
 				}
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
@@ -164,19 +252,26 @@ namespace RimThreaded
 		{
 			if (!awaitingHaulingMapDict.TryGetValue(map, out List<HashSet<Thing>[]> awaitingHaulingZoomLevels))
 			{
-				awaitingHaulingZoomLevels = new List<HashSet<Thing>[]>();
-				int mapSizeX = map.Size.x;
-				int mapSizeZ = map.Size.z;
-				int jumboCellWidth;
-				int zoomLevel = 0;
-				do
+				lock (awaitingHaulingMapDict)
 				{
-					jumboCellWidth = getJumboCellWidth(zoomLevel);
-					int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, jumboCellWidth);
-					awaitingHaulingZoomLevels.Add(new HashSet<Thing>[numGridCells]);
-					zoomLevel++;
-				} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
-				awaitingHaulingMapDict[map] = awaitingHaulingZoomLevels;
+					if (!awaitingHaulingMapDict.TryGetValue(map, out List<HashSet<Thing>[]> awaitingHaulingZoomLevels2))
+					{
+						awaitingHaulingZoomLevels2 = new List<HashSet<Thing>[]>();
+						int mapSizeX = map.Size.x;
+						int mapSizeZ = map.Size.z;
+						int jumboCellWidth;
+						int zoomLevel = 0;
+						do
+						{
+							jumboCellWidth = getJumboCellWidth(zoomLevel);
+							int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, jumboCellWidth);
+							awaitingHaulingZoomLevels2.Add(new HashSet<Thing>[numGridCells]);
+							zoomLevel++;
+						} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
+						awaitingHaulingMapDict[map] = awaitingHaulingZoomLevels2;
+					}
+					awaitingHaulingZoomLevels = awaitingHaulingZoomLevels2;
+				}
 			}
 			return awaitingHaulingZoomLevels;
 		}
@@ -184,9 +279,13 @@ namespace RimThreaded
 
 		public static void DeregisterHaulableItem(Thing haulableThing)
 		{
-			int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
-			getWaitingForZoneBetterThan(haulableThing.Map)[storagePriority].Remove(haulableThing);
-			RemoveThingFromAwaitingHaulingHashSets(haulableThing);
+			Map map = haulableThing.Map;
+			if (map != null)
+			{
+				int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
+				getWaitingForZoneBetterThan(map)[storagePriority].Remove(haulableThing);
+				RemoveThingFromAwaitingHaulingHashSets(haulableThing);
+			}
 		}
 		private static HashSet<Thing>[] getWaitingForZoneBetterThan(Map map)
         {
@@ -204,21 +303,25 @@ namespace RimThreaded
 
 		public static void Notify_AddedCell(SlotGroup __instance, IntVec3 c)
 		{
-			NewStockpileCreatedOrMadeUnfull(__instance);
+			Map map = __instance.parent.Map;
+			NewStockpileCreatedOrMadeUnfull(__instance, map);
 		}
 
 		public static void Notify_SlotGroupChanged(ListerHaulables __instance, SlotGroup sg)
 		{
-			NewStockpileCreatedOrMadeUnfull(sg);
+			Map map = __instance.map;
+			if(map == null) 
+				map = sg.parent.Map;
+			NewStockpileCreatedOrMadeUnfull(sg, map);
 		}
 
 
-		public static void NewStockpileCreatedOrMadeUnfull(SlotGroup __instance)
+		public static void NewStockpileCreatedOrMadeUnfull(SlotGroup __instance, Map map)
         {
 			if (Current.ProgramState == ProgramState.Playing)
 			{
-				Map map = __instance.parent.Map;
-				int storagePriorityCount = Enum.GetValues(typeof(StoragePriority)).Length;
+				//Map map = __instance.parent.Map;
+				//int storagePriorityCount = Enum.GetValues(typeof(StoragePriority)).Length;
 				HashSet<Thing>[] waitingForZoneBetterThanArray = getWaitingForZoneBetterThan(map);
 				StorageSettings settings = __instance.Settings;
 
@@ -230,7 +333,10 @@ namespace RimThreaded
 					{
 						if (settings.AllowedToAccept(waitingThing))
 						{
-							waitingThings.Remove(waitingThing);
+							lock (waitingThings)
+							{
+								waitingThings.Remove(waitingThing);
+							}
 							RegisterHaulableItem(waitingThing);
 						}
 					}

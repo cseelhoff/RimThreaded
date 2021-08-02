@@ -105,7 +105,12 @@ namespace RimThreaded
 
             if (traverseParms.mode == TraverseMode.ByPawn)
             {
+#if RW12
                 if (!pawn.CanReach(dest, peMode, Danger.Deadly, traverseParms.canBash, traverseParms.mode))
+#endif
+#if RW13
+                if (!pawn.CanReach(dest, peMode, Danger.Deadly, traverseParms.canBashDoors, traverseParms.canBashFences, traverseParms.mode))
+#endif
                 {
                     __result = PawnPath.NotFound;
                     return false;
@@ -119,7 +124,13 @@ namespace RimThreaded
 
             __instance.PfProfilerBeginSample(string.Concat("FindPath for ", pawn, " from ", start, " to ", dest, dest.HasThing ? (" at " + dest.Cell) : ""));
             __instance.cellIndices = __instance.map.cellIndices;
+#if RW12
             __instance.pathGrid = __instance.map.pathGrid;
+#endif
+#if RW13
+            __instance.pathingContext = __instance.map.pathing.For(traverseParms);
+            __instance.pathGrid = __instance.pathingContext.pathGrid;
+#endif
             __instance.edificeGrid = __instance.map.edificeGrid.InnerArray;
             __instance.blueprintGrid = __instance.map.blueprintGrid.InnerArray;
             int x = dest.Cell.x;
@@ -132,7 +143,12 @@ namespace RimThreaded
             bool flag3 = !flag;
             CellRect destinationRect = __instance.CalculateDestinationRect(dest, peMode);
             bool flag4 = destinationRect.Width == 1 && destinationRect.Height == 1;
+#if RW12
             int[] array = __instance.map.pathGrid.pathGrid;
+#endif
+#if RW13
+            int[] array = __instance.pathGrid.pathGrid;
+#endif
             TerrainDef[] topGrid = __instance.map.terrainGrid.topGrid;
             EdificeGrid edificeGrid = __instance.map.edificeGrid;
             int num2 = 0;
@@ -159,7 +175,12 @@ namespace RimThreaded
                 num8 = 13;
                 num9 = 18;
             }
+#if RW12
             __instance.CalculateAndAddDisallowedCorners(traverseParms, peMode, destinationRect);
+#endif
+#if RW13
+            __instance.CalculateAndAddDisallowedCorners(peMode, destinationRect);
+#endif
             __instance.InitStatusesAndPushStartNode(ref curIndex, start);
             while (true)
             {
@@ -267,7 +288,7 @@ namespace RimThreaded
                     switch (i)
                     {
                         case 4:
-                            if (PathFinder.BlocksDiagonalMovement(curIndex - __instance.mapSizeX, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex - __instance.mapSizeX))
                             {
                                 if (flag7)
                                 {
@@ -277,7 +298,7 @@ namespace RimThreaded
                                 num15 += 70;
                             }
 
-                            if (PathFinder.BlocksDiagonalMovement(curIndex + 1, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex + 1))
                             {
                                 if (flag7)
                                 {
@@ -289,7 +310,7 @@ namespace RimThreaded
 
                             break;
                         case 5:
-                            if (PathFinder.BlocksDiagonalMovement(curIndex + __instance.mapSizeX, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex + __instance.mapSizeX))
                             {
                                 if (flag7)
                                 {
@@ -299,7 +320,7 @@ namespace RimThreaded
                                 num15 += 70;
                             }
 
-                            if (PathFinder.BlocksDiagonalMovement(curIndex + 1, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex + 1))
                             {
                                 if (flag7)
                                 {
@@ -311,7 +332,7 @@ namespace RimThreaded
 
                             break;
                         case 6:
-                            if (PathFinder.BlocksDiagonalMovement(curIndex + __instance.mapSizeX, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex + __instance.mapSizeX))
                             {
                                 if (flag7)
                                 {
@@ -321,7 +342,7 @@ namespace RimThreaded
                                 num15 += 70;
                             }
 
-                            if (PathFinder.BlocksDiagonalMovement(curIndex - 1, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex - 1))
                             {
                                 if (flag7)
                                 {
@@ -333,7 +354,7 @@ namespace RimThreaded
 
                             break;
                         case 7:
-                            if (PathFinder.BlocksDiagonalMovement(curIndex - __instance.mapSizeX, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex - __instance.mapSizeX))
                             {
                                 if (flag7)
                                 {
@@ -343,7 +364,7 @@ namespace RimThreaded
                                 num15 += 70;
                             }
 
-                            if (PathFinder.BlocksDiagonalMovement(curIndex - 1, __instance.map))
+                            if (__instance.BlocksDiagonalMovement(curIndex - 1))
                             {
                                 if (flag7)
                                 {
@@ -484,7 +505,6 @@ namespace RimThreaded
             __result = PawnPath.NotFound;
             return false;
         }
-
 
         static readonly Type costNodeType = TypeByName("Verse.AI.PathFinder+CostNode");
         static readonly Type icomparerCostNodeType1 = typeof(IComparer<>).MakeGenericType(costNodeType);

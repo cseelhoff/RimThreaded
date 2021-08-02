@@ -25,7 +25,7 @@ namespace RimThreaded
 			conBlockedArrays.Enqueue(ar);
 			if (conBlockedArrays.Count > 128)
 			{
-				Log.ErrorOnce("Too many blocked arrays to be feasible. >128", 388121, false);
+				Log.ErrorOnce("Too many blocked arrays to be feasible. >128", 388121);
 			}
 		}
 		private static bool[] GetWorkingBlockedArray()
