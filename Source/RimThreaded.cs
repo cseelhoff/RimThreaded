@@ -473,6 +473,10 @@ namespace RimThreaded
                     case Action<object[]> safeAction:
                         safeAction(parameters);
                         break;
+                    // Getter without param for static Properties
+                    case Func<object> safeFunction:
+                        threadInfo.safeFunctionResult = safeFunction();
+                        break;
                     default:
                         Log.Error("First parameter of thread-safe function request was not an action or function");
                         break;

@@ -29,7 +29,6 @@ namespace RimThreaded
         private static string Cachepath = Path.Combine(RimThreadedMod.replacementsJsonPath.Replace("replacements.json", ""), "Caches");
         private static string CurrentMethodPath;
 
-
         public static void SaveJson()
         {
             string jsonString = JsonConvert.SerializeObject(CacheListS);

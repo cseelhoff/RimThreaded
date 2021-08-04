@@ -109,6 +109,7 @@ namespace RimThreaded
                 else
                 {
                     Patch[] sortedPrefixes = patches.Prefixes.ToArray();
+
                     PatchProcessor.GetSortedPatchMethods(originalMethod, sortedPrefixes);
                     bool isRimThreadedPrefixed = false;
                     string modsText1 = "";
