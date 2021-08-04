@@ -11,8 +11,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.5.7 - Remove All Dark Thoughts
-    -Fixed bug in RemoveAll_Pawn_CachedSocialThoughts
+    Version 2.5.8 - Vader's Imperial Shuttle
+    -Fixed bug with shuttles not taking off
+    -Fixed bug with roofed rooms showing as unroofed
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 

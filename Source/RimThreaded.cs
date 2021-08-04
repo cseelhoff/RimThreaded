@@ -16,7 +16,7 @@ namespace RimThreaded
     {
         //TODO clear on new game or load
         public static Dictionary<Bill_Production, List<Pawn>> billFreeColonistsSpawned = new Dictionary<Bill_Production, List<Pawn>>();
-        
+
         public static int maxThreads = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1), 128);
         public static int timeoutMS = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.timeoutMSBuffer), 5000), 1000000);
         public static float timeSpeedNormal = float.Parse(RimThreadedMod.Settings.timeSpeedNormalBuffer);
@@ -50,7 +50,7 @@ namespace RimThreaded
 
         //WorldPawns
         public static WorldPawns worldPawns = null;
-        
+
         //FactionManager
         public static List<Faction> allFactions = null;
 
@@ -74,7 +74,7 @@ namespace RimThreaded
 
         public static object allSustainersLock = new object();
         public static object map_AttackTargetReservationManager_reservations_Lock = new object();
-        
+
 
         public class ThreadInfo
         {
@@ -152,11 +152,16 @@ namespace RimThreaded
             {
                 prepareAction = Map_Patch.MapsPostTickPrepare,
                 tickAction = Map_Patch.MapPostListTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
+                tickAction = TransportShipManager_Patch.ShipObjectsTick
             }
         };
         public static void RestartAllWorkerThreads()
         {
-            foreach(Thread thread in allWorkerThreads.Keys.ToArray())
+            foreach (Thread thread in allWorkerThreads.Keys.ToArray())
             {
                 thread.Abort();
             }
@@ -165,7 +170,7 @@ namespace RimThreaded
         }
         private static void CreateWorkerThreads()
         {
-            while(allWorkerThreads.Count < maxThreads)
+            while (allWorkerThreads.Count < maxThreads)
             {
                 ThreadInfo threadInfo = CreateWorkerThread();
                 allWorkerThreads.Add(threadInfo.thread, threadInfo);
@@ -173,13 +178,13 @@ namespace RimThreaded
         }
         private static ThreadInfo CreateWorkerThread()
         {
-            ThreadInfo threadInfo = new ThreadInfo {thread = new Thread(InitializeThread) {IsBackground = true}};
+            ThreadInfo threadInfo = new ThreadInfo { thread = new Thread(InitializeThread) { IsBackground = true } };
             threadInfo.thread.Start(threadInfo);
             return threadInfo;
         }
         private static void InitializeThread(object threadInfo)
         {
-            ThreadInfo ti = (ThreadInfo) threadInfo;
+            ThreadInfo ti = (ThreadInfo)threadInfo;
             InitializeAllThreadStatics();
             ProcessTicks(ti);
         }
@@ -214,7 +219,7 @@ namespace RimThreaded
             {
                 threadInfo.eventWaitStart.WaitOne();
                 PrepareWorkLists();
-                for(int loopsCompleted = listsFullyProcessed; loopsCompleted < threadedTickLists.Count; loopsCompleted++)
+                for (int loopsCompleted = listsFullyProcessed; loopsCompleted < threadedTickLists.Count; loopsCompleted++)
                 {
                     threadedTickLists[loopsCompleted].prepEventWaitStart.WaitOne();
                     ExecuteTicks();
@@ -352,7 +357,7 @@ namespace RimThreaded
                 threadedTickLists[Interlocked.Increment(ref currentPrepsDone)].prepEventWaitStart.Set();
             }
         }
-        
+
         private static void ExecuteTicks()
         {
             foreach (ThreadedTickList tickList in threadedTickLists)
@@ -395,11 +400,11 @@ namespace RimThreaded
                     threadInfo.eventWaitStart.Set();
                 }
                 List<KeyValuePair<Thread, ThreadInfo>> threadPairs = allWorkerThreads.ToList();
-                foreach(KeyValuePair<Thread, ThreadInfo> threadPair in threadPairs)
+                foreach (KeyValuePair<Thread, ThreadInfo> threadPair in threadPairs)
                 {
                     ThreadInfo threadInfo = threadPair.Value;
                     if (!threadInfo.eventWaitDone.WaitOne(timeoutMS))
-                    {         
+                    {
                         if (threadInfo.timeoutExempt == 0)
                         {
                             Log.Error("Thread: " + threadInfo.thread + " did not finish within " + timeoutMS + "ms. Restarting thread...");
@@ -407,7 +412,8 @@ namespace RimThreaded
                             thread.Abort();
                             allWorkerThreads.Remove(thread);
                             CreateWorkerThread();
-                        } else
+                        }
+                        else
                         {
                             threadInfo.eventWaitDone.WaitOne(threadInfo.timeoutExempt);
                             threadInfo.timeoutExempt = 0;
@@ -468,10 +474,6 @@ namespace RimThreaded
                     case Action<object[]> safeAction:
                         safeAction(parameters);
                         break;
-                    // Getter without param for static Properties
-                    case Func<object> safeFunction:
-                        threadInfo.safeFunctionResult = safeFunction();
-                        break;
                     default:
                         Log.Error("First parameter of thread-safe function request was not an action or function");
                         break;
@@ -485,5 +487,3 @@ namespace RimThreaded
     }
 
 }
-
-

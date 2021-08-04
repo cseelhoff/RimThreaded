@@ -20,11 +20,11 @@ SUBMIT BUGS:
 https://github.com/cseelhoff/RimThreaded/issues/new/choose  
 
 CREDITS:  
-Special thank you for helping me test Austin (Stanui)!  
-And thank you to others in Rimworld community who have posted their bug findings!  
+Big thanks to Sernoir for his continued help bug fixing and performance tweaks!  
 Big thanks to JoJo for his continued help bug fixing and adding mod compatibility!  
 Big thanks to Brrainz (Pardeike) for Harmony and all of the coding help!
 Big thanks to Kiame Vivacity for his help with fixing sound!  
+Special thank you for helping me test Austin (Stanui)!  
 Thank you bookdude13 for your many bugfixes!  
 Thank you to Ataman for helping me fix the LVM deep storage bug!  
 Thank you Ken for fixing RegionCostCalculator.PathableNeighborIndices!  
@@ -32,14 +32,20 @@ Thank you Raccoononi for the RT 2.0 logo! https://discordhub.com/profile/2457384
 Thank you ArchieV1 for the RT 1.0 logo! https://github.com/ArchieV1  
 Logo help from: Marnador https://ludeon.com/forums/index.php?action=profile;u=36313 and JKimsey https://pixabay.com/users/jkimsey-253161/  
 Thank you BaRKy for reviewing my mod! I am honored! https://www.youtube.com/watch?v=EWudgTJksMU  
+And thank you to others in Rimworld community who have posted their bug findings!  
 
 DONATE:  
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.8 - Vader's Imperial Shuttle  
+-Fixed bug with shuttles not taking off
+-Fixed bug with roofed rooms showing as unroofed  
 
-Version 2.5.7 - Remove All Dark Thoughts  
+Version 2.5.7 - Clear, your mind must be  
 -Fixed bug in RemoveAll_Pawn_CachedSocialThoughts  
+-Fixed bug in StatWorker.get_Worker  
+-Fixed bug when raiders appear  
 
 Version 2.5.6 - Free Wookie Hugs  
 -RimWorld 1.3 Compatibility added  
