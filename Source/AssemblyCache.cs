@@ -26,31 +26,17 @@ namespace RimThreaded
     {
         private static List<MethodBase> CacheList = new List<MethodBase>();
         private static List<SerializableMethod> CacheListS = new List<SerializableMethod>();
-        private static string Cachepath = Path.Combine(RimThreadedMod.replacementsJsonpath.Replace("replacements.json", ""),"Caches");
+        private static string Cachepath = Path.Combine(RimThreadedMod.replacementsJsonPath.Replace("replacements.json", ""), "Caches");
         private static string CurrentMethodPath;
-
-        /*private static List<MethodBase> DeserializeCache(string JsonString) //DEBUGGING METHOD
-        {
-            List<MethodBase> RETARDEDSHITTHATWOULDBESOLVEDINONELINEOFPYTHONFUCKYOUDOTNET = new List<MethodBase>();
-            foreach (string RetardedSolution in JsonString.Substring(1, JsonString.Length - 1).Replace("},","").Split('{'))
-            {
-                if (RetardedSolution.Contains("Name"))
-                {
-                    Log.Message(string.Format("I AM LISTING THIS:\n {{{0}}}", RetardedSolution));
-                    RETARDEDSHITTHATWOULDBESOLVEDINONELINEOFPYTHONFUCKYOUDOTNET.Add(JsonConvert.DeserializeObject<MethodBase>(string.Format("{{{0}}}", RetardedSolution)));
-                }
-            }
-            return RETARDEDSHITTHATWOULDBESOLVEDINONELINEOFPYTHONFUCKYOUDOTNET;
-        }*/
 
         public static void SaveJson()
         {
             string jsonString = JsonConvert.SerializeObject(CacheListS);
             File.WriteAllText(CurrentMethodPath, jsonString);
         }
-        public static bool TryGetFromCache(string AssemblyName, out List<MethodBase> ReturnMethodList, Dictionary<object, object> replaceFields)
+        public static bool TryGetFromCache(string AssemblyName, out List<MethodBase> ReturnMethodList)
         {
-            string CachePath = Path.Combine(Cachepath, AssemblyName+".json");
+            string CachePath = Path.Combine(Cachepath, AssemblyName + ".json");
             System.IO.Directory.CreateDirectory(Cachepath);
             CurrentMethodPath = CachePath;
             if (!File.Exists(CachePath))
@@ -64,15 +50,15 @@ namespace RimThreaded
             {
                 if (s.Name == ".ctor")
                 {
-                    CacheList.Add(AccessTools.Constructor(s.ClassType,s.ParametersType.ToArray()));
+                    CacheList.Add(AccessTools.Constructor(s.ClassType, s.ParametersType.ToArray()));
                     continue;
                 }
                 if (s.Name == ".cctor")
                 {
-                    CacheList.Add(AccessTools.Constructor(s.ClassType, s.ParametersType.ToArray(),true));
+                    CacheList.Add(AccessTools.Constructor(s.ClassType, s.ParametersType.ToArray(), true));
                     continue;
                 }
-                CacheList.Add(AccessTools.Method(s.ClassType,s.Name,s.ParametersType.ToArray()));
+                CacheList.Add(AccessTools.Method(s.ClassType, s.Name, s.ParametersType.ToArray()));
             }
             ReturnMethodList = CacheList;
             return true;
@@ -83,12 +69,12 @@ namespace RimThreaded
             SerializableMethod SMethod = new SerializableMethod();
             SMethod.Name = method.Name;
             SMethod.ClassType = type;
-            foreach(ParameterInfo p in method.GetParameters())
+            foreach (ParameterInfo p in method.GetParameters())
             {
                 SMethod.ParametersType.Add(p.ParameterType);
             }
             CacheListS.Add(SMethod);
-            CurrentMethodPath = Path.Combine(Cachepath, AssemblyName+".json");
+            CurrentMethodPath = Path.Combine(Cachepath, AssemblyName + ".json");
             CacheList.Add(method);
         }
 
