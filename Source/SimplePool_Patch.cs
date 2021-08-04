@@ -10,7 +10,7 @@ namespace RimThreaded
 
         public static T Get()
         {
-            return !FreeItems.TryPop(out T freeItem) ? new T() : freeItem;
+            return FreeItems.TryPop(out T freeItem) ? freeItem : new T();
         }
 
         public static void Return(T item) => FreeItems.Push(item);

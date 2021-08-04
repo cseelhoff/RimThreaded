@@ -19,7 +19,9 @@ namespace RimThreaded
             Type original = typeof(Region);
             Type patched = typeof(Region_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(DangerFor));
-            RimThreadedHarmony.Prefix(original, patched, "get_Room");
+#if RW13
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_District));
+#endif
         }
 
         internal static void InitializeThreadStatics()
@@ -47,12 +49,22 @@ namespace RimThreaded
             regionTraverserReplacements.Add(OpCodes.Stfld, Method(typeof(Region_Patch), "SetRegionClosedIndex"));
             RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), regionTraverserReplacements);
         }
-
+#if RW12
         public static bool get_Room(Region __instance, ref Room __result)
+#endif
+#if RW13
+        public static bool get_District(Region __instance, ref District __result)
+        
+#endif
         {
             lock (RegionDirtyer_Patch.regionDirtyerLock)
             {
+#if RW12
                 __result = __instance.roomInt;
+#endif
+#if RW13
+                __result = __instance.districtInt;
+#endif
                 return false;
             }
         }
@@ -83,14 +95,34 @@ namespace RimThreaded
             }
             Danger danger = Danger.Unspecified;
             Room room = __instance.Room;
+#if RW12
             RoomGroup group = null;
+#endif
+#if RW13
+            District district = null;
+#endif
             if (room != null)
             {
+#if RW12
                 group = room.Group;
+#endif
+#if RW13
+                district = __instance.District;
+#endif
             }
+#if RW12
             if (room != null && group != null)
+#endif
+#if RW13
+            if (room != null && district != null)
+#endif
             {
+#if RW12
                 float temperature = group.Temperature;
+#endif
+#if RW13
+                float temperature = room.Temperature;
+#endif
                 FloatRange floatRange;
                 if (Current.ProgramState == ProgramState.Playing)
                 {
@@ -129,6 +161,6 @@ namespace RimThreaded
             __result = danger;
             return false;
         }
-
+        
     }
 }

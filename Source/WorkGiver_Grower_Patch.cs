@@ -337,7 +337,7 @@ namespace RimThreaded
 				return false;
 			}
 
-			if (!localWantedPlantDef.CanEverPlantAt_NewTemp(c, map))
+			if (!localWantedPlantDef.CanEverPlantAt(c, map))
 			{
 #if DEBUG
 				Log.Warning("CanEverPlantAt_NewTemp");

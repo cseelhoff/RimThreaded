@@ -108,19 +108,19 @@ namespace RimThreaded
             regionsSeen = 0;
             if (traverseParams.mode == TraverseMode.PassAllDestroyableThings)
             {
-                Log.Error("RegionwiseBFSWorker with traverseParams.mode PassAllDestroyableThings. Use ClosestThingGlobal.", false);
+                Log.Error("RegionwiseBFSWorker with traverseParams.mode PassAllDestroyableThings. Use ClosestThingGlobal.");
                 __result = null;
                 return false;
             }
             if (traverseParams.mode == TraverseMode.PassAllDestroyableThingsNotWater)
             {
-                Log.Error("RegionwiseBFSWorker with traverseParams.mode PassAllDestroyableThingsNotWater. Use ClosestThingGlobal.", false);
+                Log.Error("RegionwiseBFSWorker with traverseParams.mode PassAllDestroyableThingsNotWater. Use ClosestThingGlobal.");
                 __result = null;
                 return false;
             }
             if (!req.IsUndefined && !req.CanBeFoundInRegion)
             {
-                Log.ErrorOnce("RegionwiseBFSWorker with thing request group " + req.group + ". This group is never stored in regions. Most likely a global search should have been used.", 385766189, false);
+                Log.ErrorOnce("RegionwiseBFSWorker with thing request group " + req.group + ". This group is never stored in regions. Most likely a global search should have been used.", 385766189);
                 __result = null;
                 return false;
             }

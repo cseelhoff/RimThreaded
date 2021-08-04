@@ -11,37 +11,63 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net472</TargetFramework>
-		<Version>2.4.3</Version>
+		<Version>2.5.7</Version>
 		<Copyright>Copyright ©  2021</Copyright>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <AssemblyVersion>2.4.3.0</AssemblyVersion>
+    <AssemblyVersion>2.5.7.0</AssemblyVersion>
     <Authors>Caleb Seelhoff</Authors>
-    <FileVersion>2.4.3.0</FileVersion>
+    <FileVersion>2.5.7.0</FileVersion>
+    <Configurations>DB12;Rel12;DB13;Rel13</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DB13|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>bin\Debug\1.3\Assemblies\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;RW13</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>
     </DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DB12|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\1.2\Assemblies\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;RW12</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Rel13|AnyCPU' ">
     <DebugType>portable</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\Release\1.3\Assemblies\</OutputPath>
+    <DefineConstants>TRACE;RW13</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DebugSymbols>true</DebugSymbols>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Rel12|AnyCPU'">
+    <DebugType>portable</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\1.2\Assemblies\</OutputPath>
+    <DefineConstants>TRACE;RW12</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Properties\**" />
@@ -49,20 +75,94 @@
     <None Remove="Properties\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.2.2905" GeneratePathProperty="true" />
-		<PackageReference Include="Lib.Harmony" Version="2.0.4" ExcludeAssets="runtime" />
+		<PackageReference Include="Lib.Harmony" Version="2.1.0" ExcludeAssets="runtime" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="5.0.2" />
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="TaskPubliciser" Version="1.0.3" />
 		<PackageReference Include="Unity.Newtonsoft.Json" Version="7.0.0" />
+		<PackageReference Include="TaskPubliciser" Version="1.0.3">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
   </ItemGroup>
-  <Target Name="MyCode" BeforeTargets="UpdateReferences">
+  <ItemGroup>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="mscorlib">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Core">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Data">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Drawing">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.IO.Compression.FileSystem">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Numerics">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Runtime.Serialization">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Xml">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+  	<ItemGroup>
+  	  <Reference Update="System.Xml.Linq">
+  	    <Private>false</Private>
+  	  </Reference>
+  	</ItemGroup>
+	<Target Name="MyCode" BeforeTargets="UpdateReferences">
 		<PropertyGroup>
-			<AssemblyCSharp>$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll</AssemblyCSharp>
-			<PubliciseOutputPath>$(PkgKrafs_Rimworld_Ref)\ref\net472\</PubliciseOutputPath>
+			<AssemblyCSharp>bin\Assembly-CSharp.dll</AssemblyCSharp>
+			<PubliciseOutputPath>bin\</PubliciseOutputPath>
 			<AssemblyCSharp_Publicised>$(PubliciseOutputPath)Assembly-CSharp_publicised.dll</AssemblyCSharp_Publicised>
 		</PropertyGroup>
 		<Message Importance="High" Text="Publicising Rimworld Assembly ..." />
@@ -80,7 +180,7 @@
   	<Target Name="UpdateReferences" AfterTargets="ResolveLockFileReferences">
 		<Message Importance="High" Text="Remove References ..." />
 		<ItemGroup>
-			<Reference Remove="$(PkgKrafs_Rimworld_Ref)\ref\net472\Assembly-CSharp.dll" />
+			<Reference Remove="bin\Assembly-CSharp.dll" />
 		</ItemGroup>
 	</Target>
 </Project>

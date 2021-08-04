@@ -32,7 +32,10 @@ namespace RimThreaded
 				HashSet<IntVec3> hashset = awaitingActionZoomLevels[zoomLevel][cellIndex];
 				if (hashset != null)
 				{
-					hashset.Remove(location);
+					lock (hashset)
+					{
+						hashset.Remove(location);
+					}
 				}
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
@@ -174,9 +177,15 @@ namespace RimThreaded
 				if (hashset == null)
 				{
 					hashset = new HashSet<IntVec3>();
-					awaitingActionGrid[jumboCellIndex] = hashset;
+					lock (awaitingActionGrid)
+					{
+						awaitingActionGrid[jumboCellIndex] = hashset;
+					}
 				}
-				hashset.Add(location);
+				lock (hashset)
+				{
+					hashset.Add(location);
+				}
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}

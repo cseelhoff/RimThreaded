@@ -25,7 +25,7 @@ namespace RimThreaded
         {
             Type original = typeof(Reachability);
             Type patched = typeof(Reachability_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "CanReach", new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
+            RimThreadedHarmony.Prefix(original, patched, nameof(CanReach), new Type[] { typeof(IntVec3), typeof(LocalTargetInfo), typeof(PathEndMode), typeof(TraverseParms) });
         }
 
         private static void QueueNewOpenRegion(Region region, Queue<Region> openQueueParam, HashSet<Region> regionsReached)
@@ -98,8 +98,14 @@ namespace RimThreaded
 
             if ((peMode == PathEndMode.OnCell || peMode == PathEndMode.Touch || peMode == PathEndMode.ClosestTouch) && traverseParams.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParams.mode != TraverseMode.PassAllDestroyableThingsNotWater)
             {
+#if RW12
                 Room room = RegionAndRoomQuery.RoomAtFast(start, map);
                 if (room != null && room == RegionAndRoomQuery.RoomAtFast(dest.Cell, map))
+#endif
+#if RW13
+                District district = RegionAndRoomQuery.DistirctAtFast(start, map);
+                if (district != null && district == RegionAndRoomQuery.DistirctAtFast(dest.Cell, map))
+#endif
                 {
                     __result = true;
                     return false;
@@ -120,10 +126,17 @@ namespace RimThreaded
             }
 
             dest = (LocalTargetInfo)GenPath.ResolvePathMode(traverseParams.pawn, dest.ToTargetInfo(map), ref peMode);
+            //working = true;
             try
             {
+#if RW12
                 __instance.pathGrid = map.pathGrid;
                 PathGrid pathGrid = map.pathGrid;
+#endif
+#if RW13
+                __instance.pathGrid = map.pathing.For(traverseParams).pathGrid;
+                PathGrid pathGrid = __instance.pathGrid;
+#endif
                 __instance.regionGrid = map.regionGrid;
                 RegionGrid regionGrid = map.regionGrid;
 
@@ -188,9 +201,9 @@ namespace RimThreaded
             }
             finally
             {
+                //working = false;
             }
         }
-
         private static BoolUnknown GetCachedResult(Reachability __instance, TraverseParms traverseParams, List<Region> startingRegionsParams, List<Region> destRegionsParams)
         {
             bool flag = false;
@@ -203,8 +216,12 @@ namespace RimThreaded
                     {
                         return BoolUnknown.True;
                     }
-
+#if RW12
                     switch (cache.CachedResultFor(startingRegionsParams[i].Room, destRegionsParams[j].Room, traverseParams))
+#endif
+#if RW13
+                    switch (cache.CachedResultFor(startingRegionsParams[i].District, destRegionsParams[j].District, traverseParams))
+#endif
                     {
                         case BoolUnknown.True:
                             return BoolUnknown.True;
@@ -222,7 +239,7 @@ namespace RimThreaded
 
             return BoolUnknown.Unknown;
         }
-
+        
         private static bool CheckRegionBasedReachability(Reachability __instance, TraverseParms traverseParams, Queue<Region> openQueueParam, 
             HashSet<Region> regionsReached, List<Region> startingRegionsParam, List<Region> destRegionsParam)
         {
@@ -245,7 +262,12 @@ namespace RimThreaded
                         {
                             for (int k = 0; k < startingRegionsParam.Count; k++)
                             {
+#if RW12
                                 cache.AddCachedResult(startingRegionsParam[k].Room, region2.Room, traverseParams, reachable: true);
+#endif
+#if RW13
+                                cache.AddCachedResult(startingRegionsParam[k].District, region2.District, traverseParams, reachable: true);
+#endif
                             }
 
                             return true;
@@ -259,12 +281,17 @@ namespace RimThreaded
             {
                 for (int m = 0; m < destRegionsParam.Count; m++)
                 {
+#if RW12
                     cache.AddCachedResult(startingRegionsParam[l].Room, destRegionsParam[m].Room, traverseParams, reachable: false);
+#endif
+#if RW13
+                    cache.AddCachedResult(startingRegionsParam[l].District, destRegionsParam[m].District, traverseParams, reachable: false);
+#endif
                 }
             }
             return false;
         }
-
+        
         private static void DetermineStartRegions(Map map, IntVec3 start, List<Region> startingRegionsParam, PathGrid pathGrid,
             RegionGrid regionGrid, Queue<Region> openQueueParam, HashSet<Region> regionsReached)
         {
@@ -293,7 +320,6 @@ namespace RimThreaded
                 }
             }
         }
-
 
     }
 }

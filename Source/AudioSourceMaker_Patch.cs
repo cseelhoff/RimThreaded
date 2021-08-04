@@ -16,7 +16,7 @@ namespace RimThreaded
         {
             Type original = typeof(AudioSourceMaker);
             Type patched = typeof(AudioSourceMaker_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "NewAudioSourceOn");
+            RimThreadedHarmony.Prefix(original, patched, nameof(NewAudioSourceOn));
         }
 
         public static bool NewAudioSourceOn(ref AudioSource __result, GameObject go)

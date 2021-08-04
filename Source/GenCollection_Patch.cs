@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using Verse;
+using static RimWorld.SituationalThoughtHandler;
 
 namespace RimThreaded
 {
 
     public class GenCollection_Patch
     {
+        [ThreadStatic] static List<object> list;
+        [ThreadStatic] static List<Pawn> pawnList;
         internal static void RunDestructivePatches()
         {
             Type original = typeof(GenCollection);
@@ -25,7 +28,7 @@ namespace RimThreaded
             }
 
             MethodInfo originalRemoveAllGeneric = originalRemoveAll.MakeGenericMethod(typeof(object), typeof(object));
-            MethodInfo patchedRemoveAll = patched.GetMethod("RemoveAll_Object_Object_Patch");
+            MethodInfo patchedRemoveAll = patched.GetMethod(nameof(RemoveAll_Object_Object_Patch));
             HarmonyMethod prefixRemoveAll = new HarmonyMethod(patchedRemoveAll);
             RimThreadedHarmony.harmony.Patch(originalRemoveAllGeneric, prefix: prefixRemoveAll);
 
@@ -33,35 +36,52 @@ namespace RimThreaded
 
         public static bool RemoveAll_Object_Object_Patch(ref int __result, Dictionary<object, object> dictionary, Predicate<KeyValuePair<object, object>> predicate)
         {
-            List<object> list = new List<object>();
+            if (list == null)
+                list = new List<object>();
+            list.Clear();
             lock (dictionary)
             {
                 foreach (KeyValuePair<object, object> item in dictionary)
                 {
                     if (predicate(item))
                     {
-                        list.Add(item);
+                        list.Add(item.Key);
                     }
                 }
-            }
-            if (list.Count > 0)
-            {
-                int i = 0;
-                for (int count = list.Count; i < count; i++)
+                int count = list.Count;
+                for (int i = 0; i < count; i++)
                 {
-                    lock (dictionary)
+                    dictionary.Remove(list[i]);
+                }
+            }
+            __result = list.Count;
+            return false;
+        }
+
+        public static bool RemoveAll_Pawn_CachedSocialThoughts(ref int __result,
+          Dictionary<Pawn, CachedSocialThoughts> dictionary,
+          Predicate<KeyValuePair<Pawn, CachedSocialThoughts>> predicate)
+        {
+            if (pawnList == null)
+                pawnList = new List<Verse.Pawn>();
+            pawnList.Clear();
+            lock (dictionary)
+            {
+                foreach (KeyValuePair<Pawn, CachedSocialThoughts> item in dictionary)
+                {
+                    if (predicate(item))
                     {
-                        dictionary.Remove(list[i]);
+                        pawnList.Add(item.Key);
                     }
                 }
-
-                __result = list.Count;
-                return false;
+                int count = pawnList.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    dictionary.Remove(pawnList[i]);
+                }
             }
-
-            __result = 0;
+            __result = pawnList.Count;
             return false;
-
         }
 
     }

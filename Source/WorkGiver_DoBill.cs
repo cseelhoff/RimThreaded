@@ -151,7 +151,7 @@ namespace RimThreaded
 				return billGiver.Position;
 			if (building.def.hasInteractionCell)
 				return building.InteractionCell;
-			Log.Error("Tried to find bill ingredients for " + billGiver + " which has no interaction cell.", false);
+			Log.Error("Tried to find bill ingredients for " + billGiver + " which has no interaction cell.");
 			return forPawn.Position;
 		}
 		private static void MakeIngredientsListInProcessingOrder(
@@ -196,7 +196,7 @@ namespace RimThreaded
 			for (int index = 0; index < thingList.Count; ++index)
 			{
 				Thing thing = thingList[index];
-				if (medicalCareCategory.AllowsMedicine(thing.def) && baseValidator(thing) && pawn.CanReach(thing, PathEndMode.OnCell, Danger.Deadly, false, TraverseMode.ByPawn))
+				if (medicalCareCategory.AllowsMedicine(thing.def) && baseValidator(thing) && pawn.CanReach(thing, PathEndMode.OnCell, Danger.Deadly))
 					tmpMedicine.Add(thing);
 			}
 			tmpMedicine.SortBy(x => -x.GetStatValue(StatDefOf.MedicalPotency, true), x => x.Position.DistanceToSquared(billGiver.Position));
