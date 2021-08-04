@@ -235,51 +235,70 @@ namespace RimThreaded
 		//public static bool intializersReady = false;
 		private static void ApplyFieldReplacements()
         {
-            foreach (Assembly assembly in assemblies)
-            {
-                if (assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+			List<MethodBase> MethodsFromCache = new List<MethodBase>();
+			foreach (Assembly assembly in assemblies)
+			{
+				if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache))
 				{
-					Type[] types = GetTypesFromAssembly(assembly);
-					foreach (Type type in types)
-                    {
-						List<MethodBase> allMethods = new List<MethodBase>();
-						allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));
-						allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
+					foreach (MethodBase method in MethodsFromCache)
+					{
+#if DEBUG
+						Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
+#endif
+						TranspileFieldReplacements(method);
+					}
+				}
+				else
+				{
+					if (assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+					{
+						Type[] types = GetTypesFromAssembly(assembly);
+						foreach (Type type in types)
+						{
+							List<MethodBase> allMethods = new List<MethodBase>();
+							allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));//==all??
+							allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
 
-						foreach (MethodBase method in allMethods)
-                        {
-							if (method.IsDeclaredMember())
+							foreach (MethodBase method in allMethods)
 							{
-								try {
-									IEnumerable<KeyValuePair<OpCode, object>> codeInstructions = PatchProcessor.ReadMethodBody(method);
-									foreach (KeyValuePair<OpCode, object> codeInstruction in codeInstructions)
+								if (method.IsDeclaredMember())
+								{
+									try
 									{
-										if (codeInstruction.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
+										IEnumerable<KeyValuePair<OpCode, object>> codeInstructions = PatchProcessor.ReadMethodBody(method);
+										foreach (KeyValuePair<OpCode, object> codeInstruction in codeInstructions)
 										{
-											TranspileFieldReplacements(method);
-											break;
-										}
-										if (codeInstruction.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
-										{
-											TranspileFieldReplacements(method);
-											break;
+											if (codeInstruction.Value is FieldInfo fieldInfo && replaceFields.ContainsKey(fieldInfo))
+											{
+												AssemblyCache.AddToCache(assembly.ManifestModule.ModuleVersionId.ToString(), method, type);
+												TranspileFieldReplacements(method);
+												break;
+											}
+											if (codeInstruction.Value is MethodInfo methodInfo && replaceFields.ContainsKey(methodInfo))
+											{
+												AssemblyCache.AddToCache(assembly.ManifestModule.ModuleVersionId.ToString(), method, type);
+												TranspileFieldReplacements(method);
+												break;
+											}
 										}
 									}
-								} catch(NotSupportedException) {}
+									catch (NotSupportedException) { }
+								}
 							}
-                        }
-                    }
-                }
-            }
+						}
+						AssemblyCache.SaveJson();
+					}
+				}
+			}
 
-            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
-            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
-            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
-            //TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-            //	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
+			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
+			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
+			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
+			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
+			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
 			Type pawnType = typeof(Pawn);
 			Type thoughtsType = typeof(CachedSocialThoughts);
 			string removeAllString = nameof(GenCollection.RemoveAll);
@@ -897,7 +916,8 @@ namespace RimThreaded
 			RegionLink_Patch.RunDestructivePatches();
             RegionMaker_Patch.RunDestructivePatches();
             ResourceCounter_Patch.RunDestructivePatches();
-			RoofGrid_Patch.RunDestructivePatches(); // possibly for 1.2 only. oberved via tourture test
+			//RoofGrid_Patch.RunDestructivePatches(); // possibly for 1.2 only. oberved via tourture test
+			//RoofGrid_Patch is causing problems to the roof notification in 1.3 a fix is also inside the Patch in case  this is needed for something else I am commenting this for now -Senior
 			RulePackDef_Patch.RunDestructivePatches(); //explosions fix - grammar
 			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
             ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
