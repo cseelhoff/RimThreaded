@@ -14,7 +14,7 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, "LordOf", new Type[] { typeof(Pawn) });
             RimThreadedHarmony.Prefix(original, patched, "RemoveLord");
         }
-
+        /*
         public static bool LordOf(LordManager __instance, ref Lord __result, Pawn p)
         {
             Lord lordResult = null;
@@ -46,6 +46,11 @@ namespace RimThreaded
             }
             __result = lordResult;
             return false;
+        }*/
+        public static bool LordOf(LordManager __instance, ref Lord __result, Pawn p)
+        {
+            Lord_Patch.pawnsLord.TryGetValue(p, out __result);
+            return false;
         }
         public static bool RemoveLord(LordManager __instance, Lord oldLord)
         {
@@ -53,7 +58,7 @@ namespace RimThreaded
             {
                 lock (Lord_Patch.pawnsLord)
                 {
-                    Lord_Patch.pawnsLord.SetOrAdd(oldLord.ownedPawns[j], null);
+                    Lord_Patch.pawnsLord.Remove(oldLord.ownedPawns[j]);
                 }
             }
             __instance.lords.Remove(oldLord);

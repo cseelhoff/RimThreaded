@@ -22,14 +22,14 @@ namespace RimThreaded
         private static void SetAsDefender(LordToilData_Siege data, Pawn p)
         {
             //LordToilData_Siege data = __instance.Data;
-            p.mindState.duty = new PawnDuty(DutyDefOf.Defend, data.siegeCenter, -1f);
+            p.mindState.duty = new PawnDuty(DutyDefOf.Defend, data.siegeCenter);
             p.mindState.duty.radius = data.baseRadius;
         }
 
         private static void SetAsBuilder(LordToilData_Siege data, Pawn p)
         {
             //LordToilData_Siege data = this.Data;
-            p.mindState.duty = new PawnDuty(DutyDefOf.Build, data.siegeCenter, -1f);
+            p.mindState.duty = new PawnDuty(DutyDefOf.Build, data.siegeCenter);
             p.mindState.duty.radius = data.baseRadius;
             int minLevel = Mathf.Max(ThingDefOf.Sandbags.constructionSkillPrerequisite, ThingDefOf.Turret_Mortar.constructionSkillPrerequisite);
             p.skills.GetSkill(SkillDefOf.Construction).EnsureMinLevelWithMargin(minLevel);
@@ -57,7 +57,7 @@ namespace RimThreaded
             {
                 lock (__instance)
                 {
-                    __instance.rememberedDuties = new Dictionary<Pawn, DutyDef>();
+                    __instance.rememberedDuties.Clear();
                 }
                 int num1 = Mathf.RoundToInt(__instance.lord.ownedPawns.Count * data.desiredBuilderFraction);
                 if (num1 <= 0)
@@ -73,10 +73,8 @@ namespace RimThreaded
                     {
                         lock (__instance)
                         {
-                            if (__instance.rememberedDuties.ContainsKey(ownedPawn))
-                            {
-                                __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Build);
-                            }
+                            __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Build);
+
                         }
                         SetAsBuilder(data, ownedPawn);
                         ++num3;

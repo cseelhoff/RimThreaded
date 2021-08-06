@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Verse;
 using Verse.AI.Group;
-using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -11,6 +10,14 @@ namespace RimThreaded
     {
         public static Dictionary<Pawn, Lord> pawnsLord = new Dictionary<Pawn, Lord>();
 
+        public static bool AddPawns(Lord __instance, IEnumerable<Pawn> pawns)
+        {
+            foreach (Pawn pawn in pawns)
+            {
+                Lord_Patch.AddPawn(__instance, pawn);
+            }
+            return false;
+        }
         public static bool AddPawn(Lord __instance, Pawn p)
         {
             if (__instance.ownedPawns.Contains(p))
@@ -47,7 +54,7 @@ namespace RimThreaded
             }
             lock (pawnsLord)
             {
-                pawnsLord[p] = null;
+                pawnsLord.Remove(p);
             }
             if (p.mindState != null)
             {
@@ -63,6 +70,7 @@ namespace RimThreaded
             Type original = typeof(Lord);
             Type patched = typeof(Lord_Patch);
             RimThreadedHarmony.Prefix(original, patched, "AddPawn");
+            RimThreadedHarmony.Prefix(original, patched, "AddPawns");
             RimThreadedHarmony.Prefix(original, patched, "RemovePawn");
         }
     }
