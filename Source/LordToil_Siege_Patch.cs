@@ -57,7 +57,7 @@ namespace RimThreaded
             {
                 lock (__instance)
                 {
-                    __instance.rememberedDuties.Clear();
+                    __instance.rememberedDuties = new Dictionary<Pawn, DutyDef>();
                 }
                 int num1 = Mathf.RoundToInt(__instance.lord.ownedPawns.Count * data.desiredBuilderFraction);
                 if (num1 <= 0)
@@ -73,8 +73,10 @@ namespace RimThreaded
                     {
                         lock (__instance)
                         {
-                            __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Build);
-
+                            if (__instance.rememberedDuties.ContainsKey(ownedPawn))
+                            {
+                                __instance.rememberedDuties.Add(ownedPawn, DutyDefOf.Build);
+                            }
                         }
                         SetAsBuilder(data, ownedPawn);
                         ++num3;

@@ -27,10 +27,9 @@ namespace RimThreaded
             if (mapHeld == null)
             {
                 __result = new DamageWorker.DamageResult();
-                return false;
+                //return false;
             }
             //---END change---
-
             if (__instance.Destroyed)
             {
                 __result = new DamageWorker.DamageResult();

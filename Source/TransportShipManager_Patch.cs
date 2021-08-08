@@ -38,19 +38,6 @@ namespace RimThreaded
                 {
                     Log.Error("Exception ticking TransportShip: " + AllTransportShips[index].ToString() + ": " + e);
                 }
-                /*
-                                int index = Interlocked.Decrement(ref allFactionsTicks);
-                if (index < 0) return;
-                Faction faction = allFactionsTickList[index];
-                try
-                {
-                    faction.FactionTick();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("Exception ticking faction: " + faction.ToStringSafe() + ": " + ex);
-                }
-                }*/
             }
         }
     }
