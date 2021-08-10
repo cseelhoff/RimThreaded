@@ -29,9 +29,10 @@ namespace RimThreaded
 
 		static RimThreadedHarmony()
 		{
-#if DEBUG
-			Harmony.DEBUG = true;
-#endif
+			if (Prefs.LogVerbose)
+			{
+				Harmony.DEBUG = true;
+			}
 			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version + "  is patching methods...");
 
 			LoadFieldReplacements();
@@ -39,10 +40,12 @@ namespace RimThreaded
 			ApplyFieldReplacements();
 			PatchDestructiveFixes();
 			PatchNonDestructiveFixes();
-			PatchModCompatibility();
-#if DEBUG
-			//RimThreadedMod.exportTranspiledMethods();
-#endif
+			PatchModCompatibility(); 
+			if (Prefs.LogVerbose)
+			{
+				//RimThreadedMod.exportTranspiledMethods();
+			}
+
 			Log.Message("RimThreaded patching is complete.");
 
 			string potentialConflicts = RimThreadedMod.GetPotentialModConflicts();
@@ -224,10 +227,10 @@ namespace RimThreaded
 					harmony.Patch(initializer, postfix: pf);
 				}
 			}
-#if DEBUG
-			//Directory.SetCurrentDirectory("C:\\STUFF");
-			ab.Save(aName.Name + ".dll");
-#endif
+			if (Prefs.LogVerbose)
+			{
+				ab.Save(aName.Name + ".dll");
+			}
 		}
 		public static Dictionary<Type, HashSet<FieldInfo>> untouchedStaticFields = new Dictionary<Type, HashSet<FieldInfo>>();
 		public static HashSet<string> fieldFullNames = new HashSet<string>();
@@ -238,12 +241,19 @@ namespace RimThreaded
 			List<MethodBase> MethodsFromCache = new List<MethodBase>();
 			foreach (Assembly assembly in assemblies)
 			{
+				if (Prefs.LogVerbose)
+				{
+					Verse.Log.Message("RimThreaded is attempting to load replacements from cache for assembly: " + assembly.FullName);
+				}
 				if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache))
 				{
 					foreach (MethodBase method in MethodsFromCache)
 					{
-#if DEBUG
-						Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
+#if false
+						if (Prefs.LogVerbose)
+						{
+							Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
+						}
 #endif
 						TranspileFieldReplacements(method);
 					}
@@ -550,9 +560,10 @@ namespace RimThreaded
 			notifiedObjects.Clear();
 			foreach (CodeInstruction codeInstruction in instructions)
 			{
-#if DEBUG
-				Log.messageCount = 0; //prevents logging to stop from spam
-#endif
+				if (Prefs.LogVerbose)
+				{
+					Log.messageCount = 0; //prevents logging to stop from spam
+				}
 				object operand = codeInstruction.operand;
 				if (operand != null && replaceFields.TryGetValue(operand, out object newObjectInfo))
 				{
@@ -563,29 +574,31 @@ namespace RimThreaded
 								switch (newObjectInfo)
 								{
 									case FieldInfo newFieldInfo:
-#if DEBUG
-										if (!notifiedObjects.Contains(newFieldInfo))
+										if (Prefs.LogVerbose)
 										{
-											notifiedObjects.Add(newFieldInfo);
-											Log.Message("RimThreaded is replacing field: " +
-														fieldInfo.DeclaringType + "." + fieldInfo.Name +
-														" with field: " + newFieldInfo.DeclaringType + "." + newFieldInfo.Name);
+											if (!notifiedObjects.Contains(newFieldInfo))
+											{
+												notifiedObjects.Add(newFieldInfo);
+												Log.Message("RimThreaded is replacing field: " +
+															fieldInfo.DeclaringType + "." + fieldInfo.Name +
+															" with field: " + newFieldInfo.DeclaringType + "." + newFieldInfo.Name);
+											}
 										}
-#endif
 										codeInstruction.operand = newFieldInfo;
 										break;
 									case Dictionary<OpCode, MethodInfo> newMethodInfoDict:
 										MethodInfo newMethodInfo = newMethodInfoDict[codeInstruction.opcode];
-#if DEBUG
-										if (!notifiedObjects.Contains(newMethodInfo))
+										if (Prefs.LogVerbose)
 										{
-											notifiedObjects.Add(newMethodInfo);
-											Log.Message("RimThreaded is replacing field: " +
-												fieldInfo.DeclaringType + "." + fieldInfo.Name +
-												" with CALL method: " + newMethodInfo.DeclaringType + "." +
-												newMethodInfo.Name);
+											if (!notifiedObjects.Contains(newMethodInfo))
+											{
+												notifiedObjects.Add(newMethodInfo);
+												Log.Message("RimThreaded is replacing field: " +
+													fieldInfo.DeclaringType + "." + fieldInfo.Name +
+													" with CALL method: " + newMethodInfo.DeclaringType + "." +
+													newMethodInfo.Name);
+											}
 										}
-#endif
 										codeInstruction.opcode = OpCodes.Call;
 										codeInstruction.operand = newMethodInfo;
 										break;
@@ -598,30 +611,32 @@ namespace RimThreaded
 								switch (newObjectInfo)
 								{
 									case FieldInfo newFieldInfo:
-#if DEBUG
-										if (!notifiedObjects.Contains(newFieldInfo))
+										if (Prefs.LogVerbose)
 										{
-											notifiedObjects.Add(newFieldInfo);
-											Log.Message("RimThreaded is replacing method: " +
-												methodInfo.DeclaringType + "." + methodInfo.Name +
-												" with STATIC field: " + newFieldInfo.DeclaringType + "." +
-												newFieldInfo.Name);
+											if (!notifiedObjects.Contains(newFieldInfo))
+											{
+												notifiedObjects.Add(newFieldInfo);
+												Log.Message("RimThreaded is replacing method: " +
+													methodInfo.DeclaringType + "." + methodInfo.Name +
+													" with STATIC field: " + newFieldInfo.DeclaringType + "." +
+													newFieldInfo.Name);
+											}
 										}
-#endif
 										codeInstruction.opcode = OpCodes.Ldsfld;
 										codeInstruction.operand = newFieldInfo;
 										break;
 									case MethodInfo newMethodInfo:
-#if DEBUG
-										if (!notifiedObjects.Contains(newMethodInfo))
+										if (Prefs.LogVerbose)
 										{
-											notifiedObjects.Add(newMethodInfo);
-											Log.Message("RimThreaded is replacing method: " +
-												methodInfo.DeclaringType + "." + methodInfo.Name +
-												" with method: " + newMethodInfo.DeclaringType + "." +
-												newMethodInfo.Name);
+											if (!notifiedObjects.Contains(newMethodInfo))
+											{
+												notifiedObjects.Add(newMethodInfo);
+												Log.Message("RimThreaded is replacing method: " +
+													methodInfo.DeclaringType + "." + methodInfo.Name +
+													" with method: " + newMethodInfo.DeclaringType + "." +
+													newMethodInfo.Name);
+											}
 										}
-#endif
 										codeInstruction.operand = newMethodInfo;
 										break;
 								}
@@ -678,18 +693,15 @@ namespace RimThreaded
 		public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
 		public static void TranspileFieldReplacements(MethodBase original)
 		{
-#if DEBUG
-			Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
-			if (original.Name.Equals("RemoveAll"))
-			{
-				Log.Message("RemoveAll");
-			}
-#else
 			if (Prefs.LogVerbose)
 			{
 				Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
+				if (original.Name.Equals("RemoveAll"))
+				{
+					Log.Message("RemoveAll");
+				}
+				Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
 			}
-#endif
 			harmony.Patch(original, transpiler: replaceFieldsHarmonyTranspiler);
 		}
 
@@ -756,7 +768,7 @@ namespace RimThreaded
 				Log.Error("Exception Transpiling: " + oMethod.ToString() + " " + transpilerMethod.ToString() + " " + e.ToString());
 			}
 		}
-		public static void TranspileMethodLock(Type original, string methodName, Type[] origType = null, string[] harmonyAfter = null)
+		public static void TranspileMethodLock(Type original, string methodName, Type[] origType = null)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
 			harmony.Patch(oMethod, transpiler: methodLockTranspiler);
@@ -929,7 +941,7 @@ namespace RimThreaded
 			StoryState_Patch.RunDestructivePatches(); //WrapMethodInInstanceLock
 			TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
-			Thing_Patch.RunDestructivePatches();
+			Thing_Patch.RunDestructivePatches(); //Thing_Patch.TakeDamage is a good candidate for transpile
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			ThinkNode_ForbidOutsideFlagRadius_Patch.RunDestructivePatches(); //base method override is double destructive 
 

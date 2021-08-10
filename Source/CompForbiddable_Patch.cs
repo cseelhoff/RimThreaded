@@ -9,7 +9,7 @@ namespace RimThreaded
         private static readonly Type Patched = typeof(CompForbiddable_Patch);
         public static void RunNonDestructivePatches()
         {
-            RimThreadedHarmony.Postfix(Original, Patched, "set_Forbidden");
+            RimThreadedHarmony.Postfix(Original, Patched, nameof(set_Forbidden));
         }
 
         public static void set_Forbidden(CompForbiddable __instance, bool value)

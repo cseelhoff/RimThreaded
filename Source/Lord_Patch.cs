@@ -10,6 +10,14 @@ namespace RimThreaded
     class Lord_Patch
     {
         public static Dictionary<Pawn, Lord> pawnsLord = new Dictionary<Pawn, Lord>();
+        public static bool AddPawns(Lord __instance, IEnumerable<Pawn> pawns)
+        {
+            foreach (Pawn pawn in pawns)
+            {
+                Lord_Patch.AddPawn(__instance, pawn);
+            }
+            return false;
+        }
 
         public static bool AddPawn(Lord __instance, Pawn p)
         {

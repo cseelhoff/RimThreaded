@@ -987,7 +987,7 @@
           "FieldName": "tmpLoveRelations"
         },
         {
-          "FieldName": "tmpMarriageClusterPawns"
+          "FieldName": "tmpLoveClusterPawns"
         },
         {
           "FieldName": "tmpStack"

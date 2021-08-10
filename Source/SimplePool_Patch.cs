@@ -8,10 +8,7 @@ namespace RimThreaded
 
         public static int FreeItemsCount => FreeItems.Count;
 
-        public static T Get()
-        {
-            return FreeItems.TryPop(out T freeItem) ? freeItem : new T();
-        }
+        public static T Get() => FreeItems.TryPop(out T freeItem) ? freeItem : new T();
 
         public static void Return(T item) => FreeItems.Push(item);
     }

@@ -29,7 +29,7 @@ namespace RimThreaded
 
         public static EventWaitHandle mainThreadWaitHandle = new AutoResetEvent(false);
         public static EventWaitHandle monitorThreadWaitHandle = new AutoResetEvent(false);
-        private static Thread monitorThread;
+        private static readonly Thread monitorThread;
         private static bool allWorkerThreadsFinished;
 
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
@@ -152,12 +152,15 @@ namespace RimThreaded
             {
                 prepareAction = Map_Patch.MapsPostTickPrepare,
                 tickAction = Map_Patch.MapPostListTick
-            },
+            }
+#if RW13
+            ,
             new ThreadedTickList
             {
                 prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
                 tickAction = TransportShipManager_Patch.ShipObjectsTick
             }
+#endif
         };
         public static void RestartAllWorkerThreads()
         {

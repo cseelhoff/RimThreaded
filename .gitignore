@@ -360,8 +360,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Assemblies/0Harmony.dll
-/Assemblies/0Harmony.xml
-/Assemblies/UnityEngine.AssetBundleModule.dll
-/Assemblies/UnityEngine.TextRenderingModule.dll
-RimThreaded.csproj
+
+Dependencies/*/*.dll
+Dependencies/*/*.hash
+RimWorldSource/
+RimThreaded/

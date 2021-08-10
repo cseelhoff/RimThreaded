@@ -19,17 +19,17 @@ namespace RimThreaded
         public static string replacementsFolder;
         public static string replacementsJsonPath;
 #if RW12
-            string RWversion = "1.2";
+        readonly string RWversion = "1.2";
 #endif
 #if RW13
-        string RWversion = "1.3";
+        readonly string RWversion = "1.3";
 #endif
         public RimThreadedMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<RimThreadedSettings>();
 
-            replacementsFolder = Path.Combine(content.RootDir, RWversion);
-            replacementsJsonPath = Path.Combine(replacementsFolder, "replacements.json");
+            replacementsFolder = Path.Combine(content.RootDir, RWversion, "Assemblies");
+            replacementsJsonPath = Path.Combine(replacementsFolder, "replacements_" + RWversion + ".json");
             //RimThreaded.Start();
         }
         public override void DoSettingsWindowContents(Rect inRect)
@@ -38,14 +38,6 @@ namespace RimThreaded
             {
                 Settings.modsText = "Potential RimThreaded mod conflicts :\n";
                 Settings.modsText += GetPotentialModConflicts();
-
-                //Settings.modsText2 = "For future use... \n";
-                //Settings.modsText2 += getAllStaticFields();
-
-                //string path = "hmodText.txt";
-                //StreamWriter writer = new StreamWriter(path, true);
-                //writer.WriteLine(Settings.modsText);
-                //writer.Close();
             }
             Settings.DoWindowContents(inRect);
             if (Settings.maxThreads != RimThreaded.maxThreads)
