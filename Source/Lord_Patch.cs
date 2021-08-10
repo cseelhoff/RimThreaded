@@ -9,6 +9,15 @@ namespace RimThreaded
     [StaticConstructorOnStartup]
     class Lord_Patch
     {
+        internal static void RunDestructivePatches()
+        {
+            Type original = typeof(Lord);
+            Type patched = typeof(Lord_Patch);
+            RimThreadedHarmony.Prefix(original, patched, nameof(AddPawn));
+            RimThreadedHarmony.Prefix(original, patched, nameof(AddPawns));
+            RimThreadedHarmony.Prefix(original, patched, nameof(RemovePawn));
+        }
+
         public static Dictionary<Pawn, Lord> pawnsLord = new Dictionary<Pawn, Lord>();
         public static bool AddPawns(Lord __instance, IEnumerable<Pawn> pawns)
         {
@@ -66,12 +75,5 @@ namespace RimThreaded
             return false;
         }
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(Lord);
-            Type patched = typeof(Lord_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "AddPawn");
-            RimThreadedHarmony.Prefix(original, patched, "RemovePawn");
-        }
     }
 }
