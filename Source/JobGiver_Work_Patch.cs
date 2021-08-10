@@ -289,20 +289,11 @@ namespace RimThreaded
 						return false;
 					}
 
-					//If this was a cached plant job, deregister it
+					//If this was a cached plant job, deregister it and check if it is still valid to be registered
                     if (scannerWhoProvidedTarget is WorkGiver_GrowerSow)
                     {
                         Map map = pawn.Map;
                         IntVec3 cell = bestTargetOfLastPriority.Cell;
-                        List<Thing> thingList = cell.GetThingList(map);
-                        foreach (Thing thing in thingList)
-                        {
-                            if (thing is Building_PlantGrower buildingPlantGrower)
-                            {
-                                PlantSowing_Cache.ReregisterObject(map, cell,
-                                    WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
-							}
-                        }
 						PlantSowing_Cache.ReregisterObject(map, cell, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
                     }
 					//HACK - I know. I'm awful.
