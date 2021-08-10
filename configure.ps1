@@ -20,8 +20,8 @@ if((Test-Path -Path $rimworldTempFolder) -eq $false) {
     New-Item -Path $rimworldTempFolder -ItemType Directory
 }
 dotnet tool install --global ilspycmd --version 7.1.0.6543
-#Start-Process "ilspycmd" -ArgumentList @($assemblyPath, "-o", $rimworldTempFolder, "-p")
-#Start-Process "ilspycmd" -ArgumentList @($assemblyPath, "-o", $rimworldTempFolder, "-genpdb") -Wait
+Start-Process "ilspycmd" -ArgumentList @($assemblyPath, "-o", $rimworldTempFolder, "-p")
+Start-Process "ilspycmd" -ArgumentList @($assemblyPath, "-o", $rimworldTempFolder, "-genpdb") -Wait
 
 $pdbSourceFile = Join-Path -Path $rimworldTempFolder -ChildPath "Assembly-CSharp.pdb"
 $pdbDestinationFile = Join-Path -Path $rimworldManagedDir -ChildPath "Assembly-CSharp.pdb"
