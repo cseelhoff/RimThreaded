@@ -42,7 +42,7 @@ Version 2.5.9 - The Reformed Jedi Counsel
 -Reogranized folder structure of simplify builds and improve cooperative coding efforts  
 
 Version 2.5.8 - Vader's Imperial Shuttle  
--Fixed bug with shuttles not taking off
+-Fixed bug with shuttles not taking off  
 -Fixed bug with roofed rooms showing as unroofed  
 
 Version 2.5.7 - Clear, your mind must be  
