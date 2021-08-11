@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -11,22 +11,23 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net472</TargetFramework>
-		<Version>2.5.7</Version>
+		<Version>2.5.9</Version>
 		<Copyright>Copyright ©  2021</Copyright>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <AssemblyVersion>2.5.7.0</AssemblyVersion>
+    <AssemblyVersion>2.5.9.0</AssemblyVersion>
     <Authors>Caleb Seelhoff</Authors>
-    <FileVersion>2.5.7.0</FileVersion>
+    <FileVersion>2.5.9.0</FileVersion>
     <Configurations>DB12;Rel12;DB13;Rel13</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DB13|AnyCPU' ">
+    <PubliciseOutputPath>..\Dependencies\1.3\</PubliciseOutputPath>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\1.3\Assemblies\</OutputPath>
+    <OutputPath>..\Debug\1.3\Assemblies\</OutputPath>
     <DefineConstants>TRACE;DEBUG;RW13</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -35,10 +36,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DB12|AnyCPU'">
+    <PubliciseOutputPath>..\Dependencies\1.2\</PubliciseOutputPath>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\1.2\Assemblies\</OutputPath>
+    <OutputPath>..\Debug\1.2\Assemblies\</OutputPath>
     <DefineConstants>TRACE;DEBUG;RW12</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -48,9 +50,10 @@
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Rel13|AnyCPU' ">
+    <PubliciseOutputPath>..\Dependencies\1.3\</PubliciseOutputPath>
     <DebugType>portable</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\1.3\Assemblies\</OutputPath>
+    <OutputPath>..\RimThreaded\1.3\Assemblies\</OutputPath>
     <DefineConstants>TRACE;RW13</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -59,9 +62,10 @@
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Rel12|AnyCPU'">
+    <PubliciseOutputPath>..\Dependencies\1.2\</PubliciseOutputPath>
     <DebugType>portable</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\1.2\Assemblies\</OutputPath>
+    <OutputPath>..\RimThreaded\1.2\Assemblies\</OutputPath>
     <DefineConstants>TRACE;RW12</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -108,6 +112,14 @@
       <HintPath>..\..\..\..\..\..\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="replacements_1.2.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="replacements_1.3.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   	<ItemGroup>
   	  <Reference Update="mscorlib">
@@ -161,9 +173,8 @@
   	</ItemGroup>
 	<Target Name="MyCode" BeforeTargets="UpdateReferences">
 		<PropertyGroup>
-			<AssemblyCSharp>bin\Assembly-CSharp.dll</AssemblyCSharp>
-			<PubliciseOutputPath>bin\</PubliciseOutputPath>
-			<AssemblyCSharp_Publicised>$(PubliciseOutputPath)Assembly-CSharp_publicised.dll</AssemblyCSharp_Publicised>
+			<AssemblyCSharp>$(PubliciseOutputPath)\Assembly-CSharp.dll</AssemblyCSharp>
+			<AssemblyCSharp_Publicised>$(PubliciseOutputPath)\Assembly-CSharp_publicised.dll</AssemblyCSharp_Publicised>
 		</PropertyGroup>
 		<Message Importance="High" Text="Publicising Rimworld Assembly ..." />
 		<Publicise TargetAssemblyPath="$(AssemblyCSharp)" OutputPath="$(PubliciseOutputPath)" Condition="Exists('$(AssemblyCSharp)')" />
@@ -177,10 +188,10 @@
 			</Reference>
 		</ItemGroup>
 	</Target>
-  	<Target Name="UpdateReferences" AfterTargets="ResolveLockFileReferences">
+  <Target Name="UpdateReferences" AfterTargets="ResolveLockFileReferences">
 		<Message Importance="High" Text="Remove References ..." />
 		<ItemGroup>
-			<Reference Remove="bin\Assembly-CSharp.dll" />
+			<Reference Remove="$(PubliciseOutputPath)\Assembly-CSharp.dll" />
 		</ItemGroup>
 	</Target>
 </Project>

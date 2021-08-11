@@ -11,11 +11,14 @@ namespace RimThreaded
     {
         internal static void RunNonDestructivePatches()
         {
+#if RW13
             Type original = typeof(TransportShipManager);
             //Type patched = typeof(TransportShipManager_Patch);
             RimThreadedHarmony.TranspileMethodLock(original, "RegisterShipObject");
             RimThreadedHarmony.TranspileMethodLock(original, "DeregisterShipObject");
+#endif
         }
+#if RW13
         public static List<TransportShip> AllTransportShips;
         public static int AllTransportShipsCount;
 
@@ -53,5 +56,6 @@ namespace RimThreaded
                 }*/
             }
         }
+#endif
     }
 }

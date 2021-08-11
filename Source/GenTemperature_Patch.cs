@@ -48,9 +48,10 @@ namespace RimThreaded
                 SeasonalShiftAmplitudeCache.Clear();
                 tileAbsTickTemperature.Clear();
                 tileTemperature.Clear();
-#if DEBUG
-                Log.Message("RimThreaded is rebuilding WorldGrid Temperature Cache");
-#endif
+				if (Prefs.LogVerbose)
+				{
+					Log.Message("RimThreaded is rebuilding WorldGrid Temperature Cache");
+				}
             }
 
             if (SeasonalShiftAmplitudeCache.TryGetValue(tile, out __result)) return false;
@@ -69,9 +70,10 @@ namespace RimThreaded
                 SeasonalShiftAmplitudeCache.Clear();
                 tileAbsTickTemperature.Clear();
                 tileTemperature.Clear();
-#if DEBUG
-				Log.Message("RimThreaded is rebuilding WorldGrid Temperature Cache");
-#endif
+				if (Prefs.LogVerbose)
+				{
+					Log.Message("RimThreaded is rebuilding WorldGrid Temperature Cache");
+				}
 			}
 			if (absTick == 0)
 			{

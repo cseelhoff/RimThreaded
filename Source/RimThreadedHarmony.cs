@@ -29,9 +29,10 @@ namespace RimThreaded
 
 		static RimThreadedHarmony()
 		{
-#if DEBUG
-			Harmony.DEBUG = true;
-#endif
+			if (Prefs.LogVerbose)
+			{
+				Harmony.DEBUG = true;
+			}
 			Log.Message("RimThreaded " + Assembly.GetExecutingAssembly().GetName().Version + "  is patching methods...");
 
 			LoadFieldReplacements();
@@ -39,21 +40,23 @@ namespace RimThreaded
 			ApplyFieldReplacements();
 			PatchDestructiveFixes();
 			PatchNonDestructiveFixes();
-			PatchModCompatibility();
-#if DEBUG
-			//RimThreadedMod.exportTranspiledMethods();
-#endif
+			PatchModCompatibility(); 
+			if (Prefs.LogVerbose)
+			{
+				//RimThreadedMod.exportTranspiledMethods();
+			}
+
 			Log.Message("RimThreaded patching is complete.");
 
-			string potentialConflicts = RimThreadedMod.getPotentialModConflicts();
+			string potentialConflicts = RimThreadedMod.GetPotentialModConflicts();
 			if (potentialConflicts.Length > 0)
 			{
 				Log.Warning("Potential RimThreaded mod conflicts :" + potentialConflicts);
 			}
 		}
 
-        private static void AddAdditionalReplacements()
-        {
+		private static void AddAdditionalReplacements()
+		{
 			SimplePool_Patch_RunNonDestructivePatches();
 			FullPool_Patch_RunNonDestructivePatches();
 			Dijkstra_Patch_RunNonDestructivePatches();
@@ -136,41 +139,41 @@ namespace RimThreaded
 			//string replacementsJsonPath = Path.Combine(((Mod)RimThreadedMod).intContent.RootDir, "replacements.json"); 
 
 			string jsonString = File.ReadAllText(RimThreadedMod.replacementsJsonPath);
-            replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
+			replacements = JsonConvert.DeserializeObject<Replacements>(jsonString);
 
-            //IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
-            //                               where !a.FullName.StartsWith("Microsoft.VisualStudio")
-            //                               select a;
-            //foreach (Assembly a in source)
-            //{
-            //    Type[] b = GetTypesFromAssembly(a);
-            //    if (a.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
-            //    {
-            //        foreach (Type c in b)
-            //        {
-            //            if (c.FullName.Contains("BFSW"))
-            //            {
-            //                Log.Message(c.FullName);
-            //                //Console.WriteLine(c.FullName);
-            //            }
-            //        }
-            //    }
-            //}
-            MethodInfo initializer = Method(typeof(RimThreaded), "InitializeAllThreadStatics"); 
+			//IEnumerable<Assembly> source = from a in AppDomain.CurrentDomain.GetAssemblies()
+			//                               where !a.FullName.StartsWith("Microsoft.VisualStudio")
+			//                               select a;
+			//foreach (Assembly a in source)
+			//{
+			//    Type[] b = GetTypesFromAssembly(a);
+			//    if (a.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+			//    {
+			//        foreach (Type c in b)
+			//        {
+			//            if (c.FullName.Contains("BFSW"))
+			//            {
+			//                Log.Message(c.FullName);
+			//                //Console.WriteLine(c.FullName);
+			//            }
+			//        }
+			//    }
+			//}
+			MethodInfo initializer = Method(typeof(RimThreaded), "InitializeAllThreadStatics");
 			ConstructorInfo threadStaticConstructor = typeof(ThreadStaticAttribute).GetConstructor(new Type[0]);
 			CustomAttributeBuilder attributeBuilder = new CustomAttributeBuilder(threadStaticConstructor, new object[0]);
 			AssemblyName aName = new AssemblyName("RimThreadedReplacements");
 			AssemblyBuilder ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
 			ModuleBuilder modBuilder = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
 			foreach (ClassReplacement classReplacement in replacements.ClassReplacements)
-            {
+			{
 
 				Type type = TypeByName(classReplacement.ClassName);
-				if(type == null)
-                {
+				if (type == null)
+				{
 					Log.Error("Cannot find class named: " + classReplacement.ClassName);
 					continue;
-                }
+				}
 				if (classReplacement.ThreadStatics != null && classReplacement.ThreadStatics.Count > 0)
 				{
 					TypeBuilder tb = modBuilder.DefineType(type.Name + "_Replacement", TypeAttributes.Public);
@@ -179,34 +182,34 @@ namespace RimThreaded
 					foreach (ThreadStaticDetail threadStaticDetail in classReplacement.ThreadStatics)
 					{
 						FieldInfo fieldInfo = Field(type, threadStaticDetail.FieldName);
-                        if (fieldInfo == null)
-                        {
-                            Log.Error("Cannot find field named: " + classReplacement.ClassName + "." + threadStaticDetail.FieldName);
-                            continue;
-                        }
-                        FieldInfo replacementField;
-                        if (threadStaticDetail.PatchedClassName == null)
-                        {							
+						if (fieldInfo == null)
+						{
+							Log.Error("Cannot find field named: " + classReplacement.ClassName + "." + threadStaticDetail.FieldName);
+							continue;
+						}
+						FieldInfo replacementField;
+						if (threadStaticDetail.PatchedClassName == null)
+						{
 							FieldBuilder fb = tb.DefineField(fieldInfo.Name, fieldInfo.FieldType, FieldAttributes.Public | FieldAttributes.Static);
 							fb.SetCustomAttribute(attributeBuilder);
 							replacementField = fb;
 						}
 						else
-                        {
-                            Type replacementType = TypeByName(threadStaticDetail.PatchedClassName);
-                            if (replacementType == null)
-                            {
-                                Log.Error("Cannot find replacement class named: " + threadStaticDetail.PatchedClassName);
-                                continue;
-                            }
-                            replacementField = Field(replacementType, threadStaticDetail.FieldName);
-                            if (replacementField == null)
-                            {
-                                Log.Error("Cannot find replacement field named: " + threadStaticDetail.PatchedClassName + "." + threadStaticDetail.FieldName);
-                                continue;
-                            }
-                        }
-                        replaceFields[fieldInfo] = replacementField;
+						{
+							Type replacementType = TypeByName(threadStaticDetail.PatchedClassName);
+							if (replacementType == null)
+							{
+								Log.Error("Cannot find replacement class named: " + threadStaticDetail.PatchedClassName);
+								continue;
+							}
+							replacementField = Field(replacementType, threadStaticDetail.FieldName);
+							if (replacementField == null)
+							{
+								Log.Error("Cannot find replacement field named: " + threadStaticDetail.PatchedClassName + "." + threadStaticDetail.FieldName);
+								continue;
+							}
+						}
+						replaceFields[fieldInfo] = replacementField;
 						if (!threadStaticDetail.SelfInitialized)
 						{
 							ConstructorInfo constructor = fieldInfo.FieldType.GetConstructor(Type.EmptyTypes);
@@ -223,27 +226,34 @@ namespace RimThreaded
 					HarmonyMethod pf = new HarmonyMethod(mb2);
 					harmony.Patch(initializer, postfix: pf);
 				}
-            }
-#if DEBUG
-			//Directory.SetCurrentDirectory("C:\\STUFF");
-			ab.Save(aName.Name + ".dll");
-#endif
+			}
+			if (Prefs.LogVerbose)
+			{
+				ab.Save(aName.Name + ".dll");
+			}
 		}
 		public static Dictionary<Type, HashSet<FieldInfo>> untouchedStaticFields = new Dictionary<Type, HashSet<FieldInfo>>();
 		public static HashSet<string> fieldFullNames = new HashSet<string>();
 		public static HashSet<string> allStaticFieldNames = new HashSet<string>();
 		//public static bool intializersReady = false;
 		private static void ApplyFieldReplacements()
-        {
+		{
 			List<MethodBase> MethodsFromCache = new List<MethodBase>();
 			foreach (Assembly assembly in assemblies)
 			{
+				if (Prefs.LogVerbose)
+				{
+					Verse.Log.Message("RimThreaded is attempting to load replacements from cache for assembly: " + assembly.FullName);
+				}
 				if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache))
 				{
 					foreach (MethodBase method in MethodsFromCache)
 					{
-#if DEBUG
-						Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
+#if false
+						if (Prefs.LogVerbose)
+						{
+							Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
+						}
 #endif
 						TranspileFieldReplacements(method);
 					}
@@ -302,8 +312,8 @@ namespace RimThreaded
 			Type pawnType = typeof(Pawn);
 			Type thoughtsType = typeof(CachedSocialThoughts);
 			string removeAllString = nameof(GenCollection.RemoveAll);
-            MethodInfo removeAllGeneric = GetDeclaredMethods(typeof(GenCollection)).First(method => method.Name == removeAllString && method.GetGenericArguments().Count() == 2);
-            MethodInfo removeAllPawnThoughts = removeAllGeneric.MakeGenericMethod(new[] { pawnType, thoughtsType });
+			MethodInfo removeAllGeneric = GetDeclaredMethods(typeof(GenCollection)).First(method => method.Name == removeAllString && method.GetGenericArguments().Count() == 2);
+			MethodInfo removeAllPawnThoughts = removeAllGeneric.MakeGenericMethod(new[] { pawnType, thoughtsType });
 			//TranspileFieldReplacements(removeAllPawnThoughts); not sure why transpile causes error
 			Type genCollection_Patched = typeof(GenCollection_Patch);
 			MethodInfo patchedRemoveAll_Pawn_CachedSocialThoughts = genCollection_Patched.GetMethod(nameof(GenCollection_Patch.RemoveAll_Pawn_CachedSocialThoughts));
@@ -476,7 +486,7 @@ namespace RimThreaded
 		}
 
 		public static void StartTryAndAddBreakDestinationLabel(List<CodeInstruction> instructionsList, ref int currentInstructionIndex, Label breakDestination)
-        {
+		{
 			AddBreakDestination(instructionsList, currentInstructionIndex, breakDestination);
 			instructionsList[currentInstructionIndex].blocks.Add(new ExceptionBlock(ExceptionBlockType.BeginExceptionBlock));
 		}
@@ -549,88 +559,93 @@ namespace RimThreaded
 		{
 			notifiedObjects.Clear();
 			foreach (CodeInstruction codeInstruction in instructions)
-            {
-#if DEBUG
-				Log.messageCount = 0; //prevents logging to stop from spam
-#endif
+			{
+				if (Prefs.LogVerbose)
+				{
+					Log.messageCount = 0; //prevents logging to stop from spam
+				}
 				object operand = codeInstruction.operand;
-                if (operand != null && replaceFields.TryGetValue(operand, out object newObjectInfo))
-                {
-                    switch (operand)
-                    {
-                        case FieldInfo fieldInfo:
-                        {
-                            switch (newObjectInfo)
-                            {
-                                case FieldInfo newFieldInfo:
-#if DEBUG
-									if (!notifiedObjects.Contains(newFieldInfo))
-									{
-										notifiedObjects.Add(newFieldInfo);
-										Log.Message("RimThreaded is replacing field: " +
+				if (operand != null && replaceFields.TryGetValue(operand, out object newObjectInfo))
+				{
+					switch (operand)
+					{
+						case FieldInfo fieldInfo:
+							{
+								switch (newObjectInfo)
+								{
+									case FieldInfo newFieldInfo:
+										if (Prefs.LogVerbose)
+										{
+											if (!notifiedObjects.Contains(newFieldInfo))
+											{
+												notifiedObjects.Add(newFieldInfo);
+												Log.Message("RimThreaded is replacing field: " +
+															fieldInfo.DeclaringType + "." + fieldInfo.Name +
+															" with field: " + newFieldInfo.DeclaringType + "." + newFieldInfo.Name);
+											}
+										}
+										codeInstruction.operand = newFieldInfo;
+										break;
+									case Dictionary<OpCode, MethodInfo> newMethodInfoDict:
+										MethodInfo newMethodInfo = newMethodInfoDict[codeInstruction.opcode];
+										if (Prefs.LogVerbose)
+										{
+											if (!notifiedObjects.Contains(newMethodInfo))
+											{
+												notifiedObjects.Add(newMethodInfo);
+												Log.Message("RimThreaded is replacing field: " +
 													fieldInfo.DeclaringType + "." + fieldInfo.Name +
-													" with field: " + newFieldInfo.DeclaringType + "." + newFieldInfo.Name);
-									}
-#endif
-                                    codeInstruction.operand = newFieldInfo;
-                                    break;
-                                case Dictionary<OpCode, MethodInfo> newMethodInfoDict:
-                                    MethodInfo newMethodInfo = newMethodInfoDict[codeInstruction.opcode];
-#if DEBUG
-									if (!notifiedObjects.Contains(newMethodInfo))
-									{
-										notifiedObjects.Add(newMethodInfo);
-										Log.Message("RimThreaded is replacing field: " +
-											fieldInfo.DeclaringType + "." + fieldInfo.Name +
-											" with CALL method: " + newMethodInfo.DeclaringType + "." +
-											newMethodInfo.Name);
-									}
-#endif
-									codeInstruction.opcode = OpCodes.Call;
-									codeInstruction.operand = newMethodInfo;
-									break;
-                            }
+													" with CALL method: " + newMethodInfo.DeclaringType + "." +
+													newMethodInfo.Name);
+											}
+										}
+										codeInstruction.opcode = OpCodes.Call;
+										codeInstruction.operand = newMethodInfo;
+										break;
+								}
 
-                            break;
-                        }
-                        case MethodInfo methodInfo:
-                        {
-                            switch (newObjectInfo)
-                            {
-                                case FieldInfo newFieldInfo:
-#if DEBUG
-									if (!notifiedObjects.Contains(newFieldInfo))
-									{
-										notifiedObjects.Add(newFieldInfo);
-										Log.Message("RimThreaded is replacing method: " +
-											methodInfo.DeclaringType + "." + methodInfo.Name +
-											" with STATIC field: " + newFieldInfo.DeclaringType + "." +
-											newFieldInfo.Name);
-									}
-#endif
-                                    codeInstruction.opcode = OpCodes.Ldsfld;
-                                    codeInstruction.operand = newFieldInfo;
-                                    break;
-                                case MethodInfo newMethodInfo:
-#if DEBUG
-									if (!notifiedObjects.Contains(newMethodInfo))
-									{
-										notifiedObjects.Add(newMethodInfo);
-										Log.Message("RimThreaded is replacing method: " +
-											methodInfo.DeclaringType + "." + methodInfo.Name +
-											" with method: " + newMethodInfo.DeclaringType + "." +
-											newMethodInfo.Name);
-									}
-#endif
-                                    codeInstruction.operand = newMethodInfo;
-                                    break;
-                            }
+								break;
+							}
+						case MethodInfo methodInfo:
+							{
+								switch (newObjectInfo)
+								{
+									case FieldInfo newFieldInfo:
+										if (Prefs.LogVerbose)
+										{
+											if (!notifiedObjects.Contains(newFieldInfo))
+											{
+												notifiedObjects.Add(newFieldInfo);
+												Log.Message("RimThreaded is replacing method: " +
+													methodInfo.DeclaringType + "." + methodInfo.Name +
+													" with STATIC field: " + newFieldInfo.DeclaringType + "." +
+													newFieldInfo.Name);
+											}
+										}
+										codeInstruction.opcode = OpCodes.Ldsfld;
+										codeInstruction.operand = newFieldInfo;
+										break;
+									case MethodInfo newMethodInfo:
+										if (Prefs.LogVerbose)
+										{
+											if (!notifiedObjects.Contains(newMethodInfo))
+											{
+												notifiedObjects.Add(newMethodInfo);
+												Log.Message("RimThreaded is replacing method: " +
+													methodInfo.DeclaringType + "." + methodInfo.Name +
+													" with method: " + newMethodInfo.DeclaringType + "." +
+													newMethodInfo.Name);
+											}
+										}
+										codeInstruction.operand = newMethodInfo;
+										break;
+								}
 
-                            break;
-                        }
-                    }
-                }
-                yield return codeInstruction;
+								break;
+							}
+					}
+				}
+				yield return codeInstruction;
 			}
 		}
 
@@ -675,21 +690,18 @@ namespace RimThreaded
 
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), nameof(ReplaceFieldsTranspiler)));
 		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
-        public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
+		public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
 		public static void TranspileFieldReplacements(MethodBase original)
 		{
-#if DEBUG
-			Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
-			if(original.Name.Equals("RemoveAll"))
-            {
-				Log.Message("RemoveAll");
-            }
-#else
 			if (Prefs.LogVerbose)
 			{
 				Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
+				if (original.Name.Equals("RemoveAll"))
+				{
+					Log.Message("RemoveAll");
+				}
+				Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
 			}
-#endif
 			harmony.Patch(original, transpiler: replaceFieldsHarmonyTranspiler);
 		}
 
@@ -750,12 +762,13 @@ namespace RimThreaded
 			try
 			{
 				harmony.Patch(oMethod, transpiler: transpilerMethod);
-			} catch (Exception e)
-            {
+			}
+			catch (Exception e)
+			{
 				Log.Error("Exception Transpiling: " + oMethod.ToString() + " " + transpilerMethod.ToString() + " " + e.ToString());
-            }
+			}
 		}
-		public static void TranspileMethodLock(Type original, string methodName, Type[] origType = null, string[] harmonyAfter = null)
+		public static void TranspileMethodLock(Type original, string methodName, Type[] origType = null)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
 			harmony.Patch(oMethod, transpiler: methodLockTranspiler);
@@ -770,25 +783,25 @@ namespace RimThreaded
 
 			//---Simple---
 			AlertsReadout_Patch.RunNonDestructivesPatches(); //this will disable alert checks on ultrafast speed for an added speed boost
-            Area_Patch.RunNonDestructivePatches(); //added for sowing area speedup
+			Area_Patch.RunNonDestructivePatches(); //added for sowing area speedup
 			CompSpawnSubplant_Transpile.RunNonDestructivePatches(); //fixes bug with royalty spawning subplants
 			Designator_Haul_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically designates it via UI
 			CompForbiddable_Patch.RunNonDestructivePatches(); //add thing to hauling list when user specifically unforbids it via UI
 			PathFinder_Patch.RunNonDestructivePatches(); //simple initialize calcGrid on InitStatusesAndPushStartNode
 			TimeControls_Patch.RunNonDestructivePatches(); //allow speed 4
-            ZoneManager_Patch.RunNonDestructivePatches(); //recheck growing zone when upon zone grid add
-            Zone_Patch.RunNonDestructivePatches(); //recheck growing zone when upon check haul destination call
-            HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches(); //speed up for comfy temperature
-            Map_Transpile.RunNonDestructivePatches(); //creates separate thread for skyManager.SkyManagerUpdate();            
-            BattleLog_Transpile.RunNonDestructivePatches(); //if still causing issues, rewrite using ThreadSafeLinkedLists
-            //GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
-            //GrammarResolverSimple_Transpile.RunNonDestructivePatches();//reexamine complexity
-            HediffSet_Patch.RunNonDestructivePatches(); //TODO - replace 270 instances with ThreadSafeLinkedList
-            ThingOwnerThing_Patch.RunNonDestructivePatches(); //reexamine complexity?
+			ZoneManager_Patch.RunNonDestructivePatches(); //recheck growing zone when upon zone grid add
+			Zone_Patch.RunNonDestructivePatches(); //recheck growing zone when upon check haul destination call
+			HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches(); //speed up for comfy temperature
+			Map_Transpile.RunNonDestructivePatches(); //creates separate thread for skyManager.SkyManagerUpdate();            
+			BattleLog_Transpile.RunNonDestructivePatches(); //if still causing issues, rewrite using ThreadSafeLinkedLists
+															//GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
+															//GrammarResolverSimple_Transpile.RunNonDestructivePatches();//reexamine complexity
+			HediffSet_Patch.RunNonDestructivePatches(); //TODO - replace 270 instances with ThreadSafeLinkedList
+			ThingOwnerThing_Patch.RunNonDestructivePatches(); //reexamine complexity?
 			TickList_Patch.RunNonDestructivePatches(); //allows multithreaded calls of thing.tick longtick raretick
-            //WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity Jobs Of Oppurtunity?
-            //WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
-            //Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //transpile not needed with new threadsafe simplepools
+													   //WorkGiver_ConstructDeliverResources_Transpile.RunNonDestructivePatches(); //reexamine complexity Jobs Of Oppurtunity?
+													   //WorkGiver_DoBill_Transpile.RunNonDestructivePatches(); //better way to find bills with cache
+													   //Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //transpile not needed with new threadsafe simplepools
 			PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //TODO fix transpile for 1 of 2 methods try inside of try perhaps?
 			Zone_Growing_Patch.RunNonDestructivePatches();
 			CellFinder_Patch.RunNonDestructivePatches(); //explosion fix
@@ -803,7 +816,7 @@ namespace RimThreaded
 		}
 
 		private static void PatchDestructiveFixes()
-        {
+		{
 			//---REQUIRED---
 			TickManager_Patch.RunDestructivePatches(); //Redirects DoSingleTick to RimThreaded
 
@@ -819,7 +832,7 @@ namespace RimThreaded
 			MapGenerator_Patch.RunDestructivePatches();//MapGenerator (Z-levels)
 			MaterialPool_Patch.RunDestructivePatches();
 			MeshMakerPlanes_Patch.RunDestructivePatches();
-			MeshMakerShadows_Patch.RunDestructivePatches(); 
+			MeshMakerShadows_Patch.RunDestructivePatches();
 			MoteBubble_Patch.RunDestructivePatches(); //initial 1.3 patch (MaterialPropertyBlock) - main thread UnityEngine.MaterialPropertyBlock
 			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
 			SectionLayer_Patch.RunDestructivePatches();
@@ -838,21 +851,21 @@ namespace RimThreaded
 			Archive_Patch.RunDestructivePatches(); //explosions fix
 			Alert_ColonistLeftUnburied_Patch.RunDestructivePatches(); //1.3 explosions fix
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
-            AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
+			AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			Battle_Patch.RunDestructivePatches(); //added lock for battle - could use linkedlist
 			BeautyUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix null ref
 
 			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			Building_PlantGrower_Patch.RunNonDestructivePatches();
 			CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
-            CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
+			CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
 			Corpse_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			DateNotifier_Patch.RunDestructivePatches(); //performance boost when playing on only 1 map
-            DesignationManager_Patch.RunDestructivePatches(); //added for development build
+			DesignationManager_Patch.RunDestructivePatches(); //added for development build
 			District_Patch.RunDestructivePatches(); // 1.3 fix for cachedOpenRoofState null ref - TODO - optimize locks
 			DrugAIUtility_Patch.RunDestructivePatches(); //vanilla bug
-            DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
-            FilthMaker_Patch.RunDestructivePatches(); //replacing a few LINQ queries could possibly improve perf 
+			DynamicDrawManager_Patch.RunDestructivePatches(); //TODO - candidate for ThreadSafeLinkedList?
+			FilthMaker_Patch.RunDestructivePatches(); //replacing a few LINQ queries could possibly improve perf 
 			FireUtility_Patch.RunDestructivePatches();
 			FleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			FleckSystemBaseFleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
@@ -861,19 +874,19 @@ namespace RimThreaded
 
 			//GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
 			//GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
-			
+
 			//GenPlace_Patch.RunDestructivePatches(); // 1.3 TryPlaceThing null thing after kill
-			
+
 			GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
-            GenTemperature_Patch.RunDestructivePatches();
-            GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
+			GenTemperature_Patch.RunDestructivePatches();
+			GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
 			GoodwillSituationManager_Patch.RunDestructivePatches(); //initial 1.3 patch
 			GoodwillSituationWorker_MemeCompatibility_Patch.RunDestructivePatches(); //initial 1.3 patch
 			GridsUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix
-														
+
 			//GrammarResolver_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
-            HediffSet_Patch.RunDestructivePatches();
+			HediffSet_Patch.RunDestructivePatches();
 			HistoryEventsManager_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			ImmunityHandler_Patch.RunDestructivePatches();
 			JobDriver_TendPatient_Patch.RunDestructivePatches(); // 1.3 explosion fix
@@ -884,58 +897,60 @@ namespace RimThreaded
 			ListerThings_Patch.RunDestructivePatches();
 			//JobMaker_Patch.RunDestructivePatches(); should be fixed by the simplepool patch
 			LongEventHandler_Patch.RunDestructivePatches(); //TODO - could use field replacement for conncurrentqueue
-            Lord_Patch.RunDestructivePatches();
+			Lord_Patch.RunDestructivePatches();
 			LordManager_Patch.RunDestructivePatches();
-            LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. ThreadSafeLinkedList
+			LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. ThreadSafeLinkedList
 			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
-            MemoryThoughtHandler_Patch.RunDestructivePatches();
+			MemoryThoughtHandler_Patch.RunDestructivePatches();
 			Messages_Patch.RunDestructivePatches();// 1.3 explosion fix
 			OverlayDrawer_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix
 			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
-            Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
+			Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
 			Pawn_PathFollower_Patch.RunDestructivePatches(); // 1.3 null ref pawn?.jobs?.curDriver?.locomotionUrgencySameAs
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
-            Pawn_RelationsTracker_Patch.RunDestructivePatches();
+			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
 			PawnPathPool_Patch.RunDestructivePatches(); //removed leak check based on map size, since pool is now a threadstatic
-            PawnUtility_Patch.RunDestructivePatches();
-            PawnDestinationReservationManager_Patch.RunDestructivePatches();
+			PawnUtility_Patch.RunDestructivePatches();
+			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			Plant_Patch.RunNonDestructivePatches();
 			PlayLog_Patch.RunDestructivePatches();
-            PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
-            Rand_Patch.RunDestructivePatches(); //Simple
-            Reachability_Patch.RunDestructivePatches();
-            ReachabilityCache_Patch.RunDestructivePatches(); //TODO simplfy instance.fields
-            RealtimeMoteList_Patch.RunDestructivePatches();
-            RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
-            RegionAndRoomUpdater_Patch.RunDestructivePatches();
-            RegionDirtyer_Patch.RunDestructivePatches();
+			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
+			Rand_Patch.RunDestructivePatches(); //Simple
+			Reachability_Patch.RunDestructivePatches();
+			ReachabilityCache_Patch.RunDestructivePatches(); //TODO simplfy instance.fields
+			RealtimeMoteList_Patch.RunDestructivePatches();
+			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
+			RegionAndRoomUpdater_Patch.RunDestructivePatches();
+			RegionDirtyer_Patch.RunDestructivePatches();
 			RegionGrid_Patch.RunDestructivePatches();
 			RegionLink_Patch.RunDestructivePatches();
-            RegionMaker_Patch.RunDestructivePatches();
-            ResourceCounter_Patch.RunDestructivePatches();
-			//RoofGrid_Patch.RunDestructivePatches(); // possibly for 1.2 only. oberved via tourture test
+			RegionMaker_Patch.RunDestructivePatches();
+			ResourceCounter_Patch.RunDestructivePatches();
+#if RW12
+			RoofGrid_Patch.RunDestructivePatches(); // possibly for 1.2 only. oberved via tourture test
+#endif
 			//RoofGrid_Patch is causing problems to the roof notification in 1.3 a fix is also inside the Patch in case  this is needed for something else I am commenting this for now -Senior
 			RulePackDef_Patch.RunDestructivePatches(); //explosions fix - grammar
 			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
-            ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
-            SteadyEnvironmentEffects_Patch.RunDestructivePatches();
+			ShootLeanUtility_Patch.RunDestructivePatches(); //TODO: excessive locks, therefore RimThreadedHarmony.Prefix, conncurrent_queue could be transpiled in
+			SteadyEnvironmentEffects_Patch.RunDestructivePatches();
 			StoreUtility_Patch.RunDestructivePatches(); // 1.3 explosion
 			StoryState_Patch.RunDestructivePatches(); //WrapMethodInInstanceLock
-            TaleManager_Patch.RunDestructivePatches();
+			TaleManager_Patch.RunDestructivePatches();
 			ThingGrid_Patch.RunDestructivePatches();
-			Thing_Patch.RunDestructivePatches();
+			Thing_Patch.RunDestructivePatches(); //Thing_Patch.TakeDamage is a good candidate for transpile
 			ThinkNode_SubtreesByTag_Patch.RunDestructivePatches();
 			ThinkNode_ForbidOutsideFlagRadius_Patch.RunDestructivePatches(); //base method override is double destructive 
 
 			TileTemperaturesComp_Patch.RunDestructivePatches(); //TODO - good simple transpile candidate
-            UniqueIDsManager_Patch.RunDestructivePatches(); // Simple use of Interlocked.Increment
-            Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
-            WealthWatcher_Patch.RunDestructivePatches();
+			UniqueIDsManager_Patch.RunDestructivePatches(); // Simple use of Interlocked.Increment
+			Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
+			WealthWatcher_Patch.RunDestructivePatches();
 			//WorkGiver_GrowerSow_Patch.RunDestructivePatches();
-			
+
 
 			//complex methods that need further review for simplification
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
@@ -951,7 +966,7 @@ namespace RimThreaded
 			Room_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches(); //TODO replace cachedThoughts with ThreadSafeLinkedList
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
-			//-----SOUND-----
+															 //-----SOUND-----
 			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
 			SoundSizeAggregator_Patch.RunDestructivePatches();
 			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
@@ -961,18 +976,18 @@ namespace RimThreaded
 
 		private static void PatchModCompatibility()
 		{
-            AndroidTiers_Patch.Patch();
-            AwesomeInventory_Patch.Patch();
-            Children_Patch.Patch();
-            CombatExteneded_Patch.Patch();
-            Dubs_Skylight_Patch.Patch();
-            GiddyUpCore_Patch.Patch();
-            Hospitality_Patch.Patch();
-            JobsOfOppurtunity_Patch.Patch();
+			AndroidTiers_Patch.Patch();
+			AwesomeInventory_Patch.Patch();
+			Children_Patch.Patch();
+			CombatExteneded_Patch.Patch();
+			Dubs_Skylight_Patch.Patch();
+			GiddyUpCore_Patch.Patch();
+			Hospitality_Patch.Patch();
+			JobsOfOppurtunity_Patch.Patch();
 			MapReroll_Patch.Patch();
 			PawnRules_Patch.Patch();
-            ZombieLand_Patch.Patch();
-        }
+			ZombieLand_Patch.Patch();
+		}
 		private static void FullPool_Patch_RunNonDestructivePatches()
 		{
 			Type original = typeof(FullPool<PawnStatusEffecters.LiveEffecter>);
@@ -1047,7 +1062,7 @@ namespace RimThreaded
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "Return"));
 			replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "get_FreeItemsCount"),
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "get_FreeItemsCount"));
-			
+
 			replaceFields.Add(Method(typeof(SimplePool<Job>), "Get"),
 				Method(typeof(SimplePool_Patch<Job>), "Get"));
 			replaceFields.Add(Method(typeof(SimplePool<Job>), "Return"),

@@ -14,23 +14,15 @@ namespace RimThreaded
             Type original = typeof(Thing);
             Type patched = typeof(Thing_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Map));
-            RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
+            RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage)); //good candidate for transpile
             //RimThreadedHarmony.Postfix(original, patched, nameof(SpawnSetup));
             //RimThreadedHarmony.Postfix(original, patched, nameof(DeSpawn));
             //RimThreadedHarmony.Prefix(original, patched, nameof(TakeDamage));
         }
 
+        //good candidate for transpile
         public static bool TakeDamage(Thing __instance, ref DamageWorker.DamageResult __result, DamageInfo dinfo)
         {
-            //---START change---
-            Map mapHeld = __instance.MapHeld; //moved
-            if (mapHeld == null)
-            {
-                __result = new DamageWorker.DamageResult();
-                return false;
-            }
-            //---END change---
-
             if (__instance.Destroyed)
             {
                 __result = new DamageWorker.DamageResult();
@@ -61,9 +53,9 @@ namespace RimThreaded
             }
             bool anyParentSpawned = __instance.SpawnedOrAnyParentSpawned;
 
-            // Map mapHeld = __instance.MapHeld; //moved
-            DamageWorker.DamageResult damageResult = dinfo.Def.Worker.Apply(dinfo, __instance);
-            if (dinfo.Def.harmsHealth & anyParentSpawned)
+            Map mapHeld = __instance.MapHeld;
+            DamageWorker.DamageResult damageResult = dinfo.Def.Worker.Apply(dinfo, __instance);            
+            if (mapHeld != null && dinfo.Def.harmsHealth & anyParentSpawned) // added mapHeld null check
                 mapHeld.damageWatcher.Notify_DamageTaken(__instance, damageResult.totalDamageDealt);
             if (dinfo.Def.ExternalViolenceFor(__instance))
             {

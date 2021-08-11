@@ -26,7 +26,7 @@ namespace RimThreaded
                 map.glowGrid.MarkGlowGridDirty(c);
                 //Comment the 3 following lines and uncomment the 4th to fix the roof notification -Sernior
                 Room room = map.regionGrid.GetValidRegionAt_NoRebuild(c)?.Room;
-                if(room != null)
+                if (room != null)
                     room.Notify_RoofChanged();
                 //map.regionGrid.GetValidRegionAt_NoRebuild(c)?.District.Notify_RoofChanged(); This fixes the roofs notification instead of the 3 previous lines -Sernior
                 if (__instance.drawerInt != null)
@@ -38,5 +38,5 @@ namespace RimThreaded
             }
             return false;
         }
-	}
+    }
 }

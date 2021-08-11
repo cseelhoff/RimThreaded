@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.IO;
-using Verse;
 using HarmonyLib;
+using Verse;
 
 namespace RimThreaded
 {
@@ -15,7 +15,6 @@ namespace RimThreaded
         public string Name;
         public Type ClassType;
         public List<Type> ParametersType;
-        //public bool IsConstructor;
         public SerializableMethod()
         {
             ParametersType = new List<Type>();
@@ -24,27 +23,34 @@ namespace RimThreaded
 #pragma warning restore 649
     public class AssemblyCache
     {
-        private static List<MethodBase> CacheList = new List<MethodBase>();
+        private static readonly List<MethodBase> CacheList = new List<MethodBase>();
         private static List<SerializableMethod> CacheListS = new List<SerializableMethod>();
-        private static string Cachepath = Path.Combine(RimThreadedMod.replacementsJsonPath.Replace("replacements.json", ""), "Caches");
         private static string CurrentMethodPath;
-
         public static void SaveJson()
         {
             string jsonString = JsonConvert.SerializeObject(CacheListS);
             File.WriteAllText(CurrentMethodPath, jsonString);
         }
-        public static bool TryGetFromCache(string AssemblyName, out List<MethodBase> ReturnMethodList)
+        public static bool TryGetFromCache(string ModuleVersionId, out List<MethodBase> ReturnMethodList)
         {
-            string CachePath = Path.Combine(Cachepath, AssemblyName + ".json");
-            System.IO.Directory.CreateDirectory(Cachepath);
-            CurrentMethodPath = CachePath;
-            if (!File.Exists(CachePath))
+            if (Prefs.LogVerbose)
+            {
+                Verse.Log.Message("TryGetFromCache: " + ModuleVersionId);
+            }
+            string CacheFolder = Path.Combine(RimThreadedMod.replacementsFolder, "Caches");
+            Directory.CreateDirectory(CacheFolder);
+            CurrentMethodPath = Path.Combine(CacheFolder, ModuleVersionId + ".json");
+            if (!File.Exists(CurrentMethodPath))
+
             {
                 ReturnMethodList = null;
                 return false;
             }
-            string jsonstr = File.ReadAllText(CachePath);
+            if (Prefs.LogVerbose)
+            {
+                Verse.Log.Message("RimThreaded is loading Cached Field Replacements from: " + CurrentMethodPath);
+            }
+            string jsonstr = File.ReadAllText(CurrentMethodPath);
             CacheListS = JsonConvert.DeserializeObject<List<SerializableMethod>>(jsonstr);
             foreach (SerializableMethod s in CacheListS)
             {
@@ -66,15 +72,18 @@ namespace RimThreaded
         }
         public static void AddToCache(string AssemblyName, MethodBase method, Type type)
         {
-            SerializableMethod SMethod = new SerializableMethod();
-            SMethod.Name = method.Name;
-            SMethod.ClassType = type;
+            string CacheFolder = Path.Combine(RimThreadedMod.replacementsFolder, "Caches");
+            SerializableMethod SMethod = new SerializableMethod
+            {
+                Name = method.Name,
+                ClassType = type
+            };
             foreach (ParameterInfo p in method.GetParameters())
             {
                 SMethod.ParametersType.Add(p.ParameterType);
             }
             CacheListS.Add(SMethod);
-            CurrentMethodPath = Path.Combine(Cachepath, AssemblyName + ".json");
+            CurrentMethodPath = Path.Combine(CacheFolder, AssemblyName + ".json");
             CacheList.Add(method);
         }
 

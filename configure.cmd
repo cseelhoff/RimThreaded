@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy ByPass -File .\configure.ps1

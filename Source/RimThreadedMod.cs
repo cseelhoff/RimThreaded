@@ -16,17 +16,20 @@ namespace RimThreaded
     class RimThreadedMod : Mod
     {
         public static RimThreadedSettings Settings;
+        public static string replacementsFolder;
         public static string replacementsJsonPath;
+#if RW12
+        readonly string RWversion = "1.2";
+#endif
+#if RW13
+        readonly string RWversion = "1.3";
+#endif
         public RimThreadedMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<RimThreadedSettings>();
-#if RW12
-            string RWversion = "1.2";
-#endif
-#if RW13
-            string RWversion = "1.3";
-#endif
-            replacementsJsonPath = Path.Combine(content.RootDir, RWversion, "replacements.json");
+
+            replacementsFolder = Path.Combine(content.RootDir, RWversion, "Assemblies");
+            replacementsJsonPath = Path.Combine(replacementsFolder, "replacements_" + RWversion + ".json");
             //RimThreaded.Start();
         }
         public override void DoSettingsWindowContents(Rect inRect)
@@ -34,15 +37,7 @@ namespace RimThreaded
             if (Settings.modsText.Length == 0)
             {
                 Settings.modsText = "Potential RimThreaded mod conflicts :\n";
-                Settings.modsText += getPotentialModConflicts();
-
-                //Settings.modsText2 = "For future use... \n";
-                //Settings.modsText2 += getAllStaticFields();
-
-                //string path = "hmodText.txt";
-                //StreamWriter writer = new StreamWriter(path, true);
-                //writer.WriteLine(Settings.modsText);
-                //writer.Close();
+                Settings.modsText += GetPotentialModConflicts();
             }
             Settings.DoWindowContents(inRect);
             if (Settings.maxThreads != RimThreaded.maxThreads)
@@ -98,7 +93,7 @@ namespace RimThreaded
         //    return result;
         //}
 
-        public static string getPotentialModConflicts()
+        public static string GetPotentialModConflicts()
         {
             string modsText = "";
             IEnumerable<MethodBase> originalMethods = Harmony.GetAllPatchedMethods();
@@ -161,17 +156,18 @@ namespace RimThreaded
             }
             return modsText;
         }
-        public static void exportTranspiledMethods()
+        public static void ExportTranspiledMethods()
         {
             AssemblyName aName = new AssemblyName("RimWorldTranspiles");
             //PermissionSet requiredPermission = new PermissionSet(PermissionState.Unrestricted);
             AssemblyBuilder ab = AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
             ConstructorInfo Constructor2 = typeof(SecurityPermissionAttribute).GetConstructors()[0];
-            SecurityAction requestMinimum = SecurityAction.RequestMinimum;
             PropertyInfo skipVerificationProperty = Property(typeof(SecurityPermissionAttribute), "SkipVerification");
-            CustomAttributeBuilder sv2 = new CustomAttributeBuilder(Constructor2, new object[] { requestMinimum }, 
+#if false
+            CustomAttributeBuilder sv2 = new CustomAttributeBuilder(Constructor2, new object[] { SecurityAction.RequestMinimum }, 
                 new PropertyInfo[] { skipVerificationProperty }, new object[] { true });            
             ab.SetCustomAttribute(sv2);
+#endif
 
             //System.Security.AllowPartiallyTrustedCallersAttribute Att = new System.Security.AllowPartiallyTrustedCallersAttribute();            
             //ConstructorInfo Constructor1 = Att.GetType().GetConstructors()[0];
@@ -242,7 +238,9 @@ namespace RimThreaded
                     //List<Label> endLabels = new List<Label>();
                     //_ = methodCopier.Finalize(null, endLabels, out var hasReturnCode);
                     //List<CodeInstruction> ciList = MethodCopier.GetInstructions(il, originalMethod, 9999);
+#if false
                     MethodInfo methodInfo2 = UpdateWrapper(originalMethod, il);
+#endif
                     //Log.Message(ciList.ToString());
                     //List<CodeInstruction> currentInstructions = PatchProcessor.GetCurrentInstructions(originalMethod);
                     //Dictionary<Label, Label> labels = new Dictionary<Label, Label>();
@@ -524,6 +522,7 @@ namespace RimThreaded
                 }
             }
         }
+#if false
         public static MethodInfo UpdateWrapper(MethodBase original, ILGenerator il)
         {
             PatchProcessor patchProcessor = RimThreadedHarmony.harmony.CreateProcessor(original);
@@ -550,6 +549,7 @@ namespace RimThreaded
             }
             return methodInfo;
         }
+#endif
         public override string SettingsCategory()
         {
             return "RimThreaded";

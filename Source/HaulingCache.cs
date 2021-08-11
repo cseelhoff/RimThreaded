@@ -522,9 +522,10 @@ namespace RimThreaded
 														{
 															if (scanner.HasJobOnThing(pawn, tryThing))
 															{
-#if DEBUG
-                                                                Log.Message(pawn + " is going to haul thing: " + tryThing + " at pos " + tryThing.Position);
-#endif
+																if (Prefs.LogVerbose)
+																{
+																	Log.Message(pawn + " is going to haul thing: " + tryThing + " at pos " + tryThing.Position);
+																}
 																thing = tryThing;
 																break;
 															}

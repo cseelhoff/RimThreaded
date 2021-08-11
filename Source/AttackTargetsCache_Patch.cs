@@ -250,9 +250,9 @@ namespace RimThreaded
 			return false;
 		}
 
-		private static List<IAttackTarget> getTargetsHostileToFactionList(AttackTargetsCache __instance, Faction faction)
-		{
-			if (faction == null)
+        private static List<IAttackTarget> getTargetsHostileToFactionList(AttackTargetsCache __instance, Faction faction)
+        {
+            if (faction == null)
 			{
 				Log.Warning("Called getTargetsHostileToFactionList with null faction.");
 			}
