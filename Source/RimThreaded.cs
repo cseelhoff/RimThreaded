@@ -152,6 +152,11 @@ namespace RimThreaded
             {
                 prepareAction = Map_Patch.MapsPostTickPrepare,
                 tickAction = Map_Patch.MapPostListTick
+            },
+            new ThreadedTickList
+            {
+                prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
+                tickAction = TransportShipManager_Patch.ShipObjectsTick
             }
 #if RW13
             ,

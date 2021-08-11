@@ -26,8 +26,6 @@ namespace RimThreaded
         private static readonly List<MethodBase> CacheList = new List<MethodBase>();
         private static List<SerializableMethod> CacheListS = new List<SerializableMethod>();
         private static string CurrentMethodPath;
-
-
         public static void SaveJson()
         {
             string jsonString = JsonConvert.SerializeObject(CacheListS);
@@ -43,6 +41,7 @@ namespace RimThreaded
             Directory.CreateDirectory(CacheFolder);
             CurrentMethodPath = Path.Combine(CacheFolder, ModuleVersionId + ".json");
             if (!File.Exists(CurrentMethodPath))
+
             {
                 ReturnMethodList = null;
                 return false;
