@@ -10,7 +10,12 @@ namespace RimThreaded
     {
 
         static object determineNextJobLock = new object();
-
+        internal static void RunNonDestructivePatches()
+        {
+            Type original = typeof(Pawn_JobTracker);
+            Type patched = typeof(Pawn_JobTracker_Patch);
+            RimThreadedHarmony.Prefix(original, patched, "EndCurrentJob", null, false);
+        }
         internal static void RunDestructivePatches()
         {
             Type original = typeof(Pawn_JobTracker);
@@ -19,6 +24,19 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_DamageTaken));
             RimThreadedHarmony.Prefix(original, patched, nameof(DetermineNextJob));
             RimThreadedHarmony.Prefix(original, patched, nameof(StartJob)); //conflict with giddyupcore calling MakeDriver
+        }
+
+        public static bool EndCurrentJob(Pawn_JobTracker __instance, JobCondition condition, bool startNewJob = true, bool canReturnToPool = true)
+        {
+            JobDef jobDef = __instance.curJob != null ? __instance.curJob.def : (JobDef)null;
+            if (jobDef == JobDefOf.Harvest)
+            {
+                foreach (LocalTargetInfo tar in __instance.curJob.GetTargetQueue(TargetIndex.A))
+                {
+                    PlantHarvest_Cache.isBeingWorkedOn[(__instance.pawn.Map, tar.Cell)] = false;
+                }
+            }
+            return true;
         }
 
         public static bool StartJob(Pawn_JobTracker __instance,
@@ -35,6 +53,17 @@ namespace RimThreaded
             __instance.startingNewJob = true;
             try
             {
+                if (newJob != null && __instance.pawn != null)//SERNIOR CHANGES this piece is meant update the cells that are being worked on by the PlantHarvest_Cache
+                {
+                    JobDef jobDef = newJob != null ? newJob.def : (JobDef)null;
+                    if (newJob.def == JobDefOf.Harvest)
+                    {
+                        foreach (LocalTargetInfo tar in newJob.GetTargetQueue(TargetIndex.A))
+                        {
+                            PlantHarvest_Cache.isBeingWorkedOn[(__instance.pawn.Map, tar.Cell)] = true;
+                        }
+                    }
+                }//SERNIOR CHANGES
                 if (!fromQueue && (!Find.TickManager.Paused || __instance.lastJobGivenAtFrame == RealTime.frameCount))
                 {
                     __instance.jobsGivenThisTick++;

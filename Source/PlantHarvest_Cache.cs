@@ -14,7 +14,7 @@ namespace RimThreaded
 
 		public static Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingHarvestCellsMapDict = new Dictionary<Map, List<HashSet<IntVec3>[]>>();
 		static readonly IntVec3[] noOffset = new IntVec3[] { IntVec3.Zero };
-
+		public static Dictionary<(Map, IntVec3), bool> isBeingWorkedOn = new Dictionary<(Map, IntVec3), bool>();
 		internal static void InitializeThreadStatics()
 		{
 			retrunedThings = new HashSet<IntVec3>();
@@ -99,7 +99,7 @@ namespace RimThreaded
 							objectsAtCellCopy = thingsAtCell.ToArray();
 							foreach (IntVec3 actionableObject in objectsAtCellCopy)
 							{
-								if (!retrunedThings.Contains(actionableObject))
+								if (!retrunedThings.Contains(actionableObject) && !isBeingWorkedOn[(map, actionableObject)])
 								{
 									Log.Message(actionableObject.ToString());
 									yield return actionableObject;
@@ -175,6 +175,10 @@ namespace RimThreaded
 				return;
 
 			//---END--
+			if (!isBeingWorkedOn.ContainsKey((map, location)))
+			{
+				isBeingWorkedOn[(map, location)] = false;
+			}
 
 			zoomLevel = 0;
 			do
