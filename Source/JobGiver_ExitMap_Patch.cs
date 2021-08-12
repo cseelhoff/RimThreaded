@@ -20,13 +20,10 @@ namespace RimThreaded
         public static bool TryGiveJob(JobGiver_ExitMap __instance, ref Job __result, Pawn pawn)
         {
             Pawn_MindState mindState = pawn.mindState;
-            bool canDig = __instance.forceCanDig ||
-                (mindState != null && mindState.duty != null) && 
-                mindState.duty.canDig && 
-                !pawn.CanReachMapEdge() || 
-                __instance.forceCanDigIfCantReachMapEdge && !pawn.CanReachMapEdge() || 
-                __instance.forceCanDigIfAnyHostileActiveThreat && pawn.Faction != null && 
-                GenHostility.AnyHostileActiveThreatTo(pawn.Map, pawn.Faction, true);
+            bool canDig = __instance.forceCanDig || 
+                (pawn.mindState.duty != null && pawn.mindState.duty.canDig && !pawn.CanReachMapEdge()) ||
+                (__instance.forceCanDigIfCantReachMapEdge && !pawn.CanReachMapEdge()) ||
+                (__instance.forceCanDigIfAnyHostileActiveThreat && pawn.Faction != null && GenHostility.AnyHostileActiveThreatTo_NewTemp(pawn.Map, pawn.Faction, countDormantPawnsAsHostile: true));
             IntVec3 dest;
             if (!__instance.TryFindGoodExitDest(pawn, canDig, out dest))
             {
@@ -35,7 +32,7 @@ namespace RimThreaded
             }
             if (canDig)
             {
-                using (PawnPath path = pawn.Map.pathFinder.FindPath(pawn.Position, (LocalTargetInfo)dest, TraverseParms.For(pawn, mode: TraverseMode.PassAllDestroyableThings)))
+                using (PawnPath path = pawn.Map.pathFinder.FindPath(pawn.Position, dest, TraverseParms.For(pawn, mode: TraverseMode.PassAllDestroyableThings)))
                 {
                     IntVec3 cellBefore;
                     Thing blocker = path.FirstBlockingBuilding(out cellBefore, pawn);
@@ -50,7 +47,7 @@ namespace RimThreaded
                     }
                 }
             }
-            Job job1 = JobMaker.MakeJob(JobDefOf.Goto, (LocalTargetInfo)dest);
+            Job job1 = JobMaker.MakeJob(JobDefOf.Goto, dest);
             job1.exitMapOnArrival = true;
             job1.failIfCantJoinOrCreateCaravan = __instance.failIfCantJoinOrCreateCaravan;
             job1.locomotionUrgency = PawnUtility.ResolveLocomotion(pawn, __instance.defaultLocomotion, LocomotionUrgency.Jog);
