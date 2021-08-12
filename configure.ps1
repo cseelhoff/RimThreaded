@@ -25,8 +25,8 @@ if((Test-Path -Path $rimworldSourceVersionFolder) -eq $false) {
     $null = New-Item -Path $rimworldSourceVersionFolder -ItemType Directory
 }
 
-$dependenciesDir = Convert-Path -Path ".\Dependencies"
-$dependencyVersionDir = Join-Path $dependenciesDir -ChildPath $majorMinorVersion
+$dependencyVersionDir = Join-Path ".\Dependencies" -ChildPath $majorMinorVersion
+$null = New-Item -Path $dependencyVersionDir -ItemType Directory
 Write-Host ("Copying: " + $assemblyPath + " to: " + $dependencyVersionDir)
 Copy-Item -Path $assemblyPath -Destination $dependencyVersionDir
 
