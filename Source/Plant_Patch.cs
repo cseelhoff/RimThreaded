@@ -23,7 +23,8 @@ namespace RimThreaded
 
         public static void PlantCollected(Plant __instance, Pawn by)
         {
-            PlantHarvest_Cache.ReregisterObject(__instance.Map, __instance.Position, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+            if (__instance.Map != null & __instance.Position != null)
+                PlantHarvest_Cache.ReregisterObject(__instance.Map, __instance.Position, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
         }
         public static void set_Growth(Plant __instance, float value)
         {
