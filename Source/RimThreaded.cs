@@ -209,6 +209,7 @@ namespace RimThreaded
             HediffSet_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             PawnPathPool_Patch.InitializeThreadStatics();
+            PlantHarvest_Cache.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
             Region_Patch.InitializeThreadStatics();

@@ -93,6 +93,7 @@ namespace RimThreaded
                 pawnToJob.Add(claimant, job);
                 targetToJob.Add(target, job);
             }
+            PlantHarvest_Cache.ReregisterObject(claimant.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
             return false;
         }
 
