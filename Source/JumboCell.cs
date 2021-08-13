@@ -283,7 +283,7 @@ namespace RimThreaded
 		}
 		public static void RemoveObjectFromAwaitingActionHashSets(Map map, IntVec3 location, List<HashSet<IntVec3>[]> awaitingActionZoomLevels)
 		{
-			if (map == null)
+			if (map == null || map.info == null)
 				return;
 			IntVec3 size = map.Size;
 			if (size == null)
