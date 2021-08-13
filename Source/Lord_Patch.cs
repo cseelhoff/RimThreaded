@@ -14,7 +14,9 @@ namespace RimThreaded
             Type original = typeof(Lord);
             Type patched = typeof(Lord_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(AddPawn));
+#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(AddPawns));
+#endif
             RimThreadedHarmony.Prefix(original, patched, nameof(RemovePawn));
         }
 

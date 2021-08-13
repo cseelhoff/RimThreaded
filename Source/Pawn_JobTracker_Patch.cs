@@ -120,7 +120,7 @@ namespace RimThreaded
                         __instance.StartJob(job);
                         return false;
                     }
-
+#if RW13
                     if (tag.HasValue)
                     {
                         if (tag == JobTag.Fieldwork && __instance.pawn.mindState.lastJobTag != tag)
@@ -130,7 +130,6 @@ namespace RimThreaded
                                 item.jobs.Notify_MasterStartedFieldWork();
                             }
                         }
-
                         __instance.pawn.mindState.lastJobTag = tag.Value;
                     }
 
@@ -142,8 +141,8 @@ namespace RimThreaded
                         }
 
                         __instance.pawn.carryTracker.TryDropCarriedThing(__instance.pawn.Position, ThingPlaceMode.Near, out Thing _);
-                    }
-
+                    }                    
+#endif
                     cDriver.SetInitialPosture(); //changed
                     cDriver.Notify_Starting(); //changed
                     cDriver.SetupToils(); //changed

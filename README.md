@@ -38,6 +38,15 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.10 - Jawa Sandcrawler  
+Fixed Hydroponics Bug  
+Optimized Planting Caches and Sowing Caches  
+Fixed Hauling Priorities bug  
+Fixed bug with caravans and riders leaving the map  
+Fixed bug when pawns not taking damage prior to being placed on map  
+Added compatibility for new AndroidTiers mod  
+Fixed misc Royalty bugs  
+
 Version 2.5.9 - The Reformed Jedi Counsel  
 -Reogranized folder structure of simplify builds and improve cooperative coding efforts  
 

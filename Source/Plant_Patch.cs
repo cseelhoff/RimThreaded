@@ -20,11 +20,18 @@ namespace RimThreaded
             RimThreadedHarmony.Postfix(original, patched, nameof(set_Growth));
             RimThreadedHarmony.Transpile(original, patched, nameof(TickLong));
         }
-
+#if RW12
+        public static void PlantCollected(Plant __instance)
+        {
+            JumboCell.ReregisterObject(__instance.Map, __instance.Position, RimThreaded.plantHarvest_Cache);
+        }
+#endif
+#if RW13
         public static void PlantCollected(Plant __instance, Pawn by)
         {
             JumboCell.ReregisterObject(__instance.Map, __instance.Position, RimThreaded.plantHarvest_Cache);
         }
+#endif
         public static void set_Growth(Plant __instance, float value)
         {
             if (__instance.Map != null && __instance.LifeStage == PlantLifeStage.Mature)
