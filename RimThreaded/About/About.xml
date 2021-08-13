@@ -13,6 +13,8 @@
 
     Version 2.5.11 - Uparmored Jawa Sandcrawler
     -Fixed GenCollection.RemoveAll bug
+    -Fixed Roof Notification bug
+    -Fixed Shuttle bug
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 

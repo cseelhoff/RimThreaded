@@ -40,6 +40,8 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 CHANGE LOG:  
 Version 2.5.11 - Uparmored Jawa Sandcrawler  
 -Fixed GenCollection.RemoveAll bug  
+-Fixed Roof Notification bug  
+-Fixed Shuttle bug  
 
 Version 2.5.10 - Jawa Sandcrawler  
 -Fixed Hydroponics Bug  
