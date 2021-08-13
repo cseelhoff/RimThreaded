@@ -300,24 +300,6 @@ namespace RimThreaded
 					}
 				}
 			}
-
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioReverbFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioLowPassFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioHighPassFilter) }));
-			//TranspileFieldReplacements(Method(typeof(SoundFilter), "GetOrMakeFilterOn",
-			//	new Type[] { typeof(AudioSource) }, new Type[] { typeof(AudioEchoFilter) }));
-			Type pawnType = typeof(Pawn);
-			Type thoughtsType = typeof(CachedSocialThoughts);
-			string removeAllString = nameof(GenCollection.RemoveAll);
-			MethodInfo removeAllGeneric = GetDeclaredMethods(typeof(GenCollection)).First(method => method.Name == removeAllString && method.GetGenericArguments().Count() == 2);
-			MethodInfo removeAllPawnThoughts = removeAllGeneric.MakeGenericMethod(new[] { pawnType, thoughtsType });
-			//TranspileFieldReplacements(removeAllPawnThoughts); not sure why transpile causes error
-			Type genCollection_Patched = typeof(GenCollection_Patch);
-			MethodInfo patchedRemoveAll_Pawn_CachedSocialThoughts = genCollection_Patched.GetMethod(nameof(GenCollection_Patch.RemoveAll_Pawn_CachedSocialThoughts));
-			harmony.Patch(removeAllPawnThoughts, prefix: new HarmonyMethod(patchedRemoveAll_Pawn_CachedSocialThoughts));
 			Log.Message("RimThreaded Field Replacements Complete.");
 		}
 
