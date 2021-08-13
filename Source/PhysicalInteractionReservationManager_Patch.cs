@@ -93,7 +93,7 @@ namespace RimThreaded
                 pawnToJob.Add(claimant, job);
                 targetToJob.Add(target, job);
             }
-            PlantHarvest_Cache.ReregisterObject(claimant.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+            JumboCell.ReregisterObject(claimant.Map, target.Cell, RimThreaded.plantHarvest_Cache);
             return false;
         }
 
@@ -108,7 +108,7 @@ namespace RimThreaded
                             if (outJob == job) {
                                 pawnToJob.Remove(claimant);
                                 plantReregistered = true;
-                                PlantHarvest_Cache.ReregisterObject(claimant.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                                JumboCell.ReregisterObject(claimant.Map, target.Cell, RimThreaded.plantHarvest_Cache);
                             }
                             else
                             {
@@ -138,7 +138,7 @@ namespace RimThreaded
                             {
                                 bool targetToJobResult = targetToJob.Remove(target);
                                 if (!plantReregistered)
-                                    PlantHarvest_Cache.ReregisterObject(claimant.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                                    JumboCell.ReregisterObject(claimant.Map, target.Cell, RimThreaded.plantHarvest_Cache);
                             }
                             else
                             {
@@ -227,7 +227,7 @@ namespace RimThreaded
                             }
                             targetToPawnToJob.Remove(target);
                             if (target != null && target.Thing != null && target.Thing.Map != null)
-                                PlantHarvest_Cache.ReregisterObject(target.Thing.Map, target.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                                JumboCell.ReregisterObject(target.Thing.Map, target.Cell, RimThreaded.plantHarvest_Cache);
                         }
                     }
                 }
@@ -262,7 +262,7 @@ namespace RimThreaded
                                     }
                                 }
                                 targetToJob.Remove(localTargetInfo);
-                                PlantHarvest_Cache.ReregisterObject(claimant.Map, localTargetInfo.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                                JumboCell.ReregisterObject(claimant.Map, localTargetInfo.Cell, RimThreaded.plantHarvest_Cache);
                             }
                         }
                     }
@@ -290,7 +290,7 @@ namespace RimThreaded
                                     if (pawnToJob.TryGetValue(claimant, out _))
                                     {
                                         pawnToJob.Remove(claimant);
-                                        PlantHarvest_Cache.ReregisterObject(claimant.Map, localTargetInfo.Cell, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                                        JumboCell.ReregisterObject(claimant.Map, localTargetInfo.Cell, RimThreaded.plantHarvest_Cache);
                                     }
                                 }
                             }

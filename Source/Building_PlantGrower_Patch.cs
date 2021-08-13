@@ -19,7 +19,7 @@ namespace RimThreaded
             {
                 foreach (IntVec3 c in __instance.OccupiedRect())
                 {
-                    PlantSowing_Cache.ReregisterObject(__instance.Map, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                    JumboCell.ReregisterObject(__instance.Map, c, RimThreaded.plantSowing_Cache);
                 }
             }
         }

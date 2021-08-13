@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
+using static RimThreaded.JumboCell;
 
 namespace RimThreaded
 {
     class WorkGiver_GrowerHarvest_Patch
     {
-		internal static IntVec3 ClosestLocationReachable(WorkGiver_GrowerHarvest workGiver_GrowerHarvest, Pawn pawn)
+		public static IntVec3 ClosestLocationReachable(WorkGiver_GrowerHarvest workGiver_GrowerHarvest, Pawn pawn)
 		{
 			Danger maxDanger = pawn.NormalMaxDanger();
-			//bool forced = false;
 			Map map = pawn.Map;
 			ZoneManager zoneManager = pawn.Map.zoneManager;
-			foreach (IntVec3 actionableLocation in PlantHarvest_Cache.GetClosestActionableLocations(pawn, map, PlantHarvest_Cache.awaitingHarvestCellsMapDict))
+			foreach (IntVec3 actionableLocation in GetClosestActionableLocations(pawn, map, RimThreaded.plantHarvest_Cache))
 			{
 				List<Thing> thingsAtLocation = GridsUtility.GetThingList(actionableLocation, map);
 				foreach (Thing thingAtLocation in thingsAtLocation)
@@ -27,6 +27,15 @@ namespace RimThreaded
 						{
 							continue;
 						}
+						Plant plant = actionableLocation.GetPlant(pawn.Map);
+						bool hasJobOnCell = plant != null && (plant.HarvestableNow && plant.LifeStage == PlantLifeStage.Mature) && (plant.CanYieldNow());
+						if (!hasJobOnCell)
+						{
+							break;
+						}
+						bool canReserve = ReservationManager_Patch.IsUnreserved(map.reservationManager, plant);
+						if (!canReserve)
+							break;
 						return actionableLocation;
 					}
 				}
@@ -38,13 +47,9 @@ namespace RimThreaded
 				{
 					continue;
 				}
-				//if (!JobOnCellTest(workGiver_GrowerHarvest, pawn, actionableLocation, forced))
-				//{
-				//	continue;
-				//}
 				if (!workGiver_GrowerHarvest.HasJobOnCell(pawn, actionableLocation))
 				{
-					PlantHarvest_Cache.ReregisterObject(pawn.Map, actionableLocation, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+					JumboCell.ReregisterObject(pawn.Map, actionableLocation, RimThreaded.plantHarvest_Cache);
 					continue;
 				}
 				if (!pawn.CanReach(actionableLocation, PathEndMode.OnCell, maxDanger))
@@ -56,18 +61,5 @@ namespace RimThreaded
 			}
 			return IntVec3.Invalid;
 		}
-		//public static bool JobOnCellTest(WorkGiver_GrowerHarvest workGiver_GrowerHarvest, Pawn pawn, IntVec3 c, bool forced = false)
-		//{
-		//	Map map = pawn.Map;
-		//	if (workGiver_GrowerHarvest.HasJobOnCell(pawn, c, false))
-		//	{
-		//		Plant plant = c.GetPlant(map);
-		//		if (!(plant.def == WorkGiver_Grower.CalculateWantedPlantDef(c, map)))
-		//		{
-		//			return true;
-		//		}
-		//	}
-		//	return false;
-		//}
 	}
 }

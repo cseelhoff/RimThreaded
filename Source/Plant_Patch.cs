@@ -23,12 +23,12 @@ namespace RimThreaded
 
         public static void PlantCollected(Plant __instance, Pawn by)
         {
-            PlantHarvest_Cache.ReregisterObject(__instance.Map, __instance.Position, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+            JumboCell.ReregisterObject(__instance.Map, __instance.Position, RimThreaded.plantHarvest_Cache);
         }
         public static void set_Growth(Plant __instance, float value)
         {
             if (__instance.Map != null && __instance.LifeStage == PlantLifeStage.Mature)
-                PlantHarvest_Cache.ReregisterObject(__instance.Map, __instance.Position, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                JumboCell.ReregisterObject(__instance.Map, __instance.Position, RimThreaded.plantHarvest_Cache);
         }
 
         public static IEnumerable<CodeInstruction> TickLong(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
@@ -46,9 +46,9 @@ namespace RimThreaded
                     yield return ci3;
                     CodeInstruction ci4 = new CodeInstruction(OpCodes.Call, Method(typeof(Thing), "get_Position"));
                     yield return ci4;
-                    CodeInstruction ci5 = new CodeInstruction(OpCodes.Ldsfld, Field(typeof(PlantHarvest_Cache), nameof(awaitingHarvestCellsMapDict)));
+                    CodeInstruction ci5 = new CodeInstruction(OpCodes.Ldfld, Field(typeof(RimThreaded), nameof(RimThreaded.plantHarvest_Cache)));
                     yield return ci5;
-                    CodeInstruction ci6 = new CodeInstruction(OpCodes.Call, Method(typeof(PlantHarvest_Cache), nameof(ReregisterObject)));
+                    CodeInstruction ci6 = new CodeInstruction(OpCodes.Call, Method(typeof(JumboCell), nameof(JumboCell.ReregisterObject)));
                     yield return ci6;
                     continue;
 				}
