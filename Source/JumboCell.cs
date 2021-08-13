@@ -131,7 +131,7 @@ namespace RimThreaded
 			int widthOffset = jumboCellWidth - 1;
 			int cartesianX = (relativeX * 2) - widthOffset;
 			int cartesianZ = (relativeZ * 2) - widthOffset;
-			int slope2 = (cartesianZ * 2) / cartesianX;
+			int slope2 = (cartesianZ * 200) / ((cartesianX * 100) + 1);
 			if (cartesianX >= 0)
 			{
 				if (slope2 >= 0)

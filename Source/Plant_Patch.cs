@@ -46,7 +46,7 @@ namespace RimThreaded
                     yield return ci3;
                     CodeInstruction ci4 = new CodeInstruction(OpCodes.Call, Method(typeof(Thing), "get_Position"));
                     yield return ci4;
-                    CodeInstruction ci5 = new CodeInstruction(OpCodes.Ldfld, Field(typeof(RimThreaded), nameof(RimThreaded.plantHarvest_Cache)));
+                    CodeInstruction ci5 = new CodeInstruction(OpCodes.Ldsfld, Field(typeof(RimThreaded), nameof(RimThreaded.plantHarvest_Cache)));
                     yield return ci5;
                     CodeInstruction ci6 = new CodeInstruction(OpCodes.Call, Method(typeof(JumboCell), nameof(JumboCell.ReregisterObject)));
                     yield return ci6;
