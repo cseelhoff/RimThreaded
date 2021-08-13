@@ -57,7 +57,7 @@ namespace RimThreaded
                 {
                     foreach (IntVec3 plantableLocation in building_PlantGrower.OccupiedRect())
                     {
-                        PlantSowing_Cache.ReregisterObject(t.Map, plantableLocation, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                        JumboCell.ReregisterObject(t.Map, plantableLocation, RimThreaded.plantSowing_Cache);
                     }
                 }
                     /*
@@ -123,7 +123,7 @@ namespace RimThreaded
                     }
 
                     if (c.GetZone(__instance.map) is Zone_Growing zone)
-                        PlantSowing_Cache.ReregisterObject(zone.Map, c, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                        JumboCell.ReregisterObject(zone.Map, c, RimThreaded.plantSowing_Cache);
 
                     for (int i = newThingList.Count - 1; i >= 0; i--)
                     {
@@ -132,7 +132,7 @@ namespace RimThreaded
                         {
                             foreach (IntVec3 plantableLocation in building_PlantGrower.OccupiedRect())
                             {
-                                PlantSowing_Cache.ReregisterObject(building_PlantGrower.Map, plantableLocation, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+                                JumboCell.ReregisterObject(building_PlantGrower.Map, plantableLocation, RimThreaded.plantSowing_Cache);
                             }
                         }
                     }

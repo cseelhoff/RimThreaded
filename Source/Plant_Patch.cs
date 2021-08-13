@@ -2,7 +2,6 @@
 using RimWorld;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Verse;
@@ -17,17 +16,29 @@ namespace RimThreaded
         {
             Type original = typeof(Plant);
             Type patched = typeof(Plant_Patch);
+            RimThreadedHarmony.Postfix(original, patched, nameof(PlantCollected));
             RimThreadedHarmony.Postfix(original, patched, nameof(set_Growth));
-			RimThreadedHarmony.Transpile(original, patched, nameof(TickLong));
+            RimThreadedHarmony.Transpile(original, patched, nameof(TickLong));
         }
-
+#if RW12
+        public static void PlantCollected(Plant __instance)
+        {
+            JumboCell.ReregisterObject(__instance.Map, __instance.Position, RimThreaded.plantHarvest_Cache);
+        }
+#endif
+#if RW13
+        public static void PlantCollected(Plant __instance, Pawn by)
+        {
+            JumboCell.ReregisterObject(__instance.Map, __instance.Position, RimThreaded.plantHarvest_Cache);
+        }
+#endif
         public static void set_Growth(Plant __instance, float value)
         {
             if (__instance.Map != null && __instance.LifeStage == PlantLifeStage.Mature)
-                PlantHarvest_Cache.ReregisterObject(__instance.Map, __instance.Position, PlantHarvest_Cache.awaitingHarvestCellsMapDict);
+                JumboCell.ReregisterObject(__instance.Map, __instance.Position, RimThreaded.plantHarvest_Cache);
         }
 
-		public static IEnumerable<CodeInstruction> TickLong(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        public static IEnumerable<CodeInstruction> TickLong(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
 		{
 			foreach(CodeInstruction instruction in instructions)
             {
@@ -42,9 +53,9 @@ namespace RimThreaded
                     yield return ci3;
                     CodeInstruction ci4 = new CodeInstruction(OpCodes.Call, Method(typeof(Thing), "get_Position"));
                     yield return ci4;
-                    CodeInstruction ci5 = new CodeInstruction(OpCodes.Ldsfld, Field(typeof(PlantHarvest_Cache), nameof(awaitingHarvestCellsMapDict)));
+                    CodeInstruction ci5 = new CodeInstruction(OpCodes.Ldsfld, Field(typeof(RimThreaded), nameof(RimThreaded.plantHarvest_Cache)));
                     yield return ci5;
-                    CodeInstruction ci6 = new CodeInstruction(OpCodes.Call, Method(typeof(PlantHarvest_Cache), nameof(ReregisterObject)));
+                    CodeInstruction ci6 = new CodeInstruction(OpCodes.Call, Method(typeof(JumboCell), nameof(JumboCell.ReregisterObject)));
                     yield return ci6;
                     continue;
 				}

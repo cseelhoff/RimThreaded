@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RimWorld;
+using System;
 using Verse;
 using Verse.AI;
 
@@ -36,92 +37,125 @@ namespace RimThreaded
             {
                 if (!fromQueue && (!Find.TickManager.Paused || __instance.lastJobGivenAtFrame == RealTime.frameCount))
                 {
-                    ++__instance.jobsGivenThisTick;
+                    __instance.jobsGivenThisTick++;
                     if (Prefs.DevMode)
+                    {
                         __instance.jobsGivenThisTickTextual = __instance.jobsGivenThisTickTextual + "(" + newJob.ToString() + ") ";
+                    }
                 }
+
                 __instance.lastJobGivenAtFrame = RealTime.frameCount;
                 if (__instance.jobsGivenThisTick > 10)
                 {
-                    string givenThisTickTextual = __instance.jobsGivenThisTickTextual;
+                    string text = __instance.jobsGivenThisTickTextual;
                     __instance.jobsGivenThisTick = 0;
                     __instance.jobsGivenThisTickTextual = "";
                     __instance.startingNewJob = false;
                     __instance.pawn.ClearReservationsForJob(newJob);
-                    JobUtility.TryStartErrorRecoverJob(__instance.pawn, __instance.pawn.ToStringSafe<Pawn>() + " started 10 jobs in one tick. newJob=" + newJob.ToStringSafe<Job>() + " jobGiver=" + jobGiver.ToStringSafe<ThinkNode>() + " jobList=" + givenThisTickTextual);
+                    JobUtility.TryStartErrorRecoverJob(__instance.pawn, __instance.pawn.ToStringSafe() + " started 10 jobs in one tick. newJob=" + newJob.ToStringSafe() + " jobGiver=" + jobGiver.ToStringSafe() + " jobList=" + text);
+                    return false;
                 }
-                else
+
+                if (__instance.debugLog)
                 {
-                    if (__instance.debugLog)
-                        __instance.DebugLogEvent("StartJob [" + (object)newJob + "] lastJobEndCondition=" + (object)lastJobEndCondition + ", jobGiver=" + (object)jobGiver + ", cancelBusyStances=" + cancelBusyStances.ToString());
-                    Pawn_StanceTracker stances = __instance.pawn.stances; //changed
-                    if (cancelBusyStances && stances != null && stances.FullBodyBusy) //changed
-                        stances.CancelBusyStanceHard();
-                    if (__instance.curJob != null)
+                    __instance.DebugLogEvent(string.Concat("StartJob [", newJob, "] lastJobEndCondition=", lastJobEndCondition, ", jobGiver=", jobGiver, ", cancelBusyStances=", cancelBusyStances.ToString()));
+                }
+                var stances = __instance.pawn.stances; //changed
+                if (cancelBusyStances && stances != null && stances.FullBodyBusy) //changed
+                {
+                    stances.CancelBusyStanceHard(); //changed
+                }
+
+                if (__instance.curJob != null)
+                {
+                    if (lastJobEndCondition == JobCondition.None)
                     {
-                        if (lastJobEndCondition == JobCondition.None)
-                        {
-                            Log.Warning(__instance.pawn.ToString() + " starting job " + (object)newJob + " from JobGiver " + (object)newJob.jobGiver + " while already having job " + (object)__instance.curJob + " without a specific job end condition.");
-                            lastJobEndCondition = JobCondition.InterruptForced;
-                        }
-                        if (resumeCurJobAfterwards && __instance.curJob.def.suspendable)
-                        {
-                            __instance.jobQueue.EnqueueFirst(__instance.curJob);
-                            if (__instance.debugLog)
-                                __instance.DebugLogEvent("   JobQueue EnqueueFirst curJob: " + (object)__instance.curJob);
-                            __instance.CleanupCurrentJob(lastJobEndCondition, false, cancelBusyStances);
-                        }
-                        else
-                            __instance.CleanupCurrentJob(lastJobEndCondition, true, cancelBusyStances, canReturnCurJobToPool);
+                        Log.Warning(string.Concat(__instance.pawn, " starting job ", newJob, " from JobGiver ", newJob.jobGiver, " while already having job ", __instance.curJob, " without a specific job end condition."));
+                        lastJobEndCondition = JobCondition.InterruptForced;
                     }
-                    if (newJob == null)
+
+                    if (resumeCurJobAfterwards && __instance.curJob.def.suspendable)
                     {
-                        Log.Warning(__instance.pawn.ToString() + " tried to start doing a null job.");
+                        __instance.jobQueue.EnqueueFirst(__instance.curJob);
+                        if (__instance.debugLog)
+                        {
+                            __instance.DebugLogEvent("   JobQueue EnqueueFirst curJob: " + __instance.curJob);
+                        }
+
+                        __instance.CleanupCurrentJob(lastJobEndCondition, releaseReservations: false, cancelBusyStances);
                     }
                     else
                     {
-                        newJob.startTick = Find.TickManager.TicksGame;
-                        if (__instance.pawn.Drafted || newJob.playerForced)
-                        {
-                            newJob.ignoreForbidden = true;
-                            newJob.ignoreDesignations = true;
-                        }
-                        __instance.curJob = newJob;
-                        __instance.curJob.jobGiverThinkTree = thinkTree;
-                        __instance.curJob.jobGiver = jobGiver;
-                        JobDriver cDriver = __instance.curJob.MakeDriver(__instance.pawn); //changed
-                        __instance.curDriver = cDriver; //changed
-                        bool flag = fromQueue;
-                        if (__instance.curDriver.TryMakePreToilReservations(!flag))
-                        {
-                            Job newJob1 = __instance.TryOpportunisticJob(newJob);
-                            if (newJob1 != null)
-                            {
-                                __instance.jobQueue.EnqueueFirst(newJob);
-                                __instance.curJob = (Job)null;
-                                __instance.curDriver = (JobDriver)null;
-                                __instance.StartJob(newJob1);
-                            }
-                            else
-                            {
-                                if (tag.HasValue)
-                                    __instance.pawn.mindState.lastJobTag = tag.Value;
-                                cDriver.SetInitialPosture(); //changed
-                                cDriver.Notify_Starting(); //changed
-                                cDriver.SetupToils(); //changed
-                                cDriver.ReadyForNextToil(); //changed
-                            }
-                        }
-                        else if (flag)
-                        {
-                            __instance.EndCurrentJob(JobCondition.QueuedNoLongerValid);
-                        }
-                        else
-                        {
-                            Log.Warning("TryMakePreToilReservations() returned false for a non-queued job right after StartJob(). This should have been checked before. curJob=" + __instance.curJob.ToStringSafe<Job>());
-                            __instance.EndCurrentJob(JobCondition.Errored);
-                        }
+                        __instance.CleanupCurrentJob(lastJobEndCondition, releaseReservations: true, cancelBusyStances, canReturnCurJobToPool);
                     }
+                }
+
+                if (newJob == null)
+                {
+                    Log.Warning(string.Concat(__instance.pawn, " tried to start doing a null job."));
+                    return false;
+                }
+
+                newJob.startTick = Find.TickManager.TicksGame;
+                if (__instance.pawn.Drafted || newJob.playerForced)
+                {
+                    newJob.ignoreForbidden = true;
+                    newJob.ignoreDesignations = true;
+                }
+
+                __instance.curJob = newJob;
+                __instance.curJob.jobGiverThinkTree = thinkTree;
+                __instance.curJob.jobGiver = jobGiver;
+                JobDriver cDriver = __instance.curJob.MakeDriver(__instance.pawn); //changed
+                __instance.curDriver = cDriver; //changed
+                bool flag = fromQueue;
+                if (__instance.curDriver.TryMakePreToilReservations(!flag))
+                {
+                    Job job = __instance.TryOpportunisticJob(newJob);
+                    if (job != null)
+                    {
+                        __instance.jobQueue.EnqueueFirst(newJob);
+                        __instance.curJob = null;
+                        __instance.curDriver = null;
+                        __instance.StartJob(job);
+                        return false;
+                    }
+#if RW13
+                    if (tag.HasValue)
+                    {
+                        if (tag == JobTag.Fieldwork && __instance.pawn.mindState.lastJobTag != tag)
+                        {
+                            foreach (Pawn item in PawnUtility.SpawnedMasteredPawns(__instance.pawn))
+                            {
+                                item.jobs.Notify_MasterStartedFieldWork();
+                            }
+                        }
+                        __instance.pawn.mindState.lastJobTag = tag.Value;
+                    }
+
+                    if (!__instance.pawn.Destroyed && __instance.pawn.ShouldDropCarriedThingBeforeJob(__instance.curJob))
+                    {
+                        if (DebugViewSettings.logCarriedBetweenJobs)
+                        {
+                            Log.Message($"Dropping {__instance.pawn.carryTracker.CarriedThing} before starting job {newJob}");
+                        }
+
+                        __instance.pawn.carryTracker.TryDropCarriedThing(__instance.pawn.Position, ThingPlaceMode.Near, out Thing _);
+                    }                    
+#endif
+                    cDriver.SetInitialPosture(); //changed
+                    cDriver.Notify_Starting(); //changed
+                    cDriver.SetupToils(); //changed
+                    cDriver.ReadyForNextToil(); //changed
+                }
+                else if (flag)
+                {
+                    __instance.EndCurrentJob(JobCondition.QueuedNoLongerValid);
+                }
+                else
+                {
+                    Log.Warning("TryMakePreToilReservations() returned false for a non-queued job right after StartJob(). This should have been checked before. curJob=" + __instance.curJob.ToStringSafe());
+                    __instance.EndCurrentJob(JobCondition.Errored);
                 }
             }
             finally

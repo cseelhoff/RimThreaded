@@ -280,13 +280,20 @@ namespace RimThreaded
 		public static void DeregisterHaulableItem(Thing haulableThing)
 		{
 			Map map = haulableThing.Map;
-			if (map != null)
+			int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
+			if (map == null)
 			{
-				int storagePriority = (int)StoreUtility.CurrentStoragePriorityOf(haulableThing);
-				getWaitingForZoneBetterThan(map)[storagePriority].Remove(haulableThing);
+				foreach (Map knownMap in waitingForZoneBetterThanMapDict.Keys)
+				{
+					getWaitingForZoneBetterThan(knownMap)[storagePriority].Remove(haulableThing);
+				}
 				RemoveThingFromAwaitingHaulingHashSets(haulableThing);
+				return;
 			}
+			getWaitingForZoneBetterThan(map)[storagePriority].Remove(haulableThing);
+			RemoveThingFromAwaitingHaulingHashSets(haulableThing);
 		}
+
 		private static HashSet<Thing>[] getWaitingForZoneBetterThan(Map map)
         {
 			if(!waitingForZoneBetterThanMapDict.TryGetValue(map, out HashSet<Thing>[] waitingForZoneBetterThan)) {

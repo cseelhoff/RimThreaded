@@ -45,9 +45,9 @@ namespace RimThreaded
         internal static void AddFieldReplacements()
         {
             Dictionary<OpCode, MethodInfo> regionTraverserReplacements = new Dictionary<OpCode, MethodInfo>();
-            regionTraverserReplacements.Add(OpCodes.Ldfld, Method(typeof(Region_Patch), "GetRegionClosedIndex"));
-            regionTraverserReplacements.Add(OpCodes.Stfld, Method(typeof(Region_Patch), "SetRegionClosedIndex"));
-            RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), "closedIndex"), regionTraverserReplacements);
+            regionTraverserReplacements.Add(OpCodes.Ldfld, Method(typeof(Region_Patch), nameof(GetRegionClosedIndex)));
+            regionTraverserReplacements.Add(OpCodes.Stfld, Method(typeof(Region_Patch), nameof(SetRegionClosedIndex)));
+            RimThreadedHarmony.replaceFields.Add(Field(typeof(Region), nameof(Region.closedIndex)), regionTraverserReplacements);
         }
 #if RW12
         public static bool get_Room(Region __instance, ref Room __result)

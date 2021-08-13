@@ -285,7 +285,7 @@ namespace RimThreaded
 					if (job3 != null)
 					{
 						job3.workGiverDef = scannerWhoProvidedTarget.def;
-						__result = new ThinkResult(job3, __instance, list[j].def.tagToGive);
+						__result = new ThinkResult(job3, __instance, workGiver.def.tagToGive);
 						return false;
 					}
 
@@ -294,11 +294,13 @@ namespace RimThreaded
                     {
                         Map map = pawn.Map;
                         IntVec3 cell = bestTargetOfLastPriority.Cell;
-						PlantSowing_Cache.ReregisterObject(map, cell, WorkGiver_Grower_Patch.awaitingPlantCellsMapDict);
+						JumboCell.ReregisterObject(map, cell, RimThreaded.plantSowing_Cache);
                     }
 					//HACK - I know. I'm awful.
 					//Log.ErrorOnce(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."), 6112651);
-					Log.Warning(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."));
+					if (Prefs.LogVerbose) {
+						Log.Warning(string.Concat(scannerWhoProvidedTarget, " provided target ", bestTargetOfLastPriority, " but yielded no actual job for pawn ", pawn, ". The CanGiveJob and JobOnX methods may not be synchronized."));
+					}
 				}
 				num = workGiver.def.priorityInType;
 

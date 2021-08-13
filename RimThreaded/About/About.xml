@@ -11,9 +11,14 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.5.8 - Vader's Imperial Shuttle
-    -Fixed bug with shuttles not taking off
-    -Fixed bug with roofed rooms showing as unroofed
+    Version 2.5.10 - Jawa Sandcrawler
+    -Fixed Hydroponics Bug
+    -Optimized Planting Caches and Sowing Caches
+    -Fixed Hauling Priorities bug
+    -Fixed bug with caravans and riders leaving the map
+    -Fixed bug when pawns not taking damage prior to being placed on map
+    -Added compatibility for new AndroidTiers mod
+    -Fixed misc Royalty bugs
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 

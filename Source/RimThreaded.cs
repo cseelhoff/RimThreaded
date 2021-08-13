@@ -35,6 +35,9 @@ namespace RimThreaded
         public static ConcurrentQueue<Tuple<SoundDef, SoundInfo>> PlayOneShot = new ConcurrentQueue<Tuple<SoundDef, SoundInfo>>();
         public static ConcurrentQueue<Tuple<SoundDef, Map>> PlayOneShotCamera = new ConcurrentQueue<Tuple<SoundDef, Map>>();
 
+        public static PlantHarvest_Cache plantHarvest_Cache = new PlantHarvest_Cache();
+        public static PlantSowing_Cache plantSowing_Cache = new PlantSowing_Cache();
+
         //ThingListTicks
         public static List<Thing> thingListNormal;
         public static int thingListNormalTicks = 0;
@@ -153,12 +156,12 @@ namespace RimThreaded
                 prepareAction = Map_Patch.MapsPostTickPrepare,
                 tickAction = Map_Patch.MapPostListTick
             },
+#if RW13
             new ThreadedTickList
             {
                 prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
                 tickAction = TransportShipManager_Patch.ShipObjectsTick
             }
-#if RW13
             ,
             new ThreadedTickList
             {
@@ -209,6 +212,7 @@ namespace RimThreaded
             HediffSet_Patch.InitializeThreadStatics();
             PathFinder_Patch.InitializeThreadStatics();
             PawnPathPool_Patch.InitializeThreadStatics();
+            JumboCell.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
             Region_Patch.InitializeThreadStatics();

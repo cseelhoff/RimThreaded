@@ -2,18 +2,19 @@
 using System;
 using System.Reflection;
 using Verse;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreadedHarmony;
 
 namespace RimThreaded.Mod_Patches
 {
-    class AndroidTiers_Patch
-    {
-
-        public static Type androidTiers_GeneratePawns_Patch1;
-        public static Type androidTiers_GeneratePawns_Patch;
-        public static void Patch()
-        {
+	class AndroidTiers_Patch
+	{
+		public static Type androidTiers_GeneratePawns_Patch1;
+		public static Type androidTiers_GeneratePawns_Patch;
+		public static void Patch()
+		{
 
 			androidTiers_GeneratePawns_Patch1 = TypeByName("MOARANDROIDS.PawnGroupMakerUtility_Patch");
 			if (androidTiers_GeneratePawns_Patch1 != null)
@@ -30,7 +31,36 @@ namespace RimThreaded.Mod_Patches
 				Log.Message("Utility_Patch_Transpile::Listener != null: " + (Method(patched, "Listener") != null));
 				Transpile(androidTiers_GeneratePawns_Patch, patched, methodName);
 			}
+			Type androidTiers_Utils = TypeByName("MOARANDROIDS.Utils");
+			if (androidTiers_Utils != null)
+			{
+				string methodName = nameof(getCachedCSM);
+				Log.Message("RimThreaded is patching " + androidTiers_Utils.FullName + " " + methodName);
+				Transpile(androidTiers_Utils, typeof(AndroidTiers_Patch), methodName);
+			}
+		}
+		public static void set_Item(Dictionary<Thing, object> CSM, Thing t, object j)
+		{
+			lock (CSM)
+			{
+				CSM[t] = j;
+			}
+		}
+		public static IEnumerable<CodeInstruction> getCachedCSM(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			Type ThingToCompSkyMind = typeof(Dictionary<,>).MakeGenericType(new[] { typeof(Thing), TypeByName("MOARANDROIDS.CompSkyMind") });
+			foreach (CodeInstruction i in instructions)
+			{
+				if (i.opcode == OpCodes.Callvirt)
+				{//CompSkyMind
+					if ((MethodInfo)i.operand == Method(ThingToCompSkyMind, "set_Item"))
+					{
+						i.operand = Method(typeof(AndroidTiers_Patch), nameof(set_Item));
+					}
+				}
+				yield return i;
+			}
 		}
 
-    }
+	}
 }
