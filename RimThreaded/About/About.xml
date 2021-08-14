@@ -11,10 +11,8 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.5.11 - Uparmored Jawa Sandcrawler
-    -Fixed GenCollection.RemoveAll bug
-    -Fixed Roof Notification bug
-    -Fixed Shuttle bug
+    Version 2.5.12 - Obsolete Droids  
+    -Fixed bug when using Android Tiers with RW 1.2  
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 

@@ -5,7 +5,7 @@ using Verse;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreadedHarmony;
 
-namespace RimThreaded
+namespace RimThreaded.Mod_Patches
 {
 	class JobsOfOppurtunity_Patch
 	{
