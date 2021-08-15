@@ -69,12 +69,12 @@ namespace RimThreaded
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
 			Texture_Patch.RunDestructivePatches();
+			GraphicsFormatUtility_Patch.RunDestructivePatches();
 			replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), nameof(Time_Patch.get_frameCount)));
 			replaceFields.Add(Method(typeof(Time), "get_time"), Method(typeof(Time_Patch), nameof(Time_Patch.get_time)));
 			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), nameof(Component_Patch.get_transform)));
 			replaceFields.Add(Method(typeof(Component), "get_gameObject"), Method(typeof(Component_Patch), nameof(Component_Patch.get_gameObject)));
 			replaceFields.Add(Method(typeof(GameObject), "get_transform"), Method(typeof(GameObject_Patch), nameof(Component_Patch.get_transform)));
-			
 			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes), Method(typeof(GameObject_Patch), "GetComponent"));
 			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes, new Type[] { typeof(AudioReverbFilter) }),
 			//	Method(typeof(GameObject_Patch), "GetComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioReverbFilter) }));
