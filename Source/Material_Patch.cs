@@ -75,24 +75,35 @@ namespace RimThreaded
 
         private static readonly Action<object[]> ActionSetTextureOffsetImpl2 = parameters =>
             ActionSetTextureOffsetImpl((Material)parameters[0], (int)parameters[1], (Vector2)parameters[2]);
+
+        private static readonly MethodInfo methodget_mainTexture =
+            Method(typeof(Material), "get_mainTexture", Type.EmptyTypes);
+        private static readonly Func<Material, Texture> funcget_mainTexture =
+            (Func<Material, Texture>)Delegate.CreateDelegate(
+                typeof(Func<Material, Texture>), methodget_mainTexture);
+
+        private static readonly Func<object[], object> funcget_mainTexture2 = parameters => funcget_mainTexture((Material)parameters[0]);
+
         internal static void RunDestructivePatches()
         {
             Type original = typeof(Material);
             Type patched = typeof(Material_Patch);
             RimThreadedHarmony.harmony.Patch(Method(original, "SetFloat", new[] { typeof(string), typeof(float) }),
-                prefix: new HarmonyMethod(Method(patched, "SetStringFloat")));
+                prefix: new HarmonyMethod(Method(patched, nameof(SetStringFloat))));
             RimThreadedHarmony.harmony.Patch(Method(original, "SetFloat", new[] { typeof(int), typeof(float) }),
-                prefix: new HarmonyMethod(Method(patched, "SetIntFloat")));
+                prefix: new HarmonyMethod(Method(patched, nameof(SetIntFloat))));
             RimThreadedHarmony.harmony.Patch(Method(original, "SetInt", new[] { typeof(string), typeof(int) }),
-                prefix: new HarmonyMethod(Method(patched, "SetStringInt")));
+                prefix: new HarmonyMethod(Method(patched, nameof(SetStringInt))));
             RimThreadedHarmony.harmony.Patch(Method(original, "SetInt", new[] { typeof(int), typeof(int) }),
-                prefix: new HarmonyMethod(Method(patched, "SetIntInt")));
+                prefix: new HarmonyMethod(Method(patched, nameof(SetIntInt))));
+            RimThreadedHarmony.harmony.Patch(Method(original, "get_mainTexture", Type.EmptyTypes),
+                prefix: new HarmonyMethod(Method(patched, nameof(get_mainTexture))));
             RimThreadedHarmony.harmony.Patch(Method(original, "GetTextureScaleAndOffsetImpl", new[] { typeof(int) }),
-                prefix: new HarmonyMethod(Method(patched, "GetTextureScaleAndOffsetImpl")));
+                prefix: new HarmonyMethod(Method(patched, nameof(GetTextureScaleAndOffsetImpl))));
             RimThreadedHarmony.harmony.Patch(Method(original, "HasProperty", new[] { typeof(string) }),
-                prefix: new HarmonyMethod(Method(patched, "HasProperty")));
+                prefix: new HarmonyMethod(Method(patched, nameof(HasProperty))));
             RimThreadedHarmony.harmony.Patch(Method(original, "SetTextureOffsetImpl", new[] { typeof(int), typeof(Vector2) }),
-                prefix: new HarmonyMethod(Method(patched, "SetTextureOffsetImpl")));
+                prefix: new HarmonyMethod(Method(patched, nameof(SetTextureOffsetImpl))));
         }
 
 
@@ -105,6 +116,16 @@ namespace RimThreaded
             mainThreadWaitHandle.Set();
             threadInfo.eventWaitStart.WaitOne();
             __result = (bool)threadInfo.safeFunctionResult;
+            return false;
+        }
+        public static bool get_mainTexture(Material __instance, ref Texture __result)
+        {
+            if (!CurrentThread.IsBackground || !allWorkerThreads.TryGetValue(CurrentThread, out ThreadInfo threadInfo))
+                return true;
+            threadInfo.safeFunctionRequest = new object[] { funcget_mainTexture2, new object[] { __instance } };
+            mainThreadWaitHandle.Set();
+            threadInfo.eventWaitStart.WaitOne();
+            __result = (Texture)threadInfo.safeFunctionResult;
             return false;
         }
         public static bool GetTextureScaleAndOffsetImpl(Material __instance, ref Vector4 __result, int name)

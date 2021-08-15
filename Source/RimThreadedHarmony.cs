@@ -63,15 +63,18 @@ namespace RimThreaded
 			PathFinder_Patch.AddFieldReplacements();
 			Region_Patch.AddFieldReplacements();
 			replaceFields.Add(Method(typeof(Time), "get_realtimeSinceStartup"), Method(typeof(Time_Patch), nameof(Time_Patch.get_realtimeSinceStartup)));
+			replaceFields.Add(Method(typeof(RenderTexture), nameof(RenderTexture.ReleaseTemporary)), Method(typeof(RenderTexture_Patch), nameof(RenderTexture_Patch.ReleaseTemporary)));
 #if DEBUG
 			Material_Patch.RunDestructivePatches();
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
+			Texture_Patch.RunDestructivePatches();
 			replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), nameof(Time_Patch.get_frameCount)));
 			replaceFields.Add(Method(typeof(Time), "get_time"), Method(typeof(Time_Patch), nameof(Time_Patch.get_time)));
 			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), nameof(Component_Patch.get_transform)));
 			replaceFields.Add(Method(typeof(Component), "get_gameObject"), Method(typeof(Component_Patch), nameof(Component_Patch.get_gameObject)));
 			replaceFields.Add(Method(typeof(GameObject), "get_transform"), Method(typeof(GameObject_Patch), nameof(Component_Patch.get_transform)));
+			
 			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes), Method(typeof(GameObject_Patch), "GetComponent"));
 			//replaceFields.Add(Method(typeof(GameObject), "GetComponent", Type.EmptyTypes, new Type[] { typeof(AudioReverbFilter) }),
 			//	Method(typeof(GameObject_Patch), "GetComponent", new Type[] { typeof(GameObject) }, new Type[] { typeof(AudioReverbFilter) }));
@@ -239,28 +242,34 @@ namespace RimThreaded
 		private static void ApplyFieldReplacements()
 		{
 			List<MethodBase> MethodsFromCache = new List<MethodBase>();
+			HashSet<string> AssembliesToPatch = new HashSet<string>()
+			{
+				"Assembly-CSharp.dll",
+				"GiddyUpCore.dll"
+			};
 			foreach (Assembly assembly in assemblies)
 			{
-				if (Prefs.LogVerbose)
+				//Log.Message(assembly.ManifestModule.ScopeName);
+				if (AssembliesToPatch.Contains(assembly.ManifestModule.ScopeName))
 				{
-					Verse.Log.Message("RimThreaded is attempting to load replacements from cache for assembly: " + assembly.FullName);
-				}
-				if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache))
-				{
-					foreach (MethodBase method in MethodsFromCache)
+					if (Prefs.LogVerbose)
 					{
-#if false
-						if (Prefs.LogVerbose)
-						{
-							Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
-						}
-#endif
-						TranspileFieldReplacements(method);
+						Verse.Log.Message("RimThreaded is attempting to load replacements from cache for assembly: " + assembly.FullName);
 					}
-				}
-				else
-				{
-					if (assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+					if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache))
+					{
+						foreach (MethodBase method in MethodsFromCache)
+						{
+#if false
+							if (Prefs.LogVerbose)
+							{
+								Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
+							}
+#endif
+							TranspileFieldReplacements(method);
+						}
+					}
+					else
 					{
 						Type[] types = GetTypesFromAssembly(assembly);
 						foreach (Type type in types)
