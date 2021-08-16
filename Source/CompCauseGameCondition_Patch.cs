@@ -13,9 +13,9 @@ namespace RimThreaded
         {
             Type original = typeof(CompCauseGameCondition);
             Type patched = typeof(CompCauseGameCondition_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetConditionInstance");
-            RimThreadedHarmony.Prefix(original, patched, "CreateConditionOn");
-            RimThreadedHarmony.Prefix(original, patched, "CompTick");
+            RimThreadedHarmony.Prefix(original, patched, nameof(GetConditionInstance));
+            RimThreadedHarmony.Prefix(original, patched, nameof(CreateConditionOn));
+            RimThreadedHarmony.Prefix(original, patched, nameof(CompTick));
         }
 
         public static void InitializeThreadStatics()
@@ -34,7 +34,7 @@ namespace RimThreaded
                     {
                         __instance.causedConditions.Add(map, value);
                     }
-                    value.suppressEndMessage = true;
+                    __instance.SetupCondition(value, map);
                 }
             }
 
@@ -51,7 +51,7 @@ namespace RimThreaded
             {
                 __instance.causedConditions.Add(map, gameCondition);
             }
-            gameCondition.suppressEndMessage = true;
+            __instance.SetupCondition(gameCondition, map);
             __result = gameCondition;
             return false;
         }

@@ -838,7 +838,6 @@ namespace RimThreaded
 			WorldComponentUtility_Patch.RunDestructivePatches(); //allows multithreaded icking of WorldComponentUtility
 			WorldObjectsHolder_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
 			WorldPawns_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
-
 			Archive_Patch.RunDestructivePatches(); //explosions fix
 			Alert_ColonistLeftUnburied_Patch.RunDestructivePatches(); //1.3 explosions fix
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
@@ -874,7 +873,7 @@ namespace RimThreaded
 			GoodwillSituationManager_Patch.RunDestructivePatches(); //initial 1.3 patch
 			GoodwillSituationWorker_MemeCompatibility_Patch.RunDestructivePatches(); //initial 1.3 patch
 			GridsUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix
-
+			
 			//GrammarResolver_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
 			HediffSet_Patch.RunDestructivePatches();

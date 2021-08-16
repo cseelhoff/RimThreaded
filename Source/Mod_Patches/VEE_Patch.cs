@@ -47,7 +47,7 @@ namespace RimThreaded.Mod_Patches
         {
             lock (MapComp_Drought)
             {
-                MapComp_Drought.Add(m,j);
+                MapComp_Drought[m] = j;
             }
         }
         public static bool TryGetValue(Dictionary<Map, object> MapComp_Drought, Map m, out object j)
