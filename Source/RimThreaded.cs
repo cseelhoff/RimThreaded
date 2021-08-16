@@ -162,12 +162,6 @@ namespace RimThreaded
                 prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
                 tickAction = TransportShipManager_Patch.ShipObjectsTick
             }
-            ,
-            new ThreadedTickList
-            {
-                prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
-                tickAction = TransportShipManager_Patch.ShipObjectsTick
-            }
 #endif
         };
         public static void RestartAllWorkerThreads()
@@ -419,15 +413,14 @@ namespace RimThreaded
                     {
                         if (threadInfo.timeoutExempt == 0)
                         {
-                            Log.Error("Thread: " + threadInfo.thread + " did not finish within " + timeoutMS + "ms. Restarting thread...");
-                            Thread thread = threadPair.Key;
-                            thread.Abort();
-                            allWorkerThreads.Remove(thread);
-                            CreateWorkerThread();
+                            AbortThread(threadInfo, threadPair.Key);
                         }
                         else
                         {
-                            threadInfo.eventWaitDone.WaitOne(threadInfo.timeoutExempt);
+                            if (!threadInfo.eventWaitDone.WaitOne(threadInfo.timeoutExempt))
+                            {
+                                AbortThread(threadInfo, threadPair.Key);
+                            }
                             threadInfo.timeoutExempt = 0;
                         }
                     }
@@ -435,6 +428,14 @@ namespace RimThreaded
                 allWorkerThreadsFinished = true;
                 mainThreadWaitHandle.Set();
             }
+        }
+
+        public static void AbortThread(ThreadInfo threadInfo, Thread thread)
+        {
+            Log.Error("Thread: " + threadInfo.thread + " did not finish within " + timeoutMS + "ms. Restarting thread...");
+            thread.Abort();
+            allWorkerThreads.Remove(thread);
+            CreateWorkerThread();
         }
 
         public static int frameCount = 0;

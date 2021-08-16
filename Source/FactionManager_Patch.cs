@@ -14,15 +14,13 @@ namespace RimThreaded
         {
             Type original = typeof(FactionManager);
             Type patched = typeof(FactionManager_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "FactionManagerTick");
+            RimThreadedHarmony.Prefix(original, patched, nameof(FactionManagerTick));
         }
         
         public static bool FactionManagerTick(FactionManager __instance)
         {
             SettlementProximityGoodwillUtility.CheckSettlementProximityGoodwillChange();
 
-            allFactionsTickList = __instance.allFactions;
-            allFactionsTicks = allFactionsTickList.Count;
             lock (__instance)
             {
                 List<Faction> newList = __instance.toRemove;
@@ -32,9 +30,13 @@ namespace RimThreaded
                     newList.Remove(faction);
                     __instance.toRemove = newList;
                     __instance.Remove(faction);
+#if RW12
                     Find.QuestManager.Notify_FactionRemoved(faction);
+#endif
                 }
             }
+            allFactionsTickList = __instance.allFactions;
+            allFactionsTicks = allFactionsTickList.Count;
             return false;
         }
         public static List<Faction> allFactionsTickList;
