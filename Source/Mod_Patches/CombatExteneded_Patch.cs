@@ -33,6 +33,24 @@ namespace RimThreaded.Mod_Patches
 				Transpile(combatExtendedCE_Utility, patched, methodName);
 			}
 
+
+			Type CE_ThingsTrackingModel = TypeByName("CombatExtended.Utilities.ThingsTrackingModel");
+			if (CE_ThingsTrackingModel != null)
+            {
+				string methodName = "Register";
+				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName);
+				RimThreadedHarmony.TranspileMethodLock(CE_ThingsTrackingModel, methodName);
+				string methodName2 = "DeRegister";
+				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName2);
+				RimThreadedHarmony.TranspileMethodLock(CE_ThingsTrackingModel, methodName2);
+				string methodName3 = "Notify_ThingPositionChanged";
+				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName3);
+				RimThreadedHarmony.TranspileMethodLock(CE_ThingsTrackingModel, methodName3);//lock should be reentrant otherwise this is an obvious deadlock.
+				//string methodName4 = "ThingsInRangeOf";ThingsInRangeOf
+				//Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName4);
+				//RimThreadedHarmony.TranspileMethodLock(CE_ThingsTrackingModel, methodName4);
+			}
+
 			//if (combatExtendedVerb_LaunchProjectileCE != null)
 			//{
 			//	string methodName = "CanHitFromCellIgnoringRange";
