@@ -16,7 +16,7 @@ namespace RimThreaded
         {
             Type original = typeof(Pawn_PlayerSettings);
             Type patched = typeof(Pawn_PlayerSettings_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "set_Master");
+            RimThreadedHarmony.Prefix(original, patched, nameof(set_Master));
         }
 
         public static bool set_Master(Pawn_PlayerSettings __instance, Pawn value)
@@ -40,7 +40,7 @@ namespace RimThreaded
                 }
             }
             __instance.master = null;
-            if (!__instance.pawn.training.HasLearned(TrainableDefOf.Obedience))
+            if (value != null && !__instance.pawn.training.HasLearned(TrainableDefOf.Obedience))
             {
                 Log.ErrorOnce("Attempted to set master for non-obedient pawn", 73908573);
                 return false;

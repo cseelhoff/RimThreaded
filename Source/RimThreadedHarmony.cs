@@ -63,10 +63,13 @@ namespace RimThreaded
 			PathFinder_Patch.AddFieldReplacements();
 			Region_Patch.AddFieldReplacements();
 			replaceFields.Add(Method(typeof(Time), "get_realtimeSinceStartup"), Method(typeof(Time_Patch), nameof(Time_Patch.get_realtimeSinceStartup)));
+			replaceFields.Add(Method(typeof(RenderTexture), nameof(RenderTexture.ReleaseTemporary)), Method(typeof(RenderTexture_Patch), nameof(RenderTexture_Patch.ReleaseTemporary)));
 #if DEBUG
 			Material_Patch.RunDestructivePatches();
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
+			Texture_Patch.RunDestructivePatches();
+			GraphicsFormatUtility_Patch.RunDestructivePatches();
 			replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), nameof(Time_Patch.get_frameCount)));
 			replaceFields.Add(Method(typeof(Time), "get_time"), Method(typeof(Time_Patch), nameof(Time_Patch.get_time)));
 			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), nameof(Component_Patch.get_transform)));
@@ -239,28 +242,34 @@ namespace RimThreaded
 		private static void ApplyFieldReplacements()
 		{
 			List<MethodBase> MethodsFromCache = new List<MethodBase>();
+			HashSet<string> AssembliesToPatch = new HashSet<string>()
+			{
+				"Assembly-CSharp.dll",
+				"GiddyUpCore.dll"
+			};
 			foreach (Assembly assembly in assemblies)
 			{
-				if (Prefs.LogVerbose)
+				//Log.Message(assembly.ManifestModule.ScopeName);
+				if (AssembliesToPatch.Contains(assembly.ManifestModule.ScopeName))
 				{
-					Verse.Log.Message("RimThreaded is attempting to load replacements from cache for assembly: " + assembly.FullName);
-				}
-				if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache))
-				{
-					foreach (MethodBase method in MethodsFromCache)
+					if (Prefs.LogVerbose)
 					{
-#if false
-						if (Prefs.LogVerbose)
-						{
-							Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
-						}
-#endif
-						TranspileFieldReplacements(method);
+						Verse.Log.Message("RimThreaded is attempting to load replacements from cache for assembly: " + assembly.FullName);
 					}
-				}
-				else
-				{
-					if (assembly.ManifestModule.Name.Equals("Assembly-CSharp.dll"))
+					if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache))
+					{
+						foreach (MethodBase method in MethodsFromCache)
+						{
+#if false
+							if (Prefs.LogVerbose)
+							{
+								Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
+							}
+#endif
+							TranspileFieldReplacements(method);
+						}
+					}
+					else
 					{
 						Type[] types = GetTypesFromAssembly(assembly);
 						foreach (Type type in types)
@@ -829,7 +838,6 @@ namespace RimThreaded
 			WorldComponentUtility_Patch.RunDestructivePatches(); //allows multithreaded icking of WorldComponentUtility
 			WorldObjectsHolder_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
 			WorldPawns_Patch.RunDestructivePatches(); //Class was largely overhauled to allow multithreaded ticking for WorldPawns.Tick()
-
 			Archive_Patch.RunDestructivePatches(); //explosions fix
 			Alert_ColonistLeftUnburied_Patch.RunDestructivePatches(); //1.3 explosions fix
 			Alert_MinorBreakRisk_Patch.RunDestructivePatches(); //performance rewrite
@@ -865,7 +873,7 @@ namespace RimThreaded
 			GoodwillSituationManager_Patch.RunDestructivePatches(); //initial 1.3 patch
 			GoodwillSituationWorker_MemeCompatibility_Patch.RunDestructivePatches(); //initial 1.3 patch
 			GridsUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix
-
+			
 			//GrammarResolver_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
 			HediffSet_Patch.RunDestructivePatches();
@@ -969,6 +977,7 @@ namespace RimThreaded
 			MapReroll_Patch.Patch();
 			PawnRules_Patch.Patch();
 			ZombieLand_Patch.Patch();
+			VEE_Patch.Patch();
 		}
 		private static void FullPool_Patch_RunNonDestructivePatches()
 		{

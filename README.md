@@ -38,6 +38,14 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.12 - Obsolete Droids  
+-Fixed bug when using Android Tiers with RW 1.2  
+-Added Vanilla Events Extended Compatibility  
+-Added thread-safety for CombatExtended.Utilities.ThingsTrackingModel  
+-Fixed A psychic droner tuned to the None gender is driving Nones mad #434  
+-Removed outdated mod compatibility patches  
+-Added GiddyUp Compatibility  
+
 Version 2.5.11 - Uparmored Jawa Sandcrawler  
 -Fixed GenCollection.RemoveAll bug  
 -Fixed Roof Notification bug  
