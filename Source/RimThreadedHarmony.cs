@@ -58,6 +58,7 @@ namespace RimThreaded
 		private static void AddAdditionalReplacements()
 		{
 			SimplePool_Patch_RunNonDestructivePatches();
+			GraphicDatabase_Patch.RunNonDestructivePatches();
 			FullPool_Patch_RunNonDestructivePatches();
 			Dijkstra_Patch_RunNonDestructivePatches();
 			PathFinder_Patch.AddFieldReplacements();
@@ -245,6 +246,7 @@ namespace RimThreaded
 			HashSet<string> AssembliesToPatch = new HashSet<string>()
 			{
 				"Assembly-CSharp.dll",
+				"VFECore.dll",
 				"GiddyUpCore.dll"
 			};
 			foreach (Assembly assembly in assemblies)
@@ -280,6 +282,10 @@ namespace RimThreaded
 
 							foreach (MethodBase method in allMethods)
 							{
+								if(method.Name.Contains("GetColoredVersion"))
+                                {
+									Log.Message("GetColoredVersion");
+                                }
 								if (method.IsDeclaredMember())
 								{
 									try
@@ -302,6 +308,8 @@ namespace RimThreaded
 										}
 									}
 									catch (NotSupportedException) { }
+									catch (TypeInitializationException) { }
+									catch (Exception) { }
 								}
 							}
 						}
@@ -1062,6 +1070,7 @@ namespace RimThreaded
 				Method(typeof(SimplePool_Patch<Job>), "get_FreeItemsCount"));
 
 		}
+
 
 		private static void Dijkstra_Patch_RunNonDestructivePatches()
 		{

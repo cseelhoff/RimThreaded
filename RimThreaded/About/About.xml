@@ -11,13 +11,13 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.5.12 - Obsolete Droids  
-    -Fixed bug when using Android Tiers with RW 1.2  
-    -Added Vanilla Events Extended Compatibility  
-    -Added thread-safety for CombatExtended.Utilities.ThingsTrackingModel  
-    -Fixed A psychic droner tuned to the None gender is driving Nones mad #434  
-    -Removed outdated mod compatibility patches  
-    -Added GiddyUp Compatibility  
+    Version 2.5.12 - Obsolete Droids
+    -Fixed bug when using Android Tiers with RW 1.2
+    -Added Vanilla Events Extended Compatibility
+    -Added thread-safety for CombatExtended.Utilities.ThingsTrackingModel
+    -Fixed A psychic droner tuned to the None gender is driving Nones mad #434
+    -Removed outdated mod compatibility patches
+    -Added GiddyUp Compatibility
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
@@ -41,11 +41,11 @@
     https://github.com/cseelhoff/RimThreaded/issues/new/choose
 
     CREDITS:
-    Special thank you for helping me test Austin (Stanui)!
-    And thank you to others in Rimworld community who have posted their bug findings!
+    Big thanks to Sernior for his continued help bug fixing and performance tweaks!
     Big thanks to JoJo for his continued help bug fixing and adding mod compatibility!
     Big thanks to Brrainz (Pardeike) for Harmony and all of the coding help!
     Big thanks to Kiame Vivacity for his help with fixing sound!
+    Special thank you for helping me test Austin (Stanui)!
     Thank you bookdude13 for your many bugfixes!
     Thank you to Ataman for helping me fix the LVM deep storage bug!
     Thank you Ken for fixing RegionCostCalculator.PathableNeighborIndices!
@@ -53,6 +53,7 @@
     Thank you ArchieV1 for the RT 1.0 logo! https://github.com/ArchieV1
     Logo help from: Marnador https://ludeon.com/forums/index.php?action=profile;u=36313 and JKimsey https://pixabay.com/users/jkimsey-253161/
     Thank you BaRKy for reviewing my mod! I am honored! https://www.youtube.com/watch?v=EWudgTJksMU
+    And thank you to others in Rimworld community who have posted their bug findings!
 
     DONATE:
     Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded
@@ -68,7 +69,6 @@
   <incompatibleWith>
     <li>krkr.rocketman</li>
     <li>qarsoonmeel.dreamersdream</li>
-    <li>jecrell.doorsexpanded</li>
     <li>tachyonite.pawnmorpherpublic</li>
     <li>vexedtrees980.rimuhiversi</li>
     <li>ryder.turnitonoff</li>

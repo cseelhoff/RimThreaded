@@ -20,7 +20,7 @@ SUBMIT BUGS:
 https://github.com/cseelhoff/RimThreaded/issues/new/choose  
 
 CREDITS:  
-Big thanks to Sernoir for his continued help bug fixing and performance tweaks!  
+Big thanks to Sernior for his continued help bug fixing and performance tweaks!  
 Big thanks to JoJo for his continued help bug fixing and adding mod compatibility!  
 Big thanks to Brrainz (Pardeike) for Harmony and all of the coding help!
 Big thanks to Kiame Vivacity for his help with fixing sound!  
