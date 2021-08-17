@@ -10,11 +10,12 @@ namespace RimThreaded.Mod_Patches
 	class JobsOfOppurtunity_Patch
 	{
 
-		public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;
-		public static Type jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob;
+		//public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;
+		//public static Type jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob;
 
 		public static void Patch()
 		{
+			/*
 			jobsOfOpportunityJobsOfOpportunity_Hauling = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Hauling");
 			jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob = TypeByName("JobsOfOpportunity.JobsOfOpportunity+Patch_TryOpportunisticJob");
 
@@ -35,7 +36,7 @@ namespace RimThreaded.Mod_Patches
 				Log.Message("RimThreaded is patching " + jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob.FullName + " " + methodName);
 				Transpile(jobsOfOpportunityJobsOfOpportunity_Patch_TryOpportunisticJob, patched, methodName);
 			}
-
+			*/
 		}
 	}
 }

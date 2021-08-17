@@ -58,6 +58,7 @@ namespace RimThreaded
 		private static void AddAdditionalReplacements()
 		{
 			SimplePool_Patch_RunNonDestructivePatches();
+			GraphicDatabase_Patch.RunNonDestructivePatches();
 			FullPool_Patch_RunNonDestructivePatches();
 			Dijkstra_Patch_RunNonDestructivePatches();
 			PathFinder_Patch.AddFieldReplacements();
@@ -162,7 +163,7 @@ namespace RimThreaded
 			//        }
 			//    }
 			//}
-			MethodInfo initializer = Method(typeof(RimThreaded), "InitializeAllThreadStatics");
+			MethodInfo initializer = Method(typeof(RimThreaded), nameof(RimThreaded.InitializeAllThreadStatics));
 			ConstructorInfo threadStaticConstructor = typeof(ThreadStaticAttribute).GetConstructor(new Type[0]);
 			CustomAttributeBuilder attributeBuilder = new CustomAttributeBuilder(threadStaticConstructor, new object[0]);
 			AssemblyName aName = new AssemblyName("RimThreadedReplacements");
@@ -245,6 +246,7 @@ namespace RimThreaded
 			HashSet<string> AssembliesToPatch = new HashSet<string>()
 			{
 				"Assembly-CSharp.dll",
+				"VFECore.dll",
 				"GiddyUpCore.dll"
 			};
 			foreach (Assembly assembly in assemblies)
@@ -260,12 +262,6 @@ namespace RimThreaded
 					{
 						foreach (MethodBase method in MethodsFromCache)
 						{
-#if false
-							if (Prefs.LogVerbose)
-							{
-								Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
-							}
-#endif
 							TranspileFieldReplacements(method);
 						}
 					}
@@ -302,6 +298,8 @@ namespace RimThreaded
 										}
 									}
 									catch (NotSupportedException) { }
+									catch (TypeInitializationException) { }
+									catch (Exception) { }
 								}
 							}
 						}
@@ -1062,6 +1060,7 @@ namespace RimThreaded
 				Method(typeof(SimplePool_Patch<Job>), "get_FreeItemsCount"));
 
 		}
+
 
 		private static void Dijkstra_Patch_RunNonDestructivePatches()
 		{

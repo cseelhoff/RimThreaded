@@ -20,7 +20,7 @@ SUBMIT BUGS:
 https://github.com/cseelhoff/RimThreaded/issues/new/choose  
 
 CREDITS:  
-Big thanks to Sernoir for his continued help bug fixing and performance tweaks!  
+Big thanks to Sernior for his continued help bug fixing and performance tweaks!  
 Big thanks to JoJo for his continued help bug fixing and adding mod compatibility!  
 Big thanks to Brrainz (Pardeike) for Harmony and all of the coding help!
 Big thanks to Kiame Vivacity for his help with fixing sound!  
@@ -38,6 +38,11 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.13 - Jedi Temple Doors  
+-Doors Expanded now compatible  
+-ThreadSafeLinkedList decoupling and added to nuget  
+-Fixed VEE Bug with GraphicRequest.Get  
+
 Version 2.5.12 - Obsolete Droids  
 -Fixed bug when using Android Tiers with RW 1.2  
 -Added Vanilla Events Extended Compatibility  

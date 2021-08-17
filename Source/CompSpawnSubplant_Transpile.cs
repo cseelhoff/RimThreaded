@@ -5,6 +5,7 @@ using System.Reflection.Emit;
 using System.Threading;
 using HarmonyLib;
 using RimWorld;
+using ThreadSafeLinkedList;
 using Verse;
 using static HarmonyLib.AccessTools;
 
