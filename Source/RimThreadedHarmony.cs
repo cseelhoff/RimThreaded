@@ -162,7 +162,7 @@ namespace RimThreaded
 			//        }
 			//    }
 			//}
-			MethodInfo initializer = Method(typeof(RimThreaded), "InitializeAllThreadStatics");
+			MethodInfo initializer = Method(typeof(RimThreaded), nameof(RimThreaded.InitializeAllThreadStatics));
 			ConstructorInfo threadStaticConstructor = typeof(ThreadStaticAttribute).GetConstructor(new Type[0]);
 			CustomAttributeBuilder attributeBuilder = new CustomAttributeBuilder(threadStaticConstructor, new object[0]);
 			AssemblyName aName = new AssemblyName("RimThreadedReplacements");
