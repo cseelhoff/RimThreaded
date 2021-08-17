@@ -262,12 +262,6 @@ namespace RimThreaded
 					{
 						foreach (MethodBase method in MethodsFromCache)
 						{
-#if false
-							if (Prefs.LogVerbose)
-							{
-								Log.Message(string.Format("Transpiling from cache: {0} \t GUID: {1}", assembly.ManifestModule.Name, assembly.ManifestModule.ModuleVersionId.ToString()));
-							}
-#endif
 							TranspileFieldReplacements(method);
 						}
 					}
@@ -282,10 +276,6 @@ namespace RimThreaded
 
 							foreach (MethodBase method in allMethods)
 							{
-								if(method.Name.Contains("GetColoredVersion"))
-                                {
-									Log.Message("GetColoredVersion");
-                                }
 								if (method.IsDeclaredMember())
 								{
 									try
