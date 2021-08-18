@@ -8,10 +8,6 @@ namespace RimThreaded
 {
     public class ThingGrid_Patch
     {
-        public static Dictionary<Map, Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>> mapIngredientDict =
-            new Dictionary<Map, Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>>>();
-        // Map, Scanner, points, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
-        public static Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>> thingBillPoints = new Dictionary<ThingDef, Dictionary<WorkGiver_Scanner, float>>();
         
         private static int CellToIndexCustom(IntVec3 c, int mapSizeX, int cellSize)
         {
@@ -47,7 +43,9 @@ namespace RimThreaded
 
                 lock (__instance)
                 {
-                    __instance.thingGrid[index].Add(t);
+                    //__instance.thingGrid[index].Add(t);
+                    List<Thing> thingGridCopy = new List<Thing>(__instance.thingGrid[index]) { t };
+                    __instance.thingGrid[index] = thingGridCopy;
                 }
                 if (t.def.EverHaulable)
                 {

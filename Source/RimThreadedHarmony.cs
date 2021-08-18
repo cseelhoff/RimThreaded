@@ -270,6 +270,10 @@ namespace RimThreaded
 						Type[] types = GetTypesFromAssembly(assembly);
 						foreach (Type type in types)
 						{
+							if(type.FullName.Contains("TileFinder"))
+                            {
+								Log.Message("TileFinder");
+                            }
 							List<MethodBase> allMethods = new List<MethodBase>();
 							allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));//==all??
 							allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
