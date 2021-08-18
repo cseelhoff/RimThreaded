@@ -207,6 +207,7 @@ namespace RimThreaded
             PathFinder_Patch.InitializeThreadStatics();
             PawnPathPool_Patch.InitializeThreadStatics();
             JumboCell.InitializeThreadStatics();
+            PawnTextureAtlas_Patch.InitializeThreadStatics();
             Reachability_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
             Region_Patch.InitializeThreadStatics();

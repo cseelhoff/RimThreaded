@@ -900,10 +900,11 @@ namespace RimThreaded
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			Pawn_RotationTracker_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
+			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
 			PawnPathPool_Patch.RunDestructivePatches(); //removed leak check based on map size, since pool is now a threadstatic
+			PawnTextureAtlas_Patch.RunDestructivePatches();
 			PawnUtility_Patch.RunDestructivePatches();
-			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			Plant_Patch.RunNonDestructivePatches();
 			PlayLog_Patch.RunDestructivePatches();
 			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
