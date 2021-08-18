@@ -1037,6 +1037,17 @@
           "FieldName": "tempScanRooms"
         }
       ]
+    },
+    {
+      "ClassName": "RimWorld.Planet.TileFinder",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpTiles"
+        },
+        {
+          "FieldName": "tmpPlayerTiles"
+        }
+      ]
     }
   ]
 }
