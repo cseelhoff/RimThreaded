@@ -11,10 +11,7 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.5.13 - Jedi Temple Doors
-    -Doors Expanded now compatible
-    -ThreadSafeLinkedList decoupling and added to nuget
-    -Fixed VEE Bug with GraphicRequest.Get
+    Version 2.5.14 - 
 
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.

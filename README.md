@@ -38,6 +38,8 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.14 -   
+
 Version 2.5.13 - Jedi Temple Doors  
 -Doors Expanded now compatible  
 -ThreadSafeLinkedList decoupling and added to nuget  
