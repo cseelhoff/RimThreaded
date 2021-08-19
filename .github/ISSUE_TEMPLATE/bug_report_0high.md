@@ -36,6 +36,7 @@ assignees: ''
 ### **Mod list (For vanilla report, it has to be same as below list.)**
 * Harmony
 * Core
-* Royalty (optional)
+* Royalty (Optional)
+* Ideology (Optional)
 * HugsLib
 * RimThreaded
