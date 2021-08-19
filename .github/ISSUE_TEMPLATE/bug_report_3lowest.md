@@ -33,7 +33,7 @@ assignees: ''
 ### **Screenshots**
 !!! Add screenshots to help explain your problem here !!!
 
-**Mod list (Preferably a RimPy compatible list.)**
+### **Mod list (Preferably a RimPy compatible list.)**
 * Harmony
 * Core
 * Royalty (optional)
