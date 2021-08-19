@@ -28,8 +28,10 @@ namespace RimThreaded
         private static string CurrentMethodPath;
         public static void SaveJson()
         {
-            string jsonString = JsonConvert.SerializeObject(CacheListS);
+            string jsonString = JsonConvert.SerializeObject(CacheListS, Formatting.Indented);
             File.WriteAllText(CurrentMethodPath, jsonString);
+            CacheList.Clear();
+            CacheListS.Clear();
         }
         public static bool TryGetFromCache(string ModuleVersionId, out List<MethodBase> ReturnMethodList)
         {
