@@ -36,7 +36,8 @@ assignees: ''
 ### **Mod list (Preferably a RimPy compatible list.)**
 * Harmony
 * Core
-* Royalty (optional)
+* Royalty (Optional)
+* Ideology (Optional)
 * HugsLib
 *
 *
