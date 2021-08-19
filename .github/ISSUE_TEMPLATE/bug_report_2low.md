@@ -33,7 +33,7 @@ assignees: ''
 ### **Screenshots**
 !!! Add screenshots to help explain your problem here !!!
 
-**Mod list (For vanilla report, it has to be same as below list.)**
+### **Mod list (For vanilla report, it has to be same as below list.)**
 * Harmony
 * Core
 * Royalty (optional)
