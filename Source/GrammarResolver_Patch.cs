@@ -1,478 +1,126 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using RimWorld;
-using UnityEngine;
+using System.Reflection.Emit;
+using HarmonyLib;
 using Verse;
 using Verse.Grammar;
+using static HarmonyLib.AccessTools;
+using static Verse.Grammar.GrammarResolver;
 
 namespace RimThreaded
 {
 
     public class GrammarResolver_Patch
-    {
-        public static Dictionary<string, List<RuleEntry>> rules = new Dictionary<string, List<RuleEntry>>();
-        private static readonly object ResolveLock = new object();
+	{
+		private static readonly object ResolveUnsafeLock = new object();
+		private static readonly object ResolveLock = new object();
 
-        internal static void RunDestructivePatches()
-        {
-            Type original = typeof(GrammarResolver);
-            Type patched = typeof(GrammarResolver_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "ResolveUnsafe", new[] { typeof(string), typeof(GrammarRequest), typeof(bool).MakeByRefType(), typeof(string), typeof(bool), typeof(bool), typeof(List<string>), typeof(List<string>), typeof(bool) });
-        }
+		//[ThreadStatic] public static Dictionary<string, List<RuleEntry>> rules = new Dictionary<string, List<RuleEntry>>();
 
-        private static bool TryResolveRecursive(RuleEntry entry, int depth, Dictionary<string, string> constants, out string output, bool log, List<string> extraTags, List<string> resolvedTags)
-        {
-            string text = "";
-            for (int i = 0; i < depth; i++)
-            {
-                text += "  ";
-            }
+		public static Type original = typeof(GrammarResolver);
+		public static Type patched = typeof(GrammarResolver_Patch);
 
-            if (log && depth > 0)
-            {
-                GrammarResolver.logSbTrace.AppendLine();
-                GrammarResolver.logSbTrace.Append(depth.ToStringCached().PadRight(3));
-                GrammarResolver.logSbTrace.Append(text + entry);
-            }
+		//internal static void InitializeThreadStatics()
+  //      {
+		//	rules = new Dictionary<string, List<RuleEntry>>();
+		//}
 
-            text += "     ";
-            GrammarResolver.loopCount++;
-            if (GrammarResolver.loopCount > 1000)
-            {
-                Log.Error("Hit loops limit resolving grammar.");
-                output = "HIT_LOOPS_LIMIT";
-                if (log)
-                {
-                    GrammarResolver.logSbTrace.Append("\n" + text + "UNRESOLVABLE: Hit loops limit");
-                }
+		internal static void RunNonDestructivePatches()
+		{
+			//RimThreadedHarmony.Transpile(original, patched, nameof(ResolveUnsafe), new Type[] {
+			//	typeof(string), typeof(GrammarRequest), typeof(bool).MakeByRefType(), typeof(string), typeof(bool), typeof(bool), typeof(List<string>), typeof(List<string>), typeof(bool)
+			//});
+			//RimThreadedHarmony.Transpile(original, patched, nameof(Resolve), new Type[] {
+			//	typeof(string), typeof(GrammarRequest), typeof(string), typeof(bool), typeof(string), typeof(List<string>), typeof(List<string>), typeof(bool)
+			//});
+		}
+		public static bool Resolve(ref string __result, string rootKeyword, GrammarRequest request, string debugLabel = null, bool forceLog = false, string untranslatedRootKeyword = null, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
+		{
+			lock (ResolveLock)
+			{
+				if (LanguageDatabase.activeLanguage == LanguageDatabase.defaultLanguage)
+				{
+					__result = GrammarResolver.ResolveUnsafe(rootKeyword, request, debugLabel, forceLog, useUntranslatedRules: false, extraTags, outTags, capitalizeFirstSentence);
+					return false;
+				}
+				string text;
+				bool success;
+				Exception ex;
+				try
+				{
+					text = GrammarResolver.ResolveUnsafe(rootKeyword, request, out success, debugLabel, forceLog, useUntranslatedRules: false, extraTags, outTags, capitalizeFirstSentence);
+					ex = null;
+				}
+				catch (Exception ex2)
+				{
+					success = false;
+					text = "";
+					ex = ex2;
+				}
+				if (success)
+				{
+					__result = text;
+					return false;
+				}
+				string text2 = "Failed to resolve text. Trying again with English.";
+				if (ex != null)
+				{
+					text2 = text2 + " Exception: " + ex;
+				}
+				Log.ErrorOnce(text2, text.GetHashCode());
+				outTags?.Clear();
+				__result = GrammarResolver.ResolveUnsafe(untranslatedRootKeyword ?? rootKeyword, request, out success, debugLabel, forceLog, useUntranslatedRules: true, extraTags, outTags, capitalizeFirstSentence);
+				return false;
+			}
+		}
 
-                return false;
-            }
+		public static IEnumerable<CodeInstruction> ResolveUnsafe(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			List<CodeInstruction> instructionsList = instructions.ToList();
+			int i = 0;
+			List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
+			{
+				new CodeInstruction(OpCodes.Ldsfld, Field(patched, nameof(ResolveUnsafeLock)))
+			};
+			LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
+			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+			foreach (CodeInstruction ci in RimThreadedHarmony.EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
+				yield return ci;
+			while (i < instructionsList.Count - 2)
+			{
+				yield return instructionsList[i++];
+			}
+			foreach (CodeInstruction ci in RimThreadedHarmony.ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
+				yield return ci;
+			yield return instructionsList[i++];
+			yield return instructionsList[i++];
+		}
 
-            if (depth > 50)
-            {
-                Log.Error("Grammar recurred too deep while resolving keyword (>" + 50 + " deep)");
-                output = "DEPTH_LIMIT_REACHED";
-                if (log)
-                {
-                    GrammarResolver.logSbTrace.Append("\n" + text + "UNRESOLVABLE: Depth limit reached");
-                }
+		public static IEnumerable<CodeInstruction> Resolve(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			List<CodeInstruction> instructionsList = instructions.ToList();
+			int i = 0;
+			List<CodeInstruction> loadLockObjectInstructions = new List<CodeInstruction>
+			{
+				new CodeInstruction(OpCodes.Ldsfld, Field(patched, nameof(ResolveLock)))
+			};
+			LocalBuilder lockObject = iLGenerator.DeclareLocal(typeof(object));
+			LocalBuilder lockTaken = iLGenerator.DeclareLocal(typeof(bool));
+			foreach (CodeInstruction ci in RimThreadedHarmony.EnterLock(lockObject, lockTaken, loadLockObjectInstructions, instructionsList[i]))
+				yield return ci;
+			while (i < instructionsList.Count - 1)
+			{
+				yield return instructionsList[i++];
+			}
+			LocalBuilder stringResult = iLGenerator.DeclareLocal(typeof(string));
+			yield return new CodeInstruction(OpCodes.Stloc, stringResult);
+			foreach (CodeInstruction ci in RimThreadedHarmony.ExitLock(iLGenerator, lockObject, lockTaken, instructionsList[i]))
+				yield return ci;
+			yield return new CodeInstruction(OpCodes.Ldloc, stringResult);
+			yield return instructionsList[i++];
+			//yield return instructionsList[i++];
+		}
 
-                return false;
-            }
-
-            string text2 = entry.rule.Generate();
-            bool flag = false;
-            int num = -1;
-            for (int j = 0; j < text2.Length; j++)
-            {
-                char num2 = text2[j];
-                if (num2 == '[')
-                {
-                    num = j;
-                }
-
-                if (num2 != ']')
-                {
-                    continue;
-                }
-
-                if (num == -1)
-                {
-                    Log.Error("Could not resolve rule because of mismatched brackets: " + text2);
-                    output = "MISMATCHED_BRACKETS";
-                    if (log)
-                    {
-                        GrammarResolver.logSbTrace.Append("\n" + text + "UNRESOLVABLE: Mismatched brackets");
-                    }
-
-                    flag = true;
-                    continue;
-                }
-
-                string text3 = text2.Substring(num + 1, j - num - 1);
-                while (true)
-                {
-                    RuleEntry ruleEntry = RandomPossiblyResolvableEntry(text3, constants, extraTags, resolvedTags);
-                    if (ruleEntry == null)
-                    {
-                        entry.MarkKnownUnresolvable();
-                        output = "CANNOT_RESOLVE_SUBSYMBOL:" + text3;
-                        if (log)
-                        {
-                            GrammarResolver.logSbTrace.Append("\n" + text + text3 + " → UNRESOLVABLE");
-                        }
-
-                        flag = true;
-                        break;
-                    }
-
-                    ruleEntry.uses++;
-                    List<string> list = resolvedTags.ToList();
-                    if (TryResolveRecursive(ruleEntry, depth + 1, constants, out string output2, log, extraTags, list))
-                    {
-                        text2 = text2.Substring(0, num) + output2 + text2.Substring(j + 1);
-                        j = num;
-                        resolvedTags.Clear();
-                        resolvedTags.AddRange(list);
-                        if (!ruleEntry.rule.tag.NullOrEmpty() && !resolvedTags.Contains(ruleEntry.rule.tag))
-                        {
-                            resolvedTags.Add(ruleEntry.rule.tag);
-                        }
-
-                        break;
-                    }
-
-                    ruleEntry.MarkKnownUnresolvable();
-                }
-            }
-
-            output = text2;
-            return !flag;
-        }
-
-
-        public class RuleEntry
-        {
-            public Rule rule;
-
-            public bool knownUnresolvable;
-
-            public bool constantConstraintsChecked;
-
-            public bool constantConstraintsValid;
-
-            public int uses;
-
-            public float SelectionWeight => rule.BaseSelectionWeight * 100000f / ((uses + 1) * 1000);
-
-            public float Priority => rule.Priority;
-
-            public RuleEntry(Rule rule)
-            {
-                this.rule = rule;
-                knownUnresolvable = false;
-            }
-
-            public void MarkKnownUnresolvable()
-            {
-                knownUnresolvable = true;
-            }
-
-            public bool ValidateConstantConstraints(Dictionary<string, string> constraints)
-            {
-                if (!constantConstraintsChecked)
-                {
-                    constantConstraintsValid = true;
-                    if (rule.constantConstraints != null)
-                    {
-                        for (int i = 0; i < rule.constantConstraints.Count; i++)
-                        {
-                            Rule.ConstantConstraint constantConstraint = rule.constantConstraints[i];
-                            string text = (constraints != null) ? constraints.TryGetValue(constantConstraint.key, "") : "";
-                            float result = 0f;
-                            float result2 = 0f;
-                            bool flag = !text.NullOrEmpty() && !constantConstraint.value.NullOrEmpty() && float.TryParse(text, out result) && float.TryParse(constantConstraint.value, out result2);
-                            bool flag2;
-                            switch (constantConstraint.type)
-                            {
-                                case Rule.ConstantConstraint.Type.Equal:
-                                    flag2 = text.EqualsIgnoreCase(constantConstraint.value);
-                                    break;
-                                case Rule.ConstantConstraint.Type.NotEqual:
-                                    flag2 = !text.EqualsIgnoreCase(constantConstraint.value);
-                                    break;
-                                case Rule.ConstantConstraint.Type.Less:
-                                    flag2 = (flag && result < result2);
-                                    break;
-                                case Rule.ConstantConstraint.Type.Greater:
-                                    flag2 = (flag && result > result2);
-                                    break;
-                                case Rule.ConstantConstraint.Type.LessOrEqual:
-                                    flag2 = (flag && result <= result2);
-                                    break;
-                                case Rule.ConstantConstraint.Type.GreaterOrEqual:
-                                    flag2 = (flag && result >= result2);
-                                    break;
-                                default:
-                                    Log.Error("Unknown ConstantConstraint type: " + constantConstraint.type);
-                                    flag2 = false;
-                                    break;
-                            }
-
-                            if (!flag2)
-                            {
-                                constantConstraintsValid = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    constantConstraintsChecked = true;
-                }
-
-                return constantConstraintsValid;
-            }
-
-            public bool ValidateRequiredTag(List<string> extraTags, List<string> resolvedTags)
-            {
-                if (rule.requiredTag.NullOrEmpty())
-                {
-                    return true;
-                }
-
-                if (extraTags != null && extraTags.Contains(rule.requiredTag))
-                {
-                    return true;
-                }
-
-                return resolvedTags.Contains(rule.requiredTag);
-            }
-
-            public override string ToString()
-            {
-                return rule.ToString();
-            }
-        }
-
-        private static bool AddRule(Rule rule)
-        {
-            List<RuleEntry> value = null;
-            if (!rules.TryGetValue(rule.keyword, out value))
-            {
-                value = new List<RuleEntry>();
-                //value.Clear();
-                lock (rules)
-                {
-                    rules[rule.keyword] = value;
-                }
-            }
-
-            value.Add(new RuleEntry(rule));
-            return false;
-        }
-        public static bool ResolveUnsafe(ref string __result, string rootKeyword, GrammarRequest request, out bool success, string debugLabel = null, bool forceLog = false, bool useUntranslatedRules = false, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
-        {
-            string output;
-            lock (ResolveLock)
-            {
-                bool flag = forceLog || DebugViewSettings.logGrammarResolution;
-
-                rules.Clear();
-
-                //rulePool.Clear();
-                if (flag)
-                {
-                    GrammarResolver.logSbTrace = new StringBuilder();
-                    GrammarResolver.logSbMid = new StringBuilder();
-                    GrammarResolver.logSbRules = new StringBuilder();
-                }
-
-                List<Rule> rulesAllowNull = request.RulesAllowNull;
-                if (rulesAllowNull != null)
-                {
-                    if (flag)
-                    {
-                        GrammarResolver.logSbRules.AppendLine("CUSTOM RULES");
-                    }
-
-                    for (int i = 0; i < rulesAllowNull.Count; i++)
-                    {
-                        AddRule(rulesAllowNull[i]);
-                        if (flag)
-                        {
-                            GrammarResolver.logSbRules.AppendLine("■" + rulesAllowNull[i].ToString());
-                        }
-                    }
-
-                    if (flag)
-                    {
-                        GrammarResolver.logSbRules.AppendLine();
-                    }
-                }
-
-                List<RulePackDef> includesAllowNull = request.IncludesAllowNull;
-                if (includesAllowNull != null)
-                {
-                    HashSet<RulePackDef> hashSet = new HashSet<RulePackDef>();
-                    List<RulePackDef> list = new List<RulePackDef>(includesAllowNull);
-                    if (flag)
-                    {
-                        GrammarResolver.logSbMid.AppendLine("INCLUDES");
-                    }
-
-                    while (list.Count > 0)
-                    {
-                        RulePackDef rulePackDef = list[list.Count - 1];
-                        list.RemoveLast();
-                        if (!hashSet.Contains(rulePackDef))
-                        {
-                            if (flag)
-                            {
-                                GrammarResolver.logSbMid.AppendLine($"{rulePackDef.defName}");
-                            }
-
-                            hashSet.Add(rulePackDef);
-                            List<Rule> list2 = useUntranslatedRules ? rulePackDef.UntranslatedRulesImmediate : rulePackDef.RulesImmediate;
-                            if (list2 != null)
-                            {
-                                foreach (Rule item in list2)
-                                {
-                                    AddRule(item);
-                                }
-                            }
-
-                            if (!rulePackDef.include.NullOrEmpty())
-                            {
-                                list.AddRange(rulePackDef.include);
-                            }
-                        }
-                    }
-                }
-
-                List<RulePack> includesBareAllowNull = request.IncludesBareAllowNull;
-                if (includesBareAllowNull != null)
-                {
-                    if (flag)
-                    {
-                        GrammarResolver.logSbMid.AppendLine();
-                        GrammarResolver.logSbMid.AppendLine("BARE INCLUDES");
-                    }
-
-                    for (int j = 0; j < includesBareAllowNull.Count; j++)
-                    {
-                        List<Rule> list3 = useUntranslatedRules ? includesBareAllowNull[j].UntranslatedRules : includesBareAllowNull[j].Rules;
-                        for (int k = 0; k < list3.Count; k++)
-                        {
-                            AddRule(list3[k]);
-                            if (flag)
-                            {
-                                GrammarResolver.logSbMid.AppendLine("  " + list3[k].ToString());
-                            }
-                        }
-                    }
-                }
-
-                if (flag && !extraTags.NullOrEmpty())
-                {
-                    GrammarResolver.logSbMid.AppendLine();
-                    GrammarResolver.logSbMid.AppendLine("EXTRA TAGS");
-                    for (int l = 0; l < extraTags.Count; l++)
-                    {
-                        GrammarResolver.logSbMid.AppendLine("  " + extraTags[l]);
-                    }
-                }
-
-                List<Rule> list4 = useUntranslatedRules ? RulePackDefOf.GlobalUtility.UntranslatedRulesPlusIncludes : RulePackDefOf.GlobalUtility.RulesPlusIncludes;
-                for (int m = 0; m < list4.Count; m++)
-                {
-                    AddRule(list4[m]);
-                }
-
-                GrammarResolver.loopCount = 0;
-                Dictionary<string, string> constantsAllowNull = request.ConstantsAllowNull;
-                if (flag && constantsAllowNull != null)
-                {
-                    GrammarResolver.logSbMid.AppendLine("CONSTANTS");
-                    foreach (KeyValuePair<string, string> item2 in constantsAllowNull)
-                    {
-                        GrammarResolver.logSbMid.AppendLine(item2.Key.PadRight(38) + " " + item2.Value);
-                    }
-                }
-
-                if (flag)
-                {
-                    GrammarResolver.logSbTrace.Append("GRAMMAR RESOLUTION TRACE");
-                }
-
-                output = "err";
-                bool flag2 = false;
-                List<string> list5 = new List<string>();
-                if (TryResolveRecursive(new RuleEntry(new Rule_String("", "[" + rootKeyword + "]")), 0, constantsAllowNull, out output, flag, extraTags, list5))
-                {
-                    if (outTags != null)
-                    {
-                        outTags.Clear();
-                        outTags.AddRange(list5);
-                    }
-                }
-                else
-                {
-                    flag2 = true;
-                    output = ((!request.Rules.NullOrEmpty()) ? ("ERR: " + request.Rules[0].Generate()) : "ERR");
-                    if (flag)
-                    {
-                        GrammarResolver.logSbTrace.Insert(0, "Grammar unresolvable. Root '" + rootKeyword + "'\n\n");
-                    }
-                    else
-                    {
-                        GrammarResolver.ResolveUnsafe(rootKeyword, request, debugLabel, forceLog: true, useUntranslatedRules, extraTags);
-                    }
-                }
-
-                output = GenText.CapitalizeSentences(Find.ActiveLanguageWorker.PostProcessed(output), capitalizeFirstSentence);
-                output = GrammarResolver.Spaces.Replace(output, (Match match) => match.Groups[1].Value);
-                output = output.Trim();
-                if (flag)
-                {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.Append(GrammarResolver.logSbTrace.ToString().TrimEndNewlines());
-                    stringBuilder.AppendLine();
-                    stringBuilder.AppendLine();
-                    stringBuilder.Append(GrammarResolver.logSbMid.ToString().TrimEndNewlines());
-                    stringBuilder.AppendLine();
-                    stringBuilder.AppendLine();
-                    stringBuilder.Append(GrammarResolver.logSbRules.ToString().TrimEndNewlines());
-                    if (flag2)
-                    {
-                        if (DebugViewSettings.logGrammarResolution)
-                        {
-                            Log.Error(stringBuilder.ToString().Trim() + "\n");
-                        }
-                        else
-                        {
-                            Log.ErrorOnce(stringBuilder.ToString().Trim() + "\n", stringBuilder.ToString().Trim().GetHashCode());
-                        }
-                    }
-                    else
-                    {
-                        Log.Message(stringBuilder.ToString().Trim() + "\n");
-                    }
-
-                    GrammarResolver.logSbTrace = null;
-                    GrammarResolver.logSbMid = null;
-                    GrammarResolver.logSbRules = null;
-                }
-
-                success = !flag2;
-            }
-            __result = output;
-            return false;
-
-        }
-        private static RuleEntry RandomPossiblyResolvableEntry(string keyword, Dictionary<string, string> constants, List<string> extraTags, List<string> resolvedTags)
-        {
-            List<RuleEntry> list = rules.TryGetValue(keyword);
-            if (list == null)
-            {
-                return null;
-            }
-
-            float maxPriority = float.MinValue;
-            for (int i = 0; i < list.Count; i++)
-            {
-                RuleEntry ruleEntry = list[i];
-                if (!ruleEntry.knownUnresolvable && ruleEntry.ValidateConstantConstraints(constants) && ruleEntry.ValidateRequiredTag(extraTags, resolvedTags) && ruleEntry.SelectionWeight != 0f)
-                {
-                    maxPriority = Mathf.Max(maxPriority, ruleEntry.Priority);
-                }
-            }
-
-            return list.RandomElementByWeightWithFallback((RuleEntry rule) => (rule.knownUnresolvable || !rule.ValidateConstantConstraints(constants) || !rule.ValidateRequiredTag(extraTags, resolvedTags) || rule.Priority != maxPriority) ? 0f : rule.SelectionWeight);
-        }
-
-    }
+	}
 }
