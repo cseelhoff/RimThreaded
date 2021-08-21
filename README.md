@@ -38,6 +38,16 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.14 - First Intergalactic War  
+-Added better ReplaceStuff Compatibility  
+-Added better RimWar Compatibility  
+-Added better JobsOfOppurtunity Compatibility  
+-Fixed bug in Hauling  
+-Fixed bug in RimWorld.Planet.TileFinder  
+-Fixed bugs in Verse.PawnTextureAtlas  
+-Fixed bug in Pawn_RotationTracker.UpdateRotation  
+-Fixed ReplacementField Assembly Caches doubling work  
+
 Version 2.5.13 - Jedi Temple Doors  
 -Doors Expanded now compatible  
 -ThreadSafeLinkedList decoupling and added to nuget  

@@ -270,6 +270,10 @@ namespace RimThreaded
 						Type[] types = GetTypesFromAssembly(assembly);
 						foreach (Type type in types)
 						{
+							if(type.FullName.Contains("TileFinder"))
+                            {
+								Log.Message("TileFinder");
+                            }
 							List<MethodBase> allMethods = new List<MethodBase>();
 							allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));//==all??
 							allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
@@ -678,8 +682,8 @@ namespace RimThreaded
 
 
 		public static readonly HarmonyMethod replaceFieldsHarmonyTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), nameof(ReplaceFieldsTranspiler)));
-		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "WrapMethodInInstanceLock"));
-		public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), "Add3Transpiler"));
+		public static readonly HarmonyMethod methodLockTranspiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), nameof(WrapMethodInInstanceLock)));
+		public static readonly HarmonyMethod add3Transpiler = new HarmonyMethod(Method(typeof(RimThreadedHarmony), nameof(Add3Transpiler)));
 		public static void TranspileFieldReplacements(MethodBase original)
 		{
 			if (Prefs.LogVerbose)
@@ -799,6 +803,7 @@ namespace RimThreaded
 			Corpse_Patch.RunNonDestructivePatches(); // 1.3 explosion fix
 			TransportShipManager_Patch.RunNonDestructivePatches();
 			//RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix - not sure why this causes bug with sleeping
+			GrammarResolver_Patch.RunNonDestructivePatches();
 
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
@@ -898,11 +903,13 @@ namespace RimThreaded
 			Pawn_PathFollower_Patch.RunDestructivePatches(); // 1.3 null ref pawn?.jobs?.curDriver?.locomotionUrgencySameAs
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
+			Pawn_RotationTracker_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
+			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			PawnPath_Patch.RunDestructivePatches();
 			PawnPathPool_Patch.RunDestructivePatches(); //removed leak check based on map size, since pool is now a threadstatic
+			PawnTextureAtlas_Patch.RunDestructivePatches();
 			PawnUtility_Patch.RunDestructivePatches();
-			PawnDestinationReservationManager_Patch.RunDestructivePatches();
 			Plant_Patch.RunNonDestructivePatches();
 			PlayLog_Patch.RunDestructivePatches();
 			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
@@ -976,6 +983,8 @@ namespace RimThreaded
 			PawnRules_Patch.Patch();
 			ZombieLand_Patch.Patch();
 			VEE_Patch.Patch();
+			//SpeakUp_Patch.Patch();
+			RimWar_Patch.Patch();
 		}
 		private static void FullPool_Patch_RunNonDestructivePatches()
 		{
