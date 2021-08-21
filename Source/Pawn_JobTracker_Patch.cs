@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System;
+using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
@@ -19,6 +20,116 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_DamageTaken));
             RimThreadedHarmony.Prefix(original, patched, nameof(DetermineNextJob));
             RimThreadedHarmony.Prefix(original, patched, nameof(StartJob)); //conflict with giddyupcore calling MakeDriver
+            RimThreadedHarmony.Prefix(original, patched, nameof(TryOpportunisticJob));
+        }
+        public static bool TryOpportunisticJob(Pawn_JobTracker __instance, ref Job __result, Job job)
+        {
+            Pawn pawn = __instance.pawn; //added
+            if ((int)pawn.def.race.intelligence < 2)
+            {
+                __result = null;
+                return false;
+            }
+
+            if (pawn.Faction != Faction.OfPlayer)
+            {
+                __result = null;
+                return false;
+            }
+
+            if (pawn.Drafted)
+            {
+                __result = null;
+                return false;
+            }
+
+            if (job.playerForced)
+            {
+                __result = null;
+                return false;
+            }
+
+            if ((int)pawn.RaceProps.intelligence < 2)
+            {
+                __result = null;
+                return false;
+            }
+
+            if (!job.def.allowOpportunisticPrefix)
+            {
+                __result = null;
+                return false;
+            }
+
+            if (pawn.WorkTagIsDisabled(WorkTags.ManualDumb | WorkTags.Hauling | WorkTags.AllWork))
+            {
+                __result = null;
+                return false;
+            }
+
+            if (pawn.InMentalState || pawn.IsBurning())
+            {
+                __result = null;
+                return false;
+            }
+
+            if (SlaveRebellionUtility.IsRebelling(pawn))
+            {
+                __result = null;
+                return false;
+            }
+
+            IntVec3 cell = job.targetA.Cell;
+            if (!cell.IsValid || cell.IsForbidden(pawn))
+            {
+                __result = null;
+                return false;
+            }
+
+            float num = pawn.Position.DistanceTo(cell);
+            if (num < 3f)
+            {
+                __result = null;
+                return false;
+            }
+
+            //List<Thing> list = pawn.Map.listerHaulables.ThingsPotentiallyNeedingHauling(); //removed
+            //for (int i = 0; i < list.Count; i++) //removed
+            foreach(Thing thing in HaulingCache.GetClosestHaulableItems(pawn, pawn.Map))
+            {
+                //Thing thing = list[i]; //removed
+                if (thing == null) //added
+                    continue; //added
+                float num2 = pawn.Position.DistanceTo(thing.Position);
+                if (num2 > 30f || num2 > num * 0.5f || num2 + thing.Position.DistanceTo(cell) > num * 1.7f || pawn.Map.reservationManager.FirstRespectedReserver(thing, pawn) != null || thing.IsForbidden(pawn) || !HaulAIUtility.PawnCanAutomaticallyHaulFast(pawn, thing, forced: false))
+                {
+                    continue;
+                }
+
+                StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(thing);
+                IntVec3 foundCell = IntVec3.Invalid;
+                if (!StoreUtility.TryFindBestBetterStoreCellFor(thing, pawn, pawn.Map, currentPriority, pawn.Faction, out foundCell))
+                {
+                    continue;
+                }
+
+                float num3 = foundCell.DistanceTo(cell);
+                if (!(num3 > 50f) && !(num3 > num * 0.6f) && !(num2 + thing.Position.DistanceTo(foundCell) + num3 > num * 1.7f) && !(num2 + num3 > num) && pawn.Position.WithinRegions(thing.Position, pawn.Map, 25, TraverseParms.For(pawn)) && foundCell.WithinRegions(cell, pawn.Map, 25, TraverseParms.For(pawn)))
+                {
+                    if (DebugViewSettings.drawOpportunisticJobs)
+                    {
+                        Log.Message("Opportunistic job spawned");
+                        pawn.Map.debugDrawer.FlashLine(pawn.Position, thing.Position, 600, SimpleColor.Red);
+                        pawn.Map.debugDrawer.FlashLine(thing.Position, foundCell, 600, SimpleColor.Green);
+                        pawn.Map.debugDrawer.FlashLine(foundCell, cell, 600, SimpleColor.Blue);
+                    }
+
+                    __result = HaulAIUtility.HaulToCellStorageJob(pawn, thing, foundCell, fitInStoreCell: false);
+                    return false;
+                }
+            }
+            __result = null;
+            return false;
         }
 
         public static bool StartJob(Pawn_JobTracker __instance,

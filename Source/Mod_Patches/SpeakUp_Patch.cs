@@ -1,11 +1,9 @@
 ﻿using HarmonyLib;
 using System;
 using System.Reflection;
-using Verse;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using static HarmonyLib.AccessTools;
-using static RimThreaded.RimThreadedHarmony;
 using System.Linq;
 
 namespace RimThreaded.Mod_Patches
@@ -39,7 +37,7 @@ namespace RimThreaded.Mod_Patches
                 CodeInstruction ci = instructionsList[i];
                 if (ci.opcode == OpCodes.Ldsfld && (FieldInfo)ci.operand == Field(SpeakUp_GrammarResolver_Resolve, "rulesInfo"))
                 {
-                    ci.operand = Field(typeof(GrammarResolver_Patch), nameof(GrammarResolver_Patch.rules));
+                    
                 }
                 yield return ci;
             }

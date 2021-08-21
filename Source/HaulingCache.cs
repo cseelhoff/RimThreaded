@@ -357,7 +357,7 @@ namespace RimThreaded
 				RegisterHaulableItem(haulableThing);
 		}
 
-        private static IEnumerable<Thing> GetClosestHaulableItems(Pawn pawn, Map map)
+        public static IEnumerable<Thing> GetClosestHaulableItems(Pawn pawn, Map map)
         {
 			int jumboCellWidth;
 			int XposOfJumboCell;

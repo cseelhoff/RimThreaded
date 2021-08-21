@@ -11,8 +11,15 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.5.14 - 
-
+    Version 2.5.14 - First Intergalactic War  
+    -Added better ReplaceStuff Compatibility  
+    -Added better RimWar Compatibility  
+    -Added better JobsOfOppurtunity Compatibility  
+    -Fixed bug in Hauling  
+    -Fixed bug in RimWorld.Planet.TileFinder  
+    -Fixed bugs in Verse.PawnTextureAtlas  
+    -Fixed bug in Pawn_RotationTracker.UpdateRotation  
+    -Fixed ReplacementField Assembly Caches doubling work 
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
@@ -75,5 +82,7 @@
     <li>mlie.prisonerarena</li>
     <li>rwmt.Multiplayer</li>
     <li>zetrith.prepatcher</li>
+    <li>jpt.speakup</li>
+    <li>jecrell.doorsexpanded</li>
   </incompatibleWith>
 </ModMetaData>
