@@ -35,6 +35,29 @@
       ]
     },
     {
+      "ClassName": "Verse.AutoSlaughterManager",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpAnimals"
+        },
+        {
+          "FieldName": "tmpAnimalsMale"
+        },
+        {
+          "FieldName": "tmpAnimalsMaleYoung"
+        },
+        {
+          "FieldName": "tmpAnimalsFemale"
+        },
+        {
+          "FieldName": "tmpAnimalsFemaleYoung"
+        },
+        {
+          "FieldName": "tmpAnimalsPregnant"
+        }
+      ]
+    },
+    {
       "ClassName": "RimWorld.BeautyUtility",
       "ThreadStatics": [
         {
