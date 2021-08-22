@@ -154,7 +154,7 @@ namespace RimThreaded
 			Dictionary<Pawn, List<Reservation>> reservationClaimantDict = getReservationClaimantDict(__instance);
 			if (!reservationClaimantDict.TryGetValue(claimant, out List<Reservation> reservationClaimantList))
 			{
-				lock (reservationClaimantDict)
+				lock (__instance)
 				{
 					if (!reservationClaimantDict.TryGetValue(claimant, out List<Reservation> reservationClaimantList2))
 					{
