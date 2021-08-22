@@ -220,7 +220,7 @@ namespace RimThreaded
             World_Patch.InitializeThreadStatics();
             WorldPawns_Patch.InitializeThreadStatics();
             AttackTargetReservationManager_Patch.InitializeThreadStatics();
-            ReservationManager_Patch.InitializeThreadStatics();
+            //ReservationManager_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)
         {
