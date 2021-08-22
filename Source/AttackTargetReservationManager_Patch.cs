@@ -35,11 +35,11 @@ namespace RimThreaded
 			RimThreadedHarmony.harmony.Patch(oCtor, postfix: new HarmonyMethod(pMethod));
 		}*/
 
-		[ThreadStatic] static public Dictionary<AttackTargetReservationManager, List<AttackTargetReservation>> newAttackTargetReservations;
+		[ThreadStatic] static public List<AttackTargetReservation> newAttackTargetReservations;
 
 		internal static void InitializeThreadStatics()
 		{
-			newAttackTargetReservations = new Dictionary<AttackTargetReservationManager, List<AttackTargetReservation>>();
+			newAttackTargetReservations = new List<AttackTargetReservation>();
 		}
 		/*public static void ATRMConstructor(AttackTargetReservationManager __instance, Map map)
         {
@@ -55,25 +55,22 @@ namespace RimThreaded
 					return false;
 				}
 				List<AttackTargetReservation> snapshotReservations = __instance.reservations;
-				if (!newAttackTargetReservations.ContainsKey(__instance))
-                {
-					newAttackTargetReservations[__instance] = new List<AttackTargetReservation>();
-				}
-				newAttackTargetReservations[__instance].Clear();
+				
+				newAttackTargetReservations.Clear();
 				for (int i = 0; i < snapshotReservations.Count; i++)
 				{
 					AttackTargetReservation attackTargetReservation = snapshotReservations[i];
 					if (attackTargetReservation.target != target || attackTargetReservation.claimant != claimant || attackTargetReservation.job != job)
 					{
-						newAttackTargetReservations[__instance].Add(attackTargetReservation);
+						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 					else
 					{
-						SimplePool<AttackTargetReservation>.Return(attackTargetReservation);
+						SimplePool_Patch<AttackTargetReservation>.Return(attackTargetReservation);
 					}
 				}
 				__instance.reservations.Clear();
-				__instance.reservations.AddRange(newAttackTargetReservations[__instance]);
+				__instance.reservations.AddRange(newAttackTargetReservations);
 			}
 			return false;
 		}
@@ -82,26 +79,23 @@ namespace RimThreaded
 			lock (__instance)
 			{
 				List<AttackTargetReservation> snapshotReservations = __instance.reservations;
-				if (!newAttackTargetReservations.ContainsKey(__instance))
-				{
-					newAttackTargetReservations[__instance] = new List<AttackTargetReservation>();
-				}
-				newAttackTargetReservations[__instance].Clear();
+
+				newAttackTargetReservations.Clear();
 
 				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
 					AttackTargetReservation attackTargetReservation = snapshotReservations[i];
 					if (attackTargetReservation.target != target)
 					{
-						newAttackTargetReservations[__instance].Add(attackTargetReservation);
+						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 					else
 					{
-						SimplePool<AttackTargetReservation>.Return(attackTargetReservation);
+						SimplePool_Patch<AttackTargetReservation>.Return(attackTargetReservation);
 					}
 				}
 				__instance.reservations.Clear();
-				__instance.reservations.AddRange(newAttackTargetReservations[__instance]);
+				__instance.reservations.AddRange(newAttackTargetReservations);
 			}
 
 			return false;
@@ -112,25 +106,22 @@ namespace RimThreaded
 			lock (__instance)
 			{
 				List<AttackTargetReservation> snapshotReservations = __instance.reservations;
-				if (!newAttackTargetReservations.ContainsKey(__instance))
-				{
-					newAttackTargetReservations[__instance] = new List<AttackTargetReservation>();
-				}
-				newAttackTargetReservations[__instance].Clear();
+
+				newAttackTargetReservations.Clear();
 				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
 					AttackTargetReservation attackTargetReservation = snapshotReservations[i];
 					if (attackTargetReservation.claimant != claimant)
 					{
-						newAttackTargetReservations[__instance].Add(attackTargetReservation);
+						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 					else
 					{
-						SimplePool<AttackTargetReservation>.Return(attackTargetReservation);
+						SimplePool_Patch<AttackTargetReservation>.Return(attackTargetReservation);
 					}
 				}
 				__instance.reservations.Clear();
-				__instance.reservations.AddRange(newAttackTargetReservations[__instance]);
+				__instance.reservations.AddRange(newAttackTargetReservations);
 			}
 			return false;
 		}
@@ -145,23 +136,20 @@ namespace RimThreaded
 			else if (!__instance.IsReservedBy(claimant, target))
 			{
 
-				AttackTargetReservation attackTargetReservation = SimplePool<AttackTargetReservation>.Get();
+				AttackTargetReservation attackTargetReservation = SimplePool_Patch<AttackTargetReservation>.Get();
 				attackTargetReservation.target = target;
 				attackTargetReservation.claimant = claimant;
 				attackTargetReservation.job = job;
 
 				lock (__instance)
 				{
-					if (!newAttackTargetReservations.ContainsKey(__instance))
-					{
-						newAttackTargetReservations[__instance] = new List<AttackTargetReservation>();
-					}
-					newAttackTargetReservations[__instance].Clear();
-					newAttackTargetReservations[__instance].AddRange(__instance.reservations);
-					newAttackTargetReservations[__instance].Add(attackTargetReservation);
+
+					newAttackTargetReservations.Clear();
+					newAttackTargetReservations.AddRange(__instance.reservations);
+					newAttackTargetReservations.Add(attackTargetReservation);
 
 					__instance.reservations.Clear();
-					__instance.reservations.AddRange(newAttackTargetReservations[__instance]);
+					__instance.reservations.AddRange(newAttackTargetReservations);
 				}
 			}
 			return false;
@@ -185,25 +173,22 @@ namespace RimThreaded
 			lock (__instance)
 			{
 				List<AttackTargetReservation> snapshotReservations = __instance.reservations;
-				if (!newAttackTargetReservations.ContainsKey(__instance))
-				{
-					newAttackTargetReservations[__instance] = new List<AttackTargetReservation>();
-				}
-				newAttackTargetReservations[__instance].Clear();
+
+				newAttackTargetReservations.Clear();
 				for (int i = 0; i < snapshotReservations.Count - 1; i++)
 				{
 					AttackTargetReservation attackTargetReservation = snapshotReservations[i];
 					if (attackTargetReservation.claimant != claimant || attackTargetReservation.job != job)
 					{
-						newAttackTargetReservations[__instance].Add(attackTargetReservation);
+						newAttackTargetReservations.Add(attackTargetReservation);
 					}
 					else
 					{
-						SimplePool<AttackTargetReservation>.Return(attackTargetReservation);
+						SimplePool_Patch<AttackTargetReservation>.Return(attackTargetReservation);
 					}
 				}
 				__instance.reservations.Clear();
-				__instance.reservations.AddRange(newAttackTargetReservations[__instance]);
+				__instance.reservations.AddRange(newAttackTargetReservations);
 			}
 			return false;
 		}
