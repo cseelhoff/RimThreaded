@@ -753,7 +753,7 @@ namespace RimThreaded
 				//List<Reservation> newReservationClaimantList = new List<Reservation>();
 
 				newReservationClaimantList.Clear();//CHANGES
-				foreach (Reservation reservation in reservationClaimantList.ToArray())//????????????????????!
+				foreach (Reservation reservation in reservationClaimantList)
 				{
 					if (reservation.Job != job)
 					{
