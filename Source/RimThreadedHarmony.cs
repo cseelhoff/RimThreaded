@@ -918,6 +918,7 @@ namespace RimThreaded
 			ReachabilityCache_Patch.RunDestructivePatches(); //TODO simplfy instance.fields
 			RealtimeMoteList_Patch.RunDestructivePatches();
 			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
+            RecordWorker_TimeGettingJoy_Patch.RunDestructivePatches();
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
 			RegionDirtyer_Patch.RunDestructivePatches();
 			RegionGrid_Patch.RunDestructivePatches();
