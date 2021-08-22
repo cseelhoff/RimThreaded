@@ -89,11 +89,11 @@ namespace RimThreaded
 			return false;
 		}
 
-		private static List<Reservation> getReservationTargetList(Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict, LocalTargetInfo target)
+		private static List<Reservation> getReservationTargetList(Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict, LocalTargetInfo target, ReservationManager __instance)
 		{
 			if (!reservationTargetDict.TryGetValue(target, out List<Reservation> reservationTargetList))
 			{
-				lock (reservationTargetDict)
+				lock (__instance)
 				{
 					if (!reservationTargetDict.TryGetValue(target, out List<Reservation> reservationTargetList2))
 					{
@@ -134,7 +134,7 @@ namespace RimThreaded
 			Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
 			if (!reservationTargetDict.TryGetValue(target, out List<Reservation> reservationTargetList))
 			{
-				lock (reservationTargetDict)
+				lock (__instance)
 				{
 					if (!reservationTargetDict.TryGetValue(target, out List<Reservation> reservationTargetList2))
 					{
@@ -538,7 +538,7 @@ namespace RimThreaded
 						//{
 						//    reservation
 						//};
-                        getReservationTargetList(reservationTargetDict, target).Add(reservation);
+                        getReservationTargetList(reservationTargetDict, target, __instance).Add(reservation);
                         reservationClaimantDict = getReservationClaimantDict(__instance);
                         //newReservationClaimantList =
                         //    new List<Reservation>(getReservationClaimantList(reservationClaimantDict, claimant))
@@ -589,7 +589,7 @@ namespace RimThreaded
 				//	{
 				//		reservation
 				//	};
-                getReservationTargetList(reservationTargetDict, target).Add(reservation);
+                getReservationTargetList(reservationTargetDict, target, __instance).Add(reservation);
                 reservationClaimantDict = getReservationClaimantDict(__instance);
 				//newReservationClaimantList = new List<Reservation>(getReservationClaimantList(reservationClaimantDict, claimant))
 				//	{
@@ -647,7 +647,7 @@ namespace RimThreaded
 
 
 					Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
-					List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
+					List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target, __instance);
 
 					//List<Reservation> newReservationTargetList = new List<Reservation>();
 
@@ -691,7 +691,7 @@ namespace RimThreaded
 			Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
 			lock (__instance)
 			{
-				List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, t.Position);
+				List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, t.Position, __instance);
 				//List<Reservation> newReservationTargetList = new List<Reservation>();
 
 				newReservationTargetList.Clear();
@@ -762,7 +762,7 @@ namespace RimThreaded
 					else
 					{
                         LocalTargetInfo target = reservation.Target;
-						List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
+						List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target, __instance);
 						//List<Reservation> newReservationTargetList = new List<Reservation>();
 
 						newReservationTargetList.Clear();
@@ -807,7 +807,7 @@ namespace RimThreaded
 				foreach (Reservation reservation in reservationClaimantList)
 				{
 					LocalTargetInfo target = reservation.Target;
-					List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
+					List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target, __instance);
 					//List<Reservation> newReservationTargetList = new List<Reservation>();
 
 					newReservationTargetList.Clear();
@@ -849,12 +849,15 @@ namespace RimThreaded
 				__result = LocalTargetInfo.Invalid;
 				return false;
 			}
-			List<Reservation> reservationClaimantList = getReservationClaimantList(__instance, claimant);			
-			foreach (Reservation reservation in reservationClaimantList)
-			{
-				__result = reservation.Target;
-				return false;
-			}			
+			lock (__instance)
+            {
+				List<Reservation> reservationClaimantList = getReservationClaimantList(__instance, claimant);
+				foreach (Reservation reservation in reservationClaimantList)
+				{
+					__result = reservation.Target;//how was this not happening before? Pawn_Patch.VerifyReservations
+					return false;
+				}
+			}					
 			__result = LocalTargetInfo.Invalid;
 			return false;
 		}
