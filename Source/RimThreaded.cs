@@ -76,7 +76,7 @@ namespace RimThreaded
         public static HashSet<int> initializedThreads = new HashSet<int>();
 
         public static object allSustainersLock = new object();
-        public static object map_AttackTargetReservationManager_reservations_Lock = new object();
+        //public static object map_AttackTargetReservationManager_reservations_Lock = new object();
 
 
         public class ThreadInfo
@@ -218,6 +218,8 @@ namespace RimThreaded
             Toils_Ingest_Patch.InitializeThreadStatics();
             World_Patch.InitializeThreadStatics();
             WorldPawns_Patch.InitializeThreadStatics();
+            AttackTargetReservationManager_Patch.InitializeThreadStatics();
+            //ReservationManager_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)
         {
@@ -388,7 +390,7 @@ namespace RimThreaded
                     tickList.preparing = -1;
                     tickList.threadCount = -1;
                 }
-
+                //OneTickPools Ticks go here.
                 listsFullyProcessed = 0;
                 workingOnDateNotifierTick = -1;
                 workingOnWorldTick = -1;
