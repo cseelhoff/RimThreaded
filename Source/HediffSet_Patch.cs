@@ -173,15 +173,12 @@ namespace RimThreaded
 
                 if (!flag)
                 {
-                    //List<Hediff> newHediffs = new List<Hediff>(__instance.hediffs) { hediff };
-                    //__instance.hediffs = newHediffs;
-                    __instance.hediffs.Add(hediff);
+                    List<Hediff> newHediffs = new List<Hediff>(__instance.hediffs) { hediff };
+                    __instance.hediffs = newHediffs;
+                    //__instance.hediffs.Add(hediff);
 
                     hediff.PostAdd(dinfo);
-                    if (__instance.pawn.needs != null && __instance.pawn.needs.mood != null)
-                    {
-                        __instance.pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
-                    }
+                    __instance.pawn.needs?.mood?.thoughts.situational.Notify_SituationalThoughtsDirty();
                 }
             }
             bool flag2 = hediff is Hediff_MissingPart;

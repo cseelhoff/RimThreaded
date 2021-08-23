@@ -744,11 +744,11 @@ namespace RimThreaded
 			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
 		}
 
-		public static void Transpile(Type original, Type patched, string methodName, Type[] origType = null, string[] harmonyAfter = null)
+		public static void Transpile(Type original, Type patched, string methodName, Type[] origType = null, string[] harmonyAfter = null, int priority = 0)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
 			MethodInfo pMethod = Method(patched, methodName);
-			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod)
+			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod, priority)
 			{
 				after = harmonyAfter
 			};

@@ -2,8 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Threading;
+using HarmonyLib;
+using Mono.Cecil.Cil;
+using RimWorld.Planet;
 using UnityEngine;
 using Verse;
+using Verse.AI;
+using static HarmonyLib.AccessTools;
 
 namespace RimThreaded
 {
@@ -22,7 +30,52 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(HealthTick));
 #endif
             RimThreadedHarmony.Prefix(original, patched, nameof(SetDead)); //optional warning instead of error
+            //RimThreadedHarmony.Transpile(original, patched, nameof(CheckForStateChange));
+            //RimThreadedHarmony.Prefix(original, patched, nameof(CheckForStateChange));
+            MethodInfo checkForStateChange = Method(original, "CheckForStateChange");
+            MethodInfo checkForStateChangeMonitorEnterMethod = Method(patched, nameof(CheckForStateChangeMonitorEnter));
+            RimThreadedHarmony.harmony.Patch(checkForStateChange, prefix: new HarmonyMethod(checkForStateChangeMonitorEnterMethod, 1000));
+            RimThreadedHarmony.nonDestructivePrefixes.Add(checkForStateChangeMonitorEnterMethod);
+            RimThreadedHarmony.harmony.Patch(checkForStateChange, postfix: new HarmonyMethod(Method(patched, nameof(CheckForStateChangeMonitorExit)), -1000));
+            MethodInfo postApplyDamage = Method(original, "PostApplyDamage");
+            MethodInfo postApplyDamageEnterMethod = Method(patched, nameof(PostApplyDamageEnter));
+            RimThreadedHarmony.nonDestructivePrefixes.Add(postApplyDamageEnterMethod);
+            RimThreadedHarmony.harmony.Patch(postApplyDamage, prefix: new HarmonyMethod(postApplyDamageEnterMethod, 1000));
+            RimThreadedHarmony.harmony.Patch(postApplyDamage, postfix: new HarmonyMethod(Method(patched, nameof(PostApplyDamageExit)), -1000));
         }
+
+        public static bool CheckForStateChangeMonitorEnter(Pawn_HealthTracker __instance, DamageInfo? dinfo, Hediff hediff)
+        {
+            bool lockTaken = false;
+            Monitor.TryEnter(__instance, RimThreaded.halfTimeoutMS, ref lockTaken);
+            if (!lockTaken)
+            {
+                Monitor.Exit(__instance);
+                return false;
+            }
+            return true;
+        }
+        public static void CheckForStateChangeMonitorExit(Pawn_HealthTracker __instance, DamageInfo? dinfo, Hediff hediff)
+        {
+            Monitor.Exit(__instance);
+        }
+
+        public static bool PostApplyDamageEnter(Pawn_HealthTracker __instance, DamageInfo dinfo, float totalDamageDealt)
+        {
+            bool lockTaken = false;
+            Monitor.TryEnter(__instance, RimThreaded.halfTimeoutMS, ref lockTaken);
+            if (!lockTaken)
+            {
+                Monitor.Exit(__instance);
+                return false;
+            }
+            return true;
+        }
+        public static void PostApplyDamageExit(Pawn_HealthTracker __instance, DamageInfo dinfo, float totalDamageDealt)
+        {
+            Monitor.Exit(__instance);
+        }
+        
         public static bool SetDead(Pawn_HealthTracker __instance)
         {
             if (__instance.Dead)

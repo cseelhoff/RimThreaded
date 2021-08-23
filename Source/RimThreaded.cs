@@ -439,6 +439,8 @@ namespace RimThreaded
         }
 
         public static int frameCount = 0;
+        public static TimeSpan halfTimeoutMS = new TimeSpan(0,0,0,0,4000);
+
         public static void MainThreadWaitLoop(TickManager tickManager)
         {
             frameCount = Time.frameCount;

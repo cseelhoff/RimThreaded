@@ -16,7 +16,7 @@ namespace RimThreaded.Mod_Patches
             SpeakUp_GrammarResolver_Resolve = TypeByName("SpeakUp.GrammarResolver_Resolve");
             if (SpeakUp_GrammarResolver_Resolve != null)
             {
-                string methodName = nameof(Prefix);
+                //string methodName = nameof(Prefix);
                 //Log.Message("RimThreaded is patching " + SpeakUp_GrammarResolver_Resolve.FullName + " " + methodName);
                 //Transpile(SpeakUp_GrammarResolver_Resolve, typeof(SpeakUp_Patch), methodName);
             }

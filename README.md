@@ -38,6 +38,17 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.15 - Sith Memory Rub   
+-Fixed bug in RecordWorker_TimeGettingJoy  
+-Fixed bug in HediffSet.AddDirect  
+-Fixed bug in MemoryThoughtHandler.TryGainMemory  
+-Fixed bug in Pawn_HealthTracker.CheckForStateChange  
+-Fixed bug in Pawn_HealthTracker.PostApplyDamage  
+-Fixed bug in SituationalThoughtHandler.RemoveExpiredThoughtsFromCache  
+-Lowered Transpile Harmony priority for RT methods  
+-Removed disablelimits in RT settings  
+-Transpiled Thing.TakeDamage  
+
 Version 2.5.14 - First Intergalactic War  
 -Added better ReplaceStuff Compatibility  
 -Added better RimWar Compatibility  
