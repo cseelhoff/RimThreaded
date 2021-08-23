@@ -984,6 +984,7 @@ namespace RimThreaded
 			PawnRules_Patch.Patch();
 			ZombieLand_Patch.Patch();
 			VEE_Patch.Patch();
+			SOS2_Patch.Patch();
 			//SpeakUp_Patch.Patch();
 			RimWar_Patch.Patch();
 		}
