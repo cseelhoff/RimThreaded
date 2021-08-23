@@ -63,51 +63,50 @@ namespace RimThreaded
 
         public static bool TryGainMemory(MemoryThoughtHandler __instance, Thought_Memory newThought, Pawn otherPawn = null)
         {
-            if (!ThoughtUtility.CanGetThought(__instance.pawn, newThought.def))
+            lock (__instance) //ADDED
             {
-                return false;
-            }
-
-            if (newThought is Thought_MemorySocial && newThought.otherPawn == null && otherPawn == null)
-            {
-                Log.Error(string.Concat("Can't gain social thought ", newThought.def, " because its otherPawn is null and otherPawn passed to this method is also null. Social thoughts must have otherPawn."));
-                return false;
-            }
-
-            newThought.pawn = __instance.pawn;
-            newThought.otherPawn = otherPawn;
-            if (!newThought.TryMergeWithExistingMemory(out bool showBubble))
-            {
-                lock (__instance) //ADDED
+                if (!ThoughtUtility.CanGetThought(__instance.pawn, newThought.def))
                 {
-                    __instance.memories.Add(newThought);
+                    return false;
                 }
-            }
 
-            if (newThought.def.stackLimitForSameOtherPawn >= 0)
-            {
-                while (__instance.NumMemoriesInGroup(newThought) > newThought.def.stackLimitForSameOtherPawn)
+                if (newThought is Thought_MemorySocial && newThought.otherPawn == null && otherPawn == null)
                 {
-                    __instance.RemoveMemory(__instance.OldestMemoryInGroup(newThought));
+                    Log.Error(string.Concat("Can't gain social thought ", newThought.def, " because its otherPawn is null and otherPawn passed to this method is also null. Social thoughts must have otherPawn."));
+                    return false;
                 }
-            }
 
-            if (newThought.def.stackLimit >= 0)
-            {
-                while (__instance.NumMemoriesOfDef(newThought.def) > newThought.def.stackLimit)
+                newThought.pawn = __instance.pawn;
+                newThought.otherPawn = otherPawn;
+                if (!newThought.TryMergeWithExistingMemory(out bool showBubble))
                 {
-                    __instance.RemoveMemory(__instance.OldestMemoryOfDef(newThought.def));
+                        __instance.memories.Add(newThought);
                 }
-            }
 
-            if (newThought.def.thoughtToMake != null)
-            {
-                __instance.TryGainMemory(newThought.def.thoughtToMake, newThought.otherPawn);
-            }
+                if (newThought.def.stackLimitForSameOtherPawn >= 0)
+                {
+                    while (__instance.NumMemoriesInGroup(newThought) > newThought.def.stackLimitForSameOtherPawn)
+                    {
+                        __instance.RemoveMemory(__instance.OldestMemoryInGroup(newThought));
+                    }
+                }
+                if (newThought.def.stackLimit >= 0)
+                {
+                    while (__instance.NumMemoriesOfDef(newThought.def) > newThought.def.stackLimit)
+                    {
+                        __instance.RemoveMemory(__instance.OldestMemoryOfDef(newThought.def));
+                    }
+                }
 
-            if (showBubble && newThought.def.showBubble && __instance.pawn.Spawned && PawnUtility.ShouldSendNotificationAbout(__instance.pawn))
-            {
-                MoteMaker.MakeMoodThoughtBubble(__instance.pawn, newThought);
+                if (newThought.def.thoughtToMake != null)
+                {
+                    __instance.TryGainMemory(newThought.def.thoughtToMake, newThought.otherPawn);
+                }
+
+                if (showBubble && newThought.def.showBubble && __instance.pawn.Spawned && PawnUtility.ShouldSendNotificationAbout(__instance.pawn))
+                {
+                    MoteMaker.MakeMoodThoughtBubble(__instance.pawn, newThought);
+                }
             }
             return false;
         }

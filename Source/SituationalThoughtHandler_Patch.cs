@@ -160,11 +160,50 @@ namespace RimThreaded
             lock (__instance)
             {
                 Dictionary<Pawn, CachedSocialThoughts> newCachedSocialThoughts = new Dictionary<Pawn, CachedSocialThoughts>(__instance.cachedSocialThoughts);
-                newCachedSocialThoughts.RemoveAll(x => x.Value.Expired || x.Key.Discarded);
+                RemoveAll(newCachedSocialThoughts, x => x.Value.Expired || x.Key.Discarded);
                 __instance.cachedSocialThoughts = newCachedSocialThoughts;
             }
             return false;
         }
+        public static int RemoveAll<Pawn, CachedSocialThoughts>(Dictionary<Pawn, CachedSocialThoughts> dictionary, Predicate<KeyValuePair<Pawn, CachedSocialThoughts>> predicate)
+        {
+            List<Pawn> list = null;
+            try
+            {
+                foreach (KeyValuePair<Pawn, CachedSocialThoughts> item in dictionary)
+                {
+                    if (predicate(item))
+                    {
+                        if (list == null)
+                        {
+                            list = SimplePool<List<Pawn>>.Get();
+                        }
 
+                        list.Add(item.Key);
+                    }
+                }
+
+                if (list != null)
+                {
+                    int i = 0;
+                    for (int count = list.Count; i < count; i++)
+                    {
+                        dictionary.Remove(list[i]);
+                    }
+
+                    return list.Count;
+                }
+
+                return 0;
+            }
+            finally
+            {
+                if (list != null)
+                {
+                    list.Clear();
+                    SimplePool<List<Pawn>>.Return(list);
+                }
+            }
+        }
     }
 }

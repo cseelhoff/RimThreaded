@@ -19,7 +19,6 @@ namespace RimThreaded
         public float timeSpeedUltrafast = 150f;
         public string timeSpeedUltrafastBuffer = "150";
         public bool disablesomealerts = false;
-        public bool disablelimits = false;
         public bool disableforcedslowdowns = false;
         public float scrollViewHeight;
         public Vector2 scrollPosition;
