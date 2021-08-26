@@ -61,6 +61,7 @@ namespace RimThreaded
                 __instance.cachedCellCount = -1;
                 __instance.cachedOpenRoofCount = -1;
                 __instance.cachedOpenRoofState = null;
+                AnimalPenConnectedDistrictsCalculator.InvalidateDistrictCache(__instance);
                 __instance.lastChangeTick = Find.TickManager.TicksGame;
                 FacilitiesUtility.NotifyFacilitiesAboutChangedLOSBlockers(__instance.regions);
             }
