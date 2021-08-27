@@ -719,11 +719,11 @@ namespace RimThreaded
 						}
 
 					}
-					//reservationTargetDict[t.Position] = newReservationTargetList;
-					reservationTargetDict[t.Position].Clear();
-					reservationTargetDict[t.Position].AddRange(newReservationTargetList);
+					//reservationTargetDict[t.Position] = newReservationTargetList; //??? why inside the foreach?
 				}
-			
+				reservationTargetDict[t.Position].Clear();
+				reservationTargetDict[t.Position].AddRange(newReservationTargetList);
+
 			}
 			return false;
 		}
