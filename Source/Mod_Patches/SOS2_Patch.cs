@@ -81,11 +81,12 @@ namespace RimThreaded.Mod_Patches
         public static IEnumerable<CodeInstruction> Postfix(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             Type _cache_spacesuit = typeof(Dictionary<int, Tuple<int, bool>>);
+            Type GenCollection = typeof(Verse.GenCollection);
             foreach (CodeInstruction i in instructions)
             {
                 if (i.opcode == OpCodes.Call)
                 {
-                    if ((MethodInfo)i.operand == Method(_cache_spacesuit, "RemoveAll"))
+                    if ((MethodInfo)i.operand == Method(GenCollection, "RemoveAll", new Type[] { typeof(Dictionary<int, Tuple<int, bool>>), typeof(Predicate<KeyValuePair<int, Tuple<int, bool>>>) }, new Type[] { typeof(int), typeof(Tuple<int, bool>) }))
                     {
                         i.operand = Method(typeof(SOS2_Patch), nameof(RemoveAll));
                     }
