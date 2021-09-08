@@ -11,6 +11,7 @@ namespace RimThreaded
             Type original = typeof(GridsUtility);
             Type patched = typeof(GridsUtility_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(Fogged), new Type[] { typeof(Thing) });
+            RimThreadedHarmony.Prefix(original, patched, nameof(Fogged), new Type[] { typeof(IntVec3), typeof(Map) });
             RimThreadedHarmony.Prefix(original, patched, nameof(GetThingList));
             RimThreadedHarmony.Prefix(original, patched, nameof(GetEdifice));
         }
@@ -35,6 +36,23 @@ namespace RimThreaded
             if (thingGrid == null)
                 return false;
             __result = thingGrid.ThingsListAt(c);
+            return false;
+        }
+        /*public static bool Fogged(this IntVec3 c, Map map)
+        {
+            return map.fogGrid.IsFogged(c);
+        }*/
+        public static bool Fogged(ref bool __result, IntVec3 c, Map map)
+        {
+            __result = false;
+            if (c == null)
+                return false;
+            if (map == null)
+                return false;
+            FogGrid fogGrid = map.fogGrid;
+            if (fogGrid == null)
+                return false;
+            __result = fogGrid.IsFogged(c);
             return false;
         }
 

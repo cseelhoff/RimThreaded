@@ -26,7 +26,25 @@ namespace RimThreaded
 #endif
 			RimThreadedHarmony.Prefix(original, patched, nameof(Notify_RoofChanged));
 			RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
+
+			RimThreadedHarmony.Prefix(original, patched, nameof(get_Fogged));
 		}
+
+		public static bool get_Fogged(Room __instance, ref bool __result)
+		{
+			__result = false;
+            if (__instance == null || __instance.RegionCount == 0)
+            {
+                return false;
+            }
+            if (__instance.Map == null || __instance.FirstRegion == null || __instance.FirstRegion.Cells.First() == null)
+            {
+                return false;
+            }
+            __result = __instance.FirstRegion.Cells.First().Fogged(__instance.Map);//unbelievable this works and the vanilla FirstRegion.AnyCell.Fogged(Map) doesn't.
+			return false;
+		}
+#if RW12
 		public static bool Notify_ContainedThingSpawnedOrDespawned(Room __instance, Thing th)
 		{
 			if (th.def.category == ThingCategory.Mote || th.def.category == ThingCategory.Projectile || th.def.category == ThingCategory.Ethereal || th.def.category == ThingCategory.Pawn)
@@ -52,7 +70,6 @@ namespace RimThreaded
 			__instance.statsAndRoleDirty = true;
 			return false;
 		}
-#if RW12
 		public static bool OpenRoofCountStopAt(Room __instance, ref int __result, int threshold)
 		{
 			//IEnumerator<IntVec3> cachedOpenRoofState2 = __instance.Cells.GetEnumerator();

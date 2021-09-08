@@ -17,6 +17,9 @@ namespace RimThreaded
 		public static readonly Dictionary<ReservationManager, Dictionary<Pawn, List<Reservation>>> reservationClaimantDicts =
 			new Dictionary<ReservationManager, Dictionary<Pawn, List<Reservation>>>();
 
+		[ThreadStatic] static public List<Reservation> newReservationClaimantList;
+		[ThreadStatic] static public List<Reservation> newReservationTargetList;
+
 		internal static void RunDestructivePatches()
 		{
 			Type original = typeof(ReservationManager);
@@ -40,6 +43,11 @@ namespace RimThreaded
 
 			//RimThreadedHarmony.Postfix(original, patched, "Release", "PostRelease");
 			//RimThreadedHarmony.Postfix(original, patched, "Release", "PostReleaseAllForTarget");
+		}
+		internal static void InitializeThreadStatics()
+		{
+			newReservationClaimantList = new List<Reservation>();
+			newReservationTargetList = new List<Reservation>();
 		}
 
 		public static bool ExposeData(ReservationManager __instance)
@@ -512,8 +520,16 @@ namespace RimThreaded
 				{
 					if (job.playerForced && __instance.CanReserve(claimant, target, maxPawns, stackCount, layer, true))
 					{
-						reservation = new Reservation(claimant, job, maxPawns, stackCount, target, layer);
-                        List<Reservation> claimantReservations;
+						//reservation = new Reservation(claimant, job, maxPawns, stackCount, target, layer);
+						reservation = SimplePool_Patch<Reservation>.Get();
+						reservation.claimant = claimant;
+						reservation.job = job;
+						reservation.maxPawns = maxPawns;
+						reservation.stackCount = stackCount;
+						reservation.target = target;
+						reservation.layer = layer;
+
+						List<Reservation> claimantReservations;
 						
 						reservationTargetDict = getReservationTargetDict(__instance);
 						//newReservationTargetList = new List<Reservation>(getReservationTargetList(reservationTargetDict, target))
@@ -557,7 +573,14 @@ namespace RimThreaded
 					__result = false;
 					return false;
 				}
-				reservation = new Reservation(claimant, job, maxPawns, stackCount, target, layer);
+				//reservation = new Reservation(claimant, job, maxPawns, stackCount, target, layer);
+				reservation = SimplePool_Patch<Reservation>.Get();
+				reservation.claimant = claimant;
+				reservation.job = job;
+				reservation.maxPawns = maxPawns;
+				reservation.stackCount = stackCount;
+				reservation.target = target;
+				reservation.layer = layer;
 
                 reservationTargetDict = getReservationTargetDict(__instance);
 				//newReservationTargetList = new List<Reservation>(getReservationTargetList(reservationTargetDict, target))
@@ -587,7 +610,7 @@ namespace RimThreaded
 			List<Reservation> reservationTargetListUnsafe = getReservationTargetList(__instance, target);
 			foreach (Reservation reservation2 in reservationTargetListUnsafe) 
 			{ 
-				if (reservation2.Claimant == claimant && reservation2.Job == job)
+				if (reservation2.Claimant == claimant && reservation2.Job == job)//because of the Simple_Pool this check might require to be inside the lock. Is not causing problems now but is doubtful.
 				{
 					reservation1 = reservation2;
 					break;
@@ -601,18 +624,23 @@ namespace RimThreaded
 				{
 					Dictionary<Pawn, List<Reservation>> reservationClaimantDict = getReservationClaimantDict(__instance);
 					List<Reservation> reservationClaimantList = getReservationClaimantList(reservationClaimantDict, claimant);
-					List<Reservation> newReservationClaimantList = new List<Reservation>();
+					//List<Reservation> newReservationClaimantList = new List<Reservation>();
+
+					newReservationClaimantList.Clear();
 					foreach (Reservation reservation in reservationClaimantList)
 					{
 						if (reservation != reservation1)
 						{
 							newReservationClaimantList.Add(reservation);
 						}
-						reservationClaimantDict[claimant] = newReservationClaimantList;
+						//reservationClaimantDict[claimant] = newReservationClaimantList;//why inside the foreach?
 					}
+					reservationClaimantDict[claimant].Clear();
+					reservationClaimantDict[claimant].AddRange(newReservationClaimantList);
 					Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
 					List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
-					List<Reservation> newReservationTargetList = new List<Reservation>();
+					//List<Reservation> newReservationTargetList = new List<Reservation>();
+					newReservationTargetList.Clear();
 					foreach (Reservation reservation2 in reservationTargetList)
 					{
 						if (reservation2 != reservation1)
@@ -620,7 +648,10 @@ namespace RimThreaded
 							newReservationTargetList.Add(reservation2);
 						}
 					}
-					reservationTargetDict[target] = newReservationTargetList;					
+					SimplePool_Patch<Reservation>.Return(reservation1);
+					//reservationTargetDict[target] = newReservationTargetList;	
+					reservationTargetDict[target].Clear();
+					reservationTargetDict[target].AddRange(newReservationTargetList);
 				}
 			}
 
@@ -646,8 +677,9 @@ namespace RimThreaded
 			Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
 			lock (__instance)
 			{
-				List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, t.Position);
-				List<Reservation> newReservationTargetList = new List<Reservation>();
+				List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, t.Position);//t.Position? Or just t?
+				//List<Reservation> newReservationTargetList = new List<Reservation>();
+				newReservationTargetList.Clear();
 				foreach (Reservation reservation in reservationTargetList)
 				{
 					LocalTargetInfo target = reservation.Target;
@@ -660,7 +692,9 @@ namespace RimThreaded
 					{
 						Dictionary<Pawn, List<Reservation>> reservationClaimantDict = getReservationClaimantDict(__instance);
 						List<Reservation> reservationClaimantList = getReservationClaimantList(reservationClaimantDict, reservation.Claimant);
-						List<Reservation> newReservationClaimantList = new List<Reservation>();
+						//List<Reservation> newReservationClaimantList = new List<Reservation>();
+
+						newReservationClaimantList.Clear();
 						foreach (Reservation reservation2 in reservationClaimantList)
 						{
 							if (reservation2.Target.Thing != t)
@@ -668,7 +702,11 @@ namespace RimThreaded
 								newReservationClaimantList.Add(reservation2);
 							}
 						}
-						reservationClaimantDict[reservation.Claimant] = newReservationTargetList;
+						//reservationClaimantDict[reservation.Claimant] = newReservationTargetList;//  ???
+						reservationClaimantDict[reservation.Claimant].Clear();
+						reservationClaimantDict[reservation.Claimant].AddRange(newReservationClaimantList);
+
+						SimplePool_Patch<Reservation>.Return(reservation);
 
 						//HaulingCache
 						if (thing != null && thing.def.EverHaulable)
@@ -681,9 +719,11 @@ namespace RimThreaded
 						}
 
 					}
-					reservationTargetDict[t.Position] = newReservationTargetList;
+					//reservationTargetDict[t.Position] = newReservationTargetList; //??? why inside the foreach?
 				}
-			
+				reservationTargetDict[t.Position].Clear();
+				reservationTargetDict[t.Position].AddRange(newReservationTargetList);
+
 			}
 			return false;
 		}
@@ -694,7 +734,9 @@ namespace RimThreaded
 			{
 				Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
 				List<Reservation> reservationClaimantList = getReservationClaimantList(reservationClaimantDict, claimant);
-				List<Reservation> newReservationClaimantList = new List<Reservation>();
+				//List<Reservation> newReservationClaimantList = new List<Reservation>();
+
+				newReservationClaimantList.Clear();
 				foreach (Reservation reservation in reservationClaimantList)
 				{
 					if (reservation.Job != job)
@@ -705,8 +747,11 @@ namespace RimThreaded
 					{
                         LocalTargetInfo target = reservation.Target;
 						List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
-						List<Reservation> newReservationTargetList = new List<Reservation>();
-                        for (int index = 0; index < reservationTargetList.Count; index++)
+						//List<Reservation> newReservationTargetList = new List<Reservation>();
+
+						newReservationTargetList.Clear();
+
+						for (int index = 0; index < reservationTargetList.Count; index++)
                         {
                             Reservation reservation2 = reservationTargetList[index];
                             if (reservation2.Claimant != claimant || reservation2.Job != job)
@@ -715,7 +760,12 @@ namespace RimThreaded
                             }
                         }
 
-                        reservationTargetDict[target] = newReservationTargetList;
+						//reservationTargetDict[target] = newReservationTargetList;
+						reservationTargetDict[target].Clear();
+						reservationTargetDict[target].AddRange(newReservationTargetList);
+
+						SimplePool_Patch<Reservation>.Return(reservation);
+
 						//HaulingCache
 						Thing thing = target.Thing;
 						if (thing != null && thing.def.EverHaulable)
@@ -728,8 +778,10 @@ namespace RimThreaded
 						}
 
 					}
-					reservationClaimantDict[claimant] = newReservationClaimantList;
+					//reservationClaimantDict[claimant] = newReservationClaimantList;
 				}
+				reservationClaimantDict[claimant].Clear();
+				reservationClaimantDict[claimant].AddRange(newReservationClaimantList);
 			}
 			return false;
 		}
@@ -745,8 +797,11 @@ namespace RimThreaded
 				{
 					LocalTargetInfo target = reservation.Target;
 					List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
-					List<Reservation> newReservationTargetList = new List<Reservation>();
-                    for (int index = 0; index < reservationTargetList.Count; index++)
+					//List<Reservation> newReservationTargetList = new List<Reservation>();
+
+					newReservationTargetList.Clear();
+
+					for (int index = 0; index < reservationTargetList.Count; index++)
                     {
                         Reservation reservation2 = reservationTargetList[index];
                         if (reservation2.Claimant != claimant)
@@ -755,7 +810,10 @@ namespace RimThreaded
                         }
                     }
 
-                    reservationTargetDict[target] = newReservationTargetList;
+					SimplePool_Patch<Reservation>.Return(reservation);
+					//reservationTargetDict[target] = newReservationTargetList;
+					reservationTargetDict[target].Clear();
+					reservationTargetDict[target].AddRange(newReservationTargetList);
 					//HaulingCache
 					Thing thing = target.Thing;
 					if (thing != null && thing.def.EverHaulable)
@@ -768,7 +826,8 @@ namespace RimThreaded
 					}
 
 				}
-				reservationClaimantDict[claimant] = new List<Reservation>();
+				//reservationClaimantDict[claimant] = new List<Reservation>();
+				reservationClaimantDict[claimant].Clear();
 			}
 			return false;
 		}
