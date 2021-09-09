@@ -1,31 +1,30 @@
 # RimThreaded  
 RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.  
 
-JOIN OUR COMMUNITY ON DISCORD:  
+Version 2.5.15 - Sith Memory Rub  
+-Fixed bug in RecordWorker_TimeGettingJoy  
+-Fixed bug in HediffSet.AddDirect  
+-Fixed bug in MemoryThoughtHandler.TryGainMemory  
+-Fixed bug in Pawn_HealthTracker.CheckForStateChange  
+-Fixed bug in Pawn_HealthTracker.PostApplyDamage  
+-Fixed bug in SituationalThoughtHandler.RemoveExpiredThoughtsFromCache  
+-Lowered Transpile Harmony priority for RT methods  
+-Removed disablelimits in RT settings  
+-Transpiled Thing.TakeDamage  
+
+JOIN OUR COMMUNITY ON DISCORD / SUBMIT BUGS:  
 https://discord.gg/3JJuWK8  
 
-WIKI (including MOD COMPATIBILITY):
-https://github.com/cseelhoff/RimThreaded/wiki
-
-MOD COMPATIBILITY:
-https://github.com/cseelhoff/RimThreaded/wiki/Mod-Compatibility
-
-SETTINGS: 
-The number of threads to utilize should be set in the mod settings, according to your specific computer's core count.  
-
-LOAD ORDER:  
-Put RimThreaded last in load order.  
-
-SUBMIT BUGS:  
-https://github.com/cseelhoff/RimThreaded/issues/new/choose  
+MOD COMPATIBILITY/LOAD ORDER:  
+Use RimPy to check mod compatibility and load order (RimThreaded should be last)  
 
 CREDITS:  
 Big thanks to Sernior for his continued help bug fixing and performance tweaks!  
 Big thanks to JoJo for his continued help bug fixing and adding mod compatibility!  
-Big thanks to Brrainz (Pardeike) for Harmony and all of the coding help!
+Big thanks to Brrainz (Pardeike) for Harmony and all of the coding help!  
 Big thanks to Kiame Vivacity for his help with fixing sound!  
 Special thank you for helping me test Austin (Stanui)!  
-Thank you bookdude13 for your many bugfixes!  
+Thank you bookdude13 for your many bug fixes!  
 Thank you to Ataman for helping me fix the LVM deep storage bug!  
 Thank you Ken for fixing RegionCostCalculator.PathableNeighborIndices!  
 Thank you Raccoononi for the RT 2.0 logo! https://discordhub.com/profile/245738467995156481  
@@ -38,6 +37,9 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.16 -   
+
+
 Version 2.5.15 - Sith Memory Rub   
 -Fixed bug in RecordWorker_TimeGettingJoy  
 -Fixed bug in HediffSet.AddDirect  

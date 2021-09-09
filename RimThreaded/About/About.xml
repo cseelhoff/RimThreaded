@@ -11,22 +11,14 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.5.15 - Sith Memory Rub
-    -Fixed bug in RecordWorker_TimeGettingJoy
-    -Fixed bug in HediffSet.AddDirect
-    -Fixed bug in MemoryThoughtHandler.TryGainMemory
-    -Fixed bug in Pawn_HealthTracker.CheckForStateChange
-    -Fixed bug in Pawn_HealthTracker.PostApplyDamage
-    -Fixed bug in SituationalThoughtHandler.RemoveExpiredThoughtsFromCache
-    -Lowered Transpile Harmony priority for RT methods
-    -Removed disablelimits in RT settings
-    -Transpiled Thing.TakeDamage
+    Version 2.5.16 - 
+    -
 
     JOIN OUR COMMUNITY ON DISCORD / SUBMIT BUGS:
     https://discord.gg/3JJuWK8
 
     MOD COMPATIBILITY/LOAD ORDER:
-    Use RimPy to check mod compatibility and load order
+    Use RimPy to check mod compatibility and load order (RimThreaded should be last)
 
     CREDITS:
     Big thanks to Sernior for his continued help bug fixing and performance tweaks!
