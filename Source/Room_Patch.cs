@@ -29,19 +29,21 @@ namespace RimThreaded
 
 			RimThreadedHarmony.Prefix(original, patched, nameof(get_Fogged));
 		}
-
 		public static bool get_Fogged(Room __instance, ref bool __result)
 		{
 			__result = false;
-            if (__instance == null || __instance.RegionCount == 0)
+            if (__instance.RegionCount == 0)
             {
                 return false;
             }
-            if (__instance.Map == null || __instance.FirstRegion == null || __instance.FirstRegion.Cells.First() == null)
+			Region tmpRegion = __instance.FirstRegion;
+			Map tmpMap = __instance.Map;
+            if (tmpMap == null || tmpRegion == null)
             {
                 return false;
             }
-            __result = __instance.FirstRegion.Cells.First().Fogged(__instance.Map);//unbelievable this works and the vanilla FirstRegion.AnyCell.Fogged(Map) doesn't.
+			IntVec3 pos = tmpRegion.AnyCell;
+			__result = pos.Fogged(tmpMap);
 			return false;
 		}
 #if RW12
