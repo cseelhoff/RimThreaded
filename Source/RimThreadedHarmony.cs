@@ -968,6 +968,9 @@ namespace RimThreaded
 			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
 			SustainerManager_Patch.RunDestructivePatches();
 			Sustainer_Patch.RunNonDestructivePatches();
+			Building_Bed_Patch.RunDestructivePatches();//this patch hides a race condition coming from Room.Map
+			RitualObligationTargetWorker_AnyEmptyGrave_Patch.RunDestructivePatches();
+			RitualObligationTargetWorker_GraveWithTarget_Patch.RunDestructivePatches();
 		}
 
 		private static void PatchModCompatibility()
