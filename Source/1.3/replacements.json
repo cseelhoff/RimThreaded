@@ -24,6 +24,14 @@
       ]
     },
     {
+      "ClassName": "RimWorld.JobDriver_RopeToDestination",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpRopees"
+        }
+      ]
+    },
+    {
       "ClassName": "Verse.AI.AttackTargetsCache",
       "ThreadStatics": [
         {
