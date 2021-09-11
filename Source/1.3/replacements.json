@@ -24,6 +24,17 @@
       ]
     },
     {
+      "ClassName": "RimWorld.PawnBioAndNameGenerator",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpNames"
+        },
+        {
+          "FieldName": "usedNamesTmp"
+        }
+      ]
+    },
+    {
       "ClassName": "RimWorld.JobDriver_RopeToDestination",
       "ThreadStatics": [
         {
@@ -1016,9 +1027,6 @@
         },
         {
           "FieldName": "tmpLoveRelations"
-        },
-        {
-          "FieldName": "tmpMarriageClusterPawns"
         },
         {
           "FieldName": "tmpStack"
