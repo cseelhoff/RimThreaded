@@ -609,12 +609,14 @@ namespace RimThreaded
 			rwl.EnterWriteLock();
 			try
 			{
-
-				if (tl.RemoveAll(r => r.Claimant == claimant && r.Job == job) == 0)
+				int trlIdx = tl.FindIndex(r => r.Claimant == claimant && r.Job == job)
+				if (trlIdx==-1)
 					Log.Warning("Tried to release " + target + " that wasn't reserved by " + claimant + ".");
 				else
 				{
 					cl.RemoveAll(r => r.Claimant == claimant && r.Job == job);
+					SimplePool_Patch<Reservation>.Return(tl[trlIdx]);
+					tl.RemoveAt(trlIdx);
 				}
 			}
 			finally
@@ -652,6 +654,7 @@ namespace RimThreaded
 					{
 						//remove
 						getReservationClaimantList(__instance, reservation.claimant).RemoveAll(r => r.Target.Thing == t);
+						SimplePool_Patch<Reservation>.Return(reservation);
 
 					}
 				}
@@ -689,6 +692,7 @@ namespace RimThreaded
 						LocalTargetInfo target = reservation.Target;
 						getReservationTargetList(__instance, target).RemoveAll(r => r.Claimant == claimant && r.Job == job);
 						thingList.Add(target.Thing);
+						SimplePool_Patch<Reservation>.Return(reservation);
 
 					}
 				}
@@ -729,6 +733,7 @@ namespace RimThreaded
 
 					getReservationTargetList(__instance, target).RemoveAll(r => r.claimant == claimant);
 					thingList.Add(target.Thing);
+					SimplePool_Patch<Reservation>.Return(reservation)
 				}
 				reservationClaimantList.Clear();
 			}
