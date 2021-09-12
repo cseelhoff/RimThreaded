@@ -175,7 +175,8 @@ namespace RimThreaded
 		{
 			if (!reservationTargetDicts.TryGetValue(__instance, out Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict))
 			{
-				lock (__instance)
+				 rwl.EnterWriteLock();
+				try
 				{
 					if (!reservationTargetDicts.TryGetValue(__instance, out Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict2))
 					{
@@ -207,6 +208,10 @@ namespace RimThreaded
 					{
 						reservationTargetDict = reservationTargetDict2;
 					}
+				}
+				finally
+				{
+					rwl.ExitWriteLock();
 				}
 			}
 			return reservationTargetDict;
