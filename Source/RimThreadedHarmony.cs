@@ -702,8 +702,7 @@ namespace RimThreaded
 		{
 			harmony.Patch(Method(original, methodName, origType), transpiler: add3Transpiler);
 		}
-
-		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true, int priority = 0)
+		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true, int priority = 0, string finalizer = null)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
 			Type[] patch_type = null;
@@ -728,7 +727,16 @@ namespace RimThreaded
 				}
 			}
 			MethodInfo pMethod = Method(patched, methodName, patch_type);
-			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod, priority));
+
+			MethodInfo Finalizer;
+			HarmonyMethod FinalizerH = null;
+			if (finalizer != null)
+            {
+				Finalizer = Method(patched, finalizer);
+				FinalizerH = new HarmonyMethod(Finalizer, priority);
+			}
+
+			harmony.Patch(oMethod, prefix: new HarmonyMethod(pMethod, priority), finalizer: FinalizerH);
 			if (!destructive)
 			{
 				nonDestructivePrefixes.Add(pMethod);
@@ -804,6 +812,7 @@ namespace RimThreaded
 			TransportShipManager_Patch.RunNonDestructivePatches();
 			//RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix - not sure why this causes bug with sleeping
 			GrammarResolver_Patch.RunNonDestructivePatches();
+			Sustainer_Patch.RunNonDestructivePatches();
 
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
@@ -962,15 +971,18 @@ namespace RimThreaded
 			Room_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches(); //TODO replace cachedThoughts with ThreadSafeLinkedList
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
+
 															 //-----SOUND-----
 			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
 			SoundSizeAggregator_Patch.RunDestructivePatches();
 			SoundStarter_Patch.RunDestructivePatches(); //disabling this patch stops sounds
 			SustainerManager_Patch.RunDestructivePatches();
-			Sustainer_Patch.RunNonDestructivePatches();
+															//-----END SOUND-----
+
 			Building_Bed_Patch.RunDestructivePatches();//this patch hides a race condition coming from Room.Map
 			RitualObligationTargetWorker_AnyEmptyGrave_Patch.RunDestructivePatches();
 			RitualObligationTargetWorker_GraveWithTarget_Patch.RunDestructivePatches();
+			PortraitsCache_Patch.RunDestructivePatches();
 		}
 
 		private static void PatchModCompatibility()
