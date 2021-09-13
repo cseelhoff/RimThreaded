@@ -21,48 +21,48 @@ namespace RimThreaded
 		}
 		private static bool RemoveExpiredCachedPortraits()
         {
-			for (int i = 0; i < cachedPortraits.Count; i++)
-			{
-				Dictionary<Pawn, CachedPortrait> dictionary = cachedPortraits[i].CachedPortraits;
-				toRemove.Clear();
-				foreach (KeyValuePair<Pawn, CachedPortrait> item in dictionary)
+			lock (renderTexturesPool)
+            {
+				for (int i = 0; i < cachedPortraits.Count; i++)
 				{
-					if (item.Value.Expired)
+					Dictionary<Pawn, CachedPortrait> dictionary = cachedPortraits[i].CachedPortraits;
+					toRemove.Clear();
+					foreach (KeyValuePair<Pawn, CachedPortrait> item in dictionary)
 					{
-						toRemove.Add(item.Key);
-						lock(renderTexturesPool)
-                        {
+						if (item.Value.Expired)
+						{
+							toRemove.Add(item.Key);
 							renderTexturesPool.Add(item.Value.RenderTexture);
 						}
 					}
+					for (int j = 0; j < toRemove.Count; j++)
+					{
+						dictionary.Remove(toRemove[j]);
+					}
+					toRemove.Clear();
 				}
-				for (int j = 0; j < toRemove.Count; j++)
-				{
-					dictionary.Remove(toRemove[j]);
-				}
-				toRemove.Clear();
 			}
 			return false;
         }
 		public static bool NewRenderTexture(ref RenderTexture __result, Vector2 size)
         {
-			int num = renderTexturesPool.FindLastIndex((RenderTexture x) => x.width == (int)size.x && x.height == (int)size.y);
-			if (num != -1)
-			{
-				RenderTexture result = renderTexturesPool[num];
-				lock(renderTexturesPool)
-                {
+			lock (renderTexturesPool)
+            {
+				int num = renderTexturesPool.FindLastIndex((RenderTexture x) => x.width == (int)size.x && x.height == (int)size.y);
+				if (num != -1)
+				{
+					RenderTexture result = renderTexturesPool[num];
 					renderTexturesPool.RemoveAt(num);
+					__result = result;
+					return false;
 				}
-				__result = result;
-				return false;
+				__result = new RenderTexture((int)size.x, (int)size.y, 24)//this one doesn't have a parameterless constructor... I could do a specific pool for him but I am not going to, this is already a Pool for textures.
+				{
+					name = "Portrait",
+					useMipMap = false,
+					filterMode = FilterMode.Bilinear
+				};
 			}
-			__result = new RenderTexture((int)size.x, (int)size.y, 24)//this one doesn't have a parameterless constructor... I could do a specific pool for him but I am not going to, this is already a Pool for textures.
-			{
-				name = "Portrait",
-				useMipMap = false,
-				filterMode = FilterMode.Bilinear
-			};
 			return false;
         }
 
@@ -74,8 +74,8 @@ namespace RimThreaded
 				{
 					DestroyRenderTexture(cachedPortrait.Value.RenderTexture);
 				}
-				SimplePool_Patch<Dictionary<Pawn, CachedPortrait>>.Return(cachedPortraits[i].CachedPortraits);
-				SimplePool_Patch<CachedPortraitsWithParams>.Return(cachedPortraits[i]);
+				//SimplePool_Patch<Dictionary<Pawn, CachedPortrait>>.Return(cachedPortraits[i].CachedPortraits);
+				//SimplePool_Patch<CachedPortraitsWithParams>.Return(cachedPortraits[i]);
 			}
 			//in this case the one tick pool can't be used because the execution of this method can come directly from outside the abstraction of the game "tick".
 			//the PulsePool should provide enough elements to avoid race conditions (or make them extreamly rare) while avoiding garbage.
@@ -141,8 +141,8 @@ namespace RimThreaded
 						return false;
 					}
 				}
-				//CachedPortraitsWithParams cachedPortraitsWithParams = new CachedPortraitsWithParams(size, cameraOffset, cameraZoom, rotation, renderHeadgear, renderClothes, overrideApparelColors, overrideHairColor, stylingStation);
-
+				CachedPortraitsWithParams cachedPortraitsWithParams = new CachedPortraitsWithParams(size, cameraOffset, cameraZoom, rotation, renderHeadgear, renderClothes, overrideApparelColors, overrideHairColor, stylingStation);
+				/* Belive me you don't want to fuck around with this for an incredible amount of reasons.
 				CachedPortraitsWithParams cachedPortraitsWithParams = SimplePool_Patch<CachedPortraitsWithParams>.Get();
 				cachedPortraitsWithParams.CachedPortraits = SimplePool_Patch<Dictionary<Pawn, CachedPortrait>>.Get();
 				cachedPortraitsWithParams.Size = size;
@@ -153,7 +153,7 @@ namespace RimThreaded
 				cachedPortraitsWithParams.RenderClothes = renderClothes;
 				cachedPortraitsWithParams.OverrideApparelColors = overrideApparelColors;
 				cachedPortraitsWithParams.OverrideHairColor = overrideHairColor;
-				cachedPortraitsWithParams.StylingStation = stylingStation;
+				cachedPortraitsWithParams.StylingStation = stylingStation;*/
 
 				cachedPortraits.Add(cachedPortraitsWithParams);
 
