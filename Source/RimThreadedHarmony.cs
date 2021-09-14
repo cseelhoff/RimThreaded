@@ -171,7 +171,6 @@ namespace RimThreaded
 			ModuleBuilder modBuilder = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
 			foreach (ClassReplacement classReplacement in replacements.ClassReplacements)
 			{
-
 				Type type = TypeByName(classReplacement.ClassName);
 				if (type == null)
 				{
@@ -275,7 +274,7 @@ namespace RimThreaded
 								Log.Message("TileFinder");
                             }
 							List<MethodBase> allMethods = new List<MethodBase>();
-							allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));//==all??
+							allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));
 							allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
 
 							foreach (MethodBase method in allMethods)
@@ -702,9 +701,10 @@ namespace RimThreaded
 		{
 			harmony.Patch(Method(original, methodName, origType), transpiler: add3Transpiler);
 		}
-		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true, int priority = 0, string finalizer = null)
+		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true, int priority = 0, string finalizer = null, string PatchMethod = null)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
+
 			Type[] patch_type = null;
 			if (origType != null)
 			{
@@ -727,6 +727,11 @@ namespace RimThreaded
 				}
 			}
 			MethodInfo pMethod = Method(patched, methodName, patch_type);
+
+			if (PatchMethod != null)
+            {
+				pMethod = Method(patched, PatchMethod, patch_type);
+			}
 
 			MethodInfo Finalizer;
 			HarmonyMethod FinalizerH = null;
@@ -870,8 +875,8 @@ namespace RimThreaded
 			FilthMaker_Patch.RunDestructivePatches(); //replacing a few LINQ queries could possibly improve perf 
 			FireUtility_Patch.RunDestructivePatches();
 			FleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
-			FleckSystemBaseFleckStatic_Patch.RunDestructivePatches(); // 1.3 explosion fix
-			FleckSystemBaseFleckThrown_Patch.RunDestructivePatches(); // 1.3 explosion fix
+			FleckSystemBase_Patch.RunDestructivePatches(); // 1.3 explosion fix
+			//FleckSystemBaseFleckThrown_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			FoodUtility_Patch.RunDestructivePatches(); //1.3 GetMeatSourceCategory Human from NutrientPasteDispenser
 
 			//GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
