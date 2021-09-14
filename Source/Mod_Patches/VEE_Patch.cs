@@ -85,7 +85,7 @@ namespace RimThreaded.Mod_Patches
         }
         public static IEnumerable<CodeInstruction> Postfix(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
-            Type MapComp_Drought = typeof(Dictionary<,>).MakeGenericType(new[] { typeof(Map), TypeByName("VEE.MapComp_Drought") });
+            Type MapComp_Drought = typeof(Dictionary<,>).MakeGenericType(typeof(Map), TypeByName("VEE.MapComp_Drought"));
             Type affectedPlants = typeof(Dictionary<Plant, bool>);
             Type GenCollection = typeof(Verse.GenCollection);// You need to refer the extension class
             foreach (CodeInstruction i in instructions)
