@@ -24,7 +24,7 @@ namespace RimThreaded
         /// These methods SupportsRecursion so be careful to not deadlock yourself.
         /// </summary>
         /// <param name="Original">The type of what you want to lock</param>
-        /// <param name="Method">The name of the methon you want to lock</param>
+        /// <param name="Method">The name of the method you want to lock</param>
         /// <param name="Flag">LockFlag. can be ReaderLock or WriterLock</param>
         public static void LockMethodOnInstance(Type Original, string Method, int Flag)
         {
@@ -42,7 +42,7 @@ namespace RimThreaded
         /// These methods SupportsRecursion so be careful to not deadlock yourself.
         /// </summary>
         /// <param name="Original">The type of what you want to lock</param>
-        /// <param name="Method">The name of the methon you want to lock</param>
+        /// <param name="Method">The name of the method you want to lock</param>
         /// <param name="Flag">LockFlag. can be ReaderLock or WriterLock</param>
         public static void LockMethodOnDeclaringType(Type Original, string Method, int Flag)
         {
