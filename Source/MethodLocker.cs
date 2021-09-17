@@ -26,15 +26,15 @@ namespace RimThreaded
         /// <param name="Original">The type of what you want to lock</param>
         /// <param name="Method">The name of the method you want to lock</param>
         /// <param name="Flag">LockFlag. can be ReaderLock or WriterLock</param>
-        public static void LockMethodOnInstance(Type Original, string Method, int Flag)
+        public static void LockMethodOnInstance(Type Original, string Method, int Flag, Type[] OTypes = null)
         {
             if (Flag == LockFlag.ReaderLock)
             {
-                RimThreadedHarmony.Prefix(Original, typeof(MethodLocker), Method, destructive: false, PatchMethod: nameof(ReaderPrefix), finalizer: nameof(ReaderFinalizer));
+                RimThreadedHarmony.Prefix(Original, typeof(MethodLocker), Method, destructive: false, PatchMethod: nameof(ReaderPrefix), finalizer: nameof(ReaderFinalizer), origType: OTypes, NullPatchType: true);
             }
             if (Flag == LockFlag.WriterLock)
             {
-                RimThreadedHarmony.Prefix(Original, typeof(MethodLocker), Method, destructive: false, PatchMethod: nameof(WriterPrefix), finalizer: nameof(WriterFinalizer));
+                RimThreadedHarmony.Prefix(Original, typeof(MethodLocker), Method, destructive: false, PatchMethod: nameof(WriterPrefix), finalizer: nameof(WriterFinalizer), origType: OTypes, NullPatchType: true);
             }
         }
         /// <summary>
@@ -44,21 +44,21 @@ namespace RimThreaded
         /// <param name="Original">The type of what you want to lock</param>
         /// <param name="Method">The name of the method you want to lock</param>
         /// <param name="Flag">LockFlag. can be ReaderLock or WriterLock</param>
-        public static void LockMethodOnDeclaringType(Type Original, string Method, int Flag)
+        public static void LockMethodOnDeclaringType(Type Original, string Method, int Flag, Type[] OTypes = null)
         {
             if (Flag == LockFlag.ReaderLock)
             {
-                RimThreadedHarmony.Prefix(Original, typeof(MethodLocker), Method, destructive: false, PatchMethod: nameof(ReaderPrefixMB), finalizer: nameof(ReaderFinalizerMB));
+                RimThreadedHarmony.Prefix(Original, typeof(MethodLocker), Method, destructive: false, PatchMethod: nameof(ReaderPrefixMB), finalizer: nameof(ReaderFinalizerMB), origType: OTypes, NullPatchType: true);
             }
             if (Flag == LockFlag.WriterLock)
             {
-                RimThreadedHarmony.Prefix(Original, typeof(MethodLocker), Method, destructive: false, PatchMethod: nameof(WriterPrefixMB), finalizer: nameof(WriterFinalizerMB));
+                RimThreadedHarmony.Prefix(Original, typeof(MethodLocker), Method, destructive: false, PatchMethod: nameof(WriterPrefixMB), finalizer: nameof(WriterFinalizerMB), origType: OTypes, NullPatchType: true);
             }
         }
         // ----------------METHODBASE
         public static void WriterPrefixMB(MethodBase __originalMethod)
         {
-            if (DeclaringTypeToLock[__originalMethod.DeclaringType] is null)
+            if (!(DeclaringTypeToLock.ContainsKey(__originalMethod.DeclaringType))||DeclaringTypeToLock[__originalMethod.DeclaringType] is null)
             {
                 Log.Message("RimThreaded is creating a new ReaderWriterLockSlim for DeclaringType:\t" + __originalMethod.Name);
                 DeclaringTypeToLock[__originalMethod.DeclaringType] = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
@@ -71,7 +71,7 @@ namespace RimThreaded
         }
         public static void ReaderPrefixMB(MethodBase __originalMethod)
         {
-            if (DeclaringTypeToLock[__originalMethod.DeclaringType] is null)
+            if (!(DeclaringTypeToLock.ContainsKey(__originalMethod.DeclaringType)) || DeclaringTypeToLock[__originalMethod.DeclaringType] is null)
             {
                 Log.Message("RimThreaded is creating a new ReaderWriterLockSlim for DeclaringType:\t" + __originalMethod.Name);
                 DeclaringTypeToLock[__originalMethod.DeclaringType] = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
@@ -85,7 +85,7 @@ namespace RimThreaded
         // ----------------INSTANCE
         public static void WriterPrefix(object __instance)
         {
-            if (InstanceToLock[__instance] is null)
+            if (!(InstanceToLock.ContainsKey(__instance)) || InstanceToLock[__instance] is null)
             {
                 Log.Message("RimThreaded is creating a new ReaderWriterLockSlim for instance:\t" + __instance.ToString());
                 InstanceToLock[__instance] = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
@@ -98,7 +98,7 @@ namespace RimThreaded
         }
         public static void ReaderPrefix(object __instance)
         {
-            if (InstanceToLock[__instance] is null)
+            if (!(InstanceToLock.ContainsKey(__instance)) || InstanceToLock[__instance] is null)
             {
                 Log.Message("RimThreaded is creating a new ReaderWriterLockSlim for instance:\t" + __instance.ToString());
                 InstanceToLock[__instance] = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);

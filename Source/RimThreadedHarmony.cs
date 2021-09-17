@@ -701,7 +701,7 @@ namespace RimThreaded
 		{
 			harmony.Patch(Method(original, methodName, origType), transpiler: add3Transpiler);
 		}
-		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true, int priority = 0, string finalizer = null, string PatchMethod = null)
+		public static void Prefix(Type original, Type patched, string methodName, Type[] origType = null, bool destructive = true, int priority = 0, string finalizer = null, string PatchMethod = null, bool NullPatchType = false)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
 
@@ -725,6 +725,10 @@ namespace RimThreaded
 					patch_type[0] = original;
 					Array.Copy(temp_type, 0, patch_type, 1, temp_type.Length);
 				}
+			}
+			if (NullPatchType)
+            {
+				patch_type = null;
 			}
 			MethodInfo pMethod = Method(patched, methodName, patch_type);
 
@@ -1007,6 +1011,8 @@ namespace RimThreaded
 			SOS2_Patch.Patch();
 			//SpeakUp_Patch.Patch();
 			RimWar_Patch.Patch();
+			TD_Enhancement_Patch.Patch();
+			Fluffy_Breakdowns_Patch.Patch();
 		}
 		private static void FullPool_Patch_RunNonDestructivePatches()
 		{
