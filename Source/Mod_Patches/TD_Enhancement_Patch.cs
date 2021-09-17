@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace RimThreaded.Mod_Patches
 {
-    class TD_Enchancement_Patch
+    class TD_Enhancement_Patch
     {
         public static ReaderWriterLockSlim learnedInfo_Lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         public static void Patch()
@@ -15,14 +15,14 @@ namespace RimThreaded.Mod_Patches
             {
                 string methodName = "Postfix";
                 Log.Message("RimThreaded is patching " + TD_Enhancement_Pack_Learn_Patch.FullName + " " + methodName);
-                RimThreadedHarmony.Prefix(TD_Enhancement_Pack_Learn_Patch, typeof(TD_Enchancement_Patch), methodName, destructive: false, PatchMethod: nameof(WriterPrefix), finalizer: nameof(WriterFinalizer));
+                RimThreadedHarmony.Prefix(TD_Enhancement_Pack_Learn_Patch, typeof(TD_Enhancement_Patch), methodName, destructive: false, PatchMethod: nameof(WriterPrefix), finalizer: nameof(WriterFinalizer));
             }
             Type LearnedGameComponent = TypeByName("TD_Enhancement_Pack.LearnedGameComponent");
             if (LearnedGameComponent != null)
             {
                 string methodName = "GameComponentTick";
                 Log.Message("RimThreaded is patching " + LearnedGameComponent.FullName + " " + methodName);
-                RimThreadedHarmony.Prefix(LearnedGameComponent, typeof(TD_Enchancement_Patch), methodName, destructive: false, PatchMethod: nameof(WriterPrefix), finalizer: nameof(WriterFinalizer));
+                RimThreadedHarmony.Prefix(LearnedGameComponent, typeof(TD_Enhancement_Patch), methodName, destructive: false, PatchMethod: nameof(WriterPrefix), finalizer: nameof(WriterFinalizer));
             }
 
         }
