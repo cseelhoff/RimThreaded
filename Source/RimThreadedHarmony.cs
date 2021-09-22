@@ -761,10 +761,12 @@ namespace RimThreaded
 			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
 		}
 
-		public static void Transpile(Type original, Type patched, string methodName, Type[] origType = null, string[] harmonyAfter = null, int priority = 0)
+		public static void Transpile(Type original, Type patched, string methodName, Type[] origType = null, string[] harmonyAfter = null, int priority = 0,string patchMethod = null)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
 			MethodInfo pMethod = Method(patched, methodName);
+			if (patchMethod != null)
+				pMethod = Method(patched, patchMethod);
 			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod, priority)
 			{
 				after = harmonyAfter
@@ -1013,6 +1015,7 @@ namespace RimThreaded
 			RimWar_Patch.Patch();
 			TD_Enhancement_Patch.Patch();
 			Fluffy_Breakdowns_Patch.Patch();
+			Better_Message_Placement_Patch.Patch();
 		}
 		private static void FullPool_Patch_RunNonDestructivePatches()
 		{
