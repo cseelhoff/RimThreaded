@@ -1016,6 +1016,7 @@ namespace RimThreaded
 			TD_Enhancement_Patch.Patch();
 			Fluffy_Breakdowns_Patch.Patch();
 			Better_Message_Placement_Patch.Patch();
+			TurnItOnAndOff_Patch.Patch();
 		}
 		private static void FullPool_Patch_RunNonDestructivePatches()
 		{
