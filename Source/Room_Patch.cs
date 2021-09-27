@@ -28,7 +28,35 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
 
 			RimThreadedHarmony.Prefix(original, patched, nameof(get_Fogged));
+
+
+			RimThreadedHarmony.Prefix(original, patched, nameof(get_ContainedAndAdjacentThings));
 		}
+
+		public static bool get_ContainedAndAdjacentThings(Room __instance, ref List<Thing> __result)//fixes problems with rimfridge.
+        {
+			__instance.uniqueContainedThingsSet = new HashSet<Thing>();
+			__instance.uniqueContainedThings = new List<Thing>();
+			List<Region> regions = __instance.Regions;
+			for (int i = 0; i < regions.Count; i++)
+			{
+				List<Thing> allThings = regions[i].ListerThings.AllThings;
+				if (allThings == null)
+				{
+					continue;
+				}
+				for (int j = 0; j < allThings.Count; j++)
+				{
+					Thing item = allThings[j];
+					if (__instance.uniqueContainedThingsSet.Add(item))
+					{
+						__instance.uniqueContainedThings.Add(item);
+					}
+				}
+			}
+			__result = __instance.uniqueContainedThings;
+			return false;
+        }
 		public static bool get_Fogged(Room __instance, ref bool __result)
 		{
 			__result = false;
