@@ -32,7 +32,7 @@ namespace RimThreaded
 
 			RimThreadedHarmony.Prefix(original, patched, nameof(get_ContainedAndAdjacentThings));
 		}
-
+		//tmpRegions && uniqueContainedThingsOfDef can't be threadstatic
 		public static bool get_ContainedAndAdjacentThings(Room __instance, ref List<Thing> __result)//fixes problems with rimfridge.
         {
 			__instance.uniqueContainedThingsSet = new HashSet<Thing>();
