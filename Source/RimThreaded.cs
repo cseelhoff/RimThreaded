@@ -161,6 +161,11 @@ namespace RimThreaded
             {
                 prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
                 tickAction = TransportShipManager_Patch.ShipObjectsTick
+            },     
+            new ThreadedTickList
+            {
+                prepareAction = IdeoManager_Patch.IdeosPrepare,
+                tickAction = IdeoManager_Patch.IdeosTick
             }
 #endif
         };
