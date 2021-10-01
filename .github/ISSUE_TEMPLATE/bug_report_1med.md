@@ -21,19 +21,27 @@ assignees: ''
 3. Scroll down to '....'
 4. See error
 
-### **Error Logs**
-#### **Player.log**
-!!! Link to contents of Player.log or Error.log (MUST BE LINK) !!!  
-#### **HugsLib log**
-!!! Link to HugsLib log. (MUST BE LINK) !!!
+### **Error Logs** [?](https://github.com/cseelhoff/RimThreaded/wiki/Q&A#what-logs-should-my-bug-report-include)
+```
+!!! You can copy paste an error here !!!
+```
 
-### **Save file**
-!!! Please add a save file where the issue occurs to speed up testing and fixing of the issue !!!
+#### **HugsLib log** 
+!!! Link to HugsLib log. (MUST BE LINK) !!! 
 
-### **Screenshots**
-!!! Add screenshots to help explain your problem here !!!
+#### **Player.log (Optional)**
+!!! Link to contents of Player.log or Error.log (MUST BE LINK) !!!   
 
-### **Mod list (Preferably a RimPy compatible list.)**
+### **Save file** [?](https://github.com/cseelhoff/RimThreaded/wiki/Q&A#how-do-i-attach-the-save-file-to-the-report)
+!!! Please add a save file where the issue occurs to speed up testing and fixing of the issue !!! 
+
+### **Screenshots (Optional)** [?](https://github.com/cseelhoff/RimThreaded/wiki/Q%26A#how-do-i-attach-a-screenshot-to-the-report)
+!!! Add screenshots to help explain your problem here !!! 
+
+### **Mod list (Preferably a RimPy compatible list.)** [?](https://github.com/cseelhoff/RimThreaded/wiki/Q%26A#what-mod-organizer-should-i-use)
+```
+!!! Add RimPy mod list here !!! 
+```
 * Harmony
 * Core
 * Royalty (Optional)
