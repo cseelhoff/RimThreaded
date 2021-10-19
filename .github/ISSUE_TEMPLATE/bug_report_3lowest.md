@@ -7,10 +7,18 @@ labels: Bug
 assignees: ''
 
 ---
-
 ## **IMPORTANT:**  
 **Please first search existing bugs to ensure you are not creating a duplicate bug report!**   
 **Make sure you have the latest version of Rimworld!**  
+
+<!-- Igonre this if you are not a developer! -->
+### Developer To Do Notes:
+- [ ]
+- [ ]
+- [ ]
+<!-- Igonre this if you are not a developer! -->
+
+# **Non-Vanilla Bug Report**
 
 ### **Describe the bug**
 !!! bug description here !!!
