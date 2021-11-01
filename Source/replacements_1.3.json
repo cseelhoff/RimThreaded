@@ -891,12 +891,6 @@
       "ClassName": "Verse.Grammar.GrammarResolver",
       "ThreadStatics": [
         {
-          "FieldName": "rules"
-        },
-        {
-          "FieldName": "rulePool"
-        },
-        {
           "FieldName": "loopCount"
         },
         {
