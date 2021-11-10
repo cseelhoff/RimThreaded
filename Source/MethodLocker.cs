@@ -7,10 +7,10 @@ using HarmonyLib;
 
 namespace RimThreaded
 {
-    public static class LockFlag
+    public enum LockFlag
     {
-        public static int ReaderLock = 1;
-        public static int WriterLock = 2;
+        ReaderLock = 1,
+        WriterLock = 2
     }
     public static class MethodLocker
     {
@@ -28,7 +28,7 @@ namespace RimThreaded
         /// <param name="Original">The type of what you want to lock</param>
         /// <param name="Method">The name of the method you want to lock</param>
         /// <param name="Flag">LockFlag. can be ReaderLock or WriterLock</param>
-        public static void LockMethodOnInstance(Type Original, string Method, int Flag, Type[] OTypes = null)
+        public static void LockMethodOnInstance(Type Original, string Method, LockFlag Flag, Type[] OTypes = null)
         {
             if (Flag == LockFlag.ReaderLock)
             {
@@ -46,7 +46,7 @@ namespace RimThreaded
         /// <param name="Original">The type of what you want to lock</param>
         /// <param name="Method">The name of the method you want to lock</param>
         /// <param name="Flag">LockFlag. can be ReaderLock or WriterLock</param>
-        public static void LockMethodOnDeclaringType(Type Original, string Method, int Flag, Type[] OTypes = null)
+        public static void LockMethodOnDeclaringType(Type Original, string Method, LockFlag Flag, Type[] OTypes = null)
         {
             if (Flag == LockFlag.ReaderLock)
             {
@@ -65,7 +65,7 @@ namespace RimThreaded
         /// <param name="Method">The name of the method you want to lock</param>
         /// <param name="Flag">LockFlag. can be ReaderLock or WriterLock</param>
         /// <param name="LockOn">The ReaderWriterLockSlim you want to lock on</param>
-        public static void LockMethodOn(Type Original, string Method, int Flag, ReaderWriterLockSlim LockOn, Type[] OTypes = null)
+        public static void LockMethodOn(Type Original, string Method, LockFlag Flag, ReaderWriterLockSlim LockOn, Type[] OTypes = null)
         {
             MethodBase OMethod = AccessTools.Method(Original, Method, OTypes);
             MethodBaseToLock[OMethod] = LockOn;
