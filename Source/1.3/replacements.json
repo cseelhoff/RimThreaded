@@ -1,6 +1,14 @@
 {
   "ClassReplacements": [
     {
+      "ClassName": "Verse.AI.Pawn_JobTracker",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpJobsToDequeue"
+        }
+      ]
+    },
+    {
       "ClassName": "Verse.AI.AttackTargetFinder",
       "ThreadStatics": [
         {
