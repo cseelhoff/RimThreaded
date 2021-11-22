@@ -396,6 +396,8 @@ namespace RimThreaded
                     tickList.threadCount = -1;
                 }
                 //OneTickPools Ticks go here.
+                OneTickPool<List<Thing>>.Tick(null);
+                OneTickPool<List<Region>>.Tick(null);
 
                 listsFullyProcessed = 0;
                 workingOnDateNotifierTick = -1;

@@ -111,6 +111,12 @@ namespace RimThreaded
                     string modsText1 = "";
                     foreach (Patch patch in sortedPrefixes)
                     {
+#if REL13
+                        if ( patch.owner.Equals("majorhoff.rimthreaded"))/* Sernior: this if can be removed for debug */
+                        {
+                            continue;
+                        }
+#endif
                         if (patch.owner.Equals("majorhoff.rimthreaded") && !RimThreadedHarmony.nonDestructivePrefixes.Contains(patch.PatchMethod) && (patches.Prefixes.Count > 1 || patches.Postfixes.Count > 0 || patches.Transpilers.Count > 0))
                         {
                             isRimThreadedPrefixed = true;

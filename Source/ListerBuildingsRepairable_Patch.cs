@@ -12,8 +12,20 @@ namespace RimThreaded
             Type original = typeof(ListerBuildingsRepairable);
             Type patched = typeof(ListerBuildingsRepairable_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(UpdateBuilding));
+            RimThreadedHarmony.Prefix(original, patched, nameof(Notify_BuildingDeSpawned));
         }
-
+        public static bool Notify_BuildingDeSpawned(ListerBuildingsRepairable __instance, Building b)
+        {
+            if (b.Faction != null)
+            {
+                lock (__instance)
+                {
+                    __instance.ListFor(b.Faction).Remove(b);
+                    __instance.HashSetFor(b.Faction).Remove(b);
+                }
+            }
+            return false;
+        }
         public static bool UpdateBuilding(ListerBuildingsRepairable __instance, Building b)
         {
             Faction faction = b.Faction;

@@ -17,9 +17,9 @@
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <AssemblyVersion>2.5.15.0</AssemblyVersion>
+    <AssemblyVersion>2.5.16.1</AssemblyVersion>
     <Authors>Caleb Seelhoff</Authors>
-    <FileVersion>2.5.15.0</FileVersion>
+    <FileVersion>2.5.16.1</FileVersion>
     <Configurations>DB12;Rel12;DB13;Rel13</Configurations>
     <PackageId>RimThreaded Experimental</PackageId>
     <Product>RimThreaded Experimental</Product>
