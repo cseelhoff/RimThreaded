@@ -247,7 +247,8 @@ namespace RimThreaded
 			{
 				"Assembly-CSharp.dll",
 				"VFECore.dll",
-				"GiddyUpCore.dll"
+				"GiddyUpCore.dll",
+				"SpeakUp.dll"
 			};
 			foreach (Assembly assembly in assemblies)
 			{
@@ -872,6 +873,7 @@ namespace RimThreaded
 
 			GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
 			GenTemperature_Patch.RunDestructivePatches();
+			GenTypes_Patch.RunDestructivePatches(); //possibly occurs with combat extended
 			GlobalControlsUtility_Patch.RunDestructivePatches(); //Adds TPS indicator
 			GoodwillSituationManager_Patch.RunDestructivePatches(); //initial 1.3 patch
 			GoodwillSituationWorker_MemeCompatibility_Patch.RunDestructivePatches(); //initial 1.3 patch
@@ -988,7 +990,7 @@ namespace RimThreaded
 			ZombieLand_Patch.Patch();
 			VEE_Patch.Patch();
 			SOS2_Patch.Patch();
-			//SpeakUp_Patch.Patch();
+			SpeakUp_Patch.Patch();
 			RimWar_Patch.Patch();
 		}
 		private static void FullPool_Patch_RunNonDestructivePatches()

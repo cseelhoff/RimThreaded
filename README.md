@@ -38,6 +38,9 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.5.16 -  
+-Recompiled for RimWorld 1.3.3117  
+
 Version 2.5.15 - Sith Memory Rub   
 -Fixed bug in RecordWorker_TimeGettingJoy  
 -Fixed bug in HediffSet.AddDirect  

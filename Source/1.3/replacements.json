@@ -949,6 +949,9 @@
         },
         {
           "FieldName": "logSbRules"
+        },
+        {
+          "FieldName": "tmpSortedRuleList"
         }
       ]
     },
@@ -1074,6 +1077,25 @@
       "ThreadStatics": [
         {
           "FieldName": "tempScanRooms"
+        }
+      ]
+    },
+    {
+      "ClassName": "RimWorld.Planet.TileFinder",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpTiles"
+        },
+        {
+          "FieldName": "tmpPlayerTiles"
+        }
+      ]
+    },
+    {
+      "ClassName": "SpeakUp.GrammarResolver_RandomPossiblyResolvableEntry",
+      "ThreadStatics": [
+        {
+          "FieldName": "CurrentRules"
         }
       ]
     }
