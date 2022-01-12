@@ -176,7 +176,7 @@ namespace RimThreaded
                     {
                         if (list == null)
                         {
-                            list = SimplePool<List<Pawn>>.Get();
+                            list = SimplePool_Patch<List<Pawn>>.Get();
                         }
 
                         list.Add(item.Key);
@@ -201,7 +201,7 @@ namespace RimThreaded
                 if (list != null)
                 {
                     list.Clear();
-                    SimplePool<List<Pawn>>.Return(list);
+                    SimplePool_Patch<List<Pawn>>.Return(list);
                 }
             }
         }

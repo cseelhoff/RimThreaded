@@ -34,101 +34,29 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(SetDead)); //optional warning instead of error
             //RimThreadedHarmony.Transpile(original, patched, nameof(CheckForStateChange));
             //RimThreadedHarmony.Prefix(original, patched, nameof(CheckForStateChange));
-            //MethodInfo checkForStateChange = Method(original, "CheckForStateChange");
-            //MethodInfo checkForStateChangeMonitorEnterMethod = Method(patched, nameof(CheckForStateChangeMonitorEnter));
-            //RimThreadedHarmony.harmony.Patch(checkForStateChange, prefix: new HarmonyMethod(checkForStateChangeMonitorEnterMethod, -1000), finalizer: new HarmonyMethod(Method(patched, nameof(CheckForStateChangeMonitorExit)), -1000));
-            //RimThreadedHarmony.nonDestructivePrefixes.Add(checkForStateChangeMonitorEnterMethod);
-            //RimThreadedHarmony.harmony.Patch(checkForStateChange, postfix: new HarmonyMethod(Method(patched, nameof(CheckForStateChangeMonitorExit)), -1000));
+            MethodInfo checkForStateChange = Method(original, "CheckForStateChange");
+            MethodInfo checkForStateChangeMonitorEnterMethod = Method(patched, nameof(CheckForStateChangeMonitorEnter));
+            RimThreadedHarmony.harmony.Patch(checkForStateChange, prefix: new HarmonyMethod(checkForStateChangeMonitorEnterMethod, 1000));
+            RimThreadedHarmony.nonDestructivePrefixes.Add(checkForStateChangeMonitorEnterMethod);
+            RimThreadedHarmony.harmony.Patch(checkForStateChange, finalizer: new HarmonyMethod(Method(patched, nameof(CheckForStateChangeMonitorExit)), -1000));
             MethodInfo postApplyDamage = Method(original, "PostApplyDamage");
             MethodInfo postApplyDamageEnterMethod = Method(patched, nameof(PostApplyDamageEnter));
             RimThreadedHarmony.nonDestructivePrefixes.Add(postApplyDamageEnterMethod);
-            RimThreadedHarmony.harmony.Patch(postApplyDamage, prefix: new HarmonyMethod(postApplyDamageEnterMethod, -1000), finalizer: new HarmonyMethod(Method(patched, nameof(PostApplyDamageExit)), -1000));
-            //RimThreadedHarmony.harmony.Patch(postApplyDamage, postfix: new HarmonyMethod(Method(patched, nameof(PostApplyDamageExit)), -1000));
+            RimThreadedHarmony.harmony.Patch(postApplyDamage, prefix: new HarmonyMethod(postApplyDamageEnterMethod, 1000));
+            RimThreadedHarmony.harmony.Patch(postApplyDamage, finalizer: new HarmonyMethod(Method(patched, nameof(PostApplyDamageExit)), -1000));
+
         }
+        [ThreadStatic] static bool Pawn_HealthTrackerLockTaken;
+        [ThreadStatic] static HediffSet Pawn_HealthTrackerHediffSet;
 
 
         public static bool PreApplyDamage(Pawn_HealthTracker __instance, DamageInfo dinfo, out bool absorbed)
         {
-            Faction homeFaction = __instance.pawn.HomeFaction;
-            if (dinfo.Instigator != null && homeFaction != null && homeFaction.IsPlayer && !__instance.pawn.InAggroMentalState)
-            {
-                Pawn pawn = dinfo.Instigator as Pawn;
-                if (dinfo.InstigatorGuilty && pawn != null && pawn.guilt != null && pawn.mindState != null)
-                {
-                    pawn.guilt.Notify_Guilty();
-                }
-            }
-            if (__instance.pawn.Spawned)
-            {
-                if (!__instance.pawn.Position.Fogged(__instance.pawn.Map))
-                {
-                    __instance.pawn.mindState.Active = true;
-                }
-                __instance.pawn.GetLord()?.Notify_PawnDamaged(__instance.pawn, dinfo);
-                if (dinfo.Def.ExternalViolenceFor(__instance.pawn))
-                {
-                    GenClamor.DoClamor(__instance.pawn, 18f, ClamorDefOf.Harm);
-                }
-                var tmpJobs = __instance.pawn.jobs;
-                if(tmpJobs != null)
-                    tmpJobs.Notify_DamageTaken(dinfo);
-            }
-            if (homeFaction != null)
-            {
-                homeFaction.Notify_MemberTookDamage(__instance.pawn, dinfo);
-                if (Current.ProgramState == ProgramState.Playing && homeFaction == Faction.OfPlayer && dinfo.Def.ExternalViolenceFor(__instance.pawn) && __instance.pawn.SpawnedOrAnyParentSpawned)
-                {
-                    __instance.pawn.MapHeld.dangerWatcher.Notify_ColonistHarmedExternally();
-                }
-            }
-            if (__instance.pawn.apparel != null && !dinfo.IgnoreArmor)
-            {
-                List<Apparel> wornApparel = __instance.pawn.apparel.WornApparel;
-                for (int i = 0; i < wornApparel.Count; i++)
-                {
-                    if (wornApparel[i].CheckPreAbsorbDamage(dinfo))
-                    {
-                        absorbed = true;
-                        return false;
-                    }
-                }
-            }
-            if (__instance.pawn.Spawned)
-            {
-                __instance.pawn.stances.Notify_DamageTaken(dinfo);
-                __instance.pawn.stances.stunner.Notify_DamageApplied(dinfo);
-            }
-            if (__instance.pawn.RaceProps.IsFlesh && dinfo.Def.ExternalViolenceFor(__instance.pawn))
-            {
-                Pawn pawn2 = dinfo.Instigator as Pawn;
-                if (pawn2 != null)
-                {
-                    if (pawn2.HostileTo(__instance.pawn))
-                    {
-                        __instance.pawn.relations.canGetRescuedThought = true;
-                    }
-                    if (__instance.pawn.RaceProps.Humanlike && pawn2.RaceProps.Humanlike && __instance.pawn.needs.mood != null && (!pawn2.HostileTo(__instance.pawn) || (pawn2.Faction == homeFaction && pawn2.InMentalState)))
-                    {
-                        __instance.pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.HarmedMe, pawn2);
-                    }
-                }
-                TaleRecorder.RecordTale(TaleDefOf.Wounded, __instance.pawn, pawn2, dinfo.Weapon);
-            }
-            absorbed = false;
-            return false;
-        }
-
-
-
-        [ThreadStatic] static bool Pawn_HealthTrackerLockTaken;
-        [ThreadStatic] static HediffSet Pawn_HealthTrackerHediffSet;
-        public static bool CheckForStateChangeMonitorEnter(Pawn_HealthTracker __instance, DamageInfo? dinfo, Hediff hediff)
-        {
             Pawn_HealthTrackerLockTaken = false;
             Pawn_HealthTrackerHediffSet = __instance.hediffSet;
             Monitor.TryEnter(Pawn_HealthTrackerHediffSet, RimThreaded.halfTimeoutMS, ref Pawn_HealthTrackerLockTaken);
-            if (Pawn_HealthTrackerLockTaken)            
-                return true;            
+            if (Pawn_HealthTrackerLockTaken)
+                return true;
             Log.Error("RimThreaded.CheckForStateChange was unable to be obtain lock for Pawn_HealthTracker: " + __instance + " within timeout(MS) : " + RimThreaded.halfTimeoutMS.ToString());
             return false;
         }

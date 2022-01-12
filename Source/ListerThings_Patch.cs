@@ -14,7 +14,38 @@ namespace RimThreaded
 			Type patched = typeof(ListerThings_Patch);
 			RimThreadedHarmony.Prefix(original, patched, "Remove");
 			RimThreadedHarmony.Prefix(original, patched, "Add");
+			RimThreadedHarmony.Postfix(original, patched, nameof(ThingsMatching));
+			RimThreadedHarmony.Postfix(original, patched, nameof(get_AllThings));
+
 		}
+		public static void get_AllThings(ListerThings __instance, ref List<Thing> __result)
+        {
+			if (__result != null)
+			{
+				lock (__instance)
+				{
+					List<Thing> tmp = __result;
+					__result = OneTickPool<List<Thing>>.Get();
+					__result.Clear();
+					__result.AddRange(tmp);
+					//__result = new List<Thing>(__result);
+				}
+			}
+		}
+		public static void ThingsMatching(ListerThings __instance, ref List<Thing> __result, ThingRequest req)//this has to give a snapshot not just a reference -Sernior
+        {
+			if ( __result != null )
+            {
+                lock ( __instance )
+                {
+					List<Thing> tmp = __result;
+					__result = OneTickPool<List<Thing>>.Get();
+					__result.Clear();
+					__result.AddRange(tmp);
+					//__result = new List<Thing>(__result);
+				}
+            }
+        }
 
 
 		public static bool Add(ListerThings __instance, Thing t)		
