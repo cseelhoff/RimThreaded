@@ -3,10 +3,6 @@
     "RimThreaded": {
       "commandName": "Executable",
       "executablePath": "C:\\RimWorld13\\RimWorldWin64.exe"
-    },
-    "RimThreaded 1.2": {
-      "commandName": "Executable",
-      "executablePath": "C:\\RimWorld12\\RimWorldWin64.exe"
     }
   }
 }

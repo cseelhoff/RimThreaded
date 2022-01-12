@@ -121,7 +121,7 @@ namespace RimThreaded
                 return false;
             }
             List<IngredientCount> ingredientsOrdered = new List<IngredientCount>();
-            WorkGiver_DoBill.MakeIngredientsListInProcessingOrder(ingredientsOrdered, bill);
+            //WorkGiver_DoBill.MakeIngredientsListInProcessingOrder(ingredientsOrdered, bill); this methods doesn't exist anymore
             relevantThings.Clear();
             HashSet<Thing> processedThings = new HashSet<Thing>();
             bool foundAll = false;

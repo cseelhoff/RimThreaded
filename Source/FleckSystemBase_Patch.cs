@@ -40,7 +40,7 @@ namespace RimThreaded
         public static ReaderWriterLockSlim FleckStaticLockGT = new ReaderWriterLockSlim();
         public static ReaderWriterLockSlim FleckThrownLockGT = new ReaderWriterLockSlim();
         public static ReaderWriterLockSlim FleckSplashLockGT = new ReaderWriterLockSlim();
-
+        /* tmpRemoveIndices also requires protection here. I wont make a lock for it but the PulsePool should provide enough protection */
 
         // FLECKSTATIC
         public static bool Tick(FleckSystemBase<FleckStatic> __instance)
@@ -65,6 +65,7 @@ namespace RimThreaded
             finally
             {
                 FleckStaticLockGT.ExitWriteLock();
+                __instance.tmpRemoveIndices = PulsePool<List<int>>.Pulse(__instance.tmpRemoveIndices);
                 __instance.tmpRemoveIndices.Clear();
             }
             return false;
@@ -197,8 +198,9 @@ namespace RimThreaded
             }
             finally
             {
-                __instance.tmpRemoveIndices.Clear();
                 FleckStaticLockRT.ExitWriteLock();
+                __instance.tmpRemoveIndices = PulsePool<List<int>>.Pulse(__instance.tmpRemoveIndices);
+                __instance.tmpRemoveIndices.Clear();
             }
             return false;
         }
@@ -256,8 +258,9 @@ namespace RimThreaded
             finally
             {
                 FleckThrownLockGT.ExitWriteLock();
+                __instance.tmpRemoveIndices = PulsePool<List<int>>.Pulse(__instance.tmpRemoveIndices);
                 __instance.tmpRemoveIndices.Clear();
-            }
+            };
             return false;
         }
         public static bool DrawFT(FleckSystemBase<FleckThrown> __instance, DrawBatch drawBatch)
@@ -389,8 +392,9 @@ namespace RimThreaded
             finally
             {
                 //this is where the pool baby should return the flecks
-                __instance.tmpRemoveIndices.Clear();
                 FleckThrownLockRT.ExitWriteLock();
+                __instance.tmpRemoveIndices = PulsePool<List<int>>.Pulse(__instance.tmpRemoveIndices);
+                __instance.tmpRemoveIndices.Clear();
             }
             return false;
         }
@@ -448,6 +452,7 @@ namespace RimThreaded
             finally
             {
                 FleckSplashLockGT.ExitWriteLock();
+                __instance.tmpRemoveIndices = PulsePool<List<int>>.Pulse(__instance.tmpRemoveIndices);
                 __instance.tmpRemoveIndices.Clear();
             }
             return false;
@@ -580,8 +585,9 @@ namespace RimThreaded
             }
             finally
             {
-                __instance.tmpRemoveIndices.Clear();
                 FleckSplashLockRT.ExitWriteLock();
+                __instance.tmpRemoveIndices = PulsePool<List<int>>.Pulse(__instance.tmpRemoveIndices);
+                __instance.tmpRemoveIndices.Clear();
             }
             return false;
         }

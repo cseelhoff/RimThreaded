@@ -1,6 +1,14 @@
 {
   "ClassReplacements": [
     {
+      "ClassName": "Verse.AI.Pawn_JobTracker",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpJobsToDequeue"
+        }
+      ]
+    },
+    {
       "ClassName": "Verse.AI.AttackTargetFinder",
       "ThreadStatics": [
         {
@@ -960,6 +968,9 @@
         },
         {
           "FieldName": "logSbRules"
+        },
+        {
+          "FieldName": "tmpSortedRuleList"
         }
       ]
     },
@@ -1085,6 +1096,25 @@
       "ThreadStatics": [
         {
           "FieldName": "tempScanRooms"
+        }
+      ]
+    },
+    {
+      "ClassName": "RimWorld.Planet.TileFinder",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpTiles"
+        },
+        {
+          "FieldName": "tmpPlayerTiles"
+        }
+      ]
+    },
+    {
+      "ClassName": "SpeakUp.GrammarResolver_RandomPossiblyResolvableEntry",
+      "ThreadStatics": [
+        {
+          "FieldName": "CurrentRules"
         }
       ]
     }

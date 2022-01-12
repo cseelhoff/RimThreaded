@@ -28,7 +28,49 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
 
 			RimThreadedHarmony.Prefix(original, patched, nameof(get_Fogged));
+
+
+			RimThreadedHarmony.Prefix(original, patched, nameof(get_ContainedAndAdjacentThings));
+			RimThreadedHarmony.Postfix(original, patched, nameof(get_Regions));
 		}
+		//tmpRegions && uniqueContainedThingsOfDef can't be threadstatic
+		public static void get_Regions(Room __instance, ref List<Region> __result){
+			if (__result != null)
+			{
+				lock (__instance)
+				{
+					List<Region> tmp = __result;
+					__result = OneTickPool<List<Region>>.Get();
+					__result.Clear();
+					__result.AddRange(tmp);
+					//__result = new List<Region>(__result);
+				}
+			}
+		}
+		public static bool get_ContainedAndAdjacentThings(Room __instance, ref List<Thing> __result)//fixes problems with rimfridge.
+        {
+			HashSet<Thing> uniqueContainedThingsSet = new HashSet<Thing>();
+			List<Thing> uniqueContainedThings = new List<Thing>();
+			List<Region> regions = __instance.Regions;
+			for (int i = 0; i < regions.Count; i++)
+			{
+				List<Thing> allThings = regions[i].ListerThings.AllThings;
+				if (allThings == null)
+				{
+					continue;
+				}
+				for (int j = 0; j < allThings.Count; j++)
+				{
+					Thing item = allThings[j];
+					if (uniqueContainedThingsSet.Add(item))
+					{
+						uniqueContainedThings.Add(item);
+					}
+				}
+			}
+			__result = uniqueContainedThings;
+			return false;
+        }
 		public static bool get_Fogged(Room __instance, ref bool __result)
 		{
 			__result = false;

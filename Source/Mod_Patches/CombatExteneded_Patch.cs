@@ -4,6 +4,7 @@ using System.Reflection;
 using Verse;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreadedHarmony;
+using System.Threading;
 
 namespace RimThreaded.Mod_Patches
 {
@@ -39,6 +40,19 @@ namespace RimThreaded.Mod_Patches
             {
 				string methodName = "Register";
 				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName);
+				MethodLocker.LockMethodOnInstance(CE_ThingsTrackingModel, methodName, LockFlag.WriterLock);
+				methodName = "DeRegister";
+				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName);
+				MethodLocker.LockMethodOnInstance(CE_ThingsTrackingModel, methodName, LockFlag.WriterLock);
+				methodName = "Notify_ThingPositionChanged";
+				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName);
+				MethodLocker.LockMethodOnInstance(CE_ThingsTrackingModel, methodName, LockFlag.WriterLock);
+				methodName = "RemoveClean";
+				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName);
+				MethodLocker.LockMethodOnInstance(CE_ThingsTrackingModel, methodName, LockFlag.WriterLock);
+				/*
+				string methodName = "Register";
+				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName);
 				RimThreadedHarmony.TranspileMethodLock(CE_ThingsTrackingModel, methodName);
 				string methodName2 = "DeRegister";
 				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName2);
@@ -46,9 +60,9 @@ namespace RimThreaded.Mod_Patches
 				string methodName3 = "Notify_ThingPositionChanged";
 				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName3);
 				RimThreadedHarmony.TranspileMethodLock(CE_ThingsTrackingModel, methodName3);//lock should be reentrant otherwise this is an obvious deadlock.
-				//string methodName4 = "ThingsInRangeOf";ThingsInRangeOf
-				//Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName4);
-				//RimThreadedHarmony.TranspileMethodLock(CE_ThingsTrackingModel, methodName4);
+				string methodName4 = "RemoveClean";
+				Log.Message("RimThreaded is patching " + CE_ThingsTrackingModel.FullName + " " + methodName4);
+				RimThreadedHarmony.TranspileMethodLock(CE_ThingsTrackingModel, methodName4);*/
 			}
 
 			//if (combatExtendedVerb_LaunchProjectileCE != null)

@@ -18,8 +18,60 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, nameof(GetOrCreateCachedPortraitsWithParams));
 			RimThreadedHarmony.Prefix(original, patched, nameof(NewRenderTexture));
 			RimThreadedHarmony.Prefix(original, patched, nameof(RemoveExpiredCachedPortraits));
+			RimThreadedHarmony.Prefix(original, patched, nameof(Get));
+			RimThreadedHarmony.Prefix(original, patched, nameof(SetAnimatedPortraitsDirty));
+			RimThreadedHarmony.Prefix(original, patched, nameof(SetDirty));
 		}
-		private static bool RemoveExpiredCachedPortraits()
+		public static bool Get(ref RenderTexture __result,Pawn pawn, Vector2 size, Rot4 rotation, Vector3 cameraOffset = default(Vector3), float cameraZoom = 1f, bool supersample = true, bool compensateForUIScale = true, bool renderHeadgear = true, bool renderClothes = true, Dictionary<Apparel, Color> overrideApparelColors = null, Color? overrideHairColor = null, bool stylingStation = false)
+		{
+			if (supersample)
+			{
+				size *= 1.25f;
+			}
+			if (compensateForUIScale)
+			{
+				size *= Prefs.UIScale;
+			}
+			Dictionary<Pawn, CachedPortrait> dictionary = PortraitsCache.GetOrCreateCachedPortraitsWithParams(size, cameraOffset, cameraZoom, rotation, renderHeadgear, renderClothes, overrideApparelColors, overrideHairColor, stylingStation).CachedPortraits;
+			if (dictionary.TryGetValue(pawn, out var value))
+			{
+				if (!value.RenderTexture.IsCreated())
+				{
+					value.RenderTexture.Create();
+					RenderPortrait(pawn, value.RenderTexture, cameraOffset, cameraZoom, rotation, renderHeadgear, renderClothes, overrideApparelColors, overrideHairColor, stylingStation);
+				}
+				else if (value.Dirty)
+				{
+					RenderPortrait(pawn, value.RenderTexture, cameraOffset, cameraZoom, rotation, renderHeadgear, renderClothes, overrideApparelColors, overrideHairColor, stylingStation);
+				}
+				dictionary.Remove(pawn);
+				dictionary.Add(pawn, new CachedPortrait(value.RenderTexture, dirty: false, Time.time));
+				__result = value.RenderTexture;
+				return false;
+			}
+			RenderTexture renderTexture = PortraitsCache.NewRenderTexture(size);
+			RenderPortrait(pawn, renderTexture, cameraOffset, cameraZoom, rotation, renderHeadgear, renderClothes, overrideApparelColors, overrideHairColor, stylingStation);
+			dictionary.Add(pawn, new CachedPortrait(renderTexture, dirty: false, Time.time));
+			__result = value.RenderTexture;
+			return false;
+		}
+		public static bool SetDirty(Pawn pawn)
+		{
+			for (int i = 0; i < cachedPortraits.Count; i++)
+			{
+				Dictionary<Pawn, CachedPortrait> dictionary = cachedPortraits[i].CachedPortraits;
+				lock (dictionary)
+                {
+					if (dictionary.TryGetValue(pawn, out var value) && !value.Dirty)
+					{
+						dictionary.Remove(pawn);
+						dictionary.Add(pawn, new CachedPortrait(value.RenderTexture, dirty: true, value.LastUseTime));
+					}
+				}
+			}
+			return false;
+		}
+		public static bool RemoveExpiredCachedPortraits()
         {
 			lock (renderTexturesPool)
             {
@@ -27,17 +79,20 @@ namespace RimThreaded
 				{
 					Dictionary<Pawn, CachedPortrait> dictionary = cachedPortraits[i].CachedPortraits;
 					toRemove.Clear();
-					foreach (KeyValuePair<Pawn, CachedPortrait> item in dictionary)
-					{
-						if (item.Value.Expired)
+					lock (dictionary)
+                    {
+						foreach (KeyValuePair<Pawn, CachedPortrait> item in dictionary)
 						{
-							toRemove.Add(item.Key);
-							renderTexturesPool.Add(item.Value.RenderTexture);
+							if (item.Value.Expired)
+							{
+								toRemove.Add(item.Key);
+								renderTexturesPool.Add(item.Value.RenderTexture);
+							}
 						}
-					}
-					for (int j = 0; j < toRemove.Count; j++)
-					{
-						dictionary.Remove(toRemove[j]);
+						for (int j = 0; j < toRemove.Count; j++)
+						{
+							dictionary.Remove(toRemove[j]);
+						}
 					}
 					toRemove.Clear();
 				}
@@ -121,6 +176,39 @@ namespace RimThreaded
 			SimplePool_Patch<List<CachedPortraitsWithParams>>.Return(tmpcache_AfterAdd);
 			return false;
 		}*/
+
+		public static bool SetAnimatedPortraitsDirty()
+        {
+			for (int i = 0; i < cachedPortraits.Count; i++)
+			{
+				Dictionary<Pawn, CachedPortrait> dictionary = cachedPortraits[i].CachedPortraits;
+				toSetDirty.Clear();
+				lock (dictionary)
+                {
+					foreach (KeyValuePair<Pawn, CachedPortrait> item in dictionary)
+					{
+						if (IsAnimated(item.Key) && !item.Value.Dirty)
+						{
+							toSetDirty.Add(item.Key);
+						}
+					}
+				}
+				if (toSetDirty.Count > 0)
+                {
+					lock (dictionary)
+                    {
+						for (int j = 0; j < toSetDirty.Count; j++)
+						{
+							CachedPortrait cachedPortrait = dictionary[toSetDirty[j]];
+							dictionary.Remove(toSetDirty[j]);
+							dictionary.Add(toSetDirty[j], new CachedPortrait(cachedPortrait.RenderTexture, dirty: true, cachedPortrait.LastUseTime));
+						}
+					}
+				}
+				toSetDirty.Clear();
+			}
+			return false;
+		}
 		public static bool GetOrCreateCachedPortraitsWithParams(ref CachedPortraitsWithParams __result, Vector2 size, Vector3 cameraOffset, float cameraZoom, Rot4 rotation, bool renderHeadgear = true, bool renderClothes = true, Dictionary<Apparel, Color> overrideApparelColors = null, Color? overrideHairColor = null, bool stylingStation = false)
 		{
 			for (int i = 0; i < cachedPortraits.Count; i++)
