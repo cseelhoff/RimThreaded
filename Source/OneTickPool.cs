@@ -11,6 +11,7 @@ namespace RimThreaded
     {
         private static readonly List<T> ObjectsList = new List<T>();
 
+        private static T reservedItem;
         public static int ObjectsCount => ObjectsList.Count;
 
         private static int Pivot = -1;// everything to the left is being used, everything to the right is free.
@@ -20,24 +21,30 @@ namespace RimThreaded
         /// </summary>
         public static T Get()
         {
-            int index = Interlocked.Increment(ref Pivot);
-
-            if (index >= ObjectsCount)
+            T freeItem2;
+            do
             {
-                lock (ObjectsList)
+                int index = Interlocked.Increment(ref Pivot);
+
+                if (index >= ObjectsCount)
                 {
-                    while (index >= ObjectsCount)
+                    lock (ObjectsList)
                     {
-                        ObjectsList.Add(new T());
+                        while (index >= ObjectsCount)
+                        {
+                            ObjectsList.Add(new T());
+                        }
                     }
                 }
+                freeItem2 = ObjectsList[index];
             }
-            return ObjectsList[index];
+            while (freeItem2.Equals(reservedItem));
+            return freeItem2;
         }
-        public static void Tick()
+        public static void Tick(T reserved)
         {
             Pivot = -1;
+            reservedItem = reserved;
         }
-
     }
 }
