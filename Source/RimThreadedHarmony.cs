@@ -1009,6 +1009,8 @@ namespace RimThreaded
 			SOS2_Patch.Patch();
 			SpeakUp_Patch.Patch();
 			RimWar_Patch.Patch();
+
+			AlienRace_Patch.Patch();
 		}
 		private static void FullPool_Patch_RunNonDestructivePatches()
 		{
