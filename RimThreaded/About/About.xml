@@ -64,17 +64,16 @@
   <incompatibleWith>
     <li>krkr.rocketman</li>
     <li>qarsoonmeel.dreamersdream</li>
-    <li>jecrell.doorsexpanded</li>
     <li>tachyonite.pawnmorpherpublic</li>
     <li>vexedtrees980.rimuhiversi</li>
     <li>ryder.turnitonoff</li>
-    <li>mlie.turnonoffrepowered</li>
-    <li>uuugggg.tdpack</li>
     <li>dame.timecontrol</li>
     <li>biomesteam.biomesislands</li>
     <li>pyrce.terrain.movement.modkit</li>
     <li>mlie.prisonerarena</li>
     <li>rwmt.Multiplayer</li>
     <li>zetrith.prepatcher</li>
+    <li>jecrell.doorsexpanded</li>
+    <li>Owlchemist.Windows</li>
   </incompatibleWith>
 </ModMetaData>
