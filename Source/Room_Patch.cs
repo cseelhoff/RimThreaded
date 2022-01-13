@@ -35,14 +35,16 @@ namespace RimThreaded
 		}
 		//tmpRegions && uniqueContainedThingsOfDef can't be threadstatic
 		public static void get_Regions(Room __instance, ref List<Region> __result){
+			//return a copy of the list instead of the actually list
+			//this is caused by a bad mod that tries to modify the returned list
 			if (__result != null)
 			{
 				lock (__instance)
 				{
 					List<Region> tmp = __result;
-					__result = OneTickPool<List<Region>>.Get();
-					__result.Clear();
-					__result.AddRange(tmp);
+					__result = new List<Region>(tmp);
+					//__result.Clear();
+					//__result.AddRange(tmp);
 					//__result = new List<Region>(__result);
 				}
 			}

@@ -25,9 +25,8 @@ namespace RimThreaded
 				lock (__instance)
 				{
 					List<Thing> tmp = __result;
-					__result = OneTickPool<List<Thing>>.Get();
-					__result.Clear();
-					__result.AddRange(tmp);
+					__result = new List<Thing>(tmp);
+					//__result. AddRange(tmp);
 					//__result = new List<Thing>(__result);
 				}
 			}
@@ -39,9 +38,9 @@ namespace RimThreaded
                 lock ( __instance )
                 {
 					List<Thing> tmp = __result;
-					__result = OneTickPool<List<Thing>>.Get();
-					__result.Clear();
-					__result.AddRange(tmp);
+					__result = new List<Thing>(tmp);
+					//__result.Clear();
+					//__result.AddRange(tmp);
 					//__result = new List<Thing>(__result);
 				}
             }
