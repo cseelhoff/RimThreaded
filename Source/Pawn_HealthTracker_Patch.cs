@@ -12,7 +12,6 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using static HarmonyLib.AccessTools;
-using Verse.AI.Group;
 
 namespace RimThreaded
 {
@@ -27,7 +26,6 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(RestorePartRecursiveInt));
             RimThreadedHarmony.Prefix(original, patched, nameof(CheckPredicateAfterAddingHediff));
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_Resurrected));
-            RimThreadedHarmony.Prefix(original, patched, nameof(PreApplyDamage)); //dirty destructive prefix
 #if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(HealthTick));
 #endif
@@ -44,13 +42,11 @@ namespace RimThreaded
             RimThreadedHarmony.nonDestructivePrefixes.Add(postApplyDamageEnterMethod);
             RimThreadedHarmony.harmony.Patch(postApplyDamage, prefix: new HarmonyMethod(postApplyDamageEnterMethod, 1000));
             RimThreadedHarmony.harmony.Patch(postApplyDamage, finalizer: new HarmonyMethod(Method(patched, nameof(PostApplyDamageExit)), -1000));
-
         }
         [ThreadStatic] static bool Pawn_HealthTrackerLockTaken;
         [ThreadStatic] static HediffSet Pawn_HealthTrackerHediffSet;
 
-
-        public static bool PreApplyDamage(Pawn_HealthTracker __instance, DamageInfo dinfo, out bool absorbed)
+        public static bool CheckForStateChangeMonitorEnter(Pawn_HealthTracker __instance, DamageInfo? dinfo, Hediff hediff)
         {
             Pawn_HealthTrackerLockTaken = false;
             Pawn_HealthTrackerHediffSet = __instance.hediffSet;
@@ -73,7 +69,7 @@ namespace RimThreaded
             Monitor.TryEnter(Pawn_HealthTrackerHediffSet, RimThreaded.halfTimeoutMS, ref Pawn_HealthTrackerLockTaken);
             if (Pawn_HealthTrackerLockTaken)
                 return true;
-            Log.Error("RimThreaded.PostApplyDamage was unable to be obtain lock for Pawn_HealthTracker: " + __instance + " within timeout(MS) : " + RimThreaded.halfTimeoutMS.ToString());
+            Log.Error("RimThreaded.CheckForStateChange was unable to be obtain lock for Pawn_HealthTracker: " + __instance + " within timeout(MS) : " + RimThreaded.halfTimeoutMS.ToString());
             return false;
         }
         public static void PostApplyDamageExit(Pawn_HealthTracker __instance, DamageInfo dinfo, float totalDamageDealt)
@@ -81,7 +77,7 @@ namespace RimThreaded
             if (Pawn_HealthTrackerLockTaken)
                 Monitor.Exit(Pawn_HealthTrackerHediffSet);
         }
-        
+
         public static bool SetDead(Pawn_HealthTracker __instance)
         {
             if (__instance.Dead)

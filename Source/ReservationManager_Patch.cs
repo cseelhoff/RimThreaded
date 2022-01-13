@@ -614,7 +614,7 @@ namespace RimThreaded
 			rwl.EnterWriteLock();
 			try
 			{
-				int trlIdx = tl.FindIndex(r => r.Claimant == claimant && r.Job == job)
+				int trlIdx = tl.FindIndex(r => r.Claimant == claimant && r.Job == job);
 				if (trlIdx==-1)
 					Log.Warning("Tried to release " + target + " that wasn't reserved by " + claimant + ".");
 				else
@@ -738,7 +738,7 @@ namespace RimThreaded
 
 					getReservationTargetList(__instance, target).RemoveAll(r => r.claimant == claimant);
 					thingList.Add(target.Thing);
-					SimplePool_Patch<Reservation>.Return(reservation)
+					SimplePool_Patch<Reservation>.Return(reservation);
 				}
 				reservationClaimantList.Clear();
 			}
