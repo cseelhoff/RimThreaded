@@ -14,8 +14,8 @@ namespace RimThreaded
 			Type patched = typeof(ListerThings_Patch);
 			RimThreadedHarmony.Prefix(original, patched, "Remove");
 			RimThreadedHarmony.Prefix(original, patched, "Add");
-			RimThreadedHarmony.Postfix(original, patched, nameof(ThingsMatching));
-			RimThreadedHarmony.Postfix(original, patched, nameof(get_AllThings));
+			//RimThreadedHarmony.Postfix(original, patched, nameof(ThingsMatching));
+			//RimThreadedHarmony.Postfix(original, patched, nameof(get_AllThings));
 
 		}
 		public static void get_AllThings(ListerThings __instance, ref List<Thing> __result)

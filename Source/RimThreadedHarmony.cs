@@ -123,6 +123,7 @@ namespace RimThreaded
 		class ClassReplacement
 		{
 			public string ClassName;
+			public bool IgnoreMissing;
 			public List<ThreadStaticDetail> ThreadStatics;
 		}
 		[Serializable]
@@ -174,7 +175,8 @@ namespace RimThreaded
 				Type type = TypeByName(classReplacement.ClassName);
 				if (type == null)
 				{
-					Log.Error("Cannot find class named: " + classReplacement.ClassName);
+					if(!classReplacement.IgnoreMissing)
+						Log.Error("Cannot find class named: " + classReplacement.ClassName);
 					continue;
 				}
 				if (classReplacement.ThreadStatics != null && classReplacement.ThreadStatics.Count > 0)
