@@ -186,11 +186,18 @@ namespace RimThreaded
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 			return thingsZoomLevels;
 		}
-
-		private static int CellToIndexCustom2(int XposOfJumboCell, int ZposOfJumboCell, int jumboCellColumnsInMap)
+		private static int CellToIndexCustom1(IntVec3 position, int mapSizeX, int jumboCellWidth)
+		{
+			int XposInJumboCell = position.x / jumboCellWidth;
+			int ZposInJumboCell = position.z / jumboCellWidth;
+			int jumboCellColumnsInMap = GetJumboCellColumnsInMap(mapSizeX, jumboCellWidth);
+			return CellToIndexCustom3(XposInJumboCell, ZposInJumboCell, jumboCellColumnsInMap);
+		}
+		private static int CellToIndexCustom3(int XposOfJumboCell, int ZposOfJumboCell, int jumboCellColumnsInMap)
 		{
 			return (jumboCellColumnsInMap * ZposOfJumboCell) + XposOfJumboCell;
 		}
+
 		public static IEnumerable<Thing> GetClosestThingRequestGroup(Pawn pawn, Map map, ThingRequest thingReq)
 		{
 			int mapSizeX = map.Size.x;
@@ -210,7 +217,7 @@ namespace RimThreaded
 				int ZposOfJumboCell = position.z / jumboCellWidth; //assuming square map
 				if (zoomLevel == 0) //this is needed to grab the center (9th square) otherwise, only the outside 8 edges/corners are normally needed
 				{
-					foreach (Thing haulableThing in GetThingsAtCellCopy(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth, thingsGrid))
+					foreach (Thing haulableThing in GetThingsAtCellCopy(XposOfJumboCell, ZposOfJumboCell, jumboCellColumnsInMap, thingsGrid))
 						yield return haulableThing;
 				}
 				IEnumerable<IntVec3> offsetOrder = GetOptimalOffsetOrder(position, zoomLevel, scannedRange, areaRange, jumboCellWidth);
@@ -220,7 +227,7 @@ namespace RimThreaded
 					int newZposOfJumboCell = ZposOfJumboCell + offset.z;
 					if (newXposOfJumboCell >= 0 && newXposOfJumboCell < jumboCellColumnsInMap && newZposOfJumboCell >= 0 && newZposOfJumboCell < jumboCellColumnsInMap)
 					{
-						foreach (Thing haulableThing in GetThingsAtCellCopy(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth, thingsGrid))
+						foreach (Thing haulableThing in GetThingsAtCellCopy(XposOfJumboCell, ZposOfJumboCell, jumboCellColumnsInMap, thingsGrid))
 							yield return haulableThing;
 					}
 				}
@@ -231,19 +238,23 @@ namespace RimThreaded
 			}
 		}
 
-		private static IEnumerable<Thing> GetThingsAtCellCopy(int XposOfJumboCell, int ZposOfJumboCell, int jumboCellWidth, HashSet<Thing>[] thingsGrid)
+		private static IEnumerable<Thing> GetThingsAtCellCopy(int XposOfJumboCell, int ZposOfJumboCell, int jumboCellColumnsInMap, HashSet<Thing>[] thingsGrid)
 		{
-			int cellIndex = CellToIndexCustom2(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
+			int cellIndex = CellToIndexCustom3(XposOfJumboCell, ZposOfJumboCell, jumboCellColumnsInMap);
+			if(cellIndex >= thingsGrid.Length)
+            {
+				Log.Error("thingsGrid cellIndex");
+            }
 			HashSet<Thing> thingsAtCell = thingsGrid[cellIndex];
 			if (thingsAtCell != null && thingsAtCell.Count > 0)
 			{
 				HashSet<Thing> thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
-				foreach (Thing haulableThing in thingsAtCellCopy)
+				foreach (Thing thing in thingsAtCellCopy)
 				{
-					if (!returnedThings.Contains(haulableThing))
+					if (!returnedThings.Contains(thing))
 					{
-						yield return haulableThing;
-						returnedThings.Add(haulableThing);
+						yield return thing;
+						returnedThings.Add(thing);
 					}
 				}
 			}

@@ -382,7 +382,7 @@ namespace RimThreaded
 				ZposOfJumboCell = position.z / jumboCellWidth; //assuming square map
 				if (zoomLevel == 0)
 				{
-					cellIndex = CellToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
+					cellIndex = CellToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellColumnsInMap);
 					HashSet<Thing> thingsAtCell = thingsGrid[cellIndex];
 					if (thingsAtCell != null && thingsAtCell.Count > 0)
 					{
