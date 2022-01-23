@@ -215,7 +215,7 @@ namespace RimThreaded
             Reachability_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
             Region_Patch.InitializeThreadStatics();
-            //RegionAndRoomUpdater_Patch.InitializeThreadStatics();
+            RegionAndRoomUpdater_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionTraverser_Patch.InitializeThreadStatics();
             SituationalThoughtHandler_Patch.InitializeThreadStatics();
@@ -225,6 +225,7 @@ namespace RimThreaded
             WorldPawns_Patch.InitializeThreadStatics();
             AttackTargetReservationManager_Patch.InitializeThreadStatics();
             ReservationManager_Patch.InitializeThreadStatics();
+            ListerThings_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)
         {

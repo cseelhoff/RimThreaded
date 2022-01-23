@@ -949,9 +949,6 @@ namespace RimThreaded
 			RegionLink_Patch.RunDestructivePatches();
 			RegionMaker_Patch.RunDestructivePatches();
 			ResourceCounter_Patch.RunDestructivePatches();
-#if RW12
-			RoofGrid_Patch.RunDestructivePatches(); // possibly for 1.2 only. oberved via tourture test
-#endif
 			//RoofGrid_Patch is causing problems to the roof notification in 1.3 a fix is also inside the Patch in case  this is needed for something else I am commenting this for now -Senior
 			RulePackDef_Patch.RunDestructivePatches(); //explosions fix - grammar
 			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
@@ -998,6 +995,7 @@ namespace RimThreaded
 			RitualObligationTargetWorker_AnyEmptyGrave_Patch.RunDestructivePatches();
 			RitualObligationTargetWorker_GraveWithTarget_Patch.RunDestructivePatches();
 			PortraitsCache_Patch.RunDestructivePatches();
+			RegionLinkDatabase_Patch.RunDestructivePatches();
 		}
 
 		private static void PatchModCompatibility()

@@ -11,13 +11,13 @@ namespace RimThreaded
     {
         private static readonly Action<AudioSource> ActionAudioSourceStop =
             (Action<AudioSource>)Delegate.CreateDelegate(typeof(Action<AudioSource>), 
-                Method(typeof(AudioSource), "Stop", Type.EmptyTypes));
+                Method(typeof(AudioSource), nameof(Stop), Type.EmptyTypes));
 
         public static void RunDestructivePatches()
         {
             Type original = typeof(AudioSource);
             Type patched = typeof(AudioSource_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "Stop", Type.EmptyTypes);
+            RimThreadedHarmony.Prefix(original, patched, nameof(Stop), Type.EmptyTypes);
         }
 
         public static bool Stop(AudioSource __instance)
@@ -50,7 +50,7 @@ namespace RimThreaded
         private static readonly Action<AudioSource, bool> ActionSetLoop =
             (Action<AudioSource, bool>)Delegate.CreateDelegate(
                 typeof(Action<AudioSource, bool>),
-                Method(typeof(AudioSource), "set_loop"));
+                Method(typeof(AudioSource), nameof(set_loop)));
 
         private static readonly Action<object[]> ActionSetLoop2 = parameters =>
             ActionSetLoop((AudioSource)parameters[0], (bool)parameters[1]);
@@ -72,7 +72,7 @@ namespace RimThreaded
         private static readonly Action<AudioSource> ActionPlay =
             (Action<AudioSource>)Delegate.CreateDelegate(
                 typeof(Action<AudioSource>),
-                Method(typeof(AudioSource), "Play", Type.EmptyTypes));
+                Method(typeof(AudioSource), nameof(Play), Type.EmptyTypes));
 
         private static readonly Action<object[]> ActionPlay2 = parameters =>
             ActionPlay((AudioSource)parameters[0]);
@@ -94,7 +94,7 @@ namespace RimThreaded
         private static readonly Action<AudioSource, bool> ActionSetMute =
             (Action<AudioSource, bool>)Delegate.CreateDelegate(
                 typeof(Action<AudioSource, bool>),
-                Method(typeof(AudioSource), "set_mute"));
+                Method(typeof(AudioSource), nameof(set_mute)));
 
         private static readonly Action<object[]> ActionSetMute2 = parameters =>
             ActionSetMute((AudioSource)parameters[0], (bool)parameters[1]);
@@ -116,7 +116,7 @@ namespace RimThreaded
         private static readonly Action<AudioSource, float> ActionSetSpatialBlend =
             (Action<AudioSource, float>)Delegate.CreateDelegate(
                 typeof(Action<AudioSource, float>),
-                Method(typeof(AudioSource), "set_spatialBlend"));
+                Method(typeof(AudioSource), nameof(set_spatialBlend)));
 
         private static readonly Action<object[]> ActionSetSpatialBlend2 = parameters =>
             ActionSetSpatialBlend((AudioSource)parameters[0], (float)parameters[1]);
@@ -138,7 +138,7 @@ namespace RimThreaded
         private static readonly Action<AudioSource, float> ActionSetMaxDistance =
             (Action<AudioSource, float>)Delegate.CreateDelegate(
                 typeof(Action<AudioSource, float>),
-                Method(typeof(AudioSource), "set_maxDistance"));
+                Method(typeof(AudioSource), nameof(set_maxDistance)));
 
         private static readonly Action<object[]> ActionSetMaxDistance2 = parameters =>
             ActionSetMaxDistance((AudioSource)parameters[0], (float)parameters[1]);
@@ -160,7 +160,7 @@ namespace RimThreaded
         private static readonly Action<AudioSource, float> ActionSetMinDistance =
             (Action<AudioSource, float>)Delegate.CreateDelegate(
                 typeof(Action<AudioSource, float>),
-                Method(typeof(AudioSource), "set_minDistance"));
+                Method(typeof(AudioSource), nameof(set_minDistance)));
 
         private static readonly Action<object[]> ActionSetMinDistance2 = parameters =>
             ActionSetMinDistance((AudioSource)parameters[0], (float)parameters[1]);
@@ -181,7 +181,7 @@ namespace RimThreaded
 
 
         private static readonly MethodInfo AudioSourceSetPitch =
-            Method(typeof(AudioSource), "set_pitch");
+            Method(typeof(AudioSource), nameof(set_pitch));
 
         private static readonly Action<AudioSource, float> ActionSetPitch =
             (Action<AudioSource, float>)Delegate.CreateDelegate(
@@ -206,7 +206,7 @@ namespace RimThreaded
 
 
         private static readonly MethodInfo AudioSourceSetVolume =
-            Method(typeof(AudioSource), "set_volume");
+            Method(typeof(AudioSource), nameof(set_volume));
 
         private static readonly Action<AudioSource, float> ActionSet_volume =
             (Action<AudioSource, float>)Delegate.CreateDelegate(
@@ -230,7 +230,7 @@ namespace RimThreaded
         }
 
         private static readonly MethodInfo AudioSourceSetClip =
-            Method(typeof(AudioSource), "set_clip");
+            Method(typeof(AudioSource), nameof(set_clip));
 
         private static readonly Action<AudioSource, AudioClip> ActionSet_clip =
             (Action<AudioSource, AudioClip>)Delegate.CreateDelegate(

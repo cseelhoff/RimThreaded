@@ -176,5 +176,74 @@ namespace RimThreaded
             __result = closestThing;
             return false;
         }
+
+        internal static Thing ClosestThingDef(IntVec3 position, Map map, ThingDef singleDef, PathEndMode pathEndMode, TraverseParms traverseParms, float v1, Predicate<Thing> validator, IEnumerable<Thing> enumerable, int v2, int maxRegionsToScanBeforeGlobalSearch, bool v3)
+        {
+            return null;
+        }
+
+        internal static Thing ClosestThingRequestGroup(Pawn pawn, WorkGiver_Scanner scanner, Map map, ThingRequest thingReq, PathEndMode peMode, TraverseParms traverseParams, float maxDistance = 9999f, Predicate<Thing> validator = null, IEnumerable<Thing> customGlobalSearchSet = null, int searchRegionsMin = 0, int searchRegionsMax = -1, bool forceAllowGlobalSearch = false, RegionType traversableRegionTypes = RegionType.Set_Passable, bool ignoreEntirelyForbiddenRegions = false)
+        {
+            bool flag = searchRegionsMax < 0 || forceAllowGlobalSearch;
+            if (!flag && customGlobalSearchSet != null)
+            {
+                Log.ErrorOnce("searchRegionsMax >= 0 && customGlobalSearchSet != null && !forceAllowGlobalSearch. customGlobalSearchSet will never be used.", 634984);
+            }
+
+            if (!flag && !thingReq.IsUndefined && !thingReq.CanBeFoundInRegion)
+            {
+                Log.ErrorOnce(string.Concat("ClosestThingReachable with thing request group ", thingReq.group, " and global search not allowed. This will never find anything because this group is never stored in regions. Either allow global search or don't call this method at all."), 518498981);
+                return null;
+            }
+
+            Thing thing = null;
+            bool flag2 = false;
+
+            if (thing == null && flag && !flag2)
+            {
+                if (traversableRegionTypes != RegionType.Set_Passable)
+                {
+                    Log.ErrorOnce("ClosestThingReachable had to do a global search, but traversableRegionTypes is not set to passable only. It's not supported, because Reachability is based on passable regions only.", 14384767);
+                }
+                IntVec3 root = pawn.Position;
+                IEnumerable<Thing> searchSet = ListerThings_Patch.GetClosestThingRequestGroup(pawn, map, thingReq);
+                //int i = 0;
+                foreach (Thing tryThing in searchSet)
+                {
+                    if (!tryThing.Spawned)
+                    {
+                        continue;
+                    }
+                    if (tryThing.IsForbidden(pawn))
+                    {
+                        continue;
+                    }
+                    if (map.physicalInteractionReservationManager.IsReserved(tryThing) && !map.physicalInteractionReservationManager.IsReservedBy(pawn, tryThing))
+                    {
+                        continue;
+                    }
+                    if (!pawn.CanReach(tryThing, PathEndMode.ClosestTouch, pawn.NormalMaxDanger()))
+                    {
+                        continue;
+                    }
+                    //if (CanReserveTest(pawn.Map.reservationManager, pawn, tryThing))
+                    //{
+                        //continue;
+                    //}
+                    //if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+                    //{
+                    //    continue;
+                    //}
+                    if (Prefs.LogVerbose)
+                        Log.Message(pawn + " is going to do stuff with thing: " + tryThing + " at pos " + tryThing.Position);
+                    
+                    thing = tryThing;
+                    break;
+                }
+            }
+            return thing;
+        }
+
+
     }
 }

@@ -14,16 +14,8 @@ namespace RimThreaded
 		{
 			Type original = typeof(Room);
 			Type patched = typeof(Room_Patch);
-
-#if RW12
-			RimThreadedHarmony.Prefix(original, patched, nameof(OpenRoofCountStopAt));
-			RimThreadedHarmony.Prefix(original, patched, nameof(RemoveRegion));
-			RimThreadedHarmony.Prefix(original, patched, nameof(Notify_ContainedThingSpawnedOrDespawned));
-#endif
-#if RW13
 			RimThreadedHarmony.Prefix(original, patched, nameof(AddDistrict));
 			RimThreadedHarmony.Prefix(original, patched, nameof(RemoveDistrict));
-#endif
 			RimThreadedHarmony.Prefix(original, patched, nameof(Notify_RoofChanged));
 			RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
 
@@ -31,7 +23,7 @@ namespace RimThreaded
 
 
 			RimThreadedHarmony.Prefix(original, patched, nameof(get_ContainedAndAdjacentThings));
-			RimThreadedHarmony.Postfix(original, patched, nameof(get_Regions));
+			//RimThreadedHarmony.Postfix(original, patched, nameof(get_Regions));
 		}
 		//tmpRegions && uniqueContainedThingsOfDef can't be threadstatic
 		public static void get_Regions(Room __instance, ref List<Region> __result){

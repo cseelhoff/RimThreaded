@@ -109,60 +109,27 @@ namespace RimThreaded
 								thing = GenClosest.ClosestThing_Global(pawn.Position, enumerable3, 99999f, validator);
 							}
 							else
-							{
-								//TODO: use better ThingRequest groups
+							{                               
 								if (
-									workGiver.def.defName.Equals("DoctorFeedAnimals") ||
-									workGiver.def.defName.Equals("DoctorFeedHumanlikes") ||
-									workGiver.def.defName.Equals("DoctorTendToAnimals") ||
-									workGiver.def.defName.Equals("DoctorTendToHumanlikes") ||
-									workGiver.def.defName.Equals("DoBillsUseCraftingSpot") ||
-									workGiver.def.defName.Equals("DoctorTendEmergency") ||
-									workGiver.def.defName.Equals("HaulCorpses") ||
-									workGiver.def.defName.Equals("FillFermentingBarrel") ||
-									workGiver.def.defName.Equals("HandlingFeedPatientAnimals") ||
-									workGiver.def.defName.Equals("Train") ||
-									workGiver.def.defName.Equals("VisitSickPawn") ||
-									workGiver.def.defName.Equals("DoBillsButcherFlesh") ||
-									workGiver.def.defName.Equals("DoBillsCook") ||
-									workGiver.def.defName.Equals("DoBillsMakeApparel")
-								)
-								{
-									//long
-									thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-								}
-								else if (
 								   workGiver.def.defName.Equals("HaulGeneral")
 								)
 								{
-									//long
 									thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 								}
-								/*
-								else if(
-										workGiver.def.defName.Equals("DoBillsButcherFlesh") ||
-										workGiver.def.defName.Equals("DoBillsCook") ||
-										workGiver.def.defName.Equals("DoBillsMakeApparel")) 
-								{
-									
-									thing = null;
-									//ThingGrid_Patch
-									int mapSizeX = pawn.Map.Size.x;
-									int mapSizeZ = pawn.Map.Size.z;
-									int index = pawn.Map.cellIndices.CellToIndex(pawn.Position);
-									//Dictionary<Bill, float> billPointsDict = ThingGrid_Patch.thingBillPoints[t.def];
-									Dictionary<WorkGiver_Scanner, Dictionary<float, List<HashSet<Thing>[]>>> ingredientDict = ThingGrid_Patch.mapIngredientDict[pawn.Map];
-									ThingRequest thingReq = scanner.PotentialWorkThingRequest;
-									if(!ingredientDict.TryGetValue(scanner, out Dictionary<float, List<HashSet<Thing>[]>> scoreToJumboCellsList)) {
-										scoreToJumboCellsList = new Dictionary<float, List<HashSet<Thing>[]>>();
-										List<Thing> thingsMatchingRequest = pawn.Map.listerThings.ThingsMatching(thingReq);
-									}
-									
+								else if (scanner.PotentialWorkThingRequest.singleDef == null)
+                                {
+									//ThingRequestGroup
+									//thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+									thing = GenClosest_Patch.ClosestThingRequestGroup(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 								}
-								*/
-								else
+								else if(scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Undefined)
 								{
-									//long
+									//ThingDef singleDef
+									thing = GenClosest_Patch.ClosestThingDef(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest.singleDef, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
+								}
+								else
+                                {
+									//Other PotentialWorkThingRequest
 									thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 								}
 							}
@@ -306,7 +273,7 @@ namespace RimThreaded
 
 #if DEBUG
 				int milli99 = (int)DateTime.Now.Subtract(startTime).TotalMilliseconds;
-				if (milli99 > 300)
+				if (milli99 > 100)
 				{
 					Log.Warning("99 JobGiver_Work.TryIssueJobPackage Took over " + milli99.ToString() + "ms for workGiver: " + workGiver.def.defName);
 					//Log.Warning(scanner.PotentialWorkThingRequest.ToString());
