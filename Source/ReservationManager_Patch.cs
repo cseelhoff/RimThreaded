@@ -6,7 +6,6 @@ using static Verse.AI.ReservationManager;
 using UnityEngine;
 using System.Text;
 using System;
-using System.Threading;
 
 namespace RimThreaded
 {
@@ -20,8 +19,6 @@ namespace RimThreaded
 
 		[ThreadStatic] static public List<Reservation> newReservationClaimantList;
 		[ThreadStatic] static public List<Reservation> newReservationTargetList;
-		
-		private static ReaderWriterLockSlim rwl = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
 		internal static void RunDestructivePatches()
 		{
@@ -44,8 +41,122 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, nameof(DebugDrawReservations));
 			RimThreadedHarmony.Prefix(original, patched, nameof(ExposeData));
 
-			//RimThreadedHarmony.Postfix(original, patched, "Release", "PostRelease");
-			//RimThreadedHarmony.Postfix(original, patched, "Release", "PostReleaseAllForTarget");
+			/*
+			MethodLocker.LockMethodOnInstance(original, "CanReserve", LockFlag.ReaderLock);
+			MethodLocker.LockMethodOnInstance(original, "CanReserveStack", LockFlag.ReaderLock);
+			MethodLocker.LockMethodOnInstance(original, "Reserve", LockFlag.WriterLock);
+			MethodLocker.LockMethodOnInstance(original, "Release", LockFlag.WriterLock);
+			MethodLocker.LockMethodOnInstance(original, "ReleaseAllForTarget", LockFlag.WriterLock);
+			MethodLocker.LockMethodOnInstance(original, "ReleaseClaimedBy", LockFlag.WriterLock);
+			MethodLocker.LockMethodOnInstance(original, "ReleaseAllClaimedBy", LockFlag.WriterLock);
+			MethodLocker.LockMethodOnInstance(original, "FirstReservationFor", LockFlag.ReaderLock);
+			MethodLocker.LockMethodOnInstance(original, "IsReservedByAnyoneOf", LockFlag.ReaderLock);
+			MethodLocker.LockMethodOnInstance(original, "FirstRespectedReserver", LockFlag.ReaderLock);
+			MethodLocker.LockMethodOnInstance(original, "ReservedBy", LockFlag.ReaderLock, new Type[] { typeof(LocalTargetInfo), typeof(Pawn), typeof(Job) });
+			MethodLocker.LockMethodOnInstance(original, "AllReservedThings", LockFlag.ReaderLock);
+			MethodLocker.LockMethodOnInstance(original, "DebugString", LockFlag.ReaderLock);
+			MethodLocker.LockMethodOnInstance(original, "DebugDrawReservations", LockFlag.ReaderLock);
+			MethodLocker.LockMethodOnInstance(original, "ExposeData", LockFlag.WriterLock);
+
+
+			RimThreadedHarmony.Postfix(original, patched, "Reserve", nameof(PostReserve));
+			RimThreadedHarmony.Postfix(original, patched, "Release", nameof(PostRelese));
+			RimThreadedHarmony.Postfix(original, patched, "ReleaseAllForTarget", nameof(PostReleaseAllForTarget));
+			RimThreadedHarmony.Postfix(original, patched, "ReleaseAllClaimedBy", nameof(PostReleaseAllClaimedBy));
+			RimThreadedHarmony.Postfix(original, patched, "ReleaseClaimedBy", nameof(PostReleaseClaimedBy));
+			*/
+		}
+		public static void PostReleaseClaimedBy(ReservationManager __instance, Pawn claimant, Job job)
+		{
+			if (claimant == null)
+			{
+				return;
+			}
+			for (int num = __instance.reservations.Count - 1; num >= 0; num--)
+			{
+				if (__instance.reservations[num].Claimant == claimant && __instance.reservations[num].Job == job)
+				{
+					Thing thing = __instance.reservations[num].target.Thing;
+					if (thing != null && thing.def.EverHaulable)
+					{
+						HaulingCache.ReregisterHaulableItem(thing);
+					}
+					if (thing is Plant plant)
+					{
+						JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
+					}
+				}
+			}
+		}
+		public static void PostReleaseAllClaimedBy(ReservationManager __instance, Pawn claimant)
+		{
+			if (claimant == null)
+			{
+				return;
+			}
+			for (int num = __instance.reservations.Count - 1; num >= 0; num--)
+			{
+				if (__instance.reservations[num].Claimant == claimant)
+				{
+					Thing thing = __instance.reservations[num].target.Thing;
+					if (thing != null && thing.def.EverHaulable)
+					{
+						HaulingCache.ReregisterHaulableItem(thing);
+					}
+					if (thing is Plant plant)
+					{
+						JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
+					}
+				}
+			}
+		}
+		public static void PostReleaseAllForTarget(ReservationManager __instance, Thing t)
+		{
+			if (t == null)
+			{
+				return;
+			}
+			if (t.def.EverHaulable)
+			{
+				HaulingCache.ReregisterHaulableItem(t);
+			}
+			if (t is Plant plant)
+			{
+				JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
+			}
+		}
+		public static void PostRelese(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
+		{
+			if (target == null) return;
+			Thing thing = target.Thing;
+			if (thing != null && thing.def.EverHaulable)
+			{
+				HaulingCache.ReregisterHaulableItem(target.Thing);
+			}
+			if (thing is Plant plant)
+			{
+				JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
+			}
+		}
+		public static void PostReserve(ReservationManager __instance, ref bool __result,
+		  Pawn claimant,
+		  Job job,
+		  LocalTargetInfo target,
+		  int maxPawns = 1,
+		  int stackCount = -1,
+		  ReservationLayerDef layer = null,
+		  bool errorOnFailed = true)
+		{
+			if (target == null) return;
+			Thing thing = target.Thing;
+			if (thing != null && thing.def.EverHaulable)
+			{
+				HaulingCache.ReregisterHaulableItem(target.Thing);
+			}
+			if (thing is Plant plant)
+			{
+				JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
+			}
 		}
 		internal static void InitializeThreadStatics()
 		{
@@ -56,8 +167,8 @@ namespace RimThreaded
 		public static bool ExposeData(ReservationManager __instance)
 		{
 			__instance.reservations.Clear();
-			foreach(Reservation reservation1 in getAllReservations(__instance))
-            {
+			foreach (Reservation reservation1 in getAllReservations(__instance))
+			{
 				__instance.reservations.Add(reservation1);
 			}
 
@@ -175,8 +286,7 @@ namespace RimThreaded
 		{
 			if (!reservationTargetDicts.TryGetValue(__instance, out Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict))
 			{
-				 rwl.EnterWriteLock();
-				try
+				lock (__instance)
 				{
 					if (!reservationTargetDicts.TryGetValue(__instance, out Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict2))
 					{
@@ -209,68 +319,59 @@ namespace RimThreaded
 						reservationTargetDict = reservationTargetDict2;
 					}
 				}
-				finally
-				{
-					rwl.ExitWriteLock();
-				}
 			}
 			return reservationTargetDict;
 		}
 		private static Dictionary<Pawn, List<Reservation>> getReservationClaimantDict(ReservationManager __instance)
 		{
-            if (reservationClaimantDicts.TryGetValue(__instance, out Dictionary<Pawn, List<Reservation>> reservationClaimantDict)) 
-                return reservationClaimantDict;
-            rwl.EnterWriteLock();
-			try
+			if (reservationClaimantDicts.TryGetValue(__instance, out Dictionary<Pawn, List<Reservation>> reservationClaimantDict))
+				return reservationClaimantDict;
+			lock (__instance)
 			{
-                if (!reservationClaimantDicts.TryGetValue(__instance, out Dictionary<Pawn, List<Reservation>> reservationClaimantDict2))
-                {
-                    Log.Message("RimThreaded is building new Reservations Dictionary...");
-                    Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = new Dictionary<LocalTargetInfo, List<Reservation>>();
-                    reservationClaimantDict = new Dictionary<Pawn, List<Reservation>>();
-                    foreach (Reservation reservation in __instance.reservations)
-                    {
-                        LocalTargetInfo localTargetInfo = reservation.Target;
-                        if (!reservationTargetDict.TryGetValue(localTargetInfo, out List<Reservation> reservationTargetList))
-                        {
-                            reservationTargetList = new List<Reservation>();
-                            reservationTargetDict[localTargetInfo] = reservationTargetList;
-                        }
-                        reservationTargetList.Add(reservation);
+				if (!reservationClaimantDicts.TryGetValue(__instance, out Dictionary<Pawn, List<Reservation>> reservationClaimantDict2))
+				{
+					Log.Message("RimThreaded is building new Reservations Dictionary...");
+					Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = new Dictionary<LocalTargetInfo, List<Reservation>>();
+					reservationClaimantDict = new Dictionary<Pawn, List<Reservation>>();
+					foreach (Reservation reservation in __instance.reservations)
+					{
+						LocalTargetInfo localTargetInfo = reservation.Target;
+						if (!reservationTargetDict.TryGetValue(localTargetInfo, out List<Reservation> reservationTargetList))
+						{
+							reservationTargetList = new List<Reservation>();
+							reservationTargetDict[localTargetInfo] = reservationTargetList;
+						}
+						reservationTargetList.Add(reservation);
 
-                        Pawn claimant = reservation.Claimant;
-                        if (!reservationClaimantDict.TryGetValue(claimant, out List<Reservation> reservationClaimantList))
-                        {
-                            reservationClaimantList = new List<Reservation>();
-                            reservationClaimantDict[claimant] = reservationClaimantList;
-                        }
-                        reservationClaimantList.Add(reservation);
-                    }
-                    reservationTargetDicts[__instance] = reservationTargetDict;
-                    reservationClaimantDicts[__instance] = reservationClaimantDict;
-                }
-                else
-                {
-                    reservationClaimantDict = reservationClaimantDict2;
-                }
-            }
-			finally
-			{
-				rwl.ExitWriteLock();
+						Pawn claimant = reservation.Claimant;
+						if (!reservationClaimantDict.TryGetValue(claimant, out List<Reservation> reservationClaimantList))
+						{
+							reservationClaimantList = new List<Reservation>();
+							reservationClaimantDict[claimant] = reservationClaimantList;
+						}
+						reservationClaimantList.Add(reservation);
+					}
+					reservationTargetDicts[__instance] = reservationTargetDict;
+					reservationClaimantDicts[__instance] = reservationClaimantDict;
+				}
+				else
+				{
+					reservationClaimantDict = reservationClaimantDict2;
+				}
 			}
-            return reservationClaimantDict;
+			return reservationClaimantDict;
 		}
 
 		public static Pawn getFirstPawnReservingTarget(ReservationManager __instance, LocalTargetInfo target)
-        {
+		{
 			List<Reservation> reservationTargetListUnsafe = getReservationTargetList(__instance, target);
-			foreach(Reservation r in reservationTargetListUnsafe)
-            {
+			foreach (Reservation r in reservationTargetListUnsafe)
+			{
 				return r.Claimant;
-            }
+			}
 			return null;
 		}
-
+		/*
 		public static void PostRelease(ReservationManager __instance, LocalTargetInfo target, Pawn claimant, Job job)
 		{
 			if (target.Thing != null && target.Thing.def.EverHaulable && target.Thing.Map != null)
@@ -284,7 +385,7 @@ namespace RimThreaded
 			{
 				HaulingCache.ReregisterHaulableItem(target.Thing);
 			}
-		}
+		}*/
 
 		public static bool CanReserve(ReservationManager __instance, ref bool __result, Pawn claimant, LocalTargetInfo target, int maxPawns = 1, int stackCount = -1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
 		{
@@ -333,40 +434,32 @@ namespace RimThreaded
 				int num3 = 0;
 				int num4 = 0;
 				List<Reservation> reservationTargetList = getReservationTargetList(__instance, target);
-				rwl.EnterReadLock();
-				try
+				foreach (Reservation reservation in reservationTargetList)
 				{
-					foreach (Reservation reservation in reservationTargetList)
+					if (reservation.Layer == layer)
 					{
-						if (reservation.Layer == layer)
+						if (reservation.Claimant == claimant && (reservation.StackCount == -1 || reservation.StackCount >= num2))
 						{
-							if (reservation.Claimant == claimant && (reservation.StackCount == -1 || reservation.StackCount >= num2))
+							__result = true;
+							return false;
+						}
+						if (reservation.Claimant != claimant && RespectsReservationsOf(claimant, reservation.Claimant))
+						{
+							if (reservation.MaxPawns != maxPawns)
 							{
-								__result = true;
+								__result = false;
 								return false;
 							}
-							if (reservation.Claimant != claimant && RespectsReservationsOf(claimant, reservation.Claimant))
-							{
-								if (reservation.MaxPawns != maxPawns)
-								{
-									__result = false;
-									return false;
-								}
 
-								num3++;
-								num4 = (reservation.StackCount != -1) ? (num4 + reservation.StackCount) : (num4 + num);
-								if (num3 >= maxPawns || num2 + num4 > num)
-								{
-									__result = false;
-									return false;
-								}
+							num3++;
+							num4 = (reservation.StackCount != -1) ? (num4 + reservation.StackCount) : (num4 + num);
+							if (num3 >= maxPawns || num2 + num4 > num)
+							{
+								__result = false;
+								return false;
 							}
 						}
 					}
-				}
-				finally
-				{
-					rwl.ExitReadLock();
 				}
 			}
 
@@ -482,7 +575,7 @@ namespace RimThreaded
 							__result = 0;
 							return false;
 						}
-					}					
+					}
 				}
 			}
 
@@ -498,38 +591,36 @@ namespace RimThreaded
 		  ReservationLayerDef layer = null,
 		  bool errorOnFailed = true)
 		{
-			
-			if (maxPawns > 1 && stackCount == -1)
+			lock (__instance)
 			{
-				Log.ErrorOnce("Reserving with maxPawns > 1 and stackCount = All; this will not have a useful effect (suppressing future warnings)", 83269);
-			}
+				if (maxPawns > 1 && stackCount == -1)
+				{
+					Log.ErrorOnce("Reserving with maxPawns > 1 and stackCount = All; this will not have a useful effect (suppressing future warnings)", 83269);
+				}
 
-			if (job == null)
-			{
-				Log.Warning(claimant.ToStringSafe() + " tried to reserve thing " + target.ToStringSafe() + " without a valid job");
-				__result = false;
-				return false;
-			}
-			Thing thing = target.Thing;
-			int num1 = (!target.HasThing) ? 1 : thing.stackCount;
-			int num2 = stackCount == -1 ? num1 : stackCount;
+				if (job == null)
+				{
+					Log.Warning(claimant.ToStringSafe() + " tried to reserve thing " + target.ToStringSafe() + " without a valid job");
+					__result = false;
+					return false;
+				}
+				Thing thing = target.Thing;
+				int num1 = (!target.HasThing) ? 1 : thing.stackCount;
+				int num2 = stackCount == -1 ? num1 : stackCount;
 
-			List<Reservation> reservationTargetList = getReservationTargetList(__instance, target);
-			rwl.EnterUpgradeableReadLock();
-			try
-			{
+				List<Reservation> reservationTargetList = getReservationTargetList(__instance, target);
 				foreach (Reservation reservation1 in reservationTargetList)
 				{
-                    if (reservation1.Claimant == claimant && reservation1.Job == job && reservation1.Layer == layer)
-                    {
-                        if (reservation1.StackCount == -1 || reservation1.StackCount >= num2)
-                        {
-                            __result = true;
-                            return false;
-                        }
+					if (reservation1.Claimant == claimant && reservation1.Job == job && reservation1.Layer == layer)
+					{
+						if (reservation1.StackCount == -1 || reservation1.StackCount >= num2)
+						{
+							__result = true;
+							return false;
+						}
 						Log.Warning("Debug reservation");
-                    }
-                }
+					}
+				}
 				if (!target.IsValid || target.ThingDestroyed) //TODO reservation should be removed when thing is destroyed
 				{
 					__result = false;
@@ -537,6 +628,8 @@ namespace RimThreaded
 				}
 				bool canReserveResult = __instance.CanReserve(claimant, target, maxPawns, stackCount, layer);
 				Reservation reservation;
+				Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict;
+				Dictionary<Pawn, List<Reservation>> reservationClaimantDict;
 				if (!canReserveResult)
 				{
 					if (job.playerForced && __instance.CanReserve(claimant, target, maxPawns, stackCount, layer, true))
@@ -550,12 +643,24 @@ namespace RimThreaded
 						reservation.target = target;
 						reservation.layer = layer;
 
-						List<Reservation> claimantReservations= getReservationClaimantList(__instance, claimant);
-						getReservationTargetList(__instance, target).Add(reservation);
-						claimantReservations.Add(reservation);
-						
+						List<Reservation> claimantReservations;
 
-                        foreach (Reservation reservation2 in claimantReservations)
+						reservationTargetDict = getReservationTargetDict(__instance);
+						//newReservationTargetList = new List<Reservation>(getReservationTargetList(reservationTargetDict, target))
+						//{
+						//    reservation
+						//};
+						getReservationTargetList(reservationTargetDict, target).Add(reservation);
+						reservationClaimantDict = getReservationClaimantDict(__instance);
+						//newReservationClaimantList =
+						//    new List<Reservation>(getReservationClaimantList(reservationClaimantDict, claimant))
+						//    {
+						//        reservation
+						//    };
+						claimantReservations = getReservationClaimantList(reservationClaimantDict, claimant);
+						claimantReservations.Add(reservation);
+
+						foreach (Reservation reservation2 in claimantReservations)
 						{
 							if (reservation2.Claimant != claimant && (reservation2.Layer == layer && RespectsReservationsOf(claimant, reservation2.Claimant)))
 								reservation2.Claimant.jobs.EndCurrentOrQueuedJob(reservation2.Job, JobCondition.InterruptForced);
@@ -591,12 +696,19 @@ namespace RimThreaded
 				reservation.target = target;
 				reservation.layer = layer;
 
-                getReservationTargetList(__instance, target).Add(reservation);
-				getReservationClaimantList(__instance, claimant).Add(reservation);
-			}
-			finally
-			{
-				rwl.ExitUpgradeableReadLock();
+				reservationTargetDict = getReservationTargetDict(__instance);
+				//newReservationTargetList = new List<Reservation>(getReservationTargetList(reservationTargetDict, target))
+				//	{
+				//		reservation
+				//	};
+				getReservationTargetList(reservationTargetDict, target).Add(reservation);
+				reservationClaimantDict = getReservationClaimantDict(__instance);
+				//newReservationClaimantList = new List<Reservation>(getReservationClaimantList(reservationClaimantDict, claimant))
+				//	{
+				//		reservation
+				//	};
+				getReservationClaimantList(reservationClaimantDict, claimant).Add(reservation);
+
 			}
 			__result = true;
 			return false;
@@ -608,33 +720,61 @@ namespace RimThreaded
 			{
 				Log.Warning("Releasing destroyed thing " + target + " for " + claimant);
 			}
-
-			List<Reservation> tl = getReservationTargetList(__instance, target);
-			List<Reservation> cl = getReservationClaimantList(__instance, claimant);
-			rwl.EnterWriteLock();
-			try
+			Reservation reservation1 = null;
+			List<Reservation> reservationTargetListUnsafe = getReservationTargetList(__instance, target);
+			foreach (Reservation reservation2 in reservationTargetListUnsafe)
 			{
-				int trlIdx = tl.FindIndex(r => r.Claimant == claimant && r.Job == job);
-				if (trlIdx==-1)
-					Log.Warning("Tried to release " + target + " that wasn't reserved by " + claimant + ".");
-				else
+				if (reservation2.Claimant == claimant && reservation2.Job == job)//because of the Simple_Pool this check might require to be inside the lock. Is not causing problems now but is doubtful.
 				{
-					cl.RemoveAll(r => r.Claimant == claimant && r.Job == job);
-					SimplePool_Patch<Reservation>.Return(tl[trlIdx]);
-					tl.RemoveAt(trlIdx);
+					reservation1 = reservation2;
+					break;
 				}
 			}
-			finally
+			if (reservation1 == null && !target.ThingDestroyed)
+				Log.Warning("Tried to release " + target + " that wasn't reserved by " + claimant + ".");
+			else
 			{
-				rwl.ExitWriteLock();
+				lock (__instance)
+				{
+					Dictionary<Pawn, List<Reservation>> reservationClaimantDict = getReservationClaimantDict(__instance);
+					List<Reservation> reservationClaimantList = getReservationClaimantList(reservationClaimantDict, claimant);
+					//List<Reservation> newReservationClaimantList = new List<Reservation>();
+
+					newReservationClaimantList.Clear();
+					foreach (Reservation reservation in reservationClaimantList)
+					{
+						if (reservation != reservation1)
+						{
+							newReservationClaimantList.Add(reservation);
+						}
+						//reservationClaimantDict[claimant] = newReservationClaimantList;//why inside the foreach?
+					}
+					reservationClaimantDict[claimant].Clear();
+					reservationClaimantDict[claimant].AddRange(newReservationClaimantList);
+					Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
+					List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
+					//List<Reservation> newReservationTargetList = new List<Reservation>();
+					newReservationTargetList.Clear();
+					foreach (Reservation reservation2 in reservationTargetList)
+					{
+						if (reservation2 != reservation1)
+						{
+							newReservationTargetList.Add(reservation2);
+						}
+					}
+					SimplePool_Patch<Reservation>.Return(reservation1);
+					//reservationTargetDict[target] = newReservationTargetList;	
+					reservationTargetDict[target].Clear();
+					reservationTargetDict[target].AddRange(newReservationTargetList);
+				}
 			}
 
 			//Postfix
 			Thing thing = target.Thing;
-            if (thing != null && thing.def.EverHaulable)
-            {
-                HaulingCache.ReregisterHaulableItem(target.Thing);
-            }
+			if (thing != null && thing.def.EverHaulable)
+			{
+				HaulingCache.ReregisterHaulableItem(target.Thing);
+			}
 			if (thing is Plant plant)
 			{
 				JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
@@ -648,117 +788,160 @@ namespace RimThreaded
 			{
 				return false;
 			}
-			List<Reservation> rtl = getReservationTargetList(__instance, t.Position);
-			rwl.EnterWriteLock();
-			try
+			Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
+			lock (__instance)
 			{
-				foreach (Reservation reservation in rtl)
+				List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, t.Position);//t.Position? Or just t?
+																													  //List<Reservation> newReservationTargetList = new List<Reservation>();
+				newReservationTargetList.Clear();
+				foreach (Reservation reservation in reservationTargetList)
 				{
-					Thing thing = reservation.Target.Thing;
-					if (thing == t)
+					LocalTargetInfo target = reservation.Target;
+					Thing thing = target.Thing;
+					if (thing != t)
 					{
-						//remove
-						getReservationClaimantList(__instance, reservation.claimant).RemoveAll(r => r.Target.Thing == t);
+						newReservationTargetList.Add(reservation);
+					}
+					else
+					{
+						Dictionary<Pawn, List<Reservation>> reservationClaimantDict = getReservationClaimantDict(__instance);
+						List<Reservation> reservationClaimantList = getReservationClaimantList(reservationClaimantDict, reservation.Claimant);
+						//List<Reservation> newReservationClaimantList = new List<Reservation>();
+
+						newReservationClaimantList.Clear();
+						foreach (Reservation reservation2 in reservationClaimantList)
+						{
+							if (reservation2.Target.Thing != t)
+							{
+								newReservationClaimantList.Add(reservation2);
+							}
+						}
+						//reservationClaimantDict[reservation.Claimant] = newReservationTargetList;//  ???
+						reservationClaimantDict[reservation.Claimant].Clear();
+						reservationClaimantDict[reservation.Claimant].AddRange(newReservationClaimantList);
+
 						SimplePool_Patch<Reservation>.Return(reservation);
 
+						//HaulingCache
+						if (thing != null && thing.def.EverHaulable)
+						{
+							HaulingCache.ReregisterHaulableItem(thing);
+						}
+						if (thing is Plant plant)
+						{
+							JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
+						}
+
 					}
+					//reservationTargetDict[t.Position] = newReservationTargetList; //??? why inside the foreach?
 				}
+				reservationTargetDict[t.Position].Clear();
+				reservationTargetDict[t.Position].AddRange(newReservationTargetList);
 
-				rtl.RemoveAll(r => r.Target.Thing == t);
-			}
-			finally
-			{
-				rwl.ExitWriteLock();
-			}
-
-			//HaulingCache
-			if (t.def.EverHaulable)
-			{
-				HaulingCache.ReregisterHaulableItem(t);
-			}
-			if (t is Plant plant)
-			{
-				JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
 			}
 			return false;
 		}
 		public static bool ReleaseClaimedBy(ReservationManager __instance, Pawn claimant, Job job)
 		{
-			List<Reservation> reservationClaimantList = getReservationClaimantList(__instance, claimant);
-			rwl.EnterWriteLock();
-			//list of things to update caches for. I do it this way so that I can release the lock before updating the caches.
-			List<Thing> thingList = new List<Thing>();
-			try
+			Dictionary<Pawn, List<Reservation>> reservationClaimantDict = getReservationClaimantDict(__instance);
+			lock (__instance)
 			{
+				Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
+				List<Reservation> reservationClaimantList = getReservationClaimantList(reservationClaimantDict, claimant);
+				//List<Reservation> newReservationClaimantList = new List<Reservation>();
+
+				newReservationClaimantList.Clear();
 				foreach (Reservation reservation in reservationClaimantList)
 				{
-					if (reservation.Job == job)
+					if (reservation.Job != job)
+					{
+						newReservationClaimantList.Add(reservation);
+					}
+					else
 					{
 						LocalTargetInfo target = reservation.Target;
-						getReservationTargetList(__instance, target).RemoveAll(r => r.Claimant == claimant && r.Job == job);
-						thingList.Add(target.Thing);
+						List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
+						//List<Reservation> newReservationTargetList = new List<Reservation>();
+
+						newReservationTargetList.Clear();
+
+						for (int index = 0; index < reservationTargetList.Count; index++)
+						{
+							Reservation reservation2 = reservationTargetList[index];
+							if (reservation2.Claimant != claimant || reservation2.Job != job)
+							{
+								newReservationTargetList.Add(reservation2);
+							}
+						}
+
+						//reservationTargetDict[target] = newReservationTargetList;
+						reservationTargetDict[target].Clear();
+						reservationTargetDict[target].AddRange(newReservationTargetList);
+
 						SimplePool_Patch<Reservation>.Return(reservation);
 
+						//HaulingCache
+						Thing thing = target.Thing;
+						if (thing != null && thing.def.EverHaulable)
+						{
+							HaulingCache.ReregisterHaulableItem(thing);
+						}
+						if (thing is Plant plant)
+						{
+							JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
+						}
+
 					}
+					//reservationClaimantDict[claimant] = newReservationClaimantList;
 				}
-				reservationClaimantList.RemoveAll(r => r.Job == job);
-
-			}
-			finally
-			{
-				rwl.ExitWriteLock();
-			}
-
-			foreach (Thing t in thingList)
-			{
-
-				if (t != null && t.def.EverHaulable)
-				{
-					HaulingCache.ReregisterHaulableItem(t);
-				}
-				if (t is Plant plant)
-				{
-					JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
-				}
+				reservationClaimantDict[claimant].Clear();
+				reservationClaimantDict[claimant].AddRange(newReservationClaimantList);
 			}
 			return false;
 		}
 
 		public static bool ReleaseAllClaimedBy(ReservationManager __instance, Pawn claimant)
 		{
-			List<Reservation> reservationClaimantList = getReservationClaimantList(__instance, claimant);
-			//list of things to update caches for. I do it this way so that I can release the lock before updating the caches.
-			List<Thing> thingList = new List<Thing>();
-			rwl.EnterWriteLock();
-			try
+			Dictionary<Pawn, List<Reservation>> reservationClaimantDict = getReservationClaimantDict(__instance);
+			lock (__instance)
 			{
+				Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance);
+				List<Reservation> reservationClaimantList = getReservationClaimantList(reservationClaimantDict, claimant);
 				foreach (Reservation reservation in reservationClaimantList)
 				{
 					LocalTargetInfo target = reservation.Target;
+					List<Reservation> reservationTargetList = getReservationTargetList(reservationTargetDict, target);
+					//List<Reservation> newReservationTargetList = new List<Reservation>();
 
-					getReservationTargetList(__instance, target).RemoveAll(r => r.claimant == claimant);
-					thingList.Add(target.Thing);
+					newReservationTargetList.Clear();
+
+					for (int index = 0; index < reservationTargetList.Count; index++)
+					{
+						Reservation reservation2 = reservationTargetList[index];
+						if (reservation2.Claimant != claimant)
+						{
+							newReservationTargetList.Add(reservation2);
+						}
+					}
+
 					SimplePool_Patch<Reservation>.Return(reservation);
-				}
-				reservationClaimantList.Clear();
-			}
-			finally
-			{
-				rwl.ExitWriteLock();
-			}
+					//reservationTargetDict[target] = newReservationTargetList;
+					reservationTargetDict[target].Clear();
+					reservationTargetDict[target].AddRange(newReservationTargetList);
+					//HaulingCache
+					Thing thing = target.Thing;
+					if (thing != null && thing.def.EverHaulable)
+					{
+						HaulingCache.ReregisterHaulableItem(thing);
+					}
+					if (thing is Plant plant)
+					{
+						JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
+					}
 
-
-			//HaulingCache
-			foreach (Thing t in thingList)
-			{
-				if (t != null && t.def.EverHaulable)
-				{
-					HaulingCache.ReregisterHaulableItem(t);
 				}
-				if (t is Plant plant)
-				{
-					JumboCell.ReregisterObject(__instance.map, plant.Position, RimThreaded.plantHarvest_Cache);
-				}
+				//reservationClaimantDict[claimant] = new List<Reservation>();
+				reservationClaimantDict[claimant].Clear();
 			}
 			return false;
 		}
@@ -769,19 +952,11 @@ namespace RimThreaded
 				__result = LocalTargetInfo.Invalid;
 				return false;
 			}
-			List<Reservation> reservationClaimantList = getReservationClaimantList(__instance, claimant);			
-			rwl.EnterReadLock();
-			try
+			List<Reservation> reservationClaimantList = getReservationClaimantList(__instance, claimant);
+			foreach (Reservation reservation in reservationClaimantList)
 			{
-				foreach (Reservation reservation in reservationClaimantList)
-				{
-					__result = reservation.Target;
-					return false;
-				}			
-			}
-			finally
-			{
-				rwl.ExitReadLock();
+				__result = reservation.Target;
+				return false;
 			}
 			__result = LocalTargetInfo.Invalid;
 			return false;
@@ -795,21 +970,13 @@ namespace RimThreaded
 			}
 
 			List<Reservation> reservationTargetList = getReservationTargetList(__instance, target);
-			rwl.EnterReadLock();
-			try
+			foreach (Reservation reservation in reservationTargetList)
 			{
-				foreach(Reservation reservation in reservationTargetList)
+				if (reservation.Claimant.Faction == faction)
 				{
-					if (reservation.Claimant.Faction == faction)
-					{
-						__result = true;
-						return false;
-					}
+					__result = true;
+					return false;
 				}
-			}
-			finally
-			{
-				rwl.ExitReadLock();
 			}
 			__result = false;
 			return false;
@@ -828,21 +995,13 @@ namespace RimThreaded
 			}
 
 			List<Reservation> reservationTargetList = getReservationTargetList(__instance, target);
-			rwl.EnterReadLock();
-			try
+			foreach (Reservation reservation in reservationTargetList)
 			{
-				foreach (Reservation reservation in reservationTargetList)
+				if (RespectsReservationsOf(claimant, reservation.Claimant))
 				{
-					if (RespectsReservationsOf(claimant, reservation.Claimant))
-					{
-						__result = reservation.Claimant;
-						return false;
-					}
+					__result = reservation.Claimant;
+					return false;
 				}
-			}
-			finally
-			{
-				rwl.ExitReadLock();
 			}
 			__result = null;
 			return false;
@@ -856,21 +1015,13 @@ namespace RimThreaded
 			}
 
 			List<Reservation> reservationTargetList = getReservationTargetList(__instance, target);
-			rwl.EnterReadLock();
-			try
+			foreach (Reservation reservation in reservationTargetList)
 			{
-				foreach (Reservation reservation in reservationTargetList)
+				if (reservation.Claimant == claimant && (job == null || reservation.Job == job))
 				{
-					if (reservation.Claimant == claimant && (job == null || reservation.Job == job))
-					{
-						__result = true;
-						return false;
-					}
+					__result = true;
+					return false;
 				}
-			}
-			finally
-			{
-				rwl.ExitReadLock();
 			}
 			__result = false;
 			return false;
@@ -883,49 +1034,41 @@ namespace RimThreaded
 			}
 
 			List<Reservation> reservationTargetList = getReservationTargetList(__instance, target);
-			rwl.EnterReadLock();
-			try
+			foreach (Reservation reservation in reservationTargetList)
 			{
-				foreach (Reservation reservation in reservationTargetList)
+				if (reservation.Claimant != claimant || reservation.Job == null || !(reservation.Job.GetCachedDriver(claimant) is JobDriver_TakeToBed))
 				{
-					if (reservation.Claimant != claimant || reservation.Job == null || !(reservation.Job.GetCachedDriver(claimant) is JobDriver_TakeToBed))
+					continue;
+				}
+				if (targetAIsNot.HasValue)
+				{
+					LocalTargetInfo targetA = reservation.Job.targetA;
+					LocalTargetInfo? localTargetInfo = targetAIsNot;
+					if (!(targetA != localTargetInfo))
 					{
 						continue;
 					}
-					if (targetAIsNot.HasValue)
-					{
-						LocalTargetInfo targetA = reservation.Job.targetA;
-						LocalTargetInfo? localTargetInfo = targetAIsNot;
-						if (!(targetA != localTargetInfo))
-						{
-							continue;
-						}
-					}
-					if (targetBIsNot.HasValue)
-					{
-						LocalTargetInfo targetA = reservation.Job.targetB;
-						LocalTargetInfo? localTargetInfo = targetBIsNot;
-						if (!(targetA != localTargetInfo))
-						{
-							continue;
-						}
-					}
-					if (targetCIsNot.HasValue)
-					{
-						LocalTargetInfo targetA = reservation.Job.targetC;
-						LocalTargetInfo? localTargetInfo = targetCIsNot;
-						if (!(targetA != localTargetInfo))
-						{
-							continue;
-						}
-					}
-					__result = true;
-					return false;
 				}
-			}
-			finally
-			{
-				rwl.ExitReadLock();
+				if (targetBIsNot.HasValue)
+				{
+					LocalTargetInfo targetA = reservation.Job.targetB;
+					LocalTargetInfo? localTargetInfo = targetBIsNot;
+					if (!(targetA != localTargetInfo))
+					{
+						continue;
+					}
+				}
+				if (targetCIsNot.HasValue)
+				{
+					LocalTargetInfo targetA = reservation.Job.targetC;
+					LocalTargetInfo? localTargetInfo = targetCIsNot;
+					if (!(targetA != localTargetInfo))
+					{
+						continue;
+					}
+				}
+				__result = true;
+				return false;
 			}
 			__result = false;
 			return false;
@@ -937,12 +1080,12 @@ namespace RimThreaded
 			return false;
 		}
 
-        private static IEnumerable<Thing> AllReservedThings2(ReservationManager __instance)
-        {
-			foreach(Reservation reservation in getAllReservations(__instance))
-            {
+		private static IEnumerable<Thing> AllReservedThings2(ReservationManager __instance)
+		{
+			foreach (Reservation reservation in getAllReservations(__instance))
+			{
 				yield return reservation.Target.Thing;
-            }
+			}
 		}
 		public static bool DebugString(ReservationManager __instance, ref string __result)
 		{
@@ -980,29 +1123,21 @@ namespace RimThreaded
 				{
 					Graphics.DrawMesh(MeshPool.plane10, reservation.Target.Cell.ToVector3ShiftedWithAltitude(AltitudeLayer.MetaOverlays), Quaternion.identity, DebugReservedThingIcon, 0);
 					GenDraw.DrawLineBetween(reservation.Claimant.DrawPos, reservation.Target.Cell.ToVector3ShiftedWithAltitude(AltitudeLayer.MetaOverlays));
-				}				
+				}
 			}
 			return false;
 		}
 		private static IEnumerable<Reservation> getAllReservations(ReservationManager __instance)
-        {
+		{
 			Dictionary<LocalTargetInfo, List<Reservation>> reservationTargetDict = getReservationTargetDict(__instance); //could be getReservationClaimantDict if preferred
-			rwl.EnterReadLock();
-			try
+			foreach (List<Reservation> reservations in reservationTargetDict.Values)
 			{
-				foreach (List<Reservation> reservations in reservationTargetDict.Values)
+				foreach (Reservation reservation in reservations)
 				{
-					foreach (Reservation reservation in reservations)
-					{
-						yield return reservation;
-					}
+					yield return reservation;
 				}
-			}
-			finally
-			{
-				rwl.ExitReadLock();
 			}
 		}
 
-    }
+	}
 }
