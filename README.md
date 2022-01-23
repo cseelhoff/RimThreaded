@@ -38,6 +38,9 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.6.2  
+-Fixed Reservation Bug  
+
 Version 2.6.0 - For Leo.S  
 -Recompiled for RimWorld 1.3.3200  
 -Removed support for RimWorld version 1.2  
