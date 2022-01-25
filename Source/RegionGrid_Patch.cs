@@ -19,7 +19,7 @@ namespace RimThreaded
         {
             int index = __instance.map.cellIndices.CellToIndex(c);
 
-            if (Prefs.LogVerbose)
+            if (false && Prefs.LogVerbose)
             {
                 if (Log.messageCount > 900)
                     Log.Clear();

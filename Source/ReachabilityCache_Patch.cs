@@ -47,12 +47,7 @@ namespace RimThreaded
             }
             return cacheDict;
         }
-#if RW12
-        public static bool CachedResultFor(ReachabilityCache __instance, ref BoolUnknown __result, Room A, Room B, TraverseParms traverseParams)
-#endif
-#if RW13
         public static bool CachedResultFor(ReachabilityCache __instance, ref BoolUnknown __result, District A, District B, TraverseParms traverseParams)
-#endif
         {
             if (A == null || B == null)
                 return false;
@@ -73,12 +68,7 @@ namespace RimThreaded
             __result = BoolUnknown.Unknown;
             return false;
         }
-#if RW12
-        public static bool AddCachedResult(ReachabilityCache __instance, Room A, Room B, TraverseParms traverseParams, bool reachable)
-#endif
-#if RW13
         public static bool AddCachedResult(ReachabilityCache __instance, District A, District B, TraverseParms traverseParams, bool reachable)
-#endif
         {
             if (A == null || B == null)
                 return false;

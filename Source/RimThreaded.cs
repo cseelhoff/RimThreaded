@@ -156,7 +156,6 @@ namespace RimThreaded
                 prepareAction = Map_Patch.MapsPostTickPrepare,
                 tickAction = Map_Patch.MapPostListTick
             },
-#if RW13
             new ThreadedTickList
             {
                 prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
@@ -167,7 +166,6 @@ namespace RimThreaded
                 prepareAction = IdeoManager_Patch.IdeosPrepare,
                 tickAction = IdeoManager_Patch.IdeosTick
             }
-#endif
         };
         public static void RestartAllWorkerThreads()
         {

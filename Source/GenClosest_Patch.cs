@@ -36,6 +36,7 @@ namespace RimThreaded
             return thingReq.group == ThingRequestGroup.Nothing || (thingReq.IsUndefined || map.listerThings.ThingsMatching(thingReq).Count == 0) && customGlobalSearchSet.EnumerableNullOrEmpty();
         }
 
+        //ClosestThingReachable2 is same as ClosestThingReachable, except it checks validator before canreach
         public static Thing ClosestThingReachable2(
           IntVec3 root, Map map, ThingRequest thingReq, PathEndMode peMode, TraverseParms traverseParams, float maxDistance = 9999f, Predicate<Thing> validator = null, IEnumerable<Thing> customGlobalSearchSet = null, int searchRegionsMin = 0, int searchRegionsMax = -1, bool forceAllowGlobalSearch = false, RegionType traversableRegionTypes = RegionType.Set_Passable, bool ignoreEntirelyForbiddenRegions = false)
         {
@@ -207,9 +208,10 @@ namespace RimThreaded
                 }
                 IntVec3 root = pawn.Position;
                 IEnumerable<Thing> searchSet = ListerThings_Patch.GetClosestThingRequestGroup(pawn, map, thingReq);
-                //int i = 0;
+                int i = 0;
                 foreach (Thing tryThing in searchSet)
                 {
+                    i++;
                     if (!tryThing.Spawned)
                     {
                         continue;
@@ -222,13 +224,17 @@ namespace RimThreaded
                     {
                         continue;
                     }
+                    if (!validator(tryThing))
+                    {
+                        continue;
+                    }
                     if (!pawn.CanReach(tryThing, PathEndMode.ClosestTouch, pawn.NormalMaxDanger()))
                     {
                         continue;
                     }
                     //if (CanReserveTest(pawn.Map.reservationManager, pawn, tryThing))
                     //{
-                        //continue;
+                    //continue;
                     //}
                     //if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
                     //{
@@ -240,6 +246,8 @@ namespace RimThreaded
                     thing = tryThing;
                     break;
                 }
+                if (Prefs.LogVerbose)
+                    Log.Message(i.ToString() + ":" + thingReq.ToString() + ":" + scanner.def.defName);
             }
             return thing;
         }

@@ -31,7 +31,6 @@ namespace RimThreaded.Mod_Patches
 				Log.Message("Utility_Patch_Transpile::Listener != null: " + (Method(patched, "Listener") != null));
 				Transpile(androidTiers_GeneratePawns_Patch, patched, methodName);
 			}
-#if RW13
 			Type androidTiers_Utils = TypeByName("MOARANDROIDS.Utils");
 			if (androidTiers_Utils != null)
 			{
@@ -39,7 +38,6 @@ namespace RimThreaded.Mod_Patches
 				Log.Message("RimThreaded is patching " + androidTiers_Utils.FullName + " " + methodName);
 				Transpile(androidTiers_Utils, typeof(AndroidTiers_Patch), methodName);
 			}
-#endif
 		}
 		public static void set_Item(Dictionary<Thing, object> CSM, Thing t, object j)
 		{

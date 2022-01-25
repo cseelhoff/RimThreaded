@@ -11,12 +11,9 @@ namespace RimThreaded
         {
             Type original = typeof(JobGiver_ExitMap);
             Type patched = typeof(JobGiver_ExitMap_Patch);
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(TryGiveJob));
-#endif
         }
 
-#if RW13
         public static bool TryGiveJob(JobGiver_ExitMap __instance, ref Job __result, Pawn pawn)
         {
             Pawn_MindState mindState = pawn.mindState;

@@ -11,12 +11,9 @@ namespace RimThreaded
         {
             Type original = typeof(Pawn_PathFollower);
             Type patched = typeof(Pawn_PathFollower_Patch);
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(CostToMoveIntoCell), new Type[] { typeof(Pawn), typeof(IntVec3) });
-#endif
         }
 
-#if RW13
         public static bool CostToMoveIntoCell(ref int __result, Pawn pawn, IntVec3 c)
         {
             int a = (c.x == pawn.Position.x || c.z == pawn.Position.z ? pawn.TicksPerMoveCardinal : pawn.TicksPerMoveDiagonal) + pawn.Map.pathing.For(pawn).pathGrid.CalculatedCostAt(c, false, pawn.Position);

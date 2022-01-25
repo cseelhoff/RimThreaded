@@ -10,7 +10,6 @@ namespace RimThreaded
     {
         internal static void RunDestructivePatches()
         {
-#if RW13
             Type original = typeof(FleckSystemBase<FleckStatic>);
             Type originalFT = typeof(FleckSystemBase<FleckThrown>);
             Type originalFSplash = typeof(FleckSystemBase<FleckSplash>);
@@ -31,9 +30,7 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(Update));
             RimThreadedHarmony.Prefix(originalFT, patched, "Update", PatchMethod: nameof(UpdateFT));
             RimThreadedHarmony.Prefix(originalFSplash, patched, "Update", PatchMethod: nameof(UpdateFSplash));
-#endif
         }
-#if RW13
         public static ReaderWriterLockSlim FleckStaticLockRT = new ReaderWriterLockSlim();
         public static ReaderWriterLockSlim FleckThrownLockRT = new ReaderWriterLockSlim();
         public static ReaderWriterLockSlim FleckSplashLockRT = new ReaderWriterLockSlim();

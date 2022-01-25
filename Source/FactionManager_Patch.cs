@@ -30,9 +30,6 @@ namespace RimThreaded
                     newList.Remove(faction);
                     __instance.toRemove = newList;
                     __instance.Remove(faction);
-#if RW12
-                    Find.QuestManager.Notify_FactionRemoved(faction);
-#endif
                 }
             }
             allFactionsTickList = __instance.allFactions;

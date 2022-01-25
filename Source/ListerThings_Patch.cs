@@ -48,7 +48,7 @@ namespace RimThreaded
         }
 
 
-		public static bool Add(ListerThings __instance, Thing t)		
+		public static bool Add(ListerThings __instance, Thing t)
 		{
 			ThingDef thingDef = t.def;
 			if (!ListerThings.EverListable(thingDef, __instance.use))
@@ -62,7 +62,7 @@ namespace RimThreaded
 				{
 					value = new List<Thing>();
 					__instance.listsByDef.Add(t.def, value);
-				} 
+				}
 				value.Add(t);
 			}
 
@@ -81,15 +81,33 @@ namespace RimThreaded
 							__instance.stateHashByGroup[(uint)thingRequestGroup] = 0;
 						}
 						list.Add(t);
-						AddThingToHashSets(t, thingRequestGroup);
 						__instance.stateHashByGroup[(uint)thingRequestGroup]++;
 					}
 				}
 			}
-
-
-
 			return false;
+		}
+
+		public static Dictionary<ThingRequestGroup, HashSet<Thing>> thingsRegistered = new Dictionary<ThingRequestGroup, HashSet<Thing>>();
+		public static void RegisterListerThing(Thing t)
+		{
+			ThingDef thingDef = t.def;
+			IEnumerable<ThingRequestGroup> thingRequestGroups = GetThingRequestGroup(thingDef);
+			foreach (ThingRequestGroup thingRequestGroup in thingRequestGroups)
+			{
+				/*
+				lock(thingsRegistered)
+                {
+					if(!thingsRegistered.TryGetValue(thingRequestGroup, out HashSet<Thing> hashset))
+                    {
+						hashset = new HashSet<Thing>();
+						thingsRegistered[thingRequestGroup] = hashset;
+					}
+					hashset.Add(t);
+				}
+				*/
+				AddThingToHashSets(t, thingRequestGroup);
+			}
 		}
 
 		public static bool Remove(ListerThings __instance, Thing t)
@@ -116,7 +134,6 @@ namespace RimThreaded
 					{
                         List<Thing> newListsByGroup = new List<Thing>(__instance.listsByGroup[i]);
 						newListsByGroup.Remove(t);
-						RemoveThingFromHashSets(t, thingRequestGroup);
 						__instance.listsByGroup[i] = newListsByGroup;
 						__instance.stateHashByGroup[(uint)thingRequestGroup]++;
 					}
@@ -125,9 +142,64 @@ namespace RimThreaded
 			return false;
 		}
 
+		public static void DeregisterListerThing(Thing t)
+		{
+			ThingDef thingDef = t.def;
+			IEnumerable<ThingRequestGroup> thingRequestGroups = GetThingRequestGroup(thingDef);
+			foreach (ThingRequestGroup thingRequestGroup in thingRequestGroups)
+			{
+				RemoveThingFromHashSets(t, thingRequestGroup);
+			}
+		}
 
-		public static List<int> zoomLevels = new List<int>();
-		public static Dictionary<Map, List<HashSet<Thing>[]>[]> trGroupsOfZoomLevelsOfThingsMapDict = new Dictionary<Map, List<HashSet<Thing>[]>[]>();
+		public static Dictionary<ThingDef, List<ThingRequestGroup>> thingDefThingGroups = new Dictionary<ThingDef, List<ThingRequestGroup>>();
+
+		public static List<ThingRequestGroup> workGroups = new List<ThingRequestGroup>() {
+			ThingRequestGroup.Seed,
+			ThingRequestGroup.Blueprint,
+			ThingRequestGroup.Refuelable,
+			ThingRequestGroup.Transporter,
+			ThingRequestGroup.BuildingFrame,
+			ThingRequestGroup.PotentialBillGiver,
+			ThingRequestGroup.Filth,
+			ThingRequestGroup.BuildingArtificial};
+
+        private static IEnumerable<ThingRequestGroup> GetThingRequestGroup(ThingDef thingDef)
+        {
+			foreach (ThingRequestGroup thingRequestGroup in workGroups)
+			{
+				if (thingRequestGroup.Includes(thingDef))
+				{
+					yield return thingRequestGroup;
+				}
+			}
+			/*
+			//TODO create cache using thingDefThingGroups?
+			if (!thingDefThingGroups.TryGetValue(thingDef, out List<ThingRequestGroup> groups))
+			{
+				lock (thingDefThingGroups)
+				{
+					if (!thingDefThingGroups.TryGetValue(thingDef, out List<ThingRequestGroup> groups2))
+					{
+						groups2 = new List<ThingRequestGroup>();
+						foreach (ThingRequestGroup thingRequestGroup in ThingListGroupHelper.AllGroups)
+						{
+							if (thingRequestGroup.Includes(thingDef))
+							{
+								groups2.Add(thingRequestGroup);
+							}
+						}
+						thingDefThingGroups[thingDef] = groups2;
+					}
+					groups = groups2;
+				}
+			}
+			return groups;
+			*/
+		}
+
+        public static List<int> zoomLevels = new List<int>();
+		public static Dictionary<Map, Dictionary<ThingRequestGroup, List<HashSet<Thing>[]>>> mapToGroupToZoomsToGridToThings = new Dictionary<Map, Dictionary<ThingRequestGroup, List<HashSet<Thing>[]>>>();
 		public const float ZOOM_MULTIPLIER = 1.5f; //must be greater than 1. lower numbers will make searches slower, but ensure pawns find the closer things first.
 												   // Map, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
 		[ThreadStatic] private static HashSet<Thing> returnedThings;
@@ -139,52 +211,58 @@ namespace RimThreaded
 		{
 			if (thingReq.singleDef == null)
 			{
-				return GetThingRequestGroupZoomLevels(map, thingReq.group);
+				return GetZoomsFromGroup(map, thingReq.group);
 			}
 			return null;
 		}
-		private static List<HashSet<Thing>[]> GetThingRequestGroupZoomLevels(Map map, ThingRequestGroup group)
+		private static List<HashSet<Thing>[]> GetZoomsFromGroup(Map map, ThingRequestGroup group)
 		{
-			List<HashSet<Thing>[]> thingsZoomLevels = null;
-			if (!trGroupsOfZoomLevelsOfThingsMapDict.TryGetValue(map, out List<HashSet<Thing>[]>[] trGroupsOfZoomLevelsOfThings))
+			List<HashSet<Thing>[]> zoomsOfGridOfThingsets = null;
+			if (!mapToGroupToZoomsToGridToThings.TryGetValue(map, out Dictionary<ThingRequestGroup, List<HashSet<Thing>[]>> groupToZoomsToGridToThings))
 			{
-				lock (trGroupsOfZoomLevelsOfThingsMapDict)
+				lock (mapToGroupToZoomsToGridToThings)
 				{
-					if (!trGroupsOfZoomLevelsOfThingsMapDict.TryGetValue(map, out List<HashSet<Thing>[]>[] trGroupsOfZoomLevelsOfThings2))
+					if (!mapToGroupToZoomsToGridToThings.TryGetValue(map, out Dictionary<ThingRequestGroup, List<HashSet<Thing>[]>> groupToZoomsToGridToThings2))
 					{
-						trGroupsOfZoomLevelsOfThings2 = new List<HashSet<Thing>[]>[ThingListGroupHelper.AllGroups.Length];
-						trGroupsOfZoomLevelsOfThingsMapDict[map] = trGroupsOfZoomLevelsOfThings2;
+						groupToZoomsToGridToThings2 = new Dictionary<ThingRequestGroup, List<HashSet<Thing>[]>>();
+						mapToGroupToZoomsToGridToThings[map] = groupToZoomsToGridToThings2;
 					}
-					trGroupsOfZoomLevelsOfThings = trGroupsOfZoomLevelsOfThings2;
+					groupToZoomsToGridToThings = groupToZoomsToGridToThings2;
 				}
 			}
-			thingsZoomLevels = GetZoomLevelOfThings(trGroupsOfZoomLevelsOfThings, group, map.Size.x, map.Size.z);
-			return thingsZoomLevels;
+			zoomsOfGridOfThingsets = GetZoomsOfGridOfThingsetsFromGroup(groupToZoomsToGridToThings, group, map.Size.x, map.Size.z);
+			return zoomsOfGridOfThingsets;
 		}
-		private static List<HashSet<Thing>[]> GetThingsZoomLevels(List<HashSet<Thing>[]>[] trGroupsOfZoomLevelsOfThings, ThingRequestGroup group)
+		private static List<HashSet<Thing>[]> GetZoomsOfGridOfThingsets(Dictionary<ThingRequestGroup, List<HashSet<Thing>[]>> groupToZoomsToGridToThings, ThingRequestGroup group)
         {
-			List<HashSet<Thing>[]> thingsZoomLevels = trGroupsOfZoomLevelsOfThings[(uint)group];
-			if(thingsZoomLevels == null)
+			if(!groupToZoomsToGridToThings.TryGetValue(group, out List<HashSet<Thing>[]> zoomsOfGridOfThings))
             {
-				thingsZoomLevels = new List<HashSet<Thing>[]>();
-				trGroupsOfZoomLevelsOfThings[(uint)group] = thingsZoomLevels;
-			}
-			return thingsZoomLevels;
+				lock (groupToZoomsToGridToThings)
+				{
+					if (!groupToZoomsToGridToThings.TryGetValue(group, out List<HashSet<Thing>[]> thingsZoomLevels2))
+					{
+						thingsZoomLevels2 = new List<HashSet<Thing>[]>();
+						groupToZoomsToGridToThings[group] = thingsZoomLevels2;
+					}
+					zoomsOfGridOfThings = thingsZoomLevels2;
+				}
+            }
+			return zoomsOfGridOfThings;
 		}
 
-		private static List<HashSet<Thing>[]> GetZoomLevelOfThings(List<HashSet<Thing>[]>[] trGroupsOfZoomLevelsOfThings, ThingRequestGroup group, int mapSizeX, int mapSizeZ)
+		private static List<HashSet<Thing>[]> GetZoomsOfGridOfThingsetsFromGroup(Dictionary<ThingRequestGroup, List<HashSet<Thing>[]>> groupToZoomsToGridToThings, ThingRequestGroup group, int mapSizeX, int mapSizeZ)
 		{
-			List<HashSet<Thing>[]> thingsZoomLevels = GetThingsZoomLevels(trGroupsOfZoomLevelsOfThings, group);
+			List<HashSet<Thing>[]> zoomsOfGridOfThingsets = GetZoomsOfGridOfThingsets(groupToZoomsToGridToThings, group);
 			int jumboCellWidth;
 			int zoomLevel = 0;
 			do
 			{
 				jumboCellWidth = getJumboCellWidth(zoomLevel);
 				int numGridCells = NumGridCellsCustom(mapSizeX, mapSizeZ, jumboCellWidth);
-				thingsZoomLevels.Add(new HashSet<Thing>[numGridCells]);
+				zoomsOfGridOfThingsets.Add(new HashSet<Thing>[numGridCells]);
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
-			return thingsZoomLevels;
+			return zoomsOfGridOfThingsets;
 		}
 		private static int CellToIndexCustom1(IntVec3 position, int mapSizeX, int jumboCellWidth)
 		{
@@ -260,33 +338,30 @@ namespace RimThreaded
 			}
 		}
 
-		private static void AddThingToHashSets(Thing haulableThing, ThingRequestGroup thingRequestGroup)
+		private static void AddThingToHashSets(Thing thing, ThingRequestGroup thingRequestGroup)
 		{
 			int jumboCellWidth;
-			Map map = haulableThing.Map;
+			Map map = thing.Map;
 			int mapSizeX = map.Size.x;
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;
 
-			List<HashSet<Thing>[]> thingsZoomLevels = GetThingRequestGroupZoomLevels(map, thingRequestGroup);
+			List<HashSet<Thing>[]> thingsZoomLevels = GetZoomsFromGroup(map, thingRequestGroup);
 			zoomLevel = 0;
 			do
 			{
 				jumboCellWidth = getJumboCellWidth(zoomLevel);
 				HashSet<Thing>[] thingsGrid = thingsZoomLevels[zoomLevel];
-				int jumboCellIndex = CellToIndexCustom(haulableThing.Position, mapSizeX, jumboCellWidth);
-				HashSet<Thing> hashset = thingsGrid[jumboCellIndex];
-				if (hashset == null)
+				int jumboCellIndex = CellToIndexCustom(thing.Position, mapSizeX, jumboCellWidth);
+				lock (thingsGrid)
 				{
-					hashset = new HashSet<Thing>();
-					lock (thingsGrid)
-					{
+					HashSet<Thing> hashset = thingsGrid[jumboCellIndex];
+					if (hashset == null) {
+						hashset = new HashSet<Thing>();
 						thingsGrid[jumboCellIndex] = hashset;
 					}
-				}
-				lock (hashset)
-				{
-					hashset.Add(haulableThing);
+					hashset.Add(thing);
+					//thingsGrid[jumboCellIndex] = newHashset;
 				}
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
@@ -297,23 +372,26 @@ namespace RimThreaded
 			int jumboCellWidth;
 			Map map = haulableThing.Map;
 			if (map == null)
-				return; //not optimal
+				return; //TODO not optimal
 			int mapSizeX = map.Size.x;
 			int mapSizeZ = map.Size.z;
 			int zoomLevel;
-			List<HashSet<Thing>[]> thingsZoomLevels = GetThingRequestGroupZoomLevels(map, thingRequestGroup);
+			List<HashSet<Thing>[]> thingsZoomLevels = GetZoomsFromGroup(map, thingRequestGroup);
 			zoomLevel = 0;
 			do
 			{
 				jumboCellWidth = getJumboCellWidth(zoomLevel);
 				HashSet<Thing>[] thingsGrid = thingsZoomLevels[zoomLevel];
 				int jumboCellIndex = CellToIndexCustom(haulableThing.Position, mapSizeX, jumboCellWidth);
-				HashSet<Thing> hashset = thingsGrid[jumboCellIndex];
-				if (hashset != null)
+				lock (thingsGrid)
 				{
-					HashSet<Thing> newHashSet = new HashSet<Thing>(hashset);
-					newHashSet.Remove(haulableThing);
-					thingsGrid[jumboCellIndex] = newHashSet;
+					HashSet<Thing> hashset = thingsGrid[jumboCellIndex];
+					if (hashset != null)
+					{
+						HashSet<Thing> newHashSet = new HashSet<Thing>(hashset);
+						newHashSet.Remove(haulableThing);
+						thingsGrid[jumboCellIndex] = newHashSet;
+					}
 				}
 				zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);

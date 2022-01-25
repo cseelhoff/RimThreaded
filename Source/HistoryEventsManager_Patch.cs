@@ -9,13 +9,10 @@ namespace RimThreaded
     {
         internal static void RunDestructivePatches()
         {
-#if RW13
             Type original = typeof(HistoryEventsManager);
             Type patched = typeof(HistoryEventsManager_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(RecordEvent));
-#endif
         }
-#if RW13
         public static bool RecordEvent(HistoryEventsManager __instance, HistoryEvent historyEvent, bool canApplySelfTookThoughts = true)
         {
             try

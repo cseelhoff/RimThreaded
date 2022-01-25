@@ -105,12 +105,7 @@ namespace RimThreaded
 
             if (traverseParms.mode == TraverseMode.ByPawn)
             {
-#if RW12
-                if (!pawn.CanReach(dest, peMode, Danger.Deadly, traverseParms.canBash, traverseParms.mode))
-#endif
-#if RW13
                 if (!pawn.CanReach(dest, peMode, Danger.Deadly, traverseParms.canBashDoors, traverseParms.canBashFences, traverseParms.mode))
-#endif
                 {
                     __result = PawnPath.NotFound;
                     return false;
@@ -124,13 +119,8 @@ namespace RimThreaded
 
             __instance.PfProfilerBeginSample(string.Concat("FindPath for ", pawn, " from ", start, " to ", dest, dest.HasThing ? (" at " + dest.Cell) : ""));
             __instance.cellIndices = __instance.map.cellIndices;
-#if RW12
-            __instance.pathGrid = __instance.map.pathGrid;
-#endif
-#if RW13
             __instance.pathingContext = __instance.map.pathing.For(traverseParms);
             __instance.pathGrid = __instance.pathingContext.pathGrid;
-#endif
             __instance.edificeGrid = __instance.map.edificeGrid.InnerArray;
             __instance.blueprintGrid = __instance.map.blueprintGrid.InnerArray;
             int x = dest.Cell.x;
@@ -143,12 +133,7 @@ namespace RimThreaded
             bool flag3 = !flag;
             CellRect destinationRect = __instance.CalculateDestinationRect(dest, peMode);
             bool flag4 = destinationRect.Width == 1 && destinationRect.Height == 1;
-#if RW12
-            int[] array = __instance.map.pathGrid.pathGrid;
-#endif
-#if RW13
             int[] array = __instance.pathGrid.pathGrid;
-#endif
             TerrainDef[] topGrid = __instance.map.terrainGrid.topGrid;
             EdificeGrid edificeGrid = __instance.map.edificeGrid;
             int num2 = 0;
@@ -175,12 +160,7 @@ namespace RimThreaded
                 num8 = 13;
                 num9 = 18;
             }
-#if RW12
-            __instance.CalculateAndAddDisallowedCorners(traverseParms, peMode, destinationRect);
-#endif
-#if RW13
             __instance.CalculateAndAddDisallowedCorners(peMode, destinationRect);
-#endif
             __instance.InitStatusesAndPushStartNode(ref curIndex, start);
             while (true)
             {

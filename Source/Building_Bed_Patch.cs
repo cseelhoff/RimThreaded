@@ -12,9 +12,7 @@ namespace RimThreaded
 		{
 			Type original = typeof(Building_Bed);
 			Type patched = typeof(Building_Bed_Patch);
-#if RW13
 			RimThreadedHarmony.Prefix(original, patched, nameof(SpawnSetup));
-#endif
 		}
 		internal static Faction ThingFaction(Thing __instance)
         {

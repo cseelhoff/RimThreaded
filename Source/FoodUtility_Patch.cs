@@ -10,12 +10,9 @@ namespace RimThreaded
         {
             Type original = typeof(FoodUtility);
             Type patched = typeof(FoodUtility_Patch);
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(GetMeatSourceCategory));
-#endif
         }
 
-#if RW13
         public static bool GetMeatSourceCategory(ref MeatSourceCategory __result, ThingDef source)
         {
             IngestibleProperties ingestible = source.ingestible;
@@ -37,6 +34,5 @@ namespace RimThreaded
             __result = ingestible.sourceDef != null && ingestible.sourceDef.race.FleshType != null && ingestible.sourceDef.race.FleshType == FleshTypeDefOf.Insectoid ? MeatSourceCategory.Insect : MeatSourceCategory.Undefined;
             return false;
         }
-#endif
     }
 }
