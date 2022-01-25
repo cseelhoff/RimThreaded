@@ -53,6 +53,5 @@ namespace RimThreaded
                 }*/
             }
         }
-#endif
     }
 }

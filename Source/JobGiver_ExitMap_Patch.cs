@@ -53,6 +53,5 @@ namespace RimThreaded
             __result = job1;
             return false;
         }
-#endif
     }
 }

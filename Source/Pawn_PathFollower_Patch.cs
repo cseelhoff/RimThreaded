@@ -63,6 +63,5 @@ namespace RimThreaded
             __result = Mathf.Max(a, 1);
             return false;
         }
-#endif
     }
 }

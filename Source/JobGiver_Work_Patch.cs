@@ -120,14 +120,14 @@ namespace RimThreaded
 									thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 								}
 								else if (scanner.PotentialWorkThingRequest.singleDef == null && ( 
-									scanner.PotentialWorkThingRequest.group != ThingRequestGroup.Seed ||
-									scanner.PotentialWorkThingRequest.group != ThingRequestGroup.Blueprint ||
-									scanner.PotentialWorkThingRequest.group != ThingRequestGroup.Refuelable ||
-									scanner.PotentialWorkThingRequest.group != ThingRequestGroup.Transporter ||
-									scanner.PotentialWorkThingRequest.group != ThingRequestGroup.BuildingFrame ||
-									scanner.PotentialWorkThingRequest.group != ThingRequestGroup.PotentialBillGiver ||
-									scanner.PotentialWorkThingRequest.group != ThingRequestGroup.Filth ||
-									scanner.PotentialWorkThingRequest.group != ThingRequestGroup.BuildingArtificial
+									scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Seed ||
+									scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Blueprint ||
+									scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Refuelable ||
+									scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Transporter ||
+									scanner.PotentialWorkThingRequest.group == ThingRequestGroup.BuildingFrame ||
+									scanner.PotentialWorkThingRequest.group == ThingRequestGroup.PotentialBillGiver ||
+									scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Filth ||
+									scanner.PotentialWorkThingRequest.group == ThingRequestGroup.BuildingArtificial
 									))
 								{
 									//ThingRequestGroup

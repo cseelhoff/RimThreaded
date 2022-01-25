@@ -71,6 +71,5 @@ namespace RimThreaded
             historyEventRecords.customGoodwill.RemoveRange(0, historyEventRecords.ticksGame.Count - historyEvent.def.maxRemembered);
             return false;
         }
-#endif
     }
 }

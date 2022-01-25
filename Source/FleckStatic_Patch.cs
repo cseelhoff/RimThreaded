@@ -32,6 +32,5 @@ namespace RimThreaded
             __instance.Draw(def.altitudeLayer.AltitudeFor(def.altitudeLayerIncOffset), batch);
             return false;
         }
-#endif
     }
 }
