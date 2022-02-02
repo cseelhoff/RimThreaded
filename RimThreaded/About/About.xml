@@ -12,6 +12,7 @@
 
     Version 2.6.3
     -Fixed another reservation bug
+    -Fixed a bug with Social Opinions
     -Added caching for common thing request groups
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
