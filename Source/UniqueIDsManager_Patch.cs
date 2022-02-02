@@ -16,12 +16,7 @@ namespace RimThreaded
         }
         public static bool GetNextID(ref int __result, ref int nextID)
         {
-#if RW12
-            if (Scribe.mode == LoadSaveMode.Saving || Scribe.mode == LoadSaveMode.LoadingVars)
-#endif
-#if RW13
                 if (Scribe.mode == LoadSaveMode.LoadingVars && !Find.UniqueIDsManager.wasLoaded)
-#endif
             {
                 Log.Warning("Getting next unique ID during LoadingVars before UniqueIDsManager was loaded. Assigning a random value.");
                 __result = Rand.Int;

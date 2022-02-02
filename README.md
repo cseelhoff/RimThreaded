@@ -38,6 +38,11 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.6.3  
+-Fixed another reservation bug  
+-Fixed a bug with Social Opinions  
+-Added caching for common thing request groups  
+
 Version 2.6.2  
 -Fixed Reservation Bug  
 

@@ -11,7 +11,7 @@ namespace RimThreaded
 
         internal static void RunDestructivePatches()
         {
-            RimThreadedHarmony.Prefix(original, patched, "Register");
+            RimThreadedHarmony.Prefix(original, patched, nameof(Register));
         }
 
         public static bool Register(RegionLink __instance, Region reg)
@@ -31,9 +31,9 @@ namespace RimThreaded
                           __instance.RegionB.DebugString);
 
                 //TODO find root cause
-                RegionAndRoomUpdater_Patch.regionsToReDirty.Add(regionA);
-                RegionAndRoomUpdater_Patch.regionsToReDirty.Add(regionB);
-                RegionAndRoomUpdater_Patch.regionsToReDirty.Add(reg);
+                //RegionAndRoomUpdater_Patch.regionsToReDirty.Add(regionA);
+                //RegionAndRoomUpdater_Patch.regionsToReDirty.Add(regionB);
+                //RegionAndRoomUpdater_Patch.regionsToReDirty.Add(reg);
                 //RegionDirtyer_Patch.SetRegionDirty(reg.Map.regionDirtyer, regionA);
                 //RegionDirtyer_Patch.SetRegionDirty(reg.Map.regionDirtyer, regionB);
                 /*

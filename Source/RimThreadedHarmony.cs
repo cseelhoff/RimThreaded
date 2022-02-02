@@ -764,10 +764,29 @@ namespace RimThreaded
 			harmony.Patch(oMethod, postfix: new HarmonyMethod(pMethod));
 		}
 
-		public static void Transpile(Type original, Type patched, string methodName, Type[] origType = null, string[] harmonyAfter = null, int priority = 0,string patchMethod = null)
+		public static void Transpile(Type original, Type patched, string methodName, Type[] origType = null, string[] harmonyAfter = null, int priority = 0, string patchMethod = null)
 		{
 			MethodInfo oMethod = Method(original, methodName, origType);
 			MethodInfo pMethod = Method(patched, methodName);
+			if (patchMethod != null)
+				pMethod = Method(patched, patchMethod);
+			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod, priority)
+			{
+				after = harmonyAfter
+			};
+			try
+			{
+				harmony.Patch(oMethod, transpiler: transpilerMethod);
+			}
+			catch (Exception e)
+			{
+				Log.Error("Exception Transpiling: " + oMethod.ToString() + " " + transpilerMethod.ToString() + " " + e.ToString());
+			}
+		}
+		public static void Transpile(Type original, Type patched, string methodName, string newMethodName, Type[] origType = null, string[] harmonyAfter = null, int priority = 0, string patchMethod = null)
+		{
+			MethodInfo oMethod = Method(original, methodName, origType);
+			MethodInfo pMethod = Method(patched, newMethodName);
 			if (patchMethod != null)
 				pMethod = Method(patched, patchMethod);
 			HarmonyMethod transpilerMethod = new HarmonyMethod(pMethod, priority)
@@ -827,6 +846,8 @@ namespace RimThreaded
 			//RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix - not sure why this causes bug with sleeping
 			GrammarResolver_Patch.RunNonDestructivePatches();
 			Sustainer_Patch.RunNonDestructivePatches();
+			//RegionAndRoomQuery_Patch.RunNonDestructivePatches();
+			MemoryUtility_Patch.RunNonDestructivePatches(); //Mod memory cleanup on game load, or main menu
 
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
@@ -949,9 +970,6 @@ namespace RimThreaded
 			RegionLink_Patch.RunDestructivePatches();
 			RegionMaker_Patch.RunDestructivePatches();
 			ResourceCounter_Patch.RunDestructivePatches();
-#if RW12
-			RoofGrid_Patch.RunDestructivePatches(); // possibly for 1.2 only. oberved via tourture test
-#endif
 			//RoofGrid_Patch is causing problems to the roof notification in 1.3 a fix is also inside the Patch in case  this is needed for something else I am commenting this for now -Senior
 			RulePackDef_Patch.RunDestructivePatches(); //explosions fix - grammar
 			SeasonUtility_Patch.RunDestructivePatches(); //performance boost
@@ -998,6 +1016,7 @@ namespace RimThreaded
 			RitualObligationTargetWorker_AnyEmptyGrave_Patch.RunDestructivePatches();
 			RitualObligationTargetWorker_GraveWithTarget_Patch.RunDestructivePatches();
 			PortraitsCache_Patch.RunDestructivePatches();
+			RegionLinkDatabase_Patch.RunDestructivePatches();
 		}
 
 		private static void PatchModCompatibility()
@@ -1022,6 +1041,7 @@ namespace RimThreaded
 			Better_Message_Placement_Patch.Patch();
 			TurnItOnAndOff_Patch.Patch();
 			AlienRace_Patch.Patch();
+			DubsBadHygiene_Patch.Patch();
 		}
 		private static void FullPool_Patch_RunNonDestructivePatches()
 		{

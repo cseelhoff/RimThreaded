@@ -10,8 +10,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.6.2
-    -Fixed Reservation Bug
+    Version 2.6.3
+    -Fixed another reservation bug
+    -Added caching for common thing request groups
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 

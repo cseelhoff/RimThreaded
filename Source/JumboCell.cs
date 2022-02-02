@@ -14,7 +14,7 @@ namespace RimThreaded
 		static readonly IntVec3[] noOffset = new IntVec3[] { IntVec3.Zero };
 		private static readonly List<int> zoomLevels = new List<int>();
 		private const float ZOOM_MULTIPLIER = 1.5f;
-		const int sixteen = 16;
+
 		internal static void InitializeThreadStatics()
 		{
 			retrunedThings = new HashSet<IntVec3>();

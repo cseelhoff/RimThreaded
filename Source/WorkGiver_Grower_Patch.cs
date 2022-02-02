@@ -357,7 +357,7 @@ namespace RimThreaded
 			if (!pawn.CanReserve(c, 1, -1, null, forced))
 			{
 #if DEBUG
-				Log.Warning("!pawn.CanReserve(c");
+				Log.Warning("!pawn.CanReserve(c)");
 #endif
 				JumboCell.ReregisterObject(map, c, RimThreaded.plantSowing_Cache);
 				//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);

@@ -8,7 +8,6 @@ namespace RimThreaded
 {
     public class ThingGrid_Patch
     {
-        
         private static int CellToIndexCustom(IntVec3 c, int mapSizeX, int cellSize)
         {
             return (mapSizeX * c.z + c.x) / cellSize;
@@ -51,7 +50,13 @@ namespace RimThreaded
                 {
                     HaulingCache.RegisterHaulableItem(t);
                 }
-                if(t is Building_PlantGrower building_PlantGrower)
+                if (!(t is Pawn || t is Mote))
+                {
+                    //Log.Message(t.ToString());
+                    ListerThings_Patch.RegisterListerThing(t);
+                }
+
+                if (t is Building_PlantGrower building_PlantGrower)
                 {
                     foreach (IntVec3 plantableLocation in building_PlantGrower.OccupiedRect())
                     {
@@ -119,6 +124,8 @@ namespace RimThreaded
                     {
                         HaulingCache.DeregisterHaulableItem(t);
                     }
+                    if (!(t is Pawn || t is Mote))
+                        ListerThings_Patch.DeregisterListerThing(t);
 
                     if (c.GetZone(__instance.map) is Zone_Growing zone)
                         JumboCell.ReregisterObject(zone.Map, c, RimThreaded.plantSowing_Cache);

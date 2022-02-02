@@ -10,13 +10,10 @@ namespace RimThreaded
         {
             Type original = typeof(OverlayDrawer);
             Type patched = typeof(OverlayDrawer_Patch);
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(GetOverlaysHandle));
             RimThreadedHarmony.Prefix(original, patched, nameof(DisposeHandle));
-#endif
         }
 
-#if RW13
         public static bool GetOverlaysHandle(OverlayDrawer __instance, ref ThingOverlaysHandle __result, Thing thing)
         {
             if (!thing.Spawned)
@@ -49,6 +46,5 @@ namespace RimThreaded
             }
             return false;
         }
-#endif
     }
 }

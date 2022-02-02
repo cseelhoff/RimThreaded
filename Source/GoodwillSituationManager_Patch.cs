@@ -9,14 +9,11 @@ namespace RimThreaded
 
         internal static void RunDestructivePatches()
         {
-#if RW13
             Type original = typeof(GoodwillSituationManager);
             Type patched = typeof(GoodwillSituationManager_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(Recalculate), new Type[] { typeof(Faction), typeof(bool) });
-#endif
         }
 
-#if RW13
         public static bool Recalculate(GoodwillSituationManager __instance, Faction other, bool canSendHostilityChangedLetter)
         {
             List<GoodwillSituationManager.CachedSituation> outSituations1;
@@ -36,6 +33,5 @@ namespace RimThreaded
             __instance.CheckHostilityChanged(other, canSendHostilityChangedLetter);
             return false;
         }
-#endif
     }
 }

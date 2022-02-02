@@ -58,7 +58,6 @@ namespace RimThreaded
 			MethodLocker.LockMethodOnInstance(original, "DebugDrawReservations", LockFlag.ReaderLock);
 			MethodLocker.LockMethodOnInstance(original, "ExposeData", LockFlag.WriterLock);
 
-
 			RimThreadedHarmony.Postfix(original, patched, "Reserve", nameof(PostReserve));
 			RimThreadedHarmony.Postfix(original, patched, "Release", nameof(PostRelese));
 			RimThreadedHarmony.Postfix(original, patched, "ReleaseAllForTarget", nameof(PostReleaseAllForTarget));
@@ -463,7 +462,8 @@ namespace RimThreaded
 				}
 			}
 
-			return true;
+			__result = true;
+			return false;
 		}
 
 		public static bool IsUnreserved(ReservationManager __instance, LocalTargetInfo target, int maxPawns = 1, int stackCount = -1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)
@@ -914,7 +914,6 @@ namespace RimThreaded
 					//List<Reservation> newReservationTargetList = new List<Reservation>();
 
 					newReservationTargetList.Clear();
-
 					for (int index = 0; index < reservationTargetList.Count; index++)
 					{
 						Reservation reservation2 = reservationTargetList[index];
@@ -923,7 +922,6 @@ namespace RimThreaded
 							newReservationTargetList.Add(reservation2);
 						}
 					}
-
 					SimplePool_Patch<Reservation>.Return(reservation);
 					//reservationTargetDict[target] = newReservationTargetList;
 					reservationTargetDict[target].Clear();

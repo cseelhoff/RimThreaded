@@ -122,10 +122,10 @@ namespace RimThreaded
                         }
                     }
                 }
-                lock (__instance.cachedSocialThoughts)
-                {
-                    __instance.cachedSocialThoughts[otherPawn] = new CachedSocialThoughts();
-                }
+                //lock (__instance.cachedSocialThoughts)
+                //{
+                    __instance.cachedSocialThoughts[otherPawn].activeThoughts = new List<Thought_SituationalSocial>();
+                //}
                 for (int index2 = 0; index2 < cachedSocialThoughts.thoughts.Count; ++index2)
                 {
                     Thought_SituationalSocial thought = cachedSocialThoughts.thoughts[index2];

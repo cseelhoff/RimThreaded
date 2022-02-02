@@ -18,12 +18,7 @@ namespace RimThreaded
         public static RimThreadedSettings Settings;
         public static string replacementsFolder;
         public static string replacementsJsonPath;
-#if RW12
-        readonly string RWversion = "1.2";
-#endif
-#if RW13
         readonly string RWversion = "1.3";
-#endif
         public RimThreadedMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<RimThreadedSettings>();

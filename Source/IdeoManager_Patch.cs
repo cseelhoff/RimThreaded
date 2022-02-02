@@ -11,11 +11,8 @@ namespace RimThreaded
     {
         internal static void RunNonDestructivePatches()//there may be the need for locks in the IdeoManager
         {
-#if RW13
             Type original = typeof(IdeoManager);
-#endif
         }
-#if RW13
         public static List<Ideo> Ideos;
         public static int IdeosCount;
 
@@ -40,6 +37,5 @@ namespace RimThreaded
                 }
             }
         }
-#endif
     }
 }

@@ -64,7 +64,7 @@ namespace RimThreaded
         }
         
         private static readonly MethodInfo MethodDoCellSteadyEffects =
-            Method(typeof(SteadyEnvironmentEffects), "DoCellSteadyEffects", new[] { typeof(IntVec3) });
+            Method(typeof(SteadyEnvironmentEffects), nameof(SteadyEnvironmentEffects.DoCellSteadyEffects), new[] { typeof(IntVec3) });
         private static readonly Action<SteadyEnvironmentEffects, IntVec3> ActionDoCellSteadyEffects =
             (Action<SteadyEnvironmentEffects, IntVec3>)Delegate.CreateDelegate(
                 typeof(Action<SteadyEnvironmentEffects, IntVec3>), MethodDoCellSteadyEffects);

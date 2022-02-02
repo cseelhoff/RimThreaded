@@ -14,7 +14,6 @@ namespace RimThreaded
     [StaticConstructorOnStartup]
     public class RimThreaded
     {
-        //TODO clear on new game or load
         public static Dictionary<Bill_Production, List<Pawn>> billFreeColonistsSpawned = new Dictionary<Bill_Production, List<Pawn>>();
 
         public static int maxThreads = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1), 128);
@@ -156,7 +155,6 @@ namespace RimThreaded
                 prepareAction = Map_Patch.MapsPostTickPrepare,
                 tickAction = Map_Patch.MapPostListTick
             },
-#if RW13
             new ThreadedTickList
             {
                 prepareAction = TransportShipManager_Patch.ShipObjectsPrepare,
@@ -167,7 +165,6 @@ namespace RimThreaded
                 prepareAction = IdeoManager_Patch.IdeosPrepare,
                 tickAction = IdeoManager_Patch.IdeosTick
             }
-#endif
         };
         public static void RestartAllWorkerThreads()
         {
@@ -215,7 +212,7 @@ namespace RimThreaded
             Reachability_Patch.InitializeThreadStatics();
             ReachabilityCache_Patch.InitializeThreadStatics();
             Region_Patch.InitializeThreadStatics();
-            //RegionAndRoomUpdater_Patch.InitializeThreadStatics();
+            RegionAndRoomUpdater_Patch.InitializeThreadStatics();
             RegionDirtyer_Patch.InitializeThreadStatics();
             RegionTraverser_Patch.InitializeThreadStatics();
             SituationalThoughtHandler_Patch.InitializeThreadStatics();
@@ -225,6 +222,7 @@ namespace RimThreaded
             WorldPawns_Patch.InitializeThreadStatics();
             AttackTargetReservationManager_Patch.InitializeThreadStatics();
             ReservationManager_Patch.InitializeThreadStatics();
+            ListerThings_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)
         {

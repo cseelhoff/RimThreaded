@@ -26,9 +26,7 @@ namespace RimThreaded
             RimThreadedHarmony.Prefix(original, patched, nameof(RestorePartRecursiveInt));
             RimThreadedHarmony.Prefix(original, patched, nameof(CheckPredicateAfterAddingHediff));
             RimThreadedHarmony.Prefix(original, patched, nameof(Notify_Resurrected));
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(HealthTick));
-#endif
             RimThreadedHarmony.Prefix(original, patched, nameof(SetDead)); //optional warning instead of error
             //RimThreadedHarmony.Transpile(original, patched, nameof(CheckForStateChange));
             //RimThreadedHarmony.Prefix(original, patched, nameof(CheckForStateChange));
@@ -178,7 +176,6 @@ namespace RimThreaded
             return false;
         }
 
-#if RW13
         public static bool HealthTick(Pawn_HealthTracker __instance)
         {
             if (__instance.Dead)
@@ -306,6 +303,5 @@ namespace RimThreaded
             }
             return false;
         }
-#endif
     }
 }

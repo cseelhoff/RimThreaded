@@ -13,11 +13,8 @@ namespace RimThreaded
         {
             Type original = typeof(MoteBubble);
             Type patched = typeof(MoteBubble_Patch);
-#if RW13
             RimThreadedHarmony.Prefix(original, patched, nameof(SetupMoteBubble));
-#endif
         }
-#if RW13
         public static bool SetupMoteBubble(MoteBubble __instance, Texture2D icon, Pawn target, Color? iconColor = null)
         {
             __instance.iconMat = MaterialPool.MatFrom(icon, ShaderDatabase.TransparentPostLight, Color.white);
@@ -41,6 +38,5 @@ namespace RimThreaded
             __instance.iconMatPropertyBlock.SetColor("_Color", iconColor.Value);
             return false;
         }
-#endif
     }
 }

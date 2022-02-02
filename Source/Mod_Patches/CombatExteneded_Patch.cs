@@ -1,10 +1,12 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using Verse;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreadedHarmony;
-using System.Threading;
 
 namespace RimThreaded.Mod_Patches
 {
@@ -82,7 +84,53 @@ namespace RimThreaded.Mod_Patches
 			//	Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
 			//	Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
 			//}
-
+			if (combatExtendedVerb_MeleeAttackCE != null)
+			{
+				string methodName = "TryCastShot";
+				patched = typeof(CombatExteneded_Patch);
+				Log.Message("RimThreaded is patching " + combatExtendedVerb_MeleeAttackCE.FullName + " " + methodName);
+				Transpile(combatExtendedVerb_MeleeAttackCE, patched, methodName);
+			}
 		}
+
+
+		public static IEnumerable<CodeInstruction> TryCastShot(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+		{
+			List<CodeInstruction> instructionsList = instructions.ToList();
+			int i = 0;
+            MethodInfo applyMeleeDamageToTarget = Method(typeof(RimWorld.Verb_MeleeAttack), nameof(RimWorld.Verb_MeleeAttack.ApplyMeleeDamageToTarget));
+			while (i < instructionsList.Count)
+			{
+				CodeInstruction ci = instructionsList[i];
+				if (ci.opcode == OpCodes.Callvirt && (MethodInfo)ci.operand == applyMeleeDamageToTarget)
+				{
+					yield return ci;
+					//yield return new CodeInstruction(OpCodes.Dup);
+					yield return new CodeInstruction(OpCodes.Ldloc_S, 6); // load pawn target
+					yield return new CodeInstruction(OpCodes.Ldarg_0);    // verb_MeleeAttack (this)
+					yield return new CodeInstruction(OpCodes.Call, Method(typeof(CombatExteneded_Patch), nameof(PreApplyMeleeSlaveSuppression)));
+					i++;
+					//yield return instructionsList[i]; // ldloc.s 20
+					//i++;
+					//yield return instructionsList[i]; // AssociateWithLog
+
+				}
+				else
+				{
+					yield return instructionsList[i];
+					i++;
+				}
+			}
+		}
+
+		public static DamageWorker.DamageResult PreApplyMeleeSlaveSuppression(DamageWorker.DamageResult damageResult, Pawn pawn, RimWorld.Verb_MeleeAttack verb_MeleeAttack)
+		{
+			if (pawn != null && damageResult.totalDamageDealt > 0f)
+			{
+				verb_MeleeAttack.ApplyMeleeSlaveSuppression(pawn, damageResult.totalDamageDealt);
+			}
+			return damageResult;
+		}
+
 	}
 }

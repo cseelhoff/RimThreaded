@@ -114,12 +114,7 @@ namespace RimThreaded
                 Map map = newDes.target.HasThing ? newDes.target.Thing.Map : __instance.map;
                 if (map == null)
                     return false;
-#if RW12
-                MoteMaker.ThrowMetaPuffs(newDes.target.ToTargetInfo(map));
-#endif
-#if RW13
                 FleckMaker.ThrowMetaPuffs(newDes.target.ToTargetInfo(map));
-#endif
             }
             return false;
         }
