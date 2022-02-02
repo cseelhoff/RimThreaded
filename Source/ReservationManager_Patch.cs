@@ -40,7 +40,7 @@ namespace RimThreaded
 			RimThreadedHarmony.Prefix(original, patched, nameof(DebugString));
 			RimThreadedHarmony.Prefix(original, patched, nameof(DebugDrawReservations));
 			RimThreadedHarmony.Prefix(original, patched, nameof(ExposeData));
-
+			
 			/*
 			MethodLocker.LockMethodOnInstance(original, "CanReserve", LockFlag.ReaderLock);
 			MethodLocker.LockMethodOnInstance(original, "CanReserveStack", LockFlag.ReaderLock);
@@ -57,7 +57,6 @@ namespace RimThreaded
 			MethodLocker.LockMethodOnInstance(original, "DebugString", LockFlag.ReaderLock);
 			MethodLocker.LockMethodOnInstance(original, "DebugDrawReservations", LockFlag.ReaderLock);
 			MethodLocker.LockMethodOnInstance(original, "ExposeData", LockFlag.WriterLock);
-
 
 			RimThreadedHarmony.Postfix(original, patched, "Reserve", nameof(PostReserve));
 			RimThreadedHarmony.Postfix(original, patched, "Release", nameof(PostRelese));
@@ -915,7 +914,6 @@ namespace RimThreaded
 					//List<Reservation> newReservationTargetList = new List<Reservation>();
 
 					newReservationTargetList.Clear();
-
 					for (int index = 0; index < reservationTargetList.Count; index++)
 					{
 						Reservation reservation2 = reservationTargetList[index];
@@ -924,7 +922,6 @@ namespace RimThreaded
 							newReservationTargetList.Add(reservation2);
 						}
 					}
-
 					SimplePool_Patch<Reservation>.Return(reservation);
 					//reservationTargetDict[target] = newReservationTargetList;
 					reservationTargetDict[target].Clear();
