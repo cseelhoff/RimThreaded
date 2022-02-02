@@ -463,7 +463,8 @@ namespace RimThreaded
 				}
 			}
 
-			return true;
+			__result = true;
+			return false;
 		}
 
 		public static bool IsUnreserved(ReservationManager __instance, LocalTargetInfo target, int maxPawns = 1, int stackCount = -1, ReservationLayerDef layer = null, bool ignoreOtherReservations = false)

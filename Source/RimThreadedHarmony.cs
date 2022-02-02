@@ -846,6 +846,8 @@ namespace RimThreaded
 			//RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix - not sure why this causes bug with sleeping
 			GrammarResolver_Patch.RunNonDestructivePatches();
 			Sustainer_Patch.RunNonDestructivePatches();
+			//RegionAndRoomQuery_Patch.RunNonDestructivePatches();
+			MemoryUtility_Patch.RunNonDestructivePatches(); //Mod memory cleanup on game load, or main menu
 
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions

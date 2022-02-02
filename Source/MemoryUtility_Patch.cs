@@ -16,6 +16,13 @@ namespace RimThreaded
         public static void ClearAllMapsAndWorld()
         {
             //GenTemperature_Patch.SeasonalShiftAmplitudeCache.Clear();
+            RimThreaded.billFreeColonistsSpawned.Clear();
+            RimThreaded.plantHarvest_Cache.positionsAwaitingAction.Clear();
+            RimThreaded.plantSowing_Cache.positionsAwaitingAction.Clear();
+            HaulingCache.waitingForZoneBetterThanMapDict.Clear();
+            HaulingCache.awaitingHaulingMapDict.Clear();
+            ListerThings_Patch.mapToGroupToZoomsToGridToThings.Clear();
+            WorkGiver_Grower_Patch.awaitingPlantCellsMapDict.Clear();
         }
     }
 }

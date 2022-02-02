@@ -14,7 +14,6 @@ namespace RimThreaded
     [StaticConstructorOnStartup]
     public class RimThreaded
     {
-        //TODO clear on new game or load
         public static Dictionary<Bill_Production, List<Pawn>> billFreeColonistsSpawned = new Dictionary<Bill_Production, List<Pawn>>();
 
         public static int maxThreads = Math.Min(Math.Max(int.Parse(RimThreadedMod.Settings.maxThreadsBuffer), 1), 128);

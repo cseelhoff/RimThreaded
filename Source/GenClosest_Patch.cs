@@ -240,14 +240,17 @@ namespace RimThreaded
                     //{
                     //    continue;
                     //}
+#if DEBUG                
                     if (Prefs.LogVerbose)
                         Log.Message(pawn + " is going to do stuff with thing: " + tryThing + " at pos " + tryThing.Position);
-                    
+#endif
                     thing = tryThing;
                     break;
                 }
+#if DEBUG                
                 if (Prefs.LogVerbose)
                     Log.Message(i.ToString() + ":" + thingReq.ToString() + ":" + scanner.def.defName);
+#endif
             }
             return thing;
         }
