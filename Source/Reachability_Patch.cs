@@ -32,7 +32,8 @@ namespace RimThreaded
         {
             if (region == null)
             {
-                Log.ErrorOnce("Tried to queue null region.", 881121);
+                //Log.ErrorOnce("Tried to queue null region.", 881121);
+                Log.Error("Tried to queue null region.");
                 return;
             }
 

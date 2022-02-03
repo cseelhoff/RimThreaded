@@ -18,11 +18,11 @@ namespace RimThreaded
 		public static Dictionary<Map, List<HashSet<Thing>[]>> awaitingHaulingMapDict = new Dictionary<Map, List<HashSet<Thing>[]>>();
 		public const float ZOOM_MULTIPLIER = 1.5f; //must be greater than 1. lower numbers will make searches slower, but ensure pawns find the closer things first.
 												   // Map, (jumbo cell zoom level, #0 item=zoom 2x2, #1 item=4x4), jumbo cell index converted from x,z coord, HashSet<Thing>
-		[ThreadStatic] private static HashSet<Thing> returnedThings;
+		[ThreadStatic] private static HashSet<Thing> retrunedThings;
 
 		internal static void InitializeThreadStatics()
         {
-			returnedThings = new HashSet<Thing>();
+			retrunedThings = new HashSet<Thing>();
 		}
 
 		private static int getJumboCellWidth(int zoomLevel)
@@ -365,7 +365,7 @@ namespace RimThreaded
 			int cellIndex;
 			int mapSizeX = map.Size.x;
 			HashSet<Thing> thingsAtCellCopy;
-			returnedThings.Clear(); //hashset used to ensure same item is not retured twice
+			retrunedThings.Clear(); //hashset used to ensure same item is not retured twice
 
 			List<HashSet<Thing>[]> awaitingHaulingZoomLevels = GetAwaitingHauling(map);
 			IntVec3 position = pawn.Position;
@@ -382,16 +382,16 @@ namespace RimThreaded
 				ZposOfJumboCell = position.z / jumboCellWidth; //assuming square map
 				if (zoomLevel == 0)
 				{
-					cellIndex = CellToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellColumnsInMap);
+					cellIndex = CellToIndexCustom(XposOfJumboCell, ZposOfJumboCell, jumboCellWidth);
 					HashSet<Thing> thingsAtCell = thingsGrid[cellIndex];
 					if (thingsAtCell != null && thingsAtCell.Count > 0)
 					{
 						thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
 						foreach (Thing haulableThing in thingsAtCellCopy)
 						{
-							if (!returnedThings.Contains(haulableThing)) {
+							if (!retrunedThings.Contains(haulableThing)) {
 								yield return haulableThing;
-								returnedThings.Add(haulableThing);
+								retrunedThings.Add(haulableThing);
 							}
 						}
 					}
@@ -408,10 +408,10 @@ namespace RimThreaded
 							thingsAtCellCopy = new HashSet<Thing>(thingsAtCell);
 							foreach (Thing haulableThing in thingsAtCellCopy)
 							{
-								if (!returnedThings.Contains(haulableThing))
+								if (!retrunedThings.Contains(haulableThing))
 								{
 									yield return haulableThing;
-									returnedThings.Add(haulableThing);
+									retrunedThings.Add(haulableThing);
 								}
 							}
 						}
@@ -529,10 +529,12 @@ namespace RimThreaded
 														{
 															if (scanner.HasJobOnThing(pawn, tryThing))
 															{
+																/*
 																if (Prefs.LogVerbose)
 																{
 																	Log.Message(pawn + " is going to haul thing: " + tryThing + " at pos " + tryThing.Position);
 																}
+																*/
 																thing = tryThing;
 																break;
 															}

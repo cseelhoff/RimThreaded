@@ -33,7 +33,7 @@ namespace RimThreaded
 				}
 				return;
 			}
-			List<HashSet<IntVec3>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(jumboCell_Cache.positionsAwaitingAction, map);
+			List<HashSet<IntVec3>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(jumboCell_Cache.positionsAwaitingAction, map, jumboCell_Cache);
 			RemoveObjectFromAwaitingActionHashSets(map, location, awaitingActionZoomLevels);
 			if (jumboCell_Cache.IsActionableObject(map, location))
 				AddObjectToActionableObjects(map, location, awaitingActionZoomLevels);
@@ -232,7 +232,7 @@ namespace RimThreaded
 			int mapSizeX = map.Size.x;
 			retrunedThings.Clear();
 			IntVec3[] objectsAtCellCopy;
-			List<HashSet<IntVec3>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(jumboCell_Cache.positionsAwaitingAction, map);
+			List<HashSet<IntVec3>[]> awaitingActionZoomLevels = GetAwaitingActionsZoomLevels(jumboCell_Cache.positionsAwaitingAction, map, jumboCell_Cache);
 			IntVec3 position = pawn.Position;
 			Area effectiveAreaRestrictionInPawnCurrentMap = pawn.playerSettings.EffectiveAreaRestrictionInPawnCurrentMap;
 			Range2D areaRange = GetCorners(effectiveAreaRestrictionInPawnCurrentMap);
@@ -309,7 +309,7 @@ namespace RimThreaded
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}
 
-		public static List<HashSet<IntVec3>[]> GetAwaitingActionsZoomLevels(Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict, Map map)
+		public static List<HashSet<IntVec3>[]> GetAwaitingActionsZoomLevels(Dictionary<Map, List<HashSet<IntVec3>[]>> awaitingActionMapDict, Map map, JumboCell_Cache jumboCell_Cache)
 		{
 			if (!awaitingActionMapDict.TryGetValue(map, out List<HashSet<IntVec3>[]> awaitingActionsZoomLevels))
 			{
@@ -337,7 +337,10 @@ namespace RimThreaded
 							if (zone is Zone_Growing)
 							{
 								foreach (IntVec3 c in zone.Cells)
-									AddObjectToActionableObjects(zone.Map, c, awaitingActionsZoomLevels2);
+									//AddObjectToActionableObjects(zone.Map, c, awaitingActionsZoomLevels2);
+									if (jumboCell_Cache.IsActionableObject(zone.Map, c))
+										AddObjectToActionableObjects(zone.Map, c, awaitingActionsZoomLevels2);
+									
 							}
 						}
 						awaitingActionMapDict[map] = awaitingActionsZoomLevels2;

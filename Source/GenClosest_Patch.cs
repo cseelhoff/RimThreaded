@@ -183,6 +183,31 @@ namespace RimThreaded
             return null;
         }
 
+        public static Thing ClosestBedReachable(IntVec3 root, Map map, ThingRequest thingReq, PathEndMode peMode, TraverseParms traverseParams, float maxDistance = 9999f, Predicate<Thing> validator = null, IEnumerable<Thing> customGlobalSearchSet = null, int searchRegionsMin = 0, int searchRegionsMax = -1, bool forceAllowGlobalSearch = false, RegionType traversableRegionTypes = RegionType.Set_Passable, bool ignoreEntirelyForbiddenRegions = false)
+        {
+            IEnumerable<Thing> searchSet = ListerThings_Patch.GetClosestThingRequestGroupPosition(root, map, ThingRequestGroup.Bed);
+
+            int i = 0;
+            foreach (Thing thing in searchSet)
+            {
+                i++;
+                if (!thing.Spawned)
+                {
+                    continue;
+                }
+                if (!validator(thing))
+                {
+                    continue;
+                }
+                if (!map.reachability.CanReach(root, thing, peMode, traverseParams))
+                {
+                    continue;
+                }
+                return thing;
+            }
+            return null;
+        }
+
         internal static Thing ClosestThingRequestGroup(Pawn pawn, WorkGiver_Scanner scanner, Map map, ThingRequest thingReq, PathEndMode peMode, TraverseParms traverseParams, float maxDistance = 9999f, Predicate<Thing> validator = null, IEnumerable<Thing> customGlobalSearchSet = null, int searchRegionsMin = 0, int searchRegionsMax = -1, bool forceAllowGlobalSearch = false, RegionType traversableRegionTypes = RegionType.Set_Passable, bool ignoreEntirelyForbiddenRegions = false)
         {
             bool flag = searchRegionsMax < 0 || forceAllowGlobalSearch;
@@ -209,6 +234,7 @@ namespace RimThreaded
                 IntVec3 root = pawn.Position;
                 IEnumerable<Thing> searchSet = ListerThings_Patch.GetClosestThingRequestGroup(pawn, map, thingReq);
                 int i = 0;
+
                 foreach (Thing tryThing in searchSet)
                 {
                     i++;
