@@ -108,13 +108,14 @@ namespace RimThreaded
 				*/
 				AddThingToHashSets(t, thingRequestGroup);
 			}
-
+			/*
 			if (ThingRequestGroup.Bed.Includes(thingDef))
 			{
 				Building_Bed bed = t as Building_Bed;
 				if(bed.OwnersForReading.Count == 0)
 					AddThingToHashSets(t, ThingRequestGroup.Bed);
 			}
+			*/
 		}
 
 		public static bool Remove(ListerThings __instance, Thing t)
@@ -169,7 +170,6 @@ namespace RimThreaded
 			ThingRequestGroup.BuildingFrame,
 			ThingRequestGroup.PotentialBillGiver,
 			ThingRequestGroup.Filth,
-
 			//ThingRequestGroup.BuildingArtificial
 		};
 

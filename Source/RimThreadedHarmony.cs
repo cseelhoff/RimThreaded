@@ -1017,7 +1017,7 @@ namespace RimThreaded
 			RitualObligationTargetWorker_GraveWithTarget_Patch.RunDestructivePatches();
 			PortraitsCache_Patch.RunDestructivePatches();
 			RegionLinkDatabase_Patch.RunDestructivePatches();
-			RestUtility_Patch.RunDestructivePatches(); // find bed optimization
+			//RestUtility_Patch.RunDestructivePatches(); // find bed optimization
 		}
 
 		private static void PatchModCompatibility()

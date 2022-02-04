@@ -18,22 +18,23 @@ namespace RimThreaded
 		}
 		//public static HashSet<ThingRequestGroup> workGroups = new HashSet<ThingRequestGroup>();
 
+#if DEBUG
 		[ThreadStatic]
 		static Stopwatch s1;
 		[ThreadStatic]
 		static Stopwatch s2;
-
+#endif
 
 		public static bool TryIssueJobPackage(JobGiver_Work __instance, ref ThinkResult __result, Pawn pawn, JobIssueParams jobParams)
 		{
-			//#if DEBUG
+#if DEBUG
 			if (s1 == null)
 				s1 = new Stopwatch();
 			if (s2 == null)
 				s2 = new Stopwatch();
 			s1.Restart();
 			s2.Restart();
-			//#endif
+#endif
 			if (__instance.emergency && pawn.mindState.priorityWork.IsPrioritized)
 			{
 				List<WorkGiverDef> workGiversByPriority = pawn.mindState.priorityWork.WorkGiver.workType.workGiversByPriority;
@@ -88,13 +89,13 @@ namespace RimThreaded
 						if (job2 != null)
 						{
 							__result = new ThinkResult(job2, __instance, workGiver.def.tagToGive);
-							//#if DEBUG
+#if DEBUG
 							s1.Stop();
 							if (Prefs.LogVerbose && s1.ElapsedMilliseconds > 50)
 							{
 								Log.Warning(pawn.ToString() + " " + __instance.ToString() + " NonScanJob JobGiver_Work.TryIssueJobPackage Took over " + s1.ElapsedMilliseconds.ToString() + "ms");
 							}
-							//#endif
+#endif
 							return false;
 						}
 						scanner = (workGiver as WorkGiver_Scanner);
@@ -290,7 +291,7 @@ namespace RimThreaded
 							job3.workGiverDef = scannerWhoProvidedTarget.def;
 							__result = new ThinkResult(job3, __instance, workGiver.def.tagToGive);
 
-							//#if DEBUG
+#if DEBUG
 							s2.Stop();
 							if (Prefs.LogVerbose && s2.ElapsedMilliseconds > 50)
 							{
@@ -298,8 +299,6 @@ namespace RimThreaded
 								//Log.Warning(scanner.PotentialWorkThingRequest.ToString());
 								//Log.Warning(validator.ToString());
 							}
-							//#endif
-							//#if DEBUG
 							s1.Stop();
 							if (Prefs.LogVerbose && s1.ElapsedMilliseconds > 50)
 							{
@@ -307,8 +306,7 @@ namespace RimThreaded
 								//Log.Warning(scanner.PotentialWorkThingRequest.ToString());
 								//Log.Warning(validator.ToString());
 							}
-							//#endif
-
+#endif
 							return false;
 						}
 						//If this was a cached plant job, deregister it and check if it is still valid to be registered

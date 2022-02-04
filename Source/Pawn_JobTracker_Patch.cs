@@ -288,11 +288,11 @@ namespace RimThreaded
             ThinkResult thinkResult = ThinkResult.NoJob;
             try
             {
-                    thinkResult = __instance.pawn.thinker.MainThinkNodeRoot.TryIssueJobPackage(__instance.pawn, new JobIssueParams());
+                thinkResult = __instance.pawn.thinker.MainThinkNodeRoot.TryIssueJobPackage(__instance.pawn, new JobIssueParams());
             }
             catch (Exception ex)
             {
-                JobUtility.TryStartErrorRecoverJob(__instance.pawn, __instance.pawn.ToStringSafe<Pawn>() + " threw exception while determining job (main)", ex);
+                JobUtility.TryStartErrorRecoverJob(__instance.pawn, __instance.pawn.ToStringSafe() + " threw exception while determining job (main)", ex);
                 thinkTree = null;
                 __result = ThinkResult.NoJob;
                 return false;

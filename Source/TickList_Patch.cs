@@ -112,11 +112,13 @@ namespace RimThreaded
                 if (thing.Destroyed) continue;
                 try
                 {
-                    s1.Restart();
-                    if (thing.ToString().Equals("McDowell") && Find.TickManager.TicksAbs == 26634151)
+                    /*
+                    if (thing is Pawn pawn)
                     {
-                        Log.Message("McDowell Debug " + Find.TickManager.TicksAbs.ToString());
-                        Pawn pawn = thing as Pawn;
+                        s1.Restart();
+                        //if (thing.ToString().Equals("Guts") && Find.TickManager.TicksAbs == 26634152)
+                        //{
+                        //Log.Message("Guts Debug " + Find.TickManager.TicksAbs.ToString());
                         if (DebugSettings.noAnimals && pawn.Spawned && pawn.RaceProps.Animal)
                         {
                             pawn.Destroy();
@@ -133,114 +135,144 @@ namespace RimThreaded
                             {
                                 pawn.pather.PatherTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " PatherTick" + s1.ElapsedMilliseconds.ToString());
+                            s1.Restart();
                             if (pawn.Spawned)
                             {
                                 pawn.stances.StanceTrackerTick();
                                 pawn.verbTracker.VerbsTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " VerbsTick" + s1.ElapsedMilliseconds.ToString());
+                            s1.Restart();
                             if (pawn.Spawned)
                             {
                                 pawn.roping.RopingTick();
                                 pawn.natives.NativeVerbsTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " NativeVerbsTick" + s1.ElapsedMilliseconds.ToString());
+                            s1.Restart();
                             if (pawn.Spawned)
                             {
                                 pawn.jobs.JobTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100)
+                            {
+                                Log.Message(pawn + " JobTrackerTick " + s1.ElapsedMilliseconds.ToString() + " " + pawn.jobs.curJob.ToString());
+                            }
+                            s1.Restart();
                             if (pawn.Spawned)
                             {
                                 pawn.Drawer.DrawTrackerTick();
                                 pawn.rotationTracker.RotationTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " RotationTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             pawn.health.HealthTick();
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " HealthTick" + s1.ElapsedMilliseconds.ToString());
                             if (!pawn.Dead)
                             {
                                 pawn.mindState.MindStateTick();
                                 pawn.carryTracker.CarryHandsTick();
                             }
                         }
+                        if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " CarryHandsTick" + s1.ElapsedMilliseconds.ToString());
                         if (!pawn.Dead)
                         {
                             pawn.needs.NeedsTrackerTick();
                         }
+                        if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " NeedsTrackerTick" + s1.ElapsedMilliseconds.ToString());
                         if (!suspended)
                         {
                             if (pawn.equipment != null)
                             {
                                 pawn.equipment.EquipmentTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " EquipmentTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.apparel != null)
                             {
                                 pawn.apparel.ApparelTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " ApparelTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.interactions != null && pawn.Spawned)
                             {
                                 pawn.interactions.InteractionsTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " InteractionsTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.caller != null)
                             {
                                 pawn.caller.CallTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " CallTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.skills != null)
                             {
                                 pawn.skills.SkillsTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " SkillsTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.abilities != null)
                             {
                                 pawn.abilities.AbilitiesTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " AbilitiesTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.inventory != null)
                             {
                                 pawn.inventory.InventoryTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " InventoryTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.drafter != null)
                             {
                                 pawn.drafter.DraftControllerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " DraftControllerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.relations != null)
                             {
                                 pawn.relations.RelationsTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " RelationsTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (ModsConfig.RoyaltyActive && pawn.psychicEntropy != null)
                             {
                                 pawn.psychicEntropy.PsychicEntropyTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " PsychicEntropyTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.RaceProps.Humanlike)
                             {
                                 pawn.guest.GuestTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " GuestTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.ideo != null)
                             {
                                 pawn.ideo.IdeoTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " IdeoTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.royalty != null && ModsConfig.RoyaltyActive)
                             {
                                 pawn.royalty.RoyaltyTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " RoyaltyTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.style != null && ModsConfig.IdeologyActive)
                             {
                                 pawn.style.StyleTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " StyleTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.styleObserver != null && ModsConfig.IdeologyActive)
                             {
                                 pawn.styleObserver.StyleObserverTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " StyleObserverTick" + s1.ElapsedMilliseconds.ToString());
                             if (pawn.surroundings != null && ModsConfig.IdeologyActive)
                             {
                                 pawn.surroundings.SurroundingsTrackerTick();
                             }
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " SurroundingsTrackerTick" + s1.ElapsedMilliseconds.ToString());
                             pawn.ageTracker.AgeTick();
+                            if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " AgeTick" + s1.ElapsedMilliseconds.ToString());
                             pawn.records.RecordsTick();
                         }
+                        if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " RecordsTick" + s1.ElapsedMilliseconds.ToString());
                         pawn.guilt?.GuiltTrackerTick();
+                        if (s1.ElapsedMilliseconds > 100) Log.Message(pawn + " GuiltTrackerTick" + s1.ElapsedMilliseconds.ToString());
                     }
-                    else 
+                    else
+                    */
                         thing.Tick();
-                    long milli2 = s1.ElapsedMilliseconds;
-                    if (Prefs.LogVerbose && milli2 > 100)
-                    {
-                        Log.Warning(thing.ToString() + " tick was " + milli2.ToString() + "ms tickabs:" + Find.TickManager.TicksAbs.ToString());
-                    }
                 }
                 catch (Exception ex)
                 {
