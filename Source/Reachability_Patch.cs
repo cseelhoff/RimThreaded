@@ -273,8 +273,11 @@ namespace RimThreaded
             if (pathGrid.WalkableFast(start))
             {
                 Region validRegionAt = regionGrid.GetValidRegionAt(start);
-                QueueNewOpenRegion(validRegionAt, openQueueParam, regionsReached);
-                startingRegionsParam.Add(validRegionAt);
+                if (validRegionAt != null && !regionsReached.Contains(validRegionAt))
+                {
+                    QueueNewOpenRegion(validRegionAt, openQueueParam, regionsReached);
+                    startingRegionsParam.Add(validRegionAt);
+                }
                 return;
             }
             else

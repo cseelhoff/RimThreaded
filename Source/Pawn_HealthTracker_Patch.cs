@@ -43,6 +43,8 @@ namespace RimThreaded
         }
         [ThreadStatic] static bool Pawn_HealthTrackerLockTaken;
         [ThreadStatic] static HediffSet Pawn_HealthTrackerHediffSet;
+        [ThreadStatic] static bool Pawn_HealthTrackerLockTaken2;
+        [ThreadStatic] static HediffSet Pawn_HealthTrackerHediffSet2;
 
         public static bool CheckForStateChangeMonitorEnter(Pawn_HealthTracker __instance, DamageInfo? dinfo, Hediff hediff)
         {
@@ -62,18 +64,18 @@ namespace RimThreaded
 
         public static bool PostApplyDamageEnter(Pawn_HealthTracker __instance, DamageInfo dinfo, float totalDamageDealt)
         {
-            Pawn_HealthTrackerLockTaken = false;
-            Pawn_HealthTrackerHediffSet = __instance.hediffSet;
-            Monitor.TryEnter(Pawn_HealthTrackerHediffSet, RimThreaded.halfTimeoutMS, ref Pawn_HealthTrackerLockTaken);
-            if (Pawn_HealthTrackerLockTaken)
+            Pawn_HealthTrackerLockTaken2 = false;
+            Pawn_HealthTrackerHediffSet2 = __instance.hediffSet;
+            Monitor.TryEnter(Pawn_HealthTrackerHediffSet2, RimThreaded.halfTimeoutMS, ref Pawn_HealthTrackerLockTaken2);
+            if (Pawn_HealthTrackerLockTaken2)
                 return true;
             Log.Error("RimThreaded.CheckForStateChange was unable to be obtain lock for Pawn_HealthTracker: " + __instance + " within timeout(MS) : " + RimThreaded.halfTimeoutMS.ToString());
             return false;
         }
         public static void PostApplyDamageExit(Pawn_HealthTracker __instance, DamageInfo dinfo, float totalDamageDealt)
         {
-            if (Pawn_HealthTrackerLockTaken)
-                Monitor.Exit(Pawn_HealthTrackerHediffSet);
+            if (Pawn_HealthTrackerLockTaken2)
+                Monitor.Exit(Pawn_HealthTrackerHediffSet2);
         }
 
         public static bool SetDead(Pawn_HealthTracker __instance)

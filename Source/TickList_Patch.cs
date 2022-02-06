@@ -20,10 +20,10 @@ namespace RimThreaded
         {
             Type original = typeof(TickList);
             Type patched = typeof(TickList_Patch);
-            RimThreadedHarmony.TranspileMethodLock(original, "RegisterThing");
-            RimThreadedHarmony.TranspileMethodLock(original, "DeregisterThing");
-            RimThreadedHarmony.Transpile(original, patched, "Tick");
-            RimThreadedHarmony.Postfix(original, patched, "Tick", "TickPostfix");
+            RimThreadedHarmony.TranspileMethodLock(original, nameof(TickList.RegisterThing));
+            RimThreadedHarmony.TranspileMethodLock(original, nameof(TickList.DeregisterThing));
+            RimThreadedHarmony.Transpile(original, patched, nameof(Tick));
+            RimThreadedHarmony.Postfix(original, patched, nameof(TickList.Tick), nameof(TickPostfix));
         }
 
 
@@ -98,12 +98,12 @@ namespace RimThreaded
             normalThingListTicks = normalThingList.Count;
         }
 
-        [ThreadStatic]
-        static Stopwatch s1;
+        //[ThreadStatic]
+        //static Stopwatch s1;
         public static void NormalThingTick()
         {
-            if (s1 == null)
-                s1 = new Stopwatch();
+            //if (s1 == null)
+                //s1 = new Stopwatch();
             while (true)
             {
                 int index = Interlocked.Decrement(ref normalThingListTicks);
@@ -116,9 +116,10 @@ namespace RimThreaded
                     if (thing is Pawn pawn)
                     {
                         s1.Restart();
-                        //if (thing.ToString().Equals("Guts") && Find.TickManager.TicksAbs == 26634152)
-                        //{
-                        //Log.Message("Guts Debug " + Find.TickManager.TicksAbs.ToString());
+                        if (Find.TickManager.TicksGame >= 659 && (pawn.ToString().Equals("Mie") || pawn.ToString().Equals("Kane") || pawn.ToString().Equals("Nicole")))
+                        {
+                            Log.Message("659 Debug " + Find.TickManager.TicksGame.ToString());
+                        }
                         if (DebugSettings.noAnimals && pawn.Spawned && pawn.RaceProps.Animal)
                         {
                             pawn.Destroy();
@@ -272,7 +273,7 @@ namespace RimThreaded
                     }
                     else
                     */
-                        thing.Tick();
+                    thing.Tick();
                 }
                 catch (Exception ex)
                 {

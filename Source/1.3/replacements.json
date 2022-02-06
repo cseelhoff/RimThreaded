@@ -1111,23 +1111,6 @@
       ]
     },
     {
-      "ClassName": "RimWorld.QuestGen.SlateRef",
-      "ThreadStatics": [
-        {
-          "FieldName": "tmpCurSlate"
-        },
-        {
-          "FieldName": "RegexMatchEvaluatorConcatenateCached"
-        },
-        {
-          "FieldName": "RegexMatchEvaluatorConcatenateZeroIfEmptyCached"
-        },
-        {
-          "FieldName": "RegexMatchEvaluatorEvaluateMathExpressionCached"
-        }
-      ]
-    },
-    {
       "ClassName": "SpeakUp.GrammarResolver_RandomPossiblyResolvableEntry",
       "IgnoreMissing": true,
       "ThreadStatics": [
