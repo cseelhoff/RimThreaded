@@ -108,6 +108,14 @@ namespace RimThreaded
 				*/
 				AddThingToHashSets(t, thingRequestGroup);
 			}
+			/*
+			if (ThingRequestGroup.Bed.Includes(thingDef))
+			{
+				Building_Bed bed = t as Building_Bed;
+				if(bed.OwnersForReading.Count == 0)
+					AddThingToHashSets(t, ThingRequestGroup.Bed);
+			}
+			*/
 		}
 
 		public static bool Remove(ListerThings __instance, Thing t)
@@ -162,7 +170,8 @@ namespace RimThreaded
 			ThingRequestGroup.BuildingFrame,
 			ThingRequestGroup.PotentialBillGiver,
 			ThingRequestGroup.Filth,
-			ThingRequestGroup.BuildingArtificial};
+			//ThingRequestGroup.BuildingArtificial
+		};
 
         private static IEnumerable<ThingRequestGroup> GetThingRequestGroup(ThingDef thingDef)
         {
@@ -215,6 +224,7 @@ namespace RimThreaded
 			}
 			return null;
 		}
+
 		private static List<HashSet<Thing>[]> GetZoomsFromGroup(Map map, ThingRequestGroup group)
 		{
 			List<HashSet<Thing>[]> zoomsOfGridOfThingsets = null;
@@ -271,7 +281,48 @@ namespace RimThreaded
 			int jumboCellColumnsInMap = GetJumboCellColumnsInMap(mapSizeX, jumboCellWidth);
 			return CellToIndexCustom3(XposInJumboCell, ZposInJumboCell, jumboCellColumnsInMap);
 		}
-		private static int CellToIndexCustom3(int XposOfJumboCell, int ZposOfJumboCell, int jumboCellColumnsInMap)
+
+        internal static IEnumerable<Thing> GetClosestThingRequestGroupPosition(IntVec3 root, Map map, ThingRequestGroup bed)
+        {
+			int mapSizeX = map.Size.x;
+			returnedThings.Clear(); //hashset used to ensure same item is not retured twice
+
+			List<HashSet<Thing>[]> zoomLevelsOfThings = GetZoomsFromGroup(map, bed);
+			IntVec3 position = root;
+			Area effectiveAreaRestrictionInPawnCurrentMap = null;
+			Range2D areaRange = GetCorners(effectiveAreaRestrictionInPawnCurrentMap);
+			Range2D scannedRange = new Range2D(position.x, position.z, position.x, position.z);
+			for (int zoomLevel = 0; zoomLevel < zoomLevelsOfThings.Count; zoomLevel++)
+			{
+				HashSet<Thing>[] thingsGrid = zoomLevelsOfThings[zoomLevel];
+				int jumboCellWidth = getJumboCellWidth(zoomLevel);
+				int jumboCellColumnsInMap = GetJumboCellColumnsInMap(mapSizeX, jumboCellWidth);
+				int XposOfJumboCell = position.x / jumboCellWidth;
+				int ZposOfJumboCell = position.z / jumboCellWidth; //assuming square map
+				if (zoomLevel == 0) //this is needed to grab the center (9th square) otherwise, only the outside 8 edges/corners are normally needed
+				{
+					foreach (Thing haulableThing in GetThingsAtCellCopy(XposOfJumboCell, ZposOfJumboCell, jumboCellColumnsInMap, thingsGrid))
+						yield return haulableThing;
+				}
+				IEnumerable<IntVec3> offsetOrder = GetOptimalOffsetOrder(position, zoomLevel, scannedRange, areaRange, jumboCellWidth);
+				foreach (IntVec3 offset in offsetOrder)
+				{
+					int newXposOfJumboCell = XposOfJumboCell + offset.x;
+					int newZposOfJumboCell = ZposOfJumboCell + offset.z;
+					if (newXposOfJumboCell >= 0 && newXposOfJumboCell < jumboCellColumnsInMap && newZposOfJumboCell >= 0 && newZposOfJumboCell < jumboCellColumnsInMap)
+					{
+						foreach (Thing haulableThing in GetThingsAtCellCopy(XposOfJumboCell, ZposOfJumboCell, jumboCellColumnsInMap, thingsGrid))
+							yield return haulableThing;
+					}
+				}
+				scannedRange.minX = Math.Min(scannedRange.minX, (XposOfJumboCell - 1) * jumboCellWidth);
+				scannedRange.minZ = Math.Min(scannedRange.minZ, (ZposOfJumboCell - 1) * jumboCellWidth);
+				scannedRange.maxX = Math.Max(scannedRange.maxX, ((XposOfJumboCell + 2) * jumboCellWidth) - 1);
+				scannedRange.maxZ = Math.Max(scannedRange.maxZ, ((ZposOfJumboCell + 2) * jumboCellWidth) - 1);
+			}
+		}
+
+        private static int CellToIndexCustom3(int XposOfJumboCell, int ZposOfJumboCell, int jumboCellColumnsInMap)
 		{
 			return (jumboCellColumnsInMap * ZposOfJumboCell) + XposOfJumboCell;
 		}

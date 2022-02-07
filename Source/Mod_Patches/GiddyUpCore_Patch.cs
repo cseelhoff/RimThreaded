@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using Verse;
 using static HarmonyLib.AccessTools;
@@ -14,10 +15,11 @@ namespace RimThreaded.Mod_Patches
 		//public static Type giddyUpCoreUtilitiesTextureUtility;
 		public static Type giddyUpCoreStorageExtendedDataStorage;
 		public static Type giddyUpCoreStorageExtendedPawnData;
-		//public static Type giddyUpCoreJobsJobDriver_Mounted;
-		//public static Type giddyUpCoreJobsGUC_JobDefOf;
-		//public static Type giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob;
-		public static void Patch()
+        public static Type giddyUpCoreJobsJobDriver_Mounted;
+        //public static Type giddyUpCoreJobsJobDriver_Mounted;
+        //public static Type giddyUpCoreJobsGUC_JobDefOf;
+        //public static Type giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob;
+        public static void Patch()
 		{
 			giddyUpCoreStorageExtendedPawnData = TypeByName("GiddyUpCore.Storage.ExtendedPawnData");
 			//giddyUpCoreJobsGUC_JobDefOf = TypeByName("GiddyUpCore.Jobs.GUC_JobDefOf");
@@ -46,30 +48,73 @@ namespace RimThreaded.Mod_Patches
                 Transpile(giddyUpCoreStorageExtendedDataStorage, patched, methodName);
             }
 
-            //if (giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob != null)
-            //{
-            //	string methodName = "Postfix";
-            //	Log.Message("RimThreaded is patching " + giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob.FullName + " " + methodName);
-            //	patched = typeof(Pawn_JobTracker_DetermineNextJob_Transpile);
-            //	Transpile(giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob, patched, methodName);
-            //}
+            giddyUpCoreJobsJobDriver_Mounted = TypeByName("GiddyUpCore.Jobs.JobDriver_Mounted");
+            if (giddyUpCoreJobsJobDriver_Mounted != null)
+            {
+                string methodName = "<waitForRider>b__8_0";
+                Log.Message("RimThreaded is patching " + giddyUpCoreJobsJobDriver_Mounted.FullName + " " + methodName);
+                Transpile(giddyUpCoreJobsJobDriver_Mounted, patched, methodName, nameof(WaitForRider));
+            }
 
-            //if (giddyUpCoreJobsJobDriver_Mounted != null)
-            //{
-            //	string methodName = "<waitForRider>b__8_0";
-            //	foreach (MethodInfo methodInfo in ((TypeInfo)giddyUpCoreJobsJobDriver_Mounted).DeclaredMethods)
-            //	{
-            //		if (methodInfo.Name.Equals(methodName))
-            //		{
-            //			Log.Message("RimThreaded is patching " + giddyUpCoreJobsJobDriver_Mounted.FullName + " " + methodName);
-            //			patched = typeof(JobDriver_Mounted_Transpile);
-            //			MethodInfo pMethod2 = patched.GetMethod("WaitForRider");
-            //			harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod2));
-            //		}
-            //	}
-            //}
+                //if (giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob != null)
+                //{
+                //	string methodName = "Postfix";
+                //	Log.Message("RimThreaded is patching " + giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob.FullName + " " + methodName);
+                //	patched = typeof(Pawn_JobTracker_DetermineNextJob_Transpile);
+                //	Transpile(giddyUpCoreHarmonyPawnJobTracker_DetermineNextJob, patched, methodName);
+                //}
 
+                //if (giddyUpCoreJobsJobDriver_Mounted != null)
+                //{
+                //	string methodName = "<waitForRider>b__8_0";
+                //	foreach (MethodInfo methodInfo in ((TypeInfo)giddyUpCoreJobsJobDriver_Mounted).DeclaredMethods)
+                //	{
+                //		if (methodInfo.Name.Equals(methodName))
+                //		{
+                //			Log.Message("RimThreaded is patching " + giddyUpCoreJobsJobDriver_Mounted.FullName + " " + methodName);
+                //			patched = typeof(JobDriver_Mounted_Transpile);
+                //			MethodInfo pMethod2 = patched.GetMethod("WaitForRider");
+                //			harmony.Patch(methodInfo, transpiler: new HarmonyMethod(pMethod2));
+                //		}
+                //	}
+                //}
+
+            //}
         }
+
+        public static IEnumerable<CodeInstruction> WaitForRider(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        {
+            List<CodeInstruction> instructionsList = instructions.ToList();
+            int currentInstructionIndex = 0;
+            while (currentInstructionIndex < instructionsList.Count)
+            {
+                CodeInstruction currentInstruction = instructionsList[currentInstructionIndex];
+                if (currentInstructionIndex >= 1)
+                {
+                    CodeInstruction lastInstruction = instructionsList[currentInstructionIndex - 1];
+                    if(lastInstruction.opcode == OpCodes.Call)
+                    {
+                        if((MethodInfo)lastInstruction.operand == Method(giddyUpCoreJobsJobDriver_Mounted, "get_Rider"))
+                        {
+                            if (currentInstruction.opcode == OpCodes.Brfalse_S)
+                            {
+                                //Label interrupted = (Label)currentInstruction.operand;
+                                yield return currentInstruction;
+                                yield return new CodeInstruction(OpCodes.Ldarg_0);
+                                yield return lastInstruction;
+                                yield return new CodeInstruction(OpCodes.Callvirt, Method(typeof(Pawn), "get_CurJob"));
+                                yield return currentInstruction;
+                                currentInstructionIndex++;
+                                continue;
+                            }
+                        }
+                    }
+                }
+                currentInstructionIndex++;
+                yield return currentInstruction;
+            }
+        }
+
         public static IEnumerable<CodeInstruction> DeleteExtendedDataFor(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             Type typeDictionaryIntData = typeof(Dictionary<,>).MakeGenericType(new Type[] { typeof(int), giddyUpCoreStorageExtendedPawnData });

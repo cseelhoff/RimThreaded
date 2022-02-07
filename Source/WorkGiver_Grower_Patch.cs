@@ -195,21 +195,26 @@ namespace RimThreaded
 #endif
 				return false;
 			}
-
+			Plant plant = null;
 			List<Thing> thingList = c.GetThingList(map);
 			bool flag = false;
 			for (int i = 0; i < thingList.Count; i++)
 			{
 				Thing thing = thingList[i];
-				if (thing.def == localWantedPlantDef)
+				if (thing.def.category == ThingCategory.Plant)
 				{
+					plant = (Plant)thing;
+					if (thing.def == localWantedPlantDef)
+					{
 #if DEBUG
-					Log.Warning("thing.def == localWantedPlantDef... RemoveObjectFromAwaitingHaulingHashSets");
+						Log.Warning("thing.def == localWantedPlantDef... (plant thing needs to be removed before sowing) workgiverGrowerSowingHashset at: " + c.ToString());
 #endif
-					JumboCell.ReregisterObject(map, c, RimThreaded.plantSowing_Cache);
-					//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
-					return false;
+						JumboCell.ReregisterObject(map, c, RimThreaded.plantSowing_Cache);
+						//JumboCellCache.AddObjectToActionableObjects(map, c, c, awaitingPlantCellsMapDict);
+						return false;
+					}
 				}
+
 
 				if ((thing is Blueprint || thing is Frame) && thing.Faction == pawn.Faction)
 				{
@@ -253,7 +258,7 @@ namespace RimThreaded
 				return false;
 			}
 
-			Plant plant = c.GetPlant(map);
+			//Plant plant = c.GetPlant(map);
 			if (plant != null && plant.def.plant.blockAdjacentSow)
 			{
 				if (!pawn.CanReserve(plant, 1, -1, null, forced) || plant.IsForbidden(pawn))

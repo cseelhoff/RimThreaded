@@ -35,16 +35,16 @@ namespace RimThreaded
         internal static void AddFieldReplacements()
         {
             Dictionary<OpCode, MethodInfo> regionCostCalculatorReplacements = new Dictionary<OpCode, MethodInfo>();
-            regionCostCalculatorReplacements.Add(OpCodes.Ldfld, Method(typeof(PathFinder_Patch), "GetRegionCostCalculator"));
-            regionCostCalculatorReplacements.Add(OpCodes.Stfld, Method(typeof(PathFinder_Patch), "SetRegionCostCalculator"));
-            RimThreadedHarmony.replaceFields.Add(Field(typeof(PathFinder), "regionCostCalculator"), regionCostCalculatorReplacements);
+            regionCostCalculatorReplacements.Add(OpCodes.Ldfld, Method(typeof(PathFinder_Patch), nameof(GetRegionCostCalculator)));
+            regionCostCalculatorReplacements.Add(OpCodes.Stfld, Method(typeof(PathFinder_Patch), nameof(SetRegionCostCalculator)));
+            RimThreadedHarmony.replaceFields.Add(Field(typeof(PathFinder), nameof(PathFinder.regionCostCalculator)), regionCostCalculatorReplacements);
         }
 
         internal static void RunNonDestructivePatches()
         {
             Type original = typeof(PathFinder);
             Type patched = typeof(PathFinder_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "InitStatusesAndPushStartNode", null, false);
+            RimThreadedHarmony.Prefix(original, patched, nameof(InitStatusesAndPushStartNode), null, false);
         }
 
         public static bool InitStatusesAndPushStartNode(PathFinder __instance, ref int curIndex, IntVec3 start)

@@ -32,7 +32,8 @@ namespace RimThreaded
         {
             if (region == null)
             {
-                Log.ErrorOnce("Tried to queue null region.", 881121);
+                //Log.ErrorOnce("Tried to queue null region.", 881121);
+                Log.Error("Tried to queue null region.");
                 return;
             }
 
@@ -272,8 +273,11 @@ namespace RimThreaded
             if (pathGrid.WalkableFast(start))
             {
                 Region validRegionAt = regionGrid.GetValidRegionAt(start);
-                QueueNewOpenRegion(validRegionAt, openQueueParam, regionsReached);
-                startingRegionsParam.Add(validRegionAt);
+                if (validRegionAt != null && !regionsReached.Contains(validRegionAt))
+                {
+                    QueueNewOpenRegion(validRegionAt, openQueueParam, regionsReached);
+                    startingRegionsParam.Add(validRegionAt);
+                }
                 return;
             }
             else

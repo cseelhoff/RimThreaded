@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Verse;
 using Verse.AI;
 
@@ -291,7 +292,7 @@ namespace RimThreaded
             }
             catch (Exception ex)
             {
-                JobUtility.TryStartErrorRecoverJob(__instance.pawn, __instance.pawn.ToStringSafe<Pawn>() + " threw exception while determining job (main)", ex);
+                JobUtility.TryStartErrorRecoverJob(__instance.pawn, __instance.pawn.ToStringSafe() + " threw exception while determining job (main)", ex);
                 thinkTree = null;
                 __result = ThinkResult.NoJob;
                 return false;
@@ -333,17 +334,14 @@ namespace RimThreaded
                 Log.ErrorOnce(string.Concat(__instance.pawn, " did TryFindAndStartJob but had no thinker."), 8573261);
                 return false;
             }
-
             if (__instance.curJob != null)
             {
                 Log.Warning(string.Concat(__instance.pawn, " doing TryFindAndStartJob while still having job ", __instance.curJob));
             }
-
             if (__instance.debugLog)
             {
                 __instance.DebugLogEvent("TryFindAndStartJob");
             }
-
             if (!__instance.CanDoAnyJob())
             {
                 if (__instance.debugLog)
@@ -357,42 +355,16 @@ namespace RimThreaded
             ThinkTreeDef thinkTree;
             lock (determineNextJobLock) //TODO change to ReservationManager.reservations?
             {
-                ThinkResult result = DetermineNextJob2(__instance, out thinkTree);
+                ThinkResult result = __instance.DetermineNextJob(out thinkTree);
                 if (result.IsValid)
                 {
                     __instance.CheckLeaveJoinableLordBecauseJobIssued(result);
-                    __instance.StartJob(result.Job, JobCondition.None, result.SourceNode, resumeCurJobAfterwards: false, cancelBusyStances: false, thinkTree, result.Tag, result.FromQueue);
+                __instance.StartJob(result.Job, JobCondition.None, result.SourceNode, resumeCurJobAfterwards: false, cancelBusyStances: false, thinkTree, result.Tag, result.FromQueue);
                 }
             }
+
             return false;
         }
-        private static ThinkResult DetermineNextJob2(Pawn_JobTracker __instance, out ThinkTreeDef thinkTree)
-        {
-            ThinkResult result = __instance.DetermineNextConstantThinkTreeJob();
-            if (result.Job != null)
-            {
-                thinkTree = __instance.pawn.thinker.ConstantThinkTree;
-                return result;
-            }
-
-            ThinkResult result2 = ThinkResult.NoJob;
-            try
-            {
-                result2 = __instance.pawn.thinker.MainThinkNodeRoot.TryIssueJobPackage(__instance.pawn, default);
-            }
-            catch (Exception exception)
-            {
-                JobUtility.TryStartErrorRecoverJob(__instance.pawn, __instance.pawn.ToStringSafe() + " threw exception while determining job (main)", exception);
-                thinkTree = null;
-                return ThinkResult.NoJob;
-            }
-            finally
-            {
-            }
-
-            thinkTree = __instance.pawn.thinker.MainThinkTree;
-            return result2;
-        }
-
+        
     }
 }
