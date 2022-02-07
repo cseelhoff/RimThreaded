@@ -1,12 +1,39 @@
 {
   "ClassReplacements": [
-    {
+  {
       "ClassName": "Verse.AI.Pawn_JobTracker",
       "ThreadStatics": [
         {
           "FieldName": "tmpJobsToDequeue"
         }
       ]
+  },
+  {
+       "ClassName": "RimWorld.IdeoManager",
+       "ThreadStatics": [
+         {
+           "FieldName": "activeRitualsTmp"
+         }
+       ]
+   },
+   {
+        "ClassName": "RimWorld.LordJob_Ritual",
+        "ThreadStatics": [
+          {
+            "FieldName": "totalPresenceTmp"
+          }
+        ]
+    },
+    {
+         "ClassName": "RimWorld.LordToil_Ritual",
+         "ThreadStatics": [
+           {
+             "FieldName": "reservedThings"
+           },
+           {
+             "FieldName": "cachedDuties"
+           }
+         ]
     },
     {
       "ClassName": "Verse.AI.AttackTargetFinder",
