@@ -56,15 +56,16 @@ namespace RimThreaded
                 Log.Warning(string.Concat("Trying to get valid region at ", c, " but RegionAndRoomUpdater is disabled. The result may be incorrect."));
             }
             Region region = __instance.regionGrid[map.cellIndices.CellToIndex(c)];
-            if (region == null || !region.valid)
+            if (map.AgeInDays==0f&&(region == null || !region.valid))
             {
-                /*
+                //not locking this breaks the generation of raid maps, since structure, pawn and loot generation depend on the canReachMapBorder or something in order to generate
+                //Log.Message("Intitially generating region for a map, namedly: " + map.uniqueID + " Dict :"+Regen);
+
                 lock (map.regionAndRoomUpdater)
                 {
                     regionAndRoomUpdater.TryRebuildDirtyRegionsAndRooms();
                     region = __instance.regionGrid[map.cellIndices.CellToIndex(c)];
                 }
-                */
             }
             if (region != null && region.valid)
             {
