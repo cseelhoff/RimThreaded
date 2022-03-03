@@ -150,7 +150,8 @@ namespace RimThreaded
 										scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Refuelable ||
 										scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Transporter ||
 										scanner.PotentialWorkThingRequest.group == ThingRequestGroup.BuildingFrame ||
-										scanner.PotentialWorkThingRequest.group == ThingRequestGroup.PotentialBillGiver ||
+										//temp fix, will have to be revieved and reworked
+										(scanner.PotentialWorkThingRequest.group == ThingRequestGroup.PotentialBillGiver & !(workGiver.def.defName.Equals("DoBillsMedicalHumanOperation") || workGiver.def.defName.Equals("DoBillsMedicalAnimalOperation"))) 
 										scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Filth //||
 										//scanner.PotentialWorkThingRequest.group == ThingRequestGroup.BuildingArtificial
 										))
