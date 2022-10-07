@@ -1,15 +1,4 @@
-﻿using HarmonyLib;
-using System.Collections.Generic;
-using System.Linq;
-using Verse;
-using System.Reflection.Emit;
-using System;
-using System.Reflection;
-using UnityEngine;
-using static RimThreaded.RimThreaded;
-using static System.Threading.Thread;
-
-namespace RimThreaded.Mod_Patches
+﻿namespace RimThreaded.Mod_Patches
 {
     public class TextureUtility_Transpile
     {

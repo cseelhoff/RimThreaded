@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using static RimThreaded.Area_Patch;
+using static RimThreaded.RW_Patches.Area_Patch;
 using static Verse.AI.ReservationManager;
 using static HarmonyLib.AccessTools;
 using System.Reflection;
+using RimThreaded.RW_Patches;
 
 namespace RimThreaded
 {
-	class HaulingCache
+    class HaulingCache
 	{
 		public static readonly Dictionary<Map, HashSet<Thing>[]> waitingForZoneBetterThanMapDict = new Dictionary<Map, HashSet<Thing>[]>(); //each Map has sets of Things for each storage priority (typically 6)
 		public static List<int> zoomLevels = new List<int>();

@@ -1,11 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using HarmonyLib;
-using Verse;
-using Verse.AI;
-
-namespace RimThreaded.Mod_Patches
+﻿namespace RimThreaded.Mod_Patches
 {
     public class JobDriver_Mounted_Transpile
     {

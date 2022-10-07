@@ -1,11 +1,12 @@
 ﻿using System;
+using RimThreaded.RW_Patches;
 using Verse;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreadedHarmony;
 
 namespace RimThreaded.Mod_Patches
 {
-	class JobsOfOppurtunity_Patch
+    class JobsOfOppurtunity_Patch
 	{
 
 		public static Type jobsOfOpportunityJobsOfOpportunity_Hauling;

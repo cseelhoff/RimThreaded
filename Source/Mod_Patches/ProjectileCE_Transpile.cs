@@ -1,21 +1,16 @@
 ﻿using HarmonyLib;
-using RimWorld;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using static HarmonyLib.AccessTools;
-using static RimThreaded.RimThreadedHarmony;
 using static RimThreaded.Mod_Patches.CombatExteneded_Patch;
 namespace RimThreaded.Mod_Patches
 {
-	class ProjectileCE_Transpile
+    class ProjectileCE_Transpile
     {
         public static List<Thing> CheckCellForCollision2(List<Thing> thingsListAtFast)
         {

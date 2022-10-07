@@ -14,12 +14,12 @@ using static HarmonyLib.AccessTools;
 using Verse.AI;
 using System.IO;
 using Newtonsoft.Json;
-using static RimWorld.SituationalThoughtHandler;
+using RimThreaded.RW_Patches;
 
 namespace RimThreaded
 {
 
-	public class RimThreadedHarmony
+    public class RimThreadedHarmony
 	{
 		public static Harmony harmony = new Harmony("majorhoff.rimthreaded");
 
@@ -258,7 +258,7 @@ namespace RimThreaded
 				{
 					if (Prefs.LogVerbose)
 					{
-						Verse.Log.Message("RimThreaded is attempting to load replacements from cache for assembly: " + assembly.FullName);
+                        Log.Message("RimThreaded is attempting to load replacements from cache for assembly: " + assembly.FullName);
 					}
 					if (AssemblyCache.TryGetFromCache(assembly.ManifestModule.ModuleVersionId.ToString(), out MethodsFromCache))
 					{
