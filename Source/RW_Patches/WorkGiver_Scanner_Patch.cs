@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using static RimThreaded.WorkGiver_DoBill_Patch;
+using static WorkGiver_DoBill_Patch;
 
 namespace RimThreaded.RW_Patches
 {

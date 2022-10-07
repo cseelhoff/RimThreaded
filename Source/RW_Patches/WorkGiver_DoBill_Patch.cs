@@ -158,7 +158,7 @@ public class WorkGiver_DoBill_Patch
       Thing billGiver,
       List<ThingCount> chosen)
     {
-        WorkGiver_DoBill_RegionProcessor workGiver_DoBill_RegionProcessor = new WorkGiver_DoBill_RegionProcessor(); //ADD
+        RimThreaded.RW_Patches.WorkGiver_DoBill_RegionProcessor workGiver_DoBill_RegionProcessor = new RimThreaded.RW_Patches.WorkGiver_DoBill_RegionProcessor(); //ADD
         chosen.Clear(); //COULD REMOVE?
                         //newRelevantThings.Clear(); //REMOVE
         if (bill.recipe.ingredients.Count == 0)
@@ -346,4 +346,4 @@ public class WorkGiver_DoBill_Patch
     }
 
 }
-}
+
