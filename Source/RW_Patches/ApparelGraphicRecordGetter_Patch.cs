@@ -13,7 +13,7 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(ApparelGraphicRecordGetter);
             Type patched = typeof(ApparelGraphicRecordGetter_Patch);
-            //RimThreadedHarmony.Prefix(original, patched, nameof(TryGetGraphicApparel));
+            RimThreadedHarmony.Prefix(original, patched, nameof(TryGetGraphicApparel));
         }
 
         public static bool TryGetGraphicApparel(ref bool __result, Apparel apparel, BodyTypeDef bodyType, ref ApparelGraphicRecord rec)

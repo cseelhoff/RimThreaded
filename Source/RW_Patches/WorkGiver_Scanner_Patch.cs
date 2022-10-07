@@ -34,22 +34,25 @@ namespace RimThreaded.RW_Patches
             billGiver.BillStack.RemoveIncompletableBills();
             return CanStartOrResumeBillJob(__instance, pawn, billGiver);
         }
-        private static bool CanStartOrResumeBillJob(WorkGiver_DoBill __instance, Pawn pawn, IBillGiver giver)
+        private static bool CanStartOrResumeBillJob(WorkGiver_DoBill __instance, Pawn pawn, IBillGiver giver) //TODO: 1.4 changs examine
         {
+            WorkGiverDef def = __instance.def;
+            bool flag = FloatMenuMakerMap.makingFor == pawn;
             for (int i = 0; i < giver.BillStack.Count; i++)
             {
                 Bill bill = giver.BillStack[i];
-                if (bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType != __instance.def.workType ||
-                    Find.TickManager.TicksGame < bill.lastIngredientSearchFailTicks + WorkGiver_DoBill.ReCheckFailedBillTicksRange.RandomInRange && FloatMenuMakerMap.makingFor != pawn)
+                //if (bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType != __instance.def.workType ||
+                //    Find.TickManager.TicksGame < bill.nextTickToSearchForIngredients && FloatMenuMakerMap.makingFor != pawn)
+                if ((bill.recipe.requiredGiverWorkType != null && bill.recipe.requiredGiverWorkType != def.workType) || (Find.TickManager.TicksGame <= bill.nextTickToSearchForIngredients && FloatMenuMakerMap.makingFor != pawn) || !bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn))
                 {
                     continue;
                 }
 
-                bill.lastIngredientSearchFailTicks = 0;
-                if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn))
-                {
-                    continue;
-                }
+                //bill.nextTickToSearchForIngredients = 0;
+                //if (!bill.ShouldDoNow() || !bill.PawnAllowedToStartAnew(pawn))
+                //{
+                //    continue;
+                //}
 
                 SkillRequirement skillRequirement = bill.recipe.FirstSkillRequirementPawnDoesntSatisfy(pawn);
                 if (skillRequirement != null)
@@ -87,7 +90,9 @@ namespace RimThreaded.RW_Patches
                 {
                     if (FloatMenuMakerMap.makingFor != pawn)
                     {
-                        bill.lastIngredientSearchFailTicks = Find.TickManager.TicksGame;
+                        //bill.lastIngredientSearchFailTicks = Find.TickManager.TicksGame;
+                        bill.nextTickToSearchForIngredients = Find.TickManager.TicksGame + WorkGiver_DoBill.ReCheckFailedBillTicksRange.RandomInRange;
+
                     }
 
                     continue;

@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System;
+using Unity.Jobs;
 using Verse;
 using Verse.AI;
 
@@ -132,20 +133,13 @@ namespace RimThreaded.RW_Patches
         }
 
         public static bool StartJob(Pawn_JobTracker __instance,
-          Job newJob,
-          JobCondition lastJobEndCondition = JobCondition.None,
-          ThinkNode jobGiver = null,
-          bool resumeCurJobAfterwards = false,
-          bool cancelBusyStances = true,
-          ThinkTreeDef thinkTree = null,
-          JobTag? tag = null,
-          bool fromQueue = false,
-          bool canReturnCurJobToPool = false)
+          Job newJob, JobCondition lastJobEndCondition = JobCondition.None, ThinkNode jobGiver = null, bool resumeCurJobAfterwards = false, bool cancelBusyStances = true, ThinkTreeDef thinkTree = null, JobTag? tag = null, bool fromQueue = false, bool canReturnCurJobToPool = false, bool? keepCarryingThingOverride = null, bool continueSleeping = false, bool addToJobsThisTick = true)
         {
             __instance.startingNewJob = true;
+            Job job = null;
             try
             {
-                if (!fromQueue && (!Find.TickManager.Paused || __instance.lastJobGivenAtFrame == RealTime.frameCount))
+                if (addToJobsThisTick && !fromQueue && (!Find.TickManager.Paused || __instance.lastJobGivenAtFrame == RealTime.frameCount))
                 {
                     __instance.jobsGivenThisTick++;
                     if (Prefs.DevMode)
@@ -153,7 +147,6 @@ namespace RimThreaded.RW_Patches
                         __instance.jobsGivenThisTickTextual = __instance.jobsGivenThisTickTextual + "(" + newJob.ToString() + ") ";
                     }
                 }
-
                 __instance.lastJobGivenAtFrame = RealTime.frameCount;
                 if (__instance.jobsGivenThisTick > 10)
                 {
@@ -165,16 +158,18 @@ namespace RimThreaded.RW_Patches
                     JobUtility.TryStartErrorRecoverJob(__instance.pawn, __instance.pawn.ToStringSafe() + " started 10 jobs in one tick. newJob=" + newJob.ToStringSafe() + " jobGiver=" + jobGiver.ToStringSafe() + " jobList=" + text);
                     return false;
                 }
-
                 if (__instance.debugLog)
                 {
                     __instance.DebugLogEvent(string.Concat("StartJob [", newJob, "] lastJobEndCondition=", lastJobEndCondition, ", jobGiver=", jobGiver, ", cancelBusyStances=", cancelBusyStances.ToString()));
                 }
-                var stances = __instance.pawn.stances; //changed
+                Pawn_StanceTracker stances = __instance.pawn.stances; //changed
                 if (cancelBusyStances && stances != null && stances.FullBodyBusy) //changed
                 {
                     stances.CancelBusyStanceHard(); //changed
                 }
+                bool asleep = continueSleeping && (__instance.curDriver?.asleep ?? false);
+
+
 
                 if (__instance.curJob != null)
                 {
@@ -183,20 +178,18 @@ namespace RimThreaded.RW_Patches
                         Log.Warning(string.Concat(__instance.pawn, " starting job ", newJob, " from JobGiver ", newJob.jobGiver, " while already having job ", __instance.curJob, " without a specific job end condition."));
                         lastJobEndCondition = JobCondition.InterruptForced;
                     }
-
                     if (resumeCurJobAfterwards && __instance.curJob.def.suspendable)
                     {
-                        __instance.jobQueue.EnqueueFirst(__instance.curJob);
-                        if (__instance.debugLog)
-                        {
-                            __instance.DebugLogEvent("   JobQueue EnqueueFirst curJob: " + __instance.curJob);
-                        }
-
-                        __instance.CleanupCurrentJob(lastJobEndCondition, releaseReservations: false, cancelBusyStances);
+                        __instance.SuspendCurrentJob(lastJobEndCondition, cancelBusyStances, keepCarryingThingOverride);
                     }
                     else
                     {
-                        __instance.CleanupCurrentJob(lastJobEndCondition, releaseReservations: true, cancelBusyStances, canReturnCurJobToPool);
+                        job = __instance.curDriver.GetFinalizerJob(lastJobEndCondition);
+                        if (job != null)
+                        {
+                            keepCarryingThingOverride = keepCarryingThingOverride ?? true;
+                        }
+                        __instance.CleanupCurrentJob(lastJobEndCondition, releaseReservations: true, cancelBusyStances, canReturnCurJobToPool, keepCarryingThingOverride);
                     }
                 }
 
@@ -221,36 +214,34 @@ namespace RimThreaded.RW_Patches
                 bool flag = fromQueue;
                 if (__instance.curDriver.TryMakePreToilReservations(!flag))
                 {
-                    Job job = __instance.TryOpportunisticJob(newJob);
-                    if (job != null)
-                    {
+                    Job job2 = __instance.TryOpportunisticJob(job, newJob);
+                    if (job2 != null)
+					{
                         __instance.jobQueue.EnqueueFirst(newJob);
                         __instance.curJob = null;
-                        __instance.curDriver = null;
-                        __instance.StartJob(job);
-                        return false;
-                    }
-                    if (tag.HasValue)
-                    {
-                        if (tag == JobTag.Fieldwork && __instance.pawn.mindState.lastJobTag != tag)
-                        {
-                            foreach (Pawn item in PawnUtility.SpawnedMasteredPawns(__instance.pawn))
-                            {
-                                item.jobs.Notify_MasterStartedFieldWork();
-                            }
-                        }
+                        __instance.ClearDriver();
+						StartJob(__instance, job2, JobCondition.None, null, resumeCurJobAfterwards: false, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, keepCarryingThingOverride);
+						return false;
+					}
+					if (tag.HasValue)
+					{
+						if (tag == JobTag.Fieldwork && __instance.pawn.mindState.lastJobTag != tag)
+						{
+							foreach (Pawn item in PawnUtility.SpawnedMasteredPawns(__instance.pawn))
+							{
+								item.jobs.Notify_MasterStartedFieldWork();
+							}
+						}
                         __instance.pawn.mindState.lastJobTag = tag.Value;
-                    }
-
-                    if (!__instance.pawn.Destroyed && __instance.pawn.ShouldDropCarriedThingBeforeJob(__instance.curJob))
-                    {
-                        if (DebugViewSettings.logCarriedBetweenJobs)
-                        {
-                            Log.Message($"Dropping {__instance.pawn.carryTracker.CarriedThing} before starting job {newJob}");
-                        }
-
-                        __instance.pawn.carryTracker.TryDropCarriedThing(__instance.pawn.Position, ThingPlaceMode.Near, out Thing _);
-                    }
+					}
+					if (__instance.pawn.IsCarrying() && !(keepCarryingThingOverride ?? (!__instance.curJob.def.dropThingBeforeJob)))
+					{
+						if (DebugViewSettings.logCarriedBetweenJobs)
+						{
+							Log.Message($"Dropping {__instance.pawn.carryTracker.CarriedThing} before starting job {newJob}");
+						}
+                        __instance.pawn.carryTracker.TryDropCarriedThing(__instance.pawn.Position, ThingPlaceMode.Near, out var _);
+					}
                     cDriver.SetInitialPosture(); //changed
                     cDriver.Notify_Starting(); //changed
                     cDriver.SetupToils(); //changed
@@ -340,6 +331,7 @@ namespace RimThreaded.RW_Patches
             {
                 __instance.DebugLogEvent("TryFindAndStartJob");
             }
+            /* 1.4
             if (!__instance.CanDoAnyJob())
             {
                 if (__instance.debugLog)
@@ -350,6 +342,7 @@ namespace RimThreaded.RW_Patches
                 __instance.ClearQueuedJobs();
                 return false;
             }
+            */
             ThinkTreeDef thinkTree;
             lock (determineNextJobLock) //TODO change to ReservationManager.reservations?
             {
@@ -357,7 +350,7 @@ namespace RimThreaded.RW_Patches
                 if (result.IsValid)
                 {
                     __instance.CheckLeaveJoinableLordBecauseJobIssued(result);
-                    __instance.StartJob(result.Job, JobCondition.None, result.SourceNode, resumeCurJobAfterwards: false, cancelBusyStances: false, thinkTree, result.Tag, result.FromQueue);
+                    StartJob(__instance, result.Job, JobCondition.None, result.SourceNode, resumeCurJobAfterwards: false, cancelBusyStances: false, thinkTree, result.Tag, result.FromQueue);
                 }
             }
 

@@ -29,6 +29,7 @@ namespace RimThreaded.RW_Patches
             Type original = typeof(JobGiver_Work);
             Type patched = typeof(JobGiver_Work_Patch);
             RimThreadedHarmony.Prefix(original, patched, nameof(TryIssueJobPackage));
+            BuildWorkGiverList(); //TODO: Move to initialize?
         }
         //public static HashSet<ThingRequestGroup> workGroups = new HashSet<ThingRequestGroup>();
 

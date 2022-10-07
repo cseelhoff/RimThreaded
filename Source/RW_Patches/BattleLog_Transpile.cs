@@ -14,7 +14,7 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(BattleLog);
             Type patched = typeof(BattleLog_Transpile);
-            RimThreadedHarmony.Transpile(original, patched, "Add");
+            RimThreadedHarmony.Transpile(original, patched, nameof(Add));
         }
 
         public static object addLogEntryLock = new object();

@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "RimThreaded": {
-      "commandName": "Executable",
-      "executablePath": "C:\\RimWorld13\\RimWorldWin64.exe"
-    }
-  }
-}

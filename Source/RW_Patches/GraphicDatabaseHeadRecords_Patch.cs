@@ -11,11 +11,12 @@ namespace RimThreaded.RW_Patches
 
         internal static void RunDestructivePatches()
         {
-            Type original = typeof(GraphicDatabaseHeadRecords);
-            Type patched = typeof(GraphicDatabaseHeadRecords_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "BuildDatabaseIfNecessary");
+            //Type original = typeof(GraphicDatabaseHeadRecords);
+            //Type patched = typeof(GraphicDatabaseHeadRecords_Patch);
+            //RimThreadedHarmony.Prefix(original, patched, nameof(BuildDatabaseIfNecessary));
         }
 
+        /*
         private static readonly Action<object[]> SafeFunction = parameters =>
             GraphicDatabaseHeadRecords.BuildDatabaseIfNecessary();
 
@@ -28,6 +29,6 @@ namespace RimThreaded.RW_Patches
             threadInfo.eventWaitStart.WaitOne();
             return false;
         }
-
+        */
     }
 }

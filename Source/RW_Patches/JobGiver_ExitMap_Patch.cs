@@ -20,9 +20,9 @@ namespace RimThreaded.RW_Patches
             bool canDig = __instance.forceCanDig ||
                 pawn.mindState.duty != null && pawn.mindState.duty.canDig && !pawn.CanReachMapEdge() ||
                 __instance.forceCanDigIfCantReachMapEdge && !pawn.CanReachMapEdge() ||
-                __instance.forceCanDigIfAnyHostileActiveThreat && pawn.Faction != null && GenHostility.AnyHostileActiveThreatTo_NewTemp(pawn.Map, pawn.Faction, countDormantPawnsAsHostile: true);
+                __instance.forceCanDigIfAnyHostileActiveThreat && pawn.Faction != null && GenHostility.AnyHostileActiveThreatTo(pawn.Map, pawn.Faction, countDormantPawnsAsHostile: true);
             IntVec3 dest;
-            if (!__instance.TryFindGoodExitDest(pawn, canDig, out dest))
+            if (!__instance.TryFindGoodExitDest(pawn, canDig, __instance.canBash, out dest))
             {
                 __result = null;
                 return false;

@@ -94,7 +94,7 @@ namespace RimThreaded.RW_Patches
             Lord lord = __instance.GetLord();
             if (lord != null)
             {
-                PawnLostCondition cond = mode != DestroyMode.KillFinalize ? PawnLostCondition.Vanished : PawnLostCondition.IncappedOrKilled;
+                PawnLostCondition cond = mode != DestroyMode.KillFinalize ? PawnLostCondition.Vanished : PawnLostCondition.Killed;
                 lord.Notify_PawnLost(__instance, cond);
             }
 

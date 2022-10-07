@@ -109,30 +109,32 @@ namespace RimThreaded.RW_Patches
 
         public static bool CacheMissingPartsCommonAncestors(HediffSet __instance)
         {
-            lock (__instance)
+            lock (__instance) //added
             {
-                if (__instance.cachedMissingPartsCommonAncestors == null)
-                    __instance.cachedMissingPartsCommonAncestors = new List<Hediff_MissingPart>();
+                var cachedMissingPartsCommonAncestors = __instance.cachedMissingPartsCommonAncestors;
+                if (cachedMissingPartsCommonAncestors == null)
+                    cachedMissingPartsCommonAncestors = new List<Hediff_MissingPart>();
                 else
                     __instance.cachedMissingPartsCommonAncestors.Clear();
-                __instance.missingPartsCommonAncestorsQueue.Clear();
-                __instance.missingPartsCommonAncestorsQueue.Enqueue(__instance.pawn.def.race.body.corePart);
+                Queue<BodyPartRecord> missingPartsCommonAncestorsQueue = __instance.missingPartsCommonAncestorsQueue;
+                missingPartsCommonAncestorsQueue.Clear();
+                missingPartsCommonAncestorsQueue.Enqueue(__instance.pawn.def.race.body.corePart);
                 while (__instance.missingPartsCommonAncestorsQueue.Count != 0)
                 {
-                    BodyPartRecord node = __instance.missingPartsCommonAncestorsQueue.Dequeue();
-                    if (!__instance.PartOrAnyAncestorHasDirectlyAddedParts(node))
+                    BodyPartRecord bodyPartRecord = __instance.missingPartsCommonAncestorsQueue.Dequeue();
+                    if (__instance.PartOrAnyAncestorHasDirectlyAddedParts(bodyPartRecord))
                     {
-                        Hediff_MissingPart hediffMissingPart = __instance.GetHediffs<Hediff_MissingPart>().Where(x => x.Part == node).FirstOrDefault();
-                        if (hediffMissingPart != null)
-                        {
-                            __instance.cachedMissingPartsCommonAncestors.Add(hediffMissingPart);
-                        }
-                        else
-                        {
-                            for (int index = 0; index < node.parts.Count; ++index)
-                                __instance.missingPartsCommonAncestorsQueue.Enqueue(node.parts[index]);
-                        }
+                        continue;
                     }
+                    Hediff_MissingPart firstHediffMatchingPart = __instance.GetFirstHediffMatchingPart<Hediff_MissingPart>(bodyPartRecord);
+                    if (firstHediffMatchingPart != null)
+                    {
+                        cachedMissingPartsCommonAncestors.Add(firstHediffMatchingPart);
+                        continue;
+                    }
+                    for (int index = 0; index < bodyPartRecord.parts.Count; ++index)
+                        missingPartsCommonAncestorsQueue.Enqueue(bodyPartRecord.parts[index]);
+                    
                 }
             }
             return false;

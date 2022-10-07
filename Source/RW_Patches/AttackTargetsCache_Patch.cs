@@ -25,11 +25,11 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(AttackTargetsCache);
             Type patched = typeof(AttackTargetsCache_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetPotentialTargetsFor");
-            RimThreadedHarmony.Prefix(original, patched, "RegisterTarget");
-            RimThreadedHarmony.Prefix(original, patched, "DeregisterTarget");
-            RimThreadedHarmony.Prefix(original, patched, "TargetsHostileToFaction");
-            RimThreadedHarmony.Prefix(original, patched, "UpdateTarget");
+            RimThreadedHarmony.Prefix(original, patched, nameof(GetPotentialTargetsFor));
+            RimThreadedHarmony.Prefix(original, patched, nameof(RegisterTarget));
+            RimThreadedHarmony.Prefix(original, patched, nameof(DeregisterTarget));
+            RimThreadedHarmony.Prefix(original, patched, nameof(TargetsHostileToFaction));
+            RimThreadedHarmony.Prefix(original, patched, nameof(UpdateTarget));
         }
 
         public static bool DeregisterTarget(AttackTargetsCache __instance, IAttackTarget target)

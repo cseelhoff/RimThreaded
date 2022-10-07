@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using RimWorld;
 using Verse;
+using static Verse.MapPawns;
 
 namespace RimThreaded.RW_Patches
 {
@@ -13,12 +14,12 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(MapPawns);
             Type patched = typeof(MapPawns_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "EnsureFactionsListsInit");
-            RimThreadedHarmony.Prefix(original, patched, "PawnsInFaction");
-            RimThreadedHarmony.Prefix(original, patched, "FreeHumanlikesOfFaction");
-            RimThreadedHarmony.Prefix(original, patched, "FreeHumanlikesSpawnedOfFaction");
-            RimThreadedHarmony.Prefix(original, patched, "RegisterPawn");
-            RimThreadedHarmony.Prefix(original, patched, "DeRegisterPawn");
+            RimThreadedHarmony.Prefix(original, patched, nameof(EnsureFactionsListsInit));
+            RimThreadedHarmony.Prefix(original, patched, nameof(PawnsInFaction));
+            RimThreadedHarmony.Prefix(original, patched, nameof(FreeHumanlikesOfFaction));
+            RimThreadedHarmony.Prefix(original, patched, nameof(FreeHumanlikesSpawnedOfFaction));
+            RimThreadedHarmony.Prefix(original, patched, nameof(RegisterPawn));
+            RimThreadedHarmony.Prefix(original, patched, nameof(DeRegisterPawn));
         }
 
 
@@ -26,16 +27,17 @@ namespace RimThreaded.RW_Patches
         public static bool EnsureFactionsListsInit(MapPawns __instance)
         {
             List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
-            Dictionary<Faction, List<Pawn>> pawnsInFactionSpawned = __instance.pawnsInFactionSpawned;
+            FactionDictionary pawnsInFactionSpawned = __instance.pawnsInFactionSpawned;
+            Dictionary<Faction, List<Pawn>> pawnList = pawnsInFactionSpawned.pawnList;
             for (int i = 0; i < allFactionsListForReading.Count; i++)
             {
                 Faction faction = allFactionsListForReading[i];
-                if (pawnsInFactionSpawned.ContainsKey(faction)) continue;
+                if (pawnList.ContainsKey(faction)) continue;
                 lock (__instance)
                 {
-                    if (!pawnsInFactionSpawned.ContainsKey(faction))
+                    if (!pawnList.ContainsKey(faction))
                     {
-                        pawnsInFactionSpawned.Add(faction, new List<Pawn>());
+                        pawnList.Add(faction, new List<Pawn>(32));
                     }
                 }
             }
@@ -52,7 +54,7 @@ namespace RimThreaded.RW_Patches
                 return false;
             }
 
-            List<Pawn> value = new List<Pawn>();
+            List<Pawn> value = new List<Pawn>(32);
             List<Pawn> allPawns = __instance.AllPawns;
             for (int i = 0; i < allPawns.Count; i++)
             {
@@ -65,7 +67,7 @@ namespace RimThreaded.RW_Patches
 
             lock (__instance)
             {
-                __instance.pawnsInFactionResult[faction] = value;
+                __instance.pawnsInFactionResult.pawnList[faction] = value;
             }
             __result = value;
             return false;
@@ -93,7 +95,7 @@ namespace RimThreaded.RW_Patches
 
             lock (__instance)
             {
-                __instance.freeHumanlikesSpawnedOfFactionResult[faction] = value;
+                __instance.freeHumanlikesSpawnedOfFactionResult.pawnList[faction] = value;
             }
             __result = value;
             return false;
@@ -120,7 +122,7 @@ namespace RimThreaded.RW_Patches
 
             lock (__instance)
             {
-                __instance.freeHumanlikesSpawnedOfFactionResult[faction] = value;
+                __instance.freeHumanlikesSpawnedOfFactionResult.pawnList[faction] = value;
             }
             __result = value;
             return false;
@@ -162,7 +164,7 @@ namespace RimThreaded.RW_Patches
 
             }
 
-            Dictionary<Faction, List<Pawn>> pawnsInFactionSpawned = __instance.pawnsInFactionSpawned;
+            Dictionary<Faction, List<Pawn>> pawnsInFactionSpawned = __instance.pawnsInFactionSpawned.pawnList;
             if (p.Faction != null)
             {
                 List<Pawn> pawnList2 = pawnsInFactionSpawned[p.Faction];
@@ -217,13 +219,13 @@ namespace RimThreaded.RW_Patches
 
                 List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
                 Dictionary<Faction, List<Pawn>> newPawnsInFactionSpawned =
-                    new Dictionary<Faction, List<Pawn>>(__instance.pawnsInFactionSpawned);
+                    new Dictionary<Faction, List<Pawn>>(__instance.pawnsInFactionSpawned.pawnList);
                 for (int i = 0; i < allFactionsListForReading.Count; i++)
                 {
                     Faction key = allFactionsListForReading[i];
                     newPawnsInFactionSpawned[key].Remove(p);
                 }
-                __instance.pawnsInFactionSpawned = newPawnsInFactionSpawned;
+                __instance.pawnsInFactionSpawned.pawnList = newPawnsInFactionSpawned;
                 List<Pawn> newPrisonersOfColonySpawned = new List<Pawn>(__instance.prisonersOfColonySpawned);
                 newPrisonersOfColonySpawned.Remove(p);
                 __instance.prisonersOfColonySpawned = newPrisonersOfColonySpawned;

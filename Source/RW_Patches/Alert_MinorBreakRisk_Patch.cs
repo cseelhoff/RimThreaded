@@ -11,7 +11,7 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(Alert_MinorBreakRisk);
             Type patched = typeof(Alert_MinorBreakRisk_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "GetReport");
+            RimThreadedHarmony.Prefix(original, patched, nameof(GetReport));
         }
         public static bool GetReport(Alert_MinorBreakRisk __instance, ref AlertReport __result)
         {

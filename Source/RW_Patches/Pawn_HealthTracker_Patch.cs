@@ -176,6 +176,7 @@ namespace RimThreaded.RW_Patches
 
         public static bool HealthTick(Pawn_HealthTracker __instance)
         {
+            Pawn pawn = __instance.pawn; //added
             if (__instance.Dead)
                 return false;
             for (int index = __instance.hediffSet.hediffs.Count - 1; index >= 0; --index)
@@ -188,7 +189,7 @@ namespace RimThreaded.RW_Patches
                 }
                 catch (Exception ex1)
                 {
-                    Log.Error("Exception ticking hediff " + hediff.ToStringSafe() + " for pawn " + __instance.pawn.ToStringSafe() + ". Removing hediff... Exception: " + ex1);
+                    Log.Error("Exception ticking hediff " + hediff.ToStringSafe() + " for pawn " + pawn.ToStringSafe() + ". Removing hediff... Exception: " + ex1);
                     try
                     {
                         __instance.RemoveHediff(hediff);
@@ -222,46 +223,64 @@ namespace RimThreaded.RW_Patches
             if (__instance.Dead)
                 return false;
             __instance.immunity.ImmunityHandlerTick();
-            if (__instance.pawn.RaceProps.IsFlesh && __instance.pawn.IsHashIntervalTick(600) && (__instance.pawn.needs.food == null || !__instance.pawn.needs.food.Starving))
+            if (pawn.RaceProps.IsFlesh && pawn.IsHashIntervalTick(600) && (pawn.needs.food == null || !pawn.needs.food.Starving))
             {
                 bool flag2 = false;
                 if (__instance.hediffSet.HasNaturallyHealingInjury())
                 {
                     float num = 8f;
-                    if (__instance.pawn.GetPosture() != PawnPosture.Standing)
+                    if (pawn.GetPosture() != PawnPosture.Standing)
                     {
                         num += 4f;
-                        Building_Bed buildingBed = __instance.pawn.CurrentBed();
+                        Building_Bed buildingBed = pawn.CurrentBed();
                         if (buildingBed != null)
                             num += buildingBed.def.building.bed_healPerDay;
                     }
                     foreach (Hediff hediff in __instance.hediffSet.hediffs)
                     {
                         HediffStage curStage = hediff.CurStage;
-                        if (curStage != null && curStage.naturalHealingFactor != -1.0)
+                        if (curStage != null && curStage.naturalHealingFactor != -1f)
                             num *= curStage.naturalHealingFactor;
                     }
-                    __instance.hediffSet.GetHediffs<Hediff_Injury>().Where(x => x.CanHealNaturally()).RandomElement().Heal((float)((double)num * (double)__instance.pawn.HealthScale * 0.00999999977648258) * __instance.pawn.GetStatValue(StatDefOf.InjuryHealingFactor));
+                    //__instance.hediffSet.GetHediffs<Hediff_Injury>().Where(x => x.CanHealNaturally()).RandomElement().Heal((float)((double)num * (double)pawn.HealthScale * 0.00999999977648258) * pawn.GetStatValue(StatDefOf.InjuryHealingFactor));
+                    //1.4
+                    __instance.hediffSet.GetHediffs(ref __instance.tmpHediffInjuries, (Hediff_Injury h) => h.CanHealNaturally());
+                    __instance.tmpHediffInjuries.RandomElement().Heal(num * pawn.HealthScale * 0.01f * pawn.GetStatValue(StatDefOf.InjuryHealingFactor));
+
                     flag2 = true;
                 }
-                if (__instance.hediffSet.HasTendedAndHealingInjury() && (__instance.pawn.needs.food == null || !__instance.pawn.needs.food.Starving))
+                if (__instance.hediffSet.HasTendedAndHealingInjury() && (pawn.needs.food == null || !pawn.needs.food.Starving))
                 {
-                    Hediff_Injury hd = __instance.hediffSet.GetHediffs<Hediff_Injury>().Where(x => x.CanHealFromTending()).RandomElement();
-                    hd.Heal((float)(8.0 * (double)GenMath.LerpDouble(0.0f, 1f, 0.5f, 1.5f, Mathf.Clamp01(hd.TryGetComp<HediffComp_TendDuration>().tendQuality)) * (double)__instance.pawn.HealthScale * 0.00999999977648258) * __instance.pawn.GetStatValue(StatDefOf.InjuryHealingFactor));
-                    flag2 = true;
+                    //1.4
+                    //Hediff_Injury hd = __instance.hediffSet.GetHediffs<Hediff_Injury>().Where(x => x.CanHealFromTending()).RandomElement();
+                    //hd.Heal((float)(8.0 * (double)GenMath.LerpDouble(0.0f, 1f, 0.5f, 1.5f, Mathf.Clamp01(hd.TryGetComp<HediffComp_TendDuration>().tendQuality)) * (double)pawn.HealthScale * 0.00999999977648258) * pawn.GetStatValue(StatDefOf.InjuryHealingFactor));
+                    //flag2 = true;
+                    Need_Food food = pawn.needs.food;
+                    if (food == null || !food.Starving)
+                    {
+                        __instance.hediffSet.GetHediffs(ref __instance.tmpHediffInjuries, (Hediff_Injury h) => h.CanHealFromTending());
+                        Hediff_Injury hediff_Injury = __instance.tmpHediffInjuries.RandomElement();
+                        float tendQuality = hediff_Injury.TryGetComp<HediffComp_TendDuration>().tendQuality;
+                        float num4 = GenMath.LerpDouble(0f, 1f, 0.5f, 1.5f, Mathf.Clamp01(tendQuality));
+                        hediff_Injury.Heal(8f * num4 * pawn.HealthScale * 0.01f * pawn.GetStatValue(StatDefOf.InjuryHealingFactor));
+                        flag2 = true;
+                    }
                 }
-                if (flag2 && !__instance.HasHediffsNeedingTendByPlayer() && !HealthAIUtility.ShouldSeekMedicalRest(__instance.pawn) && !__instance.hediffSet.HasTendedAndHealingInjury() && PawnUtility.ShouldSendNotificationAbout(__instance.pawn))
-                    Messages.Message((string)"MessageFullyHealed".Translate((NamedArgument)__instance.pawn.LabelCap, (NamedArgument)__instance.pawn), (LookTargets)__instance.pawn, MessageTypeDefOf.PositiveEvent);
+                if (flag2 && !__instance.HasHediffsNeedingTendByPlayer() && !HealthAIUtility.ShouldSeekMedicalRest(pawn) && !__instance.hediffSet.HasTendedAndHealingInjury() && PawnUtility.ShouldSendNotificationAbout(pawn))
+                    Messages.Message((string)"MessageFullyHealed".Translate((NamedArgument)pawn.LabelCap, (NamedArgument)pawn), (LookTargets)pawn, MessageTypeDefOf.PositiveEvent);
             }
-            if (__instance.pawn.RaceProps.IsFlesh && (double)__instance.hediffSet.BleedRateTotal >= 0.100000001490116)
+            if (pawn.RaceProps.IsFlesh && __instance.hediffSet.BleedRateTotal >= 0.1f)
             {
-                float num = __instance.hediffSet.BleedRateTotal * __instance.pawn.BodySize;
-                if ((double)Rand.Value < (__instance.pawn.GetPosture() != PawnPosture.Standing ? (double)(num * 0.0004f) : (double)(num * 0.004f)))
+                float num5 = __instance.hediffSet.BleedRateTotal * pawn.BodySize;
+                num5 = ((pawn.GetPosture() != 0) ? (num5 * 0.0004f) : (num5 * 0.004f));
+                if (Rand.Value < num5)
+                {
                     __instance.DropBloodFilth();
+                }
             }
-            if (!__instance.pawn.IsHashIntervalTick(60))
+            if (!pawn.IsHashIntervalTick(60))
                 return false;
-            List<HediffGiverSetDef> hediffGiverSets = __instance.pawn.RaceProps.hediffGiverSets;
+            List<HediffGiverSetDef> hediffGiverSets = pawn.RaceProps.hediffGiverSets;
             if (hediffGiverSets != null)
             {
                 for (int index1 = 0; index1 < hediffGiverSets.Count; ++index1)
@@ -269,33 +288,51 @@ namespace RimThreaded.RW_Patches
                     List<HediffGiver> hediffGivers = hediffGiverSets[index1].hediffGivers;
                     for (int index2 = 0; index2 < hediffGivers.Count; ++index2)
                     {
-                        hediffGivers[index2].OnIntervalPassed(__instance.pawn, null);
-                        if (__instance.pawn.Dead)
+                        hediffGivers[index2].OnIntervalPassed(pawn, null);
+                        if (pawn.Dead)
                             return false;
                     }
                 }
             }
-            if (__instance.pawn.story == null)
+            if (pawn.story == null)
                 return false;
-            List<Trait> allTraits = __instance.pawn.story.traits.allTraits;
-            for (int index = 0; index < allTraits.Count; ++index)
+            List<Trait> allTraits = pawn.story.traits.allTraits;
+            for (int k = 0; k < allTraits.Count; k++)
             {
-                TraitDegreeData currentData = allTraits[index].CurrentData;
-                if (currentData.randomDiseaseMtbDays > 0.0 && Rand.MTBEventOccurs(currentData.randomDiseaseMtbDays, 60000f, 60f))
+                if (allTraits[k].Suppressed)
                 {
-                    BiomeDef biome = __instance.pawn.Tile == -1 ? DefDatabase<BiomeDef>.GetRandom() : Find.WorldGrid[__instance.pawn.Tile].biome;
-                    IncidentDef incidentDef = DefDatabase<IncidentDef>.AllDefs.Where(d => d.category == IncidentCategoryDefOf.DiseaseHuman).RandomElementByWeightWithFallback(d => biome.CommonalityOfDisease(d));
-                    if (incidentDef != null)
+                    continue;
+                }
+                TraitDegreeData currentData = allTraits[k].CurrentData;
+                if (!(currentData.randomDiseaseMtbDays > 0f) || !Rand.MTBEventOccurs(currentData.randomDiseaseMtbDays, 60000f, 60f))
+                {
+                    continue;
+                }
+                BiomeDef biome;
+                if (pawn.Tile != -1)
+                {
+                    biome = Find.WorldGrid[pawn.Tile].biome;
+                }
+                else
+                {
+                    biome = DefDatabase<BiomeDef>.GetRandom();
+                }
+                IncidentDef incidentDef = DefDatabase<IncidentDef>.AllDefs.Where((IncidentDef d) => d.category == IncidentCategoryDefOf.DiseaseHuman).RandomElementByWeightWithFallback((IncidentDef d) => biome.CommonalityOfDisease(d));
+                if (incidentDef == null)
+                {
+                    continue;
+                }
+                string blockedInfo;
+                List<Pawn> list = ((IncidentWorker_Disease)incidentDef.Worker).ApplyToPawns(Gen.YieldSingle(pawn), out blockedInfo);
+                if (PawnUtility.ShouldSendNotificationAbout(pawn))
+                {
+                    if (list.Contains(pawn))
                     {
-                        string blockedInfo;
-                        List<Pawn> pawns = ((IncidentWorker_Disease)incidentDef.Worker).ApplyToPawns(Gen.YieldSingle(__instance.pawn), out blockedInfo);
-                        if (PawnUtility.ShouldSendNotificationAbout(__instance.pawn))
-                        {
-                            if (pawns.Contains(__instance.pawn))
-                                Find.LetterStack.ReceiveLetter("LetterLabelTraitDisease".Translate((NamedArgument)incidentDef.diseaseIncident.label), "LetterTraitDisease".Translate((NamedArgument)__instance.pawn.LabelCap, (NamedArgument)incidentDef.diseaseIncident.label, __instance.pawn.Named("PAWN")).AdjustedFor(__instance.pawn), LetterDefOf.NegativeEvent, (LookTargets)__instance.pawn);
-                            else if (!blockedInfo.NullOrEmpty())
-                                Messages.Message(blockedInfo, (LookTargets)__instance.pawn, MessageTypeDefOf.NeutralEvent);
-                        }
+                        Find.LetterStack.ReceiveLetter("LetterLabelTraitDisease".Translate(incidentDef.diseaseIncident.label), "LetterTraitDisease".Translate(pawn.LabelCap, incidentDef.diseaseIncident.label, pawn.Named("PAWN")).AdjustedFor(pawn), LetterDefOf.NegativeEvent, pawn);
+                    }
+                    else if (!blockedInfo.NullOrEmpty())
+                    {
+                        Messages.Message(blockedInfo, pawn, MessageTypeDefOf.NeutralEvent);
                     }
                 }
             }
