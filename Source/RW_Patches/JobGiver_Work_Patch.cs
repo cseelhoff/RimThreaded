@@ -10,6 +10,20 @@ namespace RimThreaded.RW_Patches
 
     public class JobGiver_Work_Patch
     {
+
+        static readonly HashSet<WorkGiverDef> workGiversForClosestThingReachable2 = new HashSet<WorkGiverDef>();
+        static readonly HashSet<ThingRequestGroup> thingRequestGroupsCached = new HashSet<ThingRequestGroup>{
+                //ThingRequestGroup.Seed,
+                //ThingRequestGroup.Blueprint,
+                //ThingRequestGroup.Refuelable,
+                //ThingRequestGroup.Transporter,
+                //ThingRequestGroup.BuildingFrame,
+                //ThingRequestGroup.PotentialBillGiver,
+                //ThingRequestGroup.Filth
+                //,ThingRequestGroup.BuildingArtificial
+        };
+        static WorkGiverDef haulGeneral;
+
         internal static void RunDestructivePatches()
         {
             Type original = typeof(JobGiver_Work);
@@ -17,6 +31,41 @@ namespace RimThreaded.RW_Patches
             RimThreadedHarmony.Prefix(original, patched, nameof(TryIssueJobPackage));
         }
         //public static HashSet<ThingRequestGroup> workGroups = new HashSet<ThingRequestGroup>();
+
+        public static void BuildWorkGiverList()
+        {
+            //Use method ClosestThingReachable2 for these workGiverDefs
+            //ClosestThingReachable2 is same as ClosestThingReachable, except it checks validator before canreach
+            HashSet<string> workGivers = new HashSet<string>
+            {
+                "DoctorFeedAnimals",
+                "DoctorFeedHumanlikes",
+                "DoctorTendToAnimals",
+                "DoctorTendToHumanlikes",
+                "DoBillsUseCraftingSpot",
+                "DoctorTendEmergency",
+                "HaulCorpses",
+                "FillFermentingBarrel",
+                "HandlingFeedPatientAnimals",
+                "Train",
+                "VisitSickPawn",
+                "DoBillsButcherFlesh",
+                "DoBillsCook",
+                "DoBillsMakeApparel",
+                "ExecuteGuiltyColonist",
+                "TakeRoamingAnimalsToPen",
+                "TakeToPen",
+                "RebalanceAnimalsInPens"
+            };
+            foreach (WorkGiverDef workGiverDef in DefDatabase<WorkGiverDef>.AllDefs)
+            {
+                if (workGivers.Contains(workGiverDef.defName))
+                    workGiversForClosestThingReachable2.Add(workGiverDef);
+                if (workGiverDef.defName.Equals("HaulGeneral"))
+                    haulGeneral = workGiverDef;
+            }
+
+        }
 
 #if DEBUG
         [ThreadStatic]
@@ -138,58 +187,21 @@ namespace RimThreaded.RW_Patches
                                 }
                                 else
                                 {
-                                    if (
-                                       workGiver.def.defName.Equals("HaulGeneral")
-                                    )
+                                    if (workGiver.def == haulGeneral)
                                     {
                                         thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
                                     }
-                                    else if (scanner.PotentialWorkThingRequest.singleDef == null && (
-                                        scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Seed ||
-                                        scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Blueprint ||
-                                        scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Refuelable ||
-                                        scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Transporter ||
-                                        scanner.PotentialWorkThingRequest.group == ThingRequestGroup.BuildingFrame ||
-                                        scanner.PotentialWorkThingRequest.group == ThingRequestGroup.PotentialBillGiver ||
-                                        scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Filth //||
-                                                                                                           //scanner.PotentialWorkThingRequest.group == ThingRequestGroup.BuildingArtificial
-                                        ))
+                                    else if (scanner.PotentialWorkThingRequest.singleDef == null &&
+                                        thingRequestGroupsCached.Contains(scanner.PotentialWorkThingRequest.group))
                                     {
-                                        //ThingRequestGroup
-                                        //thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-                                        //workGroups.Add(scanner.PotentialWorkThingRequest.group);
                                         thing = GenClosest_Patch.ClosestThingRequestGroup(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
-                                        //thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
                                     }
-                                    else if (
-                                        
-                                        workGiver.def.defName.Equals("DoctorFeedAnimals") ||
-                                        workGiver.def.defName.Equals("DoctorFeedHumanlikes") ||
-                                        workGiver.def.defName.Equals("DoctorTendToAnimals") ||
-                                        workGiver.def.defName.Equals("DoctorTendToHumanlikes") ||
-                                        workGiver.def.defName.Equals("DoBillsUseCraftingSpot") ||
-                                        workGiver.def.defName.Equals("DoctorTendEmergency") ||
-                                        workGiver.def.defName.Equals("HaulCorpses") ||
-                                        workGiver.def.defName.Equals("FillFermentingBarrel") ||
-                                        workGiver.def.defName.Equals("HandlingFeedPatientAnimals") ||
-                                        workGiver.def.defName.Equals("Train") ||
-                                        workGiver.def.defName.Equals("VisitSickPawn") ||
-                                        workGiver.def.defName.Equals("DoBillsButcherFlesh") ||
-                                        workGiver.def.defName.Equals("DoBillsCook") ||
-                                        workGiver.def.defName.Equals("DoBillsMakeApparel") ||
-                                        workGiver.def.defName.Equals("ExecuteGuiltyColonist") ||
-                                        workGiver.def.defName.Equals("TakeRoamingAnimalsToPen") ||
-                                        workGiver.def.defName.Equals("TakeToPen") ||
-                                        workGiver.def.defName.Equals("RebalanceAnimalsInPens")
-                                        
-                                    )
+                                    else if (workGiversForClosestThingReachable2.Contains(workGiver.def))
                                     {
-                                        //long
                                         thing = GenClosest_Patch.ClosestThingReachable2(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
                                     }
                                     else
                                     {
-                                        //Other PotentialWorkThingRequest
                                         thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
                                     }
                                 }
