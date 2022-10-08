@@ -37,14 +37,14 @@ namespace RimThreaded
 
 			LoadFieldReplacements();
 			AddAdditionalReplacements();
-			ApplyFieldReplacements();
+			//ApplyFieldReplacements();
 			PatchDestructiveFixes();
 			PatchNonDestructiveFixes();
-			PatchModCompatibility(); 
-			if (Prefs.LogVerbose)
-			{
+			//PatchModCompatibility(); 
+			//if (Prefs.LogVerbose)
+			//{
 				//RimThreadedMod.exportTranspiledMethods();
-			}
+			//}
 
 			Log.Message("RimThreaded patching is complete.");
 
@@ -57,21 +57,21 @@ namespace RimThreaded
 
 		private static void AddAdditionalReplacements()
 		{
-			SimplePool_Patch_RunNonDestructivePatches();
+			//SimplePool_Patch_RunNonDestructivePatches(); 1.4 reexamine
 			GraphicDatabase_Patch.RunNonDestructivePatches();
 			FullPool_Patch_RunNonDestructivePatches();
 			Dijkstra_Patch_RunNonDestructivePatches();
 			PathFinder_Patch.AddFieldReplacements();
 			Region_Patch.AddFieldReplacements();
 			replaceFields.Add(Method(typeof(Time), "get_realtimeSinceStartup"), Method(typeof(Time_Patch), nameof(Time_Patch.get_realtimeSinceStartup)));
-			replaceFields.Add(Method(typeof(RenderTexture), nameof(RenderTexture.ReleaseTemporary)), Method(typeof(RenderTexture_Patch), nameof(RenderTexture_Patch.ReleaseTemporary)));
+			//replaceFields.Add(Method(typeof(RenderTexture), nameof(RenderTexture.ReleaseTemporary)), Method(typeof(RenderTexture_Patch), nameof(RenderTexture_Patch.ReleaseTemporary))); //1.4 reexamine
 #if DEBUG
 			Material_Patch.RunDestructivePatches();
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
 			Texture_Patch.RunDestructivePatches();
 			GraphicsFormatUtility_Patch.RunDestructivePatches();
-			replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), nameof(Time_Patch.get_frameCount)));
+			//replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), nameof(Time_Patch.get_frameCount))); //1.4 reexamine
 			replaceFields.Add(Method(typeof(Time), "get_time"), Method(typeof(Time_Patch), nameof(Time_Patch.get_time)));
 			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), nameof(Component_Patch.get_transform)));
 			replaceFields.Add(Method(typeof(Component), "get_gameObject"), Method(typeof(Component_Patch), nameof(Component_Patch.get_gameObject)));
@@ -815,6 +815,8 @@ namespace RimThreaded
 			GameObject_Patch.RunNonDestructivePatches(); //Prevents Game Crash from wooden floors and others
 			LongEventHandler_Patch.RunNonDestructivePatches(); //replaced concurrentqueue and run init on new threads
 
+			/*
+
 			//---Simple---
 			AlertsReadout_Patch.RunNonDestructivesPatches(); //this will disable alert checks on ultrafast speed for an added speed boost
 			Area_Patch.RunNonDestructivePatches(); //added for sowing area speedup
@@ -825,7 +827,7 @@ namespace RimThreaded
 			TimeControls_Patch.RunNonDestructivePatches(); //allow speed 4
 			ZoneManager_Patch.RunNonDestructivePatches(); //recheck growing zone when upon zone grid add
 			Zone_Patch.RunNonDestructivePatches(); //recheck growing zone when upon check haul destination call
-			HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches(); //speed up for comfy temperature
+			//HediffGiver_Hypothermia_Transpile.RunNonDestructivePatches(); //speed up for comfy temperature //1.4 reexamine
 			Map_Transpile.RunNonDestructivePatches(); //creates separate thread for skyManager.SkyManagerUpdate();            
 			BattleLog_Transpile.RunNonDestructivePatches(); //if still causing issues, rewrite using ThreadSafeLinkedLists
 															//GrammarResolver_Transpile.RunNonDestructivePatches();//reexamine complexity
@@ -844,13 +846,14 @@ namespace RimThreaded
 			Corpse_Patch.RunNonDestructivePatches(); // 1.3 explosion fix
 			TransportShipManager_Patch.RunNonDestructivePatches();
 			//RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix - not sure why this causes bug with sleeping
-			GrammarResolver_Patch.RunNonDestructivePatches();
+			//GrammarResolver_Patch.RunNonDestructivePatches(); //TODO 1.4 reexamine
 			Sustainer_Patch.RunNonDestructivePatches();
 			//RegionAndRoomQuery_Patch.RunNonDestructivePatches();
 			MemoryUtility_Patch.RunNonDestructivePatches(); //Mod memory cleanup on game load, or main menu
 
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
+			*/
 		}
 
 		private static void PatchDestructiveFixes()
@@ -872,7 +875,7 @@ namespace RimThreaded
 			MeshMakerPlanes_Patch.RunDestructivePatches();
 			MeshMakerShadows_Patch.RunDestructivePatches();
 			MoteBubble_Patch.RunDestructivePatches(); //initial 1.3 patch (MaterialPropertyBlock) - main thread UnityEngine.MaterialPropertyBlock
-			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
+			//RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up) TODO 1.4 reexamine
 			SectionLayer_Patch.RunDestructivePatches();
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 			Text_Patch.RunDestructivePatches(); //unity get_CurFontStyle on main thread
@@ -891,6 +894,8 @@ namespace RimThreaded
 			AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			Battle_Patch.RunDestructivePatches(); //added lock for battle - could use linkedlist
 			BeautyUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix null ref
+
+			/*
 
 			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			Building_PlantGrower_Patch.RunNonDestructivePatches();
@@ -965,7 +970,7 @@ namespace RimThreaded
 			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
             RecordWorker_TimeGettingJoy_Patch.RunDestructivePatches();
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
-			RegionDirtyer_Patch.RunDestructivePatches();
+			//RegionDirtyer_Patch.RunDestructivePatches(); 1.4 reexamine
 			RegionGrid_Patch.RunDestructivePatches();
 			RegionLink_Patch.RunDestructivePatches();
 			RegionMaker_Patch.RunDestructivePatches();
@@ -1018,6 +1023,8 @@ namespace RimThreaded
 			PortraitsCache_Patch.RunDestructivePatches();
 			RegionLinkDatabase_Patch.RunDestructivePatches();
 			//RestUtility_Patch.RunDestructivePatches(); // find bed optimization
+
+			*/
 		}
 
 		private static void PatchModCompatibility()
