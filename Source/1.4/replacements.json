@@ -1,14 +1,6 @@
 {
   "ClassReplacements": [
   {
-      "ClassName": "Verse.AI.Pawn_JobTracker",
-      "ThreadStatics": [
-        {
-          "FieldName": "tmpJobsToDequeue"
-        }
-      ]
-  },
-  {
        "ClassName": "RimWorld.IdeoManager",
        "ThreadStatics": [
          {
@@ -187,7 +179,7 @@
         },
         {
           "FieldName": "mapSingleEdgeCells",
-          "PatchedClassName": "RimThreaded.CellFinder_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.CellFinder_Patch",
           "SelfInitialized": true
         },
         {
@@ -297,7 +289,7 @@
         },
         {
           "FieldName": "beqRooms",
-          "PatchedClassName": "RimThreaded.GenTemperature_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.GenTemperature_Patch",
           "SelfInitialized": true
         }
       ]
@@ -490,27 +482,27 @@
       "ThreadStatics": [
         {
           "FieldName": "openList",
-          "PatchedClassName": "RimThreaded.PathFinder_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.PathFinder_Patch",
           "SelfInitialized": true
         },
         {
           "FieldName": "statusOpenValue",
-          "PatchedClassName": "RimThreaded.PathFinder_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.PathFinder_Patch",
           "SelfInitialized": true
         },
         {
           "FieldName": "statusClosedValue",
-          "PatchedClassName": "RimThreaded.PathFinder_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.PathFinder_Patch",
           "SelfInitialized": true
         },
         {
           "FieldName": "disallowedCornerIndices",
-          "PatchedClassName": "RimThreaded.PathFinder_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.PathFinder_Patch",
           "SelfInitialized": true
         },
         {
           "FieldName": "calcGrid",
-          "PatchedClassName": "RimThreaded.PathFinder_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.PathFinder_Patch",
           "SelfInitialized": true
         }
       ]
@@ -649,9 +641,6 @@
       "ClassName": "Verse.Projectile",
       "ThreadStatics": [
         {
-          "FieldName": "cellThingsFiltered"
-        },
-        {
           "FieldName": "checkedCells"
         }
       ]
@@ -661,6 +650,12 @@
       "ThreadStatics": [
         {
           "FieldName": "tmpExtraFactions"
+        },
+        {
+          "FieldName": "tmpQuestParts"
+        },
+        {
+          "FieldName": "tmpQuestWorkDisabled"
         }
       ]
     },
@@ -738,12 +733,12 @@
       "ThreadStatics": [
         {
           "FieldName": "NumWorkers",
-          "PatchedClassName": "RimThreaded.RegionTraverser_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.RegionTraverser_Patch",
           "SelfInitialized": true
         },
         {
           "FieldName": "freeWorkers",
-          "PatchedClassName": "RimThreaded.RegionTraverser_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.RegionTraverser_Patch",
           "SelfInitialized": true
         }
       ]
@@ -773,7 +768,7 @@
       "ThreadStatics": [
         {
           "FieldName": "playingPerDef",
-          "PatchedClassName": "RimThreaded.SustainerManager_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.SustainerManager_Patch",
           "SelfInitialized": true
         }
       ]
@@ -825,12 +820,12 @@
         },
         {
           "FieldName": "cardinals",
-          "PatchedClassName": "RimThreaded.Toils_Ingest_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.Toils_Ingest_Patch",
           "SelfInitialized": true
         },
         {
           "FieldName": "diagonals",
-          "PatchedClassName": "RimThreaded.Toils_Ingest_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.Toils_Ingest_Patch",
           "SelfInitialized": true
         }
       ]
@@ -899,7 +894,7 @@
       "ThreadStatics": [
         {
           "FieldName": "wantedPlantDef",
-          "PatchedClassName": "RimThreaded.WorkGiver_Grower_Patch"
+          "PatchedClassName": "RimThreaded.RW_Patches.WorkGiver_Grower_Patch"
         }
       ]
     },
@@ -941,17 +936,17 @@
       "ThreadStatics": [
         {
           "FieldName": "tmpNaturalRockDefs",
-          "PatchedClassName": "RimThreaded.World_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.World_Patch",
           "SelfInitialized": true
         },
         {
           "FieldName": "tmpOceanDirs",
-          "PatchedClassName": "RimThreaded.World_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.World_Patch",
           "SelfInitialized": true
         },
         {
           "FieldName": "tmpNeighbors",
-          "PatchedClassName": "RimThreaded.World_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.World_Patch",
           "SelfInitialized": true
         }
       ]
@@ -1040,7 +1035,7 @@
         },
         {
           "FieldName": "ColonistCountRegex",
-          "PatchedClassName": "RimThreaded.ColoredText_Patch",
+          "PatchedClassName": "RimThreaded.RW_Patches.ColoredText_Patch",
           "SelfInitialized": true
         }
       ]
@@ -1050,7 +1045,7 @@
       "ThreadStatics": [
         {
           "FieldName": "tmpApparel",
-          "PatchedClassName": "RimThreaded.Pawn_ApparelTracker_Patch"
+          "PatchedClassName": "RimThreaded.RW_Patches.Pawn_ApparelTracker_Patch"
         },
         {
           "FieldName": "tmpApparelList"
@@ -1143,6 +1138,23 @@
       "ThreadStatics": [
         {
           "FieldName": "CurrentRules"
+        }
+      ]
+    },
+    {
+      "ClassName": "Verse.ThingOwnerUtility",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpStack"
+        },
+        {
+          "FieldName": "tmpHolders"
+        },
+        {
+          "FieldName": "tmpThings"
+        },
+        {
+          "FieldName": "tmpMapChildHolders"
         }
       ]
     }
