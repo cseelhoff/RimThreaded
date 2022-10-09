@@ -852,8 +852,10 @@ namespace RimThreaded
 			Sustainer_Patch.RunNonDestructivePatches();
 			//RegionAndRoomQuery_Patch.RunNonDestructivePatches();
 			MemoryUtility_Patch.RunNonDestructivePatches(); //Mod memory cleanup on game load, or main menu
+			//PawnCapacityUtility_Patch.RunNonDestructivePatches(); //1.4 needed?
 
-			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
+
+            Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
 			
 		}
@@ -1027,7 +1029,8 @@ namespace RimThreaded
 			PortraitsCache_Patch.RunDestructivePatches();
 			RegionLinkDatabase_Patch.RunDestructivePatches();
 			//RestUtility_Patch.RunDestructivePatches(); // find bed optimization
-
+			StatWorker_Patch.RunDestructivePatches();
+			BodyDef_Patch.RunDestructivePatches();
         }
 
         private static void PatchModCompatibility()
@@ -1065,15 +1068,15 @@ namespace RimThreaded
 
 		}
 		private static void SimplePool_Patch_RunNonDestructivePatches()
-		{
-			replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Get"),
-				Method(typeof(SimplePool_Patch<List<float>>), "Get"));
-			replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Return"),
-				Method(typeof(SimplePool_Patch<List<float>>), "Return"));
-			replaceFields.Add(Method(typeof(SimplePool<List<float>>), "get_FreeItemsCount"),
-				Method(typeof(SimplePool_Patch<List<float>>), "get_FreeItemsCount"));
+        {
+            replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Get"),
+                Method(typeof(SimplePool_Patch<List<float>>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<List<float>>), "Return"),
+                Method(typeof(SimplePool_Patch<List<float>>), "Return"));
+            replaceFields.Add(Method(typeof(SimplePool<List<float>>), "get_FreeItemsCount"),
+                Method(typeof(SimplePool_Patch<List<float>>), "get_FreeItemsCount"));
 
-			replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "Get"),
+            replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "Get"),
 				Method(typeof(SimplePool_Patch<List<Pawn>>), "Get"));
 			replaceFields.Add(Method(typeof(SimplePool<List<Pawn>>), "Return"),
 				Method(typeof(SimplePool_Patch<List<Pawn>>), "Return"));
@@ -1129,14 +1132,21 @@ namespace RimThreaded
 			replaceFields.Add(Method(typeof(SimplePool<HashSet<Pawn>>), "get_FreeItemsCount"),
 				Method(typeof(SimplePool_Patch<HashSet<Pawn>>), "get_FreeItemsCount"));
 
-			replaceFields.Add(Method(typeof(SimplePool<Job>), "Get"),
-				Method(typeof(SimplePool_Patch<Job>), "Get"));
-			replaceFields.Add(Method(typeof(SimplePool<Job>), "Return"),
-				Method(typeof(SimplePool_Patch<Job>), "Return"));
-			replaceFields.Add(Method(typeof(SimplePool<Job>), "get_FreeItemsCount"),
-				Method(typeof(SimplePool_Patch<Job>), "get_FreeItemsCount"));
+            replaceFields.Add(Method(typeof(SimplePool<Job>), "Get"),
+                Method(typeof(SimplePool_Patch<Job>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<Job>), "Return"),
+                Method(typeof(SimplePool_Patch<Job>), "Return"));
+            replaceFields.Add(Method(typeof(SimplePool<Job>), "get_FreeItemsCount"),
+                Method(typeof(SimplePool_Patch<Job>), "get_FreeItemsCount"));
 
-		}
+            replaceFields.Add(Method(typeof(SimplePool<Toil>), "Get"),
+                Method(typeof(SimplePool_Patch<Toil>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<Toil>), "Return"),
+                Method(typeof(SimplePool_Patch<Toil>), "Return"));
+            replaceFields.Add(Method(typeof(SimplePool<Toil>), "get_FreeItemsCount"),
+                Method(typeof(SimplePool_Patch<Toil>), "get_FreeItemsCount"));
+
+        }
 
 
 		private static void Dijkstra_Patch_RunNonDestructivePatches()

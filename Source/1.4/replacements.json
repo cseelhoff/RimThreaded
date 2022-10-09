@@ -1,31 +1,31 @@
 {
   "ClassReplacements": [
-  {
-       "ClassName": "RimWorld.IdeoManager",
-       "ThreadStatics": [
-         {
-           "FieldName": "activeRitualsTmp"
-         }
-       ]
-   },
-   {
-        "ClassName": "RimWorld.LordJob_Ritual",
-        "ThreadStatics": [
-          {
-            "FieldName": "totalPresenceTmp"
-          }
-        ]
+    {
+      "ClassName": "RimWorld.IdeoManager",
+      "ThreadStatics": [
+        {
+          "FieldName": "activeRitualsTmp"
+        }
+      ]
     },
     {
-         "ClassName": "RimWorld.LordToil_Ritual",
-         "ThreadStatics": [
-           {
-             "FieldName": "reservedThings"
-           },
-           {
-             "FieldName": "cachedDuties"
-           }
-         ]
+      "ClassName": "RimWorld.LordJob_Ritual",
+      "ThreadStatics": [
+        {
+          "FieldName": "totalPresenceTmp"
+        }
+      ]
+    },
+    {
+      "ClassName": "RimWorld.LordToil_Ritual",
+      "ThreadStatics": [
+        {
+          "FieldName": "reservedThings"
+        },
+        {
+          "FieldName": "cachedDuties"
+        }
+      ]
     },
     {
       "ClassName": "Verse.AI.AttackTargetFinder",
@@ -1145,16 +1145,44 @@
       "ClassName": "Verse.ThingOwnerUtility",
       "ThreadStatics": [
         {
-          "FieldName": "tmpStack"
+          "FieldName": "tmpStack",
+          "PatchedClassName": "RimThreaded.RW_Patches.ThingOwnerUtility_Patch"
         },
         {
-          "FieldName": "tmpHolders"
+          "FieldName": "tmpHolders",
+          "PatchedClassName": "RimThreaded.RW_Patches.ThingOwnerUtility_Patch"
         },
         {
-          "FieldName": "tmpThings"
+          "FieldName": "tmpThings",
+          "PatchedClassName": "RimThreaded.RW_Patches.ThingOwnerUtility_Patch"
         },
         {
-          "FieldName": "tmpMapChildHolders"
+          "FieldName": "tmpMapChildHolders",
+          "PatchedClassName": "RimThreaded.RW_Patches.ThingOwnerUtility_Patch"
+        }
+      ]
+    },
+    {
+      "ClassName": "RimWorld.Building_Bed",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpOrderedInteractionCells"
+        }
+      ]
+    },
+    {
+      "ClassName": "RimWorld.Trait",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpDisabledWorktypes"
+        }
+      ]
+    },
+    {
+      "ClassName": "RimWorld.GuestUtility",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpDisabledWorkTypes"
         }
       ]
     }

@@ -10,6 +10,10 @@ namespace RimThreaded.RW_Patches
     public class ThingOwnerUtility_Patch
     {
         //public static Dictionary<int, List<IThingHolder>> tmpHoldersDict = new Dictionary<int, List<IThingHolder>>();
+        [ThreadStatic] public static Stack<IThingHolder> tmpStack;
+        [ThreadStatic] public static List<IThingHolder> tmpHolders;
+        [ThreadStatic] public static List<Thing> tmpThings;
+        [ThreadStatic] public static List<IThingHolder> tmpMapChildHolders;
 
         internal static void RunDestructivePatches()
         {
@@ -18,22 +22,30 @@ namespace RimThreaded.RW_Patches
             RimThreadedHarmony.Prefix(original, patched, nameof(AppendThingHoldersFromThings));
             RimThreadedHarmony.Prefix(original, patched, nameof(GetAllThingsRecursively), new Type[] { typeof(IThingHolder), typeof(List<Thing>), typeof(bool), typeof(Predicate<IThingHolder>) });
             MethodInfo[] methods = original.GetMethods();
-
-/* 1.4 TODO FIX method 17
+            MethodInfo GetAllThingsRecursivelyT = null;
             //MethodInfo originalPawnGetAllThings = original.GetMethod("GetAllThingsRecursively", bf, null, new Type[] { 
             //	typeof(Map), typeof(ThingRequest), typeof(List<Pawn>), typeof(bool), typeof(Predicate<IThingHolder>), typeof(bool) }, null);
-            MethodInfo originalPawnGetAllThings = methods[17];
-            MethodInfo originalPawnGetAllThingsGeneric = originalPawnGetAllThings.MakeGenericMethod(new Type[] { typeof(Pawn) });
+            foreach (MethodInfo method in methods)
+            {
+                if (method.ToString().Equals("Void GetAllThingsRecursively[T](Verse.Map, Verse.ThingRequest, System.Collections.Generic.List`1[T], Boolean, System.Predicate`1[Verse.IThingHolder], Boolean)"))
+                {
+                    GetAllThingsRecursivelyT = method;
+                    break;
+                }
+            }
+            
+            //MethodInfo originalPawnGetAllThings = methods[17];
+            MethodInfo originalPawnGetAllThingsGeneric = GetAllThingsRecursivelyT.MakeGenericMethod(new Type[] { typeof(Pawn) });
             MethodInfo patchedPawnGetAllThings = patched.GetMethod(nameof(GetAllThingsRecursively_Pawn));
             HarmonyMethod prefixPawnGetAllThings = new HarmonyMethod(patchedPawnGetAllThings);
             RimThreadedHarmony.harmony.Patch(originalPawnGetAllThingsGeneric, prefix: prefixPawnGetAllThings);
 
-            MethodInfo originalThingGetAllThings = methods[17];
-            MethodInfo originalThingGetAllThingsGeneric = originalThingGetAllThings.MakeGenericMethod(new Type[] { typeof(Thing) });
+            //MethodInfo originalThingGetAllThings = methods[17];
+            MethodInfo originalThingGetAllThingsGeneric = GetAllThingsRecursivelyT.MakeGenericMethod(new Type[] { typeof(Thing) });
             MethodInfo patchedThingGetAllThings = patched.GetMethod(nameof(GetAllThingsRecursively_Thing));
             HarmonyMethod prefixThingGetAllThings = new HarmonyMethod(patchedThingGetAllThings);
             RimThreadedHarmony.harmony.Patch(originalThingGetAllThingsGeneric, prefix: prefixThingGetAllThings);
-*/
+            
         }
 
         public static bool AppendThingHoldersFromThings(List<IThingHolder> outThingsHolders, IList<Thing> container)
@@ -88,7 +100,7 @@ namespace RimThreaded.RW_Patches
             {
                 return false;
             }
-            Stack<IThingHolder> tmpStack = new Stack<IThingHolder>();
+            //Stack<IThingHolder> tmpStack = new Stack<IThingHolder>();
             tmpStack.Push(holder);
             while (tmpStack.Count != 0)
             {
@@ -102,7 +114,8 @@ namespace RimThreaded.RW_Patches
                     }
                 }
                 //List<IThingHolder> tmpHolders = tmpHoldersDict[Thread.CurrentThread.ManagedThreadId];
-                List<IThingHolder> tmpHolders = new List<IThingHolder>();
+                //List<IThingHolder> tmpHolders = new List<IThingHolder>();
+                tmpHolders.Clear();
                 thingHolder.GetChildHolders(tmpHolders);
                 for (int i = 0; i < tmpHolders.Count; i++)
                 {
@@ -112,8 +125,8 @@ namespace RimThreaded.RW_Patches
                     }
                 }
             }
-            //tmpStack.Clear();
-            //tmpHolders.Clear();
+            tmpStack.Clear();
+            tmpHolders.Clear();
             return false;
         }
         public static bool GetAllThingsRecursively_Pawn(Map map,
@@ -140,13 +153,13 @@ namespace RimThreaded.RW_Patches
                 }
             }
 
-            List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
-            //ThingOwnerUtility.tmpMapChildHolders.Clear();
+            //List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
+            tmpMapChildHolders.Clear();
             map.GetChildHolders(tmpMapChildHolders);
             for (int j = 0; j < tmpMapChildHolders.Count; j++)
             {
-                //ThingOwnerUtility.tmpThings.Clear();
-                List<Thing> tmpThings = new List<Thing>();
+                tmpThings.Clear();
+                //List<Thing> tmpThings = new List<Thing>();
                 ThingOwnerUtility.GetAllThingsRecursively(tmpMapChildHolders[j], tmpThings, allowUnreal, passCheck);
                 for (int k = 0; k < tmpThings.Count; k++)
                 {
@@ -160,9 +173,9 @@ namespace RimThreaded.RW_Patches
                     }
                 }
             }
+            tmpThings.Clear();
+            tmpMapChildHolders.Clear();
             return false;
-            //tmpThings.Clear();
-            //tmpMapChildHolders.Clear();
         }
 
         public static bool GetAllThingsRecursively_Thing(Map map, ThingRequest request, List<Thing> outThings, bool allowUnreal = true, Predicate<IThingHolder> passCheck = null, bool alsoGetSpawnedThings = true)
@@ -180,10 +193,10 @@ namespace RimThreaded.RW_Patches
                     }
                 }
             }
-            List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
-            //tmpMapChildHolders.Clear();
+            //List<IThingHolder> tmpMapChildHolders = new List<IThingHolder>();
+            tmpMapChildHolders.Clear();
             map.GetChildHolders(tmpMapChildHolders);
-            List<Thing> tmpThings = new List<Thing>();
+            //List<Thing> tmpThings = new List<Thing>();
             for (int j = 0; j < tmpMapChildHolders.Count; j++)
             {
                 tmpThings.Clear();
@@ -196,8 +209,8 @@ namespace RimThreaded.RW_Patches
                     }
                 }
             }
-            //tmpThings.Clear();
-            //tmpMapChildHolders.Clear();
+            tmpThings.Clear();
+            tmpMapChildHolders.Clear();
             return false;
         }
     }
