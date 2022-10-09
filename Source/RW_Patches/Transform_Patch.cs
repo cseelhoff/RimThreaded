@@ -13,17 +13,17 @@ namespace RimThreaded.RW_Patches
     class Transform_Patch
     {
         private static readonly MethodInfo TransformGetPosition =
-            Method(typeof(Transform), "get_position");
+            Method(typeof(Transform), nameof(get_position));
         private static readonly MethodInfo TransformGetPositionPatch =
-            Method(typeof(Transform_Patch), "get_position");
+            Method(typeof(Transform_Patch), nameof(get_position));
         private static readonly MethodInfo TransformSetPosition =
-            Method(typeof(Transform), "set_position");
+            Method(typeof(Transform), nameof(set_position));
         private static readonly MethodInfo TransformSetPositionPatch =
-            Method(typeof(Transform_Patch), "set_position");
+            Method(typeof(Transform_Patch), nameof(set_position));
         private static readonly MethodInfo TransformSetParent =
-            Method(typeof(Transform), "set_parent");
+            Method(typeof(Transform), nameof(set_parent));
         private static readonly MethodInfo TransformSetLocalPosition =
-            Method(typeof(Transform), "set_localPosition");
+            Method(typeof(Transform), nameof(set_localPosition));
 
         private static readonly Func<Transform, Vector3> ActionGet_position =
             (Func<Transform, Vector3>)Delegate.CreateDelegate(
@@ -132,8 +132,9 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(Transform);
             Type patched = typeof(Transform_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "get_position");
-            RimThreadedHarmony.Prefix(original, patched, "set_position");
+            RimThreadedHarmony.Prefix(original, patched, nameof(get_position));
+            RimThreadedHarmony.Prefix(original, patched, nameof(set_position));
+            //RimThreadedHarmony.Prefix(original, patched, nameof(set_parent));
         }
         public static IEnumerable<CodeInstruction> TranspileTransformPosition(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {

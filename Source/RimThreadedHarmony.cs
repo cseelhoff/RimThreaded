@@ -37,10 +37,10 @@ namespace RimThreaded
 
 			LoadFieldReplacements();
 			AddAdditionalReplacements();
-			//ApplyFieldReplacements();
+			ApplyFieldReplacements();
 			PatchDestructiveFixes();
 			PatchNonDestructiveFixes();
-			//PatchModCompatibility(); 
+			PatchModCompatibility(); 
 			//if (Prefs.LogVerbose)
 			//{
 				//RimThreadedMod.exportTranspiledMethods();
@@ -57,21 +57,21 @@ namespace RimThreaded
 
 		private static void AddAdditionalReplacements()
 		{
-			//SimplePool_Patch_RunNonDestructivePatches(); 1.4 reexamine
+			SimplePool_Patch_RunNonDestructivePatches();
 			GraphicDatabase_Patch.RunNonDestructivePatches();
 			FullPool_Patch_RunNonDestructivePatches();
 			Dijkstra_Patch_RunNonDestructivePatches();
 			PathFinder_Patch.AddFieldReplacements();
 			Region_Patch.AddFieldReplacements();
 			replaceFields.Add(Method(typeof(Time), "get_realtimeSinceStartup"), Method(typeof(Time_Patch), nameof(Time_Patch.get_realtimeSinceStartup)));
-			//replaceFields.Add(Method(typeof(RenderTexture), nameof(RenderTexture.ReleaseTemporary)), Method(typeof(RenderTexture_Patch), nameof(RenderTexture_Patch.ReleaseTemporary))); //1.4 reexamine
+			replaceFields.Add(Method(typeof(RenderTexture), nameof(RenderTexture.ReleaseTemporary)), Method(typeof(RenderTexture_Patch), nameof(RenderTexture_Patch.ReleaseTemporary)));
 #if DEBUG
 			Material_Patch.RunDestructivePatches();
 			Transform_Patch.RunDestructivePatches();
 			UnityEngine_Object_Patch.RunDestructivePatches();
 			Texture_Patch.RunDestructivePatches();
 			GraphicsFormatUtility_Patch.RunDestructivePatches();
-			//replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), nameof(Time_Patch.get_frameCount))); //1.4 reexamine
+			replaceFields.Add(Method(typeof(Time), "get_frameCount"), Method(typeof(Time_Patch), nameof(Time_Patch.get_frameCount)));
 			replaceFields.Add(Method(typeof(Time), "get_time"), Method(typeof(Time_Patch), nameof(Time_Patch.get_time)));
 			replaceFields.Add(Method(typeof(Component), "get_transform"), Method(typeof(Component_Patch), nameof(Component_Patch.get_transform)));
 			replaceFields.Add(Method(typeof(Component), "get_gameObject"), Method(typeof(Component_Patch), nameof(Component_Patch.get_gameObject)));
@@ -815,7 +815,7 @@ namespace RimThreaded
 			GameObject_Patch.RunNonDestructivePatches(); //Prevents Game Crash from wooden floors and others
 			LongEventHandler_Patch.RunNonDestructivePatches(); //replaced concurrentqueue and run init on new threads
 
-			/*
+			
 
 			//---Simple---
 			AlertsReadout_Patch.RunNonDestructivesPatches(); //this will disable alert checks on ultrafast speed for an added speed boost
@@ -840,20 +840,22 @@ namespace RimThreaded
 													   //Pawn_RelationsTracker_Patch.RunNonDestructivePatches(); //transpile not needed with new threadsafe simplepools
 			PawnCapacitiesHandler_Patch.RunNonDestructivePatches(); //TODO fix transpile for 1 of 2 methods try inside of try perhaps?
 			Zone_Growing_Patch.RunNonDestructivePatches();
+			
 			CellFinder_Patch.RunNonDestructivePatches(); //explosion fix
+			
 			GenGrid_Patch.RunNonDestructivePatches(); //explosion fix
 			ThinkNode_JoinVoluntarilyJoinableLord_Patch.RunDestructivePatches(); //explosion fix
 			Corpse_Patch.RunNonDestructivePatches(); // 1.3 explosion fix
 			TransportShipManager_Patch.RunNonDestructivePatches();
 			//RestUtility_Patch.RunNonDestructivePatches(); // 1.3 explosion fix - not sure why this causes bug with sleeping
-			//GrammarResolver_Patch.RunNonDestructivePatches(); //TODO 1.4 reexamine
+			GrammarResolver_Patch.RunNonDestructivePatches(); //TODO 1.4 reexamine
 			Sustainer_Patch.RunNonDestructivePatches();
 			//RegionAndRoomQuery_Patch.RunNonDestructivePatches();
 			MemoryUtility_Patch.RunNonDestructivePatches(); //Mod memory cleanup on game load, or main menu
 
 			Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions
-			*/
+			
 		}
 
 		private static void PatchDestructiveFixes()
@@ -875,7 +877,7 @@ namespace RimThreaded
 			MeshMakerPlanes_Patch.RunDestructivePatches();
 			MeshMakerShadows_Patch.RunDestructivePatches();
 			MoteBubble_Patch.RunDestructivePatches(); //initial 1.3 patch (MaterialPropertyBlock) - main thread UnityEngine.MaterialPropertyBlock
-			//RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up) TODO 1.4 reexamine
+			RenderTexture_Patch.RunDestructivePatches();//RenderTexture (Giddy-Up)
 			SectionLayer_Patch.RunDestructivePatches();
 			Texture2D_Patch.RunDestructivePatches();//Graphics (Giddy-Up)
 			Text_Patch.RunDestructivePatches(); //unity get_CurFontStyle on main thread
@@ -894,9 +896,7 @@ namespace RimThreaded
 			AttackTargetsCache_Patch.RunDestructivesPatches(); //TODO: write ExposeData and change concurrentdictionary
 			Battle_Patch.RunDestructivePatches(); //added lock for battle - could use linkedlist
 			BeautyUtility_Patch.RunDestructivePatches(); // 1.3 explosion fix null ref
-
-			/*
-
+			
 			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			Building_PlantGrower_Patch.RunNonDestructivePatches();
 			CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
@@ -929,25 +929,26 @@ namespace RimThreaded
 			
 			//GrammarResolver_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
-			HediffSet_Patch.RunDestructivePatches();
+            
+			//HediffSet_Patch.RunDestructivePatches(); 1.4 reexamine
 			HistoryEventsManager_Patch.RunDestructivePatches(); // 1.3 explosion fix
-			ImmunityHandler_Patch.RunDestructivePatches();
+			ImmunityHandler_Patch.RunDestructivePatches();			
 			JobDriver_TendPatient_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			JobGiver_ExitMap_Patch.RunDestructivePatches(); //explosions fix
 			JobGiver_Work_Patch.RunDestructivePatches();
 			JobGiver_WanderNearDutyLocation_Patch.RunDestructivePatches();
 			ListerBuildingsRepairable_Patch.RunDestructivePatches();// 1.3 explosion fix
-			ListerThings_Patch.RunDestructivePatches();
+			ListerThings_Patch.RunDestructivePatches();			
 			//JobMaker_Patch.RunDestructivePatches(); should be fixed by the simplepool patch
 			LongEventHandler_Patch.RunDestructivePatches(); //TODO - could use field replacement for conncurrentqueue
 			Lord_Patch.RunDestructivePatches();
-			LordManager_Patch.RunDestructivePatches();
+			LordManager_Patch.RunDestructivePatches();			
 			LordToil_Siege_Patch.RunDestructivePatches(); //TODO does locks around clears and adds. ThreadSafeLinkedList
 			Map_Patch.RunDestructivePatches(); //TODO - discover root cause
 			MemoryThoughtHandler_Patch.RunDestructivePatches();
 			Messages_Patch.RunDestructivePatches();// 1.3 explosion fix
 			OverlayDrawer_Patch.RunDestructivePatches(); // 1.3 explosion fix
-			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix
+			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix			
 			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
 			Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
 			Pawn_PathFollower_Patch.RunDestructivePatches(); // 1.3 null ref pawn?.jobs?.curDriver?.locomotionUrgencySameAs
@@ -955,7 +956,7 @@ namespace RimThreaded
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			Pawn_RotationTracker_Patch.RunDestructivePatches();
 			PawnCapacitiesHandler_Patch.RunDestructivePatches();
-			PawnDestinationReservationManager_Patch.RunDestructivePatches();
+			PawnDestinationReservationManager_Patch.RunDestructivePatches();			
 			PawnPath_Patch.RunDestructivePatches();
 			PawnPathPool_Patch.RunDestructivePatches(); //removed leak check based on map size, since pool is now a threadstatic
 			PawnTextureAtlas_Patch.RunDestructivePatches();
@@ -970,7 +971,8 @@ namespace RimThreaded
 			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose
             RecordWorker_TimeGettingJoy_Patch.RunDestructivePatches();
 			RegionAndRoomUpdater_Patch.RunDestructivePatches();
-			//RegionDirtyer_Patch.RunDestructivePatches(); 1.4 reexamine
+			RegionDirtyer_Patch.RunDestructivePatches();
+			
 			RegionGrid_Patch.RunDestructivePatches();
 			RegionLink_Patch.RunDestructivePatches();
 			RegionMaker_Patch.RunDestructivePatches();
@@ -993,7 +995,8 @@ namespace RimThreaded
 			Verb_Patch.RunDestructivePatches(); // TODO: why is this causing null?
 			WealthWatcher_Patch.RunDestructivePatches();
 			//WorkGiver_GrowerSow_Patch.RunDestructivePatches();
-
+			
+			
 
 			//complex methods that need further review for simplification
 			AttackTargetReservationManager_Patch.RunDestructivePatches();
@@ -1009,7 +1012,8 @@ namespace RimThreaded
 			Room_Patch.RunDestructivePatches();
 			SituationalThoughtHandler_Patch.RunDestructivePatches(); //TODO replace cachedThoughts with ThreadSafeLinkedList
 			ThingOwnerUtility_Patch.RunDestructivePatches(); //TODO fix method reference by index
-
+			
+			
 															 //-----SOUND-----
 			SampleSustainer_Patch.RunDestructivePatches(); // TryMakeAndPlay works better than set_cutoffFrequency, which seems buggy for echo pass filters
 			SoundSizeAggregator_Patch.RunDestructivePatches();
@@ -1024,10 +1028,9 @@ namespace RimThreaded
 			RegionLinkDatabase_Patch.RunDestructivePatches();
 			//RestUtility_Patch.RunDestructivePatches(); // find bed optimization
 
-			*/
-		}
+        }
 
-		private static void PatchModCompatibility()
+        private static void PatchModCompatibility()
 		{
 			AndroidTiers_Patch.Patch();
 			AwesomeInventory_Patch.Patch();
