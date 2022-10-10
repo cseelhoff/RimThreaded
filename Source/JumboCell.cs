@@ -21,6 +21,8 @@ namespace RimThreaded
 		}
 		public static void ReregisterObject(Map map, IntVec3 location, JumboCell_Cache jumboCell_Cache)
 		{
+			if (!location.IsValid)
+				return;
             Dictionary<Map, List<HashSet<IntVec3>[]>> positionsAwaitingAction = jumboCell_Cache.positionsAwaitingAction;
 			//try to remove an item that has a null map. only way is to check all maps...
 			if (map == null)
@@ -295,17 +297,17 @@ namespace RimThreaded
 			zoomLevel = 0;
 			do
 			{
-				jumboCellWidth = getJumboCellWidth(zoomLevel);
-				int cellIndex = CellToIndexCustom(location, mapSizeX, jumboCellWidth);
+                jumboCellWidth = getJumboCellWidth(zoomLevel);
+                int cellIndex = CellToIndexCustom(location, mapSizeX, jumboCellWidth);
 				HashSet<IntVec3> hashset = awaitingActionZoomLevels[zoomLevel][cellIndex];
-				if (hashset != null)
-				{
-					lock (hashset)
-					{
-						hashset.Remove(location);
-					}
-				}
-				zoomLevel++;
+                if (hashset != null)
+                {
+                    lock (hashset)
+                    {
+                        hashset.Remove(location);
+                    }
+                }
+                zoomLevel++;
 			} while (jumboCellWidth < mapSizeX || jumboCellWidth < mapSizeZ);
 		}
 

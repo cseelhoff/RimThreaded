@@ -1185,6 +1185,36 @@
           "FieldName": "tmpDisabledWorkTypes"
         }
       ]
+    },
+    {
+      "ClassName": "RimWorld.RoomRoleWorker_Barracks",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpBeds"
+        }
+      ]
+    },
+    {
+      "ClassName": "RimWorld.RoomRoleWorker_Bedroom",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpBeds"
+        }
+      ]
+    },
+    {
+      "ClassName": "Verse.HediffSet",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpHediffVerbs"
+        },
+        {
+          "FieldName": "tmpInjuredParts"
+        },
+        {
+          "FieldName": "tmpNaturallyHealingInjuredParts"
+        }
+      ]
     }
   ]
 }

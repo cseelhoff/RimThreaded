@@ -150,4 +150,5 @@
   	    <Private>false</Private>
   	  </Reference>
   	</ItemGroup>
+  	<ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

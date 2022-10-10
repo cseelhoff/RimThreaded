@@ -272,10 +272,10 @@ namespace RimThreaded
 						Type[] types = GetTypesFromAssembly(assembly);
 						foreach (Type type in types)
 						{
-							if(type.FullName.Contains("TileFinder"))
-                            {
-								Log.Message("TileFinder");
-                            }
+							//if(type.FullName.Contains("TileFinder"))
+                            //{
+							//	Log.Message("TileFinder");
+                            //}
 							List<MethodBase> allMethods = new List<MethodBase>();
 							allMethods.AddRange(type.GetMethods(all | BindingFlags.DeclaredOnly));
 							allMethods.AddRange(type.GetConstructors(all | BindingFlags.DeclaredOnly));
@@ -1031,6 +1031,7 @@ namespace RimThreaded
 			//RestUtility_Patch.RunDestructivePatches(); // find bed optimization
 			StatWorker_Patch.RunDestructivePatches();
 			BodyDef_Patch.RunDestructivePatches();
+			SubSoundDef_Patch.RunDestructivePatches();
         }
 
         private static void PatchModCompatibility()
@@ -1145,6 +1146,13 @@ namespace RimThreaded
                 Method(typeof(SimplePool_Patch<Toil>), "Return"));
             replaceFields.Add(Method(typeof(SimplePool<Toil>), "get_FreeItemsCount"),
                 Method(typeof(SimplePool_Patch<Toil>), "get_FreeItemsCount"));
+
+            replaceFields.Add(Method(typeof(SimplePool<RegionProcessorClosestThingReachable>), "Get"),
+                Method(typeof(SimplePool_Patch<RegionProcessorClosestThingReachable>), "Get"));
+            replaceFields.Add(Method(typeof(SimplePool<RegionProcessorClosestThingReachable>), "Return"),
+                Method(typeof(SimplePool_Patch<RegionProcessorClosestThingReachable>), "Return"));
+            replaceFields.Add(Method(typeof(SimplePool<RegionProcessorClosestThingReachable>), "get_FreeItemsCount"),
+                Method(typeof(SimplePool_Patch<RegionProcessorClosestThingReachable>), "get_FreeItemsCount"));
 
         }
 
