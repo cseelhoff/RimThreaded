@@ -11,13 +11,13 @@ namespace RimThreaded
     {
         [ThreadStatic] public static bool working;
         [ThreadStatic] public static HashSet<Room> tmpVisitedRooms;
-        [ThreadStatic] public static Queue<IntVec3> cellsToReset;
+        [ThreadStatic] public static ConcurrentQueue<IntVec3> cellsToReset;
 
         static readonly Type original = typeof(RegionAndRoomUpdater);
         static readonly Type patched = typeof(RegionAndRoomUpdater_Patch);
         internal static void InitializeThreadStatics()
         {
-            cellsToReset = new Queue<IntVec3>();
+            cellsToReset = new ConcurrentQueue<IntVec3>();
         }
 
         internal static void RunDestructivePatches()

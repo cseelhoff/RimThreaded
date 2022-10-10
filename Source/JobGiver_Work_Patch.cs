@@ -144,6 +144,7 @@ namespace RimThreaded
 									{
 										thing = HaulingCache.ClosestThingReachable(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 									}
+									/*
 									else if (scanner.PotentialWorkThingRequest.singleDef == null && (
 										scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Seed ||
 										scanner.PotentialWorkThingRequest.group == ThingRequestGroup.Blueprint ||
@@ -161,6 +162,7 @@ namespace RimThreaded
 										thing = GenClosest_Patch.ClosestThingRequestGroup(pawn, scanner, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 										//thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, scanner.PotentialWorkThingRequest, scanner.PathEndMode, TraverseParms.For(pawn, scanner.MaxPathDanger(pawn)), 9999f, validator, enumerable, 0, scanner.MaxRegionsToScanBeforeGlobalSearch, enumerable != null);
 									}
+									*/
 									else if (
 										(
 										workGiver.def.defName.Equals("DoctorFeedAnimals") ||
