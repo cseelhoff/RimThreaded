@@ -8,6 +8,7 @@ using RimWorld.Planet;
 using System.Collections.Concurrent;
 using System.Threading;
 using UnityEngine;
+using RimThreaded.RW_Patches;
 
 namespace RimThreaded
 {

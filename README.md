@@ -38,6 +38,15 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+
+Version 2.7.1
+-Added RimWorld 1.4.8320.21511 (12-OCT) support
+-Fixed some bugs with HediffSet
+
+Version 2.7.0
+-Added RimWorld 1.4 support
+-Optimized Memory Usage
+
 Version 2.6.4  
 -Fixed a bug with GiddyUp  
 -Optimized Memory Usage  

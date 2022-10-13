@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using System.Reflection.Emit;
-using System;
-using Verse.AI;
 using static HarmonyLib.AccessTools;
 using System.Reflection;
 

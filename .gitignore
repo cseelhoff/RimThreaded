@@ -364,5 +364,4 @@ FodyWeavers.xsd
 Dependencies/*/*.dll
 Dependencies/*/*.hash
 RimWorldSource/
-RimThreaded/1.2/
-RimThreaded/1.3/
+RimThreaded/1.4/

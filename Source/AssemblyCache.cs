@@ -37,7 +37,7 @@ namespace RimThreaded
         {
             if (Prefs.LogVerbose)
             {
-                Verse.Log.Message("TryGetFromCache: " + ModuleVersionId);
+                Log.Message("TryGetFromCache: " + ModuleVersionId);
             }
             string CacheFolder = Path.Combine(RimThreadedMod.replacementsFolder, "Caches");
             Directory.CreateDirectory(CacheFolder);
@@ -50,7 +50,7 @@ namespace RimThreaded
             }
             if (Prefs.LogVerbose)
             {
-                Verse.Log.Message("RimThreaded is loading Cached Field Replacements from: " + CurrentMethodPath);
+                Log.Message("RimThreaded is loading Cached Field Replacements from: " + CurrentMethodPath);
             }
             string jsonstr = File.ReadAllText(CurrentMethodPath);
             CacheListS = JsonConvert.DeserializeObject<List<SerializableMethod>>(jsonstr);

@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using RimThreaded.RW_Patches;
+using RimWorld;
 using Verse;
 
 namespace RimThreaded

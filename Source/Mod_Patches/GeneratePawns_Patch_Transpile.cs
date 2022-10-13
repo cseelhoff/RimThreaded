@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
+using RimThreaded.RW_Patches;
 using UnityEngine;
 using Verse;
 

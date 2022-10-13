@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Assembly-CSharp", "..\..\..\..\..\..\RWSource\1.3\Assembly-CSharp.csproj", "{6E0D15AD-935D-474D-B0D3-4664BC0C73C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Assembly-CSharp", "..\..\..\..\..\..\RWSource\1.4\Assembly-CSharp.csproj", "{6E0D15AD-935D-474D-B0D3-4664BC0C73C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

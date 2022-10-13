@@ -1,6 +1,5 @@
-﻿using HarmonyLib;
+﻿using RimThreaded.RW_Patches;
 using System;
-using System.Reflection;
 using Verse;
 using static HarmonyLib.AccessTools;
 using static RimThreaded.RimThreadedHarmony;

@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RimThreaded
 {
     public static class PulsePool<T> where T : new()
     {
-        private static readonly Queue<T> FreeItems = new Queue<T>();
+        private static readonly ConcurrentQueue<T> FreeItems = new ConcurrentQueue<T>();
 
         public static int FreeItemsCount => FreeItems.Count;
         public static T Pulse(T o)
