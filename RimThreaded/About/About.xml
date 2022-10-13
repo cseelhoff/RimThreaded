@@ -10,9 +10,9 @@
   <description>
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 
-    Version 2.7.0
-    -Added RimWorld 1.4 support
-    -Optimized Memory Usage
+    Version 2.7.1
+    -Added RimWorld 1.4.8320.21511 (12-OCT) support
+    -Fixed some bugs with HediffSet
 
     RimThreaded enables RimWorld to utilize multiple threads and thus greatly increases the speed of the game.
 

@@ -932,7 +932,7 @@ namespace RimThreaded
 			//GrammarResolver_Patch.RunDestructivePatches();
 			HediffGiver_Heat_Patch.RunDestructivePatches(); //perf improvment
             
-			//HediffSet_Patch.RunDestructivePatches(); 1.4 reexamine
+			HediffSet_Patch.RunDestructivePatches();
 			HistoryEventsManager_Patch.RunDestructivePatches(); // 1.3 explosion fix
 			ImmunityHandler_Patch.RunDestructivePatches();			
 			JobDriver_TendPatient_Patch.RunDestructivePatches(); // 1.3 explosion fix

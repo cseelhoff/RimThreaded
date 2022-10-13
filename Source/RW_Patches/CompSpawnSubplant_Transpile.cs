@@ -18,12 +18,12 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(CompSpawnSubplant);
             Type patched = typeof(CompSpawnSubplant_Transpile);
-            RimThreadedHarmony.harmony.Patch(Constructor(original), transpiler: new HarmonyMethod(Method(patched, "CreateNewThreadSafeLinkedList_Thing")));
-            RimThreadedHarmony.harmony.Patch(Method(original, "get_SubplantsForReading"), transpiler: new HarmonyMethod(Method(patched, "ConvertListThing_ToList")));
-            RimThreadedHarmony.harmony.Patch(Method(original, "DoGrowSubplant"), transpiler: new HarmonyMethod(Method(patched, "ReplaceAdd_Thing")));
-            RimThreadedHarmony.harmony.Patch(Method(original, "Cleanup"), transpiler: new HarmonyMethod(Method(patched, "ReplaceRemoveAll_Thing")));
-            RimThreadedHarmony.harmony.Patch(Method(original, "PostExposeData"), transpiler: new HarmonyMethod(Method(patched, "ReplaceRemoveAll_Thing")));
-            RimThreadedHarmony.harmony.Patch(Method(original, "PostExposeData"), transpiler: new HarmonyMethod(Method(patched, "ReplaceLook_Thing")));
+            RimThreadedHarmony.harmony.Patch(Constructor(original), transpiler: new HarmonyMethod(Method(patched, nameof(CreateNewThreadSafeLinkedList_Thing))));
+            RimThreadedHarmony.harmony.Patch(Method(original, "get_SubplantsForReading"), transpiler: new HarmonyMethod(Method(patched, nameof(ConvertListThing_ToList))));
+            RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.DoGrowSubplant)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceAdd_Thing))));
+            RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.Cleanup)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceRemoveAll_Thing))));
+            RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.PostExposeData)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceRemoveAll_Thing))));
+            //RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.PostExposeData)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceLook_Thing)))); //1.4
         }
         internal static void RunDestructivePatches()
         {

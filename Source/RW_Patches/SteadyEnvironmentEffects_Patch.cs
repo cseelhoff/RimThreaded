@@ -32,7 +32,7 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(SteadyEnvironmentEffects);
             Type patched = typeof(SteadyEnvironmentEffects_Patch);
-            Prefix(original, patched, "SteadyEnvironmentEffectsTick");
+            Prefix(original, patched, nameof(SteadyEnvironmentEffectsTick));
         }
 
         public static bool SteadyEnvironmentEffectsTick(SteadyEnvironmentEffects __instance)
@@ -46,7 +46,8 @@ namespace RimThreaded.RW_Patches
             __instance.outdoorMeltAmount = __instance.MeltAmountAt(map2.mapTemperature.OutdoorTemp);
             __instance.snowRate = map2.weatherManager.SnowRate;
             __instance.rainRate = map2.weatherManager.RainRate;
-            __instance.deteriorationRate = Mathf.Lerp(1f, 5f, __instance.rainRate);
+            //__instance.deteriorationRate = Mathf.Lerp(1f, 5f, __instance.rainRate);
+            int num = Mathf.CeilToInt((float)map2.Area * 0.0006f);
             int area = map2.Area;
             int ticks = Mathf.CeilToInt(area * 0.0006f);
             int index = steadyEnvironmentEffectsCount;

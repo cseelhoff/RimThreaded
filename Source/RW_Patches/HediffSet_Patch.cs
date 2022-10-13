@@ -23,7 +23,7 @@ namespace RimThreaded.RW_Patches
         }
         internal static void RunNonDestructivePatches()
         {
-            RimThreadedHarmony.Postfix(original, patched, "DirtyCache", nameof(DirtyCacheSetInvisbility));
+            RimThreadedHarmony.Postfix(original, patched, nameof(HediffSet.DirtyCache), nameof(DirtyCacheSetInvisbility));
         }
         public static bool GetCoverageOfNotMissingNaturalParts(HediffSet __instance, ref float __result, BodyPartRecord part)
         {
@@ -111,7 +111,7 @@ namespace RimThreaded.RW_Patches
         {
             lock (__instance) //added
             {
-                var cachedMissingPartsCommonAncestors = __instance.cachedMissingPartsCommonAncestors;
+                List<Hediff_MissingPart> cachedMissingPartsCommonAncestors = __instance.cachedMissingPartsCommonAncestors;
                 if (cachedMissingPartsCommonAncestors == null)
                     cachedMissingPartsCommonAncestors = new List<Hediff_MissingPart>();
                 else
@@ -136,6 +136,7 @@ namespace RimThreaded.RW_Patches
                         missingPartsCommonAncestorsQueue.Enqueue(bodyPartRecord.parts[index]);
                     
                 }
+                __instance.cachedMissingPartsCommonAncestors = cachedMissingPartsCommonAncestors;
             }
             return false;
         }
