@@ -11,15 +11,15 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFramework>net472</TargetFramework>
-		<Version>2.7.1</Version>
+		<Version>2.7.2</Version>
 		<Copyright>Copyright ©  2022</Copyright>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <AssemblyVersion>2.7.1.0</AssemblyVersion>
+    <AssemblyVersion>2.7.2.0</AssemblyVersion>
     <Authors>Caleb Seelhoff</Authors>
-    <FileVersion>2.7.1.0</FileVersion>
+    <FileVersion>2.7.2.0</FileVersion>
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -58,9 +58,8 @@
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Lib.Harmony" Version="2.2.2" ExcludeAssets="runtime" />
-		<PackageReference Include="majorhoff.ThreadSafeLinkedList" Version="1.0.2" />
-		<PackageReference Include="majorhoff.ThreadSafeLinkedListRW" Version="1.5.0" />
-		<PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.5" />
+		<PackageReference Include="majorhoff.ThreadSafeLinkedListRW" Version="1.5.1" />
+		<PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.6" />
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

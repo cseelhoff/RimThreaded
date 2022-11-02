@@ -14,15 +14,18 @@ namespace RimThreaded.RW_Patches
 
     public class CompSpawnSubplant_Transpile
     {
+        //static Dictionary<CompSpawnSubplant, ThreadSafeLinkedList<Thing>> subplants;
         internal static void RunNonDestructivePatches()
         {
-            Type original = typeof(CompSpawnSubplant);
-            Type patched = typeof(CompSpawnSubplant_Transpile);
-            RimThreadedHarmony.harmony.Patch(Constructor(original), transpiler: new HarmonyMethod(Method(patched, nameof(CreateNewThreadSafeLinkedList_Thing))));
-            RimThreadedHarmony.harmony.Patch(Method(original, "get_SubplantsForReading"), transpiler: new HarmonyMethod(Method(patched, nameof(ConvertListThing_ToList))));
-            RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.DoGrowSubplant)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceAdd_Thing))));
-            RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.Cleanup)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceRemoveAll_Thing))));
-            RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.PostExposeData)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceRemoveAll_Thing))));
+            //subplants = new Dictionary<CompSpawnSubplant, ThreadSafeLinkedList<Thing>>();
+            //Type original = typeof(CompSpawnSubplant);
+            //Type patched = typeof(CompSpawnSubplant_Transpile);
+            //RimThreadedHarmony.harmony.Patch(Constructor(original), transpiler: new HarmonyMethod(Method(patched, nameof(CreateNewThreadSafeLinkedList_Thing))));
+            //RimThreadedHarmony.harmony.Patch(Method(original, "get_SubplantsForReading"), transpiler: new HarmonyMethod(Method(patched, nameof(ConvertListThing_ToList))));
+            //RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.DoGrowSubplant)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceAdd_Thing))));
+            //RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.Cleanup)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceRemoveAll_Thing))));
+            //RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.PostExposeData)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceRemoveAll_Thing))));
+            
             //RimThreadedHarmony.harmony.Patch(Method(original, nameof(CompSpawnSubplant.PostExposeData)), transpiler: new HarmonyMethod(Method(patched, nameof(ReplaceLook_Thing)))); //1.4
         }
         internal static void RunDestructivePatches()
@@ -31,7 +34,11 @@ namespace RimThreaded.RW_Patches
             Type patched = typeof(CompSpawnSubplant_Transpile);
             RimThreadedHarmony.Prefix(original, patched, nameof(AddProgress));
             RimThreadedHarmony.Prefix(original, patched, nameof(TryGrowSubplants));
+            //RimThreadedHarmony.Prefix(original, patched, nameof(get_SubplantsForReading));
+            //RimThreadedHarmony.Prefix(original, patched, nameof(Cleanup));
+
         }
+
 
         //public List<Thing> SubplantsForReading
         //{
@@ -41,6 +48,15 @@ namespace RimThreaded.RW_Patches
         //        return subplants;    -----REPLACE WITH subplants.ToList()
         //    }
         //}
+        /*
+        public static bool get_SubplantsForReading(CompSpawnSubplant __instance, ref List<Thing> __result)
+        {
+            __instance.Cleanup();
+            //__result = __instance.subplants;
+            
+            return false;
+        }
+        */
         public static IEnumerable<CodeInstruction> ConvertListThing_ToList(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             foreach (CodeInstruction codeInstruction in instructions)
@@ -48,7 +64,7 @@ namespace RimThreaded.RW_Patches
                 yield return codeInstruction;
                 if (codeInstruction.opcode == OpCodes.Ldfld && ((FieldInfo)codeInstruction.operand).FieldType == typeof(List<Thing>))
                 {
-                    yield return new CodeInstruction(OpCodes.Call, Method(typeof(ThreadSafeLinkedList<Thing>), "ToList"));
+                    yield return new CodeInstruction(OpCodes.Call, Method(typeof(ThreadSafeLinkedList<Thing>), nameof(ThreadSafeLinkedList<Thing>.ToList)));
                 }
             }
         }
@@ -57,7 +73,7 @@ namespace RimThreaded.RW_Patches
         //private List<Thing> subplants = new List<Thing>();
         //WITH:
         //private List<Thing> subplants = new ThreadSafeLinkedList<Thing>();
-        public static IEnumerable<CodeInstruction> CreateNewThreadSafeLinkedList_Thing(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        public static IEnumerable<CodeInstruction> CreateNewThreadSafeLinkedList_Thing(IEnumerable<CodeInstruction> instructions, ILGenerator _)
         {
             foreach (CodeInstruction codeInstruction in instructions)
             {
@@ -74,13 +90,18 @@ namespace RimThreaded.RW_Patches
         //{
         //    subplants.RemoveAll((Thing p) => !p.Spawned);   -----REPLACE WITH ThreadSafeLinkedList.RemoveAll(predicate)
         //}
+        public static bool Cleanup(CompSpawnSubplant __instance)
+        {
+            __instance.subplants.RemoveAll((Thing p) => !p.Spawned);
+            return false;
+        }
         public static IEnumerable<CodeInstruction> ReplaceRemoveAll_Thing(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
         {
             foreach (CodeInstruction codeInstruction in instructions)
             {
-                if (codeInstruction.opcode == OpCodes.Callvirt && (MethodInfo)codeInstruction.operand == Method(typeof(List<Thing>), "RemoveAll"))
+                if (codeInstruction.opcode == OpCodes.Callvirt && (MethodInfo)codeInstruction.operand == Method(typeof(List<Thing>), nameof(List<Thing>.RemoveAll)))
                 {
-                    codeInstruction.operand = Method(typeof(ThreadSafeLinkedList<Thing>), "RemoveAll");
+                    codeInstruction.operand = Method(typeof(ThreadSafeLinkedList<Thing>), nameof(ThreadSafeLinkedList<Thing>.RemoveAll));
                 }
                 yield return codeInstruction;
             }
@@ -92,9 +113,9 @@ namespace RimThreaded.RW_Patches
         {
             foreach (CodeInstruction codeInstruction in instructions)
             {
-                if (codeInstruction.opcode == OpCodes.Callvirt && (MethodInfo)codeInstruction.operand == Method(typeof(List<Thing>), "Add"))
+                if (codeInstruction.opcode == OpCodes.Callvirt && (MethodInfo)codeInstruction.operand == Method(typeof(List<Thing>), nameof(List<Thing>.Add)))
                 {
-                    codeInstruction.operand = Method(typeof(ThreadSafeLinkedList<Thing>), "Add");
+                    codeInstruction.operand = Method(typeof(ThreadSafeLinkedList<Thing>), nameof(ThreadSafeLinkedList<Thing>.Add));
                 }
                 yield return codeInstruction;
             }
@@ -102,7 +123,7 @@ namespace RimThreaded.RW_Patches
 
         //public override void PostExposeData()
         //Scribe_Collections.Look(ref subplants, "subplants", LookMode.Reference);   ------Add Scribe_Collections.Look(ref ThreadSafeLinkedList, string, LookMode)
-        public static IEnumerable<CodeInstruction> ReplaceLook_Thing(IEnumerable<CodeInstruction> instructions, ILGenerator iLGenerator)
+        public static IEnumerable<CodeInstruction> ReplaceLook_Thing(IEnumerable<CodeInstruction> instructions, ILGenerator _)
         {
             foreach (CodeInstruction codeInstruction in instructions)
             {
@@ -115,14 +136,10 @@ namespace RimThreaded.RW_Patches
         }
         public static bool AddProgress(CompSpawnSubplant __instance, float progress, bool ignoreMultiplier = false)
         {
-            if (!ModLister.RoyaltyInstalled)
-            {
-                Log.ErrorOnce("Subplant spawners are a Royalty-specific game system. If you want to use this code please check ModLister.RoyaltyInstalled before calling it. See rules on the Ludeon forum for more info.", 43254);
-            }
-            else
-            {
+            if (ModLister.CheckRoyalty("Subplant spawning")) { 
                 if (!ignoreMultiplier)
                     progress *= __instance.ProgressMultiplier;
+                progress *= (1f + __instance.parent.GetStatValue(StatDefOf.MeditationPlantGrowthOffset));
                 lock (__instance) //threadsafe add for float
                 {
                     __instance.progressToNextSubplant += progress;

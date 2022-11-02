@@ -691,11 +691,16 @@ namespace RimThreaded
 			if (Prefs.LogVerbose)
 			{
 				Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
+				if(original.DeclaringType.FullName.Equals("Verse.Root"))
+				{
+                    Log.Message("RT Verse.Root");
+					return;
+                }
 				if (original.Name.Equals("RemoveAll"))
 				{
 					Log.Message("RemoveAll");
 				}
-				Log.Message("RimThreaded is TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
+				Log.Message("RimThreaded is done TranspilingFieldReplacements for method: " + original.DeclaringType.FullName + "." + original.Name);
 			}
 			harmony.Patch(original, transpiler: replaceFieldsHarmonyTranspiler);
 		}
