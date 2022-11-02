@@ -9,16 +9,16 @@ namespace RimThreaded.RW_Patches
 {
     internal class Time_Patch
     {
-        private static readonly MethodInfo MethodTimeGetTime = Method(typeof(Time), "get_time");
-        private static readonly MethodInfo MethodTime_PatchedGetTime = Method(typeof(Time_Patch), "get_time");
+        private static readonly MethodInfo MethodTimeGetTime = Method(typeof(Time), nameof(get_time));
+        private static readonly MethodInfo MethodTime_PatchedGetTime = Method(typeof(Time_Patch), nameof(get_time));
         private static readonly Func<object[], object> FuncGetTime = parameters => Time.time;
 
-        private static readonly MethodInfo MethodTimeFrameCount = Method(typeof(Time), "get_frameCount");
-        private static readonly MethodInfo MethodTime_PatchedFrameCount = Method(typeof(Time_Patch), "get_frameCount");
+        private static readonly MethodInfo MethodTimeFrameCount = Method(typeof(Time), nameof(get_frameCount));
+        private static readonly MethodInfo MethodTime_PatchedFrameCount = Method(typeof(Time_Patch), nameof(get_frameCount));
         private static readonly Func<object[], object> FuncFrameCount = parameters => Time.frameCount;
 
-        private static readonly MethodInfo MethodTimeRealtimeSinceStartup = Method(typeof(Time), "get_realtimeSinceStartup");
-        private static readonly MethodInfo MethodTime_PatchedRealtimeSinceStartup = Method(typeof(Time_Patch), "get_realtimeSinceStartup");
+        private static readonly MethodInfo MethodTimeRealtimeSinceStartup = Method(typeof(Time), nameof(get_realtimeSinceStartup));
+        private static readonly MethodInfo MethodTime_PatchedRealtimeSinceStartup = Method(typeof(Time_Patch), nameof(get_realtimeSinceStartup));
         private static readonly Func<object[], object> FuncRealtimeSinceStartup = parameters => Time.realtimeSinceStartup;
 
         public static float get_time()

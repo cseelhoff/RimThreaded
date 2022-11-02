@@ -39,6 +39,11 @@ Some subscribers insisted that I set up a donation page. For those looking, here
 
 CHANGE LOG:  
 
+Version 2.7.2
+-Added RimWorld 1.4.8333.294475 support
+-Fixed some bugs with Remove Hediffs including pregnancy bug
+-Fixed alerts not appearing bug
+
 Version 2.7.1
 -Added RimWorld 1.4.8320.21511 (12-OCT) support
 -Fixed some bugs with HediffSet

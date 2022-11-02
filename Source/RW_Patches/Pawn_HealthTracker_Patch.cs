@@ -86,7 +86,7 @@ namespace RimThreaded.RW_Patches
         {
             if (__instance.hediffSet == null || __instance.hediffSet.hediffs == null)
                 return false;
-
+            hediff.PreRemoved();
             lock (__instance.hediffSet)
             {
                 List<Hediff> newHediffs = new List<Hediff>(__instance.hediffSet.hediffs);
@@ -94,7 +94,8 @@ namespace RimThreaded.RW_Patches
                 __instance.hediffSet.hediffs = newHediffs;
             }
             hediff.PostRemoved();
-            __instance.Notify_HediffChanged(null);
+            //__instance.Notify_HediffChanged(null); 1.4 changed?
+            __instance.Notify_HediffChanged(hediff);
 
             return false;
         }
@@ -211,6 +212,7 @@ namespace RimThreaded.RW_Patches
                     Hediff hediff = newHediffs[index];
                     if (hediff.ShouldRemove)
                     {
+                        hediff.PreRemoved();
                         newHediffs.RemoveAt(index); //changed
                         __instance.hediffSet.hediffs = newHediffs; //added
                         hediff.PostRemoved();
