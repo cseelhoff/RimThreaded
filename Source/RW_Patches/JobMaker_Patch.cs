@@ -14,8 +14,8 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(JobMaker);
             Type patched = typeof(JobMaker_Patch);
-            RimThreadedHarmony.Prefix(original, patched, "MakeJob", new Type[] { });
-            RimThreadedHarmony.Prefix(original, patched, "ReturnToPool");
+            RimThreadedHarmony.Prefix(original, patched, nameof(MakeJob), new Type[] { });
+            RimThreadedHarmony.Prefix(original, patched, nameof(ReturnToPool));
         }
 
         public static bool MakeJob(ref Job __result)

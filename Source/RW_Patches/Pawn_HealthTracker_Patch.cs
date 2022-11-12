@@ -204,15 +204,17 @@ namespace RimThreaded.RW_Patches
                     return false;
             }
             bool flag1 = false;
-            lock (__instance.hediffSet) //added
+            List<Hediff> hediffsSnapshot = __instance.hediffSet.hediffs; //added
+
+            lock (hediffsSnapshot) //added
             {
-                List<Hediff> newHediffs = new List<Hediff>(__instance.hediffSet.hediffs); //added
-                for (int index = newHediffs.Count - 1; index >= 0; --index) //changed
+                for (int index = hediffsSnapshot.Count - 1; index >= 0; --index) //changed
                 {
-                    Hediff hediff = newHediffs[index];
+                    Hediff hediff = hediffsSnapshot[index];
                     if (hediff.ShouldRemove)
                     {
                         hediff.PreRemoved();
+                        List<Hediff> newHediffs = new List<Hediff>(__instance.hediffSet.hediffs);
                         newHediffs.RemoveAt(index); //changed
                         __instance.hediffSet.hediffs = newHediffs; //added
                         hediff.PostRemoved();

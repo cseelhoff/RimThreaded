@@ -857,8 +857,8 @@ namespace RimThreaded
 			Sustainer_Patch.RunNonDestructivePatches();
 			//RegionAndRoomQuery_Patch.RunNonDestructivePatches();
 			MemoryUtility_Patch.RunNonDestructivePatches(); //Mod memory cleanup on game load, or main menu
-			//PawnCapacityUtility_Patch.RunNonDestructivePatches(); //1.4 needed?
-
+            //PawnCapacityUtility_Patch.RunNonDestructivePatches(); //1.4 needed?
+            Filth_Patch.RunNonDestructivePatches();
 
             Postfix(typeof(SlotGroup), typeof(HaulingCache), nameof(HaulingCache.Notify_AddedCell)); //recheck growing zone when upon stockpile zone grid add
 			Postfix(typeof(ListerHaulables), typeof(HaulingCache), nameof(HaulingCache.Notify_SlotGroupChanged)); //recheck growing zone when upon other actions

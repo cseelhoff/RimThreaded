@@ -1,5 +1,6 @@
 ﻿using System;
 using RimWorld;
+using Verse;
 
 namespace RimThreaded.RW_Patches
 {
@@ -23,7 +24,7 @@ namespace RimThreaded.RW_Patches
                 {
                     poweron = pc.PowerOn;
                 }
-                catch (NullReferenceException) { }
+                catch (NullReferenceException) { Log.Error("Error getting PowerOn status for Building_Door: " + __instance.ToString()); }
             }
             __result = poweron;
             return false;
