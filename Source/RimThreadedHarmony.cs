@@ -924,7 +924,7 @@ namespace RimThreaded
 			//GenClosest_Patch.RunDestructivePatches(); replaces RegionwiseBFSWorker - no diff noticable
 			//GenCollection_Patch.RunDestructivePatches(); may be fixed now that simplepools work
 
-			//GenPlace_Patch.RunDestructivePatches(); // 1.3 TryPlaceThing null thing after kill
+			GenPlace_Patch.RunDestructivePatches(); // 1.3 TryPlaceThing null thing after kill //1.4 added in?
 
 			GenSpawn_Patch.RunDestructivePatches(); //fixes null.destroy - commonly caused by gysers
 			GenTemperature_Patch.RunDestructivePatches();
@@ -1037,6 +1037,7 @@ namespace RimThreaded
 			StatWorker_Patch.RunDestructivePatches();
 			BodyDef_Patch.RunDestructivePatches();
 			SubSoundDef_Patch.RunDestructivePatches();
+			CompAttachBase_Patch.RunDestructivePatches();
         }
 
         private static void PatchModCompatibility()

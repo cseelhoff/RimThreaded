@@ -26,7 +26,7 @@ namespace RimThreaded.RW_Patches
           bool forPathFinder = false)
         {
             List<Thing> thingList = c.GetThingList(forPawn.Map);
-            if (thingList.Count == 0)
+            if (thingList.Count == 0 || forPawn == null) //added for 1.4
             {
                 __result = null;
                 return false;
@@ -41,10 +41,12 @@ namespace RimThreaded.RW_Patches
                 Job curJob = forPawn.CurJob;
                 if (curJob != null && (curJob.collideWithPawns || curJob.def.collideWithPawns || forPawn.jobs.curDriver.collideWithPawns))
                     flag = true;
+                /*
                 else if (forPawn.Drafted)
                 {
                     int num = forPawn.pather.Moving ? 1 : 0;
                 }
+                */
             }
             for (int index = 0; index < thingList.Count; ++index)
             {

@@ -22,7 +22,7 @@ namespace RimThreaded.RW_Patches
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Fogged));
 
 
-            RimThreadedHarmony.Prefix(original, patched, nameof(get_ContainedAndAdjacentThings));
+            //RimThreadedHarmony.Prefix(original, patched, nameof(get_ContainedAndAdjacentThings));
             //RimThreadedHarmony.Postfix(original, patched, nameof(get_Regions));
         }
         //tmpRegions && uniqueContainedThingsOfDef can't be threadstatic

@@ -1215,6 +1215,14 @@
           "FieldName": "tmpNaturallyHealingInjuredParts"
         }
       ]
+    },
+    {
+      "ClassName": "RimWorld.ThoughtWorker_YoungstersMoodBase",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpPawns"
+        }
+      ]
     }
   ]
 }

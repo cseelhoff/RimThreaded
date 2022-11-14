@@ -38,6 +38,8 @@ DONATE:
 Some subscribers insisted that I set up a donation page. For those looking, here it is: https://ko-fi.com/rimthreaded  
 
 CHANGE LOG:  
+Version 2.7.4  
+
 Version 2.7.3  
 -Added RimWorld 1.4.8347 support  
 -Fixed some more bugs with Remove Hediffs including pregnancy bug  

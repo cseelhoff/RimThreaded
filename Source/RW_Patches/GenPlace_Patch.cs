@@ -9,6 +9,8 @@ namespace RimThreaded.RW_Patches
         {
             Type original = typeof(GenPlace);
             Type patched = typeof(GenPlace_Patch);
+
+            //Check for nulls
             RimThreadedHarmony.Prefix(original, patched, nameof(TryPlaceThing), new Type[] { typeof(Thing), typeof(IntVec3),
               typeof(Map), typeof(ThingPlaceMode), typeof(Thing).MakeByRefType(), typeof(Action<Thing, int>), typeof(Predicate<IntVec3>),
               typeof(Rot4)});
@@ -24,6 +26,7 @@ namespace RimThreaded.RW_Patches
           Predicate<IntVec3> nearPlaceValidator = null,
           Rot4 rot = default)
         {
+            //added null checks at start
             if (map == null)
             {
                 Log.Error("Tried to place thing " + thing + " in a null map.");
@@ -47,7 +50,10 @@ namespace RimThreaded.RW_Patches
             if (def.category == ThingCategory.Filth)
                 mode = ThingPlaceMode.Direct;
             if (mode == ThingPlaceMode.Direct)
-                return GenPlace.TryPlaceDirect(thing, center, rot, map, out lastResultingThing, placedAction);
+            {
+                __result = GenPlace.TryPlaceDirect(thing, center, rot, map, out lastResultingThing, placedAction);
+                return false;
+            }
             if (mode != ThingPlaceMode.Near)
                 throw new InvalidOperationException();
             lastResultingThing = null;
@@ -57,9 +63,15 @@ namespace RimThreaded.RW_Patches
                 stackCount = thing.stackCount;
                 IntVec3 bestSpot;
                 if (!GenPlace.TryFindPlaceSpotNear(center, rot, map, thing, true, out bestSpot, nearPlaceValidator))
+                {
+                    __result = false;
                     return false;
+                }
                 if (GenPlace.TryPlaceDirect(thing, bestSpot, rot, map, out lastResultingThing, placedAction))
-                    return true;
+                {
+                    __result = true;
+                    return false;
+                }
             }
             while (thing.stackCount != stackCount);
             Log.Error("Failed to place " + thing + " at " + center + " in mode " + mode + ".");

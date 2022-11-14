@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using RimWorld;
 using Verse;
+using static UnityEngine.GraphicsBuffer;
 
 namespace RimThreaded.RW_Patches
 {
@@ -16,19 +17,37 @@ namespace RimThreaded.RW_Patches
         }
         internal static IEnumerable<string> GetTargetInfos_E(RitualObligationTargetWorker_GraveWithTarget __instance, RitualObligation obligation)
         {
-            if (obligation is null || obligation.targetA == null || obligation.targetA.Thing is null || obligation.targetA.Thing.ParentHolder is null || ((Corpse)obligation.targetA.Thing).InnerPawn is null)
+            if (obligation == null)
+            {
+                if (Find.IdeoManager.classicMode)
+                {
+                    yield return "RitualTargetGraveInfoAbstractNoIdeo".Translate();
+                }
+                else
+                {
+                    yield return "RitualTargetGraveInfoAbstract".Translate(__instance.parent.ideo.Named("IDEO"));
+                }
+                yield break;
+            }
+            TargetInfo targetA = obligation.targetA;
+            if (targetA == null)
             {
                 yield return "RitualTargetGraveInfoAbstract".Translate(__instance.parent.ideo.Named("IDEO"));
                 yield break;
             }
-            bool num = obligation.targetA.Thing.ParentHolder is Building_Grave;
-            Pawn innerPawn = ((Corpse)obligation.targetA.Thing).InnerPawn;
-            TaggedString taggedString = "RitualTargetGraveInfo".Translate(innerPawn.Named("PAWN"));
-            if (!num)
+            Thing thing = targetA.Thing;
+
+            Pawn pawn; 
+            if (thing is Pawn)
+                pawn = thing as Pawn;
+            else if (thing is Corpse corpse)
+                pawn = corpse.InnerPawn;            
+            else
             {
-                taggedString += " (" + "RitualTargetGraveInfoMustBeBuried".Translate(innerPawn.Named("PAWN")) + ")";
+                yield return "RitualTargetGraveInfoAbstract".Translate(__instance.parent.ideo.Named("IDEO"));
+                yield break;
             }
-            yield return taggedString;
+            yield return "RitualTargetGraveInfo".Translate(pawn.Named("PAWN"));
         }
 
         public static bool GetTargetInfos(RitualObligationTargetWorker_GraveWithTarget __instance, ref IEnumerable<string> __result, RitualObligation obligation)
@@ -39,11 +58,25 @@ namespace RimThreaded.RW_Patches
         public static bool LabelExtraPart(RitualObligationTargetWorker_GraveWithTarget __instance, ref string __result, RitualObligation obligation)
         {
             __result = string.Empty;
-            if (obligation == null || obligation.targetA == null || (Corpse)obligation.targetA.Thing == null || ((Corpse)obligation.targetA.Thing).InnerPawn == null)
+            if (obligation == null)
+                return false;
+            TargetInfo targetA = obligation.targetA;
+            if (targetA == null)
+                return false;
+            Thing thing = targetA.Thing;
+            if (thing is Pawn pawn)
             {
+                __result = pawn.LabelShort;
                 return false;
             }
-            __result = ((Corpse)obligation.targetA.Thing).InnerPawn.LabelShort;
+            if (thing is Corpse corpse)
+            {
+                Pawn innerPawn = corpse.InnerPawn;
+                if (innerPawn == null)
+                    return false;
+                __result = corpse.InnerPawn.LabelShort;
+                return false;
+            }
             return false;
         }
     }

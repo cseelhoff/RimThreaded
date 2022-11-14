@@ -224,6 +224,7 @@ namespace RimThreaded
             AttackTargetReservationManager_Patch.InitializeThreadStatics();
             ReservationManager_Patch.InitializeThreadStatics();
             ListerThings_Patch.InitializeThreadStatics();
+            ThingOwnerUtility_Patch.InitializeThreadStatics();
         }
         private static void ProcessTicks(ThreadInfo threadInfo)
         {
