@@ -906,6 +906,7 @@ namespace RimThreaded
 			
 			Building_Door_Patch.RunDestructivePatches(); //strange bug
 			Building_PlantGrower_Patch.RunNonDestructivePatches();
+			CellFinder_Patch.RunDestructivePatches(); //1.4 fix for destroyed regions
 			CompCauseGameCondition_Patch.RunDestructivePatches(); //TODO - ThreadSafeLinkedList
 			CompSpawnSubplant_Transpile.RunDestructivePatches(); //could use interlock instead
 			Corpse_Patch.RunDestructivePatches(); // 1.3 explosion fix
@@ -955,10 +956,12 @@ namespace RimThreaded
 			MemoryThoughtHandler_Patch.RunDestructivePatches();
 			Messages_Patch.RunDestructivePatches();// 1.3 explosion fix
 			OverlayDrawer_Patch.RunDestructivePatches(); // 1.3 explosion fix
-			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix			
-			Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
+			Pawn_ApparelTracker_Patch.RunDestructivePatches(); //explosions fix		
+            Pawn_GeneTracker_Patch.RunDestructivePatches(); // 1.4 fix dictionary concurrency - TODO - maybe suboptimal?
+            Pawn_HealthTracker_Patch.RunDestructivePatches(); //TODO replace with ThreadSafeLinkedList
 			Pawn_MindState_Patch.RunDestructivePatches(); //TODO - destructive hack for speed up - maybe not needed
-			Pawn_PathFollower_Patch.RunDestructivePatches(); // 1.3 null ref pawn?.jobs?.curDriver?.locomotionUrgencySameAs
+			PawnOverlayDrawer_Patch.RunDestructivePatches(); //1.4 fix - dictionary lock
+            Pawn_PathFollower_Patch.RunDestructivePatches(); // 1.3 null ref pawn?.jobs?.curDriver?.locomotionUrgencySameAs
 			Pawn_PlayerSettings_Patch.RunDestructivePatches();
 			Pawn_RelationsTracker_Patch.RunDestructivePatches();
 			Pawn_RotationTracker_Patch.RunDestructivePatches();
@@ -972,7 +975,8 @@ namespace RimThreaded
 			PlayLog_Patch.RunDestructivePatches();
 			PhysicalInteractionReservationManager_Patch.RunDestructivePatches(); //TODO: write ExposeData and change concurrent dictionary
 			Rand_Patch.RunDestructivePatches(); //Simple
-			Reachability_Patch.RunDestructivePatches();
+            RCellFinder_Patch.RunDestructivePatches(); //1.4 fixes
+            Reachability_Patch.RunDestructivePatches();
 			ReachabilityCache_Patch.RunDestructivePatches(); //TODO simplfy instance.fields
 			RealtimeMoteList_Patch.RunDestructivePatches();
 			RecipeWorkerCounter_Patch.RunDestructivePatches(); // rexamine purpose

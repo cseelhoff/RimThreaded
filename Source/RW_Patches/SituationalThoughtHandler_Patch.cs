@@ -80,6 +80,7 @@ namespace RimThreaded.RW_Patches
         }
         public static bool CheckRecalculateSocialThoughts(SituationalThoughtHandler __instance, Pawn otherPawn)
         {
+            //RT made change change in 2.7.4
             try
             {
                 if (!__instance.cachedSocialThoughts.TryGetValue(otherPawn, out CachedSocialThoughts cachedSocialThoughts))
@@ -113,7 +114,7 @@ namespace RimThreaded.RW_Patches
                         Thought_SituationalSocial socialThought = __instance.TryCreateSocialThought(socialThoughtDefs[index1], otherPawn);
                         if (socialThought != null)
                         {
-                            lock (__instance.cachedSocialThoughts)
+                            lock (cachedSocialThoughts)
                             {
                                 cachedSocialThoughts.thoughts.Add(socialThought);
                             }
@@ -122,19 +123,19 @@ namespace RimThreaded.RW_Patches
                 }
                 //lock (__instance.cachedSocialThoughts)
                 //{
-                __instance.cachedSocialThoughts[otherPawn].activeThoughts = new List<Thought_SituationalSocial>();
+                //__instance.cachedSocialThoughts[otherPawn].activeThoughts = new List<Thought_SituationalSocial>();
+                List<Thought_SituationalSocial> activeThoughts = new List<Thought_SituationalSocial>();
                 //}
                 for (int index2 = 0; index2 < cachedSocialThoughts.thoughts.Count; ++index2)
                 {
                     Thought_SituationalSocial thought = cachedSocialThoughts.thoughts[index2];
                     if (thought.Active)
                     {
-                        lock (__instance.cachedSocialThoughts)
-                        {
-                            cachedSocialThoughts.activeThoughts.Add(thought);
-                        }
+                        activeThoughts.Add(thought);
                     }
                 }
+                //RT made change change in 2.7.4
+                cachedSocialThoughts.activeThoughts = activeThoughts;
             }
             finally
             {

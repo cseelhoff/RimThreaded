@@ -20,6 +20,7 @@ namespace RimThreaded.RW_Patches
             RimThreadedHarmony.Prefix(original, patched, nameof(UpdateRoomStatsAndRole));
 
             RimThreadedHarmony.Prefix(original, patched, nameof(get_Fogged));
+            RimThreadedHarmony.Prefix(original, patched, nameof(Notify_ContainedThingSpawnedOrDespawned));
 
 
             //RimThreadedHarmony.Prefix(original, patched, nameof(get_ContainedAndAdjacentThings));
@@ -172,6 +173,35 @@ namespace RimThreaded.RW_Patches
                 __instance.cachedOpenRoofCount = -1;
                 __instance.tempTracker.RoofChanged();
             }
+            return false;
+        }
+
+        public static bool Notify_ContainedThingSpawnedOrDespawned(Room __instance, Thing th) 
+        {
+            if (th.def.category == ThingCategory.Mote || th.def.category == ThingCategory.Projectile || th.def.category == ThingCategory.Ethereal || th.def.category == ThingCategory.Pawn)
+            {
+                return false;
+            }
+            if (__instance.IsDoorway)
+            {
+                List<Region> regions = __instance.districts[0].Regions;
+                for (int i = 0; i < regions[0].links.Count; i++)
+                {
+                    Region otherRegion = regions[0].links[i].GetOtherRegion(regions[0]);
+                    if (otherRegion != null && !otherRegion.IsDoorway)
+                    {
+                        Room otherRegionRoom = otherRegion.Room;
+                        
+                        //start Change
+                        if (otherRegionRoom != null)
+                        {
+                            otherRegionRoom.Notify_ContainedThingSpawnedOrDespawned(th);
+                        }
+                        //end change
+                    }
+                }
+            }
+            __instance.statsAndRoleDirty = true;
             return false;
         }
 

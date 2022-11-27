@@ -684,6 +684,9 @@
         },
         {
           "FieldName": "tmpEdgeCells"
+        },
+        {
+          "FieldName": "tmpNearbyColonyThings"
         }
       ]
     },
@@ -1221,6 +1224,22 @@
       "ThreadStatics": [
         {
           "FieldName": "tmpPawns"
+        }
+      ]
+    },
+    {
+      "ClassName": "RimWorld.JobGiver_AITrashBuildingsDistant",
+      "ThreadStatics": [
+        {
+          "FieldName": "tmpTrashableBuildingCandidates"
+        }
+      ]
+    },
+    {
+      "ClassName": "Verse.GenPlace",
+      "ThreadStatics": [
+        {
+          "FieldName": "cellThings"
         }
       ]
     }
